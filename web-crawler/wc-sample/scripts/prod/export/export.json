@@ -1,0 +1,51 @@
+{
+  "sources": [
+    {
+      "id": "c82ef7b6-cfcd-4e11-8af4-dc9f7e61c920",
+      "locale": "en_US",
+      "url": "https://openviglet.github.io/dumont",
+      "turSNSites": [
+        "sample"
+      ],
+      "allowUrls": [
+        "/"
+      ],
+      "notAllowUrls": [],
+      "notAllowExtensions": [],
+      "attributes": [
+        {
+          "name": "site",
+          "text": "Dumont Site"
+        },
+        {
+          "name": "id",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtId"
+        },
+        {
+          "name": "title",
+          "className": "com.viglet.dumont.connector.webcrawler.sample.ext.DumWCExtSampleTitle"
+        },
+        {
+          "name": "publication_date",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtDate"
+        },
+        {
+          "name": "modification_date",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtDate"
+        },
+        {
+          "name": "abstract",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtDescription"
+        },
+        {
+          "name": "source_apps",
+          "text": "WEB-CRAWLER"
+        },
+        {
+          "name": "url",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtUrl"
+        }
+      ]
+    }
+  ]
+}
