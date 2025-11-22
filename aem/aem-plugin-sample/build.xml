@@ -13,6 +13,6 @@
         </copy>
         <copy file="target/aem-plugin-sample.jar" todir="dist/wknd/libs/"/>
         <copy file="../aem-plugin/target/aem-plugin.jar" todir="dist/wknd/libs/"/>
-        <copy file="../../dumont-connector/connector-app/target/dumont-connector.jar" todir="dist/wknd/"/>
+        <copy file="../../connector/connector-app/target/dumont-connector.jar" todir="dist/wknd/"/>
     </target>
 </project>
