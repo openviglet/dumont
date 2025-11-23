@@ -64,7 +64,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Lists;
 import com.google.common.net.UrlEscapers;
 import com.viglet.dumont.commons.cache.DumCustomClassCache;
-import com.viglet.dumont.commons.exception.DumRuntimeException;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
@@ -302,18 +301,18 @@ public class DumAemCommonsUtils {
 
     public static <T> Optional<T> getResponseBody(String url,
             DumAemConfiguration dumAemSourceContext, Class<T> clazz, boolean useCache) {
-        return getResponseBody(url, dumAemSourceContext, useCache).map(json -> {
+        return getResponseBody(url, dumAemSourceContext, useCache).flatMap(json -> {
             if (!DumCommonsUtils.isValidJson(json)) {
-                return null;
+                return Optional.empty();
             }
             try {
-                return new ObjectMapper()
+                return Optional.ofNullable(new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                        .readValue(json, clazz);
+                        .readValue(json, clazz));
             } catch (JsonProcessingException e) {
                 log.error("URL {} - {}", url, e.getMessage(), e);
             }
-            return null;
+            return Optional.empty();
         });
     }
 
@@ -328,26 +327,52 @@ public class DumAemCommonsUtils {
 
     public static @NotNull Optional<String> fetchResponseBodyWithoutCache(String url,
             DumAemConfiguration dumAemSourceContext) {
-        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .setDefaultHeaders(List.of(new BasicHeader(HttpHeaders.AUTHORIZATION, basicAuth(
-                        dumAemSourceContext.getUsername(), dumAemSourceContext.getPassword()))))
-                .build()) {
-            HttpGet request = new HttpGet(
-                    URI.create(UrlEscapers.urlFragmentEscaper().escape(url)).normalize());
-            String json = httpClient.execute(request, response -> {
-                log.debug("Request Status {} - {}", response.getCode(), url);
-                HttpEntity entity = response.getEntity();
-                return entity != null ? EntityUtils.toString(entity) : null;
-            });
-            if (DumCommonsUtils.isValidJson(json)) {
-                log.debug("Valid JSON - {}", url);
-                return Optional.ofNullable(json);
+        String escapedUrl = UrlEscapers.urlFragmentEscaper().escape(url);
+        URI normalizedUri = URI.create(Objects.requireNonNull(escapedUrl, "URL cannot be null")).normalize();
+
+        try (CloseableHttpClient httpClient = createHttpClient(dumAemSourceContext)) {
+            HttpGet request = new HttpGet(normalizedUri);
+            String json = executeRequest(httpClient, request, url);
+
+            if (isValidJsonResponse(json, url)) {
+                return Optional.of(json);
             }
+            log.warn("Invalid JSON response from URL: {}", url);
             return Optional.empty();
         } catch (IOException e) {
-            log.error("URL {} - {}", url, e.getMessage(), e);
-            throw new DumRuntimeException(e);
+            log.error("Failed to fetch response from URL: {} - {}", url, e.getMessage(), e);
+            throw new RuntimeException("Error fetching response from: " + url, e);
         }
+    }
+
+    private static CloseableHttpClient createHttpClient(DumAemConfiguration dumAemSourceContext) {
+        String authHeader = basicAuth(dumAemSourceContext.getUsername(), dumAemSourceContext.getPassword());
+        return HttpClientBuilder.create()
+                .setDefaultHeaders(List.of(new BasicHeader(HttpHeaders.AUTHORIZATION, authHeader)))
+                .build();
+    }
+
+    private static String executeRequest(CloseableHttpClient httpClient, HttpGet request, String url)
+            throws IOException {
+        return httpClient.execute(request, response -> {
+            int statusCode = response.getCode();
+            log.debug("HTTP {} - {}", statusCode, url);
+
+            HttpEntity entity = response.getEntity();
+            if (entity == null) {
+                log.warn("Empty response entity from URL: {}", url);
+                return null;
+            }
+            return EntityUtils.toString(entity);
+        });
+    }
+
+    private static boolean isValidJsonResponse(String json, String url) {
+        if (DumCommonsUtils.isValidJson(json)) {
+            log.debug("Valid JSON response - {}", url);
+            return true;
+        }
+        return false;
     }
 
     public static @NotNull Optional<String> fetchResponseBodyCached(String url,

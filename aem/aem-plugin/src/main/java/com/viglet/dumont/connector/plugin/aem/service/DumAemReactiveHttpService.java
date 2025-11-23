@@ -23,6 +23,7 @@ import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLException;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNull;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -63,7 +64,6 @@ public class DumAemReactiveHttpService {
                         throw new IllegalStateException("Unable to create HTTP client", e);
                 }
         }
-
         private WebClient createOptimizedWebClient() throws SSLException {
                 HttpClient httpClient = HttpClient.create().protocol(HttpProtocol.HTTP11)
                                 .secure(this::configureSsl).responseTimeout(Duration.ofSeconds(30))

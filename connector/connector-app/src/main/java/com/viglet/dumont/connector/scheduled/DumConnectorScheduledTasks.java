@@ -38,7 +38,7 @@ public class DumConnectorScheduledTasks {
         this.configVarService = configVarService;
     }
 
-    @Scheduled(cron = "${dumont.connector.cron:-}", zone = "${dumont.connector.cron.zone:UTC}")
+    @Scheduled(cron = "${dumont.cron:-}", zone = "${dumont.cron.zone:UTC}")
     public void executeWebCrawler() {
         if (configVarService.hasNotFirstTime()) {
             log.info("This is the first time, waiting next schedule.");

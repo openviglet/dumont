@@ -44,13 +44,13 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class DumConnectorProcessQueue {
-    private final String dumontUrl;
-    private final String dumontApiKey;
+    private final String turingUrl;
+    private final String turingApiKey;
 
-    public DumConnectorProcessQueue(@Value("${dumont.url}") String dumontUrl,
-            @Value("${dumont.apiKey}") String dumontApiKey) {
-        this.dumontUrl = dumontUrl;
-        this.dumontApiKey = dumontApiKey;
+    public DumConnectorProcessQueue(@Value("${turing.url}") String turingUrl,
+            @Value("${turing.apiKey}") String turingApiKey) {
+        this.turingUrl = turingUrl;
+        this.turingApiKey = turingApiKey;
     }
 
     @JmsListener(destination = CONNECTOR_INDEXING_QUEUE)
@@ -84,7 +84,7 @@ public class DumConnectorProcessQueue {
     }
 
     private TurSNServer getTurSNServer() {
-        return new TurSNServer(URI.create(dumontUrl), null,
-                new TurApiKeyCredentials(dumontApiKey));
+        return new TurSNServer(URI.create(turingUrl), null,
+                new TurApiKeyCredentials(turingApiKey));
     }
 }

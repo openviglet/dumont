@@ -24,11 +24,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -60,7 +63,7 @@ import lombok.experimental.Accessors;
 @Setter
 @Getter
 @Entity
-@Table(name = "con_indexing", uniqueConstraints = { @UniqueConstraint(columnNames = { "id" }) })
+@Table(name = "dum_indexing", uniqueConstraints = { @UniqueConstraint(columnNames = { "id" }) })
 @AllArgsConstructor
 public class DumConnectorIndexingModel implements Serializable {
 

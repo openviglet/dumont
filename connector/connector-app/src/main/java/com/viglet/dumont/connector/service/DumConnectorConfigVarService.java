@@ -19,7 +19,9 @@ public class DumConnectorConfigVarService {
     }
 
     public void save(DumConnectorConfigVarModel dumConfigVar) {
-        this.dumConnectorConfigVarRepository.save(dumConfigVar);
+        if (dumConfigVar != null) {
+            this.dumConnectorConfigVarRepository.save(dumConfigVar);
+        }
     }
 
     public void saveFirstTime() {

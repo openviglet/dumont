@@ -7,21 +7,14 @@ import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Builder
 @Getter
 @Setter
+@ToString
 public class DumAemContentMapping {
     private List<TurSNAttributeSpec> targetAttrDefinitions;
     private List<DumAemModel> models;
     private String deltaClassName;
-
-    @Override
-    public String toString() {
-        return "DumAemContentMapping{" +
-                "targetAttrDefinitions=" + targetAttrDefinitions +
-                ", models=" + models +
-                ", deltaClassName='" + deltaClassName +
-                '}';
-    }
 }

@@ -71,7 +71,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     private final JmsMessagingTemplate jmsMessagingTemplate;
     private final int jobSize;
 
-    public DumConnectorContextImpl(@Value("${dumont.connector.job.size:50}") int jobSize,
+    public DumConnectorContextImpl(@Value("${dumont.job.size:50}") int jobSize,
             DumConnectorIndexingService dumConnectorIndexingService,
             DumConnectorIndexingRuleService indexingRuleService,
             JmsMessagingTemplate jmsMessagingTemplate) {

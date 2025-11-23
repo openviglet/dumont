@@ -18,7 +18,9 @@ package com.viglet.dumont.connector.persistence.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -41,7 +43,7 @@ import lombok.experimental.Accessors;
 @Setter
 @Getter
 @Entity
-@Table(name = "con_dependency", uniqueConstraints = { @UniqueConstraint(columnNames = { "id" }) })
+@Table(name = "dum_dependency", uniqueConstraints = { @UniqueConstraint(columnNames = { "id" }) })
 @AllArgsConstructor
 @JsonIgnoreProperties({ "reference" })
 public class DumConnectorDependencyModel implements Serializable {

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class DumJdkSolrClient {
     private final String solrEndpoint;
 
-    public DumJdkSolrClient(@Value("${dumont.solr.endpoint:http://localhost:8983}") String solrEndpoint) {
+    public DumJdkSolrClient(@Value("${turing.solr.endpoint:http://localhost:8983}") String solrEndpoint) {
         this.solrEndpoint = solrEndpoint;
     }
 

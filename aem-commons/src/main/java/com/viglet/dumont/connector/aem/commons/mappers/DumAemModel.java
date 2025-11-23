@@ -8,12 +8,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 public class DumAemModel {
     private String type;
     private String subType;
@@ -21,15 +23,4 @@ public class DumAemModel {
     private String validToIndex;
     @Builder.Default
     private List<DumAemTargetAttr> targetAttrs = new ArrayList<>();
-
-    @Override
-    public String toString() {
-        return "DumAemModel{" +
-                "type='" + type + '\'' +
-                ", subType='" + subType + '\'' +
-                ", className='" + className + '\'' +
-                ", validToIndex='" + validToIndex + '\'' +
-                ", targetAttrs=" + targetAttrs +
-                '}';
-    }
 }

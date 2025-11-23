@@ -55,8 +55,7 @@ public class DumAemConfiguration {
   private String publishSNSite;
 
   private String contentType;
-  // private String dumSNSite;
-  // private DumAemEnv environment;
+
   @Builder.Default
   private Collection<DumAemLocalePathContext> localePaths = new HashSet<>();
 
@@ -80,9 +79,6 @@ public class DumAemConfiguration {
     this.publish = dumAemConfiguration.isPublish();
     this.authorSNSite = dumAemConfiguration.getAuthorSNSite();
     this.publishSNSite = dumAemConfiguration.getPublishSNSite();
-
-    // this.dumSNSite = dumAemConfiguration.getDumSNSite();
-    // this.environment = dumAemConfiguration.getEnvironment();
   }
 
   public DumAemConfiguration(IAemConfiguration iaemConfiguration) {

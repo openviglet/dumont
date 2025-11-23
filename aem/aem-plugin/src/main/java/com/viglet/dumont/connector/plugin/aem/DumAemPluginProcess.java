@@ -69,8 +69,8 @@ public class DumAemPluginProcess {
         private final DumAemObjectService dumAemObjectService;
 
         public DumAemPluginProcess(DumConnectorContext dumConnectorContext,
-                        @Value("${dumont.connector.dependencies.enabled:true}") boolean connectorDependencies,
-                        @Value("${dumont.connector.reactive.indexing:false}") boolean reativeIndexing,
+                        @Value("${dumont.dependencies.enabled:true}") boolean connectorDependencies,
+                        @Value("${dumont.reactive.indexing:false}") boolean reativeIndexing,
                         DumAemReactiveUtils dumAemReactiveUtils,
                         DumAemSourceService dumAemSourceService,
                         DumAemService dumAemService,

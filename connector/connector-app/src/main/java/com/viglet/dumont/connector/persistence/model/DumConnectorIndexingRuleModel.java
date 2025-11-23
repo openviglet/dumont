@@ -21,20 +21,38 @@
 
 package com.viglet.dumont.connector.persistence.model;
 
-import com.viglet.dumont.connector.commons.DumConnectorIndexingRuleType;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.Accessors;
-import org.hibernate.annotations.UuidGenerator;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.annotations.UuidGenerator;
+
+import com.viglet.dumont.connector.commons.DumConnectorIndexingRuleType;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+
 /**
- * The persistent class for the conn_indexing_rule database table.
+ * The persistent class for the dum_indexing_rule database table.
  *
  * @author Alexandre Oliveira
  * @since 2025.2
@@ -46,7 +64,7 @@ import java.util.List;
 @Setter
 @Getter
 @Entity
-@Table(name = "con_indexing_rule", uniqueConstraints = { @UniqueConstraint(columnNames = { "id" }) })
+@Table(name = "dum_indexing_rule", uniqueConstraints = { @UniqueConstraint(columnNames = { "id" }) })
 @AllArgsConstructor
 public class DumConnectorIndexingRuleModel implements Serializable {
     @Serial

@@ -28,7 +28,7 @@ public class DumConnectorIndexingService {
 
         public DumConnectorIndexingService(
                         DumConnectorIndexingRepository dumConnectorIndexingRepository,
-                        @Value("${dumont.connector.dependencies.enabled:true}") boolean connectorDependencies) {
+                        @Value("${dumont.dependencies.enabled:true}") boolean connectorDependencies) {
                 this.dumConnectorIndexingRepository = dumConnectorIndexingRepository;
                 this.connectorDependencies = connectorDependencies;
         }
@@ -77,8 +77,11 @@ public class DumConnectorIndexingService {
 
         public void update(DumJobItemWithSession turSNJobItemWithSession,
                         DumConnectorIndexingModel indexing) {
-                dumConnectorIndexingRepository.save(updateDumConnectorIndexing(indexing,
-                                turSNJobItemWithSession, DumIndexingStatus.IGNORED));
+                DumConnectorIndexingModel updated = updateDumConnectorIndexing(indexing,
+                                turSNJobItemWithSession, DumIndexingStatus.IGNORED);
+                if (updated != null) {
+                        dumConnectorIndexingRepository.save(updated);
+                }
         }
 
         public void update(DumJobItemWithSession turSNJobItemWithSession,
@@ -91,12 +94,16 @@ public class DumConnectorIndexingService {
                                                                 turSNJobItemWithSession, status))
                                                 .orElse(null))
                                 .filter(Objects::nonNull).toList();
-                dumConnectorIndexingRepository.saveAll(managedList);
+                if (!managedList.isEmpty()) {
+                        dumConnectorIndexingRepository.saveAll(managedList);
+                }
         }
 
         public void save(DumJobItemWithSession turSNJobItemWithSession, DumIndexingStatus status) {
-                dumConnectorIndexingRepository
-                                .save(createDumConnectorIndexing(turSNJobItemWithSession, status));
+                DumConnectorIndexingModel indexing = createDumConnectorIndexing(turSNJobItemWithSession, status);
+                if (indexing != null) {
+                        dumConnectorIndexingRepository.save(indexing);
+                }
         }
 
         public boolean exists(DumJobItemWithSession turSNJobItemWithSession) {

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
@@ -13,23 +14,8 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 public class DumAemTargetAttr extends DumAemTargetAttrDefinition {
     private String textValue;
     protected List<DumAemSourceAttr> sourceAttrs;
-
-    @Override
-    public String toString() {
-        return "{" +
-                "name='" + getName() + '\'' +
-                ", type='" + getType() + '\'' +
-                ", mandatory=" + isMandatory() +
-                ", multiValued=" + isMultiValued() +
-                ", description='" + getDescription() + '\'' +
-                ", facet=" + isFacet() +
-                ", facetName='" + getFacetName() + '\'' +
-                ", className='" + getClassName() + '\'' +
-                ", textValue='" + getTextValue() + '\'' +
-                ", sourceAttrs='" + getSourceAttrs() + '\'' +
-                '}';
-    }
 }

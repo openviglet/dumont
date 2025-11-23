@@ -40,6 +40,9 @@ public class DumAemSourceService {
     }
 
     public Optional<DumAemSource> getDumAemSourceById(String id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         return dumAemSourceRepository.findById(id);
     }
 

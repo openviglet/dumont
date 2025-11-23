@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -37,18 +38,18 @@ public class DumStaticResourceConfiguration implements WebMvcConfigurer {
     private String allowedOrigins;
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) {
+    public void addCorsMappings(@NonNull CorsRegistry registry) {
         registry.addMapping("/api/**").allowedOrigins(allowedOrigins).allowedMethods("PUT", "DELETE", "GET", "POST")
                 .allowCredentials(false).maxAge(3600);
     }
 
     @Override
-    public void configurePathMatch(PathMatchConfigurer configurer) {
+    public void configurePathMatch(@NonNull PathMatchConfigurer configurer) {
         configurer.setUseTrailingSlashMatch(true);
     }
 
     @Override
-    public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+    public void configureAsyncSupport(@NonNull AsyncSupportConfigurer configurer) {
         configurer.setDefaultTimeout(-1);
     }
 }

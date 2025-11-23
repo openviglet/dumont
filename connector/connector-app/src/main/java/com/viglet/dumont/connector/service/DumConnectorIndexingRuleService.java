@@ -57,6 +57,9 @@ public class DumConnectorIndexingRuleService {
     }
 
     public DumConnectorIndexingRuleModel save(DumConnectorIndexingRuleModel dumConnectorIndexingRule) {
+        if (dumConnectorIndexingRule == null) {
+            throw new IllegalArgumentException("DumConnectorIndexingRuleModel cannot be null");
+        }
         return dumConnectorIndexingRuleRepository.save(dumConnectorIndexingRule);
     }
 

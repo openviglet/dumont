@@ -96,13 +96,23 @@ public class DumConnectorSolrService {
     }
 
     private List<DumSNSiteLocale> dumontLocale(String snSite) {
-        DumSNSiteLocale[] dumSNSiteLocaleList = restClient.get()
-                .uri("/api/sn/name/%s/locale".formatted(snSite))
-                .retrieve()
-                .body(DumSNSiteLocale[].class);
-        if (dumSNSiteLocaleList == null)
+        if (snSite == null) {
             return Collections.emptyList();
-        return Arrays.asList(dumSNSiteLocaleList);
+        }
+
+        try {
+            DumSNSiteLocale[] dumSNSiteLocaleList = restClient.get()
+                    .uri(String.format("/api/sn/name/%s/locale", snSite))
+                    .retrieve()
+                    .body(DumSNSiteLocale[].class);
+
+            return dumSNSiteLocaleList != null
+                    ? Arrays.asList(dumSNSiteLocaleList)
+                    : Collections.emptyList();
+        } catch (Exception e) {
+            log.error("Failed to retrieve locales for site: {}", snSite, e);
+            return Collections.emptyList();
+        }
     }
 
     public boolean hasContentIdAtSolr(String id, String source, String provider) {
