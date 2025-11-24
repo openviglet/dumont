@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.viglet.dumont</groupId>
         <artifactId>dumont</artifactId>
-        <version>2025.4.1</version>
+        <version>2025.4.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.viglet.dumont.connector</groupId>
