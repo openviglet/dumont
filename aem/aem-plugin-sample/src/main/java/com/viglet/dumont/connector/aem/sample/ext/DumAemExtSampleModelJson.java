@@ -37,16 +37,18 @@ public class DumAemExtSampleModelJson implements DumAemExtContentInterface {
             DumAemConfiguration dumAemSourceContext) {
         log.debug("Executing DumAemExtSampleModelJson");
         String url = dumAemSourceContext.getUrl() + aemObject.getPath() + MODEL_JSON_EXTENSION;
-        DumAemTargetAttrValueMap attrValues = new DumAemTargetAttrValueMap();
+
         try {
             return DumAemCommonsUtils
                     .getResponseBody(url, dumAemSourceContext, DumAemSampleModel.class, false)
                     .map(model -> {
+                        DumAemTargetAttrValueMap attrValues = new DumAemTargetAttrValueMap();
                         getFragmentData(attrValues, model);
                         return attrValues;
-                    }).orElseGet(DumAemTargetAttrValueMap::new);
+                    })
+                    .orElseGet(DumAemTargetAttrValueMap::new);
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("Error consuming AEM model JSON from: {}", url, e);
             return new DumAemTargetAttrValueMap();
         }
     }
