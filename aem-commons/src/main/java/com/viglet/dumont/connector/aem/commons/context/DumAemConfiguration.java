@@ -28,12 +28,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @ToString
+@Slf4j
 public class DumAemConfiguration {
   private String id;
   private String url;
@@ -105,6 +107,7 @@ public class DumAemConfiguration {
         .flatMap(infinityJson -> DumAemCommonsUtils.getSiteName(this,
             infinityJson))
         .ifPresent(siteName -> this.siteName = siteName);
+
   }
 
 }

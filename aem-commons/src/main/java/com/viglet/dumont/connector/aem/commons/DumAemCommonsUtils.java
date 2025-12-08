@@ -53,6 +53,7 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -255,17 +256,27 @@ public class DumAemCommonsUtils {
             DumAemConfiguration dumAemConfiguration, boolean useCache) {
         String infinityJsonUrl = String.format(url.endsWith(JSON) ? "%s%s" : "%s%s.infinity.json",
                 dumAemConfiguration.getUrl(), url);
-        return getResponseBody(infinityJsonUrl, dumAemConfiguration, useCache)
-                .<Optional<JSONObject>>map(responseBody -> {
-                    if (isResponseBodyJSONArray(responseBody) && !url.endsWith(JSON)) {
-                        return getInfinityJson(
-                                new JSONArray(responseBody).toList().getFirst().toString(),
-                                dumAemConfiguration, useCache);
-                    } else if (isResponseBodyJSONObject(responseBody)) {
-                        return Optional.of(new JSONObject(responseBody));
-                    }
-                    return getInfinityJsonNotFound(infinityJsonUrl);
-                }).orElseGet(() -> getInfinityJsonNotFound(infinityJsonUrl));
+        try {
+            return getResponseBody(infinityJsonUrl, dumAemConfiguration, useCache)
+                    .<Optional<JSONObject>>map(responseBody -> {
+                        if (isResponseBodyJSONArray(responseBody) && !url.endsWith(JSON)) {
+                            try {
+                                return getInfinityJson(
+                                        new JSONArray(responseBody).toList().getFirst().toString(),
+                                        dumAemConfiguration, useCache);
+                            } catch (JSONException e) {
+                                log.error(e.getMessage(), e);
+                                return getInfinityJsonNotFound(infinityJsonUrl);
+                            }
+                        } else if (isResponseBodyJSONObject(responseBody)) {
+                            return Optional.of(new JSONObject(responseBody));
+                        }
+                        return getInfinityJsonNotFound(infinityJsonUrl);
+                    }).orElseGet(() -> getInfinityJsonNotFound(infinityJsonUrl));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return getInfinityJsonNotFound(infinityJsonUrl);
+        }
 
     }
 
@@ -300,7 +311,7 @@ public class DumAemCommonsUtils {
     }
 
     public static <T> Optional<T> getResponseBody(String url,
-            DumAemConfiguration dumAemSourceContext, Class<T> clazz, boolean useCache) {
+            DumAemConfiguration dumAemSourceContext, Class<T> clazz, boolean useCache) throws IOException {
         return getResponseBody(url, dumAemSourceContext, useCache).flatMap(json -> {
             if (!DumCommonsUtils.isValidJson(json)) {
                 return Optional.empty();
@@ -317,7 +328,7 @@ public class DumAemCommonsUtils {
     }
 
     public static @NotNull Optional<String> getResponseBody(String url,
-            DumAemConfiguration dumAemSourceContext, boolean useCache) {
+            DumAemConfiguration dumAemSourceContext, boolean useCache) throws IOException {
         if (useCache) {
             return fetchResponseBodyCached(url, dumAemSourceContext);
         } else {
@@ -326,7 +337,7 @@ public class DumAemCommonsUtils {
     }
 
     public static @NotNull Optional<String> fetchResponseBodyWithoutCache(String url,
-            DumAemConfiguration dumAemSourceContext) {
+            DumAemConfiguration dumAemSourceContext) throws IOException {
         String escapedUrl = UrlEscapers.urlFragmentEscaper().escape(url);
         URI normalizedUri = URI.create(Objects.requireNonNull(escapedUrl, "URL cannot be null")).normalize();
 
@@ -341,7 +352,7 @@ public class DumAemCommonsUtils {
             return Optional.empty();
         } catch (IOException e) {
             log.error("Failed to fetch response from URL: {} - {}", url, e.getMessage(), e);
-            throw new RuntimeException("Error fetching response from: " + url, e);
+            throw e;
         }
     }
 
@@ -383,7 +394,14 @@ public class DumAemCommonsUtils {
             log.debug("Creating Cache to request {}", url);
         String cacheKey = url;
         return responseBodyCache.get(cacheKey,
-                k -> fetchResponseBodyWithoutCache(url, dumAemSourceContext));
+                k -> {
+                    try {
+                        return fetchResponseBodyWithoutCache(url, dumAemSourceContext);
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                        return Optional.empty();
+                    }
+                });
     }
 
     private static String basicAuth(String username, String password) {

@@ -163,6 +163,7 @@ public class DumAemAttrUtils {
 
     public static String addTagToAttrValueList(DumAemContext context,
             DumAemConfiguration dumAemSourceContext, String facet, String value) {
+
         return DumAemCommonsUtils.getInfinityJson((CQ_TAGS_PATH + "/%s/%s").formatted(facet, value),
                 dumAemSourceContext, true).map(infinityJson -> {
                     Locale locale = DumAemCommonsUtils.getLocaleFromContext(dumAemSourceContext, context);

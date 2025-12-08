@@ -16,12 +16,15 @@
 
 package com.viglet.dumont.connector.aem.sample.ext;
 
+import java.io.IOException;
+
 import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtContentInterface;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,12 +38,17 @@ public class DumAemExtSampleModelJson implements DumAemExtContentInterface {
         log.debug("Executing DumAemExtSampleModelJson");
         String url = dumAemSourceContext.getUrl() + aemObject.getPath() + MODEL_JSON_EXTENSION;
         DumAemTargetAttrValueMap attrValues = new DumAemTargetAttrValueMap();
-        return DumAemCommonsUtils
-                .getResponseBody(url, dumAemSourceContext, DumAemSampleModel.class, false)
-                .map(model -> {
-                    getFragmentData(attrValues, model);
-                    return attrValues;
-                }).orElseGet(DumAemTargetAttrValueMap::new);
+        try {
+            return DumAemCommonsUtils
+                    .getResponseBody(url, dumAemSourceContext, DumAemSampleModel.class, false)
+                    .map(model -> {
+                        getFragmentData(attrValues, model);
+                        return attrValues;
+                    }).orElseGet(DumAemTargetAttrValueMap::new);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return new DumAemTargetAttrValueMap();
+        }
     }
 
     private static void getFragmentData(DumAemTargetAttrValueMap attrValues,

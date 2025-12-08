@@ -16,8 +16,11 @@
 
 package com.viglet.dumont.connector.aem.commons.ext;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+
+import org.jspecify.annotations.NonNull;
 
 import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
@@ -44,10 +47,15 @@ public class DumAemExtContentTags implements DumAemExtAttributeInterface {
                 .orElse(Collections.emptyList())));
     }
 
-    public static Optional<DumAemContentTags> getTags(DumAemObject aemObject,
+    public static Optional<@NonNull DumAemContentTags> getTags(DumAemObject aemObject,
             DumAemConfiguration dumAemSourceContext) {
         String url = dumAemSourceContext.getUrl() + aemObject.getPath() + TAGS_JSON_EXTENSION;
-        return DumAemCommonsUtils.getResponseBody(url, dumAemSourceContext, DumAemContentTags.class,
-                true);
+        try {
+            return DumAemCommonsUtils.getResponseBody(url, dumAemSourceContext, DumAemContentTags.class,
+                    true);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return Optional.empty();
+        }
     }
 }
