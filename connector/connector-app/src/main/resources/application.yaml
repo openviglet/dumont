@@ -29,8 +29,8 @@ dumont:
       url: http://localhost:9200
       index: dumont
       # Optional authentication
-      username: 
-      password:
+      username: ~
+      password: ~
 
 spring:
   h2:

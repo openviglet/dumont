@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.PreDestroy;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.Http2SolrClient;
@@ -107,5 +108,17 @@ public class DumSolrIndexingPlugin implements DumIndexingPlugin {
     @Override
     public String getProviderName() {
         return "SOLR";
+    }
+
+    @PreDestroy
+    public void destroy() {
+        try {
+            if (solrClient != null) {
+                solrClient.close();
+                log.info("Solr client closed successfully");
+            }
+        } catch (IOException e) {
+            log.error("Error closing Solr client: {}", e.getMessage(), e);
+        }
     }
 }

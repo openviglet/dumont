@@ -21,6 +21,7 @@ package com.viglet.dumont.connector.indexing;
 import java.io.IOException;
 import java.util.Map;
 
+import jakarta.annotation.PreDestroy;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -58,6 +59,7 @@ public class DumElasticsearchIndexingPlugin implements DumIndexingPlugin {
     private final String elasticsearchUsername;
     private final String elasticsearchPassword;
     private final ElasticsearchClient client;
+    private final RestClient restClient;
 
     public DumElasticsearchIndexingPlugin(
             @Value("${dumont.indexing.elasticsearch.url}") String elasticsearchUrl,
@@ -68,34 +70,31 @@ public class DumElasticsearchIndexingPlugin implements DumIndexingPlugin {
         this.elasticsearchIndex = elasticsearchIndex;
         this.elasticsearchUsername = elasticsearchUsername;
         this.elasticsearchPassword = elasticsearchPassword;
-        this.client = createClient();
-        log.info("Initialized Elasticsearch indexing plugin with URL: {} and index: {}", 
-                elasticsearchUrl, elasticsearchIndex);
-    }
-
-    private ElasticsearchClient createClient() {
+        
+        // Create the client and store both client and restClient for proper cleanup
+        HttpHost httpHost = HttpHost.create(elasticsearchUrl);
+        
         try {
-            HttpHost httpHost = HttpHost.create(elasticsearchUrl);
-            
-            RestClient restClient;
             if (elasticsearchUsername != null && !elasticsearchUsername.isEmpty()) {
                 BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
                 credentialsProvider.setCredentials(
                         AuthScope.ANY,
                         new UsernamePasswordCredentials(elasticsearchUsername, elasticsearchPassword));
                 
-                restClient = RestClient.builder(httpHost)
+                this.restClient = RestClient.builder(httpHost)
                         .setHttpClientConfigCallback(httpClientBuilder ->
                                 httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
                         .build();
             } else {
-                restClient = RestClient.builder(httpHost).build();
+                this.restClient = RestClient.builder(httpHost).build();
             }
             
             RestClientTransport transport = new RestClientTransport(
-                    restClient, new JacksonJsonpMapper());
+                    this.restClient, new JacksonJsonpMapper());
             
-            return new ElasticsearchClient(transport);
+            this.client = new ElasticsearchClient(transport);
+            log.info("Initialized Elasticsearch indexing plugin with URL: {} and index: {}", 
+                    elasticsearchUrl, elasticsearchIndex);
         } catch (Exception e) {
             log.error("Error creating Elasticsearch client: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create Elasticsearch client", e);
@@ -158,5 +157,17 @@ public class DumElasticsearchIndexingPlugin implements DumIndexingPlugin {
     @Override
     public String getProviderName() {
         return "ELASTICSEARCH";
+    }
+
+    @PreDestroy
+    public void destroy() {
+        try {
+            if (restClient != null) {
+                restClient.close();
+                log.info("Elasticsearch client closed successfully");
+            }
+        } catch (IOException e) {
+            log.error("Error closing Elasticsearch client: {}", e.getMessage(), e);
+        }
     }
 }
