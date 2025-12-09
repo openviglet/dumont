@@ -1,0 +1,43 @@
+/*
+ *
+ * Copyright (C) 2016-2024 the original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.viglet.dumont.connector.commons.plugin;
+
+import com.viglet.turing.client.sn.job.TurSNJobItems;
+
+/**
+ * Interface for indexing plugins that allows Dumont to send content to different search engines
+ * (Turing ES, Elasticsearch, Solr, etc.)
+ * 
+ * @author Alexandre Oliveira
+ * @since 0.3.6
+ */
+public interface DumIndexingPlugin {
+    
+    /**
+     * Indexes the job items to the configured search engine
+     * 
+     * @param turSNJobItems the job items to be indexed
+     */
+    void index(TurSNJobItems turSNJobItems);
+    
+    /**
+     * Gets the name of the indexing provider
+     * 
+     * @return the provider name (e.g., "TURING", "SOLR", "ELASTICSEARCH")
+     */
+    String getProviderName();
+}

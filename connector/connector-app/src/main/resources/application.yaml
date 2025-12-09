@@ -16,6 +16,21 @@ dumont:
   reactive.indexing: false
   scheduler:
     enabled: false
+  indexing:
+    # Indexing provider: turing, solr, or elasticsearch
+    # Default is turing (if not specified)
+    provider: turing
+    solr:
+      # Solr configuration (required when provider is solr)
+      url: http://localhost:8983/solr
+      collection: dumont
+    elasticsearch:
+      # Elasticsearch configuration (required when provider is elasticsearch)
+      url: http://localhost:9200
+      index: dumont
+      # Optional authentication
+      username: 
+      password:
 
 spring:
   h2:

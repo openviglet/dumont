@@ -21,36 +21,31 @@ package com.viglet.dumont.connector.queue;
 import static com.viglet.dumont.connector.commons.logging.DumConnectorLoggingUtils.setSuccessStatus;
 import static com.viglet.dumont.connector.constant.DumConnectorConstants.CONNECTOR_INDEXING_QUEUE;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
-import com.viglet.turing.client.auth.credentials.TurApiKeyCredentials;
-import com.viglet.turing.client.sn.TurSNServer;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
-import com.viglet.turing.client.sn.job.TurSNJobUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
 public class DumConnectorProcessQueue {
-    private final String turingUrl;
-    private final String turingApiKey;
+    private final DumIndexingPlugin indexingPlugin;
 
-    public DumConnectorProcessQueue(@Value("${turing.url}") String turingUrl,
-            @Value("${turing.apiKey}") String turingApiKey) {
-        this.turingUrl = turingUrl;
-        this.turingApiKey = turingApiKey;
+    public DumConnectorProcessQueue(DumIndexingPlugin indexingPlugin) {
+        this.indexingPlugin = indexingPlugin;
+        log.info("DumConnectorProcessQueue initialized with indexing provider: {}", 
+                indexingPlugin.getProviderName());
     }
 
     @JmsListener(destination = CONNECTOR_INDEXING_QUEUE)
@@ -62,7 +57,7 @@ public class DumConnectorProcessQueue {
             log.info("Job is empty, no action.");
             return;
         }
-        log.info("Processing job from queue");
+        log.info("Processing job from queue with provider: {}", indexingPlugin.getProviderName());
         for (TurSNJobItem turSNJobItem : turSNJobItems) {
             if (!locales.contains(turSNJobItem.getLocale())) {
                 locales.add(turSNJobItem.getLocale());
@@ -80,11 +75,6 @@ public class DumConnectorProcessQueue {
         } else {
             locales.forEach(locale -> turSNJobItems.add(new TurSNJobItem(TurSNJobAction.COMMIT, sites, locale)));
         }
-        TurSNJobUtils.importItems(turSNJobItems, getTurSNServer(), false);
-    }
-
-    private TurSNServer getTurSNServer() {
-        return new TurSNServer(URI.create(turingUrl), null,
-                new TurApiKeyCredentials(turingApiKey));
+        indexingPlugin.index(turSNJobItems);
     }
 }
