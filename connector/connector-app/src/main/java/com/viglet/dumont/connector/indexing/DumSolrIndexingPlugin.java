@@ -32,7 +32,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
-import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 
@@ -75,7 +74,8 @@ public class DumSolrIndexingPlugin implements DumIndexingPlugin {
             List<SolrInputDocument> documents = new ArrayList<>();
             
             for (TurSNJobItem item : turSNJobItems) {
-                if (item.getAction() == TurSNJobAction.CREATE || item.getAction() == TurSNJobAction.UPDATE) {
+                // Skip COMMIT items (they don't have attributes)
+                if (item.getAttributes() != null && !item.getAttributes().isEmpty()) {
                     SolrInputDocument doc = new SolrInputDocument();
                     
                     // Add all attributes from the job item to Solr document
@@ -84,16 +84,6 @@ public class DumSolrIndexingPlugin implements DumIndexingPlugin {
                     }
                     
                     documents.add(doc);
-                } else if (item.getAction() == TurSNJobAction.DELETE) {
-                    // Handle delete action
-                    String id = item.getId();
-                    if (id != null && !id.isEmpty()) {
-                        solrClient.deleteById(solrCollection, id);
-                        log.debug("Deleted document with id: {} from Solr", id);
-                    }
-                } else if (item.getAction() == TurSNJobAction.COMMIT) {
-                    // Commit will be done at the end
-                    log.debug("Commit action detected, will commit at the end");
                 }
             }
             

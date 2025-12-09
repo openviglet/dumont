@@ -19,8 +19,6 @@
 package com.viglet.dumont.connector.indexing;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpHost;
@@ -32,7 +30,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
-import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 
@@ -119,7 +116,8 @@ public class DumElasticsearchIndexingPlugin implements DumIndexingPlugin {
             int operationCount = 0;
             
             for (TurSNJobItem item : turSNJobItems) {
-                if (item.getAction() == TurSNJobAction.CREATE || item.getAction() == TurSNJobAction.UPDATE) {
+                // Skip COMMIT items (they don't have attributes)
+                if (item.getAttributes() != null && !item.getAttributes().isEmpty()) {
                     String id = item.getId();
                     Map<String, Object> attributes = item.getAttributes();
                     
@@ -131,20 +129,6 @@ public class DumElasticsearchIndexingPlugin implements DumIndexingPlugin {
                             )
                     );
                     operationCount++;
-                } else if (item.getAction() == TurSNJobAction.DELETE) {
-                    String id = item.getId();
-                    if (id != null && !id.isEmpty()) {
-                        bulkRequest.operations(op -> op
-                                .delete(del -> del
-                                        .index(elasticsearchIndex)
-                                        .id(id)
-                                )
-                        );
-                        operationCount++;
-                        log.debug("Deleted document with id: {} from Elasticsearch", id);
-                    }
-                } else if (item.getAction() == TurSNJobAction.COMMIT) {
-                    log.debug("Commit action detected");
                 }
             }
             
