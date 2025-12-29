@@ -6,12 +6,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.viglet.dumont.spring.jpa.DumUuid;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -69,32 +69,32 @@ public class DumWCSource implements Serializable {
     private Collection<String> turSNSites = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+            CascadeType.ALL })
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<DumWCStartingPoint> startingPoints = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+            CascadeType.ALL })
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<DumWCAllowUrl> allowUrls = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+            CascadeType.ALL })
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<DumWCNotAllowUrl> notAllowUrls = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+            CascadeType.ALL })
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<DumWCFileExtension> notAllowExtensions = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+    @OneToMany(mappedBy = TUR_WC_SOURCE, orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+            CascadeType.ALL })
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<DumWCAttributeMapping> attributeMappings = new HashSet<>();
 

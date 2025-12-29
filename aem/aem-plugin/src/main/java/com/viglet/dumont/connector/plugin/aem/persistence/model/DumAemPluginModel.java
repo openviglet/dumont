@@ -23,13 +23,13 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.viglet.dumont.spring.jpa.DumUuid;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -68,8 +68,7 @@ public class DumAemPluginModel implements Serializable {
     private String subType;
     private String className;
     @Builder.Default
-    @OneToMany(mappedBy = "dumAemModel", orphanRemoval = true, fetch = FetchType.LAZY)
-    @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+    @OneToMany(mappedBy = "dumAemModel", orphanRemoval = true, fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<DumAemTargetAttribute> targetAttrs = new HashSet<>();
 

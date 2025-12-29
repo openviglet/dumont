@@ -24,12 +24,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.viglet.dumont.spring.jpa.DumUuid;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -95,20 +95,20 @@ public class DumAemSource implements Serializable {
         private String publishURLPrefix;
 
         @Builder.Default
-        @OneToMany(mappedBy = "dumAemSource", orphanRemoval = true, fetch = FetchType.LAZY)
-        @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+        @OneToMany(mappedBy = "dumAemSource", orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+                        CascadeType.ALL })
         @OnDelete(action = OnDeleteAction.CASCADE)
         private Collection<DumAemSourceLocalePath> localePaths = new HashSet<>();
 
         @Builder.Default
-        @OneToMany(mappedBy = "dumAemSource", orphanRemoval = true, fetch = FetchType.LAZY)
-        @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+        @OneToMany(mappedBy = "dumAemSource", orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+                        CascadeType.ALL })
         @OnDelete(action = OnDeleteAction.CASCADE)
         private Collection<DumAemAttributeSpecification> attributeSpecifications = new HashSet<>();
 
         @Builder.Default
-        @OneToMany(mappedBy = "dumAemSource", orphanRemoval = true, fetch = FetchType.LAZY)
-        @Cascade({ org.hibernate.annotations.CascadeType.ALL, org.hibernate.annotations.CascadeType.DELETE_ORPHAN })
+        @OneToMany(mappedBy = "dumAemSource", orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+                        CascadeType.ALL })
         @OnDelete(action = OnDeleteAction.CASCADE)
         private Collection<DumAemPluginModel> models = new HashSet<>();
 }

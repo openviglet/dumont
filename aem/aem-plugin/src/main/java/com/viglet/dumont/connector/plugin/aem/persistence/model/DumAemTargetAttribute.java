@@ -23,12 +23,12 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.viglet.dumont.spring.jpa.DumUuid;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -67,8 +67,7 @@ public class DumAemTargetAttribute implements Serializable {
     private String name;
 
     @Builder.Default
-    @OneToMany(mappedBy = "dumAemTargetAttribute", orphanRemoval = true, fetch = FetchType.LAZY)
-    @Cascade({ org.hibernate.annotations.CascadeType.ALL })
+    @OneToMany(mappedBy = "dumAemTargetAttribute", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<DumAemSourceAttribute> sourceAttrs = new HashSet<>();
 

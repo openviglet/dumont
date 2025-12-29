@@ -25,13 +25,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -103,8 +102,8 @@ public class DumConnectorIndexingModel implements Serializable {
     @CollectionTable(name = "con_indexing_sites", joinColumns = @JoinColumn(name = "indexing_id"))
     private List<String> sites = new ArrayList<>();
     @Builder.Default
-    @OneToMany(mappedBy = "reference", orphanRemoval = true, fetch = FetchType.LAZY)
-    @Cascade({ CascadeType.ALL, CascadeType.DELETE_ORPHAN })
+    @OneToMany(mappedBy = "reference", orphanRemoval = true, fetch = FetchType.LAZY, cascade = {
+            CascadeType.ALL })
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<DumConnectorDependencyModel> dependencies = new HashSet<>();
 
