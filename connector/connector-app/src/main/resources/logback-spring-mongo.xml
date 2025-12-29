@@ -13,11 +13,11 @@
 		<collectionName>indexing</collectionName>
 	</appender>
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<layout class="ch.qos.logback.classic.PatternLayout">
+		<encoder>
 			<Pattern>
 				%msg%n
 			</Pattern>
-		</layout>
+		</encoder>
 	</appender>
 	<logger name="org.mongodb.driver" level="OFF" />
 	<logger name="com.viglet.dumont.connector.DumConnectorApplication" level="info" additivity="false">

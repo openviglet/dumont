@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<layout class="ch.qos.logback.classic.PatternLayout">
+		<encoder>
 			<Pattern>
 				%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 			</Pattern>
-		</layout>
+		</encoder>
 	</appender>
 	<logger name="com.viglet.dumont.commons.logging.DumLoggingIndexingLog" level="OFF" />
 	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
