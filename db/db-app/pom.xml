@@ -140,6 +140,12 @@
                                     </excludes>
                                 </filter>
                                 <filter>
+                                    <artifact>org.mongodb:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/native-image/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
                                     <artifact>org.apache.logging.log4j:log4j-core</artifact>
                                     <excludes>
                                         <exclude>META-INF/services/javax.annotation.processing.Processor</exclude>
@@ -210,6 +216,7 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>indexer</shadedClassifierName>
                             <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.viglet.dumont.tool.jdbc.DumJDBCImportTool</mainClass>
                                 </transformer>
