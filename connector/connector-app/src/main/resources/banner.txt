@@ -3,6 +3,6 @@ ${AnsiColor.BRIGHT_GREEN} |   \   _  _   _ __    ___   _ _   | |_    |   \  | __
 ${AnsiColor.BRIGHT_GREEN} | |) | | || | | '  \  / _ \ | ' \  |  _|   | |) | | _|  |  _/
 ${AnsiColor.BRIGHT_GREEN} |___/   \_,_| |_|_|_| \___/ |_||_|  \__|   |___/  |___| |_|  ${AnsiColor.BRIGHT_WHITE}${application.version}
                                                               
-${AnsiColor.BRIGHT_WHITE}:: Copyright (C) 2016-2025 Viglet Dumont DEP
+${AnsiColor.BRIGHT_WHITE}:: Copyright (C) 2016-2026 Viglet Dumont DEP
 
 ${AnsiColor.BRIGHT_WHITE}:: Built with Spring Boot :: ${spring-boot.version}
