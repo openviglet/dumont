@@ -33,7 +33,6 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,7 +80,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DumAemCommonsUtils {
 
     private static final Cache<String, Optional<String>> responseBodyCache = Caffeine.newBuilder().maximumSize(1000)
-            .expireAfterWrite(Duration.ofMinutes(5)).build();
+            .expireAfterWrite(Objects.requireNonNull(Duration.ofMinutes(5))).build();
 
     private DumAemCommonsUtils() {
         throw new IllegalStateException("Utility class");
@@ -108,11 +107,9 @@ public class DumAemCommonsUtils {
 
     private static void extractContentValues(JsonNode node, Set<String> results) {
         if (node.isObject()) {
-            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                extractContentValues(entry.getValue(), results);
-            }
+            node.properties().forEach(property -> {
+                extractContentValues(property.getValue(), results);
+            });
         } else if (node.isArray()) {
             for (JsonNode item : node) {
                 extractContentValues(item, results);
@@ -336,10 +333,10 @@ public class DumAemCommonsUtils {
         }
     }
 
-    public static @NotNull Optional<String> fetchResponseBodyWithoutCache(String url,
+    public static @NotNull Optional<String> fetchResponseBodyWithoutCache(@NotNull String url,
             DumAemConfiguration dumAemSourceContext) throws IOException {
-        String escapedUrl = UrlEscapers.urlFragmentEscaper().escape(url);
-        URI normalizedUri = URI.create(Objects.requireNonNull(escapedUrl, "URL cannot be null")).normalize();
+        String escapedUrl = Objects.requireNonNull(UrlEscapers.urlFragmentEscaper().escape(url));
+        URI normalizedUri = URI.create(escapedUrl).normalize();
 
         try (CloseableHttpClient httpClient = createHttpClient(dumAemSourceContext)) {
             HttpGet request = new HttpGet(normalizedUri);
