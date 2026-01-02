@@ -189,7 +189,6 @@
                 <configuration>
                     <layout>ZIP</layout>
                     <skip>false</skip>
-                    <executable>true</executable>
                 </configuration>
                 <executions>
                     <execution>

@@ -4,19 +4,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestClient;
+
+import jakarta.validation.constraints.NotNull;
 
 @Configuration
 public class DumRestClientConfig {
     public static final String KEY = "Key";
-    @NonNull
+    @NotNull
     private final String turingUrl;
-    @NonNull
+    @NotNull
     private final String turingApiKey;
 
-    public DumRestClientConfig(@Value("${turing.url:http://localhost:2700}") @NonNull String turingUrl,
-            @Value("${turing.apiKey}") @NonNull String turingApiKey) {
+    public DumRestClientConfig(@Value("${turing.url:http://localhost:2700}") @NotNull String turingUrl,
+            @Value("${turing.apiKey}") @NotNull String turingApiKey) {
         this.turingUrl = turingUrl;
         this.turingApiKey = turingApiKey;
     }

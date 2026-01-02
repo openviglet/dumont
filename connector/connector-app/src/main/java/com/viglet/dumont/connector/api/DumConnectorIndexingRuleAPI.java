@@ -21,7 +21,7 @@
 
 package com.viglet.dumont.connector.api;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -94,7 +94,7 @@ public class DumConnectorIndexingRuleAPI {
     @PostMapping
     public DumConnectorIndexingRuleModel dumConnectorIndexingRuleAdd(
             @RequestBody DumConnectorIndexingRuleModel dumConnectorIndexingRule) {
-        dumConnectorIndexingRule.setLastModifiedDate(new Date());
+        dumConnectorIndexingRule.setLastModifiedDate(Instant.now());
         return indexingRuleService.save(dumConnectorIndexingRule);
     }
 

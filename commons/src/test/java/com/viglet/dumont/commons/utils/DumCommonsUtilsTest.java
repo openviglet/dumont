@@ -15,9 +15,7 @@
 
 package com.viglet.dumont.commons.utils;
 
-import org.apache.commons.collections4.KeyValue;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +30,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.commons.collections4.KeyValue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Unit tests for DumCommonsUtils.
@@ -83,7 +82,7 @@ class DumCommonsUtilsTest {
 
     @Test
     void testIsValidUrlValidUrl() throws MalformedURLException {
-        URL validUrl = new URL("https://www.example.com");
+        URL validUrl = URI.create("https://www.example.com").toURL();
         boolean result = DumCommonsUtils.isValidUrl(validUrl);
 
         assertThat(result).isTrue();
@@ -91,7 +90,7 @@ class DumCommonsUtilsTest {
 
     @Test
     void testIsValidUrlLocalUrl() throws MalformedURLException {
-        URL localUrl = new URL("http://localhost:8080/api");
+        URL localUrl = URI.create("http://localhost:8080/api").toURL();
         boolean result = DumCommonsUtils.isValidUrl(localUrl);
 
         assertThat(result).isTrue();
@@ -99,7 +98,7 @@ class DumCommonsUtilsTest {
 
     @Test
     void testIsValidUrlFileUrl() throws MalformedURLException {
-        URL fileUrl = new URL("file:///tmp/test.txt");
+        URL fileUrl = URI.create("file:///tmp/test.txt").toURL();
         boolean result = DumCommonsUtils.isValidUrl(fileUrl);
 
         // Based on the actual behavior, file URLs are considered invalid by the

@@ -101,7 +101,7 @@ public class DumWCExchangeProcess {
             }
 
             // Object to JSON in file
-            ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            ObjectMapper mapper = new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
             try {
                 mapper.writerWithDefaultPrettyPrinter().writeValue(exportFile,
                         new DumWCExchange(dumWCSources.stream()

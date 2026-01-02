@@ -1,6 +1,6 @@
 package com.viglet.dumont.connector.service;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -47,7 +47,7 @@ public class DumConnectorIndexingRuleService {
             edit.setRuleType(dumConnectorIndexingRule.getRuleType());
             edit.setSource(dumConnectorIndexingRule.getSource());
             edit.setValues(dumConnectorIndexingRule.getValues());
-            edit.setLastModifiedDate(new Date());
+            edit.setLastModifiedDate(Instant.now());
             return dumConnectorIndexingRuleRepository.save(edit);
         }).orElse(new DumConnectorIndexingRuleModel());
     }

@@ -190,18 +190,14 @@ public class DumWCPluginProcess {
 
     private boolean isValidToAddQueue(String pageUrl) {
         return isNotMailUrl(pageUrl) && isNotTelUrl(pageUrl)
-                && !StringUtils.equalsAny(pageUrl, queueLinks.toArray(new String[0]))
+                && !queueLinks.contains(pageUrl)
                 && !isSharpUrl(pageUrl) && !isPagination(pageUrl) && !isJavascriptUrl(pageUrl)
                 && pageUrl.startsWith(this.website)
-                && (StringUtils.startsWithAny(getRelativePageUrl(pageUrl),
-                        allowStartsWithUrls.toArray(new String[0]))
-                        || StringUtils.equalsAny(getRelativePageUrl(pageUrl),
-                                allowUrls.toArray(new String[0])))
-                && !StringUtils.startsWithAny(getRelativePageUrl(pageUrl),
-                        notAllowStartsWithUrls.toArray(new String[0]))
-                && !StringUtils.equalsAny(getRelativePageUrl(pageUrl),
-                        notAllowUrls.toArray(new String[0]))
-                && !StringUtils.endsWithAny(pageUrl, notAllowExtensions.toArray(new String[0]));
+                && (allowStartsWithUrls.stream().anyMatch(getRelativePageUrl(pageUrl)::startsWith)
+                        || allowUrls.contains(getRelativePageUrl(pageUrl)))
+                && !notAllowStartsWithUrls.stream().anyMatch(getRelativePageUrl(pageUrl)::startsWith)
+                && !notAllowUrls.contains(getRelativePageUrl(pageUrl))
+                && !notAllowExtensions.stream().anyMatch(pageUrl::endsWith);
     }
 
     private void addTurSNJobItem(DumWCSource dumWCSource, Document document, String url,
@@ -311,12 +307,12 @@ public class DumWCPluginProcess {
 
     private boolean canBeIndexed(String pageUrl) {
         return isValidToAddQueue(pageUrl)
-                && !StringUtils.equalsAny(pageUrl, indexedLinks.toArray(new String[0]));
+                && !indexedLinks.contains(pageUrl);
     }
 
     private boolean canBeAddToQueue(String pageUrl) {
         return isValidToAddQueue(pageUrl)
-                && !StringUtils.equalsAny(pageUrl, visitedLinks.toArray(new String[0]));
+                && !visitedLinks.contains(pageUrl);
     }
 
     private static boolean isJavascriptUrl(String pageUrl) {
