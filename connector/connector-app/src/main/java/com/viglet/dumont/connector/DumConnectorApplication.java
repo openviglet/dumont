@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule;
+import com.fasterxml.jackson.datatype.hibernate7.Hibernate7Module;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +40,7 @@ public class DumConnectorApplication {
     }
 
     @Bean
-    Module hibernate5Module() {
-        return new Hibernate5JakartaModule();
+    Module hibernate7Module() {
+        return new Hibernate7Module();
     }
 }

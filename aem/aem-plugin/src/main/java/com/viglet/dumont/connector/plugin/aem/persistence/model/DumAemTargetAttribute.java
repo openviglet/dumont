@@ -26,6 +26,7 @@ import java.util.HashSet;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.viglet.dumont.spring.jpa.DumUuid;
 
 import jakarta.persistence.CascadeType;
@@ -54,6 +55,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "aem_target_attribute")
+@JsonIgnoreProperties({ "dumAemModel" })
 public class DumAemTargetAttribute implements Serializable {
 
     @Serial

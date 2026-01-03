@@ -4,4 +4,5 @@ java -Dloader.path=%~dp0libs ^
 -Dturing.url=%TURING_URL% ^
 -Dturing.apiKey=%TURING_API_KEY% ^
 -Dspring.h2.console.enabled=true ^
+-Dlogging.config=classpath:logback-spring.xml ^
 -jar %~dp0dumont-connector.jar
