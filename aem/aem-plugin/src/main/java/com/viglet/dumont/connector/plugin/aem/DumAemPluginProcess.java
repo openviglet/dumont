@@ -115,7 +115,7 @@ public class DumAemPluginProcess {
                                 dumAemPathList.getPaths());
                 dumAemSourceService.getDumAemSourceByName(source).ifPresentOrElse(dumAemSource -> {
                         DumAemSession dumAemSession = dumAemSessionService.getDumAemSession(dumAemSource,
-                                        dumAemPathList);
+                                        dumAemPathList, true);
                         indexContentIdList(dumAemPathList.getPaths(), dumAemSession);
                         if (connectorDependencies) {
                                 indexDependencies(dumAemSession, dumAemPathList.getPaths());
@@ -187,7 +187,7 @@ public class DumAemPluginProcess {
                         return;
                 }
                 runningSources.add(dumAemSource.getName());
-                DumAemSession dumAemSession = dumAemSessionService.getDumAemSession(dumAemSource);
+                DumAemSession dumAemSession = dumAemSessionService.getDumAemSession(dumAemSource, false);
                 try {
                         this.getNodesFromJson(dumAemSession);
                 } catch (Exception e) {
@@ -204,8 +204,13 @@ public class DumAemPluginProcess {
         }
 
         private void finished(DumAemSession dumAemSession) {
-                if (!dumAemSession.isStandalone())
+                if (!dumAemSession.isStandalone()) {
+                        log.info("Stopping source process. {}", dumAemSession.getSource());
                         runningSources.remove(dumAemSession.getSource());
+                } else {
+                        log.info("Finished standalone indexing for source: {}",
+                                        dumAemSession.getSource());
+                }
                 dumConnectorContext.finishIndexing(dumAemSession, dumAemSession.isStandalone());
         }
 

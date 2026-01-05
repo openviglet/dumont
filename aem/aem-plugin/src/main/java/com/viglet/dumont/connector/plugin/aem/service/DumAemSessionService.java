@@ -30,7 +30,7 @@ public class DumAemSessionService {
         }
 
         public DumAemSession getDumAemSession(DumAemSource dumAemSource,
-                        DumAemPathList dumAemPathList) {
+                        DumAemPathList dumAemPathList, boolean standalone) {
                 // Retrieve content mapping once and reuse
                 DumAemContentMapping dumAemContentMapping = dumAemContentMappingService
                                 .getDumAemContentMapping(dumAemSource);
@@ -60,7 +60,7 @@ public class DumAemSessionService {
                 return DumAemSession.builder()
                                 .configuration(dumAemConfiguration)
                                 .event(event)
-                                .standalone(true)
+                                .standalone(standalone)
                                 .indexChildren(indexChildren)
                                 .source(session.getSource())
                                 .transactionId(session.getTransactionId())
@@ -73,8 +73,7 @@ public class DumAemSessionService {
                                 .build();
         }
 
-        public DumAemSession getDumAemSession(DumAemSource dumAemSource) {
-                return getDumAemSession(dumAemSource, (DumAemPathList) null);
-
+        public DumAemSession getDumAemSession(DumAemSource dumAemSource, boolean standalone) {
+                return getDumAemSession(dumAemSource, (DumAemPathList) null, standalone);
         }
 }

@@ -48,9 +48,9 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-        globally_quoted_identifiers: true
-        enable_lazy_load_no_trans: true
-        generate_statistics: false
+        "[globally_quoted_identifiers]": true
+        "[enable_lazy_load_no_trans]": true
+        "[generate_statistics]": false
       jakarta:
         persistence:
           sharedCache:
@@ -81,10 +81,12 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   level:
-    org.springframework: INFO
-    org.apache: INFO
-    org.apache.activemq: ERROR
-    com.viglet: INFO
+    org:
+      springframework: INFO
+      apache: INFO
+      "[apache.activemq]": ERROR
+    com:
+      viglet: INFO
   file:
     name: store/logs/tur-connector.log
   logback:

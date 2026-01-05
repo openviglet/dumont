@@ -4,5 +4,31 @@
       "name": "dumont.scheduler.enabled",
       "type": "java.lang.Boolean",
       "description": "Description for dumont.scheduler.enabled."
-  }
-] }
+    },
+    {
+      "name": "turing.solr.endpoint",
+      "type": "java.lang.String",
+      "description": "A description for 'turing.solr.endpoint'"
+    },
+    {
+      "name": "turing.api-key",
+      "type": "java.lang.String",
+      "description": "A description for 'turing.api-key'"
+    },
+    {
+      "name": "turing.url",
+      "type": "java.lang.String",
+      "description": "A description for 'turing.url'"
+    },
+    {
+      "name": "dumont.job.size",
+      "type": "java.lang.String",
+      "description": "A description for 'dumont.job.size'"
+    },
+    {
+      "name": "dumont.allowedOrigins",
+      "type": "java.lang.String",
+      "description": "A description for 'dumont.allowedOrigins'"
+    }
+  ]
+}

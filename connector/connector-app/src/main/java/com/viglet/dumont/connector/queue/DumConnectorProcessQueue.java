@@ -44,7 +44,7 @@ public class DumConnectorProcessQueue {
 
     public DumConnectorProcessQueue(DumIndexingPlugin indexingPlugin) {
         this.indexingPlugin = indexingPlugin;
-        log.info("DumConnectorProcessQueue initialized with indexing provider: {}", 
+        log.info("DumConnectorProcessQueue initialized with indexing provider: {}",
                 indexingPlugin.getProviderName());
     }
 
