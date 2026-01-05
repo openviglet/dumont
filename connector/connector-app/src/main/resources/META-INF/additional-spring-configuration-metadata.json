@@ -1,34 +1,59 @@
 {
   "properties": [
     {
-      "name": "dumont.scheduler.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Description for dumont.scheduler.enabled."
+      "name": "dumont.allowedOrigins",
+      "type": "java.lang.String",
+      "description": "Comma-separated list of allowed origins for CORS configuration."
     },
     {
-      "name": "turing.solr.endpoint",
+      "name": "dumont.cron",
       "type": "java.lang.String",
-      "description": "A description for 'turing.solr.endpoint'"
+      "description": "Cron expression to schedule job execution."
     },
     {
-      "name": "turing.api-key",
+      "name": "dumont.cron.zone",
       "type": "java.lang.String",
-      "description": "A description for 'turing.api-key'"
+      "description": "Timezone used for cron expression evaluation."
     },
     {
-      "name": "turing.url",
+      "name": "dumont.dependencies.enabled",
       "type": "java.lang.String",
-      "description": "A description for 'turing.url'"
+      "description": "Enable or disable dependency resolution during processing."
+    },
+    {
+      "name": "dumont.indexing.provider",
+      "type": "java.lang.String",
+      "description": "The indexing provider to use for content indexing (e.g. turing, solr, turing)."
     },
     {
       "name": "dumont.job.size",
       "type": "java.lang.String",
-      "description": "A description for 'dumont.job.size'"
+      "description": "Maximum number of items to process per job execution."
     },
     {
-      "name": "dumont.allowedOrigins",
+      "name": "dumont.reactive.indexing",
       "type": "java.lang.String",
-      "description": "A description for 'dumont.allowedOrigins'"
+      "description": "Enable or disable reactive indexing mode for asynchronous processing."
+    },
+    {
+      "name": "dumont.scheduler.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the scheduled job execution."
+    },
+    {
+      "name": "turing.api-key",
+      "type": "java.lang.String",
+      "description": "API key for authenticating with the Turing platform."
+    },
+    {
+      "name": "turing.solr.endpoint",
+      "type": "java.lang.String",
+      "description": "Solr endpoint URL used by the Turing integration."
+    },
+    {
+      "name": "turing.url",
+      "type": "java.lang.String",
+      "description": "Base URL of the Turing platform API."
     }
   ]
 }

@@ -9,7 +9,7 @@
     <name>Dumont Web Crawler - Sample Custom Connector</name>
     <description>Dumont Web Crawler - Sample Custom Connector</description>
     <properties>
-        <revision>2026.1.7</revision>
+        <revision>2026.1.9</revision>
         <dumont.version>6eea13d91d</dumont.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
