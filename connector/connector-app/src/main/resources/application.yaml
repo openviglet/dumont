@@ -88,7 +88,7 @@ logging:
     com:
       viglet: INFO
   file:
-    name: store/logs/tur-connector.log
+    name: store/logs/dum-connector.log
   logback:
     rollingpolicy:
       max-file-size: 25MB

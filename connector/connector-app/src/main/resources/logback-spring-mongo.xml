@@ -3,13 +3,13 @@
 	<appender name="MONGO_GENERAL" class="com.viglet.dumont.commons.logging.DumMongoDBAppender">
 		<enabled>true</enabled>
 		<connectionString>mongodb://localhost:27017</connectionString>
-		<databaseName>dumontLog</databaseName>
+		<databaseName>turingLog</databaseName>
 		<collectionName>aem</collectionName>
 	</appender>
 	<appender name="MONGO_STATUS" class="com.viglet.dumont.commons.logging.DumMongoDBIndexingAppender">
 		<enabled>true</enabled>
 		<connectionString>mongodb://localhost:27017</connectionString>
-		<databaseName>dumontLog</databaseName>
+		<databaseName>turingLog</databaseName>
 		<collectionName>indexing</collectionName>
 	</appender>
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
