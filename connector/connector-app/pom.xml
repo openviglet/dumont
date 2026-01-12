@@ -154,7 +154,7 @@
         <dependency>
             <groupId>co.elastic.clients</groupId>
             <artifactId>elasticsearch-java</artifactId>
-            <version>9.2.3</version>
+            <version>9.2.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
