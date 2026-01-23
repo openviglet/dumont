@@ -7,10 +7,7 @@ import java.util.Date;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
@@ -18,12 +15,21 @@ import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.CoreConstants;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.datatype.joda.JodaModule;
 
 @Slf4j
 @Setter
 public class DumMongoDBAppender extends DumMongoDBAppenderBase {
 
     public static final int MAX_LENGTH_PACKAGE_NAME = 40;
+
+    // Recomendação: No Jackson 3, o mapper é imutável. Criá-lo como estático é
+    // muito mais eficiente.
+    private static final JsonMapper JSON_MAPPER = JsonMapper.builder()
+            .addModule(new JodaModule())
+            .withConfigOverride(Date.class, cfg -> cfg.setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.NUMBER)))
+            .build();
 
     @Override
     protected void append(ILoggingEvent event) {
@@ -42,14 +48,8 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
         } catch (UnknownHostException e) {
             log.error(e.getMessage(), e);
         }
-        try {
-            String json = new ObjectMapper().registerModule(new JodaModule())
-                    .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
-                    .writeValueAsString(dumLoggingGeneral);
-            collection.insertOne(Document.parse(json));
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage(), e);
-        }
+        String json = JSON_MAPPER.writeValueAsString(dumLoggingGeneral);
+        collection.insertOne(Document.parse(json));
     }
 
     private static @NotNull String getStackTrace(ILoggingEvent event) {
@@ -66,9 +66,9 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
     private static @NotNull String abbreviatePackage(String packageName) {
         if (packageName.length() <= MAX_LENGTH_PACKAGE_NAME)
             return packageName;
-        StringBuffer stringBuffer = new StringBuffer(packageName);
-        DumNameAbbreviator.getAbbreviator("1.").abbreviate(1, stringBuffer);
-        return stringBuffer.toString();
+        // StringBuffer -> StringBuilder (mais moderno se não houver concorrência local)
+        StringBuilder stringBuilder = new StringBuilder(packageName);
+        DumNameAbbreviator.getAbbreviator("1.").abbreviate(1, stringBuilder);
+        return stringBuilder.toString();
     }
-
 }

@@ -30,7 +30,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -55,10 +54,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.Lists;
@@ -75,6 +70,9 @@ import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 public class DumAemCommonsUtils {
@@ -87,16 +85,9 @@ public class DumAemCommonsUtils {
     }
 
     public static Set<String> getDependencies(JSONObject infinityJson) {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root;
-        try {
-            root = mapper.readTree(infinityJson.toString());
-            return getContentValues(root);
-
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage(), e);
-        }
-        return Collections.emptySet();
+        final JsonMapper mapper = JsonMapper.builder().build();
+        JsonNode root = mapper.readTree(infinityJson.toString());
+        return getContentValues(root);
     }
 
     private static Set<String> getContentValues(JsonNode node) {
@@ -309,18 +300,15 @@ public class DumAemCommonsUtils {
 
     public static <T> Optional<T> getResponseBody(String url,
             DumAemConfiguration dumAemSourceContext, Class<T> clazz, boolean useCache) throws IOException {
+        final JsonMapper mapper = JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
+
         return getResponseBody(url, dumAemSourceContext, useCache).flatMap(json -> {
             if (!DumCommonsUtils.isValidJson(json)) {
                 return Optional.empty();
             }
-            try {
-                return Optional.ofNullable(new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                        .readValue(json, clazz));
-            } catch (JsonProcessingException e) {
-                log.error("URL {} - {}", url, e.getMessage(), e);
-            }
-            return Optional.empty();
+            return Optional.ofNullable(mapper.readValue(json, clazz));
         });
     }
 

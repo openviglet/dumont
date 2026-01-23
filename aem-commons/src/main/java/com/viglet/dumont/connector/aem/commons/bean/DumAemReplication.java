@@ -20,11 +20,11 @@ package com.viglet.dumont.connector.aem.commons.bean;
 
 import java.util.Date;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.viglet.dumont.connector.aem.commons.deserializer.DumAemUnixTimestamp;
 
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @Getter
 @Setter

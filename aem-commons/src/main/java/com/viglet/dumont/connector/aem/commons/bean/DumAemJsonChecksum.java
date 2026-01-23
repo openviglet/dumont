@@ -24,22 +24,26 @@ import java.util.zip.Checksum;
 
 import org.json.JSONObject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import lombok.Getter;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @Getter
 public class DumAemJsonChecksum {
     private final JSONObject jsonObject;
     private final long checksum;
 
-    public DumAemJsonChecksum(JSONObject jsonObject) throws JsonProcessingException {
-        ObjectMapper om = new ObjectMapper();
-        om.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+    public DumAemJsonChecksum(JSONObject jsonObject) {
+        // No Jackson 3, configuramos o comportamento de ordenação no Builder
+        JsonMapper om = JsonMapper.builder()
+                .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+                .build();
+
         this.jsonObject = jsonObject;
-        this.checksum = getCRC32Checksum(om.writeValueAsString(jsonObject).getBytes(StandardCharsets.UTF_8));
+
+        // O método writeValueAsString permanece o mesmo no JsonMapper
+        byte[] jsonBytes = om.writeValueAsString(jsonObject).getBytes(StandardCharsets.UTF_8);
+        this.checksum = getCRC32Checksum(jsonBytes);
     }
 
     public static long getCRC32Checksum(byte[] bytes) {

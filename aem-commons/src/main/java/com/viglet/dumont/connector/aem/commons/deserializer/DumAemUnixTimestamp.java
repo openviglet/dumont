@@ -16,17 +16,18 @@
 
 package com.viglet.dumont.connector.aem.commons.deserializer;
 
-import java.io.IOException;
 import java.util.Date;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
-@Slf4j
 public class DumAemUnixTimestamp extends StdDeserializer<Date> {
+    private static final Logger log = LoggerFactory.getLogger(DumAemUnixTimestamp.class);
 
     public DumAemUnixTimestamp() {
         this(null);
@@ -38,26 +39,29 @@ public class DumAemUnixTimestamp extends StdDeserializer<Date> {
 
     @Override
     public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
-            throws IOException {
-        String timestamp = jsonParser.getText().trim();
-        if (timestamp.isEmpty()) {
+            throws JacksonException {
+
+        String timestamp = jsonParser.getValueAsString();
+
+        if (timestamp == null || timestamp.trim().isEmpty()) {
             return null;
         }
+
+        timestamp = timestamp.trim();
+
         try {
-            // Pad to at least 10 digits (seconds), but not arbitrarily to 12
             while (timestamp.length() < 10) {
                 timestamp += "0";
             }
+
             long timeMillis;
             if (timestamp.length() == 10) {
-                // Assume seconds, convert to milliseconds
                 timeMillis = Long.parseLong(timestamp) * 1000L;
             } else {
-                // Assume milliseconds
                 timeMillis = Long.parseLong(timestamp);
             }
-            Date date = new Date(timeMillis);
-            return date;
+
+            return new Date(timeMillis);
         } catch (NumberFormatException e) {
             log.error("Unable to deserialize timestamp: {}", timestamp, e);
             return null;

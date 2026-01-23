@@ -38,7 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemAttribExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemExchange;
@@ -61,6 +60,8 @@ import com.viglet.dumont.spring.utils.DumSpringUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * @author Alexandre Oliveira
@@ -126,8 +127,9 @@ public class DumAemExchangeProcess {
             } catch (IOException e) {
                 log.error(e.getMessage(), e);
             }
-            // Object to JSON in file
-            ObjectMapper mapper = new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
+            JsonMapper mapper = JsonMapper.builder()
+                    .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+                    .build();
             try {
                 mapper.writerWithDefaultPrettyPrinter().writeValue(exportFile,
                         new DumAemExchange(dumAemSources.stream()
@@ -198,13 +200,9 @@ public class DumAemExchangeProcess {
     public void importFromFile(File exportFile) {
         log.info("Importing {} file", exportFile);
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            DumAemExchange dumAemExchange = mapper.readValue(exportFile, DumAemExchange.class);
-            if (hasSource(dumAemExchange)) {
-                importAemSource(dumAemExchange);
-            }
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
+        DumAemExchange dumAemExchange = mapper.readValue(exportFile, DumAemExchange.class);
+        if (hasSource(dumAemExchange)) {
+            importAemSource(dumAemExchange);
         }
     }
 
