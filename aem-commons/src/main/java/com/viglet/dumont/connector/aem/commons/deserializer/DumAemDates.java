@@ -16,18 +16,16 @@
 
 package com.viglet.dumont.connector.aem.commons.deserializer;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 @Slf4j
 public class DumAemDates extends StdDeserializer<Date> {
@@ -48,20 +46,30 @@ public class DumAemDates extends StdDeserializer<Date> {
 
     @Override
     public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
-            throws IOException {
-        JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-        String dateAsString = node.textValue();
+            throws JacksonException {
+
+        // No Jackson 3, evitamos getCodec().readTree().
+        // Usamos o próprio context para ler o valor como String de forma eficiente.
+        String dateAsString = jsonParser.getValueAsString();
+
         if (dateAsString == null || dateAsString.trim().isEmpty()) {
             return null;
         }
 
-        for (SimpleDateFormat formatter : DATE_FORMATTERS) {
-            try {
-                return formatter.parse(dateAsString);
-            } catch (ParseException | NumberFormatException ignored) {
-                // Nothing
+        dateAsString = dateAsString.trim();
+
+        // Sincronização básica ou uso de formatadores locais (SimpleDateFormat não é
+        // thread-safe)
+        synchronized (DATE_FORMATTERS) {
+            for (SimpleDateFormat formatter : DATE_FORMATTERS) {
+                try {
+                    return formatter.parse(dateAsString);
+                } catch (ParseException | NumberFormatException ignored) {
+                    // Tenta o próximo formato
+                }
             }
         }
+
         if (log.isDebugEnabled()) {
             log.debug("Date was not found: {}", dateAsString);
         }

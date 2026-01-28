@@ -1,17 +1,18 @@
 package com.viglet.dumont.commons.logging;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.viglet.dumont.commons.indexing.DumIndexingStatus;
-import com.viglet.dumont.commons.indexing.DumLoggingStatus;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import com.viglet.dumont.commons.indexing.DumIndexingStatus;
+import com.viglet.dumont.commons.indexing.DumLoggingStatus;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 @Slf4j
 @Builder

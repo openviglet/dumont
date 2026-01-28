@@ -19,7 +19,12 @@
 package com.viglet.dumont.connector.plugin.aem.export.bean;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * @author Alexandre Oliveira

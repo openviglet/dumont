@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.webcrawler.export.bean.DumWCAttribExchange;
 import com.viglet.dumont.connector.plugin.webcrawler.export.bean.DumWCExchange;
@@ -41,6 +40,8 @@ import com.viglet.dumont.spring.utils.DumSpringUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Component
@@ -100,8 +101,10 @@ public class DumWCExchangeProcess {
                 log.error(e.getMessage(), e);
             }
 
-            // Object to JSON in file
-            ObjectMapper mapper = new ObjectMapper().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
+            ObjectMapper mapper = JsonMapper.builder()
+                    .changeDefaultPropertyInclusion(incl -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL,
+                            JsonInclude.Include.USE_DEFAULTS))
+                    .build();
             try {
                 mapper.writerWithDefaultPrettyPrinter().writeValue(exportFile,
                         new DumWCExchange(dumWCSources.stream()
@@ -183,13 +186,9 @@ public class DumWCExchangeProcess {
 
     public void importFromFile(File exportFile) {
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            DumWCExchange dumWCExchange = mapper.readValue(exportFile, DumWCExchange.class);
-            if (dumWCExchange.getSources() != null && !dumWCExchange.getSources().isEmpty()) {
-                importWCSource(dumWCExchange);
-            }
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
+        DumWCExchange dumWCExchange = mapper.readValue(exportFile, DumWCExchange.class);
+        if (dumWCExchange.getSources() != null && !dumWCExchange.getSources().isEmpty()) {
+            importWCSource(dumWCExchange);
         }
     }
 
