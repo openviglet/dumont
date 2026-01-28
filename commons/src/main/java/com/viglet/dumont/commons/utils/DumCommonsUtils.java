@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.KeyValue;
 import org.apache.commons.collections4.keyvalue.DefaultMapEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -44,11 +45,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+
 import com.viglet.dumont.commons.exception.DumException;
+
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * @author Alexandre Oliveira
@@ -282,8 +286,10 @@ public class DumCommonsUtils {
 
     public static String asJsonString(final Object obj) throws DumException {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            ObjectMapper mapper = JsonMapper.builder()
+                    .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                    .build();
+
             return mapper.writeValueAsString(obj);
         } catch (Exception e) {
             throw new DumException(e);

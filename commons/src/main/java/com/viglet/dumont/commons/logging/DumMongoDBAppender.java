@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import ch.qos.logback.classic.pattern.Abbreviator;
+import ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
@@ -23,6 +25,7 @@ import tools.jackson.datatype.joda.JodaModule;
 public class DumMongoDBAppender extends DumMongoDBAppenderBase {
 
     public static final int MAX_LENGTH_PACKAGE_NAME = 40;
+    private static final Abbreviator ABBREVIATOR = new TargetLengthBasedClassNameAbbreviator(1);
 
     // Recomendação: No Jackson 3, o mapper é imutável. Criá-lo como estático é
     // muito mais eficiente.
@@ -64,11 +67,10 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
     }
 
     private static @NotNull String abbreviatePackage(String packageName) {
+        if (packageName == null)
+            return "";
         if (packageName.length() <= MAX_LENGTH_PACKAGE_NAME)
             return packageName;
-        // StringBuffer -> StringBuilder (mais moderno se não houver concorrência local)
-        StringBuilder stringBuilder = new StringBuilder(packageName);
-        DumNameAbbreviator.getAbbreviator("1.").abbreviate(1, stringBuilder);
-        return stringBuilder.toString();
+        return ABBREVIATOR.abbreviate(packageName);
     }
 }

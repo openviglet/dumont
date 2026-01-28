@@ -60,6 +60,10 @@ import com.viglet.dumont.spring.utils.DumSpringUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -199,11 +203,18 @@ public class DumAemExchangeProcess {
 
     public void importFromFile(File exportFile) {
         log.info("Importing {} file", exportFile);
-        ObjectMapper mapper = new ObjectMapper();
-        DumAemExchange dumAemExchange = mapper.readValue(exportFile, DumAemExchange.class);
-        if (hasSource(dumAemExchange)) {
-            importAemSource(dumAemExchange);
+        try {
+            ObjectMapper mapper = JsonMapper.builder()
+                    .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
+                    .build();
+            DumAemExchange dumAemExchange = mapper.readValue(exportFile, DumAemExchange.class);
+            if (hasSource(dumAemExchange)) {
+                importAemSource(dumAemExchange);
+            }
+        } catch (StreamReadException | DatabindException | JacksonIOException e) {
+            log.error(e.getMessage(), e);
         }
+
     }
 
     private static boolean hasSource(DumAemExchange dumAemExchange) {
