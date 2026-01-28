@@ -18,19 +18,16 @@ package com.viglet.dumont.connector.aem.commons.deserializer;
 
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.deser.std.StdDeserializer;
 
+@Slf4j
 public class DumAemUnixTimestamp extends StdDeserializer<Date> {
-    private static final Logger log = LoggerFactory.getLogger(DumAemUnixTimestamp.class);
-
     public DumAemUnixTimestamp() {
-        this(null);
+        super(Date.class);
     }
 
     public DumAemUnixTimestamp(Class<?> vc) {

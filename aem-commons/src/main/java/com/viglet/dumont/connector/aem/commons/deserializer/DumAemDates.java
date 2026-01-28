@@ -37,7 +37,7 @@ public class DumAemDates extends StdDeserializer<Date> {
             new SimpleDateFormat("dd/MM/yyyy' 'HH'h'mm", Locale.ENGLISH) };
 
     public DumAemDates() {
-        this(null);
+        this(Date.class);
     }
 
     public DumAemDates(Class<?> vc) {
@@ -47,9 +47,6 @@ public class DumAemDates extends StdDeserializer<Date> {
     @Override
     public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
             throws JacksonException {
-
-        // No Jackson 3, evitamos getCodec().readTree().
-        // Usamos o próprio context para ler o valor como String de forma eficiente.
         String dateAsString = jsonParser.getValueAsString();
 
         if (dateAsString == null || dateAsString.trim().isEmpty()) {
@@ -57,15 +54,11 @@ public class DumAemDates extends StdDeserializer<Date> {
         }
 
         dateAsString = dateAsString.trim();
-
-        // Sincronização básica ou uso de formatadores locais (SimpleDateFormat não é
-        // thread-safe)
         synchronized (DATE_FORMATTERS) {
             for (SimpleDateFormat formatter : DATE_FORMATTERS) {
                 try {
                     return formatter.parse(dateAsString);
                 } catch (ParseException | NumberFormatException ignored) {
-                    // Tenta o próximo formato
                 }
             }
         }
