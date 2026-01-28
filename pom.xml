@@ -6,7 +6,7 @@
     <groupId>com.viglet.dumont</groupId>
     <artifactId>dumont</artifactId>
     <packaging>pom</packaging>
-    <version>2026.1.10</version>
+    <version>2026.1.11</version>
     <name>Dumont DEP Master</name>
     <description>Viglet Dumont ES</description>
     <url>https://github.com/openviglet/dumont</url>
