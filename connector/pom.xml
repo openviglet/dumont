@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.viglet.dumont</groupId>
         <artifactId>dumont</artifactId>
-        <version>2026.1.11</version>
+        <version>2026.1.12</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.viglet.dumont</groupId>
     <artifactId>dumont-connector</artifactId>
-    <version>2026.1.11</version>
+    <version>2026.1.12</version>
     <name>Dumont Connector</name>
     <description>Dumont Connector</description>
     <packaging>pom</packaging>
