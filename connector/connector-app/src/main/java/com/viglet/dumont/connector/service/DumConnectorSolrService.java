@@ -1,7 +1,5 @@
 package com.viglet.dumont.connector.service;
 
-import static com.viglet.dumont.commons.sn.field.DumSNFieldName.ID;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class DumConnectorSolrService {
+    private static final String ID = "id";
     private final DumConnectorIndexingService indexingService;
     private final SolrClient solrClient;
     private final RestClient restClient;

@@ -17,7 +17,6 @@
 package com.viglet.dumont.connector.batch;
 
 import static com.viglet.dumont.commons.indexing.DumIndexingStatus.SENT_TO_QUEUE;
-import static com.viglet.dumont.commons.sn.field.DumSNFieldName.ID;
 import static com.viglet.dumont.connector.commons.logging.DumConnectorLoggingUtils.setSuccessStatus;
 import static com.viglet.dumont.connector.constant.DumConnectorConstants.CONNECTOR_INDEXING_QUEUE;
 
@@ -85,7 +84,7 @@ public class JobItemBatchProcessor {
 
         if (log.isDebugEnabled()) {
             for (TurSNJobItem turSNJobItem : buffer) {
-                log.debug("TurSNJobItem Id: {}", turSNJobItem.getAttributes().get(ID));
+                log.debug("TurSNJobItem Id: {}", turSNJobItem.getAttributes().get("id"));
             }
         }
 

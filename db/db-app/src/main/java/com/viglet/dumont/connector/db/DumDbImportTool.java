@@ -43,7 +43,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.viglet.dumont.commons.cache.DumCustomClassCache;
-import com.viglet.dumont.commons.sn.field.DumSNFieldName;
 import com.viglet.dumont.connector.db.ext.DumDbExtCustomImpl;
 import com.viglet.dumont.connector.db.format.DumDbFormatValue;
 import com.viglet.dumont.connector.filesystem.commons.DumFileUtils;
@@ -263,8 +262,8 @@ public class DumDbImportTool {
     private TurSNJobItem createJobItem(DumDbExtCustomImpl dumJDBCCustomImpl, Connection conn, ResultSet rs)
             throws SQLException {
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put(DumSNFieldName.TYPE, type);
-        attributes.put(DumSNFieldName.SOURCE_APPS, PROVIDER_ATTRIBUTE_VALUE);
+        attributes.put("type", type);
+        attributes.put("sourceApps", PROVIDER_ATTRIBUTE_VALUE);
         addDBFieldsAsAttributes(rs, attributes);
         addFileAttributes(attributes);
         attributes = modifyAttributesByCustomClass(dumJDBCCustomImpl, conn, attributes);
