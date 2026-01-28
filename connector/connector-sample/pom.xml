@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>dumont-connector</artifactId>
-        <groupId>com.viglet.dumont.connector</groupId>
+        <groupId>com.viglet.dumont</groupId>
         <version>2026.1.9</version>
     </parent>
 
@@ -18,7 +18,7 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.viglet.dumont.connector</groupId>
+            <groupId>com.viglet.dumont</groupId>
             <artifactId>wc-plugin</artifactId>
         </dependency>
     </dependencies>
@@ -48,7 +48,7 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <artifactSet>
                                 <includes>
-                                    <include>com.viglet.dumont.connector:*</include>
+                                    <include>com.viglet.dumont:*</include>
                                 </includes>
                             </artifactSet>
                             <filters>

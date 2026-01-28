@@ -8,7 +8,7 @@
         <version>2026.1.11</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>com.viglet.dumont.connector</groupId>
+    <groupId>com.viglet.dumont</groupId>
     <artifactId>aem-commons</artifactId>
     <packaging>jar</packaging>
     <name>Dumont AEM - Commons</name>
@@ -56,12 +56,10 @@
         <dependency>
             <groupId>com.viglet.turing</groupId>
             <artifactId>turing-java-sdk</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.viglet.dumont</groupId>
             <artifactId>dumont-commons</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

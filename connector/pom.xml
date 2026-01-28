@@ -8,7 +8,7 @@
         <version>2026.1.11</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>com.viglet.dumont.connector</groupId>
+    <groupId>com.viglet.dumont</groupId>
     <artifactId>dumont-connector</artifactId>
     <version>2026.1.11</version>
     <name>Dumont Connector</name>

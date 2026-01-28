@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>dumont-web-crawler</artifactId>
-        <groupId>com.viglet.dumont.connector</groupId>
+        <groupId>com.viglet.dumont</groupId>
         <version>2026.1.11</version>
     </parent>
 
@@ -46,7 +46,7 @@
             <artifactId>turing-java-sdk</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.viglet.dumont.connector</groupId>
+            <groupId>com.viglet.dumont</groupId>
             <artifactId>wc-commons</artifactId>
         </dependency>
         <dependency>
@@ -68,7 +68,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.viglet.dumont.connector</groupId>
+            <groupId>com.viglet.dumont</groupId>
             <artifactId>connector-commons</artifactId>
         </dependency>
     </dependencies>

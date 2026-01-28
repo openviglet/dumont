@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>dumont-connector</artifactId>
-        <groupId>com.viglet.dumont.connector</groupId>
+        <groupId>com.viglet.dumont</groupId>
         <version>2026.1.11</version>
     </parent>
 
@@ -106,7 +106,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.viglet.dumont.connector</groupId>
+            <groupId>com.viglet.dumont</groupId>
             <artifactId>connector-commons</artifactId>
         </dependency>
         <dependency>

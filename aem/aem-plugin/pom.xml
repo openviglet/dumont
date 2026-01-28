@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.viglet.dumont.connector</groupId>
+        <groupId>com.viglet.dumont</groupId>
         <artifactId>dumont-aem</artifactId>
         <version>2026.1.11</version>
         <relativePath>../pom.xml</relativePath>
@@ -84,7 +84,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.viglet.dumont.connector</groupId>
+            <groupId>com.viglet.dumont</groupId>
             <artifactId>aem-commons</artifactId>
         </dependency>
         <dependency>
@@ -92,7 +92,7 @@
             <artifactId>dumont-spring</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.viglet.dumont.connector</groupId>
+            <groupId>com.viglet.dumont</groupId>
             <artifactId>connector-commons</artifactId>
         </dependency>
     </dependencies>
@@ -135,7 +135,7 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <artifactSet>
                                 <includes>
-                                    <include>com.viglet.dumont.connector:aem-commons:*</include>
+                                    <include>com.viglet.dumont:aem-commons:*</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

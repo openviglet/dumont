@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.viglet.dumont.connector</groupId>
+    <groupId>com.viglet.dumont</groupId>
     <artifactId>dumont-web-crawler</artifactId>
     <name>Dumont Web Crawler</name>
     <description>Dumont Web Crawler Connector</description>

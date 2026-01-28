@@ -243,7 +243,7 @@
             <dependency>
                 <groupId>com.viglet.turing</groupId>
                 <artifactId>turing-java-sdk</artifactId>
-                <version>${project.version}</version>
+                <version>2026.1.9</version>
             </dependency>
             <dependency>
                 <groupId>com.viglet.dumont</groupId>
@@ -256,7 +256,7 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.viglet.dumont.connector</groupId>
+                <groupId>com.viglet.dumont</groupId>
                 <artifactId>connector-commons</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -271,23 +271,18 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.viglet.dumont.connector</groupId>
+                <groupId>com.viglet.dumont</groupId>
                 <artifactId>wc-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.viglet.dumont.connector</groupId>
+                <groupId>com.viglet.dumont</groupId>
                 <artifactId>wc-commons</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.viglet.dumont.connector</groupId>
+                <groupId>com.viglet.dumont</groupId>
                 <artifactId>aem-commons</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.viglet.dumont.connector</groupId>
-                <artifactId>sprinklr-commons</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
