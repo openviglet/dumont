@@ -1,4 +1,4 @@
-<project>
+<project name="aem-plugin-sample" default="wknd">
     <target name="wknd">
         <exec executable="mvnw.cmd">
             <arg value="clean"/>

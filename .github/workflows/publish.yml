@@ -77,3 +77,4 @@ jobs:
           echo "TAG_NAME=${TAG_NAME}"
           gh release create ${TAG_NAME} --generate-notes
           gh release upload ${TAG_NAME} connector/connector-app/target/dumont-connector.jar --clobber
+          gh release upload ${TAG_NAME} aem/aem-plugin/target/aem-plugin.jar --clobber
