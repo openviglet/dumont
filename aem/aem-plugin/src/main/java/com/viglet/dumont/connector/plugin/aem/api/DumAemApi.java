@@ -60,7 +60,6 @@ public class DumAemApi {
     @PostMapping("index/{source}")
     public ResponseEntity<Map<String, String>> indexContentId(@PathVariable String source,
             @RequestBody DumAemPathList pathList) {
-        System.out.println(pathList);
         if (hasNonRepeatedRequest(source, pathList.getPaths())) {
             dumAemPluginProcess.sentToIndexStandaloneAsync(source, pathList);
         }
