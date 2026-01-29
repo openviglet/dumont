@@ -78,7 +78,7 @@ class DumAemPathListTest {
 
             assertNull(pathList.getPaths());
             assertNull(pathList.getEvent());
-            assertNull(pathList.getRecursive());
+            assertFalse(pathList.getRecursive());
         }
     }
 
