@@ -47,7 +47,7 @@ public class DeindexStrategy implements JobProcessingStrategy {
     @Override
     public void process(DumJobItemWithSession jobItem, JobItemBatchProcessor batchProcessor) {
         // Delete from indexing service
-        indexingService.delete(jobItem);
+        indexingService.deindexedStatus(jobItem);
 
         // Add to batch processor
         batchProcessor.add(jobItem.turSNJobItem(), jobItem.session());

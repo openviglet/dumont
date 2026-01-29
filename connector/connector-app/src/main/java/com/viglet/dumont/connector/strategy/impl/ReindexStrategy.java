@@ -92,7 +92,7 @@ public class ReindexStrategy implements JobProcessingStrategy {
     }
 
     private void recreateDuplicatedIndexing(DumJobItemWithSession jobItem) {
-        indexingService.delete(jobItem);
+        indexingService.deindexedStatus(jobItem);
         log.info("Removed duplicated status {}", getObjectDetailForLogs(jobItem));
 
         indexingService.save(jobItem, PREPARE_FORCED_REINDEX);

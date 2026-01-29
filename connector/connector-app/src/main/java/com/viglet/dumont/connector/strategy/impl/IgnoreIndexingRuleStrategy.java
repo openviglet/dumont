@@ -89,7 +89,7 @@ public class IgnoreIndexingRuleStrategy implements JobProcessingStrategy {
         if (indexingService.exists(jobItem)) {
             log.info("{} was ignored by Indexing Rules.", getObjectDetailForLogs(jobItem));
             indexingService.getList(jobItem)
-                    .forEach(indexing -> indexingService.update(jobItem, indexing));
+                    .forEach(indexing -> indexingService.update(jobItem));
         } else {
             log.info("{} was ignored by Indexing Rules.", getObjectDetailForLogs(jobItem));
             indexingService.save(jobItem, IGNORED);

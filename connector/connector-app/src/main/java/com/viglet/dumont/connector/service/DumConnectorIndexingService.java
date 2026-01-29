@@ -39,6 +39,10 @@ public class DumConnectorIndexingService {
                                 referenceIds);
         }
 
+        public void deindexedStatus(DumJobItemWithSession turSNJobItemWithSession) {
+                createOrUpdateDumConnectorIndexing(turSNJobItemWithSession, DumIndexingStatus.DEINDEXED);
+        }
+
         public void delete(DumJobItemWithSession turSNJobItemWithSession) {
                 TurSNJobItem turSNJobItem = turSNJobItemWithSession.turSNJobItem();
                 DumConnectorSession session = turSNJobItemWithSession.session();
@@ -75,9 +79,8 @@ public class DumConnectorIndexingService {
                                 session.getTransactionId());
         }
 
-        public void update(DumJobItemWithSession turSNJobItemWithSession,
-                        DumConnectorIndexingModel indexing) {
-                DumConnectorIndexingModel updated = updateDumConnectorIndexing(indexing,
+        public void update(DumJobItemWithSession turSNJobItemWithSession) {
+                DumConnectorIndexingModel updated = createOrUpdateDumConnectorIndexing(
                                 turSNJobItemWithSession, DumIndexingStatus.IGNORED);
                 if (updated != null) {
                         dumConnectorIndexingRepository.save(updated);
@@ -90,7 +93,7 @@ public class DumConnectorIndexingService {
                 List<DumConnectorIndexingModel> managedList = dumConnectorIndexingList.stream()
                                 .map(indexing -> dumConnectorIndexingRepository
                                                 .findById(indexing.getId())
-                                                .map(managed -> updateDumConnectorIndexing(managed,
+                                                .map(managed -> createOrUpdateDumConnectorIndexing(
                                                                 turSNJobItemWithSession, status))
                                                 .orElse(null))
                                 .filter(Objects::nonNull).toList();
@@ -100,7 +103,8 @@ public class DumConnectorIndexingService {
         }
 
         public void save(DumJobItemWithSession turSNJobItemWithSession, DumIndexingStatus status) {
-                DumConnectorIndexingModel indexing = createDumConnectorIndexing(turSNJobItemWithSession, status);
+                DumConnectorIndexingModel indexing = createOrUpdateDumConnectorIndexing(turSNJobItemWithSession,
+                                status);
                 if (indexing != null) {
                         dumConnectorIndexingRepository.save(indexing);
                 }
@@ -156,6 +160,23 @@ public class DumConnectorIndexingService {
                                 .toList());
         }
 
+        private DumConnectorIndexingModel createOrUpdateDumConnectorIndexing(
+                        DumJobItemWithSession turSNJobItemWithSession, DumIndexingStatus status) {
+                TurSNJobItem turSNJobItem = turSNJobItemWithSession.turSNJobItem();
+                DumConnectorSession session = turSNJobItemWithSession.session();
+                return dumConnectorIndexingRepository
+                                .findByObjectIdAndSourceAndEnvironmentAndProvider(
+                                                turSNJobItem.getId(), session.getSource(),
+                                                turSNJobItem.getEnvironment(),
+                                                session.getProviderName())
+                                .stream().findFirst()
+                                .map(existing -> updateDumConnectorIndexing(existing,
+                                                turSNJobItemWithSession, status))
+                                .orElseGet(() -> createDumConnectorIndexing(turSNJobItemWithSession,
+                                                status));
+
+        }
+
         private DumConnectorIndexingModel updateDumConnectorIndexing(
                         DumConnectorIndexingModel dumConnectorIndexing,
                         DumJobItemWithSession turSNJobItemWithSession, DumIndexingStatus status) {
@@ -168,7 +189,7 @@ public class DumConnectorIndexingService {
                                 .setSites(turSNJobItemWithSession.turSNJobItem().getSiteNames())
                                 .setDependencies(getDependencies(turSNJobItemWithSession,
                                                 dumConnectorIndexing));
-                return dumConnectorIndexing;
+                return dumConnectorIndexingRepository.save(dumConnectorIndexing);
         }
 
         private DumConnectorIndexingModel createDumConnectorIndexing(
@@ -187,7 +208,8 @@ public class DumConnectorIndexingService {
                                 .provider(dumConnectorSession.getProviderName()).build();
                 dumConnectorIndexingModel.setDependencies(getDependencies(turSNJobItemWithSession,
                                 dumConnectorIndexingModel));
-                return dumConnectorIndexingModel;
+                return dumConnectorIndexingRepository.save(dumConnectorIndexingModel);
+
         }
 
         public boolean isChecksumDifferent(DumJobItemWithSession turSNJobItemWithSession) {
