@@ -5,7 +5,7 @@
     <parent>
         <artifactId>dumont-web-crawler</artifactId>
         <groupId>com.viglet.dumont</groupId>
-        <version>2026.1.13</version>
+        <version>2026.1.14</version>
     </parent>
 
     <artifactId>wc-plugin</artifactId>
