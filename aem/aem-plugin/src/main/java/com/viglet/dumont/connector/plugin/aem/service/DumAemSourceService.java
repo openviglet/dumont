@@ -8,8 +8,10 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.viglet.dumont.commons.cache.DumCustomClassCache;
 import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemExtUrlAttributeInterface;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.plugin.aem.conf.AemPluginHandlerConfiguration;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemPluginSystem;
@@ -22,13 +24,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class DumAemSourceService {
+    private static final String URL_ATTRIBUTE = "url";
     private final DumAemSourceRepository dumAemSourceRepository;
     private final DumAemPluginSystemRepository dumAemPluginSystemRepository;
+    private final DumAemContentMappingService dumAemContentMappingService;
 
     public DumAemSourceService(DumAemSourceRepository dumAemSourceRepository,
-            DumAemPluginSystemRepository dumAemPluginSystemRepository) {
+            DumAemPluginSystemRepository dumAemPluginSystemRepository,
+            DumAemContentMappingService dumAemContentMappingService) {
         this.dumAemSourceRepository = dumAemSourceRepository;
         this.dumAemPluginSystemRepository = dumAemPluginSystemRepository;
+        this.dumAemContentMappingService = dumAemContentMappingService;
     }
 
     public List<DumAemSource> getAllSources() {
@@ -55,9 +61,9 @@ public class DumAemSourceService {
         return AEM;
     }
 
-    public boolean isOnce(DumAemConfiguration dumAemSourceContext) {
+    public boolean isOnce(DumAemConfiguration configuration) {
         return dumAemPluginSystemRepository
-                .findByConfig(DumAemCommonsUtils.configOnce(dumAemSourceContext))
+                .findByConfig(DumAemCommonsUtils.configOnce(configuration))
                 .map(DumAemPluginSystem::isBooleanValue).orElse(false);
     }
 
@@ -72,5 +78,24 @@ public class DumAemSourceService {
 
     public boolean isAuthor(DumAemConfiguration configuration) {
         return configuration.isAuthor() && StringUtils.isNotEmpty(configuration.getAuthorSNSite());
+    }
+
+    public String resolveIdFromUrl(String source, String url) {
+        String id = getDumAemSourceByName(source)
+                .flatMap(dumAemSource -> dumAemContentMappingService
+                        .getAttributeSpecification(dumAemSource, URL_ATTRIBUTE)
+                        .flatMap(spec -> {
+                            String className = spec.getClassName();
+                            log.debug("ClassName : {}", className);
+                            return DumCustomClassCache.getCustomClassMap(className)
+                                    .map(classInstance -> {
+                                        DumAemConfiguration configuration = getDumAemConfiguration(dumAemSource);
+                                        return ((DumAemExtUrlAttributeInterface) classInstance).getIdFromUrl(url,
+                                                configuration);
+                                    });
+                        }))
+                .orElse(null);
+        log.debug("Resolved ID from URL '{}': {}", url, id);
+        return id;
     }
 }

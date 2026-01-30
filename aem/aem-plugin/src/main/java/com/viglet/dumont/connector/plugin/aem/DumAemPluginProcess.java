@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.viglet.dumont.connector.plugin.aem.api.DumAemAttributeIndex;
 import com.viglet.dumont.connector.plugin.aem.api.DumAemPathList;
 import com.viglet.dumont.connector.plugin.aem.command.IndexingCommand;
 import com.viglet.dumont.connector.plugin.aem.command.IndexingCommandFactory;
@@ -111,16 +112,53 @@ public class DumAemPluginProcess {
          */
         public void sentToIndexStandalone(@NotNull String source, @NotNull DumAemPathList pathList) {
                 if (CollectionUtils.isEmpty(pathList.getPaths())) {
-                        log.warn("Received empty payload for source: {}", source);
+                        log.warn("Received empty path list for source '{}'", source);
                         return;
                 }
 
-                log.info("Processing {} paths for source '{}'", pathList.getPaths().size(), source);
+                DumAemAttributeIndex attribute = pathList.getAttribute();
+                DumAemPathList effectivePathList = pathList;
+
+                if (attribute == DumAemAttributeIndex.URL) {
+                        List<String> ids = convertUrl2Id(source, pathList);
+                        if (CollectionUtils.isEmpty(ids)) {
+                                log.warn("No IDs resolved from URLs for source '{}'", source);
+                                return;
+                        }
+                        effectivePathList = DumAemPathList.builder()
+                                        .attribute(DumAemAttributeIndex.ID)
+                                        .paths(ids)
+                                        .event(pathList.getEvent())
+                                        .recursive(pathList.getRecursive())
+                                        .build();
+                }
+
+                indexStandalonePaths(source, effectivePathList);
+        }
+
+        private void indexStandalonePaths(String source, DumAemPathList pathList) {
+                int pathCount = CollectionUtils.size(pathList.getPaths());
+                log.info("Processing {} path(s) for source '{}'", pathCount, source);
 
                 sourceService.getDumAemSourceByName(source)
                                 .ifPresentOrElse(
                                                 dumAemSource -> executeStandaloneIndexing(dumAemSource, pathList),
                                                 () -> log.error("Source '{}' not found", source));
+        }
+
+        /**
+         * Converts a list of URLs to their corresponding IDs for a given source.
+         * Returns an empty list if conversion fails.
+         */
+        private List<String> convertUrl2Id(@NotNull String source, @NotNull DumAemPathList pathList) {
+                List<String> urls = pathList.getPaths();
+                if (CollectionUtils.isEmpty(urls)) {
+                        return List.of();
+                }
+                return urls.stream()
+                                .map(url -> sourceService.resolveIdFromUrl(source, url))
+                                .filter(id -> id != null && !id.isBlank())
+                                .toList();
         }
 
         /**

@@ -16,11 +16,16 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class DumAemPathList {
+    private DumAemAttributeIndex attribute;
     private List<String> paths;
     private DumAemEvent event;
     private Boolean recursive;
 
     public Boolean getRecursive() {
         return recursive == null ? Boolean.FALSE : recursive;
+    }
+
+    public DumAemAttributeIndex getAttribute() {
+        return attribute == null ? DumAemAttributeIndex.ID : attribute;
     }
 }

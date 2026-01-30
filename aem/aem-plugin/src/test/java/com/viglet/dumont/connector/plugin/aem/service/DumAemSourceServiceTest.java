@@ -54,12 +54,14 @@ class DumAemSourceServiceTest {
     private DumAemPluginSystemRepository dumAemPluginSystemRepository;
 
     private DumAemSourceService dumAemSourceService;
+    private DumAemContentMappingService dumAemContentMappingService;
 
     @BeforeEach
     void setUp() {
         dumAemSourceService = new DumAemSourceService(
                 dumAemSourceRepository,
-                dumAemPluginSystemRepository);
+                dumAemPluginSystemRepository,
+                dumAemContentMappingService);
     }
 
     @Nested

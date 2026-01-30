@@ -2,6 +2,7 @@ package com.viglet.dumont.connector.plugin.aem.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,12 @@ public class DumAemContentMappingService {
                                 .targetAttrDefinitions(
                                                 collectTurSNAttributeSpecifications(dumAemSource))
                                 .build();
+        }
+
+        public Optional<DumAemAttributeSpecification> getAttributeSpecification(DumAemSource dumAemSource,
+                        String attributeName) {
+                return dumAemAttributeSpecificationRepository.findByDumAemSourceAndName(dumAemSource, attributeName)
+                                .flatMap(list -> list.stream().findFirst());
         }
 
         private @NotNull List<DumAemModel> getDumAemModels(DumAemSource dumAemSource) {

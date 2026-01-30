@@ -136,7 +136,7 @@ public class DumAemAttrProcess {
         }
 
         private DumAemTargetAttrValueMap attributeByClass(DumAemContext context,
-                        DumAemConfiguration dumAemSourceContext) {
+                        DumAemConfiguration configuration) {
                 String className = context.getDumAemSourceAttr().getClassName();
                 log.debug("ClassName : {}", className);
                 return DumCustomClassCache.getCustomClassMap(className)
@@ -146,7 +146,7 @@ public class DumAemAttrProcess {
                                                                 .consume(context.getDumAemTargetAttr(),
                                                                                 context.getDumAemSourceAttr(),
                                                                                 context.getCmsObjectInstance(),
-                                                                                dumAemSourceContext),
+                                                                                configuration),
                                                 false))
                                 .orElseGet(DumAemTargetAttrValueMap::new);
 

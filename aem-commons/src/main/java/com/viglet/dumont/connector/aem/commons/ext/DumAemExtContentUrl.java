@@ -16,6 +16,9 @@
 
 package com.viglet.dumont.connector.aem.commons.ext;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
@@ -25,7 +28,7 @@ import com.viglet.turing.client.sn.TurMultiValue;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DumAemExtContentUrl implements DumAemExtAttributeInterface {
+public class DumAemExtContentUrl implements DumAemExtUrlAttributeInterface {
     public static String getURL(DumAemObject aemObject,
             DumAemConfiguration dumAemConfiguration) {
         return String.format("%s%s.html", aemObject.getUrlPrefix(dumAemConfiguration),
@@ -38,5 +41,30 @@ public class DumAemExtContentUrl implements DumAemExtAttributeInterface {
             DumAemConfiguration dumAemConfiguration) {
         log.debug("Executing DumAemExtContentUrl");
         return TurMultiValue.singleItem(getURL(aemObject, dumAemConfiguration));
+    }
+
+    @Override
+    public String getIdFromUrl(String url, DumAemConfiguration dumAemConfiguration) {
+        try {
+            URI uri = new URI(url);
+            // getPath() ignores Query Strings (?) and Fragments (#) automatically
+            String path = uri.getPath();
+
+            if (path == null || path.isEmpty()) {
+                return "/";
+            }
+
+            int lastSlash = path.lastIndexOf('/');
+            int lastDot = path.lastIndexOf('.');
+
+            // Ensure we only remove the extension if the dot is part of the filename
+            if (lastDot > lastSlash) {
+                return path.substring(0, lastDot);
+            }
+
+            return path;
+        } catch (URISyntaxException e) {
+            return "Invalid URL";
+        }
     }
 }
