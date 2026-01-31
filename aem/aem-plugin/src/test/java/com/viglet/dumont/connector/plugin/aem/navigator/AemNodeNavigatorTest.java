@@ -43,8 +43,8 @@ import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemJobService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemObjectService;
-import com.viglet.dumont.connector.plugin.aem.service.DumAemReactiveUtils;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSourceService;
+import com.viglet.dumont.connector.plugin.aem.utils.DumAemReactiveUtils;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AemNodeNavigator Tests")

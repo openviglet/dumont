@@ -39,6 +39,7 @@ import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
+import com.viglet.dumont.connector.plugin.aem.utils.DumAemAttrUtils;
 import com.viglet.turing.client.sn.TurMultiValue;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 

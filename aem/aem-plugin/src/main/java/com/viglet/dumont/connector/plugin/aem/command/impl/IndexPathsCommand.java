@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.command.IndexingCommand;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;

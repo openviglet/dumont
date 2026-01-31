@@ -15,7 +15,7 @@
 
 package com.viglet.dumont.connector.plugin.aem.command.impl;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.command.IndexingCommand;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;

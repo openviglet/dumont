@@ -19,6 +19,7 @@ package com.viglet.dumont.connector.commons;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -40,9 +41,5 @@ public class DumConnectorSession {
         this.sites = sites;
         this.providerName = providerName;
         this.locale = locale;
-    }
-
-    public DumConnectorSession() {
-        // TODO Auto-generated constructor stub
     }
 }

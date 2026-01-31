@@ -14,7 +14,7 @@
  * not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.viglet.dumont.connector.plugin.aem.service;
+package com.viglet.dumont.connector.plugin.aem.utils;
 
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.JSON;
 
@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.plugin.aem.service.DumAemReactiveHttpService;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;

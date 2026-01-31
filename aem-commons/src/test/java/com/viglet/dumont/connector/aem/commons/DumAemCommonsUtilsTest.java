@@ -17,7 +17,11 @@
 
 package com.viglet.dumont.connector.aem.commons;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +44,7 @@ import org.junit.jupiter.api.Test;
 
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.context.DumAemLocalePathContext;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 
 @DisplayName("DumAemCommonsUtils Tests")
@@ -547,7 +552,7 @@ class DumAemCommonsUtilsTest {
         void shouldReturnLocaleForMatchingPath() {
             DumAemLocalePathContext localePath = DumAemLocalePathContext.builder()
                     .path("/content/mysite/pt")
-                    .locale(new Locale("pt", "BR"))
+                    .locale(Locale.forLanguageTag("pt-BR"))
                     .build();
 
             DumAemConfiguration config = DumAemConfiguration.builder()
@@ -557,7 +562,7 @@ class DumAemCommonsUtilsTest {
 
             Locale result = DumAemCommonsUtils.getLocaleByPath(config, "/content/mysite/pt/home");
 
-            assertEquals(new Locale("pt", "BR"), result);
+            assertEquals(Locale.forLanguageTag("pt-BR"), result);
         }
 
         @Test

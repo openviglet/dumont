@@ -12,11 +12,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.turing.client.sn.TurMultiValue;
 
 import lombok.extern.slf4j.Slf4j;
@@ -94,8 +94,8 @@ public class DumAemExtPageComponents implements DumAemExtAttributeInterface {
         }
 
         Object rootObject = jcrContentNode.get(ROOT);
-        if (rootObject instanceof JSONObject) {
-            return Optional.of((JSONObject) rootObject);
+        if (rootObject instanceof JSONObject jsonObject) {
+            return Optional.of(jsonObject);
         }
 
         log.debug("Root node exists but is not a JSONObject: {}",

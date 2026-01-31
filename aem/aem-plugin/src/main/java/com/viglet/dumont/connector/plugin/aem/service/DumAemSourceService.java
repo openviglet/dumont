@@ -9,9 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.viglet.dumont.commons.cache.DumCustomClassCache;
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtUrlAttributeInterface;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.plugin.aem.conf.AemPluginHandlerConfiguration;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemPluginSystem;

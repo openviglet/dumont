@@ -19,6 +19,7 @@ package com.viglet.dumont.connector.plugin.aem.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -35,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.plugin.aem.utils.DumAemReactiveUtils;
 
 import reactor.core.publisher.Mono;
 
@@ -96,7 +98,7 @@ class DumAemReactiveUtilsTest {
 
             assertNotNull(result);
             var jsonObject = result.block();
-            assertTrue(jsonObject == null);
+            assertNull(jsonObject);
         }
 
         @Test
@@ -111,7 +113,7 @@ class DumAemReactiveUtilsTest {
 
             assertNotNull(result);
             var jsonObject = result.block();
-            assertTrue(jsonObject == null);
+            assertNull(jsonObject);
         }
 
         @Test
@@ -158,7 +160,7 @@ class DumAemReactiveUtilsTest {
 
             assertNotNull(result);
             var jsonObject = result.block();
-            assertTrue(jsonObject == null);
+            assertNull(jsonObject);
         }
     }
 
@@ -301,7 +303,7 @@ class DumAemReactiveUtilsTest {
 
             assertNotNull(result);
             var jsonObject = result.block();
-            assertTrue(jsonObject == null);
+            assertNull(jsonObject);
         }
     }
 

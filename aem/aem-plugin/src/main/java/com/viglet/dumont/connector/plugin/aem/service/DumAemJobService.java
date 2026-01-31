@@ -22,17 +22,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
-import com.viglet.dumont.connector.plugin.aem.DumAemPluginUtils;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
+import com.viglet.dumont.connector.plugin.aem.utils.DumAemPluginUtils;
 import com.viglet.turing.client.sn.TurMultiValue;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 
@@ -45,7 +45,7 @@ public class DumAemJobService {
         private final DumConnectorContext dumConnectorContext;
         private final DumAemContentDefinitionService dumAemContentDefinitionService;
 
-        public DumAemJobService(DumAemContentMappingService dumAemContentMappingService,
+        public DumAemJobService(
                         DumAemService dumAemService,
                         DumConnectorContext dumConnectorContext,
                         DumAemContentDefinitionService dumAemContentDefinitionService) {

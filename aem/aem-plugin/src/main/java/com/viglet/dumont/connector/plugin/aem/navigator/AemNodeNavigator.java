@@ -24,14 +24,14 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemJobService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemObjectService;
-import com.viglet.dumont.connector.plugin.aem.service.DumAemReactiveUtils;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSourceService;
+import com.viglet.dumont.connector.plugin.aem.utils.DumAemReactiveUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;

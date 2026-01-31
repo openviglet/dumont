@@ -50,6 +50,7 @@ import java.util.TimeZone;
 import org.json.JSONObject;
 
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -169,7 +170,7 @@ public class DumAemObjectGeneric {
     private boolean isJcrContentFragment() {
         return DumAemCommonsUtils.hasProperty(this.jcrContentNode, CONTENT_FRAGMENT)
                 ? this.jcrContentNode.getBoolean(CONTENT_FRAGMENT)
-                : (this.contentFragment = false);
+                : this.contentFragment;
     }
 
     private boolean getJcrDelivered() {

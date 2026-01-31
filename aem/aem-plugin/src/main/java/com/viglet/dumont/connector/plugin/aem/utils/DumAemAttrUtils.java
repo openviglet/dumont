@@ -14,7 +14,7 @@
  * not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.viglet.dumont.connector.plugin.aem;
+package com.viglet.dumont.connector.plugin.aem.utils;
 
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.DEFAULT;
 import static com.viglet.turing.commons.se.field.TurSEFieldType.STRING;
@@ -36,13 +36,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.turing.client.sn.TurMultiValue;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 
@@ -51,6 +51,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DumAemAttrUtils {
     public static final String CQ_TAGS_PATH = "/content/_cq_tags";
+
+    private DumAemAttrUtils() {
+        throw new IllegalStateException("AEM Attribute Utility class");
+    }
 
     public static boolean hasCustomClass(DumAemTargetAttr targetAttr) {
         return targetAttr.getSourceAttrs() == null
@@ -217,10 +221,9 @@ public class DumAemAttrUtils {
             List<TurSNAttributeSpec> dumSNAttributeSpecList,
             DumAemTargetAttrValueMap dumAemTargetAttrValueMap,
             KeyValue<String, String> kv) {
-        Optional.ofNullable(kv.getKey()).ifPresent(facet -> {
-            processTagFacet(context, dumAemSourceContext, dumSNAttributeSpecList,
-                    dumAemTargetAttrValueMap, kv, facet);
-        });
+        Optional.ofNullable(kv.getKey())
+                .ifPresent(facet -> processTagFacet(context, dumAemSourceContext, dumSNAttributeSpecList,
+                        dumAemTargetAttrValueMap, kv, facet));
     }
 
     private static void processTagFacet(DumAemContext context,

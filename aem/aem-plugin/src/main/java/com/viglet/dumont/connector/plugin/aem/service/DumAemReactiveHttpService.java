@@ -23,7 +23,6 @@ import java.util.concurrent.TimeoutException;
 import javax.net.ssl.SSLException;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.NonNull;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -32,6 +31,7 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
 import com.google.common.net.UrlEscapers;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.turing.commons.exception.TurRuntimeException;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -57,14 +57,10 @@ public class DumAemReactiveHttpService {
         private final WebClient webClient;
 
         public DumAemReactiveHttpService() {
-                try {
-                        this.webClient = createOptimizedWebClient();
-                } catch (SSLException e) {
-                        log.error("Failed to initialize WebClient with SSL configuration", e);
-                        throw new IllegalStateException("Unable to create HTTP client", e);
-                }
+                this.webClient = createOptimizedWebClient();
         }
-        private WebClient createOptimizedWebClient() throws SSLException {
+
+        private WebClient createOptimizedWebClient() {
                 HttpClient httpClient = HttpClient.create().protocol(HttpProtocol.HTTP11)
                                 .secure(this::configureSsl).responseTimeout(Duration.ofSeconds(30))
                                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
@@ -89,7 +85,7 @@ public class DumAemReactiveHttpService {
                                         .closeNotifyReadTimeout(Duration.ofSeconds(3));
                 } catch (SSLException e) {
                         log.error("SSL configuration failed", e);
-                        throw new RuntimeException("SSL setup error", e);
+                        throw new TurRuntimeException("SSL setup error", e);
                 }
         }
 
@@ -119,15 +115,13 @@ public class DumAemReactiveHttpService {
                                                 .maxBackoff(Duration.ofSeconds(30)).jitter(0.5)
                                                 .filter(throwable -> throwable instanceof SslHandshakeTimeoutException
                                                                 || throwable instanceof PrematureCloseException
-                                                                || (throwable.getCause() != null
-                                                                                && throwable.getCause() instanceof PrematureCloseException)
+                                                                || (throwable.getCause() instanceof PrematureCloseException)
                                                                 || throwable instanceof TimeoutException
                                                                 || (throwable instanceof WebClientRequestException
                                                                                 && throwable.getCause() instanceof TimeoutException)
                                                                 || throwable instanceof IllegalArgumentException)
-                                                .doBeforeRetry(retrySignal -> {
-                                                        log.warn("Retrying HTTP request: {}", url);
-                                                })
+                                                .doBeforeRetry(retrySignal -> log.warn("Retrying HTTP request: {}",
+                                                                url))
                                                 .onRetryExhaustedThrow((retryBackoffSpec,
                                                                 retrySignal) -> retrySignal
                                                                                 .failure()))

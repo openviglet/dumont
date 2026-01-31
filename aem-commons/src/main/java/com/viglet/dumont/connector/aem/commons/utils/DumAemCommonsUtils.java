@@ -14,7 +14,7 @@
  * not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.viglet.dumont.connector.aem.commons;
+package com.viglet.dumont.connector.aem.commons.utils;
 
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.JCR;
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.JCR_CONTENT;
@@ -60,6 +60,8 @@ import com.google.common.collect.Lists;
 import com.google.common.net.UrlEscapers;
 import com.viglet.dumont.commons.cache.DumCustomClassCache;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.DumAemObject;
+import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
@@ -98,15 +100,13 @@ public class DumAemCommonsUtils {
 
     private static void extractContentValues(JsonNode node, Set<String> results) {
         if (node.isObject()) {
-            node.properties().forEach(property -> {
-                extractContentValues(property.getValue(), results);
-            });
+            node.properties().forEach(property -> extractContentValues(property.getValue(), results));
         } else if (node.isArray()) {
             for (JsonNode item : node) {
                 extractContentValues(item, results);
             }
-        } else if (node.isTextual()) {
-            String value = node.asText();
+        } else if (node.isString()) {
+            String value = node.asString();
             if (value.startsWith("/content")) {
                 results.add(value);
             }

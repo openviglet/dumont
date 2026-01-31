@@ -19,6 +19,10 @@
 package com.viglet.dumont.connector.aem.commons;
 
 public class DumAemConstants {
+    private DumAemConstants() {
+        throw new IllegalStateException("AEM Constants class");
+    }
+
     public static final String CQ_TAGS = "cq:tags";
     public static final String DEFAULT = "default";
     public static final String TEXT = "text";

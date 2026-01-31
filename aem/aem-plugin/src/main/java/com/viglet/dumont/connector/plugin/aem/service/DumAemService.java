@@ -10,11 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.DumAemAttrProcess;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 

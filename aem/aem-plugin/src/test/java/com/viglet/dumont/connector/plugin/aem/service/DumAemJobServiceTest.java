@@ -77,11 +77,7 @@ class DumAemJobServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new DumAemJobService(
-                dumAemContentMappingService,
-                dumAemService,
-                dumConnectorContext,
-                dumAemContentDefinitionService);
+        service = new DumAemJobService(dumAemService, dumConnectorContext, dumAemContentDefinitionService);
     }
 
     @Nested

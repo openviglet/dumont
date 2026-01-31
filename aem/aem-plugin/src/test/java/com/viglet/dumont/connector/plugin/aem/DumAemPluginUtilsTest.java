@@ -33,108 +33,111 @@ import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
+import com.viglet.dumont.connector.plugin.aem.utils.DumAemPluginUtils;
 
 @DisplayName("DumAemPluginUtils Tests")
 class DumAemPluginUtilsTest {
 
-    @Nested
-    @DisplayName("getObjectDetailForLogs with DumAemSession Tests")
-    class GetObjectDetailForLogsWithSessionTests {
+        @Nested
+        @DisplayName("getObjectDetailForLogs with DumAemSession Tests")
+        class GetObjectDetailForLogsWithSessionTests {
 
-        @Test
-        @DisplayName("Should return formatted object detail string")
-        void shouldReturnFormattedObjectDetailString() {
-            DumAemConfiguration configuration = DumAemConfiguration.builder()
-                    .id("config-123")
-                    .defaultLocale(Locale.US)
-                    .build();
+                @Test
+                @DisplayName("Should return formatted object detail string")
+                void shouldReturnFormattedObjectDetailString() {
+                        DumAemConfiguration configuration = DumAemConfiguration.builder()
+                                        .id("config-123")
+                                        .defaultLocale(Locale.US)
+                                        .build();
 
-            DumAemSession dumAemSession = DumAemSession.builder()
-                    .configuration(configuration)
-                    .transactionId("tx-456")
-                    .build();
+                        DumAemSession dumAemSession = DumAemSession.builder()
+                                        .configuration(configuration)
+                                        .transactionId("tx-456")
+                                        .build();
 
-            JSONObject jcrNode = new JSONObject();
-            jcrNode.put("jcr:primaryType", "cq:Page");
+                        JSONObject jcrNode = new JSONObject();
+                        jcrNode.put("jcr:primaryType", "cq:Page");
 
-            DumAemObjectGeneric aemObject = new DumAemObjectGeneric("/content/mysite/en/home", jcrNode,
-                    DumAemEvent.PUBLISHING);
+                        DumAemObjectGeneric aemObject = new DumAemObjectGeneric("/content/mysite/en/home", jcrNode,
+                                        DumAemEvent.PUBLISHING);
 
-            String result = DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject);
+                        String result = DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject);
 
-            assertNotNull(result);
-            assertTrue(result.contains("/content/mysite/en/home"));
-            assertTrue(result.contains("config-123"));
-            assertTrue(result.contains("tx-456"));
+                        assertNotNull(result);
+                        assertTrue(result.contains("/content/mysite/en/home"));
+                        assertTrue(result.contains("config-123"));
+                        assertTrue(result.contains("tx-456"));
+                }
+
+                @Test
+                @DisplayName("Should include PUBLISHING environment in log")
+                void shouldIncludePublishingEnvironmentInLog() {
+                        DumAemConfiguration configuration = DumAemConfiguration.builder()
+                                        .id("test-config")
+                                        .build();
+
+                        DumAemSession dumAemSession = DumAemSession.builder()
+                                        .configuration(configuration)
+                                        .transactionId("transaction-id")
+                                        .build();
+
+                        JSONObject jcrNode = new JSONObject();
+                        jcrNode.put("jcr:primaryType", "cq:Page");
+
+                        DumAemObjectGeneric aemObject = new DumAemObjectGeneric("/content/test", jcrNode,
+                                        DumAemEvent.PUBLISHING);
+
+                        String result = DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject);
+
+                        assertTrue(result.contains("PUBLISHING"));
+                }
         }
 
-        @Test
-        @DisplayName("Should include PUBLISHING environment in log")
-        void shouldIncludePublishingEnvironmentInLog() {
-            DumAemConfiguration configuration = DumAemConfiguration.builder()
-                    .id("test-config")
-                    .build();
+        @Nested
+        @DisplayName("getObjectDetailForLogs with DumConnectorSession Tests")
+        class GetObjectDetailForLogsWithConnectorSessionTests {
 
-            DumAemSession dumAemSession = DumAemSession.builder()
-                    .configuration(configuration)
-                    .transactionId("transaction-id")
-                    .build();
+                @Test
+                @DisplayName("Should return formatted object detail string for connector session")
+                void shouldReturnFormattedObjectDetailStringForConnectorSession() {
+                        DumConnectorIndexing indexing = DumConnectorIndexing.builder()
+                                        .environment("author")
+                                        .locale(Locale.forLanguageTag("pt-BR"))
+                                        .build();
 
-            JSONObject jcrNode = new JSONObject();
-            jcrNode.put("jcr:primaryType", "cq:Page");
+                        DumConnectorSession session = DumConnectorSession.builder()
+                                        .source("aem-source")
+                                        .transactionId("tx-789")
+                                        .build();
 
-            DumAemObjectGeneric aemObject = new DumAemObjectGeneric("/content/test", jcrNode, DumAemEvent.PUBLISHING);
+                        String result = DumAemPluginUtils.getObjectDetailForLogs("/content/path", indexing, session);
 
-            String result = DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject);
+                        assertNotNull(result);
+                        assertTrue(result.contains("/content/path"));
+                        assertTrue(result.contains("aem-source"));
+                        assertTrue(result.contains("tx-789"));
+                        assertTrue(result.contains("author"));
+                }
 
-            assertTrue(result.contains("PUBLISHING"));
+                @Test
+                @DisplayName("Should handle different content IDs")
+                void shouldHandleDifferentContentIds() {
+                        DumConnectorIndexing indexing = DumConnectorIndexing.builder()
+                                        .environment("publish")
+                                        .locale(Locale.US)
+                                        .build();
+
+                        DumConnectorSession session = DumConnectorSession.builder()
+                                        .source("test-source")
+                                        .transactionId("test-tx")
+                                        .build();
+
+                        String result1 = DumAemPluginUtils.getObjectDetailForLogs("/content/page1", indexing, session);
+                        String result2 = DumAemPluginUtils.getObjectDetailForLogs("/content/dam/asset", indexing,
+                                        session);
+
+                        assertTrue(result1.contains("/content/page1"));
+                        assertTrue(result2.contains("/content/dam/asset"));
+                }
         }
-    }
-
-    @Nested
-    @DisplayName("getObjectDetailForLogs with DumConnectorSession Tests")
-    class GetObjectDetailForLogsWithConnectorSessionTests {
-
-        @Test
-        @DisplayName("Should return formatted object detail string for connector session")
-        void shouldReturnFormattedObjectDetailStringForConnectorSession() {
-            DumConnectorIndexing indexing = DumConnectorIndexing.builder()
-                    .environment("author")
-                    .locale(Locale.forLanguageTag("pt-BR"))
-                    .build();
-
-            DumConnectorSession session = DumConnectorSession.builder()
-                    .source("aem-source")
-                    .transactionId("tx-789")
-                    .build();
-
-            String result = DumAemPluginUtils.getObjectDetailForLogs("/content/path", indexing, session);
-
-            assertNotNull(result);
-            assertTrue(result.contains("/content/path"));
-            assertTrue(result.contains("aem-source"));
-            assertTrue(result.contains("tx-789"));
-            assertTrue(result.contains("author"));
-        }
-
-        @Test
-        @DisplayName("Should handle different content IDs")
-        void shouldHandleDifferentContentIds() {
-            DumConnectorIndexing indexing = DumConnectorIndexing.builder()
-                    .environment("publish")
-                    .locale(Locale.US)
-                    .build();
-
-            DumConnectorSession session = DumConnectorSession.builder()
-                    .source("test-source")
-                    .transactionId("test-tx")
-                    .build();
-
-            String result1 = DumAemPluginUtils.getObjectDetailForLogs("/content/page1", indexing, session);
-            String result2 = DumAemPluginUtils.getObjectDetailForLogs("/content/dam/asset", indexing, session);
-
-            assertTrue(result1.contains("/content/page1"));
-            assertTrue(result2.contains("/content/dam/asset"));
-        }
-    }
 }

@@ -18,9 +18,9 @@ package com.viglet.dumont.connector.aem.commons.ext;
 
 import java.util.Date;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 
 import lombok.extern.slf4j.Slf4j;
 

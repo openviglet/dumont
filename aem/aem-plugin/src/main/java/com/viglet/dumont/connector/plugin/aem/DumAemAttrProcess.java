@@ -33,6 +33,7 @@ import com.viglet.dumont.connector.aem.commons.ext.DumAemExtAttributeInterface;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
+import com.viglet.dumont.connector.plugin.aem.utils.DumAemAttrUtils;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 
 import lombok.extern.slf4j.Slf4j;

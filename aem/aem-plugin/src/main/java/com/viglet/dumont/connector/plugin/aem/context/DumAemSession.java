@@ -16,8 +16,6 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class DumAemSession extends DumConnectorSession {
     private DumAemConfiguration configuration;
     private DumAemModel model;

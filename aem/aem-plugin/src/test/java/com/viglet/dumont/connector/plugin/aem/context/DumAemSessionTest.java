@@ -105,7 +105,7 @@ class DumAemSessionTest {
         @Test
         @DisplayName("Should create session with default values")
         void shouldCreateSessionWithDefaultValues() {
-            DumAemSession session = new DumAemSession();
+            DumAemSession session = DumAemSession.builder().build();
 
             assertNull(session.getConfiguration());
             assertNull(session.getModel());
@@ -127,8 +127,15 @@ class DumAemSessionTest {
             DumAemEvent event = DumAemEvent.NONE;
             List<TurSNAttributeSpec> attributeSpecs = Arrays.asList();
 
-            DumAemSession session = new DumAemSession(configuration, model, contentMapping,
-                    event, true, true, attributeSpecs);
+            DumAemSession session = DumAemSession.builder()
+                    .configuration(configuration)
+                    .model(model)
+                    .contentMapping(contentMapping)
+                    .event(event)
+                    .standalone(true)
+                    .indexChildren(true)
+                    .attributeSpecs(attributeSpecs)
+                    .build();
 
             assertEquals(configuration, session.getConfiguration());
             assertEquals(model, session.getModel());

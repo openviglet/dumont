@@ -18,11 +18,11 @@ package com.viglet.dumont.connector.aem.sample.ext;
 
 import java.io.IOException;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtContentInterface;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel;
 
 import lombok.extern.slf4j.Slf4j;

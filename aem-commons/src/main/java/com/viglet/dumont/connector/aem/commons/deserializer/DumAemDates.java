@@ -59,6 +59,7 @@ public class DumAemDates extends StdDeserializer<Date> {
                 try {
                     return formatter.parse(dateAsString);
                 } catch (ParseException | NumberFormatException ignored) {
+                    // Empty catch block
                 }
             }
         }

@@ -13,6 +13,10 @@ import com.viglet.turing.client.sn.job.TurSNJobItem;
 public class DumConnectorLoggingUtils {
     public static final String URL = "url";
 
+    private DumConnectorLoggingUtils() {
+        throw new IllegalStateException("Connector Logging Utility class");
+    }
+
     public static void setSuccessStatus(TurSNJobItem turSNJobItem, DumConnectorSession session,
             DumIndexingStatus status) {
         setSuccessStatus(turSNJobItem, session, status, null);

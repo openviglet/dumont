@@ -96,9 +96,8 @@ public class DumAemContentDefinitionService {
         private Optional<DumAemModel> getModel(DumAemConfiguration dumAemConfiguration,
                         DumAemContentMapping dumCmsContentMapping) {
                 return getModel(dumCmsContentMapping.getModels(),
-                                dumAemConfiguration.getContentType()).map(model -> {
-                                        return getDumCmsTargetAttrs(dumCmsContentMapping, model);
-                                });
+                                dumAemConfiguration.getContentType())
+                                .map(model -> getDumCmsTargetAttrs(dumCmsContentMapping, model));
         }
 
         private DumAemModel getDumCmsTargetAttrs(DumAemContentMapping dumCmsContentMapping,
@@ -139,10 +138,8 @@ public class DumAemContentDefinitionService {
                                                 targetAttr -> addTargetAttr(dumAemTargetAttr,
                                                                 attributeSpec,
                                                                 targetAttr),
-                                                () -> {
-                                                        addTargetAttrMandatory(dumAemTargetAttr,
-                                                                        attributeSpec);
-                                                });
+                                                () -> addTargetAttrMandatory(dumAemTargetAttr,
+                                                                attributeSpec));
         }
 
         private void addTargetAttrMandatory(List<DumAemTargetAttr> dumCmsTargetAttrs,

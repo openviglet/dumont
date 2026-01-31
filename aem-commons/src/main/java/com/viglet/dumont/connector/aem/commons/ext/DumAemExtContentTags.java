@@ -22,13 +22,13 @@ import java.util.Optional;
 
 import org.jspecify.annotations.NonNull;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContentTag;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContentTags;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.turing.client.sn.TurMultiValue;
 
 import lombok.extern.slf4j.Slf4j;

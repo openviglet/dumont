@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 
-import com.viglet.dumont.connector.aem.commons.DumAemCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.config.IAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -106,7 +106,7 @@ public class DumAemConfiguration {
     DumAemCommonsUtils.getInfinityJson(iaemConfiguration.getCmsRootPath(), this, false)
         .flatMap(infinityJson -> DumAemCommonsUtils.getSiteName(this,
             infinityJson))
-        .ifPresent(siteName -> this.siteName = siteName);
+        .ifPresent(name -> this.siteName = name);
 
   }
 

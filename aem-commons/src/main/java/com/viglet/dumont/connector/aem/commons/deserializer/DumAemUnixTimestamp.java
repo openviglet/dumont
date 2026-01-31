@@ -38,29 +38,24 @@ public class DumAemUnixTimestamp extends StdDeserializer<Date> {
     public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
             throws JacksonException {
 
-        String timestamp = jsonParser.getValueAsString();
-
-        if (timestamp == null || timestamp.trim().isEmpty()) {
+        String rawValue = jsonParser.getValueAsString();
+        if (rawValue == null || rawValue.trim().isEmpty()) {
             return null;
         }
 
-        timestamp = timestamp.trim();
+        String timestampStr = rawValue.trim();
 
         try {
-            while (timestamp.length() < 10) {
-                timestamp += "0";
+            long timestamp = Long.parseLong(timestampStr);
+
+            // If the timestamp is in seconds (10 digits), convert to milliseconds
+            if (timestampStr.length() == 10) {
+                timestamp *= 1000L;
             }
 
-            long timeMillis;
-            if (timestamp.length() == 10) {
-                timeMillis = Long.parseLong(timestamp) * 1000L;
-            } else {
-                timeMillis = Long.parseLong(timestamp);
-            }
-
-            return new Date(timeMillis);
+            return new Date(timestamp);
         } catch (NumberFormatException e) {
-            log.error("Unable to deserialize timestamp: {}", timestamp, e);
+            log.error("Unable to deserialize timestamp: '{}'", rawValue, e);
             return null;
         }
     }
