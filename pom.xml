@@ -140,7 +140,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.1</version>
+                    <version>3.15.0</version>
                     <configuration>
                         <compilerArgs>
                             <arg>-Xlint:unchecked</arg>
@@ -238,7 +238,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.5.26</version>
+                <version>1.5.27</version>
             </dependency>
             <dependency>
                 <groupId>com.viglet.turing</groupId>
@@ -288,7 +288,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.5.26</version>
+                <version>1.5.27</version>
             </dependency>
             <dependency>
                 <groupId>org.json</groupId>
