@@ -12,7 +12,7 @@ import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
-@SuperBuilder(builderMethodName = "aemBuilder")
+@SuperBuilder
 @Getter
 public class DumAemSession extends DumConnectorSession {
     private DumAemConfiguration configuration;
