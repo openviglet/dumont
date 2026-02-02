@@ -7,7 +7,7 @@
 
 **Viglet Dumont** is a powerful Data Exchange Platform (DEP) that enables seamless content indexing and search integration across multiple data sources and search engines. Built with Java and Spring Boot, Dumont provides a flexible, plugin-based architecture for enterprise content management and search solutions.
 
-## 🚀 Features
+## 🚀 Features 
 
 - **Multi-Source Connectors**: Connect and index content from various data sources
   - Adobe Experience Manager (AEM)
