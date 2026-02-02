@@ -1,0 +1,160 @@
+version: '3.8'
+
+services:
+  dumont:
+    build: .
+    container_name: dumont-connector
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/dumont
+      - SPRING_DATASOURCE_USERNAME=dumont
+      - SPRING_DATASOURCE_PASSWORD=dumont123
+      - SPRING_ARTEMIS_BROKER_URL=tcp://activemq:61616
+      - DUMONT_INDEXING_PROVIDER=TURING
+      - TURING_URL=http://turing:2700
+    depends_on:
+      db:
+        condition: service_healthy
+      activemq:
+        condition: service_started
+    networks:
+      - dumont-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  db:
+    image: postgres:16-alpine
+    container_name: dumont-db
+    environment:
+      - POSTGRES_DB=dumont
+      - POSTGRES_USER=dumont
+      - POSTGRES_PASSWORD=dumont123
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --locale=en_US.utf8
+    volumes:
+      - dumont-db-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - dumont-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dumont"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  activemq:
+    image: apache/activemq-artemis:2.32.0
+    container_name: dumont-activemq
+    environment:
+      - ARTEMIS_USER=admin
+      - ARTEMIS_PASSWORD=admin
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes:
+      - dumont-activemq-data:/var/lib/artemis-instance
+    networks:
+      - dumont-network
+    restart: unless-stopped
+
+  solr:
+    image: solr:9
+    container_name: dumont-solr
+    ports:
+      - "8983:8983"
+    environment:
+      - SOLR_HEAP=1g
+    volumes:
+      - dumont-solr-data:/var/solr
+    networks:
+      - dumont-network
+    restart: unless-stopped
+    command:
+      - solr-precreate
+      - dumont
+
+  # Optional: Elasticsearch as alternative to Solr
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: dumont-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - dumont-es-data:/usr/share/elasticsearch/data
+    networks:
+      - dumont-network
+    restart: unless-stopped
+    profiles:
+      - with-elasticsearch
+
+  # Optional: Grafana for monitoring
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: dumont-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clock-panel
+    volumes:
+      - dumont-grafana-data:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - dumont-network
+    restart: unless-stopped
+    profiles:
+      - with-monitoring
+
+  # Optional: Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:v2.48.1
+    container_name: dumont-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - dumont-prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - dumont-network
+    restart: unless-stopped
+    profiles:
+      - with-monitoring
+
+volumes:
+  dumont-db-data:
+    driver: local
+  dumont-activemq-data:
+    driver: local
+  dumont-solr-data:
+    driver: local
+  dumont-es-data:
+    driver: local
+  dumont-grafana-data:
+    driver: local
+  dumont-prometheus-data:
+    driver: local
+
+networks:
+  dumont-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
