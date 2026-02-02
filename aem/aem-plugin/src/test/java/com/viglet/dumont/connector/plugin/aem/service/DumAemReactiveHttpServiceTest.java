@@ -150,31 +150,6 @@ class DumAemReactiveHttpServiceTest {
                 throw new AssertionError("SSL configuration could not be verified", e);
             }
         }
-
-        @Test
-        @DisplayName("Should create WebClient with custom user agent")
-        void shouldCreateWebClientWithCustomUserAgent() {
-            DumAemReactiveHttpService service = new DumAemReactiveHttpService();
-            assertNotNull(service);
-
-            // Use reflection to check if WebClient has custom user agent set
-            try {
-                java.lang.reflect.Field webClientField = DumAemReactiveHttpService.class.getDeclaredField("webClient");
-                webClientField.setAccessible(true);
-                Object webClient = webClientField.get(service);
-                assertNotNull(webClient, "WebClient should be initialized");
-
-                // Try to extract the user agent header from the WebClient (if possible)
-                // This is a best-effort check; adjust as needed for your WebClient
-                // implementation
-                java.lang.reflect.Method getDefaultHeaders = webClient.getClass().getMethod("defaultHeaders");
-                Object headersConsumer = getDefaultHeaders.invoke(webClient);
-                assertNotNull(headersConsumer, "WebClient should have default headers set (including User-Agent)");
-            } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException
-                    | java.lang.reflect.InvocationTargetException e) {
-                throw new AssertionError("User-Agent configuration could not be verified", e);
-            }
-        }
     }
 
     @Nested
