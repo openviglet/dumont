@@ -10,7 +10,6 @@
 # supported CodeQL languages.
 #
 name: "CodeQL Advanced"
-
 on:
   push:
     branches: ["2026.1"]
@@ -18,7 +17,9 @@ on:
     branches: ["2026.1"]
   schedule:
     - cron: "28 17 * * 3"
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
