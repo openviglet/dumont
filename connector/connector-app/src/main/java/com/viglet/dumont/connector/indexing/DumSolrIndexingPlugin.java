@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.annotation.PreDestroy;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.Http2SolrClient;
@@ -35,7 +34,9 @@ import org.springframework.stereotype.Component;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
+import com.viglet.turing.commons.exception.TurRuntimeException;
 
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -48,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ConditionalOnProperty(name = "dumont.indexing.provider", havingValue = "solr")
 public class DumSolrIndexingPlugin implements DumIndexingPlugin {
-    
+
     private final String solrUrl;
     private final String solrCollection;
     private final SolrClient solrClient;
@@ -68,40 +69,40 @@ public class DumSolrIndexingPlugin implements DumIndexingPlugin {
             log.debug("No items to index to Solr");
             return;
         }
-        
+
         log.debug("Indexing {} items to Solr", turSNJobItems.getTuringDocuments().size());
-        
+
         try {
             List<SolrInputDocument> documents = new ArrayList<>();
-            
+
             for (TurSNJobItem item : turSNJobItems) {
                 // Skip COMMIT items (they don't have attributes)
                 if (item.getAttributes() != null && !item.getAttributes().isEmpty()) {
                     SolrInputDocument doc = new SolrInputDocument();
-                    
+
                     // Add all attributes from the job item to Solr document
                     for (Map.Entry<String, Object> entry : item.getAttributes().entrySet()) {
                         doc.addField(entry.getKey(), entry.getValue());
                     }
-                    
+
                     documents.add(doc);
                 }
             }
-            
+
             // Add documents to Solr
             if (!documents.isEmpty()) {
                 solrClient.add(solrCollection, documents);
                 log.debug("Added {} documents to Solr", documents.size());
             }
-            
+
             // Commit the changes
             solrClient.commit(solrCollection);
-            log.info("Successfully indexed {} items to Solr collection: {}", 
+            log.info("Successfully indexed {} items to Solr collection: {}",
                     documents.size(), solrCollection);
-            
+
         } catch (SolrServerException | IOException e) {
             log.error("Error indexing to Solr: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to index items to Solr", e);
+            throw new TurRuntimeException("Failed to index items to Solr", e);
         }
     }
 
