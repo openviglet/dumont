@@ -32,7 +32,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class DumWebConfiguration {
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) {
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.csrf(AbstractHttpConfigurer::disable);
         http.headers(header -> header.frameOptions(

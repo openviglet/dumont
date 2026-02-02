@@ -166,7 +166,7 @@ public class DumCommonsUtils {
     }
 
     private static String removeAmpersand(StringBuilder sbQueryString) {
-        if (!sbQueryString.toString().isEmpty()) {
+        if (!sbQueryString.isEmpty()) {
             return sbQueryString.substring(0, sbQueryString.toString().length() - 1);
         }
         return "";

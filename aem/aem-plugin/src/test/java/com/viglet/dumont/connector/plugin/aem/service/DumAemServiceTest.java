@@ -275,14 +275,13 @@ class DumAemServiceTest {
     }
 
     private DumAemSession createMockSession(DumAemModel model) {
-        DumAemConfiguration configuration = mock(DumAemConfiguration.class, withSettings().lenient());
+        DumAemConfiguration configuration = mock(DumAemConfiguration.class, withSettings());
         lenient().when(configuration.getUrl()).thenReturn("http://localhost:4502");
         lenient().when(configuration.getUsername()).thenReturn("admin");
         lenient().when(configuration.getPassword()).thenReturn("admin");
         lenient().when(configuration.getDefaultLocale()).thenReturn(Locale.ENGLISH);
         lenient().when(configuration.isAuthor()).thenReturn(true);
         lenient().when(configuration.isPublish()).thenReturn(false);
-
         return DumAemSession.builder()
                 .configuration(configuration)
                 .model(model)

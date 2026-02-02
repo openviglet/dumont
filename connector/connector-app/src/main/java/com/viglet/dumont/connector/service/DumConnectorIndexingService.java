@@ -254,7 +254,7 @@ public class DumConnectorIndexingService {
                 List<DumConnectorIndexing> dtoList = new ArrayList<>();
                 dumConnectorIndexingRepository
                                 .findByObjectIdAndSourceAndProvider(objectId, source, provider)
-                                .stream().map(indexing -> getConnectorIndexing(indexing))
+                                .stream().map(this::getConnectorIndexing)
                                 .forEach(dtoList::add);
                 return dtoList;
         }

@@ -152,8 +152,9 @@ class DumCommonsUtilsTest {
         String html = "<p>This is HTML <strong>content</strong> that should be converted to text and truncated.</p>";
         String result = DumCommonsUtils.html2Description(html, 30);
 
-        assertThat(result).contains("This is HTML content");
-        assertThat(result).contains("...");
+        assertThat(result)
+                .contains("This is HTML content")
+                .contains("...");
     }
 
     @Test
@@ -204,8 +205,9 @@ class DumCommonsUtilsTest {
         List<Object> input = Arrays.asList("term1", "term2", "term3");
         List<String> result = DumCommonsUtils.cloneListOfTermsAsString(input);
 
-        assertThat(result).hasSize(3);
-        assertThat(result).containsExactly("term1", "term2", "term3");
+        assertThat(result)
+                .hasSize(3)
+                .containsExactly("term1", "term2", "term3");
     }
 
     @Test
@@ -286,8 +288,9 @@ class DumCommonsUtilsTest {
         TestObject testObject = new TestObject("test", 42);
         String result = DumCommonsUtils.asJsonString(testObject);
 
-        assertThat(result).contains("\"name\":\"test\"");
-        assertThat(result).contains("\"value\":42");
+        assertThat(result)
+                .contains("\"name\":\"test\"")
+                .contains("\"value\":42");
     }
 
     @Test
@@ -301,9 +304,10 @@ class DumCommonsUtilsTest {
     void testGetStoreDir() {
         File storeDir = DumCommonsUtils.getStoreDir();
 
-        assertThat(storeDir).isNotNull();
-        assertThat(storeDir.getName()).isEqualTo("store");
-        assertThat(storeDir).exists();
+        assertThat(storeDir)
+                .isNotNull()
+                .hasName("store")
+                .exists();
     }
 
     @Test
@@ -311,9 +315,10 @@ class DumCommonsUtilsTest {
         String subDirName = "testSubDir";
         File subDir = DumCommonsUtils.addSubDirToStoreDir(subDirName);
 
-        assertThat(subDir).isNotNull();
-        assertThat(subDir.getName()).isEqualTo(subDirName);
-        assertThat(subDir).exists();
+        assertThat(subDir)
+                .isNotNull()
+                .hasName(subDirName)
+                .exists();
 
         // Clean up
         assertThat(subDir.delete()).isTrue();
@@ -323,9 +328,10 @@ class DumCommonsUtilsTest {
     void testGetTempDirectory() {
         File tempDir = DumCommonsUtils.getTempDirectory();
 
-        assertThat(tempDir).isNotNull();
-        assertThat(tempDir.getName()).isEqualTo("tmp");
-        assertThat(tempDir).exists();
+        assertThat(tempDir)
+                .isNotNull()
+                .hasName("tmp")
+                .exists();
     }
 
     // Helper class for JSON testing

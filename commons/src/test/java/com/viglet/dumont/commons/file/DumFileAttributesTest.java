@@ -15,13 +15,13 @@
 
 package com.viglet.dumont.commons.file;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for DumFileAttributes.
@@ -159,10 +159,11 @@ class DumFileAttributesTest {
 
         String toString = attributes.toString();
 
-        assertThat(toString).contains("content=Test content");
-        assertThat(toString).contains("name=test.txt");
-        assertThat(toString).contains("title=Test File");
-        assertThat(toString).contains("extension=txt");
+        assertThat(toString)
+                .contains("content=Test content")
+                .contains("name=test.txt")
+                .contains("title=Test File")
+                .contains("extension=txt");
     }
 
     @Test

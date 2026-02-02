@@ -38,11 +38,11 @@ class DumAemLocalePathContextTest {
         void shouldBuildLocalePathContextWithAllFields() {
             DumAemLocalePathContext localePath = DumAemLocalePathContext.builder()
                     .path("/content/mysite/pt-br")
-                    .locale(new Locale("pt", "BR"))
+                    .locale(Locale.of("pt", "BR"))
                     .build();
 
             assertEquals("/content/mysite/pt-br", localePath.getPath());
-            assertEquals(new Locale("pt", "BR"), localePath.getLocale());
+            assertEquals(Locale.of("pt", "BR"), localePath.getLocale());
         }
 
         @Test
@@ -79,7 +79,7 @@ class DumAemLocalePathContextTest {
         void shouldGetPath() {
             DumAemLocalePathContext localePath = DumAemLocalePathContext.builder()
                     .path("/content/site/es")
-                    .locale(new Locale("es", "ES"))
+                    .locale(Locale.of("es", "ES"))
                     .build();
 
             assertEquals("/content/site/es", localePath.getPath());
@@ -88,7 +88,7 @@ class DumAemLocalePathContextTest {
         @Test
         @DisplayName("Should get locale")
         void shouldGetLocale() {
-            Locale spanishLocale = new Locale("es", "ES");
+            Locale spanishLocale = Locale.of("es", "ES");
             DumAemLocalePathContext localePath = DumAemLocalePathContext.builder()
                     .path("/content/site/es")
                     .locale(spanishLocale)

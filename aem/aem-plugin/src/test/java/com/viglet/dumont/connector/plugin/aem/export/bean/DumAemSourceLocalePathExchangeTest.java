@@ -120,7 +120,7 @@ class DumAemSourceLocalePathExchangeTest {
         @DisplayName("Should handle Brazilian Portuguese locale")
         void shouldHandleBrazilianPortugueseLocale() {
             DumAemSourceLocalePathExchange exchange = new DumAemSourceLocalePathExchange();
-            Locale ptBR = new Locale("pt", "BR");
+            Locale ptBR = Locale.of("pt", "BR");
             exchange.setLocale(ptBR);
             exchange.setPath("/content/pt-br");
 

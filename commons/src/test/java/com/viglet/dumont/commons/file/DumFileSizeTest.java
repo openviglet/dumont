@@ -15,9 +15,9 @@
 
 package com.viglet.dumont.commons.file;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for DumFileSize.
@@ -125,9 +125,10 @@ class DumFileSizeTest {
         DumFileSize fileSize = new DumFileSize(1024.0f);
         String toString = fileSize.toString();
 
-        assertThat(toString).contains("bytes=1024.0");
-        assertThat(toString).contains("kiloBytes=1.0");
-        assertThat(toString).contains("megaBytes=0.0");
+        assertThat(toString)
+                .contains("bytes=1024.0")
+                .contains("kiloBytes=1.0")
+                .contains("megaBytes=0.0");
     }
 
     @Test
