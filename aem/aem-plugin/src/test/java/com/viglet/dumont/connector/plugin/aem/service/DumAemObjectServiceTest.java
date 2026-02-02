@@ -164,38 +164,18 @@ class DumAemObjectServiceTest {
             assertNotNull(result);
         }
 
-        @Test
-        @DisplayName("Should handle folder type")
-        void shouldHandleFolderType() {
+        @org.junit.jupiter.params.ParameterizedTest
+        @org.junit.jupiter.params.provider.CsvSource({
+                "sling:Folder, /content/test/folder",
+                "sling:OrderedFolder, /content/test/ordered-folder",
+                "nt:unstructured, /content/test/data"
+        })
+        @DisplayName("Should handle folder and unstructured types")
+        void shouldHandleFolderAndUnstructuredTypes(String primaryType, String path) {
             JSONObject json = new JSONObject();
-            json.put("jcr:primaryType", "sling:Folder");
+            json.put("jcr:primaryType", primaryType);
 
-            DumAemObjectGeneric result = service.getDumAemObjectGeneric(
-                    "/content/test/folder", json);
-
-            assertNotNull(result);
-        }
-
-        @Test
-        @DisplayName("Should handle ordered folder type")
-        void shouldHandleOrderedFolderType() {
-            JSONObject json = new JSONObject();
-            json.put("jcr:primaryType", "sling:OrderedFolder");
-
-            DumAemObjectGeneric result = service.getDumAemObjectGeneric(
-                    "/content/test/ordered-folder", json);
-
-            assertNotNull(result);
-        }
-
-        @Test
-        @DisplayName("Should handle nt:unstructured type")
-        void shouldHandleNtUnstructuredType() {
-            JSONObject json = new JSONObject();
-            json.put("jcr:primaryType", "nt:unstructured");
-
-            DumAemObjectGeneric result = service.getDumAemObjectGeneric(
-                    "/content/test/data", json);
+            DumAemObjectGeneric result = service.getDumAemObjectGeneric(path, json);
 
             assertNotNull(result);
         }

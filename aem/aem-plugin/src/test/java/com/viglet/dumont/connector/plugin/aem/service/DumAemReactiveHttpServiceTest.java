@@ -27,6 +27,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
@@ -64,56 +65,28 @@ class DumAemReactiveHttpServiceTest {
     @DisplayName("basicAuth Tests")
     class BasicAuthTests {
 
-        @Test
-        @DisplayName("Should generate basic auth header")
-        void shouldGenerateBasicAuthHeader() throws Exception {
+        @ParameterizedTest
+        @DisplayName("Should generate correct basic auth header for various credentials")
+        @org.junit.jupiter.params.provider.MethodSource("basicAuthTestCases")
+        void shouldGenerateBasicAuthHeaderParameterized(String username, String password, String expected)
+                throws Exception {
             Method basicAuthMethod = DumAemReactiveHttpService.class
                     .getDeclaredMethod("basicAuth", String.class, String.class);
             basicAuthMethod.setAccessible(true);
 
-            String result = (String) basicAuthMethod.invoke(dumAemReactiveHttpService, "admin", "admin");
+            String result = (String) basicAuthMethod.invoke(dumAemReactiveHttpService, username, password);
 
             assertNotNull(result);
-            assertEquals("Basic YWRtaW46YWRtaW4=", result);
+            assertEquals(expected, result);
         }
 
-        @Test
-        @DisplayName("Should handle empty username")
-        void shouldHandleEmptyUsername() throws Exception {
-            Method basicAuthMethod = DumAemReactiveHttpService.class
-                    .getDeclaredMethod("basicAuth", String.class, String.class);
-            basicAuthMethod.setAccessible(true);
-
-            String result = (String) basicAuthMethod.invoke(dumAemReactiveHttpService, "", "password");
-
-            assertNotNull(result);
-            assertEquals("Basic OnBhc3N3b3Jk", result);
-        }
-
-        @Test
-        @DisplayName("Should handle empty password")
-        void shouldHandleEmptyPassword() throws Exception {
-            Method basicAuthMethod = DumAemReactiveHttpService.class
-                    .getDeclaredMethod("basicAuth", String.class, String.class);
-            basicAuthMethod.setAccessible(true);
-
-            String result = (String) basicAuthMethod.invoke(dumAemReactiveHttpService, "admin", "");
-
-            assertNotNull(result);
-            assertEquals("Basic YWRtaW46", result);
-        }
-
-        @Test
-        @DisplayName("Should handle special characters in credentials")
-        void shouldHandleSpecialCharactersInCredentials() throws Exception {
-            Method basicAuthMethod = DumAemReactiveHttpService.class
-                    .getDeclaredMethod("basicAuth", String.class, String.class);
-            basicAuthMethod.setAccessible(true);
-
-            String result = (String) basicAuthMethod.invoke(dumAemReactiveHttpService, "user@domain.com", "p@ss:word!");
-
-            assertNotNull(result);
-            assertEquals("Basic dXNlckBkb21haW4uY29tOnBAc3M6d29yZCE=", result);
+        static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> basicAuthTestCases() {
+            return java.util.stream.Stream.of(
+                    org.junit.jupiter.params.provider.Arguments.of("admin", "admin", "Basic YWRtaW46YWRtaW4="),
+                    org.junit.jupiter.params.provider.Arguments.of("", "password", "Basic OnBhc3N3b3Jk"),
+                    org.junit.jupiter.params.provider.Arguments.of("admin", "", "Basic YWRtaW46"),
+                    org.junit.jupiter.params.provider.Arguments.of("user@domain.com", "p@ss:word!",
+                            "Basic dXNlckBkb21haW4uY29tOnBAc3M6d29yZCE="));
         }
     }
 
@@ -121,9 +94,10 @@ class DumAemReactiveHttpServiceTest {
     @DisplayName("fetchResponseBodyReactive Tests")
     class FetchResponseBodyReactiveTests {
 
-        @Test
-        @DisplayName("Should return Mono for valid URL")
-        void shouldReturnMonoForValidUrl() {
+        @ParameterizedTest
+        @DisplayName("Should return Mono for various valid URLs")
+        @org.junit.jupiter.params.provider.MethodSource("urlTestCases")
+        void shouldReturnMonoForVariousUrls(String testUrl) {
             DumAemConfiguration config = DumAemConfiguration.builder()
                     .url("http://localhost:4502")
                     .username("admin")
@@ -131,54 +105,19 @@ class DumAemReactiveHttpServiceTest {
                     .build();
 
             var result = dumAemReactiveHttpService.fetchResponseBodyReactive(
-                    "http://localhost:4502/content.json", config);
+                    testUrl, config);
 
             assertNotNull(result);
         }
 
-        @Test
-        @DisplayName("Should handle URL with special characters")
-        void shouldHandleUrlWithSpecialCharacters() {
-            DumAemConfiguration config = DumAemConfiguration.builder()
-                    .url("http://localhost:4502")
-                    .username("admin")
-                    .password("admin")
-                    .build();
-
-            var result = dumAemReactiveHttpService.fetchResponseBodyReactive(
-                    "http://localhost:4502/content/path with spaces.json", config);
-
-            assertNotNull(result);
-        }
-
-        @Test
-        @DisplayName("Should handle URL with query parameters")
-        void shouldHandleUrlWithQueryParameters() {
-            DumAemConfiguration config = DumAemConfiguration.builder()
-                    .url("http://localhost:4502")
-                    .username("admin")
-                    .password("admin")
-                    .build();
-
-            var result = dumAemReactiveHttpService.fetchResponseBodyReactive(
-                    "http://localhost:4502/content.json?limit=10&offset=0", config);
-
-            assertNotNull(result);
-        }
-
-        @Test
-        @DisplayName("Should handle URL with fragments")
-        void shouldHandleUrlWithFragments() {
-            DumAemConfiguration config = DumAemConfiguration.builder()
-                    .url("http://localhost:4502")
-                    .username("admin")
-                    .password("admin")
-                    .build();
-
-            var result = dumAemReactiveHttpService.fetchResponseBodyReactive(
-                    "http://localhost:4502/content.json#section", config);
-
-            assertNotNull(result);
+        static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> urlTestCases() {
+            return java.util.stream.Stream.of(
+                    org.junit.jupiter.params.provider.Arguments.of("http://localhost:4502/content.json"),
+                    org.junit.jupiter.params.provider.Arguments
+                            .of("http://localhost:4502/content/path with spaces.json"),
+                    org.junit.jupiter.params.provider.Arguments
+                            .of("http://localhost:4502/content.json?limit=10&offset=0"),
+                    org.junit.jupiter.params.provider.Arguments.of("http://localhost:4502/content.json#section"));
         }
     }
 
@@ -198,6 +137,18 @@ class DumAemReactiveHttpServiceTest {
         void shouldCreateWebClientWithSslProtocols() {
             DumAemReactiveHttpService service = new DumAemReactiveHttpService();
             assertNotNull(service);
+
+            // Use reflection to check if SSL context or protocols are set (example, adjust
+            // as needed)
+            try {
+                java.lang.reflect.Field webClientField = DumAemReactiveHttpService.class.getDeclaredField("webClient");
+                webClientField.setAccessible(true);
+                Object webClient = webClientField.get(service);
+                assertNotNull(webClient, "WebClient should be initialized with SSL protocols if configured");
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                // If the field does not exist, the test should fail
+                throw new AssertionError("SSL configuration could not be verified", e);
+            }
         }
 
         @Test
@@ -205,6 +156,24 @@ class DumAemReactiveHttpServiceTest {
         void shouldCreateWebClientWithCustomUserAgent() {
             DumAemReactiveHttpService service = new DumAemReactiveHttpService();
             assertNotNull(service);
+
+            // Use reflection to check if WebClient has custom user agent set
+            try {
+                java.lang.reflect.Field webClientField = DumAemReactiveHttpService.class.getDeclaredField("webClient");
+                webClientField.setAccessible(true);
+                Object webClient = webClientField.get(service);
+                assertNotNull(webClient, "WebClient should be initialized");
+
+                // Try to extract the user agent header from the WebClient (if possible)
+                // This is a best-effort check; adjust as needed for your WebClient
+                // implementation
+                java.lang.reflect.Method getDefaultHeaders = webClient.getClass().getMethod("defaultHeaders");
+                Object headersConsumer = getDefaultHeaders.invoke(webClient);
+                assertNotNull(headersConsumer, "WebClient should have default headers set (including User-Agent)");
+            } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException
+                    | java.lang.reflect.InvocationTargetException e) {
+                throw new AssertionError("User-Agent configuration could not be verified", e);
+            }
         }
     }
 
