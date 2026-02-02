@@ -315,6 +315,9 @@ class DumAemOnStartupJpaTest {
 
             // Should not throw with valid ApplicationArguments
             dumAemOnStartupJpa.run(applicationArguments);
+
+            // Add assertion to verify findById was called
+            verify(dumAemConfigVarRepository).findById(DumAemOnStartupJpa.FIRST_TIME);
         }
 
         @Test
@@ -325,6 +328,9 @@ class DumAemOnStartupJpaTest {
 
             // Should not throw with null ApplicationArguments
             dumAemOnStartupJpa.run(null);
+
+            // Add assertion to verify findById was called
+            verify(dumAemConfigVarRepository).findById(DumAemOnStartupJpa.FIRST_TIME);
         }
     }
 }

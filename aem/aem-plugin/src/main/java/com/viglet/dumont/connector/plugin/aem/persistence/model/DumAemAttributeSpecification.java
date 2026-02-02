@@ -7,7 +7,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.viglet.dumont.spring.jpa.DumUuid;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
-import com.viglet.turing.commons.se.field.TurSEFieldType;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -43,15 +42,8 @@ public class DumAemAttributeSpecification extends TurSNAttributeSpec {
     @DumUuid
     @Column(name = "id", nullable = false)
     private String id;
-
     private String className;
     private String text;
-    private String name;
-    private TurSEFieldType type;
-    private boolean mandatory;
-    private boolean multiValued;
-    private String description;
-    private boolean facet;
 
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)

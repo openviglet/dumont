@@ -195,9 +195,9 @@ public class DumWCPluginProcess {
                 && pageUrl.startsWith(this.website)
                 && (allowStartsWithUrls.stream().anyMatch(getRelativePageUrl(pageUrl)::startsWith)
                         || allowUrls.contains(getRelativePageUrl(pageUrl)))
-                && !notAllowStartsWithUrls.stream().anyMatch(getRelativePageUrl(pageUrl)::startsWith)
+                && notAllowStartsWithUrls.stream().noneMatch(getRelativePageUrl(pageUrl)::startsWith)
                 && !notAllowUrls.contains(getRelativePageUrl(pageUrl))
-                && !notAllowExtensions.stream().anyMatch(pageUrl::endsWith);
+                && notAllowExtensions.stream().noneMatch(pageUrl::endsWith);
     }
 
     private void addTurSNJobItem(DumWCSource dumWCSource, Document document, String url,
