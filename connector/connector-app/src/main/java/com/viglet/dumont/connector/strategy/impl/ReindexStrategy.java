@@ -74,8 +74,24 @@ public class ReindexStrategy implements JobProcessingStrategy {
 
     @Override
     public boolean canHandle(DumJobItemWithSession jobItem) {
-        return indexingService.exists(jobItem)
-                && (indexingService.isChecksumDifferent(jobItem) || hasIgnoredStatus(jobItem));
+        if (!indexingService.exists(jobItem)) {
+            return false;
+        }
+        if (jobItem.standalone()) {
+            return true;
+        }
+
+        boolean checksumChanged = indexingService.isChecksumDifferent(jobItem);
+        boolean ignoredStatus = hasIgnoredStatus(jobItem);
+
+        if (checksumChanged) {
+            log.debug("Checksum changed for {}", getObjectDetailForLogs(jobItem));
+        }
+        if (ignoredStatus) {
+            log.debug("Ignored status found for {}", getObjectDetailForLogs(jobItem));
+        }
+
+        return checksumChanged || ignoredStatus;
     }
 
     @Override
