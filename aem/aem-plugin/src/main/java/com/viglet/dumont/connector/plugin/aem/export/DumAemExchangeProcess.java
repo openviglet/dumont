@@ -287,7 +287,6 @@ public class DumAemExchangeProcess {
                 .name(attribute.getName())
                 .className(attribute.getClassName())
                 .text(attribute.getText())
-                .name(attribute.getName())
                 .type(attribute.getType())
                 .mandatory(attribute.isMandatory())
                 .multiValued(attribute.isMultiValued())

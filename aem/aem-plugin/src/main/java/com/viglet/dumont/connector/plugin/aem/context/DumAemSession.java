@@ -9,12 +9,10 @@ import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@SuperBuilder
+@SuperBuilder(builderMethodName = "aemBuilder")
 @Getter
 public class DumAemSession extends DumConnectorSession {
     private DumAemConfiguration configuration;
