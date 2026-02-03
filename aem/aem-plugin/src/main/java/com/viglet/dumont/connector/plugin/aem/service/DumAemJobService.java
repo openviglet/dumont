@@ -130,9 +130,14 @@ public class DumAemJobService {
                                 aemObject.getPath(), PUBLISHING.toString());
                 DumJobItemWithSession dumJobItemWithSession = new DumJobItemWithSession(
                                 deIndexJobItem, dumAemSession, aemObject.getDependencies(), true);
-                dumConnectorContext.addJobItem(dumJobItemWithSession);
-                log.info("Forcing deIndex because {} is not publishing.",
-                                DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject));
+                if (dumConnectorContext.addJobItem(dumJobItemWithSession)) {
+                        log.info("Forcing deIndex because {} is not publishing.",
+                                        DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject));
+                } else {
+                        log.error("Failed to queue deIndex job for {} in session: {}",
+                                        DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject),
+                                        dumAemSession.getProviderName());
+                }
         }
 
         private void indexByEnvironment(DumAemSession dumAemSession,
@@ -147,6 +152,7 @@ public class DumAemJobService {
 
         private void createIndexJobAndSendToConnectorQueue(DumAemSession dumAemSession,
                         DumAemObject aemObject, Locale locale) {
+                log.debug("AemObject {} ", aemObject.toString());
                 TurSNJobItem turSNJobItem = getTurSNJobItem(dumAemSession, aemObject, locale,
                                 getJobItemAttributes(dumAemSession,
                                                 dumAemService.getTargetAttrValueMap(dumAemSession,
@@ -154,7 +160,14 @@ public class DumAemJobService {
                 DumJobItemWithSession jobItemWithSession = new DumJobItemWithSession(turSNJobItem,
                                 dumAemSession, aemObject.getDependencies(),
                                 dumAemSession.isStandalone());
-                dumConnectorContext.addJobItem(jobItemWithSession);
+                if (dumConnectorContext.addJobItem(jobItemWithSession)) {
+                        log.debug("Index job successfully queued for {}",
+                                        DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject));
+                } else {
+                        log.error("Failed to queue index job for {} in session: {}",
+                                        DumAemPluginUtils.getObjectDetailForLogs(dumAemSession, aemObject),
+                                        dumAemSession.getProviderName());
+                }
         }
 
         private static @NotNull Map<String, Object> getJobItemAttributes(
@@ -211,9 +224,13 @@ public class DumAemJobService {
                                                 deIndexJobItem, dumAemSession,
                                                 Collections.emptySet(),
                                                 dumAemSession.isStandalone());
-                                dumConnectorContext.addJobItem(dumJobItemWithSession);
-                                log.debug("DeIndex job successfully queued for contentId: {}",
-                                                contentId);
+                                if (dumConnectorContext.addJobItem(dumJobItemWithSession)) {
+                                        log.debug("DeIndex job successfully queued for contentId: {}",
+                                                        contentId);
+                                } else {
+                                        log.error("Failed to queue deIndex job for contentId: {} in session: {}",
+                                                        contentId, dumAemSession.getProviderName());
+                                }
 
                         } catch (Exception e) {
                                 log.error("Failed to create deIndex job for contentId: {} in session: {}. Error: {}",

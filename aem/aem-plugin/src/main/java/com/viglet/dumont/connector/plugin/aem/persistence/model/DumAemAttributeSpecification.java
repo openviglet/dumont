@@ -7,11 +7,14 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.viglet.dumont.spring.jpa.DumUuid;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
+import com.viglet.turing.commons.se.field.TurSEFieldType;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -25,6 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+@SuppressWarnings("java:S2387")
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,8 +46,30 @@ public class DumAemAttributeSpecification extends TurSNAttributeSpec {
     @DumUuid
     @Column(name = "id", nullable = false)
     private String id;
+
+    @Column(name = "class_name")
     private String className;
+
     private String text;
+
+    @Column(name = "name")
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private TurSEFieldType type;
+
+    @Column(name = "mandatory")
+    private boolean mandatory;
+
+    @Column(name = "multi_valued")
+    private boolean multiValued;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "facet")
+    private boolean facet;
 
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)

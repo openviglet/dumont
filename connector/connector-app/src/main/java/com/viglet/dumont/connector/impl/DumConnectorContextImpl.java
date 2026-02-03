@@ -85,11 +85,16 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     }
 
     @Override
-    public void addJobItem(DumJobItemWithSession dumJobItemWithSession) {
-        if (dumJobItemWithSession.turSNJobItem() != null) {
+    public boolean addJobItem(DumJobItemWithSession dumJobItemWithSession) {
+        if (dumJobItemWithSession.turSNJobItem() != null &&
+                dumJobItemWithSession.turSNJobItem().getId() != null) {
             log.info("Adding {} object to payload.", dumJobItemWithSession.turSNJobItem().getId());
             queueLinks.offer(dumJobItemWithSession);
             processRemainingJobs();
+            return true;
+        } else {
+            log.warn("Job item or its ID is null. Skipping addition to payload.");
+            return false;
         }
     }
 

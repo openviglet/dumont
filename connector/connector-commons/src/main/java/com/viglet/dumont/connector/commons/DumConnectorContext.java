@@ -22,7 +22,7 @@ import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 
 public interface DumConnectorContext {
-    void addJobItem(DumJobItemWithSession dumJobItemWithSession);
+    boolean addJobItem(DumJobItemWithSession dumJobItemWithSession);
 
     void finishIndexing(DumConnectorSession session, boolean standalone);
 

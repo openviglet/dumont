@@ -224,33 +224,63 @@ public class DumAemObjectGeneric {
     }
 
     public void setDataPath(String dataPath) {
-        if (dataPath != null) {
-            JSONObject dataJson = this.jcrContentNode;
-            for (String node : dataPath.split("/")) {
-                if (dataJson.has(node)) {
-                    dataJson = dataJson.getJSONObject(node);
-                } else {
-                    return;
+        if (dataPath == null || dataPath.isEmpty()) {
+            log.warn("Data path is null or empty for object at path: {}", this.path);
+            return;
+        }
+
+        JSONObject currentNode = traverseDataPath(this.jcrContentNode, dataPath);
+        if (currentNode == null) {
+            return;
+        }
+
+        log.debug("Extracting attributes from data path: {} for object at path: {}", dataPath, this.path);
+        extractAttributes(currentNode);
+    }
+
+    private JSONObject traverseDataPath(JSONObject rootNode, String dataPath) {
+        JSONObject currentNode = rootNode;
+        for (String node : dataPath.split("/")) {
+            if (currentNode.has(node)) {
+                currentNode = currentNode.optJSONObject(node);
+                if (currentNode == null) {
+                    log.warn("Node '{}' is not a JSONObject in data path '{}' for object at path: {}", node, dataPath,
+                            this.path);
+                    return null;
                 }
+            } else {
+                log.warn("Node '{}' not found in data path '{}' for object at path: {}", node, dataPath, this.path);
+                return null;
             }
-            JSONObject finalDataJson = dataJson;
-            dataJson.keySet().stream().filter(key -> !key.endsWith("@LastModified"))
-                    .forEach(key -> {
-                        Object value = finalDataJson.get(key);
-                        if (isDate(value.toString())) {
-                            try {
-                                TimeZone tz = TimeZone.getTimeZone(UTC);
-                                DateFormat dumontDateFormat = new SimpleDateFormat(DATE_FORMAT);
-                                dumontDateFormat.setTimeZone(tz);
-                                this.attributes.put(key, dumontDateFormat.format(
-                                        aemJsonDateFormat.parse(value.toString()).getTime()));
-                            } catch (ParseException e) {
-                                log.error(e.getMessage(), e);
-                            }
-                        } else {
-                            this.attributes.put(key, value);
-                        }
-                    });
+        }
+        return currentNode;
+    }
+
+    private void extractAttributes(JSONObject currentNode) {
+        for (String key : currentNode.keySet()) {
+            if (key.endsWith("@LastModified")) {
+                continue;
+            }
+            Object value = currentNode.get(key);
+            if (value instanceof String stringValue && isDate(stringValue)) {
+                putParsedDateAttribute(key, stringValue);
+            } else {
+                this.attributes.put(key, value);
+            }
+        }
+    }
+
+    private void putParsedDateAttribute(String key, String value) {
+        try {
+            TimeZone tz = TimeZone.getTimeZone(UTC);
+            DateFormat dumontDateFormat = new SimpleDateFormat(DATE_FORMAT);
+            dumontDateFormat.setTimeZone(tz);
+            log.debug("Parsing date attribute: {} with value: {} for object at path: {}", key, value, this.path);
+            this.attributes.put(key, dumontDateFormat.format(aemJsonDateFormat.parse(value).getTime()));
+        } catch (ParseException e) {
+            log.error("Failed to parse date for key '{}' with value '{}' at path '{}': {}", key, value, this.path,
+                    e.getMessage());
+            this.attributes.put(key, value);
         }
     }
 
