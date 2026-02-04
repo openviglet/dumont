@@ -34,6 +34,6 @@ class DumConnectorIndexingRuleAPITest {
     void testDumConnectorIndexingRuleAPIIsRestController() {
         // Assert
         assertNotNull(DumConnectorIndexingRuleAPI.class.getAnnotation(
-            org.springframework.web.bind.annotation.RestController.class));
+                org.springframework.web.bind.annotation.RestController.class));
     }
 }

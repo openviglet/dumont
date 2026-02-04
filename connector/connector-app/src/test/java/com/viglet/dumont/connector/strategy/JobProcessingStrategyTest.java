@@ -14,33 +14,25 @@
  * not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.viglet.dumont.connector.persistence.repository;
+package com.viglet.dumont.connector.strategy;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.repository.CrudRepository;
 
 @SpringBootTest
-class DumConnectorConfigVarRepositoryTest {
+class JobProcessingStrategyTest {
 
     @Test
-    void testRepositoryIsInterface() {
-        // Assert
-        assertTrue(DumConnectorConfigVarRepository.class.isInterface());
+    void testJobProcessingStrategyClassExists() {
+        assertNotNull(JobProcessingStrategy.class);
     }
 
     @Test
-    void testRepositoryExtendsCrudRepository() {
-        // Assert
-        assertTrue(CrudRepository.class.isAssignableFrom(DumConnectorConfigVarRepository.class));
-    }
-
-    @Test
-    void testRepositoryExists() {
-        // Assert - simply verify it can be loaded
-        assertNotNull(DumConnectorConfigVarRepository.class.getName());
+    void testJobProcessingStrategyCanBeLoaded() {
+        assertDoesNotThrow(() -> {
+            Class.forName("com.viglet.dumont.connector.strategy.JobProcessingStrategy");
+        });
     }
 }

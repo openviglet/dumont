@@ -16,10 +16,10 @@
 
 package com.viglet.dumont.connector.service;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class DumConnectorIndexingServiceTest {
@@ -34,6 +34,6 @@ class DumConnectorIndexingServiceTest {
     void testDumConnectorIndexingServiceHasServiceAnnotation() {
         // Assert
         assertNotNull(DumConnectorIndexingService.class.getAnnotation(
-            org.springframework.stereotype.Service.class));
+                org.springframework.stereotype.Service.class));
     }
 }

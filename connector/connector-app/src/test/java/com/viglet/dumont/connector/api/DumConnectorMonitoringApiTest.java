@@ -34,6 +34,6 @@ class DumConnectorMonitoringApiTest {
     void testDumConnectorMonitoringApiIsRestController() {
         // Assert
         assertNotNull(DumConnectorMonitoringApi.class.getAnnotation(
-            org.springframework.web.bind.annotation.RestController.class));
+                org.springframework.web.bind.annotation.RestController.class));
     }
 }

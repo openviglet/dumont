@@ -16,10 +16,10 @@
 
 package com.viglet.dumont.connector.scheduled;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class DumSchedulerConfigurationTest {
@@ -34,6 +34,6 @@ class DumSchedulerConfigurationTest {
     void testDumSchedulerConfigurationHasConfigurationAnnotation() {
         // Assert
         assertNotNull(DumSchedulerConfiguration.class.getAnnotation(
-            org.springframework.context.annotation.Configuration.class));
+                org.springframework.context.annotation.Configuration.class));
     }
 }

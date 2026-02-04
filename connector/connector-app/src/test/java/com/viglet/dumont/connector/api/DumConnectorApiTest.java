@@ -16,10 +16,10 @@
 
 package com.viglet.dumont.connector.api;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class DumConnectorApiTest {
@@ -34,6 +34,6 @@ class DumConnectorApiTest {
     void testDumConnectorApiIsRestController() {
         // Assert
         assertNotNull(DumConnectorApi.class.getAnnotation(
-            org.springframework.web.bind.annotation.RestController.class));
+                org.springframework.web.bind.annotation.RestController.class));
     }
 }

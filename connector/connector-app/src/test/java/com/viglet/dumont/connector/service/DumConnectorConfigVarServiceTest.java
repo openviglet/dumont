@@ -14,33 +14,29 @@
  * not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.viglet.dumont.connector.persistence.repository;
+package com.viglet.dumont.connector.service;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Service;
 
 @SpringBootTest
-class DumConnectorConfigVarRepositoryTest {
+class DumConnectorConfigVarServiceTest {
 
     @Test
-    void testRepositoryIsInterface() {
-        // Assert
-        assertTrue(DumConnectorConfigVarRepository.class.isInterface());
+    void testConfigVarServiceClassExists() {
+        assertNotNull(DumConnectorConfigVarService.class);
     }
 
     @Test
-    void testRepositoryExtendsCrudRepository() {
-        // Assert
-        assertTrue(CrudRepository.class.isAssignableFrom(DumConnectorConfigVarRepository.class));
+    void testConfigVarServiceHasServiceAnnotation() {
+        assertNotNull(DumConnectorConfigVarService.class.getAnnotation(Service.class));
     }
 
     @Test
-    void testRepositoryExists() {
-        // Assert - simply verify it can be loaded
-        assertNotNull(DumConnectorConfigVarRepository.class.getName());
+    void testConfigVarServiceIsNotNull() {
+        assertNotNull(DumConnectorConfigVarService.class.getName());
     }
 }

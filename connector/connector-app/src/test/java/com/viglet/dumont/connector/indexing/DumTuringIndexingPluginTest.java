@@ -16,10 +16,10 @@
 
 package com.viglet.dumont.connector.indexing;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class DumTuringIndexingPluginTest {
@@ -34,6 +34,6 @@ class DumTuringIndexingPluginTest {
     void testDumTuringIndexingPluginHasComponentAnnotation() {
         // Assert
         assertNotNull(DumTuringIndexingPlugin.class.getAnnotation(
-            org.springframework.stereotype.Component.class));
+                org.springframework.stereotype.Component.class));
     }
 }

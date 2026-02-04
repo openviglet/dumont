@@ -16,7 +16,8 @@
 
 package com.viglet.dumont.connector;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,20 +52,20 @@ class DumConnectorApplicationTest {
     void testApplicationHasExpectedAnnotations() {
         // Assert - check that class has Spring annotations
         assertNotNull(DumConnectorApplication.class.getAnnotation(
-            org.springframework.boot.autoconfigure.SpringBootApplication.class));
+                org.springframework.boot.autoconfigure.SpringBootApplication.class));
     }
 
     @Test
     void testApplicationHasEnableSchedulingAnnotation() {
         // Assert
         assertNotNull(DumConnectorApplication.class.getAnnotation(
-            org.springframework.scheduling.annotation.EnableScheduling.class));
+                org.springframework.scheduling.annotation.EnableScheduling.class));
     }
 
     @Test
     void testApplicationHasEnableAsyncAnnotation() {
         // Assert
         assertNotNull(DumConnectorApplication.class.getAnnotation(
-            org.springframework.scheduling.annotation.EnableAsync.class));
+                org.springframework.scheduling.annotation.EnableAsync.class));
     }
 }

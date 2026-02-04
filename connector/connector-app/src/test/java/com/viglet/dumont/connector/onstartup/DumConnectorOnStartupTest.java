@@ -16,10 +16,10 @@
 
 package com.viglet.dumont.connector.onstartup;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class DumConnectorOnStartupTest {
@@ -34,6 +34,6 @@ class DumConnectorOnStartupTest {
     void testDumConnectorOnStartupHasComponentAnnotation() {
         // Assert
         assertNotNull(DumConnectorOnStartup.class.getAnnotation(
-            org.springframework.stereotype.Component.class));
+                org.springframework.stereotype.Component.class));
     }
 }

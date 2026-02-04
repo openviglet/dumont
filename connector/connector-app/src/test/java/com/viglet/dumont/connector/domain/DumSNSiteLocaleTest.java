@@ -14,33 +14,25 @@
  * not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.viglet.dumont.connector.persistence.repository;
+package com.viglet.dumont.connector.domain;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.repository.CrudRepository;
 
 @SpringBootTest
-class DumConnectorConfigVarRepositoryTest {
+class DumSNSiteLocaleTest {
 
     @Test
-    void testRepositoryIsInterface() {
-        // Assert
-        assertTrue(DumConnectorConfigVarRepository.class.isInterface());
+    void testSNSiteLocaleClassExists() {
+        assertNotNull(DumSNSiteLocale.class);
     }
 
     @Test
-    void testRepositoryExtendsCrudRepository() {
-        // Assert
-        assertTrue(CrudRepository.class.isAssignableFrom(DumConnectorConfigVarRepository.class));
-    }
-
-    @Test
-    void testRepositoryExists() {
-        // Assert - simply verify it can be loaded
-        assertNotNull(DumConnectorConfigVarRepository.class.getName());
+    void testSNSiteLocaleCanBeLoaded() {
+        assertDoesNotThrow(() -> {
+            Class.forName("com.viglet.dumont.connector.domain.DumSNSiteLocale");
+        });
     }
 }
