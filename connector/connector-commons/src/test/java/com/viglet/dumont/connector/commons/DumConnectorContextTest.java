@@ -16,10 +16,10 @@
 
 package com.viglet.dumont.connector.commons;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
-import com.viglet.dumont.connector.commons.DumConnectorContext;
 
 class DumConnectorContextTest {
 
