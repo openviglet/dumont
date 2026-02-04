@@ -32,4 +32,3 @@ hs_err_pid*
 .flattened-pom.xml
 dependency-reduced-pom.xml
 /dist/
-/connector/connector-app/store
