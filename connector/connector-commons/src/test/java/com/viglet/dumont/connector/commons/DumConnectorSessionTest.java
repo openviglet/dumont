@@ -16,7 +16,11 @@
 
 package com.viglet.dumont.connector.commons;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,7 +45,7 @@ class DumConnectorSessionTest {
     @Test
     void testConstructorInitializesFields() {
         // Arrange & Act - already done in setUp
-        
+
         // Assert
         assertEquals(SOURCE, session.getSource());
         assertEquals(PROVIDER_NAME, session.getProviderName());
@@ -54,7 +58,7 @@ class DumConnectorSessionTest {
         // Arrange & Act
         DumConnectorSession session1 = new DumConnectorSession(SOURCE, sites, PROVIDER_NAME, Locale.US);
         DumConnectorSession session2 = new DumConnectorSession(SOURCE, sites, PROVIDER_NAME, Locale.US);
-        
+
         // Assert
         assertNotNull(session1.getTransactionId());
         assertNotNull(session2.getTransactionId());
@@ -65,10 +69,10 @@ class DumConnectorSessionTest {
     void testConstructorWithEmptySites() {
         // Arrange
         Collection<String> emptySites = Arrays.asList();
-        
+
         // Act
         DumConnectorSession emptySession = new DumConnectorSession(SOURCE, emptySites, PROVIDER_NAME, Locale.US);
-        
+
         // Assert
         assertEquals(emptySites, emptySession.getSites());
         assertTrue(emptySession.getSites().isEmpty());
@@ -82,14 +86,14 @@ class DumConnectorSessionTest {
         Collection<String> newSites = Arrays.asList("site3");
         Locale newLocale = Locale.FRANCE;
         String newTransactionId = "test-transaction-id";
-        
+
         // Act
         session.setSource(newSource);
         session.setProviderName(newProvider);
         session.setSites(newSites);
         session.setLocale(newLocale);
         session.setTransactionId(newTransactionId);
-        
+
         // Assert
         assertEquals(newSource, session.getSource());
         assertEquals(newProvider, session.getProviderName());
@@ -106,16 +110,16 @@ class DumConnectorSessionTest {
         Collection<String> builderSites = Arrays.asList("site1", "site2", "site3");
         String builderProvider = "builderProvider";
         Locale builderLocale = Locale.GERMAN;
-        
+
         // Act
         DumConnectorSession builtSession = DumConnectorSession.builder()
-            .source(builderSource)
-            .transactionId(builderId)
-            .sites(builderSites)
-            .providerName(builderProvider)
-            .locale(builderLocale)
-            .build();
-        
+                .source(builderSource)
+                .transactionId(builderId)
+                .sites(builderSites)
+                .providerName(builderProvider)
+                .locale(builderLocale)
+                .build();
+
         // Assert
         assertEquals(builderSource, builtSession.getSource());
         assertEquals(builderId, builtSession.getTransactionId());
@@ -128,7 +132,7 @@ class DumConnectorSessionTest {
     void testConstructorWithNullLocale() {
         // Arrange & Act
         DumConnectorSession nullLocaleSession = new DumConnectorSession(SOURCE, sites, PROVIDER_NAME, null);
-        
+
         // Assert
         assertNull(nullLocaleSession.getLocale());
         assertNotNull(nullLocaleSession.getTransactionId());

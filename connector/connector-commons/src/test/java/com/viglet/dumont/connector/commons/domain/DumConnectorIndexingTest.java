@@ -39,18 +39,18 @@ class DumConnectorIndexingTest {
         testDate = new Date();
         testSites = Arrays.asList("site1", "site2");
         indexing = DumConnectorIndexing.builder()
-            .id(1)
-            .objectId("test-object-id")
-            .source("test-source")
-            .environment("test-env")
-            .transactionId("test-transaction-id")
-            .checksum("test-checksum")
-            .locale(Locale.US)
-            .created(testDate)
-            .modificationDate(testDate)
-            .status(DumIndexingStatus.INDEXED)
-            .sites(testSites)
-            .build();
+                .id(1)
+                .objectId("test-object-id")
+                .source("test-source")
+                .environment("test-env")
+                .transactionId("test-transaction-id")
+                .checksum("test-checksum")
+                .locale(Locale.US)
+                .created(testDate)
+                .modificationDate(testDate)
+                .status(DumIndexingStatus.INDEXED)
+                .sites(testSites)
+                .build();
     }
 
     @Test
@@ -75,12 +75,12 @@ class DumConnectorIndexingTest {
         int newId = 2;
         String newObjectId = "new-object-id";
         String newSource = "new-source";
-        
+
         // Act
         indexing.setId(newId);
         indexing.setObjectId(newObjectId);
         indexing.setSource(newSource);
-        
+
         // Assert
         assertEquals(newId, indexing.getId());
         assertEquals(newObjectId, indexing.getObjectId());
@@ -91,9 +91,9 @@ class DumConnectorIndexingTest {
     void testBuilderWithMinimalFields() {
         // Arrange & Act
         DumConnectorIndexing minimal = DumConnectorIndexing.builder()
-            .objectId("minimal-object")
-            .build();
-        
+                .objectId("minimal-object")
+                .build();
+
         // Assert
         assertEquals("minimal-object", minimal.getObjectId());
         assertEquals(0, minimal.getId());
@@ -105,12 +105,12 @@ class DumConnectorIndexingTest {
     void testBuilderWithNullValues() {
         // Arrange & Act
         DumConnectorIndexing withNulls = DumConnectorIndexing.builder()
-            .objectId("test")
-            .locale(null)
-            .sites(null)
-            .status(null)
-            .build();
-        
+                .objectId("test")
+                .locale(null)
+                .sites(null)
+                .status(null)
+                .build();
+
         // Assert
         assertEquals("test", withNulls.getObjectId());
         assertNull(withNulls.getLocale());
@@ -122,10 +122,10 @@ class DumConnectorIndexingTest {
     void testSettersWithDifferentLocales() {
         // Arrange
         Locale frenchLocale = Locale.FRANCE;
-        
+
         // Act
         indexing.setLocale(frenchLocale);
-        
+
         // Assert
         assertEquals(frenchLocale, indexing.getLocale());
     }
@@ -134,7 +134,7 @@ class DumConnectorIndexingTest {
     void testSettersWithDifferentStatus() {
         // Arrange & Act
         indexing.setStatus(DumIndexingStatus.INDEXED);
-        
+
         // Assert
         assertEquals(DumIndexingStatus.INDEXED, indexing.getStatus());
     }
@@ -144,10 +144,10 @@ class DumConnectorIndexingTest {
         // Arrange & Act
         List<String> emptySites = Arrays.asList();
         DumConnectorIndexing emptyIndexing = DumConnectorIndexing.builder()
-            .objectId("test")
-            .sites(emptySites)
-            .build();
-        
+                .objectId("test")
+                .sites(emptySites)
+                .build();
+
         // Assert
         assertTrue(emptyIndexing.getSites().isEmpty());
     }
@@ -157,10 +157,10 @@ class DumConnectorIndexingTest {
         // Arrange & Act
         List<String> multipleSites = Arrays.asList("site1", "site2", "site3", "site4");
         DumConnectorIndexing multiIndexing = DumConnectorIndexing.builder()
-            .objectId("test")
-            .sites(multipleSites)
-            .build();
-        
+                .objectId("test")
+                .sites(multipleSites)
+                .build();
+
         // Assert
         assertEquals(4, multiIndexing.getSites().size());
         assertTrue(multiIndexing.getSites().contains("site1"));

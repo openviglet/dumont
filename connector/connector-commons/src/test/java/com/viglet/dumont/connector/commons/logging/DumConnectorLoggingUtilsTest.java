@@ -16,13 +16,12 @@
 
 package com.viglet.dumont.connector.commons.logging;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +66,7 @@ class DumConnectorLoggingUtilsTest {
     void testSetSuccessStatusWithStatusOnly() {
         // Arrange
         when(mockJobItem.getId()).thenReturn("test-id");
-        
+
         // Act & Assert - No exception should be thrown
         assertDoesNotThrow(() -> {
             DumConnectorLoggingUtils.setSuccessStatus(mockJobItem, DumIndexingStatus.INDEXED);
@@ -78,7 +77,7 @@ class DumConnectorLoggingUtilsTest {
     void testSetSuccessStatusWithStatusAndSession() {
         // Arrange
         when(mockJobItem.getId()).thenReturn("test-id");
-        
+
         // Act & Assert - No exception should be thrown
         assertDoesNotThrow(() -> {
             DumConnectorLoggingUtils.setSuccessStatus(mockJobItem, mockSession, DumIndexingStatus.INDEXED);
@@ -90,7 +89,7 @@ class DumConnectorLoggingUtilsTest {
         // Arrange
         when(mockJobItem.getId()).thenReturn("test-id");
         String details = "Test details";
-        
+
         // Act & Assert - No exception should be thrown
         assertDoesNotThrow(() -> {
             DumConnectorLoggingUtils.setSuccessStatus(mockJobItem, mockSession, DumIndexingStatus.INDEXED, details);
@@ -102,8 +101,9 @@ class DumConnectorLoggingUtilsTest {
         // Arrange
         when(mockJobItem.getId()).thenReturn("test-id");
         Set<String> dependencies = new HashSet<>();
-        DumJobItemWithSession jobItemWithSession = new DumJobItemWithSession(mockJobItem, mockSession, dependencies, false);
-        
+        DumJobItemWithSession jobItemWithSession = new DumJobItemWithSession(mockJobItem, mockSession, dependencies,
+                false);
+
         // Act & Assert - No exception should be thrown
         assertDoesNotThrow(() -> {
             DumConnectorLoggingUtils.setSuccessStatus(jobItemWithSession, DumIndexingStatus.INDEXED);
@@ -114,7 +114,7 @@ class DumConnectorLoggingUtilsTest {
     void testSetSuccessStatusWithDifferentIndexingStatuses() {
         // Arrange
         when(mockJobItem.getId()).thenReturn("test-id");
-        
+
         // Act & Assert - No exception should be thrown for different statuses
         assertDoesNotThrow(() -> {
             DumConnectorLoggingUtils.setSuccessStatus(mockJobItem, DumIndexingStatus.INDEXED);
@@ -127,7 +127,7 @@ class DumConnectorLoggingUtilsTest {
     void testSetSuccessStatusWithNullDetails() {
         // Arrange
         when(mockJobItem.getId()).thenReturn("test-id");
-        
+
         // Act & Assert - No exception should be thrown with null details
         assertDoesNotThrow(() -> {
             DumConnectorLoggingUtils.setSuccessStatus(mockJobItem, mockSession, DumIndexingStatus.INDEXED, null);

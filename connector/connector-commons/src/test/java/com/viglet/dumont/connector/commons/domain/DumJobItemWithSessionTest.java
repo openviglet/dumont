@@ -36,10 +36,10 @@ class DumJobItemWithSessionTest {
 
     @Mock
     private TurSNJobItem mockJobItem;
-    
+
     @Mock
     private DumConnectorSession mockSession;
-    
+
     private Set<String> dependencies;
     private DumJobItemWithSession jobItemWithSession;
 
@@ -63,7 +63,7 @@ class DumJobItemWithSessionTest {
     void testRecordWithNullJobItem() {
         // Arrange & Act
         DumJobItemWithSession withNullItem = new DumJobItemWithSession(null, mockSession, dependencies, false);
-        
+
         // Assert
         assertNull(withNullItem.turSNJobItem());
         assertNotNull(withNullItem.session());
@@ -73,7 +73,7 @@ class DumJobItemWithSessionTest {
     void testRecordWithNullSession() {
         // Arrange & Act
         DumJobItemWithSession withNullSession = new DumJobItemWithSession(mockJobItem, null, dependencies, true);
-        
+
         // Assert
         assertNotNull(withNullSession.turSNJobItem());
         assertNull(withNullSession.session());
@@ -83,10 +83,11 @@ class DumJobItemWithSessionTest {
     void testRecordWithEmptyDependencies() {
         // Arrange
         Set<String> emptyDependencies = new HashSet<>();
-        
+
         // Act
-        DumJobItemWithSession withEmptyDeps = new DumJobItemWithSession(mockJobItem, mockSession, emptyDependencies, false);
-        
+        DumJobItemWithSession withEmptyDeps = new DumJobItemWithSession(mockJobItem, mockSession, emptyDependencies,
+                false);
+
         // Assert
         assertTrue(withEmptyDeps.dependencies().isEmpty());
         assertFalse(withEmptyDeps.standalone());
@@ -96,10 +97,11 @@ class DumJobItemWithSessionTest {
     void testRecordWithMultipleDependencies() {
         // Arrange
         Set<String> multipleDeps = new HashSet<>(Arrays.asList("dep1", "dep2", "dep3", "dep4"));
-        
+
         // Act
-        DumJobItemWithSession withMultipleDeps = new DumJobItemWithSession(mockJobItem, mockSession, multipleDeps, true);
-        
+        DumJobItemWithSession withMultipleDeps = new DumJobItemWithSession(mockJobItem, mockSession, multipleDeps,
+                true);
+
         // Assert
         assertEquals(4, withMultipleDeps.dependencies().size());
         assertTrue(withMultipleDeps.dependencies().contains("dep1"));
@@ -112,7 +114,7 @@ class DumJobItemWithSessionTest {
         Set<String> sameDependencies = new HashSet<>(Arrays.asList("dep1", "dep2"));
         DumJobItemWithSession item1 = new DumJobItemWithSession(mockJobItem, mockSession, sameDependencies, true);
         DumJobItemWithSession item2 = new DumJobItemWithSession(mockJobItem, mockSession, sameDependencies, true);
-        
+
         // Assert
         assertEquals(item1, item2);
     }
@@ -122,7 +124,7 @@ class DumJobItemWithSessionTest {
         // Arrange & Act
         DumJobItemWithSession standalone = new DumJobItemWithSession(mockJobItem, mockSession, dependencies, true);
         DumJobItemWithSession notStandalone = new DumJobItemWithSession(mockJobItem, mockSession, dependencies, false);
-        
+
         // Assert
         assertTrue(standalone.standalone());
         assertFalse(notStandalone.standalone());
@@ -132,7 +134,7 @@ class DumJobItemWithSessionTest {
     void testRecordWithNullDependencies() {
         // Arrange & Act
         DumJobItemWithSession withNullDeps = new DumJobItemWithSession(mockJobItem, mockSession, null, true);
-        
+
         // Assert
         assertNull(withNullDeps.dependencies());
     }
