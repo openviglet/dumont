@@ -158,7 +158,8 @@ public class AemNodeNavigator {
     private void processChildNode(DumAemSession session, String childPath) {
         DumAemCommonsUtils.getInfinityJson(childPath, session.getConfiguration(), false)
                 .ifPresent(infinityJson -> {
-                    DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson);
+                    DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson,
+                            session.getEvent());
                     processNode(session, childObject);
 
                     if (session.isRecursive()) {
@@ -173,7 +174,8 @@ public class AemNodeNavigator {
     private Mono<Void> processChildNodeReactive(DumAemSession session, String childPath) {
         return reactiveUtils.getInfinityJsonReactive(childPath, session.getConfiguration())
                 .flatMap(infinityJson -> {
-                    DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson);
+                    DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson,
+                            session.getEvent());
                     processNode(session, childObject);
 
                     if (session.isRecursive()) {
