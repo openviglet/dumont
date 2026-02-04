@@ -70,7 +70,7 @@ class DumAemSessionTest {
                     .contentMapping(contentMapping)
                     .event(event)
                     .standalone(true)
-                    .indexChildren(true)
+                    .recursive(true)
                     .attributeSpecs(attributeSpecs)
                     .build();
 
@@ -79,7 +79,7 @@ class DumAemSessionTest {
             assertNotNull(session.getContentMapping());
             assertNotNull(session.getEvent());
             assertTrue(session.isStandalone());
-            assertTrue(session.isIndexChildren());
+            assertTrue(session.isRecursive());
             assertEquals(1, session.getAttributeSpecs().size());
         }
 
@@ -93,7 +93,7 @@ class DumAemSessionTest {
             assertNull(session.getContentMapping());
             assertNull(session.getEvent());
             assertFalse(session.isStandalone());
-            assertFalse(session.isIndexChildren());
+            assertFalse(session.isRecursive());
             assertNull(session.getAttributeSpecs());
         }
     }
@@ -110,7 +110,7 @@ class DumAemSessionTest {
             assertNull(session.getConfiguration());
             assertNull(session.getModel());
             assertFalse(session.isStandalone());
-            assertFalse(session.isIndexChildren());
+            assertFalse(session.isRecursive());
         }
     }
 
@@ -133,7 +133,7 @@ class DumAemSessionTest {
                     .contentMapping(contentMapping)
                     .event(event)
                     .standalone(true)
-                    .indexChildren(true)
+                    .recursive(true)
                     .attributeSpecs(attributeSpecs)
                     .build();
 
@@ -142,7 +142,7 @@ class DumAemSessionTest {
             assertEquals(contentMapping, session.getContentMapping());
             assertEquals(event, session.getEvent());
             assertTrue(session.isStandalone());
-            assertTrue(session.isIndexChildren());
+            assertTrue(session.isRecursive());
             assertEquals(attributeSpecs, session.getAttributeSpecs());
         }
     }

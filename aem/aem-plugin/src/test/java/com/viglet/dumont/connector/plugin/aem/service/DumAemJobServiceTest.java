@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -197,7 +196,7 @@ class DumAemJobServiceTest {
                     .thenReturn(new DumAemTargetAttrValueMap());
             when(dumAemContentDefinitionService.getDeltaDate(any(), any(), any()))
                     .thenReturn(new Date());
-            doNothing().when(dumConnectorContext).addJobItem(any());
+            when(dumConnectorContext.addJobItem(any())).thenReturn(true);
 
             // When
             service.indexObject(session, aemObjectGeneric);
@@ -217,7 +216,7 @@ class DumAemJobServiceTest {
                     .thenReturn(new DumAemTargetAttrValueMap());
             lenient().when(dumAemContentDefinitionService.getDeltaDate(any(), any(), any()))
                     .thenReturn(new Date());
-            lenient().doNothing().when(dumConnectorContext).addJobItem(any());
+            lenient().when(dumConnectorContext.addJobItem(any())).thenReturn(true);
 
             // When
             service.indexObject(session, aemObjectGeneric);

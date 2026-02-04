@@ -88,7 +88,7 @@ public class AemNodeNavigator {
 
         processNode(session, aemObject);
 
-        if (session.isIndexChildren()) {
+        if (session.isRecursive()) {
             navigateChildren(session, aemObject);
         }
     }
@@ -161,7 +161,7 @@ public class AemNodeNavigator {
                     DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson);
                     processNode(session, childObject);
 
-                    if (session.isIndexChildren()) {
+                    if (session.isRecursive()) {
                         navigateChildrenSync(session, childObject);
                     }
                 });
@@ -176,7 +176,7 @@ public class AemNodeNavigator {
                     DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson);
                     processNode(session, childObject);
 
-                    if (session.isIndexChildren()) {
+                    if (session.isRecursive()) {
                         return navigateChildrenReactive(session, childObject);
                     }
                     return Mono.empty();

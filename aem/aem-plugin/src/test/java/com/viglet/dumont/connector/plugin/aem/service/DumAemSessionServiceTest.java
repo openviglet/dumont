@@ -125,8 +125,8 @@ class DumAemSessionServiceTest {
         }
 
         @Test
-        @DisplayName("Should set indexChildren from path list recursive flag")
-        void shouldSetIndexChildrenFromPathListRecursiveFlag() {
+        @DisplayName("Should set recursive from path list recursive flag")
+        void shouldSetRecursiveFromPathListRecursiveFlag() {
             // Given
             DumAemSource source = createDumAemSource();
             DumAemPathList pathList = createDumAemPathList(DumAemEvent.NONE, false);
@@ -138,7 +138,7 @@ class DumAemSessionServiceTest {
 
             // Then
             assertNotNull(result);
-            assertFalse(result.isIndexChildren());
+            assertFalse(result.isRecursive());
         }
 
         @Test
@@ -158,8 +158,8 @@ class DumAemSessionServiceTest {
         }
 
         @Test
-        @DisplayName("Should default to true for indexChildren when path list is null")
-        void shouldDefaultToTrueForIndexChildrenWhenPathListIsNull() {
+        @DisplayName("Should default to true for recursive when path list is null")
+        void shouldDefaultToTrueForRecursiveWhenPathListIsNull() {
             // Given
             DumAemSource source = createDumAemSource();
 
@@ -170,7 +170,7 @@ class DumAemSessionServiceTest {
 
             // Then
             assertNotNull(result);
-            assertTrue(result.isIndexChildren());
+            assertTrue(result.isRecursive());
         }
 
         @Test
@@ -281,7 +281,7 @@ class DumAemSessionServiceTest {
             // Then
             assertNotNull(result);
             assertEquals(DumAemEvent.NONE, result.getEvent());
-            assertTrue(result.isIndexChildren());
+            assertTrue(result.isRecursive());
             assertFalse(result.isStandalone());
         }
     }

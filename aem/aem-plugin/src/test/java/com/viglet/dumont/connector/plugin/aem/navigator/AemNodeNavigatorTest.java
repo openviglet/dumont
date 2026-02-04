@@ -160,8 +160,8 @@ class AemNodeNavigatorTest {
         }
 
         @Test
-        @DisplayName("Should navigate children when indexChildren is true")
-        void shouldNavigateChildrenWhenIndexChildrenIsTrue() {
+        @DisplayName("Should navigate children when recursive is true")
+        void shouldNavigateChildrenWhenRecursiveIsTrue() {
             // Given
             DumAemSession session = createMockSession(true);
             String path = "/content/test";
@@ -179,8 +179,8 @@ class AemNodeNavigatorTest {
         }
 
         @Test
-        @DisplayName("Should not navigate children when indexChildren is false")
-        void shouldNotNavigateChildrenWhenIndexChildrenIsFalse() {
+        @DisplayName("Should not navigate children when recursive is false")
+        void shouldNotNavigateChildrenWhenRecursiveIsFalse() {
             // Given
             DumAemSession session = createMockSession(false);
             String path = "/content/test";
@@ -225,7 +225,7 @@ class AemNodeNavigatorTest {
         }
     }
 
-    private DumAemSession createMockSession(boolean indexChildren) {
+    private DumAemSession createMockSession(boolean recursive) {
         DumAemConfiguration config = mock(DumAemConfiguration.class);
         lenient().when(config.getContentType()).thenReturn("cq:Page");
         lenient().when(config.getSubType()).thenReturn(null);
@@ -233,7 +233,7 @@ class AemNodeNavigatorTest {
         return DumAemSession.builder()
                 .configuration(config)
                 .event(DumAemEvent.NONE)
-                .indexChildren(indexChildren)
+                .recursive(recursive)
                 .standalone(true)
                 .providerName("AEM")
                 .build();

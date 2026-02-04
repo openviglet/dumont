@@ -20,6 +20,6 @@ public class DumAemSession extends DumConnectorSession {
     private DumAemContentMapping contentMapping;
     private DumAemEvent event;
     private boolean standalone;
-    private boolean indexChildren;
+    private boolean recursive;
     private List<TurSNAttributeSpec> attributeSpecs;
 }

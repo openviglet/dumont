@@ -52,7 +52,7 @@ public class DumAemSessionService {
                                 .map(DumAemPathList::getEvent)
                                 .orElse(DumAemEvent.NONE);
 
-                boolean indexChildren = Optional.ofNullable(dumAemPathList)
+                boolean recursive = Optional.ofNullable(dumAemPathList)
                                 .map(DumAemPathList::getRecursive)
                                 .orElse(true);
 
@@ -61,7 +61,7 @@ public class DumAemSessionService {
                                 .configuration(dumAemConfiguration)
                                 .event(event)
                                 .standalone(standalone)
-                                .indexChildren(indexChildren)
+                                .recursive(recursive)
                                 .source(session.getSource())
                                 .transactionId(session.getTransactionId())
                                 .sites(session.getSites())
