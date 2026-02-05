@@ -19,7 +19,6 @@
 package com.viglet.dumont.connector.plugin.aem.api;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +75,10 @@ public class DumAemSourceApi {
     public DumAemSource dumAemSourceGet(@PathVariable String id) {
         return this.dumAemSourceRepository.findById(id).map(dumAemSource -> {
             dumAemSourceLocalePathRepository.findByDumAemSource(dumAemSource)
-                    .ifPresent(dumAemSource::setLocalePaths);
+                    .ifPresent(localePaths -> {
+                        dumAemSource.getLocalePaths().clear();
+                        dumAemSource.getLocalePaths().addAll(localePaths);
+                    });
             return dumAemSource;
         }).orElse(new DumAemSource());
     }
@@ -95,10 +97,14 @@ public class DumAemSourceApi {
             dumAemSourceEdit.setPublish(dumAemSource.isPublish());
             dumAemSourceEdit.setOncePattern(dumAemSource.getOncePattern());
             dumAemSourceEdit.setRootPath(dumAemSource.getRootPath());
-            dumAemSourceEdit.setLocalePaths(dumAemSource.getLocalePaths()
-                    .stream()
-                    .peek(localePath -> localePath.setDumAemSource(dumAemSource))
-                    .collect(Collectors.toSet()));
+
+            // Update localePaths collection in-place to respect orphanRemoval
+            dumAemSourceEdit.getLocalePaths().clear();
+            dumAemSource.getLocalePaths().forEach(localePath -> {
+                localePath.setDumAemSource(dumAemSourceEdit);
+                dumAemSourceEdit.getLocalePaths().add(localePath);
+            });
+
             this.dumAemSourceRepository.save(dumAemSourceEdit);
             return dumAemSourceEdit;
         }).orElse(new DumAemSource());
