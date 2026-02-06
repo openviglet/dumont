@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
+import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourceLocalePathRepository;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourceRepository;
@@ -49,13 +50,16 @@ public class DumAemSourceApi {
     private final DumAemSourceRepository dumAemSourceRepository;
     private final DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository;
     private final DumAemPluginProcess dumAemPluginProcess;
+    private final DumAemSourceMapper dumAemSourceMapper;
 
     public DumAemSourceApi(DumAemSourceRepository dumAemSourceRepository,
             DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository,
-            DumAemPluginProcess dumAemPluginProcess) {
+            DumAemPluginProcess dumAemPluginProcess,
+            DumAemSourceMapper dumAemSourceMapper) {
         this.dumAemSourceRepository = dumAemSourceRepository;
         this.dumAemSourceLocalePathRepository = dumAemSourceLocalePathRepository;
         this.dumAemPluginProcess = dumAemPluginProcess;
+        this.dumAemSourceMapper = dumAemSourceMapper;
     }
 
     @GetMapping
@@ -85,30 +89,27 @@ public class DumAemSourceApi {
 
     @Operation(summary = "Update a AEM Source")
     @PutMapping("/{id}")
-    public DumAemSource dumAemSourceUpdate(@PathVariable String id, @RequestBody DumAemSource dumAemSource) {
+    public ResponseEntity<DumAemSource> dumAemSourceUpdate(@PathVariable String id,
+            @RequestBody DumAemSource dumAemSource) {
+        if (dumAemSource.getId() != null && !id.equals(dumAemSource.getId())) {
+            return ResponseEntity.badRequest().build();
+        }
+
         return dumAemSourceRepository.findById(id).map(dumAemSourceEdit -> {
-            dumAemSourceEdit.setName(dumAemSource.getName());
-            dumAemSourceEdit.setEndpoint(dumAemSource.getEndpoint());
-            dumAemSourceEdit.setUsername(dumAemSource.getUsername());
-            dumAemSourceEdit.setPassword(dumAemSource.getPassword());
-            dumAemSourceEdit.setAuthorURLPrefix(dumAemSource.getAuthorURLPrefix());
-            dumAemSourceEdit.setPublishURLPrefix(dumAemSource.getPublishURLPrefix());
-            dumAemSourceEdit.setAuthor(dumAemSource.isAuthor());
-            dumAemSourceEdit.setPublish(dumAemSource.isPublish());
-            dumAemSourceEdit.setOncePattern(dumAemSource.getOncePattern());
-            dumAemSourceEdit.setRootPath(dumAemSource.getRootPath());
+            dumAemSourceMapper.update(dumAemSourceEdit, dumAemSource);
 
             // Update localePaths collection in-place to respect orphanRemoval
             dumAemSourceEdit.getLocalePaths().clear();
-            dumAemSource.getLocalePaths().forEach(localePath -> {
-                localePath.setDumAemSource(dumAemSourceEdit);
-                dumAemSourceEdit.getLocalePaths().add(localePath);
-            });
+            if (dumAemSource.getLocalePaths() != null) {
+                dumAemSource.getLocalePaths().forEach(localePath -> {
+                    localePath.setDumAemSource(dumAemSourceEdit);
+                    dumAemSourceEdit.getLocalePaths().add(localePath);
+                });
+            }
 
-            this.dumAemSourceRepository.save(dumAemSourceEdit);
-            return dumAemSourceEdit;
-        }).orElse(new DumAemSource());
-
+            DumAemSource saved = this.dumAemSourceRepository.save(dumAemSourceEdit);
+            return ResponseEntity.ok(saved);
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Transactional
@@ -124,6 +125,7 @@ public class DumAemSourceApi {
     @Operation(summary = "Create a AEM Source")
     @PostMapping
     public DumAemSource dumAemSourceAdd(@RequestBody DumAemSource dumAemSource) {
+        dumAemSource.getLocalePaths().forEach(localePath -> localePath.setDumAemSource(dumAemSource));
         this.dumAemSourceRepository.save(dumAemSource);
         return dumAemSource;
     }

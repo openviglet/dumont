@@ -45,6 +45,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
+import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSourceLocalePath;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourceLocalePathRepository;
@@ -63,6 +64,9 @@ class DumAemSourceApiTest {
     @Mock
     private DumAemPluginProcess dumAemPluginProcess;
 
+    @Mock
+    private DumAemSourceMapper dumAemSourceMapper;
+
     private DumAemSourceApi api;
 
     @BeforeEach
@@ -70,7 +74,8 @@ class DumAemSourceApiTest {
         api = new DumAemSourceApi(
                 dumAemSourceRepository,
                 dumAemSourceLocalePathRepository,
-                dumAemPluginProcess);
+                dumAemPluginProcess,
+                dumAemSourceMapper);
     }
 
     @Nested
@@ -204,10 +209,10 @@ class DumAemSourceApiTest {
             when(dumAemSourceRepository.save(any())).thenReturn(existingSource);
 
             // When
-            DumAemSource result = api.dumAemSourceUpdate(sourceId, updatedSource);
+            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, updatedSource);
 
             // Then
-            assertNotNull(result);
+            assertNotNull(result.getBody());
             verify(dumAemSourceRepository, times(1)).save(any());
         }
 
@@ -220,10 +225,10 @@ class DumAemSourceApiTest {
             when(dumAemSourceRepository.findById(sourceId)).thenReturn(Optional.empty());
 
             // When
-            DumAemSource result = api.dumAemSourceUpdate(sourceId, updatedSource);
+            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, updatedSource);
 
             // Then
-            assertNotNull(result);
+            assertNotNull(result.getBody());
             verify(dumAemSourceRepository, times(0)).save(any());
         }
 
@@ -238,11 +243,11 @@ class DumAemSourceApiTest {
             when(dumAemSourceRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             // When
-            DumAemSource result = api.dumAemSourceUpdate(sourceId, updatedSource);
+            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, updatedSource);
 
             // Then
-            assertNotNull(result);
-            assertEquals("Updated Name", result.getName());
+            assertNotNull(result.getBody());
+            assertEquals("Updated Name", result.getBody().getName());
         }
     }
 
