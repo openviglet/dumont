@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.command.IndexingCommand;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
@@ -57,14 +58,19 @@ public class IndexPathsCommand implements IndexingCommand {
 
         paths.stream()
                 .filter(StringUtils::isNotBlank)
-                .forEach(this::indexPath);
+                .forEach(path -> indexPath(path, session.getEvent()));
     }
 
     /**
      * Indexes a single path, creating a de-index job if content is not found.
      */
-    private void indexPath(String path) {
+    private void indexPath(String path, DumAemEvent event) {
         log.debug("Processing path: {}", path);
+
+        if (event.equals(DumAemEvent.DEINDEXING)) {
+            createDeIndexJob(path);
+            return;
+        }
 
         DumAemCommonsUtils.getInfinityJson(path, session.getConfiguration(), false)
                 .ifPresentOrElse(

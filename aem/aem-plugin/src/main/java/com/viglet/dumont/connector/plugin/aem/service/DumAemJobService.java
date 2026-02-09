@@ -214,7 +214,7 @@ public class DumAemJobService {
 
                 indexingItems.forEach(indexing -> {
                         try {
-                                log.info("DeIndex initiated for {} - infinity Json file not found.",
+                                log.info("DeIndex initiated for {}.",
                                                 DumAemPluginUtils.getObjectDetailForLogs(contentId,
                                                                 indexing,
                                                                 dumAemSession));
