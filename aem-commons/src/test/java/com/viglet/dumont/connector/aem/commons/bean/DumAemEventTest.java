@@ -17,7 +17,7 @@
 
 package com.viglet.dumont.connector.aem.commons.bean;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,13 +40,13 @@ class DumAemEventTest {
     @Test
     @DisplayName("Should have NONE enum value")
     void shouldHaveNoneEnumValue() {
-        assertEquals("NONE", DumAemEvent.NONE.toString());
+        assertEquals("INDEXING", DumAemEvent.INDEXING.toString());
     }
 
     @Test
     @DisplayName("Should have correct number of enum values")
     void shouldHaveCorrectNumberOfEnumValues() {
-        assertEquals(3, DumAemEvent.values().length);
+        assertEquals(4, DumAemEvent.values().length);
     }
 
     @Test
@@ -54,6 +54,7 @@ class DumAemEventTest {
     void shouldGetEnumByName() {
         assertEquals(DumAemEvent.UNPUBLISHING, DumAemEvent.valueOf("UNPUBLISHING"));
         assertEquals(DumAemEvent.PUBLISHING, DumAemEvent.valueOf("PUBLISHING"));
-        assertEquals(DumAemEvent.NONE, DumAemEvent.valueOf("NONE"));
+        assertEquals(DumAemEvent.INDEXING, DumAemEvent.valueOf("INDEXING"));
+        assertEquals(DumAemEvent.DEINDEXING, DumAemEvent.valueOf("DEINDEXING"));
     }
 }

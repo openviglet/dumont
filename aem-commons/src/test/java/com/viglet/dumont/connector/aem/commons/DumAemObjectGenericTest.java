@@ -17,7 +17,10 @@
 
 package com.viglet.dumont.connector.aem.commons;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.json.JSONObject;
 import org.junit.jupiter.api.DisplayName;
@@ -98,7 +101,7 @@ class DumAemObjectGenericTest {
         void shouldHandleEventNone() {
             JSONObject jcrNode = createJcrNodeWithContent();
 
-            DumAemObjectGeneric object = new DumAemObjectGeneric(TEST_PATH, jcrNode, DumAemEvent.NONE);
+            DumAemObjectGeneric object = new DumAemObjectGeneric(TEST_PATH, jcrNode, DumAemEvent.INDEXING);
 
             assertNotNull(object);
         }

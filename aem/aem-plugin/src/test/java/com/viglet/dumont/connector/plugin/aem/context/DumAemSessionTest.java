@@ -124,7 +124,7 @@ class DumAemSessionTest {
             DumAemConfiguration configuration = DumAemConfiguration.builder().build();
             DumAemModel model = DumAemModel.builder().build();
             DumAemContentMapping contentMapping = DumAemContentMapping.builder().build();
-            DumAemEvent event = DumAemEvent.NONE;
+            DumAemEvent event = DumAemEvent.INDEXING;
             List<TurSNAttributeSpec> attributeSpecs = Arrays.asList();
 
             DumAemSession session = DumAemSession.builder()

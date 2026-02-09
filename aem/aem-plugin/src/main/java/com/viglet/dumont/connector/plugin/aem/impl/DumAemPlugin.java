@@ -59,7 +59,7 @@ public class DumAemPlugin implements DumConnectorPlugin {
     public void indexById(String source, List<String> contentId) {
         DumAemPathList dumAemPathList = DumAemPathList.builder()
                 .paths(contentId)
-                .event(DumAemEvent.NONE)
+                .event(DumAemEvent.INDEXING)
                 .recursive(false)
                 .build();
         dumAemPluginProcess.sentToIndexStandalone(source, dumAemPathList);

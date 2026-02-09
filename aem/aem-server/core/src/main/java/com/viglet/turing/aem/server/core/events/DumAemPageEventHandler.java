@@ -35,6 +35,6 @@ public class DumAemPageEventHandler implements EventHandler {
                 .stream()
                 .map(PageModification::getPath)
                 .collect(Collectors.toList());
-        DumAemEventUtils.index(dumAemIndexerService.getConfig(), paths, DumAemEvent.NONE);
+        DumAemEventUtils.index(dumAemIndexerService.getConfig(), paths, DumAemEvent.INDEXING);
     }
 }

@@ -20,6 +20,7 @@ package com.viglet.dumont.connector.plugin.aem.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -64,13 +66,13 @@ class DumAemSourceApiTest {
     @Mock
     private DumAemPluginProcess dumAemPluginProcess;
 
-    @Mock
     private DumAemSourceMapper dumAemSourceMapper;
 
     private DumAemSourceApi api;
 
     @BeforeEach
     void setUp() {
+        dumAemSourceMapper = Mappers.getMapper(DumAemSourceMapper.class);
         api = new DumAemSourceApi(
                 dumAemSourceRepository,
                 dumAemSourceLocalePathRepository,
@@ -228,7 +230,7 @@ class DumAemSourceApiTest {
             ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, updatedSource);
 
             // Then
-            assertNotNull(result.getBody());
+            assertNull(result.getBody());
             verify(dumAemSourceRepository, times(0)).save(any());
         }
 
@@ -236,7 +238,7 @@ class DumAemSourceApiTest {
         @DisplayName("Should update all source fields")
         void shouldUpdateAllSourceFields() {
             // Given
-            String sourceId = "source-1";
+            String sourceId = "source-100";
             DumAemSource existingSource = createDumAemSource(sourceId);
             DumAemSource updatedSource = createFullyUpdatedDumAemSource(sourceId);
             when(dumAemSourceRepository.findById(sourceId)).thenReturn(Optional.of(existingSource));

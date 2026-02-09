@@ -146,7 +146,7 @@ class DumAemAttrUtilsTest {
             jcrContent.put("jcr:title", "Test Title");
             jcrNode.put("jcr:content", jcrContent);
 
-            DumAemObjectGeneric aemObject = new DumAemObjectGeneric("/content/test", jcrNode, DumAemEvent.NONE);
+            DumAemObjectGeneric aemObject = new DumAemObjectGeneric("/content/test", jcrNode, DumAemEvent.INDEXING);
 
             assertTrue(DumAemAttrUtils.isValidNode("jcr:title", aemObject));
         }
@@ -157,7 +157,7 @@ class DumAemAttrUtilsTest {
             JSONObject jcrNode = new JSONObject();
             jcrNode.put("jcr:primaryType", "nt:unstructured");
 
-            DumAemObjectGeneric aemObject = new DumAemObjectGeneric("/content/test", jcrNode, DumAemEvent.NONE);
+            DumAemObjectGeneric aemObject = new DumAemObjectGeneric("/content/test", jcrNode, DumAemEvent.INDEXING);
 
             assertFalse(DumAemAttrUtils.isValidNode("jcr:title", aemObject));
         }

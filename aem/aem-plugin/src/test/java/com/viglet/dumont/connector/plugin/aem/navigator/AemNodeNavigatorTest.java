@@ -232,7 +232,7 @@ class AemNodeNavigatorTest {
 
         return DumAemSession.builder()
                 .configuration(config)
-                .event(DumAemEvent.NONE)
+                .event(DumAemEvent.INDEXING)
                 .recursive(recursive)
                 .standalone(true)
                 .providerName("AEM")

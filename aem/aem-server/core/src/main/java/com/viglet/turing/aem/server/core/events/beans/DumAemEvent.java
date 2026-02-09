@@ -1,19 +1,28 @@
 package com.viglet.dumont.aem.server.core.events.beans;
 
 public enum DumAemEvent {
-    UNPUBLISHING {
+    INDEXING {
+        @Override
         public String toString() {
-            return "UNPUBLISHING";
+            return "INDEXING";
+        }
+    },
+    DEINDEXING {
+        @Override
+        public String toString() {
+            return "DEINDEXING";
         }
     },
     PUBLISHING {
+        @Override
         public String toString() {
             return "PUBLISHING";
         }
     },
-    NONE {
+    UNPUBLISHING {
+        @Override
         public String toString() {
-            return "NONE";
+            return "UNPUBLISHING";
         }
     }
 }

@@ -285,7 +285,7 @@ class DumAemServiceTest {
         return DumAemSession.builder()
                 .configuration(configuration)
                 .model(model)
-                .event(DumAemEvent.NONE)
+                .event(DumAemEvent.INDEXING)
                 .source("test-source")
                 .locale(Locale.ENGLISH)
                 .build();
@@ -301,7 +301,7 @@ class DumAemServiceTest {
         json.put("jcr:primaryType", "cq:Page");
 
         DumAemObjectGeneric aemObjectGeneric = new DumAemObjectGeneric(
-                "/content/test/page", json, DumAemEvent.NONE);
+                "/content/test/page", json, DumAemEvent.INDEXING);
 
         return new DumAemObject(aemObjectGeneric, DumAemEnv.AUTHOR);
     }
@@ -314,7 +314,7 @@ class DumAemServiceTest {
         json.put("jcr:content", jcrContent);
         json.put("jcr:primaryType", "cq:Page");
 
-        return new DumAemObjectGeneric("/content/test/page", json, DumAemEvent.NONE);
+        return new DumAemObjectGeneric("/content/test/page", json, DumAemEvent.INDEXING);
     }
 
     private DumAemObjectGeneric createContentFragmentObject() {
@@ -326,6 +326,6 @@ class DumAemServiceTest {
         json.put("jcr:content", jcrContent);
         json.put("jcr:primaryType", "dam:Asset");
 
-        return new DumAemObjectGeneric("/content/dam/test/fragment", json, DumAemEvent.NONE);
+        return new DumAemObjectGeneric("/content/dam/test/fragment", json, DumAemEvent.INDEXING);
     }
 }

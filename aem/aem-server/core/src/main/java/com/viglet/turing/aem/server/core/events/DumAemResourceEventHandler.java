@@ -42,7 +42,7 @@ public class DumAemResourceEventHandler implements EventHandler {
             return;
         // Index the asset path to update the search engine with the latest changes in
         // DAM assets.
-        DumAemEventUtils.index(dumAemIndexerService.getConfig(), path, DumAemEvent.NONE);
+        DumAemEventUtils.index(dumAemIndexerService.getConfig(), path, DumAemEvent.INDEXING);
     }
 
     protected boolean isAssetEvent(String path, String resourceType) {

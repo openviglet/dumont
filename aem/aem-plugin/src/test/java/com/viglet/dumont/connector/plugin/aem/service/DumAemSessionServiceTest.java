@@ -129,7 +129,7 @@ class DumAemSessionServiceTest {
         void shouldSetRecursiveFromPathListRecursiveFlag() {
             // Given
             DumAemSource source = createDumAemSource();
-            DumAemPathList pathList = createDumAemPathList(DumAemEvent.NONE, false);
+            DumAemPathList pathList = createDumAemPathList(DumAemEvent.INDEXING, false);
 
             setupMocks(source);
 
@@ -154,7 +154,7 @@ class DumAemSessionServiceTest {
 
             // Then
             assertNotNull(result);
-            assertEquals(DumAemEvent.NONE, result.getEvent());
+            assertEquals(DumAemEvent.INDEXING, result.getEvent());
         }
 
         @Test
@@ -178,7 +178,7 @@ class DumAemSessionServiceTest {
         void shouldIncludeConfigurationInSession() {
             // Given
             DumAemSource source = createDumAemSource();
-            DumAemPathList pathList = createDumAemPathList(DumAemEvent.NONE, true);
+            DumAemPathList pathList = createDumAemPathList(DumAemEvent.INDEXING, true);
             DumAemConfiguration expectedConfig = createMockConfiguration();
 
             setupMocksWithConfig(source, expectedConfig);
@@ -196,7 +196,7 @@ class DumAemSessionServiceTest {
         void shouldIncludeAttributeSpecsInSession() {
             // Given
             DumAemSource source = createDumAemSource();
-            DumAemPathList pathList = createDumAemPathList(DumAemEvent.NONE, true);
+            DumAemPathList pathList = createDumAemPathList(DumAemEvent.INDEXING, true);
             List<TurSNAttributeSpec> expectedSpecs = createAttributeSpecs();
 
             setupMocksWithAttributeSpecs(source, expectedSpecs);
@@ -215,7 +215,7 @@ class DumAemSessionServiceTest {
         void shouldIncludeModelInSessionWhenAvailable() {
             // Given
             DumAemSource source = createDumAemSource();
-            DumAemPathList pathList = createDumAemPathList(DumAemEvent.NONE, true);
+            DumAemPathList pathList = createDumAemPathList(DumAemEvent.INDEXING, true);
             DumAemModel expectedModel = createDumAemModel();
 
             setupMocksWithModel(source, expectedModel);
@@ -234,7 +234,7 @@ class DumAemSessionServiceTest {
         void shouldHaveNullModelWhenNotAvailable() {
             // Given
             DumAemSource source = createDumAemSource();
-            DumAemPathList pathList = createDumAemPathList(DumAemEvent.NONE, true);
+            DumAemPathList pathList = createDumAemPathList(DumAemEvent.INDEXING, true);
 
             setupMocksWithoutModel(source);
 
@@ -280,7 +280,7 @@ class DumAemSessionServiceTest {
 
             // Then
             assertNotNull(result);
-            assertEquals(DumAemEvent.NONE, result.getEvent());
+            assertEquals(DumAemEvent.INDEXING, result.getEvent());
             assertTrue(result.isRecursive());
             assertFalse(result.isStandalone());
         }

@@ -57,7 +57,7 @@ class DumAemObjectServiceTest {
             JSONObject json = new JSONObject();
             json.put("jcr:primaryType", "cq:Page");
 
-            DumAemObjectGeneric result = service.getDumAemObjectGeneric("/content/test", json, DumAemEvent.NONE);
+            DumAemObjectGeneric result = service.getDumAemObjectGeneric("/content/test", json, DumAemEvent.INDEXING);
 
             assertNotNull(result);
             assertEquals("/content/test", result.getPath());
@@ -72,7 +72,8 @@ class DumAemObjectServiceTest {
             jcrContent.put("jcr:title", "Test Page");
             json.put("jcr:content", jcrContent);
 
-            DumAemObjectGeneric result = service.getDumAemObjectGeneric("/content/test/page", json, DumAemEvent.NONE);
+            DumAemObjectGeneric result = service.getDumAemObjectGeneric("/content/test/page", json,
+                    DumAemEvent.INDEXING);
 
             assertNotNull(result);
             assertEquals("/content/test/page", result.getPath());
@@ -85,7 +86,7 @@ class DumAemObjectServiceTest {
             json.put("jcr:primaryType", "dam:Asset");
 
             DumAemObjectGeneric result = service.getDumAemObjectGeneric("/content/dam/test.jpg", json,
-                    DumAemEvent.NONE);
+                    DumAemEvent.INDEXING);
 
             assertNotNull(result);
             assertEquals("/content/dam/test.jpg", result.getPath());
@@ -96,7 +97,7 @@ class DumAemObjectServiceTest {
         void shouldHandleEmptyJsonObject() {
             JSONObject json = new JSONObject();
 
-            DumAemObjectGeneric result = service.getDumAemObjectGeneric("/content/test", json, DumAemEvent.NONE);
+            DumAemObjectGeneric result = service.getDumAemObjectGeneric("/content/test", json, DumAemEvent.INDEXING);
 
             assertNotNull(result);
             assertEquals("/content/test", result.getPath());
@@ -139,7 +140,7 @@ class DumAemObjectServiceTest {
             json.put("jcr:primaryType", "cq:Page");
 
             DumAemObjectGeneric result = service.getDumAemObjectGeneric(
-                    "/content/test", json, DumAemEvent.NONE);
+                    "/content/test", json, DumAemEvent.INDEXING);
 
             assertNotNull(result);
         }
@@ -160,7 +161,7 @@ class DumAemObjectServiceTest {
             json.put("jcr:content", jcrContent);
 
             DumAemObjectGeneric result = service.getDumAemObjectGeneric(
-                    "/content/dam/test/cf", json, DumAemEvent.NONE);
+                    "/content/dam/test/cf", json, DumAemEvent.INDEXING);
 
             assertNotNull(result);
         }
@@ -176,7 +177,7 @@ class DumAemObjectServiceTest {
             JSONObject json = new JSONObject();
             json.put("jcr:primaryType", primaryType);
 
-            DumAemObjectGeneric result = service.getDumAemObjectGeneric(path, json, DumAemEvent.NONE);
+            DumAemObjectGeneric result = service.getDumAemObjectGeneric(path, json, DumAemEvent.INDEXING);
 
             assertNotNull(result);
         }
@@ -202,7 +203,7 @@ class DumAemObjectServiceTest {
             json.put("jcr:content", jcrContent);
 
             DumAemObjectGeneric result = service.getDumAemObjectGeneric(
-                    "/content/test/page", json, DumAemEvent.NONE);
+                    "/content/test/page", json, DumAemEvent.INDEXING);
 
             assertNotNull(result);
             assertNotNull(result.getJcrNode());

@@ -255,7 +255,7 @@ class DumAemJobServiceTest {
 
         return DumAemSession.builder()
                 .configuration(config)
-                .event(DumAemEvent.NONE)
+                .event(DumAemEvent.INDEXING)
                 .standalone(true)
                 .providerName("AEM")
                 .sites(Collections.singletonList("site1"))
@@ -272,7 +272,7 @@ class DumAemJobServiceTest {
 
         return DumAemSession.builder()
                 .configuration(config)
-                .event(DumAemEvent.NONE)
+                .event(DumAemEvent.INDEXING)
                 .standalone(true)
                 .providerName("AEM")
                 .sites(Collections.singletonList("author-site"))
@@ -289,7 +289,7 @@ class DumAemJobServiceTest {
 
         return DumAemSession.builder()
                 .configuration(config)
-                .event(DumAemEvent.NONE)
+                .event(DumAemEvent.INDEXING)
                 .standalone(true)
                 .providerName("AEM")
                 .sites(Collections.singletonList("publish-site"))

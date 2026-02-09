@@ -50,7 +50,7 @@ public class DumAemSessionService {
                 // Extract event and recursion settings with null-safe operations
                 DumAemEvent event = Optional.ofNullable(dumAemPathList)
                                 .map(DumAemPathList::getEvent)
-                                .orElse(DumAemEvent.NONE);
+                                .orElse(DumAemEvent.INDEXING);
 
                 boolean recursive = Optional.ofNullable(dumAemPathList)
                                 .map(DumAemPathList::getRecursive)

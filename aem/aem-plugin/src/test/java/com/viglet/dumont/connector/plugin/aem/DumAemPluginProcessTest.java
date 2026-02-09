@@ -193,7 +193,7 @@ class DumAemPluginProcessTest {
             String sourceName = "test-source";
             DumAemPathList pathList = DumAemPathList.builder()
                     .paths(List.of("/content/test/page1", "/content/test/page2"))
-                    .event(DumAemEvent.NONE)
+                    .event(DumAemEvent.INDEXING)
                     .recursive(false)
                     .build();
 
@@ -215,7 +215,7 @@ class DumAemPluginProcessTest {
             String sourceName = "non-existent";
             DumAemPathList pathList = DumAemPathList.builder()
                     .paths(List.of("/content/test/page1"))
-                    .event(DumAemEvent.NONE)
+                    .event(DumAemEvent.INDEXING)
                     .recursive(false)
                     .build();
 

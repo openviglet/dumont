@@ -79,7 +79,7 @@ public class DumAemObjectGeneric {
     public final SimpleDateFormat aemJsonDateFormat = new SimpleDateFormat(DATE_JSON_FORMAT, Locale.ENGLISH);
 
     public DumAemObjectGeneric(String nodePath, JSONObject jcrNode) {
-        this(nodePath, jcrNode, DumAemEvent.NONE);
+        this(nodePath, jcrNode, DumAemEvent.INDEXING);
     }
 
     public DumAemObjectGeneric(String nodePath, JSONObject jcrNode, DumAemEvent event) {

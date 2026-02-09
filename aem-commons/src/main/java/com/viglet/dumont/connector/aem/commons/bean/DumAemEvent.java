@@ -1,10 +1,16 @@
 package com.viglet.dumont.connector.aem.commons.bean;
 
 public enum DumAemEvent {
-    UNPUBLISHING {
+    INDEXING {
         @Override
         public String toString() {
-            return "UNPUBLISHING";
+            return "INDEXING";
+        }
+    },
+    DEINDEXING {
+        @Override
+        public String toString() {
+            return "DEINDEXING";
         }
     },
     PUBLISHING {
@@ -13,10 +19,10 @@ public enum DumAemEvent {
             return "PUBLISHING";
         }
     },
-    NONE {
+    UNPUBLISHING {
         @Override
         public String toString() {
-            return "NONE";
+            return "UNPUBLISHING";
         }
     }
 }
