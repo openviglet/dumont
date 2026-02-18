@@ -8,7 +8,7 @@ turing:
     endpoint: http://localhost:8983
 
 dumont:
-  allowedOrigins: "localhost"
+  allowedOrigins: "http://localhost:5173,http://localhost:2700"
   job.size: 50
   cron: "-"
   cron.zone: UTC

@@ -32,7 +32,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @AutoConfigureAfter(DispatcherServletAutoConfiguration.class)
 public class DumStaticResourceConfiguration implements WebMvcConfigurer {
-    @Value("${dumont.allowedOrigins:localhost}")
+    @Value("${dumont.allowedOrigins:http://localhost:5173,http://localhost:2700}")
     private String allowedOrigins;
 
     @Override
