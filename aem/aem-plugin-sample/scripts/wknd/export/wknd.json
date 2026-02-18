@@ -31,7 +31,7 @@
       "attributes": [
         {
           "name": "id",
-          "type": "TEXT",
+          "type": "STRING",
           "mandatory": true,
           "multiValued": false,
           "description": "Id",

@@ -5,7 +5,7 @@
       "name": "WKND2",
       "defaultLocale": "en_US",
       "localeClass": "com.viglet.dumont.connector.aem.commons.ext.DumAemExtLocale",
-      "deltaClass":  "com.viglet.dumont.connector.aem.sample.ext.DumAemExtSampleDeltaDate",
+      "deltaClass": "com.viglet.dumont.connector.aem.sample.ext.DumAemExtSampleDeltaDate",
       "endpoint": "http://localhost:4502",
       "username": "admin",
       "password": "admin",
@@ -31,7 +31,7 @@
       "attributes": [
         {
           "name": "id",
-          "type": "TEXT",
+          "type": "STRING",
           "mandatory": true,
           "multiValued": false,
           "description": "Id",
