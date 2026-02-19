@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @since 2025.2
  */
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/connector/indexing-rule")
 @Tag(name = "Connector Indexing Rules", description = "Connector Indexing Rules API")

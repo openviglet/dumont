@@ -19,6 +19,7 @@ package com.viglet.dumont.connector.api;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,6 +34,7 @@ import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/connector/monitoring/indexing")
 @Tag(name = "Connector API", description = "Connector API")
