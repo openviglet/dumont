@@ -7,5 +7,5 @@ java -Dloader.path=%~dp0libs ^
 -Dlogging.config=classpath:logback-spring.xml ^
 -Dlogging.level.com.viglet=DEBUG ^
 -Dlogging.level.org.springframework=DEBUG ^
--Dlogging.level.org.apache=DEBUG ^
+-Dlogging.level.org.apache=INFO ^
 -jar %~dp0dumont-connector.jar

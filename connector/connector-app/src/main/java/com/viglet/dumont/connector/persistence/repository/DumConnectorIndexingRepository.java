@@ -19,12 +19,13 @@ package com.viglet.dumont.connector.persistence.repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+
 import org.springframework.data.domain.Limit;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 
 public interface DumConnectorIndexingRepository
@@ -46,14 +47,11 @@ public interface DumConnectorIndexingRepository
         List<DumConnectorIndexingModel> findByObjectIdAndSourceAndProvider(String objectId,
                         String source, String provider);
 
-        @EntityGraph(value = "DumConnectorIndexingModel.dependencies", type = EntityGraph.EntityGraphType.LOAD)
         List<DumConnectorIndexingModel> findAllBySourceAndProviderOrderByModificationDateDesc(
                         String source, String provider, Limit limit);
 
-        @EntityGraph(value = "DumConnectorIndexingModel.dependencies", type = EntityGraph.EntityGraphType.LOAD)
         List<DumConnectorIndexingModel> findAllByOrderByModificationDateDesc(Limit limit);
 
-        @EntityGraph(value = "DumConnectorIndexingModel.dependencies", type = EntityGraph.EntityGraphType.LOAD)
         List<DumConnectorIndexingModel> findAllByProviderAndObjectIdIn(String provider,
                         Collection<String> objectIds);
 
