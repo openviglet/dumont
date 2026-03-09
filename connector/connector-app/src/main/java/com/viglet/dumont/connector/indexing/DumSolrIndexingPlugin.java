@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.Http2SolrClient;
+import org.apache.solr.client.solrj.impl.HttpJdkSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -59,7 +59,7 @@ public class DumSolrIndexingPlugin implements DumIndexingPlugin {
             @Value("${dumont.indexing.solr.collection}") String solrCollection) {
         this.solrUrl = solrUrl;
         this.solrCollection = solrCollection;
-        this.solrClient = new Http2SolrClient.Builder(solrUrl).build();
+        this.solrClient = new HttpJdkSolrClient.Builder(solrUrl).build();
         log.info("Initialized Solr indexing plugin with URL: {} and collection: {}", solrUrl, solrCollection);
     }
 
