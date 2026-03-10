@@ -19,16 +19,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.text.BreakIterator;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,21 +30,13 @@ import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.net.URIBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 
-import com.viglet.dumont.commons.exception.DumException;
-
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.SerializationFeature;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * @author Alexandre Oliveira
@@ -62,7 +46,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class DumCommonsUtils {
     private static final String USER_DIR = "user.dir";
     private static final File userDir = new File(System.getProperty(USER_DIR));
-    public static final String COLON = ":";
+    private static final String COLON = ":";
 
     private DumCommonsUtils() {
         throw new IllegalStateException("Utility class");
@@ -79,108 +63,8 @@ public class DumCommonsUtils {
         }
     }
 
-    public static boolean isValidUrl(URL url) {
-
-        UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
-        if (urlValidator.isValid(url.toString())) {
-            return true;
-        } else {
-            log.error("Invalid URL: {}", url);
-            return false;
-        }
-    }
-
     public static String html2Text(String text) {
         return Jsoup.parse(text).text();
-    }
-
-    public static String text2Description(String text, int maxLength) {
-        if (text != null && text.length() > maxLength) {
-            BreakIterator bi = BreakIterator.getWordInstance();
-            bi.setText(text);
-
-            if (bi.isBoundary(maxLength - 1)) {
-                return text.substring(0, maxLength - 2) + " ...";
-            } else {
-                int preceding = bi.preceding(maxLength - 1);
-                return text.substring(0, preceding - 1) + " ...";
-            }
-        } else {
-            return text + " ...";
-        }
-    }
-
-    public static String html2Description(String text, int numberChars) {
-        return text2Description(html2Text(text), numberChars);
-    }
-
-    public static URI addOrReplaceParameter(URI uri, String paramName, Locale locale,
-            boolean decoded) {
-        return addOrReplaceParameter(uri, paramName, locale.toLanguageTag(), decoded);
-    }
-
-    public static URI addOrReplaceParameter(URI uri, String paramName, String paramValue,
-            boolean decoded) {
-        List<NameValuePair> params = new URIBuilder(uri, StandardCharsets.ISO_8859_1).getQueryParams();
-        StringBuilder sbQueryString = new StringBuilder();
-        boolean alreadyExists = false;
-        for (NameValuePair nameValuePair : params) {
-            if (nameValuePair == null || nameValuePair.getName() == null) {
-                continue;
-            }
-            String value = nameValuePair.getValue();
-            String name = nameValuePair.getName();
-            if (name.equals(paramName) && !alreadyExists) {
-                alreadyExists = true;
-                addParameterToQueryString(sbQueryString, name, paramValue);
-            } else {
-                String paramVal = value;
-                if (decoded && value != null) {
-                    paramVal = URLDecoder.decode(value, StandardCharsets.UTF_8);
-                }
-                addParameterToQueryString(sbQueryString, name, paramVal);
-            }
-        }
-        if (!alreadyExists) {
-            addParameterToQueryString(sbQueryString, paramName, paramValue);
-        }
-
-        return modifiedURI(uri, sbQueryString);
-    }
-
-    public static void addParameterToQueryString(StringBuilder sbQueryString, String name,
-            String value) {
-        if (value != null) {
-            sbQueryString.append(String.format("%s=%s&", name, value));
-        }
-    }
-
-    public static URI modifiedURI(URI uri, StringBuilder sbQueryString) {
-        try {
-            return new URI(uri.getRawPath() + "?" + removeAmpersand(sbQueryString)
-                    .replaceAll("[\\t\\n\\r]+", "%20").replace(" ", "%20").replace("\"", "%22"));
-        } catch (URISyntaxException e) {
-            log.error(e.getMessage(), e);
-        }
-        return uri;
-    }
-
-    private static String removeAmpersand(StringBuilder sbQueryString) {
-        if (!sbQueryString.isEmpty()) {
-            return sbQueryString.substring(0, sbQueryString.toString().length() - 1);
-        }
-        return "";
-    }
-
-    public static String cleanTextContent(String text) {
-        text = text.replaceAll("[\r\n\t]", " ");
-        // Remove 2 or more spaces
-        text = text.trim().replaceAll(" +", " ");
-        return text.trim();
-    }
-
-    public static List<String> cloneListOfTermsAsString(List<?> attributeArray) {
-        return attributeArray.stream().map(String.class::cast).collect(Collectors.toList());
     }
 
     /**
@@ -236,7 +120,7 @@ public class DumCommonsUtils {
         return path.substring(index);
     }
 
-    public static File getStoreDir() {
+    private static File getStoreDir() {
         File store = new File(userDir.getAbsolutePath().concat(File.separator + "store"));
         try {
             Files.createDirectories(store.toPath());
@@ -282,18 +166,6 @@ public class DumCommonsUtils {
             }
         }
         return true;
-    }
-
-    public static String asJsonString(final Object obj) throws DumException {
-        try {
-            ObjectMapper mapper = JsonMapper.builder()
-                    .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-                    .build();
-
-            return mapper.writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new DumException(e);
-        }
     }
 
     public static File getTempDirectory() {

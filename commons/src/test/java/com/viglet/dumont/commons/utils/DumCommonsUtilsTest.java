@@ -19,15 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 import org.apache.commons.collections4.KeyValue;
@@ -81,32 +74,6 @@ class DumCommonsUtilsTest {
     }
 
     @Test
-    void testIsValidUrlValidUrl() throws MalformedURLException {
-        URL validUrl = URI.create("https://www.example.com").toURL();
-        boolean result = DumCommonsUtils.isValidUrl(validUrl);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void testIsValidUrlLocalUrl() throws MalformedURLException {
-        URL localUrl = URI.create("http://localhost:8080/api").toURL();
-        boolean result = DumCommonsUtils.isValidUrl(localUrl);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void testIsValidUrlFileUrl() throws MalformedURLException {
-        URL fileUrl = URI.create("file:///tmp/test.txt").toURL();
-        boolean result = DumCommonsUtils.isValidUrl(fileUrl);
-
-        // Based on the actual behavior, file URLs are considered invalid by the
-        // validator
-        assertThat(result).isFalse();
-    }
-
-    @Test
     void testHtml2Text() {
         String html = "<p>This is a <strong>test</strong> with <em>HTML</em> tags.</p>";
         String result = DumCommonsUtils.html2Text(html);
@@ -120,94 +87,6 @@ class DumCommonsUtilsTest {
         String result = DumCommonsUtils.html2Text(html);
 
         assertThat(result).isEqualTo("Title Paragraph with link");
-    }
-
-    @Test
-    void testText2DescriptionShortText() {
-        String text = "Short text";
-        String result = DumCommonsUtils.text2Description(text, 100);
-
-        assertThat(result).isEqualTo("Short text ...");
-    }
-
-    @Test
-    void testText2DescriptionLongText() {
-        String text = "This is a very long text that should be truncated at word boundaries " +
-                "to ensure readability and proper formatting when displayed.";
-        String result = DumCommonsUtils.text2Description(text, 50);
-
-        assertThat(result).contains("...");
-        assertThat(result.length()).isLessThanOrEqualTo(52); // 50 + " ..."
-    }
-
-    @Test
-    void testText2DescriptionNullText() {
-        String result = DumCommonsUtils.text2Description(null, 50);
-
-        assertThat(result).isEqualTo("null ...");
-    }
-
-    @Test
-    void testHtml2Description() {
-        String html = "<p>This is HTML <strong>content</strong> that should be converted to text and truncated.</p>";
-        String result = DumCommonsUtils.html2Description(html, 30);
-
-        assertThat(result)
-                .contains("This is HTML content")
-                .contains("...");
-    }
-
-    @Test
-    void testAddOrReplaceParameterWithLocale() throws URISyntaxException {
-        URI uri = new URI("/test?param1=value1");
-        Locale locale = Locale.ENGLISH;
-        URI result = DumCommonsUtils.addOrReplaceParameter(uri, "locale", locale, false);
-
-        assertThat(result.toString()).contains("locale=en");
-    }
-
-    @Test
-    void testAddOrReplaceParameterNewParameter() throws URISyntaxException {
-        URI uri = new URI("/test?param1=value1");
-        URI result = DumCommonsUtils.addOrReplaceParameter(uri, "newParam", "newValue", false);
-
-        assertThat(result.toString()).contains("newParam=newValue");
-        assertThat(result.toString()).contains("param1=value1");
-    }
-
-    @Test
-    void testAddOrReplaceParameterExistingParameter() throws URISyntaxException {
-        URI uri = new URI("/test?param1=oldValue&param2=value2");
-        URI result = DumCommonsUtils.addOrReplaceParameter(uri, "param1", "newValue", false);
-
-        assertThat(result.toString()).contains("param1=newValue");
-        assertThat(result.toString()).contains("param2=value2");
-        assertThat(result.toString()).doesNotContain("param1=oldValue");
-    }
-
-    @Test
-    void testCleanTextContent() {
-        String dirtyText = " \t\n Text  with   multiple\r\n   spaces \t ";
-        String result = DumCommonsUtils.cleanTextContent(dirtyText);
-
-        assertThat(result).isEqualTo("Text with multiple spaces");
-    }
-
-    @Test
-    void testCleanTextContentEmpty() {
-        String result = DumCommonsUtils.cleanTextContent("");
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void testCloneListOfTermsAsString() {
-        List<Object> input = Arrays.asList("term1", "term2", "term3");
-        List<String> result = DumCommonsUtils.cloneListOfTermsAsString(input);
-
-        assertThat(result)
-                .hasSize(3)
-                .containsExactly("term1", "term2", "term3");
     }
 
     @Test
@@ -281,33 +160,6 @@ class DumCommonsUtilsTest {
         boolean result = DumCommonsUtils.isValidJson(invalidJson);
 
         assertThat(result).isFalse();
-    }
-
-    @Test
-    void testAsJsonStringValidObject() throws Exception {
-        TestObject testObject = new TestObject("test", 42);
-        String result = DumCommonsUtils.asJsonString(testObject);
-
-        assertThat(result)
-                .contains("\"name\":\"test\"")
-                .contains("\"value\":42");
-    }
-
-    @Test
-    void testAsJsonStringNullObject() throws Exception {
-        // Test with null - should return "null" as JSON string
-        String result = DumCommonsUtils.asJsonString(null);
-        assertThat(result).isEqualTo("null");
-    }
-
-    @Test
-    void testGetStoreDir() {
-        File storeDir = DumCommonsUtils.getStoreDir();
-
-        assertThat(storeDir)
-                .isNotNull()
-                .hasName("store")
-                .exists();
     }
 
     @Test
