@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -166,16 +167,20 @@ class AemNodeNavigatorTest {
             DumAemSession session = createMockSession(true);
             String path = "/content/test";
             JSONObject infinityJson = new JSONObject();
-            DumAemObjectGeneric aemObject = createMockAemObjectWithChildren(path, "cq:Page");
+            DumAemObjectGeneric parentObject = createMockAemObjectWithChildren(path, "cq:Page");
+            DumAemObjectGeneric childObject = createMockAemObject("/content/test/childNode", "cq:Page");
 
-            when(objectService.getDumAemObjectGeneric(anyString(), any(JSONObject.class), any()))
-                    .thenReturn(aemObject);
+            // Parent returns object with children, child returns object without children
+            when(objectService.getDumAemObjectGeneric(eq(path), any(JSONObject.class), any()))
+                    .thenReturn(parentObject);
+            when(objectService.getDumAemObjectGeneric(eq("/content/test/childNode"), any(JSONObject.class), any()))
+                    .thenReturn(childObject);
 
             // When
             aemNodeNavigator.navigateAndIndex(session, path, infinityJson);
 
-            // Then
-            verify(objectService).getDumAemObjectGeneric(anyString(), any(JSONObject.class), any());
+            // Then - should process both parent and child
+            verify(objectService, times(2)).getDumAemObjectGeneric(anyString(), any(JSONObject.class), any());
         }
 
         @Test
@@ -216,10 +221,13 @@ class AemNodeNavigatorTest {
             DumAemSession session = createMockSession(true);
             String path = "/content/test";
             JSONObject infinityJson = new JSONObject();
-            DumAemObjectGeneric aemObject = createMockAemObjectWithChildren(path, "cq:Page");
+            DumAemObjectGeneric parentObject = createMockAemObjectWithChildren(path, "cq:Page");
+            DumAemObjectGeneric childObject = createMockAemObject("/content/test/childNode", "cq:Page");
 
-            when(objectService.getDumAemObjectGeneric(anyString(), any(JSONObject.class), any()))
-                    .thenReturn(aemObject);
+            when(objectService.getDumAemObjectGeneric(eq(path), any(JSONObject.class), any()))
+                    .thenReturn(parentObject);
+            when(objectService.getDumAemObjectGeneric(eq("/content/test/childNode"), any(JSONObject.class), any()))
+                    .thenReturn(childObject);
 
             assertDoesNotThrow(() -> reactiveNavigator.navigateAndIndex(session, path, infinityJson));
         }

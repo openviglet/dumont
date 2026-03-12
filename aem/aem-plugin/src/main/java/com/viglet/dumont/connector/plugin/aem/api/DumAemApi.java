@@ -20,6 +20,7 @@ package com.viglet.dumont.connector.plugin.aem.api;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -79,7 +80,8 @@ public class DumAemApi {
         Duration duration = Duration.between(currentStandAloneUpdate, LocalDateTime.now());
         if (duration.getSeconds() > 30L)
             return true;
-        paths.removeIf(path -> {
+        List<String> filteredPaths = new ArrayList<>(paths);
+        filteredPaths.removeIf(path -> {
             String pathName = getSourceWithContentId(name, path);
             if (currentContentIdSet.contains(pathName)) {
                 log.warn("Skipping. Repeated request: {}", pathName);
@@ -87,9 +89,9 @@ public class DumAemApi {
             }
             return false;
         });
-        if (hasPath(paths))
-            updateCurrentRequests(name, paths);
-        return hasPath(paths);
+        if (hasPath(filteredPaths))
+            updateCurrentRequests(name, filteredPaths);
+        return hasPath(filteredPaths);
     }
 
     private static boolean hasPath(List<String> paths) {
