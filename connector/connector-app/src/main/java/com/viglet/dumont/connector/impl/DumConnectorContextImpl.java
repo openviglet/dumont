@@ -80,8 +80,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
                     dependenciesObjectIdList);
             dependencies.forEach(dependency -> log.info("Dependent object: {}", dependency));
         }
-        return indexingService.findByDependencies(source, provider, dependenciesObjectIdList)
-                .stream().distinct().toList();
+        return dependencies;
     }
 
     @Override

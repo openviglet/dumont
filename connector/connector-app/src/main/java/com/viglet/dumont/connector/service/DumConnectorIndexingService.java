@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
@@ -90,16 +89,14 @@ public class DumConnectorIndexingService {
         public void update(DumJobItemWithSession turSNJobItemWithSession,
                         List<DumConnectorIndexingModel> dumConnectorIndexingList,
                         DumIndexingStatus status) {
-                List<DumConnectorIndexingModel> managedList = dumConnectorIndexingList.stream()
-                                .map(indexing -> dumConnectorIndexingRepository
-                                                .findById(indexing.getId())
-                                                .map(managed -> createOrUpdateDumConnectorIndexing(
-                                                                turSNJobItemWithSession, status))
-                                                .orElse(null))
-                                .filter(Objects::nonNull).toList();
-                if (!managedList.isEmpty()) {
-                        dumConnectorIndexingRepository.saveAll(managedList);
+                if (dumConnectorIndexingList.isEmpty()) {
+                        return;
                 }
+                List<DumConnectorIndexingModel> updatedList = dumConnectorIndexingList.stream()
+                                .map(indexing -> updateDumConnectorIndexing(indexing,
+                                                turSNJobItemWithSession, status))
+                                .toList();
+                dumConnectorIndexingRepository.saveAll(updatedList);
         }
 
         public void save(DumJobItemWithSession turSNJobItemWithSession, DumIndexingStatus status) {

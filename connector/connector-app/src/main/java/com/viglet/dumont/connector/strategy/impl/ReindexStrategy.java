@@ -52,14 +52,17 @@ public class ReindexStrategy implements JobProcessingStrategy {
 
     @Override
     public void process(DumJobItemWithSession jobItem, JobItemBatchProcessor batchProcessor) {
+        // Single query for the entire process
+        List<DumConnectorIndexingModel> indexingModelList = indexingService.getList(jobItem);
+
         // Log the reindex operation
-        logReindex(jobItem);
+        indexingModelList.forEach(indexing -> log.info("ReIndexed {} from {} to {}",
+                getObjectDetailForLogs(jobItem),
+                indexing.getChecksum(),
+                jobItem.turSNJobItem().getChecksum()));
 
         // Add to batch processor
         batchProcessor.add(jobItem.turSNJobItem(), jobItem.session());
-
-        // Update indexing status
-        List<DumConnectorIndexingModel> indexingModelList = indexingService.getList(jobItem);
 
         if (indexingModelList.size() > 1) {
             // Handle duplicated entries
@@ -74,15 +77,21 @@ public class ReindexStrategy implements JobProcessingStrategy {
 
     @Override
     public boolean canHandle(DumJobItemWithSession jobItem) {
-        if (!indexingService.exists(jobItem)) {
-            return false;
-        }
         if (jobItem.standalone()) {
-            return true;
+            return indexingService.exists(jobItem);
         }
 
-        boolean checksumChanged = indexingService.isChecksumDifferent(jobItem);
-        boolean ignoredStatus = hasIgnoredStatus(jobItem);
+        // Single query: get list and check conditions from it
+        List<DumConnectorIndexingModel> list = indexingService.getList(jobItem);
+        if (list.isEmpty()) {
+            return false;
+        }
+
+        boolean checksumChanged = list.stream()
+                .anyMatch(indexing -> !jobItem.turSNJobItem().getChecksum()
+                        .equals(indexing.getChecksum()));
+        boolean ignoredStatus = list.stream()
+                .anyMatch(indexing -> IGNORED.equals(indexing.getStatus()));
 
         if (checksumChanged) {
             log.debug("Checksum changed for {}", getObjectDetailForLogs(jobItem));
@@ -99,14 +108,6 @@ public class ReindexStrategy implements JobProcessingStrategy {
         return 40; // After index strategy
     }
 
-    private void logReindex(DumJobItemWithSession jobItem) {
-        indexingService.getList(jobItem)
-                .forEach(indexing -> log.info("ReIndexed {} from {} to {}",
-                        getObjectDetailForLogs(jobItem),
-                        indexing.getChecksum(),
-                        jobItem.turSNJobItem().getChecksum()));
-    }
-
     private void recreateDuplicatedIndexing(DumJobItemWithSession jobItem) {
         indexingService.deindexedStatus(jobItem);
         log.info("Removed duplicated status {}", getObjectDetailForLogs(jobItem));
@@ -114,11 +115,6 @@ public class ReindexStrategy implements JobProcessingStrategy {
         indexingService.save(jobItem, PREPARE_FORCED_REINDEX);
         setSuccessStatus(jobItem, PREPARE_FORCED_REINDEX);
         log.info("Recreated status {}", getObjectDetailForLogs(jobItem));
-    }
-
-    private boolean hasIgnoredStatus(DumJobItemWithSession jobItem) {
-        return indexingService.getList(jobItem).stream()
-                .anyMatch(indexing -> IGNORED.equals(indexing.getStatus()));
     }
 
     private String getObjectDetailForLogs(DumJobItemWithSession jobItem) {

@@ -49,13 +49,14 @@ public class UnchangedStrategy implements JobProcessingStrategy {
 
     @Override
     public void process(DumJobItemWithSession jobItem, JobItemBatchProcessor batchProcessor) {
-        // Log unchanged status
-        if (indexingService.exists(jobItem)) {
+        // Single query replaces both exists() and getList()
+        List<DumConnectorIndexingModel> indexingModelList = indexingService.getList(jobItem);
+
+        if (!indexingModelList.isEmpty()) {
             log.info("Unchanged {}", getObjectDetailForLogs(jobItem));
         }
 
         // Update indexing status
-        List<DumConnectorIndexingModel> indexingModelList = indexingService.getList(jobItem);
         indexingService.update(jobItem, indexingModelList, PREPARE_UNCHANGED);
 
         // Set success status

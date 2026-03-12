@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Iterators;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
@@ -124,6 +123,6 @@ public class JobItemBatchProcessor {
     }
 
     private void logQueueInfo() {
-        log.debug("Total Job Items in buffer: {}", Iterators.size(buffer.iterator()));
+        log.debug("Total Job Items in buffer: {}", buffer.size());
     }
 }
