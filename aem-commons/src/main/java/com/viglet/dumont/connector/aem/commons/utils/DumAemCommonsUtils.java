@@ -45,10 +45,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.util.TimeValue;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,8 +81,13 @@ import tools.jackson.databind.json.JsonMapper;
 @Slf4j
 public class DumAemCommonsUtils {
 
-    private static final Cache<String, Optional<String>> responseBodyCache = Caffeine.newBuilder().maximumSize(1000)
-            .expireAfterWrite(Objects.requireNonNull(Duration.ofMinutes(5))).build();
+    private static final Cache<String, Optional<String>> responseBodyCache = Caffeine.newBuilder().maximumSize(10_000)
+            .expireAfterWrite(Objects.requireNonNull(Duration.ofMinutes(2))).build();
+
+    private static final Cache<String, CloseableHttpClient> httpClientCache = Caffeine.newBuilder()
+            .maximumSize(50)
+            .expireAfterAccess(Duration.ofMinutes(30))
+            .build();
 
     private DumAemCommonsUtils() {
         throw new IllegalStateException("Utility class");
@@ -326,7 +333,8 @@ public class DumAemCommonsUtils {
         String escapedUrl = Objects.requireNonNull(UrlEscapers.urlFragmentEscaper().escape(url));
         URI normalizedUri = URI.create(escapedUrl).normalize();
 
-        try (CloseableHttpClient httpClient = createHttpClient(dumAemSourceContext)) {
+        try {
+            CloseableHttpClient httpClient = getOrCreateHttpClient(dumAemSourceContext);
             HttpGet request = new HttpGet(normalizedUri);
             String json = executeRequest(httpClient, request, url);
 
@@ -341,11 +349,19 @@ public class DumAemCommonsUtils {
         }
     }
 
-    private static CloseableHttpClient createHttpClient(DumAemConfiguration dumAemSourceContext) {
-        String authHeader = basicAuth(dumAemSourceContext.getUsername(), dumAemSourceContext.getPassword());
-        return HttpClientBuilder.create()
-                .setDefaultHeaders(List.of(new BasicHeader(HttpHeaders.AUTHORIZATION, authHeader)))
-                .build();
+    private static CloseableHttpClient getOrCreateHttpClient(DumAemConfiguration dumAemSourceContext) {
+        String cacheKey = dumAemSourceContext.getUrl() + "|" + dumAemSourceContext.getUsername();
+        return httpClientCache.get(cacheKey, k -> {
+            String authHeader = basicAuth(dumAemSourceContext.getUsername(), dumAemSourceContext.getPassword());
+            PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+            connectionManager.setMaxTotal(100);
+            connectionManager.setDefaultMaxPerRoute(20);
+            return HttpClientBuilder.create()
+                    .setConnectionManager(connectionManager)
+                    .evictIdleConnections(TimeValue.ofMinutes(5))
+                    .setDefaultHeaders(List.of(new BasicHeader(HttpHeaders.AUTHORIZATION, authHeader)))
+                    .build();
+        });
     }
 
     private static String executeRequest(CloseableHttpClient httpClient, HttpGet request, String url)

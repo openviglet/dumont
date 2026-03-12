@@ -20,10 +20,11 @@ package com.viglet.dumont.connector.plugin.aem.api;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "AEM API", description = "AEM API")
 public class DumAemApi {
     private final DumAemPluginProcess dumAemPluginProcess;
-    private final List<String> currentContentIdList = new ArrayList<>();
+    private final Set<String> currentContentIdSet = new HashSet<>();
     private LocalDateTime currentStandAloneUpdate = LocalDateTime.now();
 
     public DumAemApi(DumAemPluginProcess dumAemPluginProcess) {
@@ -69,8 +70,8 @@ public class DumAemApi {
     }
 
     private void updateCurrentRequests(String name, List<String> paths) {
-        currentContentIdList.clear();
-        paths.forEach(path -> currentContentIdList.add(getSourceWithContentId(name, path)));
+        currentContentIdSet.clear();
+        paths.forEach(path -> currentContentIdSet.add(getSourceWithContentId(name, path)));
         currentStandAloneUpdate = LocalDateTime.now();
     }
 
@@ -78,12 +79,13 @@ public class DumAemApi {
         Duration duration = Duration.between(currentStandAloneUpdate, LocalDateTime.now());
         if (duration.getSeconds() > 30L)
             return true;
-        new ArrayList<>(paths).forEach(path -> {
+        paths.removeIf(path -> {
             String pathName = getSourceWithContentId(name, path);
-            if (currentContentIdList.contains(pathName)) {
-                paths.remove(path);
+            if (currentContentIdSet.contains(pathName)) {
                 log.warn("Skipping. Repeated request: {}", pathName);
+                return true;
             }
+            return false;
         });
         if (hasPath(paths))
             updateCurrentRequests(name, paths);

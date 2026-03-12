@@ -111,8 +111,8 @@ public class DumAemReactiveHttpService {
                                         }
                                         return responseBody;
                                 })
-                                .retryWhen(Retry.backoff(5, Duration.ofSeconds(10))
-                                                .maxBackoff(Duration.ofSeconds(30)).jitter(0.5)
+                                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
+                                                .maxBackoff(Duration.ofSeconds(10)).jitter(0.5)
                                                 .filter(throwable -> throwable instanceof SslHandshakeTimeoutException
                                                                 || throwable instanceof PrematureCloseException
                                                                 || (throwable.getCause() instanceof PrematureCloseException)
