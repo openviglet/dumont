@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.domain.DumConnectorMonitoring;
+import com.viglet.dumont.connector.domain.DumConnectorMonitoringPage;
+import com.viglet.dumont.connector.domain.DumConnectorMonitoringRequest;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 
@@ -68,6 +70,12 @@ public class DumConnectorMonitoringApi {
                 List<DumConnectorIndexingModel> indexing = indexingService.findAllByProviderAndObjectIdIn(
                                 plugin.getProviderName(), contentIds);
                 return generateMonitoringResponse(indexing);
+        }
+
+        @PostMapping("_search")
+        public ResponseEntity<DumConnectorMonitoringPage> search(
+                        @RequestBody DumConnectorMonitoringRequest request) {
+                return ResponseEntity.ok(indexingService.search(request, plugin.getProviderName()));
         }
 
         private ResponseEntity<DumConnectorMonitoring> generateMonitoringResponse(

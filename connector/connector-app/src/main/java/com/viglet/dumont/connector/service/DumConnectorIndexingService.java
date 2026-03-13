@@ -5,19 +5,28 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.domain.DumConnectorMonitoringPage;
+import com.viglet.dumont.connector.domain.DumConnectorMonitoringRequest;
 import com.viglet.dumont.connector.domain.DumSNSiteLocale;
 import com.viglet.dumont.connector.persistence.model.DumConnectorDependencyModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.persistence.repository.DumConnectorIndexingRepository;
+import com.viglet.dumont.connector.persistence.specification.DumConnectorIndexingSpecification;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 
 @Service
@@ -143,6 +152,42 @@ public class DumConnectorIndexingService {
 
         public List<String> getAllSources(String provider) {
                 return dumConnectorIndexingRepository.findAllSources(provider);
+        }
+
+        public DumConnectorMonitoringPage search(DumConnectorMonitoringRequest request,
+                        String provider) {
+                Set<String> allowedSortFields = Set.of("modificationDate", "objectId", "status",
+                                "environment", "locale", "created");
+                String sortField = allowedSortFields.contains(request.getSortBy())
+                                ? request.getSortBy()
+                                : "modificationDate";
+                Sort sort = "asc".equalsIgnoreCase(request.getSortDirection())
+                                ? Sort.by(sortField).ascending()
+                                : Sort.by(sortField).descending();
+                PageRequest pageRequest = PageRequest.of(request.getPage(), request.getSize(), sort);
+
+                Page<DumConnectorIndexingModel> page = dumConnectorIndexingRepository.findAll(
+                                DumConnectorIndexingSpecification.fromRequest(request, provider),
+                                pageRequest);
+
+                List<String> sources = dumConnectorIndexingRepository.findAllSources(provider);
+                List<String> environments = dumConnectorIndexingRepository
+                                .findAllEnvironments(provider);
+                List<String> locales = dumConnectorIndexingRepository.findAllLocales(provider)
+                                .stream().map(Locale::toString).collect(Collectors.toList());
+                List<String> sites = dumConnectorIndexingRepository.findAllSites(provider);
+
+                return DumConnectorMonitoringPage.builder()
+                                .sources(sources)
+                                .environments(environments)
+                                .locales(locales)
+                                .sites(sites)
+                                .content(page.getContent())
+                                .page(page.getNumber())
+                                .size(page.getSize())
+                                .totalElements(page.getTotalElements())
+                                .totalPages(page.getTotalPages())
+                                .build();
         }
 
         private HashSet<DumConnectorDependencyModel> getDependencies(
