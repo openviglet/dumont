@@ -41,6 +41,7 @@ import reactor.core.publisher.Mono;
 import reactor.netty.http.HttpProtocol;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.PrematureCloseException;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.tcp.SslProvider.SslContextSpec;
 import reactor.util.retry.Retry;
 
@@ -61,7 +62,15 @@ public class DumAemReactiveHttpService {
         }
 
         private WebClient createOptimizedWebClient() {
-                HttpClient httpClient = HttpClient.create().protocol(HttpProtocol.HTTP11)
+                ConnectionProvider connectionProvider = ConnectionProvider.builder("aem-pool")
+                                .maxConnections(5)
+                                .pendingAcquireMaxCount(50)
+                                .pendingAcquireTimeout(Duration.ofSeconds(45))
+                                .maxIdleTime(Duration.ofSeconds(20))
+                                .build();
+
+                HttpClient httpClient = HttpClient.create(connectionProvider)
+                                .protocol(HttpProtocol.HTTP11)
                                 .secure(this::configureSsl).responseTimeout(Duration.ofSeconds(30))
                                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
                                 .option(ChannelOption.SO_KEEPALIVE, true)
