@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.springframework.stereotype.Component;
 
@@ -56,6 +58,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     private final JobItemBatchProcessor batchProcessor;
     private final JobProcessingChain processingChain;
     private final ConcurrentLinkedQueue<DumJobItemWithSession> queueLinks = new ConcurrentLinkedQueue<>();
+    private final ReadWriteLock processLock = new ReentrantReadWriteLock();
 
     public DumConnectorContextImpl(
             DumConnectorIndexingService indexingService,
@@ -99,18 +102,23 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
     @Override
     public void finishIndexing(DumConnectorSession session, boolean standalone) {
-        // Flush any remaining items in the batch processor
-        batchProcessor.flush(session);
+        processLock.writeLock().lock();
+        try {
+            // Flush any remaining items in the batch processor
+            batchProcessor.flush(session);
 
-        // Handle deindexing if not standalone
-        if (!standalone) {
-            deIndexObjects(session);
+            // Handle deindexing if not standalone
+            if (!standalone) {
+                deIndexObjects(session);
+            }
+
+            // Clear the queue
+            queueLinks.clear();
+
+            log.info("Indexing process finished for session: {}", session.getTransactionId());
+        } finally {
+            processLock.writeLock().unlock();
         }
-
-        // Clear the queue
-        queueLinks.clear();
-
-        log.info("Indexing process finished for session: {}", session.getTransactionId());
     }
 
     @Override
@@ -123,11 +131,16 @@ public class DumConnectorContextImpl implements DumConnectorContext {
      * Processes all remaining jobs in the queue using the processing chain.
      */
     private void processRemainingJobs() {
-        while (!queueLinks.isEmpty()) {
-            DumJobItemWithSession jobItem = queueLinks.poll();
-            if (jobItem != null) {
-                processingChain.process(jobItem, batchProcessor);
+        processLock.readLock().lock();
+        try {
+            while (!queueLinks.isEmpty()) {
+                DumJobItemWithSession jobItem = queueLinks.poll();
+                if (jobItem != null) {
+                    processingChain.process(jobItem, batchProcessor);
+                }
             }
+        } finally {
+            processLock.readLock().unlock();
         }
     }
 

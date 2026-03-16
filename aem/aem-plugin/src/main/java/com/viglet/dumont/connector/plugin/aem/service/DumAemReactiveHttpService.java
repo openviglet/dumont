@@ -63,16 +63,17 @@ public class DumAemReactiveHttpService {
 
         private WebClient createOptimizedWebClient() {
                 ConnectionProvider connectionProvider = ConnectionProvider.builder("aem-pool")
-                                .maxConnections(10)
+                                .maxConnections(4)
                                 .pendingAcquireMaxCount(500)
                                 .pendingAcquireTimeout(Duration.ofSeconds(60))
-                                .maxIdleTime(Duration.ofSeconds(20))
-                                .evictInBackground(Duration.ofSeconds(30))
+                                .maxIdleTime(Duration.ofSeconds(5))
+                                .maxLifeTime(Duration.ofSeconds(60))
+                                .evictInBackground(Duration.ofSeconds(5))
                                 .build();
 
                 HttpClient httpClient = HttpClient.create(connectionProvider)
                                 .protocol(HttpProtocol.HTTP11)
-                                .secure(this::configureSsl).responseTimeout(Duration.ofSeconds(30))
+                                .secure(this::configureSsl).responseTimeout(Duration.ofSeconds(60))
                                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 15000)
                                 .option(ChannelOption.SO_KEEPALIVE, true)
                                 .option(ChannelOption.TCP_NODELAY, true);
@@ -113,7 +114,7 @@ public class DumAemReactiveHttpService {
                 String basicAuth = basicAuth(dumAemSourceContext.getUsername(),
                                 dumAemSourceContext.getPassword());
                 return webClient.get().uri(escapedUrl).header(HttpHeaders.AUTHORIZATION, basicAuth)
-                                .retrieve().bodyToMono(String.class).timeout(Duration.ofSeconds(30))
+                                .retrieve().bodyToMono(String.class)
                                 .map(responseBody -> {
                                         if (!DumCommonsUtils.isValidJson(responseBody)) {
                                                 throw new IllegalArgumentException(
