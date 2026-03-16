@@ -63,10 +63,11 @@ public class DumAemReactiveHttpService {
 
         private WebClient createOptimizedWebClient() {
                 ConnectionProvider connectionProvider = ConnectionProvider.builder("aem-pool")
-                                .maxConnections(5)
-                                .pendingAcquireMaxCount(50)
-                                .pendingAcquireTimeout(Duration.ofSeconds(45))
+                                .maxConnections(10)
+                                .pendingAcquireMaxCount(500)
+                                .pendingAcquireTimeout(Duration.ofSeconds(60))
                                 .maxIdleTime(Duration.ofSeconds(20))
+                                .evictInBackground(Duration.ofSeconds(30))
                                 .build();
 
                 HttpClient httpClient = HttpClient.create(connectionProvider)

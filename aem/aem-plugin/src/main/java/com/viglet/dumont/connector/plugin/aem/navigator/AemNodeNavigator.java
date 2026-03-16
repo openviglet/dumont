@@ -139,7 +139,8 @@ public class AemNodeNavigator {
 
     /**
      * Reactive children navigation with parallelism.
-     * Processes child nodes concurrently using WebFlux.
+     * Fetches child nodes concurrently but processes them sequentially to avoid
+     * concurrent modification of shared indexing state.
      */
     private Mono<Void> navigateChildrenReactive(DumAemSession session, DumAemObjectGeneric aemObject) {
         DumAemConfiguration config = session.getConfiguration();
@@ -148,7 +149,8 @@ public class AemNodeNavigator {
                 .filter(entry -> isIndexableNode(config, entry.getKey()))
                 .map(entry -> "%s/%s".formatted(aemObject.getPath(), entry.getKey()))
                 .filter(childPath -> shouldProcessNode(session, childPath))
-                .flatMap(childPath -> processChildNodeReactive(session, childPath), reactiveParallelism)
+                .flatMap(childPath -> fetchChildNodeReactive(session, childPath), reactiveParallelism)
+                .concatMap(childObject -> processAndNavigateReactive(session, childObject))
                 .then();
     }
 
@@ -169,24 +171,29 @@ public class AemNodeNavigator {
     }
 
     /**
-     * Processes a child node reactively.
+     * Fetches a child node's JSON reactively (runs concurrently via flatMap).
      */
-    private Mono<Void> processChildNodeReactive(DumAemSession session, String childPath) {
+    private Mono<DumAemObjectGeneric> fetchChildNodeReactive(DumAemSession session, String childPath) {
         return reactiveUtils.getInfinityJsonReactive(childPath, session.getConfiguration())
-                .flatMap(infinityJson -> {
-                    DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson,
-                            session.getEvent());
-                    processNode(session, childObject);
-
-                    if (session.isRecursive()) {
-                        return navigateChildrenReactive(session, childObject);
-                    }
-                    return Mono.empty();
-                })
+                .map(infinityJson -> objectService.getDumAemObjectGeneric(childPath, infinityJson,
+                        session.getEvent()))
                 .onErrorResume(e -> {
-                    log.warn("Error processing child path {}: {}", childPath, e.getMessage());
+                    log.warn("Error fetching child path {}: {}", childPath, e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    /**
+     * Processes a fetched child node and navigates its children (runs sequentially
+     * via concatMap to avoid concurrent modification of shared indexing state).
+     */
+    private Mono<Void> processAndNavigateReactive(DumAemSession session, DumAemObjectGeneric childObject) {
+        processNode(session, childObject);
+
+        if (session.isRecursive()) {
+            return navigateChildrenReactive(session, childObject);
+        }
+        return Mono.empty();
     }
 
     /**
