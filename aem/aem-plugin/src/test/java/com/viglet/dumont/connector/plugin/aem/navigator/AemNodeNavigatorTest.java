@@ -20,14 +20,18 @@ package com.viglet.dumont.connector.plugin.aem.navigator;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +40,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
+
+import reactor.core.publisher.Mono;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
@@ -176,11 +185,22 @@ class AemNodeNavigatorTest {
             when(objectService.getDumAemObjectGeneric(eq("/content/test/childNode"), any(JSONObject.class), any()))
                     .thenReturn(childObject);
 
-            // When
-            aemNodeNavigator.navigateAndIndex(session, path, infinityJson);
+            try (MockedStatic<DumAemCommonsUtils> mockedUtils = mockStatic(DumAemCommonsUtils.class)) {
+                mockedUtils.when(() -> DumAemCommonsUtils.getInfinityJson(anyString(), any(), anyBoolean()))
+                        .thenReturn(Optional.of(new JSONObject()));
+                mockedUtils.when(() -> DumAemCommonsUtils.checkIfFileHasNotImageExtension(anyString()))
+                        .thenReturn(true);
+                mockedUtils.when(() -> DumAemCommonsUtils.isTypeEqualContentType(any(), any()))
+                        .thenReturn(false);
+                mockedUtils.when(() -> DumAemCommonsUtils.isNotOnceConfig(anyString(), any()))
+                        .thenReturn(true);
 
-            // Then - should process both parent and child
-            verify(objectService, times(2)).getDumAemObjectGeneric(anyString(), any(JSONObject.class), any());
+                // When
+                aemNodeNavigator.navigateAndIndex(session, path, infinityJson);
+
+                // Then - should process both parent and child
+                verify(objectService, times(2)).getDumAemObjectGeneric(anyString(), any(JSONObject.class), any());
+            }
         }
 
         @Test
@@ -228,8 +248,19 @@ class AemNodeNavigatorTest {
                     .thenReturn(parentObject);
             when(objectService.getDumAemObjectGeneric(eq("/content/test/childNode"), any(JSONObject.class), any()))
                     .thenReturn(childObject);
+            when(reactiveUtils.getInfinityJsonReactive(anyString(), any()))
+                    .thenReturn(Mono.just(new JSONObject()));
 
-            assertDoesNotThrow(() -> reactiveNavigator.navigateAndIndex(session, path, infinityJson));
+            try (MockedStatic<DumAemCommonsUtils> mockedUtils = mockStatic(DumAemCommonsUtils.class)) {
+                mockedUtils.when(() -> DumAemCommonsUtils.checkIfFileHasNotImageExtension(anyString()))
+                        .thenReturn(true);
+                mockedUtils.when(() -> DumAemCommonsUtils.isTypeEqualContentType(any(), any()))
+                        .thenReturn(false);
+                mockedUtils.when(() -> DumAemCommonsUtils.isNotOnceConfig(anyString(), any()))
+                        .thenReturn(true);
+
+                assertDoesNotThrow(() -> reactiveNavigator.navigateAndIndex(session, path, infinityJson));
+            }
         }
     }
 

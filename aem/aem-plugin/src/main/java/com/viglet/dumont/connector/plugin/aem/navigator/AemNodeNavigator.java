@@ -121,23 +121,17 @@ public class AemNodeNavigator {
 
     /**
      * Synchronous children navigation.
-     * Reuses child JSON from the parent's infinity.json when available,
-     * avoiding additional HTTP requests.
+     * Iterates through all child nodes and processes them sequentially.
      */
     private void navigateChildrenSync(DumAemSession session, DumAemObjectGeneric aemObject) {
         DumAemConfiguration config = session.getConfiguration();
-        JSONObject parentJson = aemObject.getJcrNode();
 
-        parentJson.toMap().forEach((nodeName, nodeValue) -> {
+        aemObject.getJcrNode().toMap().forEach((nodeName, nodeValue) -> {
             if (isIndexableNode(config, nodeName)) {
                 String childPath = "%s/%s".formatted(aemObject.getPath(), nodeName);
 
                 if (shouldProcessNode(session, childPath)) {
-                    if (parentJson.optJSONObject(nodeName) != null) {
-                        navigateAndIndex(session, childPath, parentJson.getJSONObject(nodeName));
-                    } else {
-                        processChildNode(session, childPath);
-                    }
+                    processChildNode(session, childPath);
                 }
             }
         });
@@ -145,26 +139,16 @@ public class AemNodeNavigator {
 
     /**
      * Reactive children navigation with parallelism.
-     * Reuses child JSON from the parent's infinity.json when available,
-     * processing child nodes concurrently using WebFlux.
+     * Processes child nodes concurrently using WebFlux.
      */
     private Mono<Void> navigateChildrenReactive(DumAemSession session, DumAemObjectGeneric aemObject) {
         DumAemConfiguration config = session.getConfiguration();
-        JSONObject parentJson = aemObject.getJcrNode();
 
-        return Flux.fromIterable(parentJson.toMap().entrySet())
+        return Flux.fromIterable(aemObject.getJcrNode().toMap().entrySet())
                 .filter(entry -> isIndexableNode(config, entry.getKey()))
-                .filter(entry -> shouldProcessNode(session,
-                        "%s/%s".formatted(aemObject.getPath(), entry.getKey())))
-                .flatMap(entry -> {
-                    String nodeName = entry.getKey();
-                    String childPath = "%s/%s".formatted(aemObject.getPath(), nodeName);
-                    JSONObject childJson = parentJson.optJSONObject(nodeName);
-                    if (childJson != null) {
-                        return processChildNodeFromJson(session, childPath, childJson);
-                    }
-                    return processChildNodeReactive(session, childPath);
-                }, reactiveParallelism)
+                .map(entry -> "%s/%s".formatted(aemObject.getPath(), entry.getKey()))
+                .filter(childPath -> shouldProcessNode(session, childPath))
+                .flatMap(childPath -> processChildNodeReactive(session, childPath), reactiveParallelism)
                 .then();
     }
 
@@ -185,7 +169,7 @@ public class AemNodeNavigator {
     }
 
     /**
-     * Processes a child node reactively by fetching its JSON via HTTP.
+     * Processes a child node reactively.
      */
     private Mono<Void> processChildNodeReactive(DumAemSession session, String childPath) {
         return reactiveUtils.getInfinityJsonReactive(childPath, session.getConfiguration())
@@ -197,31 +181,12 @@ public class AemNodeNavigator {
                     if (session.isRecursive()) {
                         return navigateChildrenReactive(session, childObject);
                     }
-                    return Mono.<Void>empty();
+                    return Mono.empty();
                 })
                 .onErrorResume(e -> {
                     log.warn("Error processing child path {}: {}", childPath, e.getMessage());
                     return Mono.empty();
                 });
-    }
-
-    /**
-     * Processes a child node reactively using already-available JSON from the parent.
-     */
-    private Mono<Void> processChildNodeFromJson(DumAemSession session, String childPath, JSONObject childJson) {
-        return Mono.defer(() -> {
-            DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, childJson,
-                    session.getEvent());
-            processNode(session, childObject);
-
-            if (session.isRecursive()) {
-                return navigateChildrenReactive(session, childObject);
-            }
-            return Mono.<Void>empty();
-        }).onErrorResume(e -> {
-            log.warn("Error processing child path {} from parent JSON: {}", childPath, e.getMessage());
-            return Mono.empty();
-        });
     }
 
     /**
