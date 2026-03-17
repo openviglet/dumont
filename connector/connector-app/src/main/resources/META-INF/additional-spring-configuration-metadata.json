@@ -54,6 +54,11 @@
       "name": "turing.url",
       "type": "java.lang.String",
       "description": "Base URL of the Turing platform API."
+    },
+    {
+      "name": "dumont.reactive.parallelism",
+      "type": "java.lang.String",
+      "description": "A description for 'dumont.reactive.parallelism'"
     }
   ]
 }
