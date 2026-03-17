@@ -1,2 +1,2 @@
 set TURING_URL=http://localhost:2700
-set TURING_API_KEY=5083170f78bb428e8c6392385
+set TURING_API_KEY=1de5af67aef44044bec2e34dd

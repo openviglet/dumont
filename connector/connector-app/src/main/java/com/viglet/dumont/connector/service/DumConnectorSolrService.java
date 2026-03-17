@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.solr.client.solrj.RemoteSolrException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.SolrQuery;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
+import com.viglet.dumont.connector.domain.DumSNSite;
 import com.viglet.dumont.connector.domain.DumSNSiteLocale;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,15 +41,31 @@ public class DumConnectorSolrService {
     }
 
     public DumConnectorValidateDifference validateContent(String source, String provider) {
+        log.debug("Starting validation for source={}, provider={}", source, provider);
         Map<String, List<String>> missingMap = new HashMap<>();
         Map<String, List<String>> extraMap = new HashMap<>();
-        for (String site : indexingService.getSites(source, provider)) {
+
+        List<String> sites = indexingService.getSites(source, provider);
+        if (sites.isEmpty()) {
+            log.debug("No sites found in indexing for source={}, falling back to Dumont API", source);
+            sites = dumontSites();
+        }
+
+        for (String site : sites) {
             List<DumSNSiteLocale> locales = dumontLocale(site);
-            for (String environment : indexingService.getEnvironment(site, provider)) {
+            log.debug("Site={} has {} locale(s)", site, locales.size());
+            List<String> environments = indexingService.getEnvironment(site, provider);
+            if (environments.isEmpty()) {
                 locales.forEach(siteLocale -> computeDifferences(
-                        source, environment, siteLocale, provider, missingMap, extraMap));
+                        source, null, siteLocale, provider, missingMap, extraMap));
+            } else {
+                for (String environment : environments) {
+                    locales.forEach(siteLocale -> computeDifferences(
+                            source, environment, siteLocale, provider, missingMap, extraMap));
+                }
             }
         }
+        log.debug("Validation complete for source={}: {} core(s) processed", source, missingMap.size());
         return DumConnectorValidateDifference.builder()
                 .missing(missingMap).extra(extraMap).build();
     }
@@ -55,26 +73,38 @@ public class DumConnectorSolrService {
     private void computeDifferences(String source, String environment,
             DumSNSiteLocale siteLocale, String provider,
             Map<String, List<String>> missingMap, Map<String, List<String>> extraMap) {
+        String core = siteLocale.getCore();
         try {
-            Set<String> solrIds = fetchAllSolrIds(siteLocale.getCore());
-            Set<String> dbIds = new HashSet<>(indexingService.getObjectIdList(
-                    source, environment, siteLocale, provider));
+            log.debug("Fetching Solr IDs for core={}", core);
+            Set<String> solrIds = fetchAllSolrIds(core);
+            log.debug("Fetched {} Solr IDs for core={}", solrIds.size(), core);
+
+            log.debug("Fetching DB IDs for core={}, source={}, environment={}", core, source, environment);
+            Set<String> dbIds = environment != null
+                    ? new HashSet<>(indexingService.getObjectIdList(
+                            source, environment, siteLocale, provider))
+                    : new HashSet<>();
+            log.debug("Fetched {} DB IDs for core={}", dbIds.size(), core);
 
             List<String> extraIds = solrIds.stream()
                     .filter(id -> !dbIds.contains(id)).toList();
             List<String> missingIds = dbIds.stream()
                     .filter(id -> !solrIds.contains(id)).toList();
 
-            extraMap.put(siteLocale.getCore(), extraIds);
-            missingMap.put(siteLocale.getCore(), missingIds);
+            log.debug("Core={}: {} extra, {} missing", core, extraIds.size(), missingIds.size());
+            extraMap.put(core, extraIds);
+            missingMap.put(core, missingIds);
+        } catch (RemoteSolrException e) {
+            log.warn("Core={} not found in Solr, skipping: {}", core, e.getMessage());
         } catch (IOException | SolrServerException e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to compute differences for core={}: {}", core, e.getMessage(), e);
         }
     }
 
     private Set<String> fetchAllSolrIds(String core) throws IOException, SolrServerException {
         Set<String> solrIds = new HashSet<>();
         String cursorMark = CursorMarkParams.CURSOR_MARK_START;
+        int pageCount = 0;
         while (true) {
             SolrQuery query = new SolrQuery();
             query.setQuery("*:*");
@@ -83,8 +113,12 @@ public class DumConnectorSolrService {
             query.setSort(ID, SolrQuery.ORDER.asc);
             query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
             QueryResponse response = solrClient.query(core, query);
+            int batchSize = response.getResults().size();
             response.getResults()
                     .forEach(doc -> solrIds.add((String) doc.getFieldValue(ID)));
+            pageCount++;
+            log.debug("Core={}: fetched page {} ({} docs, {} total so far)",
+                    core, pageCount, batchSize, solrIds.size());
             String nextCursorMark = response.getNextCursorMark();
             if (cursorMark.equals(nextCursorMark)) {
                 break;
@@ -92,6 +126,22 @@ public class DumConnectorSolrService {
             cursorMark = nextCursorMark;
         }
         return solrIds;
+    }
+
+    private List<String> dumontSites() {
+        try {
+            DumSNSite[] sites = restClient.get()
+                    .uri("/api/sn")
+                    .retrieve()
+                    .body(DumSNSite[].class);
+
+            return sites != null
+                    ? Arrays.stream(sites).map(DumSNSite::getName).toList()
+                    : Collections.emptyList();
+        } catch (Exception e) {
+            log.error("Failed to retrieve sites from Dumont API: {}", e.getMessage(), e);
+            return Collections.emptyList();
+        }
     }
 
     private List<DumSNSiteLocale> dumontLocale(String snSite) {
