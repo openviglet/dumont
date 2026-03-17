@@ -1,23 +1,23 @@
 package com.viglet.dumont.connector.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocumentList;
-import org.jetbrains.annotations.NotNull;
+import org.apache.solr.common.params.CursorMarkParams;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import com.google.common.collect.Lists;
+import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
 import com.viglet.dumont.connector.domain.DumSNSiteLocale;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,60 +38,60 @@ public class DumConnectorSolrService {
         this.restClient = restClient;
     }
 
-    @NotNull
-    public Map<String, List<String>> solrExtraContent(String source, String provider) {
-        Map<String, List<String>> solrExtraContentMap = new HashMap<>();
+    public DumConnectorValidateDifference validateContent(String source, String provider) {
+        Map<String, List<String>> missingMap = new HashMap<>();
+        Map<String, List<String>> extraMap = new HashMap<>();
         for (String site : indexingService.getSites(source, provider)) {
+            List<DumSNSiteLocale> locales = dumontLocale(site);
             for (String environment : indexingService.getEnvironment(site, provider)) {
-                dumontLocale(site).forEach(siteLocale -> {
-                    try {
-                        SolrQuery query = new SolrQuery();
-                        query.setQuery("*:*");
-                        query.setFields(ID);
-                        query.setRows(Integer.MAX_VALUE);
-                        QueryResponse response = solrClient.query(siteLocale.getCore(), query);
-                        List<String> solrIds = new ArrayList<>(response.getResults().stream()
-                                .map(solrDocument -> (String) solrDocument.getFieldValue(ID))
-                                .toList());
-                        List<String> connectorIds = new ArrayList<>();
-                        for (List<String> partition : Lists.partition(solrIds, 100)) {
-                            connectorIds.addAll(indexingService
-                                    .validateObjectIdList(source, environment, siteLocale, provider, partition));
-                        }
-                        solrIds.removeAll(connectorIds);
-                        solrExtraContentMap.put(siteLocale.getCore(), solrIds);
-                    } catch (IOException | SolrServerException e) {
-                        log.error(e.getMessage(), e);
-                    }
-                });
+                locales.forEach(siteLocale -> computeDifferences(
+                        source, environment, siteLocale, provider, missingMap, extraMap));
             }
         }
-        return solrExtraContentMap;
+        return DumConnectorValidateDifference.builder()
+                .missing(missingMap).extra(extraMap).build();
     }
 
-    @NotNull
-    public Map<String, List<String>> solrMissingContent(String source, String provider) {
-        Map<String, List<String>> solrMissingContentMap = new HashMap<>();
-        for (String site : indexingService.getSites(source, provider)) {
-            for (String environment : indexingService.getEnvironment(site, provider)) {
-                dumontLocale(site).forEach(siteLocale -> {
-                    List<String> outputIdList = new ArrayList<>();
-                    List<String> objectIdList = indexingService.getObjectIdList(source, environment, siteLocale,
-                            provider);
-                    try {
-                        for (List<String> partition : Lists.partition(objectIdList, 20)) {
-                            SolrDocumentList documents = solrClient.getById(siteLocale.getCore(), partition);
-                            documents.forEach(document -> outputIdList.add(document.get(ID).toString()));
-                        }
-                    } catch (IOException | SolrServerException e) {
-                        log.error(e.getMessage(), e);
-                    }
-                    objectIdList.removeAll(outputIdList);
-                    solrMissingContentMap.put(siteLocale.getCore(), objectIdList);
-                });
-            }
+    private void computeDifferences(String source, String environment,
+            DumSNSiteLocale siteLocale, String provider,
+            Map<String, List<String>> missingMap, Map<String, List<String>> extraMap) {
+        try {
+            Set<String> solrIds = fetchAllSolrIds(siteLocale.getCore());
+            Set<String> dbIds = new HashSet<>(indexingService.getObjectIdList(
+                    source, environment, siteLocale, provider));
+
+            List<String> extraIds = solrIds.stream()
+                    .filter(id -> !dbIds.contains(id)).toList();
+            List<String> missingIds = dbIds.stream()
+                    .filter(id -> !solrIds.contains(id)).toList();
+
+            extraMap.put(siteLocale.getCore(), extraIds);
+            missingMap.put(siteLocale.getCore(), missingIds);
+        } catch (IOException | SolrServerException e) {
+            log.error(e.getMessage(), e);
         }
-        return solrMissingContentMap;
+    }
+
+    private Set<String> fetchAllSolrIds(String core) throws IOException, SolrServerException {
+        Set<String> solrIds = new HashSet<>();
+        String cursorMark = CursorMarkParams.CURSOR_MARK_START;
+        while (true) {
+            SolrQuery query = new SolrQuery();
+            query.setQuery("*:*");
+            query.setFields(ID);
+            query.setRows(1000);
+            query.setSort(ID, SolrQuery.ORDER.asc);
+            query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
+            QueryResponse response = solrClient.query(core, query);
+            response.getResults()
+                    .forEach(doc -> solrIds.add((String) doc.getFieldValue(ID)));
+            String nextCursorMark = response.getNextCursorMark();
+            if (cursorMark.equals(nextCursorMark)) {
+                break;
+            }
+            cursorMark = nextCursorMark;
+        }
+        return solrIds;
     }
 
     private List<DumSNSiteLocale> dumontLocale(String snSite) {

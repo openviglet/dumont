@@ -70,9 +70,7 @@ public class DumConnectorApi {
 
     @GetMapping("validate/{source}")
     public DumConnectorValidateDifference validateSource(@PathVariable String source) {
-        return DumConnectorValidateDifference.builder()
-                .missing(dumConnectorSolr.solrMissingContent(source, plugin.getProviderName()))
-                .extra(dumConnectorSolr.solrExtraContent(source, plugin.getProviderName())).build();
+        return dumConnectorSolr.validateContent(source, plugin.getProviderName());
     }
 
     @GetMapping("monitoring/index/{source}")
