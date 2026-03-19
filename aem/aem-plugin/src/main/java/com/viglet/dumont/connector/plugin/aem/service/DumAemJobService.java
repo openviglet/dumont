@@ -73,9 +73,9 @@ public class DumAemJobService {
 
         public @NotNull TurSNJobItem getTurSNJobItem(DumAemSession dumAemSession,
                         DumAemObject aemObject, Locale locale,
-                        Map<String, Object> attributes) {
+                        Map<String, Object> attributes, List<String> sites) {
                 TurSNJobItem jobItem = new TurSNJobItem(CREATE,
-                                dumAemSession.getSites().stream().toList(), locale, attributes,
+                                sites, locale, attributes,
                                 DumAemCommonsUtils.castSpecToJobSpec(
                                                 DumAemCommonsUtils.getDefinitionFromModel(
                                                                 dumAemSession.getAttributeSpecs(),
@@ -142,21 +142,23 @@ public class DumAemJobService {
 
         private void indexByEnvironment(DumAemSession dumAemSession,
                         @NotNull DumAemObject aemObject) {
-                dumAemSession.setSites(Collections.singletonList(aemObject.getSNSite(
-                                dumAemSession.getConfiguration())));
+                List<String> sites = Collections.singletonList(aemObject.getSNSite(
+                                dumAemSession.getConfiguration()));
                 createIndexJobAndSendToConnectorQueue(dumAemSession, aemObject,
                                 DumAemCommonsUtils.getLocaleFromAemObject(
                                                 dumAemSession.getConfiguration(),
-                                                aemObject));
+                                                aemObject),
+                                sites);
         }
 
         private void createIndexJobAndSendToConnectorQueue(DumAemSession dumAemSession,
-                        DumAemObject aemObject, Locale locale) {
+                        DumAemObject aemObject, Locale locale, List<String> sites) {
                 log.debug("AemObject {} ", aemObject.toString());
                 TurSNJobItem turSNJobItem = getTurSNJobItem(dumAemSession, aemObject, locale,
                                 getJobItemAttributes(dumAemSession,
                                                 dumAemService.getTargetAttrValueMap(dumAemSession,
-                                                                aemObject)));
+                                                                aemObject)),
+                                sites);
                 DumJobItemWithSession jobItemWithSession = new DumJobItemWithSession(turSNJobItem,
                                 dumAemSession, aemObject.getDependencies(),
                                 dumAemSession.isStandalone());

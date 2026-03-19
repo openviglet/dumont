@@ -16,29 +16,23 @@
 
 package com.viglet.dumont.connector.commons;
 
-import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Getter
-@Setter
 public class DumConnectorSession {
     private String source;
     private String transactionId;
-    private Collection<String> sites;
     private String providerName;
     private Locale locale;
 
-    public DumConnectorSession(String source, Collection<String> sites, String providerName,
-            Locale locale) {
+    public DumConnectorSession(String source, String providerName, Locale locale) {
         this.source = source;
         this.transactionId = UUID.randomUUID().toString();
-        this.sites = sites;
         this.providerName = providerName;
         this.locale = locale;
     }

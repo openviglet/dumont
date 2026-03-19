@@ -64,7 +64,6 @@ public class DumAemSessionService {
                                 .recursive(recursive)
                                 .source(session.getSource())
                                 .transactionId(session.getTransactionId())
-                                .sites(session.getSites())
                                 .providerName(session.getProviderName())
                                 .locale(session.getLocale())
                                 .attributeSpecs(attributeSpecs)

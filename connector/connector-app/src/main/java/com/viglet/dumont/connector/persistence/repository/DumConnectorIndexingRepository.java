@@ -79,8 +79,9 @@ public interface DumConnectorIndexingRepository
         List<String> findAllSources(@Param("provider") String provider);
 
         @Query("SELECT DISTINCT i.objectId FROM DumConnectorIndexingModel i WHERE i.source = :source AND "
-                        + "i.locale = :locale AND i.environment IN :environment AND i.provider = :provider")
-        List<String> findAllObjectIds(@Param("source") String source,
+                        + "i.locale = :locale AND i.environment IN :environment AND i.provider = :provider "
+                        + "AND i.status <> com.viglet.dumont.commons.indexing.DumIndexingStatus.DEINDEXED")
+        List<String> findAllIndexedObjectIds(@Param("source") String source,
                         @Param("locale") Locale locale, @Param("environment") String environment,
                         @Param("provider") String provider);
 

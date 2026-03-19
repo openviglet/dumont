@@ -28,7 +28,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -311,7 +310,6 @@ class DumAemSessionServiceTest {
         return DumConnectorSession.builder()
                 .source("test-source")
                 .transactionId("tx-123")
-                .sites(Collections.singletonList("site1"))
                 .providerName("AEM")
                 .locale(Locale.ENGLISH)
                 .build();

@@ -279,9 +279,9 @@ public class DumConnectorIndexingService {
                 return dumConnectorIndexingRepository.distinctEnvironment(site, provider);
         }
 
-        public List<String> getObjectIdList(String source, String environment,
+        public List<String> listIndexedObjectIds(String source, String environment,
                         DumSNSiteLocale siteLocale, String provider) {
-                return dumConnectorIndexingRepository.findAllObjectIds(source,
+                return dumConnectorIndexingRepository.findAllIndexedObjectIds(source,
                                 siteLocale.getLanguage(), environment, provider);
         }
 

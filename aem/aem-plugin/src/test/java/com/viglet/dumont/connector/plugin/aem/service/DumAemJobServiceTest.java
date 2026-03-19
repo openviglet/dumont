@@ -152,7 +152,8 @@ class DumAemJobServiceTest {
                     .thenReturn(new Date());
 
             // When
-            TurSNJobItem result = service.getTurSNJobItem(session, aemObject, locale, attributes);
+            TurSNJobItem result = service.getTurSNJobItem(session, aemObject, locale, attributes,
+                    Collections.singletonList("site1"));
 
             // Then
             assertNotNull(result);
@@ -173,7 +174,8 @@ class DumAemJobServiceTest {
                     .thenReturn(deltaDate);
 
             // When
-            TurSNJobItem result = service.getTurSNJobItem(session, aemObject, locale, attributes);
+            TurSNJobItem result = service.getTurSNJobItem(session, aemObject, locale, attributes,
+                    Collections.singletonList("site1"));
 
             // Then
             assertNotNull(result);
@@ -258,7 +260,6 @@ class DumAemJobServiceTest {
                 .event(DumAemEvent.INDEXING)
                 .standalone(true)
                 .providerName("AEM")
-                .sites(Collections.singletonList("site1"))
                 .contentMapping(DumAemContentMapping.builder().build())
                 .attributeSpecs(Collections.emptyList())
                 .build();
@@ -275,7 +276,6 @@ class DumAemJobServiceTest {
                 .event(DumAemEvent.INDEXING)
                 .standalone(true)
                 .providerName("AEM")
-                .sites(Collections.singletonList("author-site"))
                 .contentMapping(DumAemContentMapping.builder().build())
                 .attributeSpecs(Collections.emptyList())
                 .build();
@@ -292,7 +292,6 @@ class DumAemJobServiceTest {
                 .event(DumAemEvent.INDEXING)
                 .standalone(true)
                 .providerName("AEM")
-                .sites(Collections.singletonList("publish-site"))
                 .contentMapping(DumAemContentMapping.builder().build())
                 .attributeSpecs(Collections.emptyList())
                 .build();

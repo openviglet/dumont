@@ -53,7 +53,7 @@ public class DumAemSourceService {
     }
 
     public DumConnectorSession getDumConnectorSession(DumAemSource dumAemSource) {
-        return new DumConnectorSession(dumAemSource.getName(), null, getProviderName(),
+        return new DumConnectorSession(dumAemSource.getName(), getProviderName(),
                 dumAemSource.getDefaultLocale());
     }
 

@@ -141,7 +141,7 @@ public class DumWCPluginProcess {
     }
 
     private static DumConnectorSession getSource(DumWCSource dumWCSource) {
-        return new DumConnectorSession(dumWCSource.getId(), dumWCSource.getTurSNSites(),
+        return new DumConnectorSession(dumWCSource.getId(),
                 WEB_CRAWLER, dumWCSource.getLocale());
     }
 

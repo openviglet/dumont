@@ -81,7 +81,7 @@ public class DumConnectorSolrService {
 
             log.debug("Fetching DB IDs for core={}, source={}, environment={}", core, source, environment);
             Set<String> dbIds = environment != null
-                    ? new HashSet<>(indexingService.getObjectIdList(
+                    ? new HashSet<>(indexingService.listIndexedObjectIds(
                             source, environment, siteLocale, provider))
                     : new HashSet<>();
             log.debug("Fetched {} DB IDs for core={}", dbIds.size(), core);
