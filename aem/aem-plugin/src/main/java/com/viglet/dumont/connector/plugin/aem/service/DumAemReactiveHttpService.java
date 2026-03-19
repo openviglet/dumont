@@ -83,7 +83,7 @@ public class DumAemReactiveHttpService {
                                 .codecs(configurer -> configurer.defaultCodecs()
                                                 .maxInMemorySize(16 * 1024 * 1024))
                                 .defaultHeader(HttpHeaders.USER_AGENT,
-                                                "Dumont-AEM-Connector/2025.3")
+                                                "Dumont-AEM-Connector/2026.1")
                                 .build();
         }
 
