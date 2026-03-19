@@ -76,7 +76,9 @@ public class DumAemObjectGeneric {
     private Set<String> dependencies;
     private final Map<String, Object> attributes = new HashMap<>();
 
-    public final SimpleDateFormat aemJsonDateFormat = new SimpleDateFormat(DATE_JSON_FORMAT, Locale.ENGLISH);
+    private static SimpleDateFormat newAemJsonDateFormat() {
+        return new SimpleDateFormat(DATE_JSON_FORMAT, Locale.ENGLISH);
+    }
 
     public DumAemObjectGeneric(String nodePath, JSONObject jcrNode) {
         this(nodePath, jcrNode, DumAemEvent.INDEXING);
@@ -102,7 +104,7 @@ public class DumAemObjectGeneric {
 
     private void processJcrCreated(JSONObject jcrNode) throws ParseException {
         Calendar createdDateCalendar = Calendar.getInstance();
-        createdDateCalendar.setTime(aemJsonDateFormat.parse(jcrNode.getString(JCR_CREATED)));
+        createdDateCalendar.setTime(newAemJsonDateFormat().parse(jcrNode.getString(JCR_CREATED)));
         this.createdDate = createdDateCalendar;
     }
 
@@ -196,11 +198,11 @@ public class DumAemObjectGeneric {
             throws ParseException {
         Calendar calendar = Calendar.getInstance();
         if (this.jcrContentNode.has(cqLastReplicatedPublish)) {
-            calendar.setTime(aemJsonDateFormat
+            calendar.setTime(newAemJsonDateFormat()
                     .parse(this.jcrContentNode.getString(cqLastReplicatedPublish)));
         } else if (this.jcrContentNode.has(cqLastReplicated)) {
             calendar.setTime(
-                    aemJsonDateFormat.parse(this.jcrContentNode.getString(cqLastReplicated)));
+                    newAemJsonDateFormat().parse(this.jcrContentNode.getString(cqLastReplicated)));
         }
         return calendar;
     }
@@ -276,7 +278,7 @@ public class DumAemObjectGeneric {
             DateFormat dumontDateFormat = new SimpleDateFormat(DATE_FORMAT);
             dumontDateFormat.setTimeZone(tz);
             log.debug("Parsing date attribute: {} with value: {} for object at path: {}", key, value, this.path);
-            this.attributes.put(key, dumontDateFormat.format(aemJsonDateFormat.parse(value).getTime()));
+            this.attributes.put(key, dumontDateFormat.format(newAemJsonDateFormat().parse(value).getTime()));
         } catch (ParseException e) {
             log.error("Failed to parse date for key '{}' with value '{}' at path '{}': {}", key, value, this.path,
                     e.getMessage());
@@ -286,7 +288,7 @@ public class DumAemObjectGeneric {
 
     public boolean isDate(String dateStr) {
         try {
-            aemJsonDateFormat.parse(dateStr);
+            newAemJsonDateFormat().parse(dateStr);
             return true;
         } catch (ParseException e) {
             return false;
