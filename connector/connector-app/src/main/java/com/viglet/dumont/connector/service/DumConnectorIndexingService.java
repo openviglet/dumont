@@ -25,19 +25,24 @@ import com.viglet.dumont.connector.domain.DumConnectorMonitoringRequest;
 import com.viglet.dumont.connector.domain.DumSNSiteLocale;
 import com.viglet.dumont.connector.persistence.model.DumConnectorDependencyModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel;
 import com.viglet.dumont.connector.persistence.repository.DumConnectorIndexingRepository;
+import com.viglet.dumont.connector.persistence.repository.DumConnectorIndexingStatsRepository;
 import com.viglet.dumont.connector.persistence.specification.DumConnectorIndexingSpecification;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 
 @Service
 public class DumConnectorIndexingService {
         private final DumConnectorIndexingRepository dumConnectorIndexingRepository;
+        private final DumConnectorIndexingStatsRepository dumConnectorIndexingStatsRepository;
         private final boolean connectorDependencies;
 
         public DumConnectorIndexingService(
                         DumConnectorIndexingRepository dumConnectorIndexingRepository,
+                        DumConnectorIndexingStatsRepository dumConnectorIndexingStatsRepository,
                         @Value("${dumont.dependencies.enabled:true}") boolean connectorDependencies) {
                 this.dumConnectorIndexingRepository = dumConnectorIndexingRepository;
+                this.dumConnectorIndexingStatsRepository = dumConnectorIndexingStatsRepository;
                 this.connectorDependencies = connectorDependencies;
         }
 
@@ -310,5 +315,28 @@ public class DumConnectorIndexingService {
                                 .source(indexing.getSource()).objectId(indexing.getObjectId())
                                 .sites(indexing.getSites()).status(indexing.getStatus())
                                 .transactionId(indexing.getTransactionId()).build();
+        }
+
+        public long countBySourceAndProviderSince(String source, String provider, Date since) {
+                return dumConnectorIndexingRepository
+                                .countBySourceAndProviderAndModificationDateGreaterThanEqual(
+                                                source, provider, since);
+        }
+
+        public DumConnectorIndexingStatsModel saveStats(
+                        DumConnectorIndexingStatsModel stats) {
+                return dumConnectorIndexingStatsRepository.save(stats);
+        }
+
+        public List<DumConnectorIndexingStatsModel> getStatsBySourceAndProvider(
+                        String source, String provider) {
+                return dumConnectorIndexingStatsRepository
+                                .findAllBySourceAndProviderOrderByStartTimeDesc(source, provider,
+                                                Limit.of(50));
+        }
+
+        public List<DumConnectorIndexingStatsModel> getAllStats() {
+                return dumConnectorIndexingStatsRepository
+                                .findAllByOrderByStartTimeDesc(Limit.of(50));
         }
 }

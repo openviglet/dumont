@@ -17,6 +17,7 @@
 package com.viglet.dumont.connector.persistence.repository;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -114,4 +115,7 @@ public interface DumConnectorIndexingRepository
 
         @Query("SELECT DISTINCT s FROM DumConnectorIndexingModel i JOIN i.sites s WHERE i.provider = :provider")
         List<String> findAllSites(@Param("provider") String provider);
+
+        long countBySourceAndProviderAndModificationDateGreaterThanEqual(String source,
+                        String provider, Date modificationDate);
 }

@@ -32,6 +32,7 @@ import com.viglet.dumont.connector.domain.DumConnectorMonitoring;
 import com.viglet.dumont.connector.domain.DumConnectorMonitoringPage;
 import com.viglet.dumont.connector.domain.DumConnectorMonitoringRequest;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -76,6 +77,22 @@ public class DumConnectorMonitoringApi {
         public ResponseEntity<DumConnectorMonitoringPage> search(
                         @RequestBody DumConnectorMonitoringRequest request) {
                 return ResponseEntity.ok(indexingService.search(request, plugin.getProviderName()));
+        }
+
+        @GetMapping("stats")
+        public ResponseEntity<List<DumConnectorIndexingStatsModel>> monitoringStats() {
+                List<DumConnectorIndexingStatsModel> stats = indexingService.getAllStats();
+                return stats.isEmpty() ? ResponseEntity.notFound().build()
+                                : ResponseEntity.ok(stats);
+        }
+
+        @GetMapping("stats/{source}")
+        public ResponseEntity<List<DumConnectorIndexingStatsModel>> monitoringStatsBySource(
+                        @PathVariable String source) {
+                List<DumConnectorIndexingStatsModel> stats = indexingService
+                                .getStatsBySourceAndProvider(source, plugin.getProviderName());
+                return stats.isEmpty() ? ResponseEntity.notFound().build()
+                                : ResponseEntity.ok(stats);
         }
 
         private ResponseEntity<DumConnectorMonitoring> generateMonitoringResponse(

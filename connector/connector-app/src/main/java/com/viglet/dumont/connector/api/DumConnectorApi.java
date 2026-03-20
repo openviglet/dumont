@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.api;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel.OperationType;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.dumont.connector.service.DumConnectorSolrService;
 
@@ -84,7 +87,9 @@ public class DumConnectorApi {
 
     @GetMapping("index/{name}/all")
     public ResponseEntity<Map<String, String>> indexAll(@PathVariable String name) {
+        Date startTime = new Date();
         plugin.indexAll(name);
+        saveIndexingStats(name, OperationType.INDEX_ALL, startTime);
         return ResponseEntity.ok(statusSent());
     }
 
@@ -98,7 +103,9 @@ public class DumConnectorApi {
     @GetMapping("reindex/{name}/all")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name) {
         indexingService.deleteByProviderAndSource(plugin.getProviderName(), name);
+        Date startTime = new Date();
         plugin.indexAll(name);
+        saveIndexingStats(name, OperationType.REINDEX_ALL, startTime);
         return ResponseEntity.ok(statusSent());
     }
 
@@ -109,6 +116,30 @@ public class DumConnectorApi {
                 contentIds);
         plugin.indexById(name, contentIds);
         return ResponseEntity.ok(statusSent());
+    }
+
+    private void saveIndexingStats(String source, OperationType operationType,
+            Date startTime) {
+        Date endTime = new Date();
+        long documentCount = indexingService.countBySourceAndProviderSince(source,
+                plugin.getProviderName(), startTime);
+        long durationMs = endTime.getTime() - startTime.getTime();
+        double documentsPerMinute = durationMs > 0
+                ? (documentCount * 60_000.0) / durationMs
+                : 0;
+        DumConnectorIndexingStatsModel stats = DumConnectorIndexingStatsModel.builder()
+                .provider(plugin.getProviderName())
+                .source(source)
+                .operationType(operationType)
+                .startTime(startTime)
+                .endTime(endTime)
+                .documentCount(documentCount)
+                .documentsPerMinute(documentsPerMinute)
+                .build();
+        indexingService.saveStats(stats);
+        log.info("Indexing stats for source '{}': {} documents in {}ms ({} docs/min)",
+                source, documentCount, durationMs,
+                String.format("%.2f", documentsPerMinute));
     }
 
 }
