@@ -29,6 +29,7 @@ public enum DumIndexingStatus {
     INDEXED,
     DEINDEXED,
     IGNORED,
-    FINISHED, RECEIVED_FROM_QUEUE,
+    FINISHED,
+    RECEIVED_FROM_QUEUE
 
 }

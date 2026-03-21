@@ -26,4 +26,6 @@ public interface DumConnectorPlugin {
     void indexAll(String source);
 
     void indexById(String source, List<String> contentId);
+
+    List<String> discoverContentIds(String source);
 }

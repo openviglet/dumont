@@ -38,6 +38,9 @@ public interface DumConnectorIndexingRepository
         boolean existsByObjectIdAndSourceAndEnvironmentAndProvider(String objectId, String source,
                         String environment, String provider);
 
+        boolean existsByObjectIdAndSourceAndProvider(String objectId, String source,
+                        String provider);
+
         boolean existsByObjectIdAndSourceAndEnvironmentAndChecksumNot(String objectId,
                         String source, String environment, String checksum);
 
@@ -52,6 +55,10 @@ public interface DumConnectorIndexingRepository
 
         List<DumConnectorIndexingModel> findAllBySourceAndProviderOrderByModificationDateDesc(
                         String source, String provider, Limit limit);
+
+        List<DumConnectorIndexingModel> findAllBySourceAndProviderAndStatusOrderByModificationDateDesc(
+                        String source, String provider,
+                        com.viglet.dumont.commons.indexing.DumIndexingStatus status, Limit limit);
 
         List<DumConnectorIndexingModel> findAllByOrderByModificationDateDesc(Limit limit);
 

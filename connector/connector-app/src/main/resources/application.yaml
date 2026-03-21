@@ -12,6 +12,9 @@ dumont:
   job.size: 50
   cron: "-"
   cron.zone: UTC
+  audit:
+    cron: "0 0 3 * * *"
+    cron.zone: UTC
   dependencies.enabled: false
   reactive.indexing: false
   reactive.parallelism: 10

@@ -317,6 +317,33 @@ public class DumConnectorIndexingService {
                                 .transactionId(indexing.getTransactionId()).build();
         }
 
+        public List<DumConnectorIndexingModel> getUnprocessedBySourceAndProvider(String source,
+                        String provider) {
+                return dumConnectorIndexingRepository
+                                .findAllBySourceAndProviderAndStatusOrderByModificationDateDesc(
+                                                source, provider, DumIndexingStatus.NOT_PROCESSED,
+                                                Limit.of(500));
+        }
+
+        public boolean existsByObjectIdAndSourceAndProvider(String objectId, String source,
+                        String provider) {
+                return dumConnectorIndexingRepository.existsByObjectIdAndSourceAndProvider(
+                                objectId, source, provider);
+        }
+
+        public DumConnectorIndexingModel createUnprocessedRecord(String objectId, String source,
+                        String provider) {
+                DumConnectorIndexingModel model = DumConnectorIndexingModel.builder()
+                                .objectId(objectId)
+                                .source(source)
+                                .provider(provider)
+                                .status(DumIndexingStatus.NOT_PROCESSED)
+                                .created(new Date())
+                                .modificationDate(new Date())
+                                .build();
+                return dumConnectorIndexingRepository.save(model);
+        }
+
         public long countBySourceAndProviderSince(String source, String provider, Date since) {
                 return dumConnectorIndexingRepository
                                 .countBySourceAndProviderAndModificationDateGreaterThanEqual(

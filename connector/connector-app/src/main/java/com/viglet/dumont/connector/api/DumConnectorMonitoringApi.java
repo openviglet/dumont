@@ -51,6 +51,14 @@ public class DumConnectorMonitoringApi {
                 this.plugin = plugin;
         }
 
+        @GetMapping("unprocessed/{source}")
+        public ResponseEntity<DumConnectorMonitoring> monitoringUnprocessed(
+                        @PathVariable String source) {
+                List<DumConnectorIndexingModel> indexing = indexingService
+                                .getUnprocessedBySourceAndProvider(source, plugin.getProviderName());
+                return generateMonitoringResponse(indexing);
+        }
+
         @GetMapping
         public ResponseEntity<DumConnectorMonitoring> monitoringIndexing() {
                 List<DumConnectorIndexingModel> indexing = indexingService.findAll();

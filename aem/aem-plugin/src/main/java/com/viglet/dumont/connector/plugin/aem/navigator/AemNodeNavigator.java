@@ -20,6 +20,9 @@ import static com.viglet.dumont.connector.aem.commons.DumAemConstants.JCR;
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.REP;
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.STATIC_FILE_SUB_TYPE;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -209,7 +212,7 @@ public class AemNodeNavigator {
 
     /**
      * Checks if a node should be processed based on "once" configuration.
-     * 
+     *
      * @param session  the AEM session
      * @param nodePath the node path
      * @return true if the node should be processed
@@ -217,5 +220,57 @@ public class AemNodeNavigator {
     private boolean shouldProcessNode(DumAemSession session, String nodePath) {
         DumAemConfiguration config = session.getConfiguration();
         return !sourceService.isOnce(config) || DumAemCommonsUtils.isNotOnceConfig(nodePath, config);
+    }
+
+    /**
+     * Traverses the content tree and collects all accessible paths (HTTP 200)
+     * that match the configured content type.
+     * Used for content auditing without triggering indexing.
+     *
+     * @param session      the AEM session
+     * @param path         the starting path
+     * @param infinityJson the JSON representation of the root node
+     * @return list of accessible content paths
+     */
+    public List<String> collectAccessiblePaths(DumAemSession session, String path, JSONObject infinityJson) {
+        List<String> paths = new ArrayList<>();
+        DumAemObjectGeneric aemObject = objectService.getDumAemObjectGeneric(
+                path, infinityJson, session.getEvent());
+
+        if (DumAemCommonsUtils.isTypeEqualContentType(aemObject, session.getConfiguration())) {
+            paths.add(path);
+        }
+
+        if (session.isRecursive()) {
+            collectChildPaths(session, aemObject, paths);
+        }
+
+        return paths;
+    }
+
+    private void collectChildPaths(DumAemSession session, DumAemObjectGeneric aemObject, List<String> paths) {
+        DumAemConfiguration config = session.getConfiguration();
+
+        aemObject.getJcrNode().toMap().forEach((nodeName, nodeValue) -> {
+            if (isIndexableNode(config, nodeName)) {
+                String childPath = "%s/%s".formatted(aemObject.getPath(), nodeName);
+
+                if (shouldProcessNode(session, childPath)) {
+                    DumAemCommonsUtils.getInfinityJson(childPath, config, false)
+                            .ifPresent(childJson -> {
+                                DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(
+                                        childPath, childJson, session.getEvent());
+
+                                if (DumAemCommonsUtils.isTypeEqualContentType(childObject, config)) {
+                                    paths.add(childPath);
+                                }
+
+                                if (session.isRecursive()) {
+                                    collectChildPaths(session, childObject, paths);
+                                }
+                            });
+                }
+            }
+        });
     }
 }

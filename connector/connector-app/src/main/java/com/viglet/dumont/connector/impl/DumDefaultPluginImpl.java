@@ -45,4 +45,9 @@ public class DumDefaultPluginImpl implements DumConnectorPlugin {
     public void indexById(String source, List<String> contentId) {
         throw new UnsupportedOperationException("This method is only a placeholder");
     }
+
+    @Override
+    public List<String> discoverContentIds(String source) {
+        throw new UnsupportedOperationException("This method is only a placeholder");
+    }
 }

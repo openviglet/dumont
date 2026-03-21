@@ -37,8 +37,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import com.viglet.dumont.connector.plugin.aem.api.DumAemPathList;
+import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemService;
+import com.viglet.dumont.connector.plugin.aem.service.DumAemSessionService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSourceService;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,6 +56,12 @@ class DumAemPluginTest {
     @Mock
     private DumAemService dumAemService;
 
+    @Mock
+    private DumAemSessionService dumAemSessionService;
+
+    @Mock
+    private AemNodeNavigator aemNodeNavigator;
+
     private DumAemPlugin dumAemPlugin;
 
     @BeforeEach
@@ -61,7 +69,9 @@ class DumAemPluginTest {
         dumAemPlugin = new DumAemPlugin(
                 dumAemPluginProcess,
                 dumAemSourceService,
-                dumAemService);
+                dumAemService,
+                dumAemSessionService,
+                aemNodeNavigator);
     }
 
     @Nested
