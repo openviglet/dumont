@@ -6,7 +6,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -26,16 +28,23 @@ import com.viglet.dumont.connector.domain.DumSNSiteLocale;
 import com.viglet.dumont.connector.persistence.model.DumConnectorDependencyModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel.OperationType;
 import com.viglet.dumont.connector.persistence.repository.DumConnectorIndexingRepository;
 import com.viglet.dumont.connector.persistence.repository.DumConnectorIndexingStatsRepository;
 import com.viglet.dumont.connector.persistence.specification.DumConnectorIndexingSpecification;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class DumConnectorIndexingService {
         private final DumConnectorIndexingRepository dumConnectorIndexingRepository;
         private final DumConnectorIndexingStatsRepository dumConnectorIndexingStatsRepository;
         private final boolean connectorDependencies;
+        private final Map<String, PendingStats> pendingStatsMap = new ConcurrentHashMap<>();
+
+        public record PendingStats(Date startTime, OperationType operationType) {}
 
         public DumConnectorIndexingService(
                         DumConnectorIndexingRepository dumConnectorIndexingRepository,
@@ -44,6 +53,42 @@ public class DumConnectorIndexingService {
                 this.dumConnectorIndexingRepository = dumConnectorIndexingRepository;
                 this.dumConnectorIndexingStatsRepository = dumConnectorIndexingStatsRepository;
                 this.connectorDependencies = connectorDependencies;
+        }
+
+        public void trackIndexingStart(String source, String provider,
+                        OperationType operationType) {
+                String key = source + "|" + provider;
+                pendingStatsMap.put(key, new PendingStats(new Date(), operationType));
+        }
+
+        public void completeIndexingStats(String source, String provider) {
+                String key = source + "|" + provider;
+                PendingStats pending = pendingStatsMap.remove(key);
+                if (pending == null) {
+                        log.warn("No pending stats found for key '{}'. Available keys: {}",
+                                        key, pendingStatsMap.keySet());
+                        return;
+                }
+                Date endTime = new Date();
+                long documentCount = countBySourceAndProviderSince(source, provider,
+                                pending.startTime());
+                long durationMs = endTime.getTime() - pending.startTime().getTime();
+                double documentsPerMinute = durationMs > 0
+                                ? (documentCount * 60_000.0) / durationMs
+                                : 0;
+                DumConnectorIndexingStatsModel stats = DumConnectorIndexingStatsModel.builder()
+                                .provider(provider)
+                                .source(source)
+                                .operationType(pending.operationType())
+                                .startTime(pending.startTime())
+                                .endTime(endTime)
+                                .documentCount(documentCount)
+                                .documentsPerMinute(documentsPerMinute)
+                                .build();
+                dumConnectorIndexingStatsRepository.save(stats);
+                log.info("Indexing stats for source '{}': {} documents in {}ms ({} docs/min)",
+                                source, documentCount, durationMs,
+                                String.format("%.2f", documentsPerMinute));
         }
 
         public List<String> findByDependencies(String source, String provider,
@@ -179,7 +224,8 @@ public class DumConnectorIndexingService {
                 List<String> environments = dumConnectorIndexingRepository
                                 .findAllEnvironments(provider);
                 List<String> locales = dumConnectorIndexingRepository.findAllLocales(provider)
-                                .stream().map(Locale::toString).collect(Collectors.toList());
+                                .stream().filter(java.util.Objects::nonNull)
+                                .map(Locale::toString).toList();
                 List<String> sites = dumConnectorIndexingRepository.findAllSites(provider);
 
                 return DumConnectorMonitoringPage.builder()
@@ -333,15 +379,45 @@ public class DumConnectorIndexingService {
 
         public DumConnectorIndexingModel createUnprocessedRecord(String objectId, String source,
                         String provider) {
+                return createUnprocessedRecord(objectId, source, provider, null);
+        }
+
+        public DumConnectorIndexingModel createUnprocessedRecord(String objectId, String source,
+                        String provider, Locale locale) {
+                return createUnprocessedRecord(objectId, source, provider, locale, null, null);
+        }
+
+        public DumConnectorIndexingModel createUnprocessedRecord(String objectId, String source,
+                        String provider, Locale locale, String environment,
+                        List<String> sites) {
                 DumConnectorIndexingModel model = DumConnectorIndexingModel.builder()
                                 .objectId(objectId)
                                 .source(source)
                                 .provider(provider)
+                                .locale(locale)
+                                .environment(environment)
+                                .sites(sites)
                                 .status(DumIndexingStatus.NOT_PROCESSED)
                                 .created(new Date())
                                 .modificationDate(new Date())
                                 .build();
                 return dumConnectorIndexingRepository.save(model);
+        }
+
+        public boolean existsByObjectIdAndSourceAndEnvironmentAndProvider(String objectId,
+                        String source, String environment, String provider) {
+                return dumConnectorIndexingRepository.existsByObjectIdAndSourceAndEnvironmentAndProvider(
+                                objectId, source, environment, provider);
+        }
+
+        public List<DumConnectorIndexingModel> findUnprocessedByObjectIdAndSourceAndProvider(
+                        String objectId, String source, String provider) {
+                return dumConnectorIndexingRepository.findByObjectIdAndSourceAndProviderAndStatus(
+                                objectId, source, provider, DumIndexingStatus.NOT_PROCESSED);
+        }
+
+        public void deleteAll(List<DumConnectorIndexingModel> records) {
+                dumConnectorIndexingRepository.deleteAll(records);
         }
 
         public long countBySourceAndProviderSince(String source, String provider, Date since) {
@@ -365,5 +441,16 @@ public class DumConnectorIndexingService {
         public List<DumConnectorIndexingStatsModel> getAllStats() {
                 return dumConnectorIndexingStatsRepository
                                 .findAllByOrderByStartTimeDesc(Limit.of(50));
+        }
+
+        public long countByProvider(String provider) {
+                return dumConnectorIndexingRepository.countByProvider(provider);
+        }
+
+        public Map<String, Long> countByProviderGroupBySource(String provider) {
+                return dumConnectorIndexingRepository.countByProviderGroupBySource(provider).stream()
+                                .collect(Collectors.toMap(
+                                                row -> (String) row[0],
+                                                row -> (Long) row[1]));
         }
 }

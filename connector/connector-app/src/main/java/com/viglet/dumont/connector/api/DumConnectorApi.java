@@ -16,7 +16,6 @@
 
 package com.viglet.dumont.connector.api;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
-import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel.OperationType;
+import com.viglet.dumont.connector.scheduled.DumConnectorContentAuditTask;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.dumont.connector.service.DumConnectorSolrService;
 
@@ -47,27 +46,31 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v2/connector")
 @Tag(name = "Connector API", description = "Connector API")
 public class DumConnectorApi {
+    private static final String STATUS_KEY = "status";
     private final DumConnectorIndexingService indexingService;
     private final DumConnectorSolrService dumConnectorSolr;
     private final DumConnectorPlugin plugin;
+    private final DumConnectorContentAuditTask auditTask;
 
     public DumConnectorApi(DumConnectorIndexingService indexingService,
-            DumConnectorSolrService dumConnectorSolr, DumConnectorPlugin plugin) {
+            DumConnectorSolrService dumConnectorSolr, DumConnectorPlugin plugin,
+            DumConnectorContentAuditTask auditTask) {
         this.indexingService = indexingService;
         this.dumConnectorSolr = dumConnectorSolr;
         this.plugin = plugin;
+        this.auditTask = auditTask;
     }
 
     @GetMapping("status")
     public Map<String, String> status() {
         Map<String, String> status = new HashMap<>();
-        status.put("status", "ok");
+        status.put(STATUS_KEY, "ok");
         return status;
     }
 
     private static Map<String, String> statusSent() {
         Map<String, String> status = new HashMap<>();
-        status.put("status", "sent");
+        status.put(STATUS_KEY, "sent");
         return status;
     }
 
@@ -87,9 +90,9 @@ public class DumConnectorApi {
 
     @GetMapping("index/{name}/all")
     public ResponseEntity<Map<String, String>> indexAll(@PathVariable String name) {
-        Date startTime = new Date();
+        indexingService.trackIndexingStart(name, plugin.getProviderName(),
+                OperationType.INDEX_ALL);
         plugin.indexAll(name);
-        saveIndexingStats(name, OperationType.INDEX_ALL, startTime);
         return ResponseEntity.ok(statusSent());
     }
 
@@ -103,9 +106,9 @@ public class DumConnectorApi {
     @GetMapping("reindex/{name}/all")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name) {
         indexingService.deleteByProviderAndSource(plugin.getProviderName(), name);
-        Date startTime = new Date();
+        indexingService.trackIndexingStart(name, plugin.getProviderName(),
+                OperationType.REINDEX_ALL);
         plugin.indexAll(name);
-        saveIndexingStats(name, OperationType.REINDEX_ALL, startTime);
         return ResponseEntity.ok(statusSent());
     }
 
@@ -118,28 +121,10 @@ public class DumConnectorApi {
         return ResponseEntity.ok(statusSent());
     }
 
-    private void saveIndexingStats(String source, OperationType operationType,
-            Date startTime) {
-        Date endTime = new Date();
-        long documentCount = indexingService.countBySourceAndProviderSince(source,
-                plugin.getProviderName(), startTime);
-        long durationMs = endTime.getTime() - startTime.getTime();
-        double documentsPerMinute = durationMs > 0
-                ? (documentCount * 60_000.0) / durationMs
-                : 0;
-        DumConnectorIndexingStatsModel stats = DumConnectorIndexingStatsModel.builder()
-                .provider(plugin.getProviderName())
-                .source(source)
-                .operationType(operationType)
-                .startTime(startTime)
-                .endTime(endTime)
-                .documentCount(documentCount)
-                .documentsPerMinute(documentsPerMinute)
-                .build();
-        indexingService.saveStats(stats);
-        log.info("Indexing stats for source '{}': {} documents in {}ms ({} docs/min)",
-                source, documentCount, durationMs,
-                String.format("%.2f", documentsPerMinute));
+    @GetMapping("audit/{source}")
+    public ResponseEntity<Map<String, String>> auditSource(@PathVariable String source) {
+        auditTask.auditSourceAsync(source, plugin.getProviderName());
+        return ResponseEntity.ok(statusSent());
     }
 
 }

@@ -17,8 +17,12 @@
 package com.viglet.dumont.connector.commons.plugin;
 
 import java.util.List;
+import java.util.Locale;
 
 public interface DumConnectorPlugin {
+
+    record EnvironmentInfo(String environment, List<String> sites) {}
+
     void crawl();
 
     String getProviderName();
@@ -28,4 +32,12 @@ public interface DumConnectorPlugin {
     void indexById(String source, List<String> contentId);
 
     List<String> discoverContentIds(String source);
+
+    default Locale resolveLocale(String source, String objectId) {
+        return null;
+    }
+
+    default List<EnvironmentInfo> resolveEnvironments(String source, String objectId) {
+        return List.of();
+    }
 }

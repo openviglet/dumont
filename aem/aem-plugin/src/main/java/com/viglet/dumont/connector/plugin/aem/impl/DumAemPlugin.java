@@ -16,12 +16,17 @@
 
 package com.viglet.dumont.connector.plugin.aem.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
@@ -80,6 +85,55 @@ public class DumAemPlugin implements DumConnectorPlugin {
     @Override
     public String getProviderName() {
         return dumAemService.getProviderName();
+    }
+
+    @Override
+    public Locale resolveLocale(String source, String objectId) {
+        return dumAemSourceService.getDumAemSourceByName(source)
+                .map(dumAemSource -> {
+                    DumAemSession session = dumAemSessionService.getDumAemSession(dumAemSource, false);
+                    return DumAemCommonsUtils.getLocaleByPath(session.getConfiguration(), objectId);
+                })
+                .orElse(null);
+    }
+
+    @Override
+    public List<EnvironmentInfo> resolveEnvironments(String source, String objectId) {
+        return dumAemSourceService.getDumAemSourceByName(source)
+                .map(dumAemSource -> {
+                    DumAemSession session = dumAemSessionService.getDumAemSession(dumAemSource, false);
+                    DumAemConfiguration config = session.getConfiguration();
+                    List<EnvironmentInfo> environments = new ArrayList<>();
+                    String modelJsonSuffix = ".model.json";
+
+                    if (config.isAuthor() && StringUtils.isNotBlank(config.getAuthorURLPrefix())) {
+                        String authorUrl = config.getAuthorURLPrefix() + objectId + modelJsonSuffix;
+                        if (isUrlAccessible(authorUrl, config)) {
+                            environments.add(new EnvironmentInfo(
+                                    DumAemEnv.AUTHOR.toString(),
+                                    List.of(config.getAuthorSNSite())));
+                        }
+                    }
+                    if (config.isPublish() && StringUtils.isNotBlank(config.getPublishURLPrefix())) {
+                        String publishUrl = config.getPublishURLPrefix() + objectId + modelJsonSuffix;
+                        if (isUrlAccessible(publishUrl, config)) {
+                            environments.add(new EnvironmentInfo(
+                                    DumAemEnv.PUBLISHING.toString(),
+                                    List.of(config.getPublishSNSite())));
+                        }
+                    }
+                    return environments;
+                })
+                .orElse(Collections.emptyList());
+    }
+
+    private boolean isUrlAccessible(String url, DumAemConfiguration config) {
+        try {
+            return DumAemCommonsUtils.getResponseBody(url, config, false).isPresent();
+        } catch (IOException e) {
+            log.debug("URL not accessible: {} - {}", url, e.getMessage());
+            return false;
+        }
     }
 
     @Override

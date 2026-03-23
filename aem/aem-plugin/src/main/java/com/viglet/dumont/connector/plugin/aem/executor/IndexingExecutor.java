@@ -63,12 +63,12 @@ public class IndexingExecutor {
         try {
             log.info("Starting exclusive execution: {}", command.getDescription());
             command.execute();
-            finish(command.getSession(), false);
             return true;
         } catch (Exception e) {
             log.error("Error executing {}: {}", command.getDescription(), e.getMessage(), e);
             throw e;
         } finally {
+            finish(command.getSession(), false);
             runningSources.remove(source);
             log.info("Completed exclusive execution: {}", command.getDescription());
         }

@@ -17,6 +17,7 @@
 package com.viglet.dumont.connector.api;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -89,18 +90,20 @@ public class DumConnectorMonitoringApi {
 
         @GetMapping("stats")
         public ResponseEntity<List<DumConnectorIndexingStatsModel>> monitoringStats() {
-                List<DumConnectorIndexingStatsModel> stats = indexingService.getAllStats();
-                return stats.isEmpty() ? ResponseEntity.notFound().build()
-                                : ResponseEntity.ok(stats);
+                return ResponseEntity.ok(indexingService.getAllStats());
+        }
+
+        @GetMapping("stats/count")
+        public ResponseEntity<Map<String, Long>> monitoringStatsCount() {
+                return ResponseEntity.ok(indexingService
+                                .countByProviderGroupBySource(plugin.getProviderName()));
         }
 
         @GetMapping("stats/{source}")
         public ResponseEntity<List<DumConnectorIndexingStatsModel>> monitoringStatsBySource(
                         @PathVariable String source) {
-                List<DumConnectorIndexingStatsModel> stats = indexingService
-                                .getStatsBySourceAndProvider(source, plugin.getProviderName());
-                return stats.isEmpty() ? ResponseEntity.notFound().build()
-                                : ResponseEntity.ok(stats);
+                return ResponseEntity.ok(indexingService
+                                .getStatsBySourceAndProvider(source, plugin.getProviderName()));
         }
 
         private ResponseEntity<DumConnectorMonitoring> generateMonitoringResponse(

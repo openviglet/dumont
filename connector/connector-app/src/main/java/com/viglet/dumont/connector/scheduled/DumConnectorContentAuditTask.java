@@ -16,12 +16,19 @@
 
 package com.viglet.dumont.connector.scheduled;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel.OperationType;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -57,24 +64,94 @@ public class DumConnectorContentAuditTask {
         log.info("Content audit completed.");
     }
 
+    @Async
+    public void auditSourceAsync(String source, String provider) {
+        auditSource(source, provider);
+    }
+
     private void auditSource(String source, String provider) {
         log.info("Auditing source '{}'", source);
+        Date startTime = new Date();
         try {
             List<String> discoveredIds = plugin.discoverContentIds(source);
             int created = 0;
 
             for (String objectId : discoveredIds) {
-                if (!indexingService.existsByObjectIdAndSourceAndProvider(objectId, source, provider)) {
-                    indexingService.createUnprocessedRecord(objectId, source, provider);
-                    created++;
-                    log.debug("Created NOT_PROCESSED record for objectId='{}' source='{}'", objectId, source);
-                }
+                created += auditObject(objectId, source, provider);
             }
 
-            log.info("Audit for source '{}': discovered={}, new NOT_PROCESSED records={}",
-                    source, discoveredIds.size(), created);
+            Date endTime = new Date();
+            long durationMs = endTime.getTime() - startTime.getTime();
+            double docsPerMinute = durationMs > 0
+                    ? (discoveredIds.size() * 60_000.0) / durationMs
+                    : 0;
+            indexingService.saveStats(DumConnectorIndexingStatsModel.builder()
+                    .provider(provider)
+                    .source(source)
+                    .operationType(OperationType.DRY_SCAN)
+                    .startTime(startTime)
+                    .endTime(endTime)
+                    .documentCount(discoveredIds.size())
+                    .documentsPerMinute(docsPerMinute)
+                    .build());
+
+            log.info("Audit for source '{}': discovered={}, new NOT_PROCESSED records={}, duration={}ms",
+                    source, discoveredIds.size(), created, durationMs);
         } catch (Exception e) {
             log.error("Error auditing source '{}': {}", source, e.getMessage(), e);
+        }
+    }
+
+    private int auditObject(String objectId, String source, String provider) {
+        java.util.Locale locale = plugin.resolveLocale(source, objectId);
+        List<DumConnectorPlugin.EnvironmentInfo> environments =
+                plugin.resolveEnvironments(source, objectId);
+        int created = 0;
+
+        if (environments.isEmpty()) {
+            removeStaleUnprocessedRecords(objectId, source, provider);
+        } else {
+            Set<String> activeEnvs = environments.stream()
+                    .map(DumConnectorPlugin.EnvironmentInfo::environment)
+                    .collect(Collectors.toSet());
+            removeStaleUnprocessedRecords(objectId, source, provider, activeEnvs);
+
+            for (DumConnectorPlugin.EnvironmentInfo envInfo : environments) {
+                if (!indexingService.existsByObjectIdAndSourceAndEnvironmentAndProvider(
+                        objectId, source, envInfo.environment(), provider)) {
+                    indexingService.createUnprocessedRecord(objectId, source, provider, locale,
+                            envInfo.environment(), envInfo.sites());
+                    created++;
+                    log.debug("Created NOT_PROCESSED record for objectId='{}' source='{}' locale='{}' env='{}' sites='{}'",
+                            objectId, source, locale, envInfo.environment(), envInfo.sites());
+                }
+            }
+        }
+        return created;
+    }
+
+    private void removeStaleUnprocessedRecords(String objectId, String source, String provider) {
+        List<DumConnectorIndexingModel> staleRecords = indexingService
+                .findUnprocessedByObjectIdAndSourceAndProvider(objectId, source, provider);
+        if (!staleRecords.isEmpty()) {
+            indexingService.deleteAll(staleRecords);
+            log.debug("Removed {} stale NOT_PROCESSED records for objectId='{}' source='{}'",
+                    staleRecords.size(), objectId, source);
+        }
+    }
+
+    private void removeStaleUnprocessedRecords(String objectId, String source, String provider,
+            Set<String> activeEnvironments) {
+        List<DumConnectorIndexingModel> unprocessed = indexingService
+                .findUnprocessedByObjectIdAndSourceAndProvider(objectId, source, provider);
+        List<DumConnectorIndexingModel> staleRecords = unprocessed.stream()
+                .filter(indexing -> indexing.getEnvironment() != null
+                        && !activeEnvironments.contains(indexing.getEnvironment()))
+                .toList();
+        if (!staleRecords.isEmpty()) {
+            indexingService.deleteAll(staleRecords);
+            log.debug("Removed {} stale NOT_PROCESSED records for objectId='{}' source='{}' (not in envs: {})",
+                    staleRecords.size(), objectId, source, activeEnvironments);
         }
     }
 }

@@ -49,7 +49,7 @@ public class DumConnectorIndexingStatsModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public enum OperationType {
-        INDEX_ALL, REINDEX_ALL
+        INDEX_ALL, REINDEX_ALL, DRY_SCAN
     }
 
     @Id

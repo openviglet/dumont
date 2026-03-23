@@ -60,6 +60,10 @@ public interface DumConnectorIndexingRepository
                         String source, String provider,
                         com.viglet.dumont.commons.indexing.DumIndexingStatus status, Limit limit);
 
+        List<DumConnectorIndexingModel> findByObjectIdAndSourceAndProviderAndStatus(
+                        String objectId, String source, String provider,
+                        com.viglet.dumont.commons.indexing.DumIndexingStatus status);
+
         List<DumConnectorIndexingModel> findAllByOrderByModificationDateDesc(Limit limit);
 
         List<DumConnectorIndexingModel> findAllByProviderAndObjectIdIn(String provider,
@@ -125,4 +129,9 @@ public interface DumConnectorIndexingRepository
 
         long countBySourceAndProviderAndModificationDateGreaterThanEqual(String source,
                         String provider, Date modificationDate);
+
+        long countByProvider(String provider);
+
+        @Query("SELECT i.source, COUNT(i) FROM DumConnectorIndexingModel i WHERE i.provider = :provider GROUP BY i.source")
+        List<Object[]> countByProviderGroupBySource(@Param("provider") String provider);
 }

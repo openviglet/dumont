@@ -115,6 +115,12 @@ public class DumConnectorContextImpl implements DumConnectorContext {
             // Clear the queue
             queueLinks.clear();
 
+            // Save indexing stats if tracked
+            if (!standalone) {
+                indexingService.completeIndexingStats(session.getSource(),
+                        session.getProviderName());
+            }
+
             log.info("Indexing process finished for session: {}", session.getTransactionId());
         } finally {
             processLock.writeLock().unlock();
