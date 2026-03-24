@@ -287,10 +287,10 @@ public class DumConnectorIndexingService {
                                 .setTransactionId(turSNJobItemWithSession.session()
                                                 .getTransactionId())
                                 .setModificationDate(new Date()).setStatus(status)
-                                .setStandalone(turSNJobItemWithSession.standalone())
-                                .setSites(turSNJobItemWithSession.turSNJobItem().getSiteNames())
-                                .setDependencies(getDependencies(turSNJobItemWithSession,
-                                                dumConnectorIndexing));
+                                .setStandalone(turSNJobItemWithSession.standalone());
+                dumConnectorIndexing.setSites(turSNJobItemWithSession.turSNJobItem().getSiteNames());
+                dumConnectorIndexing.setDependencies(getDependencies(turSNJobItemWithSession,
+                                dumConnectorIndexing));
                 return dumConnectorIndexingRepository.save(dumConnectorIndexing);
         }
 

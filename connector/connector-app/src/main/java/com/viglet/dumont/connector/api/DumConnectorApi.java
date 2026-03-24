@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
@@ -103,10 +104,10 @@ public class DumConnectorApi {
         return ResponseEntity.ok(statusSent());
     }
 
-    @GetMapping("index/{name}/id/{contentId}")
+    @GetMapping("index/{name}")
     public ResponseEntity<Map<String, String>> indexContentId(@PathVariable String name,
-            @PathVariable String contentId) {
-        plugin.indexById(name, List.of(contentId));
+            @RequestParam String id) {
+        plugin.indexById(name, List.of(id));
         return ResponseEntity.ok(statusSent());
     }
 
@@ -128,12 +129,12 @@ public class DumConnectorApi {
         return ResponseEntity.ok(statusSent());
     }
 
-    @GetMapping("reindex/{name}/id/{contentId}")
+    @GetMapping("reindex/{name}")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name,
-            @PathVariable String contentId) {
+            @RequestParam String id) {
         indexingService.deleteByProviderAndSourceAndObjectIdIn(plugin.getProviderName(), name,
-                List.of(contentId));
-        plugin.indexById(name, List.of(contentId));
+                List.of(id));
+        plugin.indexById(name, List.of(id));
         return ResponseEntity.ok(statusSent());
     }
 

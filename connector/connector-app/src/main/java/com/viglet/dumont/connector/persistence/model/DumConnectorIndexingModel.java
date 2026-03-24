@@ -104,6 +104,13 @@ public class DumConnectorIndexingModel implements Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<DumConnectorDependencyModel> dependencies = new HashSet<>();
 
+    public void setSites(List<String> sites) {
+        this.sites.clear();
+        if (sites != null) {
+            this.sites.addAll(sites);
+        }
+    }
+
     public void setDependencies(Set<DumConnectorDependencyModel> dependencyModels) {
         this.dependencies.clear();
         if (dependencyModels != null) {
