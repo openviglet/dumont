@@ -18,15 +18,22 @@ package com.viglet.dumont.connector.persistence.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -70,4 +77,12 @@ public class DumConnectorIndexingStatsModel implements Serializable {
     private long documentCount;
     @Column
     private double documentsPerMinute;
+    @Column
+    private String environment;
+    @Column
+    private Locale locale;
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "dum_indexing_stats_sites", joinColumns = @JoinColumn(name = "stats_id"))
+    private List<String> sites = new ArrayList<>();
 }

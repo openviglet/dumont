@@ -103,6 +103,13 @@ public class DumConnectorApi {
         return ResponseEntity.ok(statusSent());
     }
 
+    @GetMapping("index/{name}/id/{contentId}")
+    public ResponseEntity<Map<String, String>> indexContentId(@PathVariable String name,
+            @PathVariable String contentId) {
+        plugin.indexById(name, List.of(contentId));
+        return ResponseEntity.ok(statusSent());
+    }
+
     @GetMapping("reindex/{name}/all")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name) {
         indexingService.deleteByProviderAndSource(plugin.getProviderName(), name);
@@ -112,12 +119,21 @@ public class DumConnectorApi {
         return ResponseEntity.ok(statusSent());
     }
 
-    @GetMapping("reindex/{name}")
+    @PostMapping("reindex/{name}")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name,
             @RequestBody List<String> contentIds) {
         indexingService.deleteByProviderAndSourceAndObjectIdIn(plugin.getProviderName(), name,
                 contentIds);
         plugin.indexById(name, contentIds);
+        return ResponseEntity.ok(statusSent());
+    }
+
+    @GetMapping("reindex/{name}/id/{contentId}")
+    public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name,
+            @PathVariable String contentId) {
+        indexingService.deleteByProviderAndSourceAndObjectIdIn(plugin.getProviderName(), name,
+                List.of(contentId));
+        plugin.indexById(name, List.of(contentId));
         return ResponseEntity.ok(statusSent());
     }
 

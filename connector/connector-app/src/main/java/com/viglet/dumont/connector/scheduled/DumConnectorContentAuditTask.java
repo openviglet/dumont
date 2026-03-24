@@ -16,8 +16,11 @@
 
 package com.viglet.dumont.connector.scheduled;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,9 +78,18 @@ public class DumConnectorContentAuditTask {
         try {
             List<String> discoveredIds = plugin.discoverContentIds(source);
             int created = 0;
+            Set<String> allEnvironments = new LinkedHashSet<>();
+            Set<String> allSites = new LinkedHashSet<>();
+            Locale firstLocale = null;
 
             for (String objectId : discoveredIds) {
-                created += auditObject(objectId, source, provider);
+                AuditResult result = auditObject(objectId, source, provider);
+                created += result.created;
+                allEnvironments.addAll(result.environments);
+                allSites.addAll(result.sites);
+                if (firstLocale == null && result.locale != null) {
+                    firstLocale = result.locale;
+                }
             }
 
             Date endTime = new Date();
@@ -93,6 +105,9 @@ public class DumConnectorContentAuditTask {
                     .endTime(endTime)
                     .documentCount(discoveredIds.size())
                     .documentsPerMinute(docsPerMinute)
+                    .environment(String.join(", ", allEnvironments))
+                    .locale(firstLocale)
+                    .sites(new ArrayList<>(allSites))
                     .build());
 
             log.info("Audit for source '{}': discovered={}, new NOT_PROCESSED records={}, duration={}ms",
@@ -102,11 +117,15 @@ public class DumConnectorContentAuditTask {
         }
     }
 
-    private int auditObject(String objectId, String source, String provider) {
-        java.util.Locale locale = plugin.resolveLocale(source, objectId);
+    private record AuditResult(int created, Set<String> environments, Set<String> sites, Locale locale) {}
+
+    private AuditResult auditObject(String objectId, String source, String provider) {
+        Locale locale = plugin.resolveLocale(source, objectId);
         List<DumConnectorPlugin.EnvironmentInfo> environments =
                 plugin.resolveEnvironments(source, objectId);
         int created = 0;
+        Set<String> envNames = new LinkedHashSet<>();
+        Set<String> siteNames = new LinkedHashSet<>();
 
         if (environments.isEmpty()) {
             removeStaleUnprocessedRecords(objectId, source, provider);
@@ -117,6 +136,8 @@ public class DumConnectorContentAuditTask {
             removeStaleUnprocessedRecords(objectId, source, provider, activeEnvs);
 
             for (DumConnectorPlugin.EnvironmentInfo envInfo : environments) {
+                envNames.add(envInfo.environment());
+                siteNames.addAll(envInfo.sites());
                 if (!indexingService.existsByObjectIdAndSourceAndEnvironmentAndProvider(
                         objectId, source, envInfo.environment(), provider)) {
                     indexingService.createUnprocessedRecord(objectId, source, provider, locale,
@@ -127,7 +148,7 @@ public class DumConnectorContentAuditTask {
                 }
             }
         }
-        return created;
+        return new AuditResult(created, envNames, siteNames, locale);
     }
 
     private void removeStaleUnprocessedRecords(String objectId, String source, String provider) {

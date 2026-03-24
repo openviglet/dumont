@@ -121,8 +121,14 @@ public interface DumConnectorIndexingRepository
         @Query("SELECT DISTINCT i.environment FROM DumConnectorIndexingModel i WHERE i.provider = :provider")
         List<String> findAllEnvironments(@Param("provider") String provider);
 
+        @Query("SELECT DISTINCT i.environment FROM DumConnectorIndexingModel i WHERE i.source = :source AND i.provider = :provider AND i.environment IS NOT NULL")
+        List<String> findAllEnvironmentsBySourceAndProvider(@Param("source") String source, @Param("provider") String provider);
+
         @Query("SELECT DISTINCT i.locale FROM DumConnectorIndexingModel i WHERE i.provider = :provider")
         List<Locale> findAllLocales(@Param("provider") String provider);
+
+        @Query("SELECT DISTINCT i.locale FROM DumConnectorIndexingModel i WHERE i.source = :source AND i.provider = :provider AND i.locale IS NOT NULL")
+        List<Locale> findAllLocalesBySourceAndProvider(@Param("source") String source, @Param("provider") String provider);
 
         @Query("SELECT DISTINCT s FROM DumConnectorIndexingModel i JOIN i.sites s WHERE i.provider = :provider")
         List<String> findAllSites(@Param("provider") String provider);

@@ -16,16 +16,15 @@
 
 package com.viglet.dumont.connector.plugin.aem.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
@@ -35,6 +34,7 @@ import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import com.viglet.dumont.connector.plugin.aem.api.DumAemPathList;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;
+import com.viglet.dumont.connector.plugin.aem.service.DumAemObjectService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSessionService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSourceService;
@@ -49,17 +49,20 @@ public class DumAemPlugin implements DumConnectorPlugin {
     private final DumAemSourceService dumAemSourceService;
     private final DumAemService dumAemService;
     private final DumAemSessionService dumAemSessionService;
+    private final DumAemObjectService dumAemObjectService;
     private final AemNodeNavigator aemNodeNavigator;
 
     public DumAemPlugin(DumAemPluginProcess dumAemPluginProcess,
             DumAemSourceService dumAemSourceService,
             DumAemService dumAemService,
             DumAemSessionService dumAemSessionService,
+            DumAemObjectService dumAemObjectService,
             AemNodeNavigator aemNodeNavigator) {
         this.dumAemPluginProcess = dumAemPluginProcess;
         this.dumAemSourceService = dumAemSourceService;
         this.dumAemService = dumAemService;
         this.dumAemSessionService = dumAemSessionService;
+        this.dumAemObjectService = dumAemObjectService;
         this.aemNodeNavigator = aemNodeNavigator;
     }
 
@@ -104,36 +107,28 @@ public class DumAemPlugin implements DumConnectorPlugin {
                     DumAemSession session = dumAemSessionService.getDumAemSession(dumAemSource, false);
                     DumAemConfiguration config = session.getConfiguration();
                     List<EnvironmentInfo> environments = new ArrayList<>();
-                    String modelJsonSuffix = ".model.json";
 
-                    if (config.isAuthor() && StringUtils.isNotBlank(config.getAuthorURLPrefix())) {
-                        String authorUrl = config.getAuthorURLPrefix() + objectId + modelJsonSuffix;
-                        if (isUrlAccessible(authorUrl, config)) {
-                            environments.add(new EnvironmentInfo(
-                                    DumAemEnv.AUTHOR.toString(),
-                                    List.of(config.getAuthorSNSite())));
-                        }
-                    }
-                    if (config.isPublish() && StringUtils.isNotBlank(config.getPublishURLPrefix())) {
-                        String publishUrl = config.getPublishURLPrefix() + objectId + modelJsonSuffix;
-                        if (isUrlAccessible(publishUrl, config)) {
-                            environments.add(new EnvironmentInfo(
-                                    DumAemEnv.PUBLISHING.toString(),
-                                    List.of(config.getPublishSNSite())));
-                        }
-                    }
-                    return environments;
+                    return DumAemCommonsUtils.getInfinityJson(objectId, config, false)
+                            .map(infinityJson -> {
+                                if (config.isAuthor()) {
+                                    environments.add(new EnvironmentInfo(
+                                            DumAemEnv.AUTHOR.toString(),
+                                            List.of(config.getAuthorSNSite())));
+                                }
+                                if (config.isPublish()) {
+                                    DumAemObjectGeneric aemObject = dumAemObjectService
+                                            .getDumAemObjectGeneric(objectId, infinityJson, DumAemEvent.INDEXING);
+                                    if (aemObject.isDelivered()) {
+                                        environments.add(new EnvironmentInfo(
+                                                DumAemEnv.PUBLISHING.toString(),
+                                                List.of(config.getPublishSNSite())));
+                                    }
+                                }
+                                return environments;
+                            })
+                            .orElse(Collections.emptyList());
                 })
                 .orElse(Collections.emptyList());
-    }
-
-    private boolean isUrlAccessible(String url, DumAemConfiguration config) {
-        try {
-            return DumAemCommonsUtils.getResponseBody(url, config, false).isPresent();
-        } catch (IOException e) {
-            log.debug("URL not accessible: {} - {}", url, e.getMessage());
-            return false;
-        }
     }
 
     @Override

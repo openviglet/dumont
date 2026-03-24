@@ -76,6 +76,11 @@ public class DumConnectorIndexingService {
                 double documentsPerMinute = durationMs > 0
                                 ? (documentCount * 60_000.0) / durationMs
                                 : 0;
+                List<String> environments = dumConnectorIndexingRepository
+                                .findAllEnvironmentsBySourceAndProvider(source, provider);
+                List<Locale> locales = dumConnectorIndexingRepository
+                                .findAllLocalesBySourceAndProvider(source, provider);
+                List<String> sites = dumConnectorIndexingRepository.distinctSites(source, provider);
                 DumConnectorIndexingStatsModel stats = DumConnectorIndexingStatsModel.builder()
                                 .provider(provider)
                                 .source(source)
@@ -84,6 +89,10 @@ public class DumConnectorIndexingService {
                                 .endTime(endTime)
                                 .documentCount(documentCount)
                                 .documentsPerMinute(documentsPerMinute)
+                                .environment(String.join(", ", environments))
+                                .locale(locales.stream().filter(java.util.Objects::nonNull)
+                                                .findFirst().orElse(null))
+                                .sites(sites)
                                 .build();
                 dumConnectorIndexingStatsRepository.save(stats);
                 log.info("Indexing stats for source '{}': {} documents in {}ms ({} docs/min)",
