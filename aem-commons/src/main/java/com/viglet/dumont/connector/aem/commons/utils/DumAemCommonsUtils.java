@@ -122,6 +122,9 @@ public class DumAemCommonsUtils {
 
     public static boolean isTypeEqualContentType(DumAemObjectGeneric dumAemObject,
             DumAemConfiguration dumAemSourceContext) {
+        if (dumAemObject == null || dumAemObject.getType() == null) {
+            return false;
+        }
         return dumAemObject.getType().equals(dumAemSourceContext.getContentType());
     }
 

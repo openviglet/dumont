@@ -161,12 +161,16 @@ public class AemNodeNavigator {
     private void processChildNode(DumAemSession session, String childPath) {
         DumAemCommonsUtils.getInfinityJson(childPath, session.getConfiguration(), false)
                 .ifPresent(infinityJson -> {
-                    DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson,
-                            session.getEvent());
-                    processNode(session, childObject);
+                    try {
+                        DumAemObjectGeneric childObject = objectService.getDumAemObjectGeneric(childPath, infinityJson,
+                                session.getEvent());
+                        processNode(session, childObject);
 
-                    if (session.isRecursive()) {
-                        navigateChildrenSync(session, childObject);
+                        if (session.isRecursive()) {
+                            navigateChildrenSync(session, childObject);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Error processing child path {}: {}", childPath, e.toString(), e);
                     }
                 });
     }
@@ -187,7 +191,7 @@ public class AemNodeNavigator {
                     return Mono.empty();
                 })
                 .onErrorResume(e -> {
-                    log.warn("Error processing child path {}: {}", childPath, e.getMessage());
+                    log.warn("Error processing child path {}: {}", childPath, e.toString(), e);
                     return Mono.empty();
                 });
     }
