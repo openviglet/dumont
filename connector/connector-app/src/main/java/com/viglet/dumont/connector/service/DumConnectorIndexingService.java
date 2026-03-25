@@ -43,6 +43,7 @@ public class DumConnectorIndexingService {
         private final DumConnectorIndexingStatsRepository dumConnectorIndexingStatsRepository;
         private final boolean connectorDependencies;
         private final Map<String, PendingStats> pendingStatsMap = new ConcurrentHashMap<>();
+        private final Set<String> processingSources = ConcurrentHashMap.newKeySet();
 
         public record PendingStats(Date startTime, OperationType operationType) {}
 
@@ -53,6 +54,18 @@ public class DumConnectorIndexingService {
                 this.dumConnectorIndexingRepository = dumConnectorIndexingRepository;
                 this.dumConnectorIndexingStatsRepository = dumConnectorIndexingStatsRepository;
                 this.connectorDependencies = connectorDependencies;
+        }
+
+        public boolean tryStartProcessing(String source) {
+                return processingSources.add(source);
+        }
+
+        public void finishProcessing(String source) {
+                processingSources.remove(source);
+        }
+
+        public boolean isProcessing(String source) {
+                return processingSources.contains(source);
         }
 
         public void trackIndexingStart(String source, String provider,

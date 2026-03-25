@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -79,6 +80,12 @@ public class DumConnectorApi {
         return status;
     }
 
+    private static Map<String, String> statusAlreadyRunning() {
+        Map<String, String> status = new HashMap<>();
+        status.put(STATUS_KEY, "already running");
+        return status;
+    }
+
     @GetMapping("validate/{source}")
     public DumConnectorValidateDifference validateSource(@PathVariable String source) {
         return dumConnectorSolr.validateContent(source, plugin.getProviderName());
@@ -95,6 +102,9 @@ public class DumConnectorApi {
 
     @GetMapping("index/{name}/all")
     public ResponseEntity<Map<String, String>> indexAll(@PathVariable String name) {
+        if (!indexingService.tryStartProcessing(name)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(statusAlreadyRunning());
+        }
         indexingService.trackIndexingStart(name, plugin.getProviderName(),
                 OperationType.INDEX_ALL);
         plugin.indexAll(name);
@@ -117,6 +127,9 @@ public class DumConnectorApi {
 
     @GetMapping("reindex/{name}/all")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name) {
+        if (!indexingService.tryStartProcessing(name)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(statusAlreadyRunning());
+        }
         indexingService.deleteByProviderAndSource(plugin.getProviderName(), name);
         indexingService.trackIndexingStart(name, plugin.getProviderName(),
                 OperationType.REINDEX_ALL);

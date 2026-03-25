@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -57,8 +58,8 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     private final DumConnectorIndexingService indexingService;
     private final JobItemBatchProcessor batchProcessor;
     private final JobProcessingChain processingChain;
-    private final ConcurrentLinkedQueue<DumJobItemWithSession> queueLinks = new ConcurrentLinkedQueue<>();
-    private final ReadWriteLock processLock = new ReentrantReadWriteLock();
+    private final Map<String, ConcurrentLinkedQueue<DumJobItemWithSession>> queuesBySource = new ConcurrentHashMap<>();
+    private final Map<String, ReadWriteLock> locksBySource = new ConcurrentHashMap<>();
 
     public DumConnectorContextImpl(
             DumConnectorIndexingService indexingService,
@@ -90,9 +91,11 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     public boolean addJobItem(DumJobItemWithSession dumJobItemWithSession) {
         if (dumJobItemWithSession.turSNJobItem() != null &&
                 dumJobItemWithSession.turSNJobItem().getId() != null) {
-            log.info("Adding {} object to payload.", dumJobItemWithSession.turSNJobItem().getId());
-            queueLinks.offer(dumJobItemWithSession);
-            processRemainingJobs();
+            String source = dumJobItemWithSession.session().getSource();
+            log.info("Adding {} object to payload for source '{}'.",
+                    dumJobItemWithSession.turSNJobItem().getId(), source);
+            getQueue(source).offer(dumJobItemWithSession);
+            processRemainingJobs(source);
             return true;
         } else {
             log.warn("Job item or its ID is null. Skipping addition to payload.");
@@ -102,7 +105,9 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
     @Override
     public void finishIndexing(DumConnectorSession session, boolean standalone) {
-        processLock.writeLock().lock();
+        String source = session.getSource();
+        ReadWriteLock lock = getLock(source);
+        lock.writeLock().lock();
         try {
             // Flush any remaining items in the batch processor
             batchProcessor.flush(session);
@@ -112,8 +117,8 @@ public class DumConnectorContextImpl implements DumConnectorContext {
                 deIndexObjects(session);
             }
 
-            // Clear the queue
-            queueLinks.clear();
+            // Clear only the queue for this source
+            queuesBySource.remove(source);
 
             // Save indexing stats if tracked
             if (!standalone) {
@@ -123,7 +128,9 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
             log.info("Indexing process finished for session: {}", session.getTransactionId());
         } finally {
-            processLock.writeLock().unlock();
+            lock.writeLock().unlock();
+            locksBySource.remove(source);
+            indexingService.finishProcessing(source);
         }
     }
 
@@ -133,20 +140,30 @@ public class DumConnectorContextImpl implements DumConnectorContext {
         return indexingService.getIndexingItem(objectId, source, provider);
     }
 
+    private ConcurrentLinkedQueue<DumJobItemWithSession> getQueue(String source) {
+        return queuesBySource.computeIfAbsent(source, k -> new ConcurrentLinkedQueue<>());
+    }
+
+    private ReadWriteLock getLock(String source) {
+        return locksBySource.computeIfAbsent(source, k -> new ReentrantReadWriteLock());
+    }
+
     /**
-     * Processes all remaining jobs in the queue using the processing chain.
+     * Processes all remaining jobs in the queue for a specific source.
      */
-    private void processRemainingJobs() {
-        processLock.readLock().lock();
+    private void processRemainingJobs(String source) {
+        ReadWriteLock lock = getLock(source);
+        ConcurrentLinkedQueue<DumJobItemWithSession> queue = getQueue(source);
+        lock.readLock().lock();
         try {
-            while (!queueLinks.isEmpty()) {
-                DumJobItemWithSession jobItem = queueLinks.poll();
+            while (!queue.isEmpty()) {
+                DumJobItemWithSession jobItem = queue.poll();
                 if (jobItem != null) {
                     processingChain.process(jobItem, batchProcessor);
                 }
             }
         } finally {
-            processLock.readLock().unlock();
+            lock.readLock().unlock();
         }
     }
 
