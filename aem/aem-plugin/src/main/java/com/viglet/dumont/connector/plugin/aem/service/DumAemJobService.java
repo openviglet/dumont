@@ -209,8 +209,15 @@ public class DumAemJobService {
                                                 dumAemSession.getProviderName());
 
                 if (CollectionUtils.isEmpty(indexingItems)) {
-                        log.debug("No indexing items found for contentId: {} in source: {}",
-                                        contentId, dumAemSession.getProviderName());
+                        if (dumAemSession.isStandalone()) {
+                                log.info("No indexing items found for contentId: {} in source: {}. "
+                                                + "Standalone mode: sending deIndex jobs for Author and Publish.",
+                                                contentId, dumAemSession.getProviderName());
+                                createStandaloneDeIndexJobs(dumAemSession, contentId);
+                        } else {
+                                log.debug("No indexing items found for contentId: {} in source: {}",
+                                                contentId, dumAemSession.getProviderName());
+                        }
                         return;
                 }
 
@@ -240,6 +247,41 @@ public class DumAemJobService {
                                                 e.getMessage(), e);
                         }
                 });
+        }
+
+        private void createStandaloneDeIndexJobs(DumAemSession dumAemSession, String contentId) {
+                DumAemConfiguration config = dumAemSession.getConfiguration();
+                Locale locale = config.getDefaultLocale();
+
+                if (config.isAuthor()) {
+                        sendStandaloneDeIndexJob(dumAemSession, contentId, locale,
+                                        config.getAuthorSNSite(), DumAemEnv.AUTHOR.toString());
+                }
+                if (config.isPublish()) {
+                        sendStandaloneDeIndexJob(dumAemSession, contentId, locale,
+                                        config.getPublishSNSite(), PUBLISHING.toString());
+                }
+        }
+
+        private void sendStandaloneDeIndexJob(DumAemSession dumAemSession, String contentId,
+                        Locale locale, String site, String environment) {
+                try {
+                        TurSNJobItem deIndexJobItem = deIndexJob(dumAemSession,
+                                        List.of(site), locale, contentId, environment);
+                        DumJobItemWithSession dumJobItemWithSession = new DumJobItemWithSession(
+                                        deIndexJobItem, dumAemSession,
+                                        Collections.emptySet(), true);
+                        if (dumConnectorContext.addJobItem(dumJobItemWithSession)) {
+                                log.info("Standalone deIndex job queued for contentId: {} env: {}",
+                                                contentId, environment);
+                        } else {
+                                log.error("Failed to queue standalone deIndex job for contentId: {} env: {}",
+                                                contentId, environment);
+                        }
+                } catch (Exception e) {
+                        log.error("Failed to create standalone deIndex job for contentId: {} env: {}. Error: {}",
+                                        contentId, environment, e.getMessage(), e);
+                }
         }
 
         public void prepareIndexObject(DumAemSession dumAemSession,
