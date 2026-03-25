@@ -35,6 +35,7 @@ import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel.OperationType;
 import com.viglet.dumont.connector.scheduled.DumConnectorContentAuditTask;
+import com.viglet.dumont.connector.service.DumConnectorIndexAllByTabService;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.dumont.connector.service.DumConnectorSolrService;
 
@@ -52,14 +53,17 @@ public class DumConnectorApi {
     private final DumConnectorSolrService dumConnectorSolr;
     private final DumConnectorPlugin plugin;
     private final DumConnectorContentAuditTask auditTask;
+    private final DumConnectorIndexAllByTabService indexAllByTabService;
 
     public DumConnectorApi(DumConnectorIndexingService indexingService,
             DumConnectorSolrService dumConnectorSolr, DumConnectorPlugin plugin,
-            DumConnectorContentAuditTask auditTask) {
+            DumConnectorContentAuditTask auditTask,
+            DumConnectorIndexAllByTabService indexAllByTabService) {
         this.indexingService = indexingService;
         this.dumConnectorSolr = dumConnectorSolr;
         this.plugin = plugin;
         this.auditTask = auditTask;
+        this.indexAllByTabService = indexAllByTabService;
     }
 
     @GetMapping("status")
@@ -135,6 +139,14 @@ public class DumConnectorApi {
         indexingService.deleteByProviderAndSourceAndObjectIdIn(plugin.getProviderName(), name,
                 List.of(id));
         plugin.indexById(name, List.of(id));
+        return ResponseEntity.ok(statusSent());
+    }
+
+    @PostMapping("index-all-by-tab/{source}")
+    public ResponseEntity<Map<String, String>> indexAllByTab(@PathVariable String source,
+            @RequestBody Map<String, String> body) {
+        String tab = body.getOrDefault("tab", "");
+        indexAllByTabService.indexAllByTabAsync(source, tab);
         return ResponseEntity.ok(statusSent());
     }
 
