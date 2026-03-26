@@ -17,39 +17,57 @@ package com.viglet.dumont.connector.plugin.aem.command;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.plugin.aem.command.impl.IndexAllCommand;
+import com.viglet.dumont.connector.plugin.aem.command.impl.IndexAllQueryBuilderCommand;
 import com.viglet.dumont.connector.plugin.aem.command.impl.IndexPathsCommand;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemJobService;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Factory for creating indexing commands.
  * Centralizes command creation and ensures proper dependency injection.
- * 
+ *
  * @author Alexandre Oliveira
  * @since 2026.1
  */
+@Slf4j
 @Component
 public class IndexingCommandFactory {
 
     private final AemNodeNavigator nodeNavigator;
     private final DumAemJobService jobService;
+    private final boolean queryBuilderEnabled;
+    private final int parallelism;
 
-    public IndexingCommandFactory(AemNodeNavigator nodeNavigator, DumAemJobService jobService) {
+    public IndexingCommandFactory(
+            AemNodeNavigator nodeNavigator,
+            DumAemJobService jobService,
+            @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled,
+            @Value("${dumont.aem.querybuilder.parallelism:10}") int parallelism) {
         this.nodeNavigator = nodeNavigator;
         this.jobService = jobService;
+        this.queryBuilderEnabled = queryBuilderEnabled;
+        this.parallelism = parallelism;
     }
 
     /**
      * Creates a command to index all content from a source.
-     * 
+     * Uses QueryBuilder API when enabled, otherwise uses infinity.json traversal.
+     *
      * @param session the AEM session
      * @return the index all command
      */
     public IndexingCommand createIndexAllCommand(DumAemSession session) {
+        if (queryBuilderEnabled) {
+            log.info("Using QueryBuilder strategy for source: {}", session.getSource());
+            return new IndexAllQueryBuilderCommand(session, nodeNavigator, parallelism);
+        }
         return new IndexAllCommand(session, nodeNavigator);
     }
 

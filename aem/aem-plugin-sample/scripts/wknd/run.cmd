@@ -8,4 +8,5 @@ java -Dloader.path=%~dp0libs ^
 -Dlogging.level.com.viglet=DEBUG ^
 -Dlogging.level.org.springframework=DEBUG ^
 -Dlogging.level.org.apache=INFO ^
+-Ddumont.aem.querybuilder=true ^
 -jar %~dp0dumont-connector.jar

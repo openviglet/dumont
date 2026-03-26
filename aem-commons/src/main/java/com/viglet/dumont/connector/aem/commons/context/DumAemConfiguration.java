@@ -57,6 +57,7 @@ public class DumAemConfiguration {
   private String publishSNSite;
 
   private String contentType;
+  private boolean queryBuilderEnabled;
 
   @Builder.Default
   private Collection<DumAemLocalePathContext> localePaths = new HashSet<>();
@@ -81,6 +82,7 @@ public class DumAemConfiguration {
     this.publish = dumAemConfiguration.isPublish();
     this.authorSNSite = dumAemConfiguration.getAuthorSNSite();
     this.publishSNSite = dumAemConfiguration.getPublishSNSite();
+    this.queryBuilderEnabled = dumAemConfiguration.isQueryBuilderEnabled();
   }
 
   public DumAemConfiguration(IAemConfiguration iaemConfiguration) {

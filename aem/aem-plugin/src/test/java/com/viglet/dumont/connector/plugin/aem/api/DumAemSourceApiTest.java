@@ -50,6 +50,8 @@ import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSourceLocalePath;
+import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemAttributeSpecificationRepository;
+import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemPluginModelRepository;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourceLocalePathRepository;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourceRepository;
 
@@ -64,6 +66,12 @@ class DumAemSourceApiTest {
     private DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository;
 
     @Mock
+    private DumAemAttributeSpecificationRepository dumAemAttributeSpecificationRepository;
+
+    @Mock
+    private DumAemPluginModelRepository dumAemPluginModelRepository;
+
+    @Mock
     private DumAemPluginProcess dumAemPluginProcess;
 
     private DumAemSourceMapper dumAemSourceMapper;
@@ -76,6 +84,8 @@ class DumAemSourceApiTest {
         api = new DumAemSourceApi(
                 dumAemSourceRepository,
                 dumAemSourceLocalePathRepository,
+                dumAemAttributeSpecificationRepository,
+                dumAemPluginModelRepository,
                 dumAemPluginProcess,
                 dumAemSourceMapper);
     }

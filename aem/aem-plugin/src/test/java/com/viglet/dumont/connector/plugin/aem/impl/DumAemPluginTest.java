@@ -76,7 +76,8 @@ class DumAemPluginTest {
                 dumAemService,
                 dumAemSessionService,
                 dumAemObjectService,
-                aemNodeNavigator);
+                aemNodeNavigator,
+                false);
     }
 
     @Nested

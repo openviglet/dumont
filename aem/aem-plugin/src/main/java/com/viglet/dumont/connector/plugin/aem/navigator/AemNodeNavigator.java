@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemQueryBuilderUtils;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemJobService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemObjectService;
@@ -94,6 +95,20 @@ public class AemNodeNavigator {
         if (session.isRecursive()) {
             navigateChildren(session, aemObject);
         }
+    }
+
+    /**
+     * Processes a single node by path and its infinity.json for indexing.
+     * Used by QueryBuilder-based indexing where paths are already known.
+     *
+     * @param session      the AEM session
+     * @param path         the node path
+     * @param infinityJson the JSON representation of the node
+     */
+    public void processNode(DumAemSession session, String path, JSONObject infinityJson) {
+        DumAemObjectGeneric aemObject = objectService.getDumAemObjectGeneric(
+                path, infinityJson, session.getEvent());
+        processNode(session, aemObject);
     }
 
     /**
@@ -250,6 +265,17 @@ public class AemNodeNavigator {
         }
 
         return paths;
+    }
+
+    /**
+     * Collects all accessible content paths using the AEM QueryBuilder API.
+     * Used for content auditing when QueryBuilder is enabled.
+     *
+     * @param session the AEM session
+     * @return list of accessible content paths
+     */
+    public List<String> collectAccessiblePathsViaQueryBuilder(DumAemSession session) {
+        return DumAemQueryBuilderUtils.queryAllPaths(session.getConfiguration());
     }
 
     private void collectChildPaths(DumAemSession session, DumAemObjectGeneric aemObject, List<String> paths) {

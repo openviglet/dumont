@@ -180,8 +180,9 @@ public class DumAemCommonsUtils {
 
     public static List<TurSNAttributeSpec> getDefinitionFromModel(
             List<TurSNAttributeSpec> dumSNAttributeSpecList, Map<String, Object> targetAttrMap) {
+        List<TurSNAttributeSpec> specListCopy = List.copyOf(dumSNAttributeSpecList);
         List<TurSNAttributeSpec> dumSNAttributeSpecFromModelList = new ArrayList<>();
-        targetAttrMap.forEach((key, value) -> dumSNAttributeSpecList.stream()
+        targetAttrMap.forEach((key, value) -> specListCopy.stream()
                 .filter(dumSNAttributeSpec -> dumSNAttributeSpec.getName() != null
                         && dumSNAttributeSpec.getName().equals(key))
                 .findFirst().ifPresent(dumSNAttributeSpecFromModelList::add));
@@ -276,6 +277,34 @@ public class DumAemCommonsUtils {
             return getInfinityJsonNotFound(infinityJsonUrl);
         }
 
+    }
+
+    public static Optional<JSONObject> getDepthJson(String path,
+            DumAemConfiguration dumAemConfiguration, int depth) {
+        String depthJsonUrl = path.endsWith(JSON)
+                ? "%s%s".formatted(dumAemConfiguration.getUrl(), path)
+                : "%s%s.%d.json".formatted(dumAemConfiguration.getUrl(), path, depth);
+        try {
+            return getResponseBody(depthJsonUrl, dumAemConfiguration, false)
+                    .<Optional<JSONObject>>map(responseBody -> {
+                        if (isResponseBodyJSONArray(responseBody) && !path.endsWith(JSON)) {
+                            try {
+                                return getDepthJson(
+                                        new JSONArray(responseBody).toList().getFirst().toString(),
+                                        dumAemConfiguration, depth);
+                            } catch (JSONException e) {
+                                log.error(e.getMessage(), e);
+                                return getInfinityJsonNotFound(depthJsonUrl);
+                            }
+                        } else if (isResponseBodyJSONObject(responseBody)) {
+                            return Optional.of(new JSONObject(responseBody));
+                        }
+                        return getInfinityJsonNotFound(depthJsonUrl);
+                    }).orElseGet(() -> getInfinityJsonNotFound(depthJsonUrl));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return getInfinityJsonNotFound(depthJsonUrl);
+        }
     }
 
     private static Optional<JSONObject> getInfinityJsonNotFound(String infinityJsonUrl) {

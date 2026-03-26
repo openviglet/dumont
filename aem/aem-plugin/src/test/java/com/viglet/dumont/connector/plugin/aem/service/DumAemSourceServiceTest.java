@@ -61,7 +61,8 @@ class DumAemSourceServiceTest {
         dumAemSourceService = new DumAemSourceService(
                 dumAemSourceRepository,
                 dumAemPluginSystemRepository,
-                dumAemContentMappingService);
+                dumAemContentMappingService,
+                false);
     }
 
     @Nested

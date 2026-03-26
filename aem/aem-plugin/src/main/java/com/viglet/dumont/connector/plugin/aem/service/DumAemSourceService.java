@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.viglet.dumont.commons.cache.DumCustomClassCache;
@@ -28,13 +29,16 @@ public class DumAemSourceService {
     private final DumAemSourceRepository dumAemSourceRepository;
     private final DumAemPluginSystemRepository dumAemPluginSystemRepository;
     private final DumAemContentMappingService dumAemContentMappingService;
+    private final boolean queryBuilderEnabled;
 
     public DumAemSourceService(DumAemSourceRepository dumAemSourceRepository,
             DumAemPluginSystemRepository dumAemPluginSystemRepository,
-            DumAemContentMappingService dumAemContentMappingService) {
+            DumAemContentMappingService dumAemContentMappingService,
+            @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled) {
         this.dumAemSourceRepository = dumAemSourceRepository;
         this.dumAemPluginSystemRepository = dumAemPluginSystemRepository;
         this.dumAemContentMappingService = dumAemContentMappingService;
+        this.queryBuilderEnabled = queryBuilderEnabled;
     }
 
     public List<DumAemSource> getAllSources() {
@@ -68,7 +72,11 @@ public class DumAemSourceService {
     }
 
     public DumAemConfiguration getDumAemConfiguration(DumAemSource dumAemSource) {
-        return new DumAemConfiguration(new AemPluginHandlerConfiguration(dumAemSource));
+        DumAemConfiguration config = new DumAemConfiguration(
+                new AemPluginHandlerConfiguration(dumAemSource));
+        return config.toBuilder()
+                .queryBuilderEnabled(queryBuilderEnabled)
+                .build();
     }
 
     public boolean isPublish(DumAemConfiguration configuration) {

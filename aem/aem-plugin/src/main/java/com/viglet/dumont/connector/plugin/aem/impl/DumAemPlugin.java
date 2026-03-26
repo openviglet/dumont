@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -51,19 +52,22 @@ public class DumAemPlugin implements DumConnectorPlugin {
     private final DumAemSessionService dumAemSessionService;
     private final DumAemObjectService dumAemObjectService;
     private final AemNodeNavigator aemNodeNavigator;
+    private final boolean queryBuilderEnabled;
 
     public DumAemPlugin(DumAemPluginProcess dumAemPluginProcess,
             DumAemSourceService dumAemSourceService,
             DumAemService dumAemService,
             DumAemSessionService dumAemSessionService,
             DumAemObjectService dumAemObjectService,
-            AemNodeNavigator aemNodeNavigator) {
+            AemNodeNavigator aemNodeNavigator,
+            @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled) {
         this.dumAemPluginProcess = dumAemPluginProcess;
         this.dumAemSourceService = dumAemSourceService;
         this.dumAemService = dumAemService;
         this.dumAemSessionService = dumAemSessionService;
         this.dumAemObjectService = dumAemObjectService;
         this.aemNodeNavigator = aemNodeNavigator;
+        this.queryBuilderEnabled = queryBuilderEnabled;
     }
 
     @Override
@@ -136,6 +140,11 @@ public class DumAemPlugin implements DumConnectorPlugin {
         return dumAemSourceService.getDumAemSourceByName(source)
                 .map(dumAemSource -> {
                     DumAemSession session = dumAemSessionService.getDumAemSession(dumAemSource, false);
+
+                    if (queryBuilderEnabled) {
+                        return aemNodeNavigator.collectAccessiblePathsViaQueryBuilder(session);
+                    }
+
                     DumAemConfiguration config = session.getConfiguration();
                     String rootPath = config.getRootPath();
 

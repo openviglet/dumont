@@ -54,7 +54,7 @@ class IndexingCommandFactoryTest {
 
     @BeforeEach
     void setUp() {
-        factory = new IndexingCommandFactory(nodeNavigator, jobService);
+        factory = new IndexingCommandFactory(nodeNavigator, jobService, false, 10);
 
         DumAemConfiguration configuration = DumAemConfiguration.builder()
                 .rootPath("/content/mysite")
