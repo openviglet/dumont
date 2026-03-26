@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
+import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemAttributeSpecificationRepository;
+import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemPluginModelRepository;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourceLocalePathRepository;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourceRepository;
 
@@ -49,15 +51,21 @@ public class DumAemSourceApi {
 
     private final DumAemSourceRepository dumAemSourceRepository;
     private final DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository;
+    private final DumAemAttributeSpecificationRepository dumAemAttributeSpecificationRepository;
+    private final DumAemPluginModelRepository dumAemPluginModelRepository;
     private final DumAemPluginProcess dumAemPluginProcess;
     private final DumAemSourceMapper dumAemSourceMapper;
 
     public DumAemSourceApi(DumAemSourceRepository dumAemSourceRepository,
             DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository,
+            DumAemAttributeSpecificationRepository dumAemAttributeSpecificationRepository,
+            DumAemPluginModelRepository dumAemPluginModelRepository,
             DumAemPluginProcess dumAemPluginProcess,
             DumAemSourceMapper dumAemSourceMapper) {
         this.dumAemSourceRepository = dumAemSourceRepository;
         this.dumAemSourceLocalePathRepository = dumAemSourceLocalePathRepository;
+        this.dumAemAttributeSpecificationRepository = dumAemAttributeSpecificationRepository;
+        this.dumAemPluginModelRepository = dumAemPluginModelRepository;
         this.dumAemPluginProcess = dumAemPluginProcess;
         this.dumAemSourceMapper = dumAemSourceMapper;
     }
@@ -83,10 +91,21 @@ public class DumAemSourceApi {
                         dumAemSource.getLocalePaths().clear();
                         dumAemSource.getLocalePaths().addAll(localePaths);
                     });
+            dumAemAttributeSpecificationRepository.findByDumAemSource(dumAemSource)
+                    .ifPresent(specs -> {
+                        dumAemSource.getAttributeSpecifications().clear();
+                        dumAemSource.getAttributeSpecifications().addAll(specs);
+                    });
+            var models = dumAemPluginModelRepository.findByDumAemSource(dumAemSource);
+            if (!models.isEmpty()) {
+                dumAemSource.getModels().clear();
+                dumAemSource.getModels().addAll(models);
+            }
             return dumAemSource;
         }).orElse(new DumAemSource());
     }
 
+    @Transactional
     @Operation(summary = "Update a AEM Source")
     @PutMapping("/{id}")
     public ResponseEntity<DumAemSource> dumAemSourceUpdate(@PathVariable String id,
@@ -104,6 +123,24 @@ public class DumAemSourceApi {
                 dumAemSource.getLocalePaths().forEach(localePath -> {
                     localePath.setDumAemSource(dumAemSourceEdit);
                     dumAemSourceEdit.getLocalePaths().add(localePath);
+                });
+            }
+
+            // Update attributeSpecifications collection in-place to respect orphanRemoval
+            dumAemSourceEdit.getAttributeSpecifications().clear();
+            if (dumAemSource.getAttributeSpecifications() != null) {
+                dumAemSource.getAttributeSpecifications().forEach(spec -> {
+                    spec.setDumAemSource(dumAemSourceEdit);
+                    dumAemSourceEdit.getAttributeSpecifications().add(spec);
+                });
+            }
+
+            // Update models collection in-place to respect orphanRemoval
+            dumAemSourceEdit.getModels().clear();
+            if (dumAemSource.getModels() != null) {
+                dumAemSource.getModels().forEach(model -> {
+                    model.setDumAemSource(dumAemSourceEdit);
+                    dumAemSourceEdit.getModels().add(model);
                 });
             }
 
@@ -126,6 +163,8 @@ public class DumAemSourceApi {
     @PostMapping
     public DumAemSource dumAemSourceAdd(@RequestBody DumAemSource dumAemSource) {
         dumAemSource.getLocalePaths().forEach(localePath -> localePath.setDumAemSource(dumAemSource));
+        dumAemSource.getAttributeSpecifications().forEach(spec -> spec.setDumAemSource(dumAemSource));
+        dumAemSource.getModels().forEach(model -> model.setDumAemSource(dumAemSource));
         this.dumAemSourceRepository.save(dumAemSource);
         return dumAemSource;
     }
