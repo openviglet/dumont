@@ -22,8 +22,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -41,11 +46,17 @@ import lombok.extern.slf4j.Slf4j;
 public class DumConnectorContentAuditTask {
     private final DumConnectorPlugin plugin;
     private final DumConnectorIndexingService indexingService;
+    private final boolean queryBuilderEnabled;
+    private final int parallelism;
 
     public DumConnectorContentAuditTask(DumConnectorPlugin plugin,
-            DumConnectorIndexingService indexingService) {
+            DumConnectorIndexingService indexingService,
+            @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled,
+            @Value("${dumont.aem.querybuilder.parallelism:10}") int parallelism) {
         this.plugin = plugin;
         this.indexingService = indexingService;
+        this.queryBuilderEnabled = queryBuilderEnabled;
+        this.parallelism = Math.max(1, parallelism);
     }
 
     @Scheduled(cron = "${dumont.audit.cron:-}", zone = "${dumont.audit.cron.zone:UTC}")
@@ -73,23 +84,23 @@ public class DumConnectorContentAuditTask {
     }
 
     private void auditSource(String source, String provider) {
-        log.info("Auditing source '{}'", source);
+        log.info("Auditing source '{}' (queryBuilder={}, parallelism={})",
+                source, queryBuilderEnabled, parallelism);
         Date startTime = new Date();
         try {
             List<String> discoveredIds = plugin.discoverContentIds(source);
-            int created = 0;
-            Set<String> allEnvironments = new LinkedHashSet<>();
-            Set<String> allSites = new LinkedHashSet<>();
-            Locale firstLocale = null;
 
-            for (String objectId : discoveredIds) {
-                AuditResult result = auditObject(objectId, source, provider);
-                created += result.created;
-                allEnvironments.addAll(result.environments);
-                allSites.addAll(result.sites);
-                if (firstLocale == null && result.locale != null) {
-                    firstLocale = result.locale;
-                }
+            AtomicInteger created = new AtomicInteger();
+            ConcurrentLinkedQueue<String> allEnvironments = new ConcurrentLinkedQueue<>();
+            ConcurrentLinkedQueue<String> allSites = new ConcurrentLinkedQueue<>();
+            AtomicReference<Locale> firstLocale = new AtomicReference<>();
+
+            if (queryBuilderEnabled) {
+                auditParallel(discoveredIds, source, provider, created,
+                        allEnvironments, allSites, firstLocale);
+            } else {
+                auditSequential(discoveredIds, source, provider, created,
+                        allEnvironments, allSites, firstLocale);
             }
 
             Date endTime = new Date();
@@ -105,15 +116,53 @@ public class DumConnectorContentAuditTask {
                     .endTime(endTime)
                     .documentCount(discoveredIds.size())
                     .documentsPerMinute(docsPerMinute)
-                    .environment(String.join(", ", allEnvironments))
-                    .locale(firstLocale)
-                    .sites(new ArrayList<>(allSites))
+                    .environment(String.join(", ", new LinkedHashSet<>(allEnvironments)))
+                    .locale(firstLocale.get())
+                    .sites(new ArrayList<>(new LinkedHashSet<>(allSites)))
                     .build());
 
             log.info("Audit for source '{}': discovered={}, new NOT_PROCESSED records={}, duration={}ms",
-                    source, discoveredIds.size(), created, durationMs);
+                    source, discoveredIds.size(), created.get(), durationMs);
         } catch (Exception e) {
             log.error("Error auditing source '{}': {}", source, e.getMessage(), e);
+        }
+    }
+
+    private void auditParallel(List<String> discoveredIds, String source, String provider,
+            AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
+            ConcurrentLinkedQueue<String> allSites, AtomicReference<Locale> firstLocale) {
+        try (ForkJoinPool pool = new ForkJoinPool(parallelism)) {
+            pool.submit(() -> discoveredIds.parallelStream()
+                    .forEach(objectId -> processAuditObject(objectId, source, provider,
+                            created, allEnvironments, allSites, firstLocale))).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Audit interrupted for source '{}'", source, e);
+        } catch (Exception e) {
+            log.error("Parallel audit error for source '{}'", source, e);
+        }
+    }
+
+    private void auditSequential(List<String> discoveredIds, String source, String provider,
+            AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
+            ConcurrentLinkedQueue<String> allSites, AtomicReference<Locale> firstLocale) {
+        for (String objectId : discoveredIds) {
+            processAuditObject(objectId, source, provider, created,
+                    allEnvironments, allSites, firstLocale);
+        }
+    }
+
+    private void processAuditObject(String objectId, String source, String provider,
+            AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
+            ConcurrentLinkedQueue<String> allSites, AtomicReference<Locale> firstLocale) {
+        try {
+            AuditResult result = auditObject(objectId, source, provider);
+            created.addAndGet(result.created);
+            allEnvironments.addAll(result.environments);
+            allSites.addAll(result.sites);
+            firstLocale.compareAndSet(null, result.locale);
+        } catch (Exception e) {
+            log.error("Error auditing objectId '{}': {}", objectId, e.getMessage(), e);
         }
     }
 
