@@ -23,7 +23,7 @@
     {
       "name": "dumont.indexing.provider",
       "type": "java.lang.String",
-      "description": "The indexing provider to use for content indexing (e.g. turing, solr, turing)."
+      "description": "The indexing provider to use for content indexing (e.g. turing, solr, elasticsearch)."
     },
     {
       "name": "dumont.job.size",
@@ -58,7 +58,57 @@
     {
       "name": "dumont.reactive.parallelism",
       "type": "java.lang.String",
-      "description": "A description for 'dumont.reactive.parallelism'"
+      "description": "Number of parallel threads used for reactive indexing processing."
+    },
+    {
+      "name": "dumont.audit.cron",
+      "type": "java.lang.String",
+      "description": "Cron expression to schedule content audit job execution."
+    },
+    {
+      "name": "dumont.audit.cron.zone",
+      "type": "java.lang.String",
+      "description": "Timezone used for audit cron expression evaluation."
+    },
+    {
+      "name": "dumont.aem.querybuilder",
+      "type": "java.lang.String",
+      "description": "Enable or disable AEM QueryBuilder-based content indexing."
+    },
+    {
+      "name": "dumont.aem.querybuilder.parallelism",
+      "type": "java.lang.String",
+      "description": "Number of parallel threads used for AEM QueryBuilder indexing."
+    },
+    {
+      "name": "dumont.indexing.solr.url",
+      "type": "java.lang.String",
+      "description": "Base URL of the Solr instance used for direct content indexing."
+    },
+    {
+      "name": "dumont.indexing.solr.collection",
+      "type": "java.lang.String",
+      "description": "Name of the Solr collection where indexed content is stored."
+    },
+    {
+      "name": "dumont.indexing.elasticsearch.url",
+      "type": "java.lang.String",
+      "description": "Base URL of the Elasticsearch instance used for direct content indexing."
+    },
+    {
+      "name": "dumont.indexing.elasticsearch.index",
+      "type": "java.lang.String",
+      "description": "Name of the Elasticsearch index where indexed content is stored."
+    },
+    {
+      "name": "dumont.indexing.elasticsearch.username",
+      "type": "java.lang.String",
+      "description": "Username for authenticating with the Elasticsearch instance."
+    },
+    {
+      "name": "dumont.indexing.elasticsearch.password",
+      "type": "java.lang.String",
+      "description": "Password for authenticating with the Elasticsearch instance."
     }
   ]
 }
