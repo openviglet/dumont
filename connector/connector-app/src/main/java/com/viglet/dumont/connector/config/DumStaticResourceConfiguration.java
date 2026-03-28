@@ -21,17 +21,27 @@
 
 package com.viglet.dumont.connector.config;
 
+import java.io.IOException;
+
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.webmvc.autoconfigure.DispatcherServletAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 
 @Configuration
 @AutoConfigureAfter(DispatcherServletAutoConfiguration.class)
 public class DumStaticResourceConfiguration implements WebMvcConfigurer {
+    private static final String FORWARD_DUMONT_INDEX = "forward:/dumont/index.html";
+
     @Value("${dumont.allowedOrigins:http://localhost:5173,http://localhost:2700}")
     private String allowedOrigins;
 
@@ -39,6 +49,32 @@ public class DumStaticResourceConfiguration implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**").allowedOrigins(allowedOrigins).allowedMethods("PUT", "DELETE", "GET", "POST")
                 .allowCredentials(false).maxAge(3600);
+        registry.addMapping("/dumont/**").allowedOrigins(allowedOrigins).allowedMethods("GET")
+                .allowCredentials(false).maxAge(3600);
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/dumont").setViewName(FORWARD_DUMONT_INDEX);
+        registry.addViewController("/dumont/").setViewName(FORWARD_DUMONT_INDEX);
+    }
+
+    @Override
+    public void addResourceHandlers(@NotNull ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/dumont/**")
+                .addResourceLocations("classpath:/public/dumont/")
+                .setCacheControl(org.springframework.http.CacheControl.noCache())
+                .resourceChain(true)
+                .addResolver(new PathResourceResolver() {
+                    @Override
+                    protected Resource getResource(@NotNull String resourcePath, @NotNull Resource location)
+                            throws IOException {
+                        Resource requestedResource = location.createRelative(resourcePath);
+                        return requestedResource.exists() && requestedResource.isReadable()
+                                ? requestedResource
+                                : new ClassPathResource("/public/dumont/index.html");
+                    }
+                });
     }
 
     @Override

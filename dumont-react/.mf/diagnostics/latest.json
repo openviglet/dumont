@@ -1,0 +1,10 @@
+{
+  "latestErrorEvent": {
+    "code": "TYPE-001",
+    "message": "Failed to generate type declaration. Execute the below cmd to reproduce and fix the error. #TYPE-001\nargs: {\"cmd\":\"npx tsc --project D:\\\\Git\\\\viglet\\\\dumont\\\\dumont-react\\\\node_modules\\\\.federation\\\\tsconfig.3a1daf9fe5376d3528b8483b2f9f8d7c.json\"}\nView the docs to see how to solve: https://module-federation.io/guide/troubleshooting/type#type-001",
+    "args": {
+      "cmd": "npx tsc --project D:\\Git\\viglet\\dumont\\dumont-react\\node_modules\\.federation\\tsconfig.3a1daf9fe5376d3528b8483b2f9f8d7c.json"
+    },
+    "timestamp": 1774711666456
+  }
+}
