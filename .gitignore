@@ -33,3 +33,5 @@ hs_err_pid*
 dependency-reduced-pom.xml
 /dist/
 /.claude
+/connector/connector-app/src/main/resources/public
+/dumont-react
