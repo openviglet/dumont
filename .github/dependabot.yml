@@ -9,7 +9,7 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
-    target-branch: "2026.1"
+    target-branch: "2026.2"
     open-pull-requests-limit: 15
     groups:
       java:
