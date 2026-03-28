@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.viglet.dumont</groupId>
         <artifactId>dumont</artifactId>
-        <version>2026.1.19</version>
+        <version>2026.2.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>dumont-commons</artifactId>
@@ -61,7 +61,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
         </dependency>
-<dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
         </dependency>
