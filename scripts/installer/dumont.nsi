@@ -7,8 +7,6 @@
 
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
-!include "WordFunc.nsh"
-!include "WinMessages.nsh"
 !include "nsDialogs.nsh"
 !include "LogicLib.nsh"
 
@@ -272,23 +270,12 @@ Section "Dumont DEP" SecMain
     CreateShortcut "$SMPROGRAMS\Viglet Dumont\Uninstall.lnk" \
         "$INSTDIR\uninstall.exe"
 
-    ; Add bin to system PATH via registry
-    ReadRegStr $0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path"
-    StrCpy $0 "$0;$INSTDIR\bin"
-    WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path" "$0"
-    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 SectionEnd
 
 ; --------------------------------------------------------------------------
 ; Uninstaller Section
 ; --------------------------------------------------------------------------
 Section "Uninstall"
-    ; Remove from system PATH
-    ReadRegStr $0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path"
-    ${WordReplace} "$0" ";$INSTDIR\bin" "" "+" $0
-    WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path" "$0"
-    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-
     ; Remove files
     RMDir /r "$INSTDIR\connector"
     RMDir /r "$INSTDIR\db"
