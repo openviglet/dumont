@@ -233,10 +233,10 @@ Function ProviderPageCreate
         "Choose which search engine Dumont will use to index content:"
     Pop $0
 
-    ${NSD_CreateRadioButton} 10u 32u 100% 12u "Turing"
+    ${NSD_CreateRadioButton} 10u 32u 100% 12u "Turing ES"
     Pop $RadioTuring
 
-    ${NSD_CreateLabel} 24u 46u 100% 12u "Viglet Turing AI platform (recommended)"
+    ${NSD_CreateLabel} 24u 46u 100% 12u "Viglet Turing ES platform (recommended)"
     Pop $0
 
     ${NSD_CreateRadioButton} 10u 66u 100% 12u "Elasticsearch"
