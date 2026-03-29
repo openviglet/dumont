@@ -42,6 +42,34 @@ Var JavaDirText
 Var JavaDirBrowse
 Var JavaStatusLabel
 
+; Indexing provider variables
+Var ProviderDialog
+Var RadioTuring
+Var RadioElasticsearch
+Var RadioSolr
+Var IndexingProvider        ; "turing", "elasticsearch" or "solr"
+
+; Provider detail page
+Var ProviderDetailDialog
+
+; Turing fields
+Var TuringUrl
+Var TuringApiKey
+Var TuringUrlText
+Var TuringApiKeyText
+
+; Elasticsearch fields
+Var ElasticsearchUrl
+Var ElasticsearchIndex
+Var ElasticsearchUrlText
+Var ElasticsearchIndexText
+
+; Solr fields
+Var SolrUrl
+Var SolrCore
+Var SolrUrlText
+Var SolrCoreText
+
 ; --------------------------------------------------------------------------
 ; MUI Settings
 ; --------------------------------------------------------------------------
@@ -61,6 +89,8 @@ Var JavaStatusLabel
 !insertmacro MUI_PAGE_LICENSE "..\..\LICENSE"
 !insertmacro MUI_PAGE_DIRECTORY
 Page custom JavaPageCreate JavaPageLeave
+Page custom ProviderPageCreate ProviderPageLeave
+Page custom ProviderDetailPageCreate ProviderDetailPageLeave
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 
@@ -183,6 +213,172 @@ Function JavaPageLeave
 FunctionEnd
 
 ; --------------------------------------------------------------------------
+; Indexing Provider Page - Choose between Turing, Elasticsearch, Solr
+; --------------------------------------------------------------------------
+Function ProviderPageCreate
+    !insertmacro MUI_HEADER_TEXT "Indexing Provider" "Select the search engine to use for indexing."
+
+    nsDialogs::Create 1018
+    Pop $ProviderDialog
+    ${If} $ProviderDialog == error
+        Abort
+    ${EndIf}
+
+    ; Default to turing if not set
+    ${If} $IndexingProvider == ""
+        StrCpy $IndexingProvider "turing"
+    ${EndIf}
+
+    ${NSD_CreateLabel} 0 0 100% 24u \
+        "Choose which search engine Dumont will use to index content:"
+    Pop $0
+
+    ${NSD_CreateRadioButton} 10u 32u 100% 12u "Turing"
+    Pop $RadioTuring
+
+    ${NSD_CreateLabel} 24u 46u 100% 12u "Viglet Turing AI platform (recommended)"
+    Pop $0
+
+    ${NSD_CreateRadioButton} 10u 66u 100% 12u "Elasticsearch"
+    Pop $RadioElasticsearch
+
+    ${NSD_CreateLabel} 24u 80u 100% 12u "Connect directly to an Elasticsearch cluster"
+    Pop $0
+
+    ${NSD_CreateRadioButton} 10u 100u 100% 12u "Apache Solr"
+    Pop $RadioSolr
+
+    ${NSD_CreateLabel} 24u 114u 100% 12u "Connect directly to an Apache Solr instance"
+    Pop $0
+
+    ; Restore previous selection
+    ${If} $IndexingProvider == "elasticsearch"
+        ${NSD_Check} $RadioElasticsearch
+    ${ElseIf} $IndexingProvider == "solr"
+        ${NSD_Check} $RadioSolr
+    ${Else}
+        ${NSD_Check} $RadioTuring
+    ${EndIf}
+
+    nsDialogs::Show
+FunctionEnd
+
+Function ProviderPageLeave
+    ${NSD_GetState} $RadioTuring $0
+    ${If} $0 == ${BST_CHECKED}
+        StrCpy $IndexingProvider "turing"
+    ${EndIf}
+
+    ${NSD_GetState} $RadioElasticsearch $0
+    ${If} $0 == ${BST_CHECKED}
+        StrCpy $IndexingProvider "elasticsearch"
+    ${EndIf}
+
+    ${NSD_GetState} $RadioSolr $0
+    ${If} $0 == ${BST_CHECKED}
+        StrCpy $IndexingProvider "solr"
+    ${EndIf}
+FunctionEnd
+
+; --------------------------------------------------------------------------
+; Provider Detail Page - Collect connection details for chosen provider
+; --------------------------------------------------------------------------
+Function ProviderDetailPageCreate
+    ${If} $IndexingProvider == "turing"
+        !insertmacro MUI_HEADER_TEXT "Turing Configuration" "Enter the Turing server connection details."
+    ${ElseIf} $IndexingProvider == "elasticsearch"
+        !insertmacro MUI_HEADER_TEXT "Elasticsearch Configuration" "Enter the Elasticsearch connection details."
+    ${Else}
+        !insertmacro MUI_HEADER_TEXT "Apache Solr Configuration" "Enter the Solr connection details."
+    ${EndIf}
+
+    nsDialogs::Create 1018
+    Pop $ProviderDetailDialog
+    ${If} $ProviderDetailDialog == error
+        Abort
+    ${EndIf}
+
+    ; --- Turing fields ---
+    ${If} $IndexingProvider == "turing"
+        ; Default values
+        ${If} $TuringUrl == ""
+            StrCpy $TuringUrl "http://localhost:2700"
+        ${EndIf}
+
+        ${NSD_CreateLabel} 0 0 100% 12u "Turing URL:"
+        Pop $0
+
+        ${NSD_CreateText} 0 14u 100% 12u "$TuringUrl"
+        Pop $TuringUrlText
+
+        ${NSD_CreateLabel} 0 36u 100% 12u "API Key:"
+        Pop $0
+
+        ${NSD_CreateText} 0 50u 100% 12u "$TuringApiKey"
+        Pop $TuringApiKeyText
+    ${EndIf}
+
+    ; --- Elasticsearch fields ---
+    ${If} $IndexingProvider == "elasticsearch"
+        ${If} $ElasticsearchUrl == ""
+            StrCpy $ElasticsearchUrl "http://localhost:9200"
+        ${EndIf}
+        ${If} $ElasticsearchIndex == ""
+            StrCpy $ElasticsearchIndex "dumont"
+        ${EndIf}
+
+        ${NSD_CreateLabel} 0 0 100% 12u "Elasticsearch URL:"
+        Pop $0
+
+        ${NSD_CreateText} 0 14u 100% 12u "$ElasticsearchUrl"
+        Pop $ElasticsearchUrlText
+
+        ${NSD_CreateLabel} 0 36u 100% 12u "Index name:"
+        Pop $0
+
+        ${NSD_CreateText} 0 50u 100% 12u "$ElasticsearchIndex"
+        Pop $ElasticsearchIndexText
+    ${EndIf}
+
+    ; --- Solr fields ---
+    ${If} $IndexingProvider == "solr"
+        ${If} $SolrUrl == ""
+            StrCpy $SolrUrl "http://localhost:8983/solr"
+        ${EndIf}
+        ${If} $SolrCore == ""
+            StrCpy $SolrCore "dumont"
+        ${EndIf}
+
+        ${NSD_CreateLabel} 0 0 100% 12u "Solr URL:"
+        Pop $0
+
+        ${NSD_CreateText} 0 14u 100% 12u "$SolrUrl"
+        Pop $SolrUrlText
+
+        ${NSD_CreateLabel} 0 36u 100% 12u "Core name:"
+        Pop $0
+
+        ${NSD_CreateText} 0 50u 100% 12u "$SolrCore"
+        Pop $SolrCoreText
+    ${EndIf}
+
+    nsDialogs::Show
+FunctionEnd
+
+Function ProviderDetailPageLeave
+    ${If} $IndexingProvider == "turing"
+        ${NSD_GetText} $TuringUrlText $TuringUrl
+        ${NSD_GetText} $TuringApiKeyText $TuringApiKey
+    ${ElseIf} $IndexingProvider == "elasticsearch"
+        ${NSD_GetText} $ElasticsearchUrlText $ElasticsearchUrl
+        ${NSD_GetText} $ElasticsearchIndexText $ElasticsearchIndex
+    ${Else}
+        ${NSD_GetText} $SolrUrlText $SolrUrl
+        ${NSD_GetText} $SolrCoreText $SolrCore
+    ${EndIf}
+FunctionEnd
+
+; --------------------------------------------------------------------------
 ; Installer Section
 ; --------------------------------------------------------------------------
 Section "Dumont DEP" SecMain
@@ -195,7 +391,35 @@ Section "Dumont DEP" SecMain
     ; Connector engine
     SetOutPath "$INSTDIR\connector"
     File "${STAGE}\connector\dumont-connector.jar"
-    File "${STAGE}\connector\dumont-connector.properties"
+
+    ; Write dumont-connector.properties with user-selected indexing provider
+    FileOpen $0 "$INSTDIR\connector\dumont-connector.properties" w
+    FileWrite $0 "# Dumont Connector - Configuration$\r$\n"
+    FileWrite $0 "dumont.aem.querybuilder=true$\r$\n"
+    FileWrite $0 "dumont.aem.querybuilder.parallelism=10$\r$\n"
+    FileWrite $0 "$\r$\n"
+    FileWrite $0 "# Indexing provider (options: turing, elasticsearch, solr)$\r$\n"
+    FileWrite $0 "dumont.indexing.provider=$IndexingProvider$\r$\n"
+    FileWrite $0 "$\r$\n"
+
+    ${If} $IndexingProvider == "turing"
+        FileWrite $0 "# Turing connection$\r$\n"
+        FileWrite $0 "turing.url=$TuringUrl$\r$\n"
+        FileWrite $0 "turing.apiKey=$TuringApiKey$\r$\n"
+    ${ElseIf} $IndexingProvider == "elasticsearch"
+        FileWrite $0 "# Elasticsearch connection$\r$\n"
+        FileWrite $0 "dumont.indexing.elasticsearch.url=$ElasticsearchUrl$\r$\n"
+        FileWrite $0 "dumont.indexing.elasticsearch.index=$ElasticsearchIndex$\r$\n"
+    ${Else}
+        FileWrite $0 "# Solr connection$\r$\n"
+        FileWrite $0 "dumont.indexing.solr.url=$SolrUrl$\r$\n"
+        FileWrite $0 "dumont.indexing.solr.core=$SolrCore$\r$\n"
+    ${EndIf}
+
+    FileWrite $0 "$\r$\n"
+    FileWrite $0 "# Server port (use different ports for multiple connector instances)$\r$\n"
+    FileWrite $0 "server.port=30130$\r$\n"
+    FileClose $0
 
     ; AEM plugin
     SetOutPath "$INSTDIR\connector\libs\aem"
