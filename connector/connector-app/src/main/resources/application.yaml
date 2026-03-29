@@ -18,7 +18,7 @@ dumont:
   dependencies.enabled: false
   reactive.indexing: false
   reactive.parallelism: 10
-  aem.querybuilder: false
+  aem.querybuilder: true
   aem.querybuilder.parallelism: 10
   scheduler:
     enabled: false
