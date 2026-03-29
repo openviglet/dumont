@@ -26,8 +26,9 @@ SetCompressor /SOLID lzma
 ; --------------------------------------------------------------------------
 ; Version info
 ; --------------------------------------------------------------------------
-VIProductVersion "1.0.0.0"
+VIProductVersion "2026.2.1.0"
 VIAddVersionKey "ProductName" "Viglet Dumont DEP"
+VIAddVersionKey "FileVersion" "2026.2.1.0"
 VIAddVersionKey "CompanyName" "Viglet"
 VIAddVersionKey "FileDescription" "Viglet Dumont DEP Installer"
 VIAddVersionKey "LegalCopyright" "Apache License 2.0"
