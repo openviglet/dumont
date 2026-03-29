@@ -190,40 +190,40 @@ Section "Dumont DEP" SecMain
     SectionIn RO
 
     SetOutPath "$INSTDIR"
-    File "..\config\README.txt"
+    File "${STAGE}\README.txt"
     File "dumont.ico"
 
     ; Connector engine
     SetOutPath "$INSTDIR\connector"
-    File "..\..\connector\connector-app\target\dumont-connector.jar"
-    File "..\config\dumont-connector.properties"
+    File "${STAGE}\connector\dumont-connector.jar"
+    File "${STAGE}\connector\dumont-connector.properties"
 
     ; AEM plugin
     SetOutPath "$INSTDIR\connector\libs\aem"
-    File "..\..\aem\aem-plugin\target\aem-plugin.jar"
+    File "${STAGE}\connector\libs\aem\aem-plugin.jar"
 
     ; Web Crawler plugin
     SetOutPath "$INSTDIR\connector\libs\webcrawler"
-    File "..\..\web-crawler\wc-plugin\target\web-crawler-plugin.jar"
+    File "${STAGE}\connector\libs\webcrawler\web-crawler-plugin.jar"
 
     ; Database CLI
     SetOutPath "$INSTDIR\db"
-    File "..\..\db\db-app\target\dumont-db.jar"
+    File "${STAGE}\db\dumont-db.jar"
 
     ; Filesystem CLI
     SetOutPath "$INSTDIR\filesystem"
-    File "..\..\filesystem\fs-connector\target\dumont-filesystem.jar"
+    File "${STAGE}\filesystem\dumont-filesystem.jar"
 
     ; Bin scripts
     SetOutPath "$INSTDIR\bin"
-    File "..\bin\dumont-aem.sh"
-    File "..\bin\dumont-aem.bat"
-    File "..\bin\dumont-webcrawler.sh"
-    File "..\bin\dumont-webcrawler.bat"
-    File "..\bin\dumont-db.sh"
-    File "..\bin\dumont-db.bat"
-    File "..\bin\dumont-filesystem.sh"
-    File "..\bin\dumont-filesystem.bat"
+    File "${STAGE}\bin\dumont-aem.sh"
+    File "${STAGE}\bin\dumont-aem.bat"
+    File "${STAGE}\bin\dumont-webcrawler.sh"
+    File "${STAGE}\bin\dumont-webcrawler.bat"
+    File "${STAGE}\bin\dumont-db.sh"
+    File "${STAGE}\bin\dumont-db.bat"
+    File "${STAGE}\bin\dumont-filesystem.sh"
+    File "${STAGE}\bin\dumont-filesystem.bat"
 
     ; Write java-home.conf with the selected Java path
     FileOpen $0 "$INSTDIR\bin\java-home.conf" w

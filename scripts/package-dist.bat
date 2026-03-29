@@ -27,15 +27,20 @@ exit /b 1
 pushd "%PROJECT_ROOT%"
 
 rem --------------- Build ---------------
-if "%SKIP_BUILD%"=="false" (
-    echo ==^> Building Dumont...
+if "%SKIP_BUILD%"=="true" goto :skip_build
+echo ==^> Building Dumont...
+where mvn >nul 2>&1
+if %errorlevel%==0 (
+    call mvn clean install -DskipTests -Dgpg.skip=true -Dturing.open-browser=false
+) else (
     call mvnw.cmd clean install -DskipTests -Dgpg.skip=true -Dturing.open-browser=false
-    if errorlevel 1 (
-        echo Build failed.
-        popd
-        exit /b 1
-    )
 )
+if errorlevel 1 (
+    echo Build failed.
+    popd
+    exit /b 1
+)
+:skip_build
 
 rem =====================================================================
 rem  Shared: copy artifacts into a staging area
@@ -85,7 +90,7 @@ if exist "%ZIP_OUTPUT%" del "%ZIP_OUTPUT%"
 
 set STAGE_PARENT=%PROJECT_ROOT%\target\dist-stage
 pushd "%STAGE_PARENT%"
-tar -a -cf "%ZIP_OUTPUT%" "%DIST_NAME%"
+powershell -NoProfile -Command "Compress-Archive -Path '%DIST_NAME%' -DestinationPath '%ZIP_OUTPUT%'"
 popd
 
 rem =====================================================================
@@ -115,7 +120,7 @@ goto :done
 :build_nsis
 echo ==^> Creating Windows installer...
 if not exist "%PROJECT_ROOT%\target" mkdir "%PROJECT_ROOT%\target"
-"%MAKENSIS%" /V2 /DOUTDIR="%PROJECT_ROOT%\target" "%SCRIPT_DIR%installer\dumont.nsi"
+"%MAKENSIS%" /V2 /DOUTDIR="%PROJECT_ROOT%\target" /DSTAGE="%STAGE%" "%SCRIPT_DIR%installer\dumont.nsi"
 if errorlevel 1 (
     echo Installer build failed.
 ) else (
