@@ -34,4 +34,5 @@ dependency-reduced-pom.xml
 /dist/
 /.claude
 /connector/connector-app/src/main/resources/public
-/dumont-react
+/dumont-react/.__mf__temp
+/dumont-react/.mf
