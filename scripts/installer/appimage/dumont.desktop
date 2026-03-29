@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Viglet Dumont DEP
+Comment=Data Exchange Platform - Content indexing and search integration
+Exec=dumont-aem
+Icon=dumont
+Categories=Development;Java;
+Terminal=true
+StartupNotify=false
