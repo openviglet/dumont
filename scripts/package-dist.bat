@@ -12,6 +12,7 @@ setlocal enabledelayedexpansion
 set SCRIPT_DIR=%~dp0
 set PROJECT_ROOT=%SCRIPT_DIR%..
 set SKIP_BUILD=false
+set "PS=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
 
 :parse_args
 if "%~1"=="" goto end_args
@@ -90,7 +91,7 @@ if exist "%ZIP_OUTPUT%" del "%ZIP_OUTPUT%"
 
 set STAGE_PARENT=%PROJECT_ROOT%\target\dist-stage
 pushd "%STAGE_PARENT%"
-powershell -NoProfile -Command "Compress-Archive -Path '%DIST_NAME%' -DestinationPath '%ZIP_OUTPUT%'"
+"!PS!" -NoProfile -Command "Compress-Archive -Path '%DIST_NAME%' -DestinationPath '%ZIP_OUTPUT%'"
 popd
 
 rem =====================================================================
