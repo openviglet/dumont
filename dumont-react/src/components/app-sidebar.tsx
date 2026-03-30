@@ -34,14 +34,18 @@ interface SidebarNavItem {
   icon: Icon
 }
 
+/** Fixed id used for standalone routes — the axios interceptor strips it from API calls. */
+const STANDALONE_ID = "local"
+const BASE = `${ROUTES.INTEGRATION_INSTANCE}/${STANDALONE_ID}`
+
 const aemItems: SidebarNavItem[] = [
-  { key: "sources", titleKey: "integration.nav.sources", url: `${ROUTES.CONSOLE}/source`, icon: IconGitCommit },
-  { key: "indexingRules", titleKey: "integration.nav.indexingRules", url: `${ROUTES.CONSOLE}/indexing-rule`, icon: IconTools },
-  { key: "indexingManager", titleKey: "integration.nav.indexingManager", url: `${ROUTES.CONSOLE}/indexing-manager`, icon: IconAdjustmentsSearch },
-  { key: "monitoring", titleKey: "integration.nav.monitoring", url: `${ROUTES.CONSOLE}/monitoring`, icon: IconGraph },
-  { key: "indexingStats", titleKey: "integration.nav.indexingStats", url: `${ROUTES.CONSOLE}/indexing-stats`, icon: IconChartBar },
-  { key: "doubleCheck", titleKey: "integration.nav.doubleCheck", url: `${ROUTES.CONSOLE}/double-check`, icon: IconListCheck },
-  { key: "systemInfo", titleKey: "integration.nav.systemInfo", url: `${ROUTES.CONSOLE}/system-info`, icon: IconInfoCircle },
+  { key: "sources", titleKey: "integration.nav.sources", url: `${BASE}/source`, icon: IconGitCommit },
+  { key: "indexingRules", titleKey: "integration.nav.indexingRules", url: `${BASE}/indexing-rule`, icon: IconTools },
+  { key: "indexingManager", titleKey: "integration.nav.indexingManager", url: `${BASE}/indexing-manager`, icon: IconAdjustmentsSearch },
+  { key: "monitoring", titleKey: "integration.nav.monitoring", url: `${BASE}/monitoring`, icon: IconGraph },
+  { key: "indexingStats", titleKey: "integration.nav.indexingStats", url: `${BASE}/indexing-stats`, icon: IconChartBar },
+  { key: "doubleCheck", titleKey: "integration.nav.doubleCheck", url: `${BASE}/double-check`, icon: IconListCheck },
+  { key: "systemInfo", titleKey: "integration.nav.systemInfo", url: `${BASE}/system-info`, icon: IconInfoCircle },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

@@ -28,6 +28,14 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:30130",
+        changeOrigin: true,
+      },
+    },
+  },
   base: "/dumont/",
   build: {
     emptyOutDir: true,

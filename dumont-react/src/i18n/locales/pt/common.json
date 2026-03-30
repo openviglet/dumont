@@ -63,6 +63,27 @@
       }
     }
   },
+  "systemInfo": {
+    "physicalMemory": "Memória Física",
+    "physicalMemoryDesc": "Uso de memória RAM física da máquina host.",
+    "ramUsage": "Uso de RAM",
+    "used": "Usado:",
+    "totalLabel": "Total:",
+    "totalRam": "RAM Total",
+    "freeRam": "RAM Livre",
+    "jvmHeap": "Memória Heap da JVM",
+    "jvmHeapDesc": "Alocação e uso de memória heap da Java Virtual Machine.",
+    "heapUsage": "Uso do Heap",
+    "max": "Máx:",
+    "totalAllocated": "Total Alocado",
+    "freeAllocated": "Livre Alocado",
+    "maxHeap": "Heap Máximo",
+    "diskSpace": "Espaço em Disco",
+    "diskSpaceDesc": "Uso de armazenamento na partição de disco da aplicação.",
+    "diskUsage": "Uso de Disco",
+    "available": "Disponível",
+    "usedMemory": "Usado"
+  },
   "theme": {
     "toggle": "Alternar tema",
     "light": "Claro",

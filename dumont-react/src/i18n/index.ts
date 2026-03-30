@@ -6,9 +6,13 @@ import enIntegration from "./locales/en/integration.json";
 import ptIntegration from "./locales/pt/integration.json";
 import enCommon from "./locales/en/common.json";
 import ptCommon from "./locales/pt/common.json";
+import enForms from "./locales/en/forms.json";
+import ptForms from "./locales/pt/forms.json";
+import enDialog from "./locales/en/dialog.json";
+import ptDialog from "./locales/pt/dialog.json";
 
-const en = { ...enIntegration, ...enCommon };
-const pt = { ...ptIntegration, ...ptCommon };
+const en = { ...enIntegration, ...enCommon, ...enForms, ...enDialog };
+const pt = { ...ptIntegration, ...ptCommon, ...ptForms, ...ptDialog };
 
 i18n
   .use(LanguageDetector)

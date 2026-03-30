@@ -32,19 +32,23 @@ interface FeatureSection {
   items: FeatureCard[]
 }
 
+/** Fixed id used for standalone routes — the axios interceptor strips it from API calls. */
+const STANDALONE_ID = "local"
+const BASE = `${ROUTES.INTEGRATION_INSTANCE}/${STANDALONE_ID}`
+
 const SECTIONS: FeatureSection[] = [
   {
     labelKey: "home.sections.aem.label",
     descriptionKey: "home.sections.aem.description",
     gradient: "from-teal-600 to-emerald-600",
     items: [
-      { titleKey: "home.features.sources.title", descriptionKey: "home.features.sources.description", url: `${ROUTES.CONSOLE}/source`, icon: IconGitCommit },
-      { titleKey: "home.features.indexingRules.title", descriptionKey: "home.features.indexingRules.description", url: `${ROUTES.CONSOLE}/indexing-rule`, icon: IconTools },
-      { titleKey: "home.features.indexingManager.title", descriptionKey: "home.features.indexingManager.description", url: `${ROUTES.CONSOLE}/indexing-manager`, icon: IconAdjustmentsSearch },
-      { titleKey: "home.features.monitoring.title", descriptionKey: "home.features.monitoring.description", url: `${ROUTES.CONSOLE}/monitoring`, icon: IconGraph },
-      { titleKey: "home.features.indexingStats.title", descriptionKey: "home.features.indexingStats.description", url: `${ROUTES.CONSOLE}/indexing-stats`, icon: IconChartBar },
-      { titleKey: "home.features.doubleCheck.title", descriptionKey: "home.features.doubleCheck.description", url: `${ROUTES.CONSOLE}/double-check`, icon: IconListCheck },
-      { titleKey: "home.features.systemInfo.title", descriptionKey: "home.features.systemInfo.description", url: `${ROUTES.CONSOLE}/system-info`, icon: IconInfoCircle },
+      { titleKey: "home.features.sources.title", descriptionKey: "home.features.sources.description", url: `${BASE}/source`, icon: IconGitCommit },
+      { titleKey: "home.features.indexingRules.title", descriptionKey: "home.features.indexingRules.description", url: `${BASE}/indexing-rule`, icon: IconTools },
+      { titleKey: "home.features.indexingManager.title", descriptionKey: "home.features.indexingManager.description", url: `${BASE}/indexing-manager`, icon: IconAdjustmentsSearch },
+      { titleKey: "home.features.monitoring.title", descriptionKey: "home.features.monitoring.description", url: `${BASE}/monitoring`, icon: IconGraph },
+      { titleKey: "home.features.indexingStats.title", descriptionKey: "home.features.indexingStats.description", url: `${BASE}/indexing-stats`, icon: IconChartBar },
+      { titleKey: "home.features.doubleCheck.title", descriptionKey: "home.features.doubleCheck.description", url: `${BASE}/double-check`, icon: IconListCheck },
+      { titleKey: "home.features.systemInfo.title", descriptionKey: "home.features.systemInfo.description", url: `${BASE}/system-info`, icon: IconInfoCircle },
     ],
   },
 ]
