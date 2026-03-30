@@ -170,6 +170,116 @@
             "default": "Source Apps"
           },
           "className": "com.viglet.dumont.connector.aem.commons.ext.DumAemExtSourceApps"
+        },
+        {
+          "name": "pageTitle",
+          "type": "TEXT",
+          "multiValued": false,
+          "description": "Page Title from model.json",
+          "facet": false,
+          "facetName": {
+            "default": "Page Titles"
+          }
+        },
+        {
+          "name": "pageDescription",
+          "type": "TEXT",
+          "multiValued": false,
+          "description": "Page Description from model.json",
+          "facet": false,
+          "facetName": {
+            "default": "Page Descriptions"
+          }
+        },
+        {
+          "name": "pageLanguage",
+          "type": "STRING",
+          "multiValued": false,
+          "description": "Page Language",
+          "facet": true,
+          "facetName": {
+            "default": "Languages"
+          }
+        },
+        {
+          "name": "pageTemplate",
+          "type": "STRING",
+          "multiValued": false,
+          "description": "Page Template Name",
+          "facet": true,
+          "facetName": {
+            "default": "Templates"
+          }
+        },
+        {
+          "name": "pageLastModified",
+          "type": "DATE",
+          "multiValued": false,
+          "description": "Page Last Modified Date from model.json",
+          "facet": false,
+          "facetName": {
+            "default": "Page Last Modified Dates"
+          }
+        },
+        {
+          "name": "paragraphs",
+          "type": "TEXT",
+          "multiValued": true,
+          "description": "Content Fragment Paragraphs",
+          "facet": false,
+          "facetName": {
+            "default": "Paragraphs"
+          }
+        },
+        {
+          "name": "texts",
+          "type": "TEXT",
+          "multiValued": true,
+          "description": "Text Components Content",
+          "facet": false,
+          "facetName": {
+            "default": "Texts"
+          }
+        },
+        {
+          "name": "pageImages",
+          "type": "STRING",
+          "multiValued": true,
+          "description": "Image Sources",
+          "facet": false,
+          "facetName": {
+            "default": "Page Images"
+          }
+        },
+        {
+          "name": "contentFragmentTitles",
+          "type": "TEXT",
+          "multiValued": true,
+          "description": "Content Fragment Titles",
+          "facet": false,
+          "facetName": {
+            "default": "Content Fragment Titles"
+          }
+        },
+        {
+          "name": "contentFragmentModels",
+          "type": "STRING",
+          "multiValued": true,
+          "description": "Content Fragment Models",
+          "facet": true,
+          "facetName": {
+            "default": "Content Fragment Models"
+          }
+        },
+        {
+          "name": "contentFragmentElements",
+          "type": "TEXT",
+          "multiValued": true,
+          "description": "Content Fragment Element Values",
+          "facet": false,
+          "facetName": {
+            "default": "Content Fragment Elements"
+          }
         }
       ],
       "models": [

@@ -18,11 +18,54 @@
 
 package com.viglet.dumont.connector.aem.sample.beans;
 
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DumAemSampleModel {
     private String fragmentPath;
+    private String title;
+    private String description;
+    private String language;
+    private String templateName;
+    private Long lastModifiedDate;
+    @JsonProperty(":items")
+    private Map<String, DumAemSampleModelItem> items;
+
+    @Getter
+    @Setter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DumAemSampleModelItem {
+        @JsonProperty(":type")
+        private String type;
+        @JsonProperty(":items")
+        private Map<String, DumAemSampleModelItem> items;
+        private String title;
+        private String text;
+        private Boolean richText;
+        private List<String> paragraphs;
+        private String model;
+        private String src;
+        private String alt;
+        private Map<String, DumAemSampleModelElement> elements;
+    }
+
+    @Getter
+    @Setter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DumAemSampleModelElement {
+        private String value;
+        private String title;
+        @JsonProperty(":type")
+        private String type;
+        private String dataType;
+    }
 }
