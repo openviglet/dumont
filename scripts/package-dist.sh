@@ -40,6 +40,7 @@ STAGE="${PROJECT_ROOT}/target/dist-stage/${DIST_NAME}"
 rm -rf "$STAGE"
 mkdir -p "$STAGE/connector/libs/aem"
 mkdir -p "$STAGE/connector/libs/webcrawler"
+mkdir -p "$STAGE/connector/export"
 mkdir -p "$STAGE/db"
 mkdir -p "$STAGE/filesystem"
 mkdir -p "$STAGE/bin"
@@ -50,6 +51,11 @@ cp "connector/connector-app/target/dumont-connector.jar" "$STAGE/connector/"
 # Connector plugins
 cp "aem/aem-plugin/target/aem-plugin.jar"               "$STAGE/connector/libs/aem/"
 cp "web-crawler/wc-plugin/target/web-crawler-plugin.jar" "$STAGE/connector/libs/webcrawler/"
+
+# AEM Sample plugin + export files
+cp "aem/aem-plugin-sample/target/aem-plugin-sample.jar"   "$STAGE/connector/libs/aem/"
+cp "aem/aem-plugin-sample/scripts/wknd/export/wknd.json"  "$STAGE/connector/export/"
+cp "aem/aem-plugin-sample/scripts/wknd/export/wknd2.json" "$STAGE/connector/export/"
 
 # Standalone CLI tools
 cp "db/db-app/target/dumont-db.jar"                      "$STAGE/db/"

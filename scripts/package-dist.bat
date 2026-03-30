@@ -53,6 +53,7 @@ set STAGE=%PROJECT_ROOT%\target\dist-stage\%DIST_NAME%
 if exist "%STAGE%" rmdir /s /q "%STAGE%"
 mkdir "%STAGE%\connector\libs\aem"
 mkdir "%STAGE%\connector\libs\webcrawler"
+mkdir "%STAGE%\connector\export"
 mkdir "%STAGE%\db"
 mkdir "%STAGE%\filesystem"
 mkdir "%STAGE%\bin"
@@ -63,6 +64,11 @@ copy "connector\connector-app\target\dumont-connector.jar" "%STAGE%\connector\" 
 rem Connector plugins
 copy "aem\aem-plugin\target\aem-plugin.jar"               "%STAGE%\connector\libs\aem\" >nul
 copy "web-crawler\wc-plugin\target\web-crawler-plugin.jar" "%STAGE%\connector\libs\webcrawler\" >nul
+
+rem AEM Sample plugin + export files
+copy "aem\aem-plugin-sample\target\aem-plugin-sample.jar"  "%STAGE%\connector\libs\aem\" >nul
+copy "aem\aem-plugin-sample\scripts\wknd\export\wknd.json"  "%STAGE%\connector\export\" >nul
+copy "aem\aem-plugin-sample\scripts\wknd\export\wknd2.json" "%STAGE%\connector\export\" >nul
 
 rem Standalone CLI tools
 copy "db\db-app\target\dumont-db.jar"                      "%STAGE%\db\" >nul

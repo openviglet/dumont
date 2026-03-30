@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
 import { ThemeProvider } from "./components/theme-provider";
 import { BreadcrumbProvider } from "./contexts/breadcrumb.context";
 import { ROUTES } from "./app/routes.const";
@@ -17,6 +18,7 @@ import DumontRoutes from "./DumontRoutes";
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="dumont-ui-theme">
+      <Toaster richColors position="bottom-right" />
       <BreadcrumbProvider>
         <Routes>
           <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />

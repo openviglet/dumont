@@ -9,6 +9,7 @@
 !include "FileFunc.nsh"
 !include "nsDialogs.nsh"
 !include "LogicLib.nsh"
+!include "Sections.nsh"
 
 ; --------------------------------------------------------------------------
 ; General
@@ -88,6 +89,7 @@ Var SolrCoreText
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "..\..\LICENSE"
 !insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_COMPONENTS
 Page custom JavaPageCreate JavaPageLeave
 Page custom ProviderPageCreate ProviderPageLeave
 Page custom ProviderDetailPageCreate ProviderDetailPageLeave
@@ -99,6 +101,24 @@ Page custom ProviderDetailPageCreate ProviderDetailPageLeave
 
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "Portuguese"
+
+; --------------------------------------------------------------------------
+; Component descriptions
+; --------------------------------------------------------------------------
+LangString DESC_SecCore      ${LANG_ENGLISH} "Core connector engine required by all connectors."
+LangString DESC_SecCore      ${LANG_PORTUGUESE} "Motor principal do conector, necessário para todos os conectores."
+LangString DESC_SecConnectors ${LANG_ENGLISH} "Connectors for indexing data from different sources."
+LangString DESC_SecConnectors ${LANG_PORTUGUESE} "Conectores para indexar dados de diferentes fontes."
+LangString DESC_SecAEM       ${LANG_ENGLISH} "Adobe Experience Manager connector plugin."
+LangString DESC_SecAEM       ${LANG_PORTUGUESE} "Plugin conector para Adobe Experience Manager."
+LangString DESC_SecAEMSample ${LANG_ENGLISH} "AEM WKND sample: plugin JAR and export configuration files."
+LangString DESC_SecAEMSample ${LANG_PORTUGUESE} "Exemplo AEM WKND: JAR do plugin e arquivos de configuração de exportação."
+LangString DESC_SecWC        ${LANG_ENGLISH} "Web Crawler connector plugin for indexing web pages."
+LangString DESC_SecWC        ${LANG_PORTUGUESE} "Plugin conector Web Crawler para indexar páginas web."
+LangString DESC_SecDB        ${LANG_ENGLISH} "Database connector CLI tool for indexing from databases."
+LangString DESC_SecDB        ${LANG_PORTUGUESE} "Ferramenta CLI do conector de banco de dados."
+LangString DESC_SecFS        ${LANG_ENGLISH} "Filesystem connector CLI tool for indexing local files."
+LangString DESC_SecFS        ${LANG_PORTUGUESE} "Ferramenta CLI do conector de sistema de arquivos."
 
 ; --------------------------------------------------------------------------
 ; Java Page - Auto-detect and allow user to browse
@@ -378,10 +398,14 @@ Function ProviderDetailPageLeave
     ${EndIf}
 FunctionEnd
 
+; ==========================================================================
+; Installer Sections  (hierarchical component tree)
+; ==========================================================================
+
 ; --------------------------------------------------------------------------
-; Installer Section
+; Core (always installed, read-only)
 ; --------------------------------------------------------------------------
-Section "Dumont DEP" SecMain
+Section "Dumont Core" SecCore
     SectionIn RO
 
     SetOutPath "$INSTDIR"
@@ -421,32 +445,8 @@ Section "Dumont DEP" SecMain
     FileWrite $0 "server.port=30130$\r$\n"
     FileClose $0
 
-    ; AEM plugin
-    SetOutPath "$INSTDIR\connector\libs\aem"
-    File "${STAGE}\connector\libs\aem\aem-plugin.jar"
-
-    ; Web Crawler plugin
-    SetOutPath "$INSTDIR\connector\libs\webcrawler"
-    File "${STAGE}\connector\libs\webcrawler\web-crawler-plugin.jar"
-
-    ; Database CLI
-    SetOutPath "$INSTDIR\db"
-    File "${STAGE}\db\dumont-db.jar"
-
-    ; Filesystem CLI
-    SetOutPath "$INSTDIR\filesystem"
-    File "${STAGE}\filesystem\dumont-filesystem.jar"
-
-    ; Bin scripts
+    ; Bin scripts (common)
     SetOutPath "$INSTDIR\bin"
-    File "${STAGE}\bin\dumont-aem.sh"
-    File "${STAGE}\bin\dumont-aem.bat"
-    File "${STAGE}\bin\dumont-webcrawler.sh"
-    File "${STAGE}\bin\dumont-webcrawler.bat"
-    File "${STAGE}\bin\dumont-db.sh"
-    File "${STAGE}\bin\dumont-db.bat"
-    File "${STAGE}\bin\dumont-filesystem.sh"
-    File "${STAGE}\bin\dumont-filesystem.bat"
 
     ; Write java-home.conf with the selected Java path
     FileOpen $0 "$INSTDIR\bin\java-home.conf" w
@@ -486,16 +486,128 @@ Section "Dumont DEP" SecMain
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VigletDumont" \
         "DisplayIcon" '"$INSTDIR\dumont.ico"'
 
-    ; Start Menu shortcuts
+    ; Start Menu base
     CreateDirectory "$SMPROGRAMS\Viglet Dumont"
-    CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont AEM Connector.lnk" \
-        "$INSTDIR\bin\dumont-aem.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
-    CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont Web Crawler.lnk" \
-        "$INSTDIR\bin\dumont-webcrawler.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
     CreateShortcut "$SMPROGRAMS\Viglet Dumont\Uninstall.lnk" \
         "$INSTDIR\uninstall.exe"
-
 SectionEnd
+
+; --------------------------------------------------------------------------
+; Connectors group header
+; --------------------------------------------------------------------------
+SectionGroup "Connectors" SecConnectors
+
+    ; ------------------------------------------------------------------
+    ; AEM Connector
+    ; ------------------------------------------------------------------
+    Section "AEM Connector" SecAEM
+        SetOutPath "$INSTDIR\connector\libs\aem"
+        File "${STAGE}\connector\libs\aem\aem-plugin.jar"
+
+        SetOutPath "$INSTDIR\bin"
+        File "${STAGE}\bin\dumont-aem.sh"
+        File "${STAGE}\bin\dumont-aem.bat"
+
+        ; Start Menu shortcut
+        CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont AEM Connector.lnk" \
+            "$INSTDIR\bin\dumont-aem.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
+    SectionEnd
+
+    ; ------------------------------------------------------------------
+    ; AEM Sample (child of AEM - copies lib + export into AEM connector)
+    ; ------------------------------------------------------------------
+    Section /o "AEM WKND Sample" SecAEMSample
+        ; Sample plugin JAR goes into the AEM libs folder
+        SetOutPath "$INSTDIR\connector\libs\aem"
+        File "${STAGE}\connector\libs\aem\aem-plugin-sample.jar"
+
+        ; Export configuration files go into the AEM working directory
+        ; (the connector uses %LOCALAPPDATA%\Viglet\Dumont\aem as its working dir)
+        CreateDirectory "$LOCALAPPDATA\Viglet\Dumont\aem\export"
+        SetOutPath "$LOCALAPPDATA\Viglet\Dumont\aem\export"
+        File "${STAGE}\connector\export\wknd.json"
+        File "${STAGE}\connector\export\wknd2.json"
+    SectionEnd
+
+    ; ------------------------------------------------------------------
+    ; Web Crawler Connector
+    ; ------------------------------------------------------------------
+    Section "Web Crawler" SecWC
+        SetOutPath "$INSTDIR\connector\libs\webcrawler"
+        File "${STAGE}\connector\libs\webcrawler\web-crawler-plugin.jar"
+
+        SetOutPath "$INSTDIR\bin"
+        File "${STAGE}\bin\dumont-webcrawler.sh"
+        File "${STAGE}\bin\dumont-webcrawler.bat"
+
+        ; Start Menu shortcut
+        CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont Web Crawler.lnk" \
+            "$INSTDIR\bin\dumont-webcrawler.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
+    SectionEnd
+
+    ; ------------------------------------------------------------------
+    ; Database Connector
+    ; ------------------------------------------------------------------
+    Section "Database" SecDB
+        SetOutPath "$INSTDIR\db"
+        File "${STAGE}\db\dumont-db.jar"
+
+        SetOutPath "$INSTDIR\bin"
+        File "${STAGE}\bin\dumont-db.sh"
+        File "${STAGE}\bin\dumont-db.bat"
+
+        ; Start Menu shortcut
+        CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont Database.lnk" \
+            "$INSTDIR\bin\dumont-db.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
+    SectionEnd
+
+    ; ------------------------------------------------------------------
+    ; Filesystem Connector
+    ; ------------------------------------------------------------------
+    Section "Filesystem" SecFS
+        SetOutPath "$INSTDIR\filesystem"
+        File "${STAGE}\filesystem\dumont-filesystem.jar"
+
+        SetOutPath "$INSTDIR\bin"
+        File "${STAGE}\bin\dumont-filesystem.sh"
+        File "${STAGE}\bin\dumont-filesystem.bat"
+
+        ; Start Menu shortcut
+        CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont Filesystem.lnk" \
+            "$INSTDIR\bin\dumont-filesystem.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
+    SectionEnd
+
+SectionGroupEnd
+
+; --------------------------------------------------------------------------
+; Section descriptions (shown in the component selection page)
+; --------------------------------------------------------------------------
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecCore}       $(DESC_SecCore)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecConnectors}  $(DESC_SecConnectors)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAEM}         $(DESC_SecAEM)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAEMSample}   $(DESC_SecAEMSample)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecWC}          $(DESC_SecWC)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDB}          $(DESC_SecDB)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecFS}          $(DESC_SecFS)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+; --------------------------------------------------------------------------
+; Callbacks - enforce AEM Sample requires AEM
+; --------------------------------------------------------------------------
+Function .onSelChange
+    ; If AEM Sample is checked but AEM is not, force-check AEM
+    ${If} ${SectionIsSelected} ${SecAEMSample}
+    ${AndIfNot} ${SectionIsSelected} ${SecAEM}
+        !insertmacro SelectSection ${SecAEM}
+    ${EndIf}
+
+    ; If AEM is unchecked, also uncheck AEM Sample
+    ${IfNot} ${SectionIsSelected} ${SecAEM}
+    ${AndIf} ${SectionIsSelected} ${SecAEMSample}
+        !insertmacro UnselectSection ${SecAEMSample}
+    ${EndIf}
+FunctionEnd
 
 ; --------------------------------------------------------------------------
 ; Uninstaller Section
