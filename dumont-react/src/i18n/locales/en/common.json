@@ -11,5 +11,63 @@
     "errorLoading": "Error while loading data",
     "openNavigation": "Open navigation",
     "connectionError": "Connection error or timeout while fetching {{resource}}."
+  },
+  "sidebar": {
+    "brandName": "Dumont",
+    "brandTagline": "Data Exchange Platform"
+  },
+  "home": {
+    "title": "Home",
+    "welcome": "Welcome to Viglet Dumont — your Data Exchange Platform.",
+    "docs": "Docs",
+    "open": "Open",
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "sections": {
+      "aem": {
+        "label": "AEM",
+        "description": "Adobe Experience Manager integration for content indexing and management."
+      }
+    },
+    "features": {
+      "sources": {
+        "title": "Sources",
+        "description": "Manage AEM sources for indexing and configuration."
+      },
+      "indexingRules": {
+        "title": "Indexing Rules",
+        "description": "Define rules for how content is indexed."
+      },
+      "indexingManager": {
+        "title": "Indexing Manager",
+        "description": "Manage indexing, deindexing, publishing and unpublishing operations."
+      },
+      "monitoring": {
+        "title": "Monitoring",
+        "description": "Monitor indexing progress and status in real-time."
+      },
+      "indexingStats": {
+        "title": "Indexing Stats",
+        "description": "View indexing statistics and analytics."
+      },
+      "doubleCheck": {
+        "title": "Double Check",
+        "description": "Verify and validate indexing results."
+      },
+      "systemInfo": {
+        "title": "System Information",
+        "description": "View system details and configuration."
+      }
+    }
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "modeLabel": "Theme: {{mode}}"
   }
 }

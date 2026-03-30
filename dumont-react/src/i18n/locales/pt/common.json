@@ -11,5 +11,63 @@
     "errorLoading": "Erro ao carregar dados",
     "openNavigation": "Abrir navegação",
     "connectionError": "Erro de conexão ou tempo esgotado ao buscar {{resource}}."
+  },
+  "sidebar": {
+    "brandName": "Dumont",
+    "brandTagline": "Plataforma de Troca de Dados"
+  },
+  "home": {
+    "title": "Início",
+    "welcome": "Bem-vindo ao Viglet Dumont — sua Plataforma de Troca de Dados.",
+    "docs": "Docs",
+    "open": "Abrir",
+    "greeting": {
+      "morning": "Bom dia",
+      "afternoon": "Boa tarde",
+      "evening": "Boa noite"
+    },
+    "sections": {
+      "aem": {
+        "label": "AEM",
+        "description": "Integração com Adobe Experience Manager para indexação e gerenciamento de conteúdo."
+      }
+    },
+    "features": {
+      "sources": {
+        "title": "Fontes",
+        "description": "Gerencie fontes AEM para indexação e configuração."
+      },
+      "indexingRules": {
+        "title": "Regras de Indexação",
+        "description": "Defina regras de como o conteúdo é indexado."
+      },
+      "indexingManager": {
+        "title": "Gerenciador de Indexação",
+        "description": "Gerencie operações de indexação, desindexação, publicação e despublicação."
+      },
+      "monitoring": {
+        "title": "Monitoramento",
+        "description": "Monitore o progresso e o status da indexação em tempo real."
+      },
+      "indexingStats": {
+        "title": "Estatísticas de Indexação",
+        "description": "Visualize estatísticas e análises de indexação."
+      },
+      "doubleCheck": {
+        "title": "Verificação Dupla",
+        "description": "Verifique e valide os resultados da indexação."
+      },
+      "systemInfo": {
+        "title": "Informações do Sistema",
+        "description": "Visualize detalhes e configurações do sistema."
+      }
+    }
+  },
+  "theme": {
+    "toggle": "Alternar tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "modeLabel": "Tema: {{mode}}"
   }
 }
