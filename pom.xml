@@ -35,9 +35,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-boot.version>4.0.4</spring-boot.version>
-        <turing.version>2026.1.17</turing.version>
-        <tika.version>3.2.3</tika.version>
+        <spring-boot.version>4.0.5</spring-boot.version>
+        <turing.version>2026.1.18</turing.version>
+        <tika.version>3.3.0</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <sonar.organization>viglet</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
