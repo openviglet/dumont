@@ -89,6 +89,27 @@ public class DumAemModelJsonQuery {
     }
 
     /**
+     * Creates a fluent component mapper for the given AEM component type.
+     * <p>
+     * Use this to declaratively map component fields to target attributes:
+     * <pre>{@code
+     * query.component("my-app/components/event", MyEvent.class)
+     *     .first()
+     *     .attr("date", MyEvent::getDate)
+     *     .attr("title", MyEvent::getTitle)
+     *     .into(attrValues);
+     * }</pre>
+     *
+     * @param componentType the AEM component resource type
+     * @param itemClass     the class to deserialize into
+     * @param <T>           the target type
+     * @return a {@link DumAemComponentMapper} for fluent attribute mapping
+     */
+    public <T> DumAemComponentMapper<T> component(String componentType, Class<T> itemClass) {
+        return new DumAemComponentMapper<>(findByComponentType(componentType, itemClass));
+    }
+
+    /**
      * Returns the underlying DocumentContext for advanced JsonPath queries.
      */
     public DocumentContext getJsonContext() {

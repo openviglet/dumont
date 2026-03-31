@@ -26,6 +26,11 @@ import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * Abstract base class for AEM model.json content extractors.
  * <p>
@@ -83,6 +88,43 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
      */
     protected abstract void extractAttributes(T model, DumAemModelJsonQuery query,
             DumAemObject aemObject, DumAemTargetAttrValueMap attrValues);
+
+    /**
+     * Returns a map of template name aliases for normalization.
+     * <p>
+     * Override this to map multiple AEM template names to a canonical name.
+     * For example, mapping "contact", "sub-home" → "institutional".
+     * <p>
+     * The map keys are the original template names, values are the canonical names.
+     * Template names not in the map are returned as-is by {@link #resolveTemplateName(String)}.
+     *
+     * @return alias map (empty by default)
+     */
+    protected Map<String, String> templateNameAliases() {
+        return Map.of();
+    }
+
+    /**
+     * Resolves a template name using the configured aliases.
+     *
+     * @param templateName the original template name from AEM
+     * @return the canonical name if an alias exists, otherwise the original name
+     */
+    protected String resolveTemplateName(String templateName) {
+        return templateNameAliases().getOrDefault(templateName, templateName);
+    }
+
+    /**
+     * Extracts the last modified date from an AEM object, falling back to the creation date.
+     *
+     * @param aemObject the AEM content object
+     * @return the last modified date, or creation date if not available
+     */
+    protected static Date lastModifiedDate(DumAemObject aemObject) {
+        return Optional.ofNullable(aemObject.getLastModified())
+                .map(Calendar::getTime)
+                .orElseGet(() -> aemObject.getCreatedDate().getTime());
+    }
 
     @Override
     public final DumAemTargetAttrValueMap consume(DumAemObject aemObject,

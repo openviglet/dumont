@@ -86,6 +86,28 @@ public class DumAemTargetAttrValueMap extends HashMap<String, TurMultiValue> {
     }
 
     /**
+     * Adds a value of any supported type to the attribute map, dispatching to the
+     * appropriate typed method. Supports String, Date, Boolean, Integer, Long,
+     * Double, Float, and TurMultiValue. Null values are ignored.
+     */
+    public void addWithValue(String attributeName, Object value, boolean override) {
+        if (value == null) {
+            return;
+        }
+        switch (value) {
+            case String s -> addWithSingleValue(attributeName, s, override);
+            case Date d -> addWithSingleValue(attributeName, d, override);
+            case Boolean b -> addWithSingleValue(attributeName, b, override);
+            case Integer i -> addWithSingleValue(attributeName, i, override);
+            case Long l -> addWithSingleValue(attributeName, l, override);
+            case Double d -> addWithSingleValue(attributeName, d, override);
+            case Float f -> addWithSingleValue(attributeName, f, override);
+            case TurMultiValue mv -> addWithSingleValue(attributeName, mv, override);
+            default -> addWithSingleValue(attributeName, value.toString(), override);
+        }
+    }
+
+    /**
      * Internal helper to add or merge TurMultiValue based on override flag.
      */
     private void addOrMerge(String attributeName, TurMultiValue value, boolean override) {

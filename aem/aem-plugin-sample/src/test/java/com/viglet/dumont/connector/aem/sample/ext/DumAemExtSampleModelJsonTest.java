@@ -60,9 +60,9 @@ class DumAemExtSampleModelJsonTest {
         }
 
         @Test
-        @DisplayName("Should have correct MODEL_JSON_EXTENSION constant")
-        void shouldHaveCorrectModelJsonExtensionConstant() {
-            assertEquals(".model.json", DumAemExtSampleModelJson.MODEL_JSON_EXTENSION);
+        @DisplayName("Should have correct PAGE_TITLE constant")
+        void shouldHaveCorrectPageTitleConstant() {
+            assertEquals("pageTitle", DumAemExtSampleModelJson.PAGE_TITLE);
         }
     }
 
