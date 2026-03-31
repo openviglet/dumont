@@ -114,7 +114,7 @@ public class DumCommonsUtils {
      * @throws IOException if the io fails
      */
     private static String getEntryName(File source, File file) throws IOException {
-        int index = source.getAbsolutePath().length() + 1;
+        int index = source.getCanonicalPath().length() + 1;
         String path = file.getCanonicalPath();
 
         return path.substring(index);
