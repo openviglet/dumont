@@ -16,7 +16,6 @@
 
 package com.viglet.dumont.connector.aem.sample.ext;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,17 +23,13 @@ import java.util.Map;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
-import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
-import com.viglet.dumont.connector.aem.commons.ext.DumAemExtContentInterface;
-import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemExtModelJsonBase;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemModelJsonQuery;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel.DumAemSampleModelElement;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel.DumAemSampleModelItem;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
-public class DumAemExtSampleModelJson implements DumAemExtContentInterface {
+public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampleModel> {
     public static final String FRAGMENT_PATH = "fragmentPath";
     public static final String PAGE_TITLE = "pageTitle";
     public static final String PAGE_DESCRIPTION = "pageDescription";
@@ -47,29 +42,19 @@ public class DumAemExtSampleModelJson implements DumAemExtContentInterface {
     public static final String CONTENT_FRAGMENT_TITLES = "contentFragmentTitles";
     public static final String CONTENT_FRAGMENT_MODELS = "contentFragmentModels";
     public static final String CONTENT_FRAGMENT_ELEMENTS = "contentFragmentElements";
-    public static final String MODEL_JSON_EXTENSION = ".model.json";
+
+    @SuppressWarnings("null")
+    @Override
+    protected Class<DumAemSampleModel> getModelClass() {
+        return DumAemSampleModel.class;
+    }
 
     @Override
-    public DumAemTargetAttrValueMap consume(DumAemObject aemObject,
-            DumAemConfiguration dumAemSourceContext) {
-        log.debug("Executing DumAemExtSampleModelJson");
-        String url = dumAemSourceContext.getUrl() + aemObject.getPath() + MODEL_JSON_EXTENSION;
-
-        try {
-            return DumAemCommonsUtils
-                    .getResponseBody(url, dumAemSourceContext, DumAemSampleModel.class, false)
-                    .map(model -> {
-                        DumAemTargetAttrValueMap attrValues = new DumAemTargetAttrValueMap();
-                        getFragmentData(attrValues, model);
-                        getPageMetadata(attrValues, model);
-                        getContentFromItems(attrValues, model);
-                        return attrValues;
-                    })
-                    .orElseGet(DumAemTargetAttrValueMap::new);
-        } catch (IOException e) {
-            log.error("Error consuming AEM model JSON from: {}", url, e);
-            return new DumAemTargetAttrValueMap();
-        }
+    protected void extractAttributes(DumAemSampleModel model, DumAemModelJsonQuery query,
+            DumAemObject aemObject, DumAemTargetAttrValueMap attrValues) {
+        getFragmentData(attrValues, model);
+        getPageMetadata(attrValues, model);
+        getContentFromItems(attrValues, model);
     }
 
     private static void getFragmentData(DumAemTargetAttrValueMap attrValues,
@@ -128,6 +113,13 @@ public class DumAemExtSampleModelJson implements DumAemExtContentInterface {
     private static void extractContentFromItem(DumAemSampleModelItem item,
             List<String> paragraphs, List<String> texts, List<String> images,
             List<String> cfTitles, List<String> cfModels, List<String> cfElements) {
+        extractParagraphs(item, paragraphs);
+        extractText(item, texts);
+        extractImages(item, images);
+        extractContentFragment(item, cfTitles, cfModels, cfElements);
+    }
+
+    private static void extractParagraphs(DumAemSampleModelItem item, List<String> paragraphs) {
         if (item.getParagraphs() != null) {
             for (String paragraph : item.getParagraphs()) {
                 String cleaned = stripHtml(paragraph);
@@ -136,12 +128,22 @@ public class DumAemExtSampleModelJson implements DumAemExtContentInterface {
                 }
             }
         }
+    }
+
+    private static void extractText(DumAemSampleModelItem item, List<String> texts) {
         if (item.getText() != null && !item.getText().isBlank()) {
             texts.add(stripHtml(item.getText()));
         }
+    }
+
+    private static void extractImages(DumAemSampleModelItem item, List<String> images) {
         if (item.getSrc() != null && !item.getSrc().isBlank()) {
             images.add(item.getSrc());
         }
+    }
+
+    private static void extractContentFragment(DumAemSampleModelItem item,
+            List<String> cfTitles, List<String> cfModels, List<String> cfElements) {
         String type = item.getType();
         if (type != null && type.contains("contentfragment")) {
             if (item.getTitle() != null && !item.getTitle().isBlank()) {
