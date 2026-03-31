@@ -65,7 +65,7 @@ import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.context.DumAemLocalePathContext;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtContentInterface;
@@ -154,14 +154,14 @@ public class DumAemCommonsUtils {
         return "%s/%s".formatted(dumAemSourceContext.getId(), ONCE);
     }
 
-    public static DumAemTargetAttrValueMap runCustomClassFromContentType(DumAemModel dumAemModel,
+    public static DumAemAttrMap runCustomClassFromContentType(DumAemModel dumAemModel,
             DumAemObject aemObject, DumAemConfiguration dumAemSourceContext) {
         return StringUtils.isNotEmpty(dumAemModel.getClassName())
                 ? DumCustomClassCache.getCustomClassMap(dumAemModel.getClassName())
                         .map(customClassMap -> ((DumAemExtContentInterface) customClassMap)
                                 .consume(aemObject, dumAemSourceContext))
-                        .orElseGet(DumAemTargetAttrValueMap::new)
-                : new DumAemTargetAttrValueMap();
+                        .orElseGet(DumAemAttrMap::new)
+                : new DumAemAttrMap();
     }
 
     public static void addFirstItemToAttribute(String attributeName, String attributeValue,

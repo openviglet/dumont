@@ -47,7 +47,7 @@ import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemContentMapping;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
@@ -195,7 +195,7 @@ class DumAemJobServiceTest {
             DumAemObjectGeneric aemObjectGeneric = createMockAemObjectGeneric();
 
             when(dumAemService.getTargetAttrValueMap(any(), any()))
-                    .thenReturn(new DumAemTargetAttrValueMap());
+                    .thenReturn(new DumAemAttrMap());
             when(dumAemContentDefinitionService.getDeltaDate(any(), any(), any()))
                     .thenReturn(new Date());
             when(dumConnectorContext.addJobItem(any())).thenReturn(true);
@@ -215,7 +215,7 @@ class DumAemJobServiceTest {
             DumAemObjectGeneric aemObjectGeneric = createMockAemObjectGenericDelivered();
 
             lenient().when(dumAemService.getTargetAttrValueMap(any(), any()))
-                    .thenReturn(new DumAemTargetAttrValueMap());
+                    .thenReturn(new DumAemAttrMap());
             lenient().when(dumAemContentDefinitionService.getDeltaDate(any(), any(), any()))
                     .thenReturn(new Date());
             lenient().when(dumConnectorContext.addJobItem(any())).thenReturn(true);

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
@@ -173,7 +173,7 @@ public class DumAemJobService {
         }
 
         private static @NotNull Map<String, Object> getJobItemAttributes(
-                        DumAemSession dumAemSession, DumAemTargetAttrValueMap targetAttrValueMap) {
+                        DumAemSession dumAemSession, DumAemAttrMap targetAttrValueMap) {
                 Map<String, Object> attributes = new HashMap<>();
                 String siteName = dumAemSession.getConfiguration().getSiteName();
                 if (StringUtils.isNotBlank(siteName)) {

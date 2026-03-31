@@ -17,10 +17,10 @@
 package com.viglet.dumont.connector.aem.commons.ext;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 
 public interface DumAemExtContentInterface {
-    DumAemTargetAttrValueMap consume(DumAemObject aemObject,
+    DumAemAttrMap consume(DumAemObject aemObject,
             DumAemConfiguration dumAemConfiguration);
 }

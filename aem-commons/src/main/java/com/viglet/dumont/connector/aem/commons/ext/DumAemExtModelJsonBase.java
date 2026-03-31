@@ -18,7 +18,7 @@ package com.viglet.dumont.connector.aem.commons.ext;
 
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ import java.util.Optional;
  * implement two methods:
  * <ul>
  *   <li>{@link #getModelClass()} - the root model bean class</li>
- *   <li>{@link #extractAttributes(Object, DumAemModelJsonQuery, DumAemObject, DumAemTargetAttrValueMap)}
+ *   <li>{@link #extractAttributes(Object, DumAemModelJsonQuery, DumAemObject, DumAemAttrMap)}
  *       - the business logic for attribute extraction</li>
  * </ul>
  * <p>
@@ -54,7 +54,7 @@ import java.util.Optional;
  *
  *     @Override
  *     protected void extractAttributes(MyModel model, DumAemModelJsonQuery query,
- *             DumAemObject aemObject, DumAemTargetAttrValueMap attrValues) {
+ *             DumAemObject aemObject, DumAemAttrMap attrValues) {
  *         attrValues.addWithSingleValue("title", model.getTitle(), true);
  *
  *         query.findFirstByComponentType("my-app/components/news", MyNews.class)
@@ -87,7 +87,7 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
      * @param attrValues the attribute map to populate with extracted values
      */
     protected abstract void extractAttributes(T model, DumAemModelJsonQuery query,
-            DumAemObject aemObject, DumAemTargetAttrValueMap attrValues);
+            DumAemObject aemObject, DumAemAttrMap attrValues);
 
     /**
      * Returns a map of template name aliases for normalization.
@@ -127,7 +127,7 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
     }
 
     @Override
-    public final DumAemTargetAttrValueMap consume(DumAemObject aemObject,
+    public final DumAemAttrMap consume(DumAemObject aemObject,
             DumAemConfiguration configuration) {
         String url = configuration.getUrl() + aemObject.getPath() + MODEL_JSON_EXTENSION;
         try {
@@ -136,17 +136,17 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
                     .map(json -> {
                         T model = MAPPER.readValue(json, getModelClass());
                         if (model == null) {
-                            return new DumAemTargetAttrValueMap();
+                            return new DumAemAttrMap();
                         }
                         DumAemModelJsonQuery query = new DumAemModelJsonQuery(json);
-                        DumAemTargetAttrValueMap attrValues = new DumAemTargetAttrValueMap();
+                        DumAemAttrMap attrValues = new DumAemAttrMap();
                         extractAttributes(model, query, aemObject, attrValues);
                         return attrValues;
                     })
-                    .orElseGet(DumAemTargetAttrValueMap::new);
+                    .orElseGet(DumAemAttrMap::new);
         } catch (Exception e) {
             log.error("Error processing model.json from: {}", url, e);
-            return new DumAemTargetAttrValueMap();
+            return new DumAemAttrMap();
         }
     }
 }

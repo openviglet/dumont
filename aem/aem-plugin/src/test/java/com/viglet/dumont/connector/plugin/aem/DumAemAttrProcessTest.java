@@ -39,7 +39,7 @@ import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
@@ -82,7 +82,7 @@ class DumAemAttrProcessTest {
                         DumAemSession session = createMockSession(model);
                         DumAemObject aemObject = createMockAemObject();
 
-                        DumAemTargetAttrValueMap result = dumAemAttrProcess.prepareAttributeDefs(session, aemObject);
+                        DumAemAttrMap result = dumAemAttrProcess.prepareAttributeDefs(session, aemObject);
 
                         assertNotNull(result);
                 }
@@ -108,7 +108,7 @@ class DumAemAttrProcessTest {
                         DumAemSession session = createMockSession(model);
                         DumAemObject aemObject = createMockAemObject();
 
-                        DumAemTargetAttrValueMap result = dumAemAttrProcess.prepareAttributeDefs(session, aemObject);
+                        DumAemAttrMap result = dumAemAttrProcess.prepareAttributeDefs(session, aemObject);
 
                         assertNotNull(result);
                 }
@@ -130,7 +130,7 @@ class DumAemAttrProcessTest {
                         DumAemSession session = createMockSession(model);
                         DumAemObject aemObject = createMockAemObject();
 
-                        DumAemTargetAttrValueMap result = dumAemAttrProcess.prepareAttributeDefs(session, aemObject);
+                        DumAemAttrMap result = dumAemAttrProcess.prepareAttributeDefs(session, aemObject);
 
                         assertNotNull(result);
                 }
@@ -164,7 +164,7 @@ class DumAemAttrProcessTest {
                         DumAemContext context = new DumAemContext(aemObject);
                         context.setDumAemTargetAttr(targetAttr);
 
-                        DumAemTargetAttrValueMap result = dumAemAttrProcess.addTargetAttrValuesBySourceAttr(
+                        DumAemAttrMap result = dumAemAttrProcess.addTargetAttrValuesBySourceAttr(
                                         session, targetAttr, sourceAttr, context);
 
                         assertNotNull(result);
@@ -194,7 +194,7 @@ class DumAemAttrProcessTest {
                         DumAemContext context = new DumAemContext(aemObject);
                         context.setDumAemTargetAttr(targetAttr);
 
-                        DumAemTargetAttrValueMap result = dumAemAttrProcess.addTargetAttrValuesBySourceAttr(
+                        DumAemAttrMap result = dumAemAttrProcess.addTargetAttrValuesBySourceAttr(
                                         session, targetAttr, sourceAttr, context);
 
                         assertNotNull(result);
@@ -229,7 +229,7 @@ class DumAemAttrProcessTest {
                         context.setDumAemTargetAttr(targetAttr);
                         context.setDumAemSourceAttr(sourceAttr);
 
-                        DumAemTargetAttrValueMap result = dumAemAttrProcess.process(session, context);
+                        DumAemAttrMap result = dumAemAttrProcess.process(session, context);
 
                         assertNotNull(result);
                         assertTrue(result.containsKey("title"));
@@ -258,7 +258,7 @@ class DumAemAttrProcessTest {
                         context.setDumAemTargetAttr(targetAttr);
                         context.setDumAemSourceAttr(sourceAttr);
 
-                        DumAemTargetAttrValueMap result = dumAemAttrProcess.process(session, context);
+                        DumAemAttrMap result = dumAemAttrProcess.process(session, context);
 
                         assertNotNull(result);
                 }

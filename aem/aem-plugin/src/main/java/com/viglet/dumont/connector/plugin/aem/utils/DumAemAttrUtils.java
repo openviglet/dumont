@@ -38,7 +38,7 @@ import org.json.JSONObject;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
@@ -112,13 +112,12 @@ public class DumAemAttrUtils {
         return locale;
     }
 
-    public static DumAemTargetAttrValueMap addValuesToAttributes(DumAemTargetAttr dumAemTargetAttr,
+    public static DumAemAttrMap addValuesToAttributes(DumAemTargetAttr dumAemTargetAttr,
             DumAemSourceAttr dumAemSourceAttr, Object jcrProperty) {
 
         if (dumAemSourceAttr.isConvertHtmlToText()) {
-            return DumAemTargetAttrValueMap.singleItem(dumAemTargetAttr.getName(),
-                    DumCommonsUtils.html2Text(DumAemCommonsUtils.getPropertyValue(jcrProperty)),
-                    false);
+            return DumAemAttrMap.ofAppend(dumAemTargetAttr.getName(),
+                    DumCommonsUtils.html2Text(DumAemCommonsUtils.getPropertyValue(jcrProperty)));
         } else if (jcrProperty != null) {
             TurMultiValue turMultiValue = new TurMultiValue();
             if (isJSONArray(jcrProperty)) {
@@ -127,11 +126,10 @@ public class DumAemAttrUtils {
                 turMultiValue.add(DumAemCommonsUtils.getPropertyValue(jcrProperty));
             }
             if (!turMultiValue.isEmpty()) {
-                return DumAemTargetAttrValueMap.singleItem(dumAemTargetAttr.getName(),
-                        turMultiValue, false);
+                return DumAemAttrMap.ofAppend(dumAemTargetAttr.getName(), turMultiValue);
             }
         }
-        return new DumAemTargetAttrValueMap();
+        return new DumAemAttrMap();
     }
 
     private static boolean isJSONArray(Object jcrProperty) {
@@ -147,13 +145,11 @@ public class DumAemAttrUtils {
                 DumAemCommonsUtils.getPropertyValue(jcrProperty));
     }
 
-    public static DumAemTargetAttrValueMap getDumAttrDefUnique(DumAemTargetAttr dumAemTargetAttr,
-            DumAemTargetAttrValueMap dumAemTargetAttrValueMap) {
-        return DumAemTargetAttrValueMap
-                .singleItem(
+    public static DumAemAttrMap getDumAttrDefUnique(DumAemTargetAttr dumAemTargetAttr,
+            DumAemAttrMap dumAemTargetAttrValueMap) {
+        return DumAemAttrMap.ofAppendAll(
                         dumAemTargetAttr.getName(), dumAemTargetAttrValueMap
-                                .get(dumAemTargetAttr.getName()).stream().distinct().toList(),
-                        false);
+                                .get(dumAemTargetAttr.getName()).stream().distinct().toList());
     }
 
     public static TurSNAttributeSpec setTagFacet(DumAemConfiguration dumAemSourceContext,
@@ -183,14 +179,14 @@ public class DumAemAttrUtils {
                 }).orElse(value);
     }
 
-    public static @NotNull DumAemTargetAttrValueMap getTextValue(DumAemContext context) {
-        return DumAemTargetAttrValueMap.singleItem(context.getDumAemTargetAttr(), false);
+    public static @NotNull DumAemAttrMap getTextValue(DumAemContext context) {
+        return DumAemAttrMap.ofAppend(context.getDumAemTargetAttr());
     }
 
     public static void processTagsFromSourceAttr(DumAemContext context,
             DumAemConfiguration dumAemSourceContext,
             List<TurSNAttributeSpec> dumSNAttributeSpecList, String attributeName,
-            DumAemTargetAttrValueMap dumAemTargetAttrValueMap) {
+            DumAemAttrMap dumAemTargetAttrValueMap) {
         Optional.ofNullable((JSONArray) getJcrProperty(context, attributeName)).ifPresent(
                 property -> property.forEach(tag -> formatTags(context, dumAemSourceContext,
                         dumSNAttributeSpecList, tag.toString(), dumAemTargetAttrValueMap)));
@@ -199,8 +195,8 @@ public class DumAemAttrUtils {
     public static void processTagsFromTargetAttr(DumAemContext context,
             DumAemConfiguration dumAemSourceContext,
             List<TurSNAttributeSpec> dumSNAttributeSpecList,
-            DumAemTargetAttrValueMap dumAemTargetAttrValueMapFromClass, String targetName,
-            DumAemTargetAttrValueMap dumAemTargetAttrValueMap) {
+            DumAemAttrMap dumAemTargetAttrValueMapFromClass, String targetName,
+            DumAemAttrMap dumAemTargetAttrValueMap) {
         dumAemTargetAttrValueMapFromClass.get(targetName)
                 .forEach(tag -> formatTags(context,
                         dumAemSourceContext, dumSNAttributeSpecList, tag,
@@ -209,7 +205,7 @@ public class DumAemAttrUtils {
 
     public static void formatTags(DumAemContext context, DumAemConfiguration dumAemSourceContext,
             List<TurSNAttributeSpec> dumSNAttributeSpecList, String tag,
-            DumAemTargetAttrValueMap dumAemTargetAttrValueMap) {
+            DumAemAttrMap dumAemTargetAttrValueMap) {
         DumCommonsUtils.getKeyValueFromColon(tag)
                 .ifPresent(
                         kv -> handleTagFacet(context, dumAemSourceContext, dumSNAttributeSpecList,
@@ -219,7 +215,7 @@ public class DumAemAttrUtils {
     private static void handleTagFacet(DumAemContext context,
             DumAemConfiguration dumAemSourceContext,
             List<TurSNAttributeSpec> dumSNAttributeSpecList,
-            DumAemTargetAttrValueMap dumAemTargetAttrValueMap,
+            DumAemAttrMap dumAemTargetAttrValueMap,
             KeyValue<String, String> kv) {
         Optional.ofNullable(kv.getKey())
                 .ifPresent(facet -> processTagFacet(context, dumAemSourceContext, dumSNAttributeSpecList,
@@ -229,14 +225,13 @@ public class DumAemAttrUtils {
     private static void processTagFacet(DumAemContext context,
             DumAemConfiguration dumAemSourceContext,
             List<TurSNAttributeSpec> dumSNAttributeSpecList,
-            DumAemTargetAttrValueMap dumAemTargetAttrValueMap,
+            DumAemAttrMap dumAemTargetAttrValueMap,
             KeyValue<String, String> kv,
             String facet) {
         dumSNAttributeSpecList.add(setTagFacet(dumAemSourceContext, facet));
         Optional.ofNullable(kv.getValue())
                 .ifPresent(value -> dumAemTargetAttrValueMap
-                        .addWithSingleValue(facet, addTagToAttrValueList(context,
-                                dumAemSourceContext, facet, value),
-                                false));
+                        .append(facet, addTagToAttrValueList(context,
+                                dumAemSourceContext, facet, value)));
     }
 }

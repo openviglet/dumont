@@ -42,7 +42,7 @@ import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.plugin.aem.DumAemAttrProcess;
@@ -91,7 +91,7 @@ class DumAemServiceTest {
         @Test
         @DisplayName("Should return target attribute value map")
         void shouldReturnTargetAttrValueMap() {
-            DumAemTargetAttrValueMap expectedMap = new DumAemTargetAttrValueMap();
+            DumAemAttrMap expectedMap = new DumAemAttrMap();
             when(dumAemAttrProcess.prepareAttributeDefs(any(), any())).thenReturn(expectedMap);
 
             DumAemModel model = DumAemModel.builder()
@@ -100,7 +100,7 @@ class DumAemServiceTest {
             DumAemSession session = createMockSession(model);
             DumAemObject aemObject = createMockAemObject();
 
-            DumAemTargetAttrValueMap result = dumAemService.getTargetAttrValueMap(session, aemObject);
+            DumAemAttrMap result = dumAemService.getTargetAttrValueMap(session, aemObject);
 
             assertNotNull(result);
         }
