@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.DumAemAttrProcess;
@@ -30,9 +30,9 @@ public class DumAemService {
         return AEM;
     }
 
-    public @NotNull DumAemTargetAttrValueMap getTargetAttrValueMap(DumAemSession dumAemSession,
+    public @NotNull DumAemAttrMap getTargetAttrValueMap(DumAemSession dumAemSession,
             DumAemObject aemObject) {
-        DumAemTargetAttrValueMap dumAemTargetAttrValueMap = dumAemAttrProcess.prepareAttributeDefs(dumAemSession,
+        DumAemAttrMap dumAemTargetAttrValueMap = dumAemAttrProcess.prepareAttributeDefs(dumAemSession,
                 aemObject);
         dumAemTargetAttrValueMap
                 .merge(DumAemCommonsUtils.runCustomClassFromContentType(dumAemSession.getModel(),

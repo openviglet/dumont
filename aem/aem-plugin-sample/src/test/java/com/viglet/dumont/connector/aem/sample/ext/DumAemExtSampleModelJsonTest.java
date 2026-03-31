@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtContentInterface;
 
@@ -71,14 +71,14 @@ class DumAemExtSampleModelJsonTest {
     class ConsumeTests {
 
         @Test
-        @DisplayName("Should return DumAemTargetAttrValueMap")
-        void shouldReturnDumAemTargetAttrValueMap() {
+        @DisplayName("Should return DumAemAttrMap")
+        void shouldReturnDumAemAttrMap() {
             JSONObject jcrNode = new JSONObject();
             jcrNode.put("jcr:primaryType", "cq:Page");
 
             DumAemObject aemObject = new DumAemObject("/content/mysite/en/home", jcrNode, DumAemEnv.AUTHOR);
 
-            DumAemTargetAttrValueMap result = extSampleModelJson.consume(aemObject, configuration);
+            DumAemAttrMap result = extSampleModelJson.consume(aemObject, configuration);
 
             assertNotNull(result);
         }
@@ -95,7 +95,7 @@ class DumAemExtSampleModelJsonTest {
 
             DumAemObject aemObject = new DumAemObject("/content/test", jcrNode, DumAemEnv.AUTHOR);
 
-            DumAemTargetAttrValueMap result = extSampleModelJson.consume(aemObject, invalidConfig);
+            DumAemAttrMap result = extSampleModelJson.consume(aemObject, invalidConfig);
 
             assertNotNull(result);
         }

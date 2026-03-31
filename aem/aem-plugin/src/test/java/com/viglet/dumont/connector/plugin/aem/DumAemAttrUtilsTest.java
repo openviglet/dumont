@@ -36,7 +36,7 @@ import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
 import com.viglet.dumont.connector.plugin.aem.utils.DumAemAttrUtils;
@@ -250,7 +250,7 @@ class DumAemAttrUtilsTest {
                     .name("jcr:title")
                     .build();
 
-            DumAemTargetAttrValueMap result = DumAemAttrUtils.addValuesToAttributes(
+            DumAemAttrMap result = DumAemAttrUtils.addValuesToAttributes(
                     targetAttr, sourceAttr, "Test Title");
 
             assertTrue(result.containsKey("title"));
@@ -268,7 +268,7 @@ class DumAemAttrUtilsTest {
                     .convertHtmlToText(true)
                     .build();
 
-            DumAemTargetAttrValueMap result = DumAemAttrUtils.addValuesToAttributes(
+            DumAemAttrMap result = DumAemAttrUtils.addValuesToAttributes(
                     targetAttr, sourceAttr, "<p>Test Content</p>");
 
             assertTrue(result.containsKey("content"));
@@ -289,7 +289,7 @@ class DumAemAttrUtilsTest {
             jsonArray.put("tag1");
             jsonArray.put("tag2");
 
-            DumAemTargetAttrValueMap result = DumAemAttrUtils.addValuesToAttributes(
+            DumAemAttrMap result = DumAemAttrUtils.addValuesToAttributes(
                     targetAttr, sourceAttr, jsonArray);
 
             assertTrue(result.containsKey("tags"));
@@ -306,7 +306,7 @@ class DumAemAttrUtilsTest {
                     .name("jcr:title")
                     .build();
 
-            DumAemTargetAttrValueMap result = DumAemAttrUtils.addValuesToAttributes(
+            DumAemAttrMap result = DumAemAttrUtils.addValuesToAttributes(
                     targetAttr, sourceAttr, null);
 
             assertTrue(result.isEmpty());
@@ -341,7 +341,7 @@ class DumAemAttrUtilsTest {
                     .name("tags")
                     .build();
 
-            DumAemTargetAttrValueMap valueMap = new DumAemTargetAttrValueMap();
+            DumAemAttrMap valueMap = new DumAemAttrMap();
             TurMultiValue multiValue = new TurMultiValue();
             multiValue.add("tag1");
             multiValue.add("tag2");
@@ -349,7 +349,7 @@ class DumAemAttrUtilsTest {
             multiValue.add("tag3");
             valueMap.put("tags", multiValue);
 
-            DumAemTargetAttrValueMap result = DumAemAttrUtils.getDumAttrDefUnique(targetAttr, valueMap);
+            DumAemAttrMap result = DumAemAttrUtils.getDumAttrDefUnique(targetAttr, valueMap);
 
             assertEquals(3, result.get("tags").size());
         }
@@ -375,7 +375,7 @@ class DumAemAttrUtilsTest {
             context.setDumAemTargetAttr(targetAttr);
             context.setDumAemSourceAttr(DumAemSourceAttr.builder().build());
 
-            DumAemTargetAttrValueMap result = DumAemAttrUtils.getTextValue(context);
+            DumAemAttrMap result = DumAemAttrUtils.getTextValue(context);
 
             assertNotNull(result);
             assertTrue(result.containsKey("staticField"));

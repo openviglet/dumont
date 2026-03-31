@@ -16,7 +16,7 @@
 
 package com.viglet.dumont.connector.aem.commons.ext;
 
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +72,7 @@ public class DumAemComponentMapper<T> {
 
     private final List<T> items;
     private final List<AttrMapping<T>> mappings = new ArrayList<>();
-    private final List<BiConsumer<T, DumAemTargetAttrValueMap>> customActions = new ArrayList<>();
+    private final List<BiConsumer<T, DumAemAttrMap>> customActions = new ArrayList<>();
     private boolean firstOnly = false;
 
     DumAemComponentMapper(List<T> items) {
@@ -125,7 +125,7 @@ public class DumAemComponentMapper<T> {
      *
      * @param action a consumer that receives the component bean and the target attribute map
      */
-    public DumAemComponentMapper<T> also(BiConsumer<T, DumAemTargetAttrValueMap> action) {
+    public DumAemComponentMapper<T> also(BiConsumer<T, DumAemAttrMap> action) {
         customActions.add(action);
         return this;
     }
@@ -154,7 +154,7 @@ public class DumAemComponentMapper<T> {
      * Executes all accumulated attribute mappings and custom actions,
      * populating the target attribute map.
      */
-    public void into(DumAemTargetAttrValueMap attrValues) {
+    public void into(DumAemAttrMap attrValues) {
         Stream<T> stream = items.stream().filter(Objects::nonNull);
         if (firstOnly) {
             stream.findFirst().ifPresent(item -> applyAll(item, attrValues));
@@ -178,7 +178,7 @@ public class DumAemComponentMapper<T> {
         return items.stream().filter(Objects::nonNull);
     }
 
-    private void applyAll(T item, DumAemTargetAttrValueMap attrValues) {
+    private void applyAll(T item, DumAemAttrMap attrValues) {
         for (var mapping : mappings) {
             Object value = mapping.getter().apply(item);
             attrValues.addWithValue(mapping.name(), value, mapping.override());

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 import com.viglet.dumont.commons.cache.DumCustomClassCache;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtAttributeInterface;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
@@ -43,11 +43,11 @@ import lombok.extern.slf4j.Slf4j;
 public class DumAemAttrProcess {
         public static final String CQ_TAGS_PATH = "/content/_cq_tags";
 
-        public DumAemTargetAttrValueMap prepareAttributeDefs(DumAemSession dumAemSession,
+        public DumAemAttrMap prepareAttributeDefs(DumAemSession dumAemSession,
                         DumAemObject aemObject) {
 
                 DumAemContext context = new DumAemContext(aemObject);
-                DumAemTargetAttrValueMap dumAemTargetAttrValueMap = new DumAemTargetAttrValueMap();
+                DumAemAttrMap dumAemTargetAttrValueMap = new DumAemAttrMap();
                 dumAemSession.getModel().getTargetAttrs().stream().filter(Objects::nonNull)
                                 .forEach(targetAttr -> {
                                         log.debug("TargetAttr: {}", targetAttr);
@@ -70,18 +70,18 @@ public class DumAemAttrProcess {
 
         }
 
-        public DumAemTargetAttrValueMap addTargetAttrValuesBySourceAttr(DumAemSession dumAemSession,
+        public DumAemAttrMap addTargetAttrValuesBySourceAttr(DumAemSession dumAemSession,
                         DumAemTargetAttr targetAttr, DumAemSourceAttr sourceAttr,
                         DumAemContext context) {
 
                 context.setDumAemSourceAttr(sourceAttr);
-                DumAemTargetAttrValueMap targetAttrValues = process(dumAemSession, context);
+                DumAemAttrMap targetAttrValues = process(dumAemSession, context);
                 return sourceAttr.isUniqueValues()
                                 ? DumAemAttrUtils.getDumAttrDefUnique(targetAttr, targetAttrValues)
                                 : targetAttrValues;
         }
 
-        public DumAemTargetAttrValueMap process(DumAemSession dumAemSession,
+        public DumAemAttrMap process(DumAemSession dumAemSession,
                         DumAemContext context) {
                 log.debug("Target Attribute Name: {} and Source Attribute Name: {}",
                                 context.getDumAemTargetAttr().getName(),
@@ -92,10 +92,10 @@ public class DumAemAttrProcess {
                                                 dumAemSession.getConfiguration());
         }
 
-        private @NotNull DumAemTargetAttrValueMap getCustomClassValue(DumAemContext context,
+        private @NotNull DumAemAttrMap getCustomClassValue(DumAemContext context,
                         List<TurSNAttributeSpec> dumSNAttributeSpecList,
                         DumAemConfiguration dumAemSourceContext) {
-                DumAemTargetAttrValueMap dumAemTargetAttrValueMap = DumAemAttrUtils.hasCustomClass(context)
+                DumAemAttrMap dumAemTargetAttrValueMap = DumAemAttrUtils.hasCustomClass(context)
                                 ? attributeByClass(context, dumAemSourceContext)
                                 : attributeByCMS(context);
                 dumAemTargetAttrValueMap
@@ -104,21 +104,21 @@ public class DumAemAttrProcess {
                 return dumAemTargetAttrValueMap;
         }
 
-        private DumAemTargetAttrValueMap attributeByCMS(DumAemContext context) {
+        private DumAemAttrMap attributeByCMS(DumAemContext context) {
                 final Object jcrProperty = DumAemAttrUtils.getJcrProperty(context,
                                 context.getDumAemSourceAttr().getName());
                 return DumAemAttrUtils.hasJcrPropertyValue(jcrProperty)
                                 ? DumAemAttrUtils.addValuesToAttributes(
                                                 context.getDumAemTargetAttr(),
                                                 context.getDumAemSourceAttr(), jcrProperty)
-                                : new DumAemTargetAttrValueMap();
+                                : new DumAemAttrMap();
         }
 
-        private DumAemTargetAttrValueMap generateNewAttributesFromCqTags(DumAemContext context,
+        private DumAemAttrMap generateNewAttributesFromCqTags(DumAemContext context,
                         DumAemConfiguration dumAemSourceContext,
                         List<TurSNAttributeSpec> dumSNAttributeSpecList,
-                        DumAemTargetAttrValueMap dumAemTargetAttrValueMapFromClass) {
-                DumAemTargetAttrValueMap dumAemTargetAttrValueMap = new DumAemTargetAttrValueMap();
+                        DumAemAttrMap dumAemTargetAttrValueMapFromClass) {
+                DumAemAttrMap dumAemTargetAttrValueMap = new DumAemAttrMap();
                 String attributeName = context.getDumAemSourceAttr().getName();
                 if (CQ_TAGS.equals(attributeName)) {
                         String targetName = context.getDumAemTargetAttr().getName();
@@ -136,20 +136,19 @@ public class DumAemAttrProcess {
                 return dumAemTargetAttrValueMap;
         }
 
-        private DumAemTargetAttrValueMap attributeByClass(DumAemContext context,
+        private DumAemAttrMap attributeByClass(DumAemContext context,
                         DumAemConfiguration configuration) {
                 String className = context.getDumAemSourceAttr().getClassName();
                 log.debug("ClassName : {}", className);
                 return DumCustomClassCache.getCustomClassMap(className)
-                                .map(classInstance -> DumAemTargetAttrValueMap.singleItem(
+                                .map(classInstance -> DumAemAttrMap.ofAppend(
                                                 context.getDumAemTargetAttr().getName(),
                                                 ((DumAemExtAttributeInterface) classInstance)
                                                                 .consume(context.getDumAemTargetAttr(),
                                                                                 context.getDumAemSourceAttr(),
                                                                                 context.getCmsObjectInstance(),
-                                                                                configuration),
-                                                false))
-                                .orElseGet(DumAemTargetAttrValueMap::new);
+                                                                                configuration)))
+                                .orElseGet(DumAemAttrMap::new);
 
         }
 }

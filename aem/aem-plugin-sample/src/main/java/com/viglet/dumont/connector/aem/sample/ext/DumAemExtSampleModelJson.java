@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemTargetAttrValueMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtModelJsonBase;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemModelJsonQuery;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel;
@@ -43,7 +43,6 @@ public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampl
     public static final String CONTENT_FRAGMENT_MODELS = "contentFragmentModels";
     public static final String CONTENT_FRAGMENT_ELEMENTS = "contentFragmentElements";
 
-    @SuppressWarnings("null")
     @Override
     protected Class<DumAemSampleModel> getModelClass() {
         return DumAemSampleModel.class;
@@ -51,30 +50,21 @@ public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampl
 
     @Override
     protected void extractAttributes(DumAemSampleModel model, DumAemModelJsonQuery query,
-            DumAemObject aemObject, DumAemTargetAttrValueMap attrValues) {
-        getFragmentData(attrValues, model);
-        getPageMetadata(attrValues, model);
+            DumAemObject aemObject, DumAemAttrMap attrValues) {
+        attrValues.set(FRAGMENT_PATH, model.getFragmentPath())
+                .set(PAGE_TITLE, model.getTitle())
+                .set(PAGE_DESCRIPTION, model.getDescription())
+                .set(PAGE_LANGUAGE, model.getLanguage())
+                .set(PAGE_TEMPLATE, model.getTemplateName());
+
+        if (model.getLastModifiedDate() != null) {
+            attrValues.set(PAGE_LAST_MODIFIED, new Date(model.getLastModifiedDate()));
+        }
+
         getContentFromItems(attrValues, model);
     }
 
-    private static void getFragmentData(DumAemTargetAttrValueMap attrValues,
-            DumAemSampleModel model) {
-        attrValues.addWithSingleValue(FRAGMENT_PATH, model.getFragmentPath(), true);
-    }
-
-    private static void getPageMetadata(DumAemTargetAttrValueMap attrValues,
-            DumAemSampleModel model) {
-        attrValues.addWithSingleValue(PAGE_TITLE, model.getTitle(), true);
-        attrValues.addWithSingleValue(PAGE_DESCRIPTION, model.getDescription(), true);
-        attrValues.addWithSingleValue(PAGE_LANGUAGE, model.getLanguage(), true);
-        attrValues.addWithSingleValue(PAGE_TEMPLATE, model.getTemplateName(), true);
-        if (model.getLastModifiedDate() != null) {
-            attrValues.addWithSingleValue(PAGE_LAST_MODIFIED,
-                    new Date(model.getLastModifiedDate()), true);
-        }
-    }
-
-    private static void getContentFromItems(DumAemTargetAttrValueMap attrValues,
+    private static void getContentFromItems(DumAemAttrMap attrValues,
             DumAemSampleModel model) {
         if (model.getItems() == null) {
             return;
@@ -89,12 +79,12 @@ public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampl
         collectContentRecursively(model.getItems(), paragraphs, texts, images,
                 cfTitles, cfModels, cfElements);
 
-        attrValues.addWithStringCollectionValue(PARAGRAPHS, paragraphs, true);
-        attrValues.addWithStringCollectionValue(TEXTS, texts, true);
-        attrValues.addWithStringCollectionValue(IMAGES, images, true);
-        attrValues.addWithStringCollectionValue(CONTENT_FRAGMENT_TITLES, cfTitles, true);
-        attrValues.addWithStringCollectionValue(CONTENT_FRAGMENT_MODELS, cfModels, true);
-        attrValues.addWithStringCollectionValue(CONTENT_FRAGMENT_ELEMENTS, cfElements, true);
+        attrValues.setAll(PARAGRAPHS, paragraphs)
+                .setAll(TEXTS, texts)
+                .setAll(IMAGES, images)
+                .setAll(CONTENT_FRAGMENT_TITLES, cfTitles)
+                .setAll(CONTENT_FRAGMENT_MODELS, cfModels)
+                .setAll(CONTENT_FRAGMENT_ELEMENTS, cfElements);
     }
 
     private static void collectContentRecursively(Map<String, DumAemSampleModelItem> items,
@@ -120,12 +110,13 @@ public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampl
     }
 
     private static void extractParagraphs(DumAemSampleModelItem item, List<String> paragraphs) {
-        if (item.getParagraphs() != null) {
-            for (String paragraph : item.getParagraphs()) {
-                String cleaned = stripHtml(paragraph);
-                if (!cleaned.isBlank()) {
-                    paragraphs.add(cleaned);
-                }
+        if (item.getParagraphs() == null) {
+            return;
+        }
+        for (String paragraph : item.getParagraphs()) {
+            String cleaned = stripHtml(paragraph);
+            if (!cleaned.isBlank()) {
+                paragraphs.add(cleaned);
             }
         }
     }
@@ -145,15 +136,16 @@ public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampl
     private static void extractContentFragment(DumAemSampleModelItem item,
             List<String> cfTitles, List<String> cfModels, List<String> cfElements) {
         String type = item.getType();
-        if (type != null && type.contains("contentfragment")) {
-            if (item.getTitle() != null && !item.getTitle().isBlank()) {
-                cfTitles.add(item.getTitle());
-            }
-            if (item.getModel() != null && !item.getModel().isBlank()) {
-                cfModels.add(item.getModel());
-            }
-            extractElements(item, cfElements);
+        if (type == null || !type.contains("contentfragment")) {
+            return;
         }
+        if (item.getTitle() != null && !item.getTitle().isBlank()) {
+            cfTitles.add(item.getTitle());
+        }
+        if (item.getModel() != null && !item.getModel().isBlank()) {
+            cfModels.add(item.getModel());
+        }
+        extractElements(item, cfElements);
     }
 
     private static void extractElements(DumAemSampleModelItem item,
