@@ -10,7 +10,8 @@
     "notDeleted": "The {{name}} Integration Instance was not deleted",
     "nav": {
       "settings": "Settings",
-      "sources": "Sources",
+      "sources": "AEM Sources",
+      "dbSources": "Database Sources",
       "indexingRules": "Indexing Rules",
       "indexingManager": "Indexing Manager",
       "monitoring": "Monitoring",
@@ -41,6 +42,23 @@
       "dryScan": "Dry Scan",
       "dryScanStarted": "Dry scan started for {{name}}",
       "dryScanFailed": "Failed to start dry scan for {{name}}",
+      "alreadyRunning": "A process is already running for {{name}}. Please wait for it to finish."
+    },
+    "dbSources": {
+      "title": "Database Sources",
+      "description": "Available JDBC database sources for indexing and configuration.",
+      "feature": "Database Source",
+      "blankTitle": "You don't seem to have any database sources.",
+      "blankDescription": "Create a new database source to import data from JDBC databases.",
+      "newSource": "New Database Source",
+      "deleted": "The {{name}} Database Source was deleted",
+      "notDeleted": "The {{name}} Database Source was not deleted",
+      "indexingStarted": "Indexing started for {{name}}",
+      "indexingFailed": "Failed to start indexing for {{name}}",
+      "reindexingStarted": "Reindexing started for {{name}}",
+      "reindexingFailed": "Failed to start reindexing for {{name}}",
+      "reindexAll": "Reindex all",
+      "indexAll": "Index all",
       "alreadyRunning": "A process is already running for {{name}}. Please wait for it to finish."
     },
     "indexingRules": {

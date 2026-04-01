@@ -31,7 +31,9 @@
     <modules>
         <module>db-commons</module>
         <module>db-app</module>
+        <module>db-plugin</module>
         <module>db-sample</module>
+        <module>db-plugin-sample</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

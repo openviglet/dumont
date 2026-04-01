@@ -1,0 +1,48 @@
+{
+  "sources": [
+    {
+      "id": "",
+      "name": "Sample MariaDB",
+      "description": "Sample database source importing RNA families from the Rfam public database.",
+      "driver": "org.mariadb.jdbc.Driver",
+      "url": "jdbc:mariadb://mysql-rfam-public.ebi.ac.uk:4497/Rfam",
+      "dbUsername": "rfamro",
+      "query": "SELECT rfam_id AS id, description AS title, author AS abstract, rfam_id AS url, created AS publication_date, updated AS modification_date FROM family LIMIT 100",
+      "site": "Sample",
+      "locale": "en_US",
+      "contentType": "Family",
+      "chunk": 100,
+      "typeInId": true,
+      "multiValuedSeparator": ",",
+      "encoding": "UTF-8",
+      "maxContentMegaByteSize": 5,
+      "customClassName": "com.viglet.dumont.connector.db.sample.ext.DumDbExtPluginSample",
+      "turSNSites": [
+        "Sample"
+      ]
+    },
+    {
+      "id": "",
+      "name": "Sample PostgreSQL",
+      "description": "Example PostgreSQL source for importing articles. Update the connection settings before use.",
+      "driver": "org.postgresql.Driver",
+      "url": "jdbc:postgresql://localhost:5432/mydb",
+      "dbUsername": "postgres",
+      "dbPassword": "changeme",
+      "query": "SELECT id, title, content AS text, summary AS abstract, author, created_at AS publication_date, updated_at AS modification_date, category AS tags FROM articles",
+      "site": "Articles",
+      "locale": "en_US",
+      "contentType": "Article",
+      "chunk": 50,
+      "typeInId": false,
+      "multiValuedSeparator": ",",
+      "multiValuedFields": "tags",
+      "removeHtmlTagsFields": "text,abstract",
+      "encoding": "UTF-8",
+      "maxContentMegaByteSize": 10,
+      "turSNSites": [
+        "Articles"
+      ]
+    }
+  ]
+}

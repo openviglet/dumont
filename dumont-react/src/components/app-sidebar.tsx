@@ -1,6 +1,7 @@
 import {
   IconAdjustmentsSearch,
   IconChartBar,
+  IconDatabase,
   IconGitCommit,
   IconGraph,
   IconHome,
@@ -14,6 +15,7 @@ import { useTranslation } from "react-i18next"
 
 import { ROUTES } from "@/app/routes.const"
 import { NavMain } from "@/components/nav-main"
+import { usePlugin } from "@/contexts/plugin.context"
 import {
   Sidebar,
   SidebarContent,
@@ -38,8 +40,15 @@ interface SidebarNavItem {
 const STANDALONE_ID = "local"
 const BASE = `${ROUTES.INTEGRATION_INSTANCE}/${STANDALONE_ID}`
 
-const aemItems: SidebarNavItem[] = [
+const aemSourceItems: SidebarNavItem[] = [
   { key: "sources", titleKey: "integration.nav.sources", url: `${BASE}/source`, icon: IconGitCommit },
+]
+
+const dbSourceItems: SidebarNavItem[] = [
+  { key: "dbSources", titleKey: "integration.nav.dbSources", url: `${BASE}/db-source`, icon: IconDatabase },
+]
+
+const commonItems: SidebarNavItem[] = [
   { key: "indexingRules", titleKey: "integration.nav.indexingRules", url: `${BASE}/indexing-rule`, icon: IconTools },
   { key: "indexingManager", titleKey: "integration.nav.indexingManager", url: `${BASE}/indexing-manager`, icon: IconAdjustmentsSearch },
   { key: "monitoring", titleKey: "integration.nav.monitoring", url: `${BASE}/monitoring`, icon: IconGraph },
@@ -51,6 +60,7 @@ const aemItems: SidebarNavItem[] = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const { toggleSidebar, state, isMobile } = useSidebar();
+  const { provider } = usePlugin();
   const isCollapsed = state === "collapsed";
 
   const toNavItems = React.useCallback(
@@ -58,12 +68,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     [t]
   )
 
+  const isAem = provider === "AEM";
+  const isDb = provider === "JDBC-DATABASE";
+
   const navGroups = React.useMemo(
-    () => [
-      { items: [{ title: t("home.title"), url: ROUTES.HOME, icon: IconHome }] },
-      { label: "AEM", items: toNavItems(aemItems) },
-    ],
-    [t, toNavItems]
+    () => {
+      const groups: { label?: string; items: { title: string; url: string; icon: Icon }[] }[] = [
+        { items: [{ title: t("home.title"), url: ROUTES.HOME, icon: IconHome }] },
+      ];
+
+      if (isAem) {
+        groups.push({ label: "AEM", items: toNavItems(aemSourceItems) });
+      }
+
+      if (isDb) {
+        groups.push({ label: "Database", items: toNavItems(dbSourceItems) });
+      }
+
+      groups.push({ label: t("integration.title"), items: toNavItems(commonItems) });
+
+      return groups;
+    },
+    [t, toNavItems, isAem, isDb]
   )
 
   return (

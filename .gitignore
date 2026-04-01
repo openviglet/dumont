@@ -36,3 +36,6 @@ dependency-reduced-pom.xml
 /connector/connector-app/src/main/resources/public
 /dumont-react/.__mf__temp
 /dumont-react/.mf
+/db/db-plugin/target
+/db/db-plugin-sample/dist
+/db/db-plugin-sample/target

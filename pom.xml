@@ -278,6 +278,11 @@
             </dependency>
             <dependency>
                 <groupId>com.viglet.dumont</groupId>
+                <artifactId>db-plugin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.viglet.dumont</groupId>
                 <artifactId>fs-commons</artifactId>
                 <version>${project.version}</version>
             </dependency>

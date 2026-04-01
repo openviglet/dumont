@@ -3,6 +3,8 @@ import IntegrationInstanceSourceListPage from "./pages/integration.instance.sour
 import IntegrationInstanceSourcePage from "./pages/integration.instance.source.page";
 import IntegrationInstanceSourceSpecPage from "./pages/integration.instance.source.spec.page";
 import IntegrationInstanceSourceModelPage from "./pages/integration.instance.source.model.page";
+import IntegrationInstanceDbSourceListPage from "./pages/integration.instance.db.source.list.page";
+import IntegrationInstanceDbSourcePage from "./pages/integration.instance.db.source.page";
 import IntegrationInstanceIndexingRulesListPage from "./pages/integration.instance.indexing.rules.list.page";
 import IntegrationInstanceIndexingRulesPage from "./pages/integration.instance.indexing.rules.page";
 import IntegrationInstanceIndexingManagerPage from "./pages/integration.instance.indexing.manager.page";
@@ -14,15 +16,21 @@ import IntegrationInstanceSystemInfoPage from "./pages/integration.instance.syst
 // All dumont routes are defined here.
 // The host (turing-react) mounts this via a single wildcard route.
 // Adding new pages here requires NO changes in turing-react.
+// Visibility is controlled by the sidebar (manifest.ts provider field),
+// not by conditionally rendering routes.
 export default function DumontRoutes() {
   return (
     <Routes>
-      {/* Sources */}
+      {/* AEM Sources */}
       <Route path="source" element={<IntegrationInstanceSourceListPage />} />
       <Route path="source/:sourceId" element={<IntegrationInstanceSourcePage />} />
       <Route path="source/:sourceId/:tab" element={<IntegrationInstanceSourcePage />} />
       <Route path="source/:sourceId/specifications/:specIndex" element={<IntegrationInstanceSourceSpecPage />} />
       <Route path="source/:sourceId/models/:modelIndex" element={<IntegrationInstanceSourceModelPage />} />
+      {/* DB Sources */}
+      <Route path="db-source" element={<IntegrationInstanceDbSourceListPage />} />
+      <Route path="db-source/:sourceId" element={<IntegrationInstanceDbSourcePage />} />
+      <Route path="db-source/:sourceId/:tab" element={<IntegrationInstanceDbSourcePage />} />
       {/* Indexing Rules */}
       <Route path="indexing-rule" element={<IntegrationInstanceIndexingRulesListPage />} />
       <Route path="indexing-rule/:ruleId" element={<IntegrationInstanceIndexingRulesPage />} />

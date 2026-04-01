@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "./components/theme-provider";
 import { BreadcrumbProvider } from "./contexts/breadcrumb.context";
+import { PluginProvider } from "./contexts/plugin.context";
 import { ROUTES } from "./app/routes.const";
 import ConsoleRootPage from "./app/console/console.root.page";
 import HomePage from "./app/console/home/home.page";
@@ -19,6 +20,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="dumont-ui-theme">
       <Toaster richColors position="bottom-right" />
+      <PluginProvider>
       <BreadcrumbProvider>
         <Routes>
           <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
@@ -31,6 +33,7 @@ function App() {
           </Route>
         </Routes>
       </BreadcrumbProvider>
+      </PluginProvider>
     </ThemeProvider>
   );
 }

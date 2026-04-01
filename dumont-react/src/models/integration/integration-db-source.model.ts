@@ -1,0 +1,27 @@
+export type TurIntegrationDbSource = {
+  id: string;
+  name: string;
+  description: string;
+  driver: string;
+  url: string;
+  dbUsername: string;
+  dbPassword: string;
+  query: string;
+  site: string;
+  locale: string;
+  contentType: string;
+  chunk: number;
+  typeInId: boolean;
+  multiValuedSeparator: string;
+  multiValuedFields: string;
+  removeHtmlTagsFields: string;
+  filePathField: string;
+  fileContentField: string;
+  fileSizeField: string;
+  customClassName: string;
+  maxContentMegaByteSize: number;
+  encoding: string;
+  showOutput: boolean;
+  deindexBeforeImporting: boolean;
+  turSNSites: string[];
+};

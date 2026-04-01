@@ -71,6 +71,7 @@ public class DumConnectorApi {
     public Map<String, String> status() {
         Map<String, String> status = new HashMap<>();
         status.put(STATUS_KEY, "ok");
+        status.put("provider", plugin.getProviderName());
         return status;
     }
 
