@@ -20,11 +20,25 @@
         <maven.compiler.target>21</maven.compiler.target>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
-    <modules>
-        <module>aem-commons</module>
-        <module>aem-plugin</module>
-        <module>aem-plugin-sample</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>aem-commons</module>
+                <module>aem-plugin</module>
+                <module>aem-plugin-sample</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>release</id>
+            <modules>
+                <module>aem-commons</module>
+            </modules>
+        </profile>
+    </profiles>
     <build>
     </build>
 </project>
