@@ -28,13 +28,21 @@ public class DumAemPageEventHandler implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
-        log.info("Dumont Log Page Event: {}", event);
         PageEvent pageEvent = PageEvent.fromEvent(event);
+        if (pageEvent == null) {
+            log.warn("Dumont: Failed to extract PageEvent from event: {}", event.getTopic());
+            return;
+        }
+        log.info("Dumont: Page event received: {}", event.getTopic());
         List<String> paths = IteratorUtils
                 .toList(pageEvent.getModifications())
                 .stream()
                 .map(PageModification::getPath)
                 .collect(Collectors.toList());
+
+        if (paths.isEmpty()) {
+            return;
+        }
         DumAemEventUtils.index(dumAemIndexerService.getConfig(), paths, DumAemEvent.INDEXING);
     }
 }

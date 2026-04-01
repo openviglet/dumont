@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-@Version("2025.3")
+@Version("2026.2")
 package com.viglet.dumont.aem.server.core.events;
 
 import org.osgi.annotation.versioning.Version;
