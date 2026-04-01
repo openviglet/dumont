@@ -17,6 +17,8 @@ const manifest: DumontManifest = {
   navItems: [
     { titleKey: "integration.nav.sources", url: "/source", icon: "IconGitCommit", order: 10, provider: "AEM" },
     { titleKey: "integration.nav.dbSources", url: "/db-source", icon: "IconDatabase", order: 10, provider: "JDBC-DATABASE" },
+    { titleKey: "integration.nav.wcSources", url: "/wc-source", icon: "IconGlobe", order: 10, provider: "WEB-CRAWLER" },
+    { titleKey: "integration.nav.assetsSources", url: "/assets-source", icon: "IconFolder", order: 10, provider: "ASSETS" },
     { titleKey: "integration.nav.indexingRules", url: "/indexing-rule", icon: "IconTools", order: 20 },
     { titleKey: "integration.nav.indexingManager", url: "/indexing-manager", icon: "IconAdjustmentsSearch", order: 30 },
     { titleKey: "integration.nav.monitoring", url: "/monitoring", icon: "IconGraph", order: 40 },

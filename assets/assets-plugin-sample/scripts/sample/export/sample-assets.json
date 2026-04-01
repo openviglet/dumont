@@ -1,0 +1,23 @@
+{
+  "sources": [
+    {
+      "id": "",
+      "name": "Sample Documents",
+      "description": "Sample source for indexing a local documents directory.",
+      "sourceDir": "/opt/documents",
+      "prefixFromReplace": "/opt/documents",
+      "prefixToReplace": "https://docs.example.com/files",
+      "site": "Sample",
+      "locale": "en_US",
+      "contentType": "Static File",
+      "chunk": 100,
+      "typeInId": false,
+      "fileSizeField": "fileSize",
+      "fileExtensionField": "fileExtension",
+      "encoding": "UTF-8",
+      "turSNSites": [
+        "Sample"
+      ]
+    }
+  ]
+}

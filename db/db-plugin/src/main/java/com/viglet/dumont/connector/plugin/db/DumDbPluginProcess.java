@@ -44,8 +44,8 @@ import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.commons.cache.DumCustomClassCache;
 import com.viglet.dumont.connector.db.ext.DumDbExtCustomImpl;
-import com.viglet.dumont.connector.filesystem.commons.DumFileUtils;
-import com.viglet.dumont.connector.filesystem.commons.DumTikaFileAttributes;
+import com.viglet.dumont.connector.assets.commons.DumFileUtils;
+import com.viglet.dumont.connector.assets.commons.DumTikaFileAttributes;
 import com.viglet.dumont.connector.plugin.db.persistence.model.DumDbSource;
 import com.viglet.dumont.connector.plugin.db.persistence.repository.DumDbSourceRepository;
 import com.viglet.turing.client.auth.credentials.TurApiKeyCredentials;

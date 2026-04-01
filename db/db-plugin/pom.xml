@@ -51,7 +51,7 @@
         </dependency>
         <dependency>
             <groupId>com.viglet.dumont</groupId>
-            <artifactId>fs-commons</artifactId>
+            <artifactId>assets-commons</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>

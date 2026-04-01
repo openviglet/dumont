@@ -32,5 +32,6 @@
     <modules>
         <module>wc-commons</module>
         <module>wc-plugin</module>
+        <module>wc-plugin-sample</module>
     </modules>
 </project>

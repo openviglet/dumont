@@ -5,6 +5,10 @@ import IntegrationInstanceSourceSpecPage from "./pages/integration.instance.sour
 import IntegrationInstanceSourceModelPage from "./pages/integration.instance.source.model.page";
 import IntegrationInstanceDbSourceListPage from "./pages/integration.instance.db.source.list.page";
 import IntegrationInstanceDbSourcePage from "./pages/integration.instance.db.source.page";
+import IntegrationInstanceWcSourceListPage from "./pages/integration.instance.wc.source.list.page";
+import IntegrationInstanceWcSourcePage from "./pages/integration.instance.wc.source.page";
+import IntegrationInstanceAssetsSourceListPage from "./pages/integration.instance.assets.source.list.page";
+import IntegrationInstanceAssetsSourcePage from "./pages/integration.instance.assets.source.page";
 import IntegrationInstanceIndexingRulesListPage from "./pages/integration.instance.indexing.rules.list.page";
 import IntegrationInstanceIndexingRulesPage from "./pages/integration.instance.indexing.rules.page";
 import IntegrationInstanceIndexingManagerPage from "./pages/integration.instance.indexing.manager.page";
@@ -31,6 +35,14 @@ export default function DumontRoutes() {
       <Route path="db-source" element={<IntegrationInstanceDbSourceListPage />} />
       <Route path="db-source/:sourceId" element={<IntegrationInstanceDbSourcePage />} />
       <Route path="db-source/:sourceId/:tab" element={<IntegrationInstanceDbSourcePage />} />
+      {/* WC Sources */}
+      <Route path="wc-source" element={<IntegrationInstanceWcSourceListPage />} />
+      <Route path="wc-source/:sourceId" element={<IntegrationInstanceWcSourcePage />} />
+      <Route path="wc-source/:sourceId/:tab" element={<IntegrationInstanceWcSourcePage />} />
+      {/* Assets Sources */}
+      <Route path="assets-source" element={<IntegrationInstanceAssetsSourceListPage />} />
+      <Route path="assets-source/:sourceId" element={<IntegrationInstanceAssetsSourcePage />} />
+      <Route path="assets-source/:sourceId/:tab" element={<IntegrationInstanceAssetsSourcePage />} />
       {/* Indexing Rules */}
       <Route path="indexing-rule" element={<IntegrationInstanceIndexingRulesListPage />} />
       <Route path="indexing-rule/:ruleId" element={<IntegrationInstanceIndexingRulesPage />} />

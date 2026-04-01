@@ -39,3 +39,10 @@ dependency-reduced-pom.xml
 /db/db-plugin/target
 /db/db-plugin-sample/dist
 /db/db-plugin-sample/target
+/assets/assets-connector/target
+/assets/assets-plugin-sample/target
+/assets/assets-plugin/target
+/db/db-app/target
+/db/db-sample/target
+/web-crawler/wc-sample/target
+/web-crawler/wc-plugin-sample/target

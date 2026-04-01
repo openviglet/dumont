@@ -1,0 +1,18 @@
+<project name="wc-plugin-sample" default="sample">
+    <target name="sample">
+        <exec executable="mvnw.cmd">
+            <arg value="clean"/>
+            <arg value="install"/>
+            <arg value="package"/>
+            <arg value="-am"/>
+        </exec>
+        <delete dir="dist/sample"/>
+        <mkdir dir="dist/sample/libs"/>
+        <copy todir="dist/sample/">
+            <fileset dir="scripts/sample/"/>
+        </copy>
+        <copy file="target/wc-plugin-sample.jar" todir="dist/sample/libs/"/>
+        <copy file="../wc-plugin/target/web-crawler-plugin.jar" todir="dist/sample/libs/"/>
+        <copy file="../../connector/connector-app/target/dumont-connector.jar" todir="dist/sample/"/>
+    </target>
+</project>

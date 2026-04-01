@@ -30,9 +30,7 @@
     <description>Dumont Database</description>
     <modules>
         <module>db-commons</module>
-        <module>db-app</module>
         <module>db-plugin</module>
-        <module>db-sample</module>
         <module>db-plugin-sample</module>
     </modules>
     <properties>

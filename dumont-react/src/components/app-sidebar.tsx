@@ -2,7 +2,9 @@ import {
   IconAdjustmentsSearch,
   IconChartBar,
   IconDatabase,
+  IconFolder,
   IconGitCommit,
+  IconGlobe,
   IconGraph,
   IconHome,
   IconInfoCircle,
@@ -48,6 +50,14 @@ const dbSourceItems: SidebarNavItem[] = [
   { key: "dbSources", titleKey: "integration.nav.dbSources", url: `${BASE}/db-source`, icon: IconDatabase },
 ]
 
+const wcSourceItems: SidebarNavItem[] = [
+  { key: "wcSources", titleKey: "integration.nav.wcSources", url: `${BASE}/wc-source`, icon: IconGlobe },
+]
+
+const assetsSourceItems: SidebarNavItem[] = [
+  { key: "assetsSources", titleKey: "integration.nav.assetsSources", url: `${BASE}/assets-source`, icon: IconFolder },
+]
+
 const commonItems: SidebarNavItem[] = [
   { key: "indexingRules", titleKey: "integration.nav.indexingRules", url: `${BASE}/indexing-rule`, icon: IconTools },
   { key: "indexingManager", titleKey: "integration.nav.indexingManager", url: `${BASE}/indexing-manager`, icon: IconAdjustmentsSearch },
@@ -70,6 +80,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const isAem = provider === "AEM";
   const isDb = provider === "JDBC-DATABASE";
+  const isWc = provider === "WEB-CRAWLER";
+  const isAssets = provider === "ASSETS";
 
   const navGroups = React.useMemo(
     () => {
@@ -85,11 +97,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         groups.push({ label: "Database", items: toNavItems(dbSourceItems) });
       }
 
+      if (isWc) {
+        groups.push({ label: "Web Crawler", items: toNavItems(wcSourceItems) });
+      }
+
+      if (isAssets) {
+        groups.push({ label: "Assets", items: toNavItems(assetsSourceItems) });
+      }
+
       groups.push({ label: t("integration.title"), items: toNavItems(commonItems) });
 
       return groups;
     },
-    [t, toNavItems, isAem, isDb]
+    [t, toNavItems, isAem, isDb, isWc, isAssets]
   )
 
   return (

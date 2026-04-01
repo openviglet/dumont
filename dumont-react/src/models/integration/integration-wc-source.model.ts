@@ -9,9 +9,10 @@ export type TurIntegrationWcSource = {
   locale: string;
   localeClass: string;
   url: string;
-  turSNSite: string;
   username: string;
   password: string;
+  turSNSites: string[];
+  startingPoints: TurIntegrationWcUrl[];
   allowUrls: TurIntegrationWcUrl[];
   notAllowUrls: TurIntegrationWcUrl[];
   notAllowExtensions: TurIntegrationWcExtension[];

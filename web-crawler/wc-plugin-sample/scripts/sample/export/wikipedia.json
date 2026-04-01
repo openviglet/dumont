@@ -1,0 +1,90 @@
+{
+  "sources": [
+    {
+      "id": "",
+      "url": "https://en.wikipedia.org",
+      "locale": "en_US",
+      "turSNSites": [
+        "wikipedia"
+      ],
+      "startingPoints": [
+        "https://en.wikipedia.org/wiki/Main_Page"
+      ],
+      "allowUrls": [
+        "https://en.wikipedia.org/wiki/*"
+      ],
+      "notAllowUrls": [
+        "https://en.wikipedia.org/wiki/Special:*",
+        "https://en.wikipedia.org/wiki/Talk:*",
+        "https://en.wikipedia.org/wiki/User:*",
+        "https://en.wikipedia.org/wiki/User_talk:*",
+        "https://en.wikipedia.org/wiki/Wikipedia:*",
+        "https://en.wikipedia.org/wiki/Wikipedia_talk:*",
+        "https://en.wikipedia.org/wiki/Template:*",
+        "https://en.wikipedia.org/wiki/Template_talk:*",
+        "https://en.wikipedia.org/wiki/Help:*",
+        "https://en.wikipedia.org/wiki/Category:*",
+        "https://en.wikipedia.org/wiki/Portal:*",
+        "https://en.wikipedia.org/wiki/File:*",
+        "https://en.wikipedia.org/wiki/Module:*",
+        "https://en.wikipedia.org/w/*"
+      ],
+      "notAllowExtensions": [
+        ".pdf",
+        ".zip",
+        ".gz",
+        ".tar",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".svg",
+        ".mp3",
+        ".mp4",
+        ".ogg"
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtId"
+        },
+        {
+          "name": "title",
+          "className": "com.viglet.dumont.connector.webcrawler.sample.ext.DumWCExtWikipediaTitle"
+        },
+        {
+          "name": "text",
+          "className": "com.viglet.dumont.connector.webcrawler.sample.ext.DumWCExtWikipediaContent"
+        },
+        {
+          "name": "abstract",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtDescription"
+        },
+        {
+          "name": "tags",
+          "className": "com.viglet.dumont.connector.webcrawler.sample.ext.DumWCExtWikipediaCategories"
+        },
+        {
+          "name": "url",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtUrl"
+        },
+        {
+          "name": "publication_date",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtDate"
+        },
+        {
+          "name": "modification_date",
+          "className": "com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtDate"
+        },
+        {
+          "name": "site",
+          "text": "Wikipedia"
+        },
+        {
+          "name": "source_apps",
+          "text": "WEB-CRAWLER"
+        }
+      ]
+    }
+  ]
+}

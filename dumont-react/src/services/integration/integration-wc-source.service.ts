@@ -10,8 +10,8 @@ export class TurIntegrationWcSourceService {
     this.axiosInstance = axiosInstance;
   }
 
-  private get url(): string {
-    return `/integration/${this.integrationId}/wc/source`;
+  private get wcUrl(): string {
+    return `/v2/integration/${this.integrationId}/wc/source`;
   }
 
   setIntegrationId(integrationId: string): this {
@@ -21,21 +21,21 @@ export class TurIntegrationWcSourceService {
 
   async query(): Promise<TurIntegrationWcSource[]> {
     const { data } = await this.axiosInstance.get<TurIntegrationWcSource[]>(
-      this.url
+      this.wcUrl
     );
     return data;
   }
 
   async get(id: string): Promise<TurIntegrationWcSource> {
     const { data } = await this.axiosInstance.get<TurIntegrationWcSource>(
-      `${this.url}/${id}`
+      `${this.wcUrl}/${id}`
     );
     return data;
   }
 
-  async getStructure(): Promise<TurIntegrationWcSource[]> {
-    const { data } = await this.axiosInstance.get<TurIntegrationWcSource[]>(
-      `${this.url}/structure`
+  async getStructure(): Promise<TurIntegrationWcSource> {
+    const { data } = await this.axiosInstance.get<TurIntegrationWcSource>(
+      `${this.wcUrl}/structure`
     );
     return data;
   }
@@ -44,7 +44,7 @@ export class TurIntegrationWcSourceService {
     source: TurIntegrationWcSource
   ): Promise<TurIntegrationWcSource> {
     const { data } = await this.axiosInstance.post<TurIntegrationWcSource>(
-      this.url,
+      this.wcUrl,
       source
     );
     return data;
@@ -54,7 +54,7 @@ export class TurIntegrationWcSourceService {
     source: TurIntegrationWcSource
   ): Promise<TurIntegrationWcSource> {
     const { data } = await this.axiosInstance.put<TurIntegrationWcSource>(
-      `${this.url}/${source.id}`,
+      `${this.wcUrl}/${source.id}`,
       source
     );
     return data;
@@ -62,8 +62,12 @@ export class TurIntegrationWcSourceService {
 
   async delete(source: TurIntegrationWcSource): Promise<boolean> {
     const { status } = await this.axiosInstance.delete(
-      `${this.url}/${source.id}`
+      `${this.wcUrl}/${source.id}`
     );
     return status === 200;
+  }
+
+  async crawl(source: TurIntegrationWcSource): Promise<void> {
+    await this.axiosInstance.get(`${this.wcUrl}/${source.id}/crawl`);
   }
 }

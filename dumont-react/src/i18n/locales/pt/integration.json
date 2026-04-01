@@ -12,6 +12,8 @@
       "settings": "Configurações",
       "sources": "Fontes AEM",
       "dbSources": "Fontes de Banco de Dados",
+      "wcSources": "Fontes Web Crawler",
+      "assetsSources": "Fontes de Assets",
       "indexingRules": "Regras de Indexação",
       "indexingManager": "Gerenciador de Indexação",
       "monitoring": "Monitoramento",
@@ -43,6 +45,32 @@
       "dryScanStarted": "Dry scan iniciado para {{name}}",
       "dryScanFailed": "Falha ao iniciar dry scan para {{name}}",
       "alreadyRunning": "Um processo já está em execução para {{name}}. Aguarde a conclusão."
+    },
+    "assetsSources": {
+      "title": "Fontes de Assets",
+      "description": "Fontes de assets do sistema de arquivos disponíveis para indexação de arquivos e documentos.",
+      "feature": "Fonte de Assets",
+      "blankTitle": "Você ainda não possui nenhuma fonte de assets.",
+      "blankDescription": "Crie uma nova fonte de assets para indexar arquivos de um diretório local.",
+      "newSource": "Nova Fonte de Assets",
+      "deleted": "A Fonte de Assets {{name}} foi excluída",
+      "notDeleted": "A Fonte de Assets {{name}} não foi excluída",
+      "indexAll": "Indexar Tudo",
+      "indexingStarted": "Indexação iniciada para {{name}}",
+      "indexingFailed": "Falha ao iniciar indexação para {{name}}"
+    },
+    "wcSources": {
+      "title": "Fontes Web Crawler",
+      "description": "Fontes web crawler disponíveis para rastreamento e indexação de sites.",
+      "feature": "Fonte Web Crawler",
+      "blankTitle": "Você ainda não possui nenhuma fonte web crawler.",
+      "blankDescription": "Crie uma nova fonte web crawler para rastrear e indexar conteúdo de sites.",
+      "newSource": "Nova Fonte Web Crawler",
+      "deleted": "A Fonte Web Crawler {{name}} foi excluída",
+      "notDeleted": "A Fonte Web Crawler {{name}} não foi excluída",
+      "crawl": "Iniciar Rastreamento",
+      "crawlStarted": "Rastreamento iniciado para {{name}}",
+      "crawlFailed": "Falha ao iniciar rastreamento para {{name}}"
     },
     "dbSources": {
       "title": "Fontes de Banco de Dados",

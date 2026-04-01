@@ -12,6 +12,8 @@
       "settings": "Settings",
       "sources": "AEM Sources",
       "dbSources": "Database Sources",
+      "wcSources": "Web Crawler Sources",
+      "assetsSources": "Assets Sources",
       "indexingRules": "Indexing Rules",
       "indexingManager": "Indexing Manager",
       "monitoring": "Monitoring",
@@ -43,6 +45,32 @@
       "dryScanStarted": "Dry scan started for {{name}}",
       "dryScanFailed": "Failed to start dry scan for {{name}}",
       "alreadyRunning": "A process is already running for {{name}}. Please wait for it to finish."
+    },
+    "assetsSources": {
+      "title": "Assets Sources",
+      "description": "Available filesystem asset sources for indexing files and documents.",
+      "feature": "Assets Source",
+      "blankTitle": "You don't seem to have any assets sources.",
+      "blankDescription": "Create a new assets source to index files from a local directory.",
+      "newSource": "New Assets Source",
+      "deleted": "The {{name}} Assets Source was deleted",
+      "notDeleted": "The {{name}} Assets Source was not deleted",
+      "indexAll": "Index All",
+      "indexingStarted": "Indexing started for {{name}}",
+      "indexingFailed": "Failed to start indexing for {{name}}"
+    },
+    "wcSources": {
+      "title": "Web Crawler Sources",
+      "description": "Available web crawler sources for crawling and indexing websites.",
+      "feature": "Web Crawler Source",
+      "blankTitle": "You don't seem to have any web crawler sources.",
+      "blankDescription": "Create a new web crawler source to crawl and index website content.",
+      "newSource": "New Web Crawler Source",
+      "deleted": "The {{name}} Web Crawler Source was deleted",
+      "notDeleted": "The {{name}} Web Crawler Source was not deleted",
+      "crawl": "Start Crawl",
+      "crawlStarted": "Crawling started for {{name}}",
+      "crawlFailed": "Failed to start crawling for {{name}}"
     },
     "dbSources": {
       "title": "Database Sources",

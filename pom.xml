@@ -174,7 +174,7 @@
                 <module>commons</module>
                 <module>spring</module>
                 <module>connector</module>
-                <module>filesystem</module>
+                <module>assets</module>
                 <module>db</module>
                 <module>aem-commons</module>
                 <module>aem</module>
@@ -283,7 +283,7 @@
             </dependency>
             <dependency>
                 <groupId>com.viglet.dumont</groupId>
-                <artifactId>fs-commons</artifactId>
+                <artifactId>assets-commons</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
