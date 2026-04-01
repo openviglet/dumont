@@ -65,7 +65,7 @@ jobs:
             }]
       - name: Publish package
         run: |
-          mvn --batch-mode -pl aem-commons -P release -am deploy -DskipTests -Dturing.open-browser=false
+          mvn --batch-mode -P release deploy -DskipTests -Dturing.open-browser=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
