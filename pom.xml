@@ -188,7 +188,7 @@
             <id>release</id>
             <modules>
                 <module>commons</module>
-                <module>aem/aem-commons</module>
+                <module>aem</module>
             </modules>
             <build>
                 <plugins>
