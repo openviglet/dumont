@@ -6,8 +6,8 @@
 #   ./Dumont-DEP.AppImage                     (starts AEM connector)
 #   ./Dumont-DEP.AppImage --connector aem
 #   ./Dumont-DEP.AppImage --connector webcrawler
-#   ./Dumont-DEP.AppImage --connector db [db options...]
-#   ./Dumont-DEP.AppImage --connector filesystem [fs options...]
+#   ./Dumont-DEP.AppImage --connector db
+#   ./Dumont-DEP.AppImage --connector assets
 # --------------------------------------------------------------------------
 set -euo pipefail
 
@@ -34,46 +34,29 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+start_connector() {
+  local LIBS_DIR="$1"
+  local LABEL="$2"
+  echo "Starting Dumont Connector ($LABEL)..."
+  SPRING_CONFIG=""
+  if [ -f "$PROPS" ]; then
+    SPRING_CONFIG="--spring.config.additional-location=file:$PROPS"
+  fi
+  exec java -Xmx512m -Xms512m \
+    -Dloader.path="$LIBS_DIR" \
+    -jar "$JAR" \
+    $SPRING_CONFIG \
+    "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"
+}
+
 case "$CONNECTOR" in
-  aem)
-    LIBS_DIR="$CONNECTOR_DIR/libs/aem"
-    echo "Starting Dumont Connector (AEM)..."
-    SPRING_CONFIG=""
-    if [ -f "$PROPS" ]; then
-      SPRING_CONFIG="--spring.config.additional-location=file:$PROPS"
-    fi
-    exec java -Xmx512m -Xms512m \
-      -Dloader.path="$LIBS_DIR" \
-      -jar "$JAR" \
-      $SPRING_CONFIG \
-      "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"
-    ;;
-  webcrawler)
-    LIBS_DIR="$CONNECTOR_DIR/libs/webcrawler"
-    echo "Starting Dumont Connector (Web Crawler)..."
-    SPRING_CONFIG=""
-    if [ -f "$PROPS" ]; then
-      SPRING_CONFIG="--spring.config.additional-location=file:$PROPS"
-    fi
-    exec java -Xmx512m -Xms512m \
-      -Dloader.path="$LIBS_DIR" \
-      -jar "$JAR" \
-      $SPRING_CONFIG \
-      "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"
-    ;;
-  db)
-    DB_JAR="$APPDIR/usr/lib/dumont/db/dumont-db.jar"
-    echo "Starting Dumont Database Connector..."
-    exec java -jar "$DB_JAR" "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"
-    ;;
-  filesystem)
-    FS_JAR="$APPDIR/usr/lib/dumont/filesystem/dumont-filesystem.jar"
-    echo "Starting Dumont Filesystem Connector..."
-    exec java -jar "$FS_JAR" "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"
-    ;;
+  aem)        start_connector "$CONNECTOR_DIR/libs/aem"        "AEM" ;;
+  webcrawler) start_connector "$CONNECTOR_DIR/libs/webcrawler" "Web Crawler" ;;
+  db)         start_connector "$CONNECTOR_DIR/libs/db"         "Database" ;;
+  assets)     start_connector "$CONNECTOR_DIR/libs/assets"     "Assets" ;;
   *)
     echo "Unknown connector: $CONNECTOR"
-    echo "Available: aem, webcrawler, db, filesystem"
+    echo "Available: aem, webcrawler, db, assets"
     exit 1
     ;;
 esac

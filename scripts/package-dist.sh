@@ -39,27 +39,35 @@ DIST_NAME="dumont-install"
 STAGE="${PROJECT_ROOT}/target/dist-stage/${DIST_NAME}"
 rm -rf "$STAGE"
 mkdir -p "$STAGE/connector/libs/aem"
+mkdir -p "$STAGE/connector/libs/db"
 mkdir -p "$STAGE/connector/libs/webcrawler"
+mkdir -p "$STAGE/connector/libs/assets"
 mkdir -p "$STAGE/connector/export"
-mkdir -p "$STAGE/db"
-mkdir -p "$STAGE/filesystem"
 mkdir -p "$STAGE/bin"
 
 # Connector engine
 cp "connector/connector-app/target/dumont-connector.jar" "$STAGE/connector/"
 
-# Connector plugins
+# AEM Plugin
 cp "aem/aem-plugin/target/aem-plugin.jar"               "$STAGE/connector/libs/aem/"
-cp "web-crawler/wc-plugin/target/web-crawler-plugin.jar" "$STAGE/connector/libs/webcrawler/"
-
-# AEM Sample plugin + export files
-cp "aem/aem-plugin-sample/target/aem-plugin-sample.jar"   "$STAGE/connector/libs/aem/"
+cp "aem/aem-plugin-sample/target/aem-plugin-sample.jar"  "$STAGE/connector/libs/aem/"
 cp "aem/aem-plugin-sample/scripts/wknd/export/wknd.json"  "$STAGE/connector/export/"
 cp "aem/aem-plugin-sample/scripts/wknd/export/wknd2.json" "$STAGE/connector/export/"
 
-# Standalone CLI tools
-cp "db/db-app/target/dumont-db.jar"                      "$STAGE/db/"
-cp "filesystem/fs-connector/target/dumont-filesystem.jar" "$STAGE/filesystem/"
+# DB Plugin
+cp "db/db-plugin/target/db-plugin.jar"                    "$STAGE/connector/libs/db/"
+cp "db/db-plugin-sample/target/db-plugin-sample.jar"      "$STAGE/connector/libs/db/"
+cp "db/db-plugin-sample/scripts/sample/export/sample-db.json" "$STAGE/connector/export/"
+
+# Web Crawler Plugin
+cp "web-crawler/wc-plugin/target/web-crawler-plugin.jar"  "$STAGE/connector/libs/webcrawler/"
+cp "web-crawler/wc-plugin-sample/target/wc-plugin-sample.jar" "$STAGE/connector/libs/webcrawler/"
+cp "web-crawler/wc-plugin-sample/scripts/sample/export/wikipedia.json" "$STAGE/connector/export/"
+
+# Assets Plugin
+cp "assets/assets-plugin/target/assets-plugin.jar"        "$STAGE/connector/libs/assets/"
+cp "assets/assets-plugin-sample/target/assets-plugin-sample.jar" "$STAGE/connector/libs/assets/"
+cp "assets/assets-plugin-sample/scripts/sample/export/sample-assets.json" "$STAGE/connector/export/"
 
 # Scripts
 cp "$SCRIPT_DIR/bin/dumont-aem.sh"          "$STAGE/bin/"
@@ -68,8 +76,6 @@ cp "$SCRIPT_DIR/bin/dumont-webcrawler.sh"   "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-webcrawler.bat"  "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-db.sh"           "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-db.bat"          "$STAGE/bin/"
-cp "$SCRIPT_DIR/bin/dumont-filesystem.sh"   "$STAGE/bin/"
-cp "$SCRIPT_DIR/bin/dumont-filesystem.bat"  "$STAGE/bin/"
 chmod +x "$STAGE/bin/"*.sh 2>/dev/null || true
 
 # Config and docs
@@ -95,8 +101,6 @@ mkdir -p "$APPDIR/usr/lib/dumont"
 
 # Copy staged artifacts into AppDir
 cp -r "$STAGE/connector" "$APPDIR/usr/lib/dumont/"
-cp -r "$STAGE/db"        "$APPDIR/usr/lib/dumont/"
-cp -r "$STAGE/filesystem" "$APPDIR/usr/lib/dumont/"
 
 # AppRun entry point
 cp "$SCRIPT_DIR/installer/appimage/AppRun" "$APPDIR/AppRun"

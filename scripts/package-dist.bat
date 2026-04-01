@@ -52,27 +52,35 @@ set DIST_NAME=dumont-install
 set STAGE=%PROJECT_ROOT%\target\dist-stage\%DIST_NAME%
 if exist "%STAGE%" rmdir /s /q "%STAGE%"
 mkdir "%STAGE%\connector\libs\aem"
+mkdir "%STAGE%\connector\libs\db"
 mkdir "%STAGE%\connector\libs\webcrawler"
+mkdir "%STAGE%\connector\libs\assets"
 mkdir "%STAGE%\connector\export"
-mkdir "%STAGE%\db"
-mkdir "%STAGE%\filesystem"
 mkdir "%STAGE%\bin"
 
 rem Connector engine
 copy "connector\connector-app\target\dumont-connector.jar" "%STAGE%\connector\" >nul
 
-rem Connector plugins
+rem AEM Plugin
 copy "aem\aem-plugin\target\aem-plugin.jar"               "%STAGE%\connector\libs\aem\" >nul
-copy "web-crawler\wc-plugin\target\web-crawler-plugin.jar" "%STAGE%\connector\libs\webcrawler\" >nul
-
-rem AEM Sample plugin + export files
 copy "aem\aem-plugin-sample\target\aem-plugin-sample.jar"  "%STAGE%\connector\libs\aem\" >nul
 copy "aem\aem-plugin-sample\scripts\wknd\export\wknd.json"  "%STAGE%\connector\export\" >nul
 copy "aem\aem-plugin-sample\scripts\wknd\export\wknd2.json" "%STAGE%\connector\export\" >nul
 
-rem Standalone CLI tools
-copy "db\db-app\target\dumont-db.jar"                      "%STAGE%\db\" >nul
-copy "filesystem\fs-connector\target\dumont-filesystem.jar" "%STAGE%\filesystem\" >nul
+rem DB Plugin
+copy "db\db-plugin\target\db-plugin.jar"                    "%STAGE%\connector\libs\db\" >nul
+copy "db\db-plugin-sample\target\db-plugin-sample.jar"      "%STAGE%\connector\libs\db\" >nul
+copy "db\db-plugin-sample\scripts\sample\export\sample-db.json" "%STAGE%\connector\export\" >nul
+
+rem Web Crawler Plugin
+copy "web-crawler\wc-plugin\target\web-crawler-plugin.jar"  "%STAGE%\connector\libs\webcrawler\" >nul
+copy "web-crawler\wc-plugin-sample\target\wc-plugin-sample.jar" "%STAGE%\connector\libs\webcrawler\" >nul
+copy "web-crawler\wc-plugin-sample\scripts\sample\export\wikipedia.json" "%STAGE%\connector\export\" >nul
+
+rem Assets Plugin
+copy "assets\assets-plugin\target\assets-plugin.jar"        "%STAGE%\connector\libs\assets\" >nul
+copy "assets\assets-plugin-sample\target\assets-plugin-sample.jar" "%STAGE%\connector\libs\assets\" >nul
+copy "assets\assets-plugin-sample\scripts\sample\export\sample-assets.json" "%STAGE%\connector\export\" >nul
 
 rem Scripts
 copy "%SCRIPT_DIR%bin\dumont-aem.sh"         "%STAGE%\bin\" >nul
@@ -81,8 +89,6 @@ copy "%SCRIPT_DIR%bin\dumont-webcrawler.sh"  "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-webcrawler.bat" "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-db.sh"          "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-db.bat"         "%STAGE%\bin\" >nul
-copy "%SCRIPT_DIR%bin\dumont-filesystem.sh"  "%STAGE%\bin\" >nul
-copy "%SCRIPT_DIR%bin\dumont-filesystem.bat" "%STAGE%\bin\" >nul
 
 rem Config and docs
 copy "%SCRIPT_DIR%config\dumont-connector.properties" "%STAGE%\connector\" >nul

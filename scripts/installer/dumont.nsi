@@ -89,6 +89,7 @@ Var SolrCoreText
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "..\..\LICENSE"
 !insertmacro MUI_PAGE_DIRECTORY
+!define MUI_COMPONENTSPAGE_SMALLDESC
 !insertmacro MUI_PAGE_COMPONENTS
 Page custom JavaPageCreate JavaPageLeave
 Page custom ProviderPageCreate ProviderPageLeave
@@ -113,12 +114,18 @@ LangString DESC_SecAEM       ${LANG_ENGLISH} "Adobe Experience Manager connector
 LangString DESC_SecAEM       ${LANG_PORTUGUESE} "Plugin conector para Adobe Experience Manager."
 LangString DESC_SecAEMSample ${LANG_ENGLISH} "AEM WKND sample: plugin JAR and export configuration files."
 LangString DESC_SecAEMSample ${LANG_PORTUGUESE} "Exemplo AEM WKND: JAR do plugin e arquivos de configuração de exportação."
-LangString DESC_SecWC        ${LANG_ENGLISH} "Web Crawler connector plugin for indexing web pages."
-LangString DESC_SecWC        ${LANG_PORTUGUESE} "Plugin conector Web Crawler para indexar páginas web."
-LangString DESC_SecDB        ${LANG_ENGLISH} "Database connector CLI tool for indexing from databases."
-LangString DESC_SecDB        ${LANG_PORTUGUESE} "Ferramenta CLI do conector de banco de dados."
-LangString DESC_SecFS        ${LANG_ENGLISH} "Filesystem connector CLI tool for indexing local files."
-LangString DESC_SecFS        ${LANG_PORTUGUESE} "Ferramenta CLI do conector de sistema de arquivos."
+LangString DESC_SecWC          ${LANG_ENGLISH} "Web Crawler connector plugin for indexing web pages."
+LangString DESC_SecWC          ${LANG_PORTUGUESE} "Plugin conector Web Crawler para indexar páginas web."
+LangString DESC_SecWCSample    ${LANG_ENGLISH} "Wikipedia sample: plugin JAR and export configuration."
+LangString DESC_SecWCSample    ${LANG_PORTUGUESE} "Exemplo Wikipedia: JAR do plugin e configuração de exportação."
+LangString DESC_SecDB          ${LANG_ENGLISH} "Database plugin for indexing from JDBC databases."
+LangString DESC_SecDB          ${LANG_PORTUGUESE} "Plugin de banco de dados para indexação via JDBC."
+LangString DESC_SecDBSample    ${LANG_ENGLISH} "Rfam database sample: plugin JAR and export configuration."
+LangString DESC_SecDBSample    ${LANG_PORTUGUESE} "Exemplo Rfam: JAR do plugin e configuração de exportação."
+LangString DESC_SecAssets      ${LANG_ENGLISH} "Assets plugin for indexing local files and documents."
+LangString DESC_SecAssets      ${LANG_PORTUGUESE} "Plugin de assets para indexação de arquivos e documentos locais."
+LangString DESC_SecAssetsSample ${LANG_ENGLISH} "Documents sample: plugin JAR and export configuration."
+LangString DESC_SecAssetsSample ${LANG_PORTUGUESE} "Exemplo documentos: JAR do plugin e configuração de exportação."
 
 ; --------------------------------------------------------------------------
 ; Java Page - Auto-detect and allow user to browse
@@ -546,11 +553,23 @@ SectionGroup "Connectors" SecConnectors
     SectionEnd
 
     ; ------------------------------------------------------------------
-    ; Database Connector
+    ; Web Crawler Wikipedia Sample
+    ; ------------------------------------------------------------------
+    Section /o "Web Crawler Wikipedia Sample" SecWCSample
+        SetOutPath "$INSTDIR\connector\libs\webcrawler"
+        File "${STAGE}\connector\libs\webcrawler\wc-plugin-sample.jar"
+
+        CreateDirectory "$LOCALAPPDATA\Viglet\Dumont\webcrawler\export"
+        SetOutPath "$LOCALAPPDATA\Viglet\Dumont\webcrawler\export"
+        File "${STAGE}\connector\export\wikipedia.json"
+    SectionEnd
+
+    ; ------------------------------------------------------------------
+    ; Database Plugin
     ; ------------------------------------------------------------------
     Section "Database" SecDB
-        SetOutPath "$INSTDIR\db"
-        File "${STAGE}\db\dumont-db.jar"
+        SetOutPath "$INSTDIR\connector\libs\db"
+        File "${STAGE}\connector\libs\db\db-plugin.jar"
 
         SetOutPath "$INSTDIR\bin"
         File "${STAGE}\bin\dumont-db.sh"
@@ -562,19 +581,35 @@ SectionGroup "Connectors" SecConnectors
     SectionEnd
 
     ; ------------------------------------------------------------------
-    ; Filesystem Connector
+    ; Database Sample
     ; ------------------------------------------------------------------
-    Section "Filesystem" SecFS
-        SetOutPath "$INSTDIR\filesystem"
-        File "${STAGE}\filesystem\dumont-filesystem.jar"
+    Section /o "Database Rfam Sample" SecDBSample
+        SetOutPath "$INSTDIR\connector\libs\db"
+        File "${STAGE}\connector\libs\db\db-plugin-sample.jar"
 
-        SetOutPath "$INSTDIR\bin"
-        File "${STAGE}\bin\dumont-filesystem.sh"
-        File "${STAGE}\bin\dumont-filesystem.bat"
+        CreateDirectory "$LOCALAPPDATA\Viglet\Dumont\db\export"
+        SetOutPath "$LOCALAPPDATA\Viglet\Dumont\db\export"
+        File "${STAGE}\connector\export\sample-db.json"
+    SectionEnd
 
-        ; Start Menu shortcut
-        CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont Filesystem.lnk" \
-            "$INSTDIR\bin\dumont-filesystem.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
+    ; ------------------------------------------------------------------
+    ; Assets Plugin
+    ; ------------------------------------------------------------------
+    Section "Assets" SecAssets
+        SetOutPath "$INSTDIR\connector\libs\assets"
+        File "${STAGE}\connector\libs\assets\assets-plugin.jar"
+    SectionEnd
+
+    ; ------------------------------------------------------------------
+    ; Assets Sample
+    ; ------------------------------------------------------------------
+    Section /o "Assets Documents Sample" SecAssetsSample
+        SetOutPath "$INSTDIR\connector\libs\assets"
+        File "${STAGE}\connector\libs\assets\assets-plugin-sample.jar"
+
+        CreateDirectory "$LOCALAPPDATA\Viglet\Dumont\assets\export"
+        SetOutPath "$LOCALAPPDATA\Viglet\Dumont\assets\export"
+        File "${STAGE}\connector\export\sample-assets.json"
     SectionEnd
 
 SectionGroupEnd
@@ -583,29 +618,60 @@ SectionGroupEnd
 ; Section descriptions (shown in the component selection page)
 ; --------------------------------------------------------------------------
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecCore}       $(DESC_SecCore)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecConnectors}  $(DESC_SecConnectors)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecAEM}         $(DESC_SecAEM)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecAEMSample}   $(DESC_SecAEMSample)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecWC}          $(DESC_SecWC)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecDB}          $(DESC_SecDB)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecFS}          $(DESC_SecFS)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecCore}          $(DESC_SecCore)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecConnectors}    $(DESC_SecConnectors)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAEM}           $(DESC_SecAEM)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAEMSample}     $(DESC_SecAEMSample)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecWC}            $(DESC_SecWC)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecWCSample}      $(DESC_SecWCSample)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDB}            $(DESC_SecDB)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDBSample}      $(DESC_SecDBSample)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAssets}        $(DESC_SecAssets)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAssetsSample}  $(DESC_SecAssetsSample)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ; --------------------------------------------------------------------------
 ; Callbacks - enforce AEM Sample requires AEM
 ; --------------------------------------------------------------------------
 Function .onSelChange
-    ; If AEM Sample is checked but AEM is not, force-check AEM
+    ; AEM Sample requires AEM
     ${If} ${SectionIsSelected} ${SecAEMSample}
     ${AndIfNot} ${SectionIsSelected} ${SecAEM}
         !insertmacro SelectSection ${SecAEM}
     ${EndIf}
-
-    ; If AEM is unchecked, also uncheck AEM Sample
     ${IfNot} ${SectionIsSelected} ${SecAEM}
     ${AndIf} ${SectionIsSelected} ${SecAEMSample}
         !insertmacro UnselectSection ${SecAEMSample}
+    ${EndIf}
+
+    ; WC Sample requires WC
+    ${If} ${SectionIsSelected} ${SecWCSample}
+    ${AndIfNot} ${SectionIsSelected} ${SecWC}
+        !insertmacro SelectSection ${SecWC}
+    ${EndIf}
+    ${IfNot} ${SectionIsSelected} ${SecWC}
+    ${AndIf} ${SectionIsSelected} ${SecWCSample}
+        !insertmacro UnselectSection ${SecWCSample}
+    ${EndIf}
+
+    ; DB Sample requires DB
+    ${If} ${SectionIsSelected} ${SecDBSample}
+    ${AndIfNot} ${SectionIsSelected} ${SecDB}
+        !insertmacro SelectSection ${SecDB}
+    ${EndIf}
+    ${IfNot} ${SectionIsSelected} ${SecDB}
+    ${AndIf} ${SectionIsSelected} ${SecDBSample}
+        !insertmacro UnselectSection ${SecDBSample}
+    ${EndIf}
+
+    ; Assets Sample requires Assets
+    ${If} ${SectionIsSelected} ${SecAssetsSample}
+    ${AndIfNot} ${SectionIsSelected} ${SecAssets}
+        !insertmacro SelectSection ${SecAssets}
+    ${EndIf}
+    ${IfNot} ${SectionIsSelected} ${SecAssets}
+    ${AndIf} ${SectionIsSelected} ${SecAssetsSample}
+        !insertmacro UnselectSection ${SecAssetsSample}
     ${EndIf}
 FunctionEnd
 
@@ -615,8 +681,6 @@ FunctionEnd
 Section "Uninstall"
     ; Remove files
     RMDir /r "$INSTDIR\connector"
-    RMDir /r "$INSTDIR\db"
-    RMDir /r "$INSTDIR\filesystem"
     RMDir /r "$INSTDIR\bin"
     Delete "$INSTDIR\README.txt"
     Delete "$INSTDIR\dumont.ico"

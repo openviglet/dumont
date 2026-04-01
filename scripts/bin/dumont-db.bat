@@ -1,24 +1,16 @@
 @echo off
 rem --------------------------------------------------------------------------
-rem Run the Dumont Database Connector (standalone CLI tool).
+rem Run the Dumont Connector with the Database plugin.
 rem
-rem Usage:  bin\dumont-db.bat [options]
-rem
-rem Example:
-rem   bin\dumont-db.bat ^
-rem     --server http://localhost:30130 ^
-rem     --api-key YOUR_API_KEY ^
-rem     --driver org.mariadb.jdbc.Driver ^
-rem     --connect "jdbc:mariadb://localhost:3306/mydb" ^
-rem     --query "SELECT id, title, body FROM articles" ^
-rem     --site MySite ^
-rem     --locale en_US
+rem Usage:  bin\dumont-db.bat [spring-boot options]
 rem --------------------------------------------------------------------------
 setlocal enabledelayedexpansion
 
 set SCRIPT_DIR=%~dp0
 set BASE_DIR=%SCRIPT_DIR%..
-set JAR=%BASE_DIR%\db\dumont-db.jar
+set JAR=%BASE_DIR%\connector\dumont-connector.jar
+set LIBS_DIR=%BASE_DIR%\connector\libs\db
+set PROPS=%BASE_DIR%\connector\dumont-connector.properties
 
 rem Resolve Java executable
 set JAVA_CMD=java
@@ -34,6 +26,9 @@ if not exist "%JAR%" (
     exit /b 1
 )
 
-"!JAVA_CMD!" -jar "%JAR%" %*
+set SPRING_CONFIG=
+if exist "%PROPS%" set SPRING_CONFIG=--spring.config.additional-location=file:%PROPS%
+
+"!JAVA_CMD!" -Xmx512m -Xms512m -Dloader.path="%LIBS_DIR%" -jar "%JAR%" %SPRING_CONFIG% %*
 
 endlocal

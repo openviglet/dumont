@@ -1,28 +1,29 @@
 #!/usr/bin/env bash
 # --------------------------------------------------------------------------
-# Run the Dumont Database Connector (standalone CLI tool).
+# Run the Dumont Connector with the Database plugin.
 #
-# Usage:  ./bin/dumont-db.sh [options]
-#
-# Example:
-#   ./bin/dumont-db.sh \
-#     --server http://localhost:30130 \
-#     --api-key YOUR_API_KEY \
-#     --driver org.mariadb.jdbc.Driver \
-#     --connect "jdbc:mariadb://localhost:3306/mydb" \
-#     --query "SELECT id, title, body FROM articles" \
-#     --site MySite \
-#     --locale en_US
+# Usage:  ./bin/dumont-db.sh [spring-boot options]
 # --------------------------------------------------------------------------
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-JAR="$BASE_DIR/db/dumont-db.jar"
+JAR="$BASE_DIR/connector/dumont-connector.jar"
+LIBS_DIR="$BASE_DIR/connector/libs/db"
+PROPS="$BASE_DIR/connector/dumont-connector.properties"
 
 if [ ! -f "$JAR" ]; then
   echo "Error: $JAR not found." >&2
   exit 1
 fi
 
-exec java -jar "$JAR" "$@"
+SPRING_CONFIG=""
+if [ -f "$PROPS" ]; then
+  SPRING_CONFIG="--spring.config.additional-location=file:$PROPS"
+fi
+
+exec java -Xmx512m -Xms512m \
+  -Dloader.path="$LIBS_DIR" \
+  -jar "$JAR" \
+  $SPRING_CONFIG \
+  "$@"
