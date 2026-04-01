@@ -17,6 +17,8 @@ import lombok.Setter;
 @Setter
 public class DumWCSourceExchange {
     private String id;
+    private String title;
+    private String description;
     private Locale locale;
     private String localeClass;
     private String url;

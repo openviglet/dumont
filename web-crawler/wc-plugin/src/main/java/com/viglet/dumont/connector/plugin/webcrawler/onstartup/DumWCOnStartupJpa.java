@@ -1,5 +1,9 @@
 package com.viglet.dumont.connector.plugin.webcrawler.onstartup;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -30,18 +34,27 @@ public class DumWCOnStartupJpa implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments arg0) {
-        if (this.dumWCConfigVarRepository.findById(FIRST_TIME).isEmpty()) {
-            log.info("First Time Configuration ...");
-            Path exportFile = Paths.get("export/export.json");
-            if (exportFile.toFile().exists()) {
-                dumWCExchangeProcess.importFromFile(exportFile.toFile());
+        if (this.dumWCConfigVarRepository.findById(FIRST_TIME).isPresent())
+            return;
+
+        log.info("First Time Configuration ...");
+        String exportPath = System.getProperty("user.dir") + File.separator + "export";
+        log.info("Reading export directory: {}", exportPath);
+        Path dir = Paths.get(exportPath);
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.json")) {
+            for (Path exportFile : stream) {
+                if (exportFile.toFile().exists()) {
+                    dumWCExchangeProcess.importFromFile(exportFile.toFile());
+                }
             }
-            setFirstTIme();
-            log.info("Configuration finished.");
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
         }
+        setFirstTime();
+        log.info("Configuration finished.");
     }
 
-    private void setFirstTIme() {
+    private void setFirstTime() {
         DumWCConfigVar dumConfigVar = new DumWCConfigVar();
         dumConfigVar.setId(FIRST_TIME);
         dumConfigVar.setPath("/system");

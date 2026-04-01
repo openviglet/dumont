@@ -2,6 +2,8 @@
   "sources": [
     {
       "id": "",
+      "title": "Wikipedia English",
+      "description": "Crawls Wikipedia English articles starting from the Main Page.",
       "url": "https://en.wikipedia.org",
       "locale": "en_US",
       "turSNSites": [

@@ -110,6 +110,8 @@ public class DumWCExchangeProcess {
                         new DumWCExchange(dumWCSources.stream()
                                 .map(dumWCSource -> DumWCSourceExchange.builder()
                                         .id(dumWCSource.getId())
+                                        .title(dumWCSource.getTitle())
+                                        .description(dumWCSource.getDescription())
                                         .url(dumWCSource.getUrl())
                                         .allowUrls(dumWCSource.getAllowUrls().stream().map(DumWCUrl::getUrl)
                                                 .toList())
@@ -194,9 +196,11 @@ public class DumWCExchangeProcess {
 
     public void importWCSource(DumWCExchange dumWCExchange) {
         for (DumWCSourceExchange dumWCSourceExchange : dumWCExchange.getSources()) {
-            if (dumWCSourceRepository.findById(dumWCSourceExchange.getId()).isEmpty()) {
+            String id = dumWCSourceExchange.getId();
+            if (id == null || id.isEmpty() || dumWCSourceRepository.findById(id).isEmpty()) {
                 DumWCSource dumWCSource = DumWCSource.builder()
-                        // .id(dumWCSourceExchange.getId())
+                        .title(dumWCSourceExchange.getTitle())
+                        .description(dumWCSourceExchange.getDescription())
                         .url(dumWCSourceExchange.getUrl())
                         .username(dumWCSourceExchange.getUsername())
                         .password(dumWCSourceExchange.getPassword())

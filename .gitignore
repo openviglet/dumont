@@ -48,3 +48,4 @@ dependency-reduced-pom.xml
 /web-crawler/wc-plugin-sample/target
 /aem/aem-commons/target
 /web-crawler/wc-plugin-sample/dist
+/assets/assets-plugin-sample/dist
