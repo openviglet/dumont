@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.viglet.dumont</groupId>
         <artifactId>dumont</artifactId>
-        <version>2026.2.10</version>
+        <version>2026.2.11</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>dumont-assets</artifactId>
