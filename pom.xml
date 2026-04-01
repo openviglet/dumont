@@ -54,6 +54,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
+                    <excludeArtifacts>
+                        <excludeArtifact>dumont</excludeArtifact>
+                        <excludeArtifact>dumont-aem</excludeArtifact>
+                    </excludeArtifacts>
                 </configuration>
             </plugin>
             <plugin>
@@ -176,7 +180,6 @@
                 <module>connector</module>
                 <module>assets</module>
                 <module>db</module>
-                <module>aem-commons</module>
                 <module>aem</module>
                 <module>web-crawler</module>
             </modules>
@@ -185,7 +188,7 @@
             <id>release</id>
             <modules>
                 <module>commons</module>
-                <module>aem-commons</module>
+                <module>aem</module>
             </modules>
             <build>
                 <plugins>

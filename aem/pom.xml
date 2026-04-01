@@ -21,21 +21,10 @@
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
     <modules>
+        <module>aem-commons</module>
         <module>aem-plugin</module>
         <module>aem-plugin-sample</module>
     </modules>
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.10.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <skipPublishing>true</skipPublishing>
-                    <publishingServerId>central</publishingServerId>
-                </configuration>
-            </plugin>
-        </plugins>
     </build>
 </project>

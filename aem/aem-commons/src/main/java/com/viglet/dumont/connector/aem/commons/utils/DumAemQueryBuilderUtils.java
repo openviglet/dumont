@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Utility class for querying AEM content via the QueryBuilder API.
- * Provides an alternative to infinity.json for discovering content paths.
+ * Provides lightweight discovery of all content paths using slim hits.
  *
  * @author Alexandre Oliveira
  * @since 2026.1
@@ -38,87 +39,148 @@ import lombok.extern.slf4j.Slf4j;
 public class DumAemQueryBuilderUtils {
 
     private static final String QUERY_BUILDER_PATH = "/bin/querybuilder.json";
-    private static final int PAGE_SIZE = 500;
+    private static final int SLIM_PAGE_SIZE = 500;
 
     private DumAemQueryBuilderUtils() {
         throw new IllegalStateException("Utility class");
     }
 
     /**
-     * Queries the AEM QueryBuilder API to find all content paths of a given type
-     * under the configured root path.
+     * Discovers all content paths and collects them into a list.
+     * Suitable for auditing and small/medium repositories.
      *
      * @param configuration the AEM source configuration
-     * @return list of content paths matching the query
+     * @return list of content paths
      */
     public static List<String> queryAllPaths(DumAemConfiguration configuration) {
-        String rootPath = configuration.getRootPath();
-        String contentType = configuration.getContentType();
-
-        log.info("QueryBuilder: querying all '{}' under '{}'", contentType, rootPath);
-
         List<String> allPaths = new ArrayList<>();
-        int offset = 0;
-        boolean hasMore = true;
-
-        while (hasMore) {
-            Optional<JSONObject> response = executeQuery(configuration, rootPath,
-                    contentType, offset, PAGE_SIZE);
-
-            if (response.isEmpty()) {
-                log.warn("QueryBuilder: empty response at offset {}", offset);
-                break;
-            }
-
-            JSONObject json = response.get();
-            JSONArray hits = json.optJSONArray("hits");
-
-            if (hits == null || hits.isEmpty()) {
-                break;
-            }
-
-            for (int i = 0; i < hits.length(); i++) {
-                JSONObject hit = hits.getJSONObject(i);
-                String path = hit.optString("path");
-                if (path != null && !path.isBlank()) {
-                    allPaths.add(path);
-                }
-            }
-
-            boolean moreResults = json.optBoolean("more", false);
-            if (moreResults && hits.length() == PAGE_SIZE) {
-                offset += PAGE_SIZE;
-            } else {
-                hasMore = false;
-            }
-        }
-
-        log.info("QueryBuilder: found {} paths under '{}'", allPaths.size(), rootPath);
+        discoverPaths(configuration, allPaths::addAll);
         return allPaths;
     }
 
     /**
-     * Executes a single paginated QueryBuilder request.
+     * Discovers content paths in pages and streams each page to the consumer
+     * as it arrives. Never holds the full path list in memory.
+     * <p>
+     * The first request fetches the total count. All subsequent page offsets
+     * are then fetched in parallel and each batch is delivered to the consumer
+     * immediately.
+     *
+     * @param configuration the AEM source configuration
+     * @param pageConsumer  receives a batch of paths for each page
+     * @return the total number of paths discovered
      */
+    public static long discoverPaths(DumAemConfiguration configuration,
+            Consumer<List<String>> pageConsumer) {
+        String rootPath = configuration.getRootPath();
+        String contentType = configuration.getContentType();
+
+        log.info("QueryBuilder: discovering all '{}' under '{}'",
+                contentType, rootPath);
+
+        // First request to get total
+        JSONObject firstJson = executeSlimQuery(configuration, rootPath, contentType, 0)
+                .orElse(null);
+
+        if (firstJson == null) {
+            log.warn("QueryBuilder: no response for first page");
+            return 0;
+        }
+
+        long total = firstJson.optLong("total", 0);
+        log.info("QueryBuilder: total reported by AEM: {}", total);
+
+        if (total == 0) {
+            return 0;
+        }
+
+        // Process first page
+        JSONArray firstHits = firstJson.optJSONArray("hits");
+        long collected = deliverPage(firstHits, pageConsumer);
+
+        log.info("QueryBuilder: page offset=0, collected={}/{}", collected, total);
+
+        // Remaining pages
+        for (int offset = SLIM_PAGE_SIZE; offset < total; offset += SLIM_PAGE_SIZE) {
+            JSONObject json = executeSlimQuery(configuration, rootPath, contentType, offset)
+                    .orElse(null);
+
+            if (json == null) {
+                break;
+            }
+
+            JSONArray hits = json.optJSONArray("hits");
+            long pageCount = deliverPage(hits, pageConsumer);
+            collected += pageCount;
+
+            log.info("QueryBuilder: page offset={}, collected={}/{}",
+                    offset, collected, total);
+
+            if (pageCount == 0) {
+                break;
+            }
+        }
+
+        log.info("QueryBuilder: discovered {} total paths under '{}'",
+                collected, rootPath);
+        return collected;
+    }
+
+    private static long deliverPage(JSONArray hits, Consumer<List<String>> pageConsumer) {
+        if (hits == null || hits.isEmpty()) {
+            return 0;
+        }
+        List<String> paths = new ArrayList<>(hits.length());
+        extractPaths(hits, paths);
+        if (!paths.isEmpty()) {
+            pageConsumer.accept(paths);
+        }
+        return paths.size();
+    }
+
+    private static void extractPaths(JSONArray hits, List<String> allPaths) {
+        for (int i = 0; i < hits.length(); i++) {
+            String path = extractPath(hits.get(i));
+            if (path != null && !path.isBlank()) {
+                allPaths.add(path);
+            }
+        }
+    }
+
+    private static String extractPath(Object hit) {
+        if (hit instanceof String hitStr) {
+            return hitStr;
+        }
+        if (hit instanceof JSONObject hitObj) {
+            if (hitObj.has("jcr:path")) {
+                return hitObj.optString("jcr:path");
+            }
+            if (hitObj.has("path")) {
+                return hitObj.optString("path");
+            }
+        }
+        return null;
+    }
+
+    private static Optional<JSONObject> executeSlimQuery(DumAemConfiguration configuration,
+            String rootPath, String contentType, int offset) {
+        return executeQuery(configuration,
+                "path=%s&type=%s&p.offset=%d&p.limit=%d&p.hits=slim"
+                        .formatted(rootPath, contentType, offset, SLIM_PAGE_SIZE));
+    }
+
     private static Optional<JSONObject> executeQuery(DumAemConfiguration configuration,
-            String rootPath, String contentType, int offset, int limit) {
-        String queryUrl = buildQueryUrl(configuration.getUrl(), rootPath, contentType,
-                offset, limit);
+            String queryParams) {
+        String queryUrl = "%s%s?%s".formatted(
+                configuration.getUrl(), QUERY_BUILDER_PATH, queryParams);
 
         try {
             return DumAemCommonsUtils.getResponseBody(queryUrl, configuration, false)
                     .filter(DumAemCommonsUtils::isResponseBodyJSONObject)
                     .map(JSONObject::new);
         } catch (IOException e) {
-            log.error("QueryBuilder: failed to execute query at offset {}: {}",
-                    offset, e.getMessage(), e);
+            log.error("QueryBuilder: query failed: {}", e.getMessage(), e);
             return Optional.empty();
         }
-    }
-
-    private static String buildQueryUrl(String aemUrl, String rootPath,
-            String contentType, int offset, int limit) {
-        return "%s%s?path=%s&type=%s&p.offset=%d&p.limit=%d&p.hits=full&p.nodedepth=-1".formatted(
-                aemUrl, QUERY_BUILDER_PATH, rootPath, contentType, offset, limit);
     }
 }
