@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.viglet.dumont</groupId>
-        <artifactId>dumont-aem</artifactId>
+        <artifactId>dumont</artifactId>
         <version>2026.2.7</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <groupId>com.viglet.dumont</groupId>
     <artifactId>aem-commons</artifactId>

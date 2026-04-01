@@ -55,7 +55,6 @@
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                     <excludeArtifacts>
-                        <excludeArtifact>dumont</excludeArtifact>
                         <excludeArtifact>dumont-aem</excludeArtifact>
                     </excludeArtifacts>
                 </configuration>
@@ -188,7 +187,7 @@
             <id>release</id>
             <modules>
                 <module>commons</module>
-                <module>aem</module>
+                <module>aem/aem-commons</module>
             </modules>
             <build>
                 <plugins>
