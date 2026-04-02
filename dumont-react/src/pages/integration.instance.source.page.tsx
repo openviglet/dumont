@@ -22,6 +22,9 @@ export default function IntegrationInstanceSourcePage() {
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
   const turIntegrationConnectorService = useMemo(() => new TurIntegrationConnectorService(id), [id]);
   const [open, setOpen] = useState(false);
+  const [indexingAll, setIndexingAll] = useState(false);
+  const [reindexingAll, setReindexingAll] = useState(false);
+  const [dryScanning, setDryScanning] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -55,6 +58,7 @@ export default function IntegrationInstanceSourcePage() {
   const isActionDisabled = isNew || !integrationAemSource.id;
 
   async function onIndexAll() {
+    setIndexingAll(true);
     try {
       const result = await turIntegrationConnectorService.indexAll(integrationAemSource.name);
       if (result) {
@@ -69,10 +73,13 @@ export default function IntegrationInstanceSourcePage() {
         return;
       }
       toast.error(t("integration.sources.indexingFailed", { name: integrationAemSource.name }));
+    } finally {
+      setIndexingAll(false);
     }
   }
 
   async function onReindexAll() {
+    setReindexingAll(true);
     try {
       const result = await turIntegrationConnectorService.reindexAll(integrationAemSource.name);
       if (result) {
@@ -87,10 +94,13 @@ export default function IntegrationInstanceSourcePage() {
         return;
       }
       toast.error(t("integration.sources.reindexingFailed", { name: integrationAemSource.name }));
+    } finally {
+      setReindexingAll(false);
     }
   }
 
   async function onDryScan() {
+    setDryScanning(true);
     try {
       const result = await turIntegrationConnectorService.auditSource(integrationAemSource.name);
       if (result) {
@@ -101,6 +111,8 @@ export default function IntegrationInstanceSourcePage() {
     } catch (error) {
       console.error("Dry scan error", error);
       toast.error(t("integration.sources.dryScanFailed", { name: integrationAemSource.name }));
+    } finally {
+      setDryScanning(false);
     }
   }
   return (
@@ -119,6 +131,7 @@ export default function IntegrationInstanceSourcePage() {
             variant="outline"
             onClick={onDryScan}
             disabled={isActionDisabled}
+            loading={dryScanning}
           >
             {t("integration.sources.dryScan")}
           </GradientButton>
@@ -127,6 +140,7 @@ export default function IntegrationInstanceSourcePage() {
             variant="outline"
             onClick={onReindexAll}
             disabled={isActionDisabled}
+            loading={reindexingAll}
           >
             {t("integration.sources.reindexAll")}
           </GradientButton>
@@ -135,6 +149,7 @@ export default function IntegrationInstanceSourcePage() {
             variant="outline"
             onClick={onIndexAll}
             disabled={isActionDisabled}
+            loading={indexingAll}
           >
             {t("integration.sources.indexAll")}
           </GradientButton>

@@ -18,6 +18,7 @@ package com.viglet.dumont.connector.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * REST API that exposes runtime system information for the Dumont connector,
@@ -39,6 +41,33 @@ import java.util.Map;
 @RequestMapping("/api/v2/connector/system-info")
 @Tag(name = "System Info", description = "Connector System Information API")
 public class DumConnectorSystemInfoApi {
+
+    @Value("${dumont.indexing.provider:turing}")
+    private String indexingProvider;
+
+    @Value("${turing.url:#{null}}")
+    private String turingUrl;
+
+    @Value("${turing.apiKey:#{null}}")
+    private String turingApiKey;
+
+    @Value("${turing.solr.endpoint:#{null}}")
+    private String turingSolrEndpoint;
+
+    @Value("${dumont.indexing.solr.url:#{null}}")
+    private String solrUrl;
+
+    @Value("${dumont.indexing.solr.collection:#{null}}")
+    private String solrCollection;
+
+    @Value("${dumont.indexing.elasticsearch.url:#{null}}")
+    private String elasticsearchUrl;
+
+    @Value("${dumont.indexing.elasticsearch.index:#{null}}")
+    private String elasticsearchIndex;
+
+    @Value("${dumont.indexing.elasticsearch.username:#{null}}")
+    private String elasticsearchUsername;
 
     @Operation(summary = "Get connector system information")
     @GetMapping
@@ -96,9 +125,47 @@ public class DumConnectorSystemInfoApi {
         disk.put("usedSpace", root.getTotalSpace() - root.getUsableSpace());
         info.put("disk", disk);
 
+        // Indexing
+        Map<String, Object> indexing = new LinkedHashMap<>();
+        indexing.put("provider", propertyEntry(indexingProvider, "dumont.indexing.provider"));
+        switch (indexingProvider) {
+            case "turing" -> {
+                indexing.put("turingUrl", propertyEntry(turingUrl, "turing.url"));
+                indexing.put("turingSolrEndpoint", propertyEntry(turingSolrEndpoint, "turing.solr.endpoint"));
+            }
+            case "solr" -> {
+                indexing.put("solrUrl", propertyEntry(solrUrl, "dumont.indexing.solr.url"));
+                indexing.put("solrCollection", propertyEntry(solrCollection, "dumont.indexing.solr.collection"));
+            }
+            case "elasticsearch" -> {
+                indexing.put("elasticsearchUrl", propertyEntry(elasticsearchUrl, "dumont.indexing.elasticsearch.url"));
+                indexing.put("elasticsearchIndex", propertyEntry(elasticsearchIndex, "dumont.indexing.elasticsearch.index"));
+                indexing.put("elasticsearchUsername", propertyEntry(elasticsearchUsername, "dumont.indexing.elasticsearch.username"));
+            }
+        }
+        info.put("indexing", indexing);
+
         // Status
         info.put("status", "UP");
 
         return info;
+    }
+
+    @Operation(summary = "Get system properties and environment variables")
+    @GetMapping("/variables")
+    public Map<String, String> getVariables() {
+        Map<String, String> variables = new TreeMap<>();
+        System.getProperties().forEach((key, value) ->
+                variables.put(String.valueOf(key), String.valueOf(value)));
+        System.getenv().forEach((key, value) ->
+                variables.put("env." + key, value));
+        return variables;
+    }
+
+    private Map<String, String> propertyEntry(String value, String property) {
+        Map<String, String> entry = new LinkedHashMap<>();
+        entry.put("value", value);
+        entry.put("property", property);
+        return entry;
     }
 }

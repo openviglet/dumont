@@ -19,6 +19,8 @@ export default function IntegrationInstanceDbSourcePage() {
   const [isNew, setIsNew] = useState<boolean>(true);
   const turIntegrationDbSourceService = useMemo(() => new TurIntegrationDbSourceService(id), [id]);
   const [open, setOpen] = useState(false);
+  const [indexingAll, setIndexingAll] = useState(false);
+  const [reindexingAll, setReindexingAll] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -48,6 +50,7 @@ export default function IntegrationInstanceDbSourcePage() {
   const isActionDisabled = isNew || !integrationDbSource.id;
 
   async function onIndexAll() {
+    setIndexingAll(true);
     try {
       await turIntegrationDbSourceService.indexAll(integrationDbSource);
       toast.success(t("integration.dbSources.indexingStarted", { name: integrationDbSource.name }));
@@ -58,10 +61,13 @@ export default function IntegrationInstanceDbSourcePage() {
         return;
       }
       toast.error(t("integration.dbSources.indexingFailed", { name: integrationDbSource.name }));
+    } finally {
+      setIndexingAll(false);
     }
   }
 
   async function onReindexAll() {
+    setReindexingAll(true);
     try {
       await turIntegrationDbSourceService.reindexAll(integrationDbSource);
       toast.success(t("integration.dbSources.reindexingStarted", { name: integrationDbSource.name }));
@@ -72,6 +78,8 @@ export default function IntegrationInstanceDbSourcePage() {
         return;
       }
       toast.error(t("integration.dbSources.reindexingFailed", { name: integrationDbSource.name }));
+    } finally {
+      setReindexingAll(false);
     }
   }
 
@@ -91,6 +99,7 @@ export default function IntegrationInstanceDbSourcePage() {
             variant="outline"
             onClick={onReindexAll}
             disabled={isActionDisabled}
+            loading={reindexingAll}
           >
             {t("integration.dbSources.reindexAll")}
           </GradientButton>
@@ -99,6 +108,7 @@ export default function IntegrationInstanceDbSourcePage() {
             variant="outline"
             onClick={onIndexAll}
             disabled={isActionDisabled}
+            loading={indexingAll}
           >
             {t("integration.dbSources.indexAll")}
           </GradientButton>

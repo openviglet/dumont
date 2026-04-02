@@ -83,7 +83,15 @@
     "diskSpaceDesc": "Storage usage on the application disk partition.",
     "diskUsage": "Disk Usage",
     "available": "Available",
-    "usedMemory": "Used"
+    "usedMemory": "Used",
+    "overview": "Overview",
+    "systemVariables": "System Variables",
+    "sysVarsDesc": "Java system properties and environment variables.",
+    "searchVariables": "Search variables...",
+    "property": "Property",
+    "value": "Value",
+    "noVariablesMatch": "No variables match your search.",
+    "propertiesShown": "Showing {{count}} of {{total}} properties."
   },
   "theme": {
     "toggle": "Toggle theme",

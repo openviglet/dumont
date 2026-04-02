@@ -204,7 +204,17 @@
       "jvm": "JVM",
       "os": "OS",
       "up": "UP",
-      "down": "DOWN"
+      "down": "DOWN",
+      "indexingProvider": "Indexing Provider",
+      "indexingProviderDesc": "Search engine configuration used for content indexing.",
+      "provider": "Provider",
+      "turingUrl": "Turing URL",
+      "turingSolrEndpoint": "Turing Solr Endpoint",
+      "solrUrl": "Solr URL",
+      "solrCollection": "Solr Collection",
+      "elasticsearchUrl": "Elasticsearch URL",
+      "elasticsearchIndex": "Elasticsearch Index",
+      "elasticsearchUsername": "Elasticsearch Username"
     }
   }
 }

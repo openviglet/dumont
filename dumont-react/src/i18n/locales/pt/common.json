@@ -83,7 +83,15 @@
     "diskSpaceDesc": "Uso de armazenamento na partição de disco da aplicação.",
     "diskUsage": "Uso de Disco",
     "available": "Disponível",
-    "usedMemory": "Usado"
+    "usedMemory": "Usado",
+    "overview": "Visão Geral",
+    "systemVariables": "Variáveis do Sistema",
+    "sysVarsDesc": "Propriedades do sistema Java e variáveis de ambiente.",
+    "searchVariables": "Pesquisar variáveis...",
+    "property": "Propriedade",
+    "value": "Valor",
+    "noVariablesMatch": "Nenhuma variável corresponde à sua pesquisa.",
+    "propertiesShown": "Exibindo {{count}} de {{total}} propriedades."
   },
   "theme": {
     "toggle": "Alternar tema",

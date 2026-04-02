@@ -2,6 +2,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import * as React from "react"
 import { NavLink, type To } from "react-router-dom"
+import { IconLoader2 } from "@tabler/icons-react"
 
 import { cn } from "@/lib/utils"
 
@@ -99,11 +100,13 @@ function GradientButton({
     size,
     asChild = false,
     to,
+    loading = false,
     ...props
 }: React.ComponentProps<"button"> &
     VariantProps<typeof gradientButtonVariants> & {
         asChild?: boolean
         to?: To
+        loading?: boolean
     }) {
     const classes = cn(gradientButtonVariants({ variant, size, className }))
 
@@ -131,8 +134,12 @@ function GradientButton({
         <Comp
             data-slot="gradient-button"
             className={classes}
+            disabled={loading || props.disabled}
             {...props}
-        />
+        >
+            {loading ? <IconLoader2 className="animate-spin" /> : null}
+            {props.children}
+        </Comp>
     )
 }
 

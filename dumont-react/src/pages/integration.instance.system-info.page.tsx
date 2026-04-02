@@ -1,15 +1,20 @@
 import { SubPageHeader } from "@/components/sub.page.header";
 import { SectionCard } from "@/components/ui/section-card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import {
     IconCpu,
+    IconDatabase,
     IconDeviceDesktop,
     IconDisc,
     IconInfoCircle,
     IconLoader2,
+    IconSearch,
     IconServer,
+    IconVariable,
 } from "@tabler/icons-react";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -29,6 +34,22 @@ interface ConnectorDisk {
     usedSpace: number;
 }
 
+interface PropertyEntry {
+    value: string;
+    property: string;
+}
+
+interface ConnectorIndexing {
+    provider: PropertyEntry;
+    turingUrl?: PropertyEntry;
+    turingSolrEndpoint?: PropertyEntry;
+    solrUrl?: PropertyEntry;
+    solrCollection?: PropertyEntry;
+    elasticsearchUrl?: PropertyEntry;
+    elasticsearchIndex?: PropertyEntry;
+    elasticsearchUsername?: PropertyEntry;
+}
+
 interface ConnectorSystemInfo {
     appVersion: string;
     appName: string;
@@ -40,6 +61,7 @@ interface ConnectorSystemInfo {
     osArch: string;
     memory: ConnectorMemory;
     disk: ConnectorDisk;
+    indexing: ConnectorIndexing;
     status: string;
 }
 
@@ -67,10 +89,13 @@ function ProgressBar({ value, color }: Readonly<{ value: number; color: string }
     );
 }
 
-function InfoRow({ label, value }: Readonly<{ label: string; value: string }>) {
+function InfoRow({ label, value, property }: Readonly<{ label: string; value: string; property?: string }>) {
     return (
         <div className="flex items-center justify-between py-2 border-b last:border-b-0">
-            <span className="text-sm text-muted-foreground">{label}</span>
+            <div className="flex flex-col">
+                <span className="text-sm text-muted-foreground">{label}</span>
+                {property && <span className="text-xs font-mono text-muted-foreground/60">{property}</span>}
+            </div>
             <span className="text-sm font-medium font-mono">{value}</span>
         </div>
     );
@@ -95,16 +120,21 @@ export default function IntegrationInstanceSystemInfoPage() {
     const { id } = useParams() as { id: string };
 
     const [info, setInfo] = useState<ConnectorSystemInfo | null>(null);
+    const [variables, setVariables] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [status, setStatus] = useState<string>("DOWN");
+    const [varSearch, setVarSearch] = useState("");
 
     useEffect(() => {
         if (id && id !== "new") {
-            axios
-                .get<ConnectorSystemInfo>(`/v2/integration/${id}/connector/system-info`)
-                .then((res) => {
-                    setInfo(res.data);
-                    setStatus(res.data.status ?? "UP");
+            Promise.all([
+                axios.get<ConnectorSystemInfo>(`/v2/integration/${id}/connector/system-info`),
+                axios.get<Record<string, string>>(`/v2/integration/${id}/connector/system-info/variables`),
+            ])
+                .then(([infoRes, varsRes]) => {
+                    setInfo(infoRes.data);
+                    setStatus(infoRes.data.status ?? "UP");
+                    setVariables(varsRes.data);
                 })
                 .catch(() => {
                     setStatus("DOWN");
@@ -115,6 +145,15 @@ export default function IntegrationInstanceSystemInfoPage() {
             setIsLoading(false);
         }
     }, [id]);
+
+    const filteredVariables = useMemo(() => {
+        const search = varSearch.toLowerCase();
+        return Object.entries(variables).filter(
+            ([key, value]) =>
+                key.toLowerCase().includes(search) ||
+                value.toLowerCase().includes(search),
+        );
+    }, [variables, varSearch]);
 
     if (isLoading) {
         return (
@@ -151,7 +190,20 @@ export default function IntegrationInstanceSystemInfoPage() {
                 name="System Information"
                 description="Connector version and runtime details."
             />
-            <div className="py-6 px-6 space-y-4">
+            <div className="py-6 px-6">
+                <Tabs defaultValue="overview">
+                    <TabsList>
+                        <TabsTrigger value="overview">
+                            <IconServer className="size-4 mr-1" />
+                            {t("systemInfo.overview")}
+                        </TabsTrigger>
+                        <TabsTrigger value="variables">
+                            <IconVariable className="size-4 mr-1" />
+                            {t("systemInfo.systemVariables")}
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="overview" className="space-y-4 mt-4">
                 {/* Application */}
                 <SectionCard variant="blue">
                     <SectionCard.StaticHeader
@@ -172,6 +224,39 @@ export default function IntegrationInstanceSystemInfoPage() {
                         <InfoRow label={t("integration.connectorSystemInfo.os")} value={`${info?.osName ?? ""} ${info?.osVersion ?? ""} (${info?.osArch ?? ""})`} />
                     </SectionCard.Content>
                 </SectionCard>
+
+                {/* Indexing Provider */}
+                {info?.indexing && (
+                    <SectionCard variant="violet">
+                        <SectionCard.StaticHeader
+                            icon={IconDatabase}
+                            title={t("integration.connectorSystemInfo.indexingProvider")}
+                            description={t("integration.connectorSystemInfo.indexingProviderDesc")}
+                        />
+                        <SectionCard.Content>
+                            <InfoRow label={t("integration.connectorSystemInfo.provider")} value={info.indexing.provider?.value?.toUpperCase() ?? "N/A"} property={info.indexing.provider?.property} />
+                            {info.indexing.provider?.value === "turing" && (
+                                <>
+                                    <InfoRow label={t("integration.connectorSystemInfo.turingUrl")} value={info.indexing.turingUrl?.value ?? "N/A"} property={info.indexing.turingUrl?.property} />
+                                    <InfoRow label={t("integration.connectorSystemInfo.turingSolrEndpoint")} value={info.indexing.turingSolrEndpoint?.value ?? "N/A"} property={info.indexing.turingSolrEndpoint?.property} />
+                                </>
+                            )}
+                            {info.indexing.provider?.value === "solr" && (
+                                <>
+                                    <InfoRow label={t("integration.connectorSystemInfo.solrUrl")} value={info.indexing.solrUrl?.value ?? "N/A"} property={info.indexing.solrUrl?.property} />
+                                    <InfoRow label={t("integration.connectorSystemInfo.solrCollection")} value={info.indexing.solrCollection?.value ?? "N/A"} property={info.indexing.solrCollection?.property} />
+                                </>
+                            )}
+                            {info.indexing.provider?.value === "elasticsearch" && (
+                                <>
+                                    <InfoRow label={t("integration.connectorSystemInfo.elasticsearchUrl")} value={info.indexing.elasticsearchUrl?.value ?? "N/A"} property={info.indexing.elasticsearchUrl?.property} />
+                                    <InfoRow label={t("integration.connectorSystemInfo.elasticsearchIndex")} value={info.indexing.elasticsearchIndex?.value ?? "N/A"} property={info.indexing.elasticsearchIndex?.property} />
+                                    <InfoRow label={t("integration.connectorSystemInfo.elasticsearchUsername")} value={info.indexing.elasticsearchUsername?.value ?? "N/A"} property={info.indexing.elasticsearchUsername?.property} />
+                                </>
+                            )}
+                        </SectionCard.Content>
+                    </SectionCard>
+                )}
 
                 {/* Physical RAM */}
                 {physicalPercent >= 0 && (
@@ -248,6 +333,59 @@ export default function IntegrationInstanceSystemInfoPage() {
                         <InfoRow label={t("systemInfo.usedMemory")} value={formatBytes(disk?.usedSpace ?? 0)} />
                     </SectionCard.Content>
                 </SectionCard>
+                    </TabsContent>
+
+                    <TabsContent value="variables" className="mt-4">
+                        <SectionCard variant="slate">
+                            <SectionCard.StaticHeader
+                                icon={IconVariable}
+                                title={t("systemInfo.systemVariables")}
+                                description={t("systemInfo.sysVarsDesc")}
+                            />
+                            <SectionCard.Content>
+                                <div className="relative">
+                                    <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                                    <Input
+                                        className="pl-9 max-w-sm"
+                                        placeholder={t("systemInfo.searchVariables")}
+                                        value={varSearch}
+                                        onChange={(e) => setVarSearch(e.target.value)}
+                                    />
+                                </div>
+                                <div className="rounded-lg border overflow-hidden">
+                                    <div className="max-h-150 overflow-y-auto">
+                                        <table className="w-full text-sm">
+                                            <thead className="bg-muted/60 sticky top-0">
+                                                <tr>
+                                                    <th className="text-left px-4 py-2 font-medium text-muted-foreground w-1/3">{t("systemInfo.property")}</th>
+                                                    <th className="text-left px-4 py-2 font-medium text-muted-foreground">{t("systemInfo.value")}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredVariables.map(([key, value]) => (
+                                                    <tr key={key} className="border-t hover:bg-muted/30 transition-colors">
+                                                        <td className="px-4 py-2 font-mono text-xs break-all">{key}</td>
+                                                        <td className="px-4 py-2 font-mono text-xs break-all text-muted-foreground">{value}</td>
+                                                    </tr>
+                                                ))}
+                                                {filteredVariables.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan={2} className="px-4 py-8 text-center text-muted-foreground">
+                                                            {t("systemInfo.noVariablesMatch")}
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    {t("systemInfo.propertiesShown", { count: filteredVariables.length, total: Object.keys(variables).length })}
+                                </p>
+                            </SectionCard.Content>
+                        </SectionCard>
+                    </TabsContent>
+                </Tabs>
             </div>
         </>
     );

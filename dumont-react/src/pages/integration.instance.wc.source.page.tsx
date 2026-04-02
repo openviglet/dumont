@@ -17,6 +17,7 @@ export default function IntegrationInstanceWcSourcePage() {
   const [isNew, setIsNew] = useState<boolean>(true);
   const service = useMemo(() => new TurIntegrationWcSourceService(id), [id]);
   const [open, setOpen] = useState(false);
+  const [crawling, setCrawling] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -44,12 +45,15 @@ export default function IntegrationInstanceWcSourcePage() {
   const isActionDisabled = isNew || !wcSource.id;
 
   async function onCrawl() {
+    setCrawling(true);
     try {
       await service.crawl(wcSource);
       toast.success(t("integration.wcSources.crawlStarted", { name: wcSource.title }));
     } catch (error) {
       console.error("Crawl error", error);
       toast.error(t("integration.wcSources.crawlFailed", { name: wcSource.title }));
+    } finally {
+      setCrawling(false);
     }
   }
 
@@ -62,7 +66,7 @@ export default function IntegrationInstanceWcSourcePage() {
 
       <div className="flex justify-end pb-4 px-6">
         <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
-          <GradientButton type="button" variant="outline" onClick={onCrawl} disabled={isActionDisabled}>
+          <GradientButton type="button" variant="outline" onClick={onCrawl} disabled={isActionDisabled} loading={crawling}>
             {t("integration.wcSources.crawl")}
           </GradientButton>
         </div>

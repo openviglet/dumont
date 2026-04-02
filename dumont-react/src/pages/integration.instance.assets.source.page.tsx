@@ -17,6 +17,7 @@ export default function IntegrationInstanceAssetsSourcePage() {
   const [isNew, setIsNew] = useState<boolean>(true);
   const service = useMemo(() => new TurIntegrationAssetsSourceService(id), [id]);
   const [open, setOpen] = useState(false);
+  const [indexingAll, setIndexingAll] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -32,8 +33,10 @@ export default function IntegrationInstanceAssetsSourcePage() {
   }
 
   async function onIndexAll() {
+    setIndexingAll(true);
     try { await service.indexAll(source); toast.success(t("integration.assetsSources.indexingStarted", { name: source.name })); }
     catch (error) { console.error(error); toast.error(t("integration.assetsSources.indexingFailed", { name: source.name })); }
+    finally { setIndexingAll(false); }
   }
 
   return (
@@ -41,7 +44,7 @@ export default function IntegrationInstanceAssetsSourcePage() {
       <SubPageHeader icon={IconFolder} name={t("integration.assetsSources.title")} feature={t("integration.assetsSources.title")} description={t("integration.assetsSources.description")} onDelete={onDelete} open={open} setOpen={setOpen} />
       <div className="flex justify-end pb-4 px-6">
         <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
-          <GradientButton type="button" variant="outline" onClick={onIndexAll} disabled={isNew || !source.id}>{t("integration.assetsSources.indexAll")}</GradientButton>
+          <GradientButton type="button" variant="outline" onClick={onIndexAll} disabled={isNew || !source.id} loading={indexingAll}>{t("integration.assetsSources.indexAll")}</GradientButton>
         </div>
       </div>
       <IntegrationAssetsSourceForm value={source} isNew={isNew} integrationId={id} sourceId={sourceId} tab={tab} />
