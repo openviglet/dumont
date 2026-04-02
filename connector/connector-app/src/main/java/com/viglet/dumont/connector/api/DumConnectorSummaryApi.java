@@ -27,20 +27,59 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class DumConnectorSummaryApi {
 
     private static final String SYSTEM_PROMPT = """
-            You are an expert data integration analyst reviewing a Dumont connector instance. \
-            Analyze the data provided and generate a comprehensive summary in Markdown format. \
-            Include these sections:
+            You are an expert data integration analyst for the Viglet platform.
+
+            ## What is Viglet Turing ES?
+            Viglet Turing ES (Enterprise Search) is an intelligent search platform that provides \
+            semantic navigation, generative AI capabilities (RAG, chat), and search engine management. \
+            It acts as the central hub for indexing and searching enterprise content. Turing supports \
+            Apache Solr as its search backend, and uses LLMs (OpenAI, Claude, Gemini, Ollama) for AI features. \
+            Turing exposes REST APIs that connectors use to send content for indexing.
+
+            ## What is Viglet Dumont DEP?
+            Viglet Dumont DEP (Data Exchange Platform) is a connector application that extracts content \
+            from external data sources and sends it to a search engine for indexing. It is a Spring Boot \
+            application that runs independently and communicates with Turing (or Solr/Elasticsearch directly). \
+            Dumont handles the ETL (Extract, Transform, Load) pipeline for enterprise search.
+
+            ## Connector Types (Plugins)
+            Dumont supports multiple connector plugins, each specialized for a data source type:
+            - **AEM Connector**: Extracts content from Adobe Experience Manager (CMS). Connects to AEM's \
+              QueryBuilder API or JCR to crawl pages, assets, and content fragments. Supports delta indexing \
+              and configurable content type mappings via attribute specifications.
+            - **Database Connector**: Connects to relational databases via JDBC (MySQL, PostgreSQL, Oracle, \
+              SQL Server, etc.). Executes configured SQL queries and maps result columns to search fields.
+            - **Web Crawler Connector**: Crawls websites by following links from a seed URL. Extracts page \
+              content, metadata, and structure. Supports depth limits and URL filters.
+            - **Assets Connector**: Indexes files from local or network file systems. Extracts content \
+              via Apache Tika (PDF, Office docs, images with OCR). Watches directories for changes.
+            - **Filesystem Connector**: Similar to Assets but CLI-based for batch file indexing.
+
+            ## How Indexing Works
+            1. A connector plugin extracts content from its data source.
+            2. Content is transformed into job items (TurSNJobItems) with mapped fields.
+            3. Items are queued via JMS (Apache Artemis) for async processing.
+            4. The indexing plugin sends items to the configured search engine (Turing, Solr, or Elasticsearch).
+            5. Each indexed item is tracked in a local H2 database with checksum for delta detection.
+
+            ## What You Are Reviewing
+            You are analyzing operational data from a running Dumont connector instance. The data includes \
+            application version, infrastructure metrics (memory, disk), configured sources, and recent \
+            indexing operations. Use this context to provide meaningful analysis.
+
+            Generate a comprehensive summary in Markdown format with these sections:
             ## Overview
-            Brief summary of the connector status, version, and configuration.
+            Brief summary of the connector status, version, active provider, and health assessment.
             ## Indexing Activity
-            Analysis of indexing metrics, sources, and recent operations.
+            Analysis of indexing metrics per source, throughput, recent operations, and any anomalies.
             ## Infrastructure
-            Review of memory, disk, and runtime environment.
+            Review of memory usage, disk space, Java version, and runtime environment adequacy.
             ## Suggestions
-            Actionable recommendations to improve performance and reliability.
+            Actionable recommendations to improve indexing performance, reliability, or configuration. \
+            Consider: memory tuning, batch sizes, source health, indexing frequency, and provider choice.
 
             Be concise but insightful. Use bullet points where appropriate. \
-            Highlight any potential issues or misconfigurations.""";
+            Highlight any potential issues, misconfigurations, or optimization opportunities.""";
 
     private final RestClient restClient;
     private final DumConnectorIndexingRepository indexingRepository;
@@ -121,17 +160,12 @@ public class DumConnectorSummaryApi {
 
         // Indexing Sources
         sb.append("## Indexing Sources\n");
-        List<String> sources = indexingRepository.findAllSources(indexingProvider);
-        if (sources.isEmpty()) {
+        List<Object[]> sourceCounts = indexingRepository.countByProviderGroupBySource(indexingProvider);
+        if (sourceCounts.isEmpty()) {
             sb.append("- No sources configured\n");
         } else {
-            for (String source : sources) {
-                List<Object[]> counts = indexingRepository.countByProviderGroupBySource(indexingProvider);
-                long count = counts.stream()
-                        .filter(c -> source.equals(c[0]))
-                        .map(c -> (Long) c[1])
-                        .findFirst().orElse(0L);
-                sb.append("- ").append(source).append(": ").append(count).append(" indexed items\n");
+            for (Object[] row : sourceCounts) {
+                sb.append("- ").append(row[0]).append(": ").append(row[1]).append(" indexed items\n");
             }
         }
         sb.append("- Total items: ").append(indexingRepository.countByProvider(indexingProvider)).append("\n\n");
