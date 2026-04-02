@@ -26,11 +26,19 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @Profile("production")
 @EnableWebSecurity
 public class DumWebConfiguration {
+
+    private final DumApiKeyFilter apiKeyFilter;
+
+    public DumWebConfiguration(DumApiKeyFilter apiKeyFilter) {
+        this.apiKeyFilter = apiKeyFilter;
+    }
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) {
         http.httpBasic(AbstractHttpConfigurer::disable);
@@ -38,6 +46,7 @@ public class DumWebConfiguration {
         http.headers(header -> header.frameOptions(
                 frameOptions -> frameOptions.disable()
                         .cacheControl(HeadersConfigurer.CacheControlConfig::disable)));
+        http.addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

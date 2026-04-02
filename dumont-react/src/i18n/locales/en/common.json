@@ -10,7 +10,8 @@
     "tryAgain": "Try again",
     "errorLoading": "Error while loading data",
     "openNavigation": "Open navigation",
-    "connectionError": "Connection error or timeout while fetching {{resource}}."
+    "connectionError": "Connection error or timeout while fetching {{resource}}.",
+    "apiKeyMismatch": "The API Key used by this application to connect to Turing does not match the API Key configured in Dumont."
   },
   "sidebar": {
     "brandName": "Dumont",

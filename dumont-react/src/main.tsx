@@ -1,5 +1,6 @@
-import "@/i18n";
+import i18n from "@/i18n";
 import axios from "axios";
+import { toast } from "sonner";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -22,6 +23,16 @@ axios.interceptors.request.use((config) => {
   }
   return config;
 });
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 422) {
+      toast.error(i18n.t("common.apiKeyMismatch"));
+    }
+    return Promise.reject(error);
+  }
+);
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

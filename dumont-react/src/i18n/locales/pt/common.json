@@ -10,7 +10,8 @@
     "tryAgain": "Tentar novamente",
     "errorLoading": "Erro ao carregar dados",
     "openNavigation": "Abrir navegação",
-    "connectionError": "Erro de conexão ou tempo esgotado ao buscar {{resource}}."
+    "connectionError": "Erro de conexão ou tempo esgotado ao buscar {{resource}}.",
+    "apiKeyMismatch": "A API Key usada por esta aplicação para se conectar ao Turing não confere com a API Key configurada no Dumont."
   },
   "sidebar": {
     "brandName": "Dumont",
