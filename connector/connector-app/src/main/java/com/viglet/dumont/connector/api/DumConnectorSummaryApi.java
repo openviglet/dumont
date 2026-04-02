@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
+import com.viglet.dumont.connector.config.DumTuringCsrfService;
 import com.viglet.dumont.connector.persistence.repository.DumConnectorIndexingRepository;
 import com.viglet.dumont.connector.persistence.repository.DumConnectorIndexingStatsRepository;
+
+import jakarta.persistence.EntityManager;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -82,18 +85,24 @@ public class DumConnectorSummaryApi {
             Highlight any potential issues, misconfigurations, or optimization opportunities.""";
 
     private final RestClient restClient;
+    private final DumTuringCsrfService csrfService;
     private final DumConnectorIndexingRepository indexingRepository;
     private final DumConnectorIndexingStatsRepository statsRepository;
+    private final EntityManager entityManager;
     private final String indexingProvider;
 
     public DumConnectorSummaryApi(
             RestClient restClient,
+            DumTuringCsrfService csrfService,
             DumConnectorIndexingRepository indexingRepository,
             DumConnectorIndexingStatsRepository statsRepository,
+            EntityManager entityManager,
             @Value("${dumont.indexing.provider:turing}") String indexingProvider) {
         this.restClient = restClient;
+        this.csrfService = csrfService;
         this.indexingRepository = indexingRepository;
         this.statsRepository = statsRepository;
+        this.entityManager = entityManager;
         this.indexingProvider = indexingProvider;
     }
 
@@ -111,8 +120,11 @@ public class DumConnectorSummaryApi {
 
             String url = "/api/v2/summary" + (regenerate ? "?regenerate=true" : "");
 
+            var csrf = csrfService.fetch();
+
             SummaryResponse response = restClient.post()
                     .uri(url)
+                    .header(csrf.headerName(), csrf.token())
                     .body(request)
                     .retrieve()
                     .body(SummaryResponse.class);
@@ -158,11 +170,19 @@ public class DumConnectorSummaryApi {
         sb.append("- Usage: ").append(totalGB > 0 ? Math.round((double) (totalGB - usableGB) / totalGB * 100) : 0)
                 .append("%\n\n");
 
-        // Indexing Sources
-        sb.append("## Indexing Sources\n");
+        // Configured Sources (from plugin tables)
+        sb.append("## Configured Sources\n");
+        appendPluginSources(sb, "AEM", "aem_source", "name", "endpoint", "\"rootPath\"");
+        appendPluginSources(sb, "Database", "db_source", "name", "db_url", null);
+        appendPluginSources(sb, "Web Crawler", "wc_source", "title", "url", null);
+        appendPluginSources(sb, "Assets", "assets_source", "name", "\"sourceDir\"", null);
+        sb.append("\n");
+
+        // Indexing Activity
+        sb.append("## Indexing Activity\n");
         List<Object[]> sourceCounts = indexingRepository.countByProviderGroupBySource(indexingProvider);
         if (sourceCounts.isEmpty()) {
-            sb.append("- No sources configured\n");
+            sb.append("- No indexed content yet\n");
         } else {
             for (Object[] row : sourceCounts) {
                 sb.append("- ").append(row[0]).append(": ").append(row[1]).append(" indexed items\n");
@@ -185,6 +205,33 @@ public class DumConnectorSummaryApi {
         }
 
         return sb.toString();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void appendPluginSources(StringBuilder sb, String label, String table,
+                                     String nameCol, String urlCol, String extraCol) {
+        try {
+            List<Object[]> rows = entityManager
+                    .createNativeQuery("SELECT " + nameCol
+                            + (urlCol != null ? ", " + urlCol : "")
+                            + (extraCol != null ? ", " + extraCol : "")
+                            + " FROM " + table)
+                    .getResultList();
+            if (rows.isEmpty()) return;
+            sb.append("### ").append(label).append(" (").append(rows.size()).append(")\n");
+            for (Object row : rows) {
+                if (row instanceof Object[] cols) {
+                    sb.append("- ").append(cols[0]);
+                    if (cols.length > 1 && cols[1] != null) sb.append(" — ").append(cols[1]);
+                    if (cols.length > 2 && cols[2] != null) sb.append(" (").append(cols[2]).append(")");
+                    sb.append("\n");
+                } else {
+                    sb.append("- ").append(row).append("\n");
+                }
+            }
+        } catch (Exception ignored) {
+            // Table may not exist if plugin is not loaded
+        }
     }
 
     public record SummaryResponse(boolean success, String error, String content, boolean canRegenerate) {
