@@ -20,6 +20,7 @@
       "indexingStats": "Estatísticas de Indexação",
       "doubleCheck": "Verificação Dupla",
       "systemInfo": "Informações do Sistema",
+      "insights": "Insights de IA",
       "sample": "Exemplo"
     },
     "detail": {
@@ -215,6 +216,14 @@
       "elasticsearchUrl": "URL do Elasticsearch",
       "elasticsearchIndex": "Índice do Elasticsearch",
       "elasticsearchUsername": "Usuário do Elasticsearch"
+    },
+    "insights": {
+      "title": "Insights de IA",
+      "description": "Visão geral e sugestões com IA para este conector.",
+      "generating": "Gerando resumo com IA...",
+      "failedGenerate": "Falha ao gerar resumo.",
+      "failedConnect": "Falha ao conectar ao serviço de resumo. Tente novamente.",
+      "regenerate": "Regenerar"
     }
   }
 }

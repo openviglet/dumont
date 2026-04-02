@@ -20,6 +20,7 @@
       "indexingStats": "Indexing Stats",
       "doubleCheck": "Double Check",
       "systemInfo": "System Information",
+      "insights": "AI Insights",
       "sample": "Sample"
     },
     "detail": {
@@ -215,6 +216,14 @@
       "elasticsearchUrl": "Elasticsearch URL",
       "elasticsearchIndex": "Elasticsearch Index",
       "elasticsearchUsername": "Elasticsearch Username"
+    },
+    "insights": {
+      "title": "AI Insights",
+      "description": "AI-powered overview and suggestions for this connector.",
+      "generating": "Generating AI summary...",
+      "failedGenerate": "Failed to generate summary.",
+      "failedConnect": "Failed to connect to the summary service. Please try again.",
+      "regenerate": "Regenerate"
     }
   }
 }

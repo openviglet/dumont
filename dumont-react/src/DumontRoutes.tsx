@@ -16,6 +16,7 @@ import IntegrationInstanceMonitoringPage from "./pages/integration.instance.moni
 import IntegrationInstanceIndexingStatsPage from "./pages/integration.instance.indexing.stats.page";
 import IntegrationInstanceDoubleCheckPage from "./pages/integration.instance.double.check.page";
 import IntegrationInstanceSystemInfoPage from "./pages/integration.instance.system-info.page";
+import IntegrationInstanceInsightsPage from "./pages/integration.instance.insights.page";
 
 // All dumont routes are defined here.
 // The host (turing-react) mounts this via a single wildcard route.
@@ -58,6 +59,8 @@ export default function DumontRoutes() {
       <Route path="indexing-stats" element={<IntegrationInstanceIndexingStatsPage />} />
       {/* Double Check */}
       <Route path="double-check" element={<IntegrationInstanceDoubleCheckPage />} />
+      {/* AI Insights */}
+      <Route path="insights" element={<IntegrationInstanceInsightsPage />} />
       {/* System Information */}
       <Route path="system-info" element={<IntegrationInstanceSystemInfoPage />} />
     </Routes>

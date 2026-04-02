@@ -9,6 +9,7 @@ import {
   IconHome,
   IconInfoCircle,
   IconListCheck,
+  IconSparkles,
   IconTools,
 } from "@tabler/icons-react"
 import type { Icon } from "@tabler/icons-react"
@@ -64,6 +65,7 @@ const commonItems: SidebarNavItem[] = [
   { key: "monitoring", titleKey: "integration.nav.monitoring", url: `${BASE}/monitoring`, icon: IconGraph },
   { key: "indexingStats", titleKey: "integration.nav.indexingStats", url: `${BASE}/indexing-stats`, icon: IconChartBar },
   { key: "doubleCheck", titleKey: "integration.nav.doubleCheck", url: `${BASE}/double-check`, icon: IconListCheck },
+  { key: "insights", titleKey: "integration.nav.insights", url: `${BASE}/insights`, icon: IconSparkles },
   { key: "systemInfo", titleKey: "integration.nav.systemInfo", url: `${BASE}/system-info`, icon: IconInfoCircle },
 ]
 
