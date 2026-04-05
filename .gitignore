@@ -49,3 +49,7 @@ dependency-reduced-pom.xml
 /aem/aem-commons/target
 /web-crawler/wc-plugin-sample/dist
 /assets/assets-plugin-sample/dist
+/aem/aem-plugin-sample/turing-export/app/node_modules
+/assets/assets-plugin-sample/turing-export/app/node_modules
+/db/db-plugin-sample/turing-export/app/node_modules
+/web-crawler/wc-plugin-sample/turing-export/app/node_modules

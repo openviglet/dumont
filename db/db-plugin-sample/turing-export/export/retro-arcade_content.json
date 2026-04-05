@@ -1,0 +1,102 @@
+{
+  "retro-arcade": {
+    "en_US": [
+      {
+        "id": "arc-001", "type": "game",
+        "title": "Pac-Man \u2014 The Maze That Changed Everything",
+        "abstract": "The most iconic arcade game ever created. Guide Pac-Man through a maze, eating dots and avoiding ghosts. Created by Toru Iwatani at Namco, inspired by a pizza with a slice removed.",
+        "text": "Pac-Man was released by Namco in May 1980 and licensed to Midway for North American distribution. Designer Toru Iwatani wanted to create a game that would appeal to women and couples \u2014 a departure from the male-dominated space shooters of the era. The iconic character was inspired by a pizza with one slice removed. Each ghost has its own AI personality: Blinky (red) directly chases Pac-Man, Pinky (pink) tries to position ahead, Inky (cyan) uses complex targeting, and Clyde (orange) alternates between chasing and wandering. The famous Level 256 'kill screen' occurs due to an integer overflow bug. Pac-Man earned over $2.5 billion in quarters by the 1990s, making it the highest-grossing arcade game of all time.",
+        "url": "/games/pac-man",
+        "tags": ["Maze", "Action", "Classic"],
+        "author": "Namco",
+        "publication_date": "1980-05-22T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Retro Arcade"
+      },
+      {
+        "id": "arc-002", "type": "game",
+        "title": "Space Invaders \u2014 The Alien Onslaught",
+        "abstract": "The game that launched the golden age of arcade gaming. Defend Earth from descending waves of alien invaders with a laser cannon.",
+        "text": "Space Invaders was created by Tomohiro Nishikado at Taito Corporation and released in June 1978. It was one of the earliest shooting games and the first to feature an escalating difficulty curve \u2014 as you destroy aliens, the remaining ones speed up due to the hardware processing fewer sprites. The game was so popular in Japan that it caused a national shortage of 100-yen coins. By 1982, Space Invaders had generated $3.8 billion in revenue. The game introduced the concept of a high score, competitive gaming, and the 'one more quarter' addiction loop. It was directly responsible for launching the golden age of arcade gaming (1978-1983).",
+        "url": "/games/space-invaders",
+        "tags": ["Shooter", "Fixed Shooter", "Sci-Fi"],
+        "author": "Taito",
+        "publication_date": "1978-06-01T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Retro Arcade"
+      },
+      {
+        "id": "arc-003", "type": "game",
+        "title": "Donkey Kong \u2014 The Birth of Mario",
+        "abstract": "Shigeru Miyamoto's debut masterpiece. Climb steel girders, leap rolling barrels, and rescue Pauline from the giant ape.",
+        "text": "Donkey Kong was released by Nintendo in July 1981, designed by a young Shigeru Miyamoto. The game was born from necessity \u2014 Nintendo of America needed a hit after the failure of Radar Scope. Miyamoto created a love triangle: Jumpman (a carpenter), his girlfriend Pauline, and a pet ape who escaped. The game introduced platforming \u2014 jumping over obstacles on platforms \u2014 essentially inventing an entire genre. When Universal Studios sued Nintendo claiming King Kong infringement, lawyer John Kirby won the case. Nintendo thanked him by naming a certain pink character 'Kirby.' Jumpman was later renamed Mario, becoming gaming's most famous character.",
+        "url": "/games/donkey-kong",
+        "tags": ["Platformer", "Action", "Nintendo"],
+        "author": "Nintendo",
+        "publication_date": "1981-07-09T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Retro Arcade"
+      },
+      {
+        "id": "arc-004", "type": "game",
+        "title": "Street Fighter II \u2014 The Fighting Revolution",
+        "abstract": "The game that defined competitive fighting. Choose from eight world warriors, master unique move sets, and battle your way to M. Bison.",
+        "text": "Street Fighter II: The World Warrior was released by Capcom in February 1991 and single-handedly revived the arcade industry. SFII revolutionized competitive gaming with its eight selectable characters, six-button control scheme, and combo attacks \u2014 discovered accidentally by producer Noritaka Funamizu. The game introduced Ryu, Ken, Chun-Li (the first playable female character in a fighting game), and the iconic Hadouken fireball. Tournament culture exploded around SFII \u2014 arcades became competitive arenas where reputation was built quarter by quarter. The cabinet earned over $10 billion in revenue across all versions.",
+        "url": "/games/street-fighter-ii",
+        "tags": ["Fighting", "Competitive", "Capcom"],
+        "author": "Capcom",
+        "publication_date": "1991-02-06T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Retro Arcade"
+      },
+      {
+        "id": "arc-005", "type": "game",
+        "title": "Galaga \u2014 The Insect Armada",
+        "abstract": "The beloved sequel to Galaxian. Shoot down wave after wave of alien insects in mesmerizing attack formations.",
+        "text": "Galaga was released by Namco in September 1981 as the sequel to Galaxian. It perfected the fixed-shooter formula with its iconic 'capture' mechanic: the Boss Galaga can use a tractor beam to capture your ship. Clever players intentionally sacrifice a fighter, then rescue it to create a dual-fighter setup \u2014 doubling their firepower. This risk-reward mechanic was revolutionary. The game features 'Challenging Stages' (bonus rounds) that were among the first bonus stages in gaming. Galaga remains one of the most popular retro arcade games, frequently appearing in 'greatest games' lists.",
+        "url": "/games/galaga",
+        "tags": ["Shooter", "Fixed Shooter", "Namco"],
+        "author": "Namco",
+        "publication_date": "1981-09-01T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Retro Arcade"
+      },
+      {
+        "id": "arc-006", "type": "game",
+        "title": "Tetris \u2014 The Eternal Puzzle",
+        "abstract": "The deceptively simple Soviet puzzle game that became the most addictive game ever created. Rotate and stack falling tetrominoes.",
+        "text": "Tetris was created by Alexey Pajitnov at the Soviet Academy of Sciences in Moscow on June 6, 1984. The game's name combines 'tetra' (four) and 'tennis.' Despite being created behind the Iron Curtain, Tetris spread rapidly. Nintendo bundled Tetris with the Game Boy in 1989, selling over 35 million copies. The 'Tetris Effect' \u2014 seeing falling blocks when closing your eyes \u2014 became one of the first documented game transfer phenomena. Scientifically, Tetris has been shown to reduce PTSD symptoms and improve brain efficiency. The legal battle for Tetris rights is one of the most dramatic stories in gaming history.",
+        "url": "/games/tetris",
+        "tags": ["Puzzle", "Strategy", "Classic"],
+        "author": "Alexey Pajitnov",
+        "publication_date": "1984-06-06T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Retro Arcade"
+      },
+      {
+        "id": "arc-007", "type": "game",
+        "title": "Metal Slug \u2014 The Run-and-Gun Masterpiece",
+        "abstract": "SNK's hand-animated action extravaganza. Battle through beautifully drawn warzones in a hijacked tank.",
+        "text": "Metal Slug was released by Nazca Corporation for SNK's Neo Geo MVS arcade system in April 1996. The game is widely regarded as the greatest run-and-gun shooter ever made, thanks to its extraordinarily detailed hand-drawn pixel art animation. Every character, vehicle, explosion, and background element was painstakingly animated frame by frame. The game features a subversive sense of humor: enemies cook meals and sunbathe before noticing you, rescued POWs hand you power-ups while sobbing with gratitude, and eating too much food makes your character comically overweight. The original Neo Geo cartridge cost $650 in 1996. Metal Slug remains the gold standard for 2D action games.",
+        "url": "/games/metal-slug",
+        "tags": ["Run and Gun", "Action", "Neo Geo"],
+        "author": "Nazca / SNK",
+        "publication_date": "1996-04-19T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Retro Arcade"
+      },
+      {
+        "id": "arc-008", "type": "game",
+        "title": "Frogger \u2014 The Deadly Commute",
+        "abstract": "Guide a frog across a busy highway and a treacherous river to reach home safely. One of gaming's perfect concepts.",
+        "text": "Frogger was developed by Konami and released in June 1981. The premise is elegantly simple: guide a frog from the bottom of the screen to one of five home bays at the top, first crossing a busy highway then navigating a river by hopping on logs, turtles, and alligators. The game has no weapons, no power-ups, and no combat \u2014 just pure spatial reasoning and timing. What makes Frogger brilliant is its accessibility combined with escalating difficulty. Frogger was one of the first games to use multiple music tracks. The Seinfeld episode 'The Frogger' (1998) perfectly captured the game's cultural significance. Frogger has been ported to over 30 platforms.",
+        "url": "/games/frogger",
+        "tags": ["Action", "Strategy", "Konami"],
+        "author": "Konami",
+        "publication_date": "1981-06-05T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Retro Arcade"
+      }
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "wknd": {
+    "en_US": [
+      {
+        "id": "wknd-001", "type": "article",
+        "title": "Ultimate Guide to LA Skateparks",
+        "description": "From Venice Beach to the San Fernando Valley, discover the best skateparks in Los Angeles.",
+        "abstract": "Los Angeles is the spiritual home of skateboarding. We mapped out the 10 best skateparks across the city.",
+        "text": "Los Angeles is the undisputed capital of skateboarding culture. From the legendary Venice Beach Skatepark, where the Z-Boys revolutionized the sport in the 1970s, to the modern concrete bowls of Stoner Skate Plaza, LA offers something for every skill level. Venice Beach Skatepark is the crown jewel — a 16,000-square-foot facility right on the oceanfront with snake runs, bowls, and rails. The Berrics in downtown LA is the private indoor skatepark founded by Steve Berra and Eric Koston, now famous through its viral video series. For vert skating, the Vans Off The Wall Skatepark in Huntington Beach features the legendary Combi Pool replica. In the San Fernando Valley, North Hollywood Skatepark offers a massive 30,000-square-foot street course. Garvanza Skatepark in Highland Park combines a flowing bowl with street elements perfect for intermediate riders. LA's year-round sunshine and skate culture make it the ultimate destination for boarders worldwide.",
+        "url": "https://wknd.site/us/en/magazine/la-skateparks",
+        "tags": ["Skateboarding", "Los Angeles", "Extreme Sports", "Urban Culture"],
+        "publicationDate": "2025-08-15T00:00:00Z",
+        "site": "WKND", "source_apps": ["AEM"],
+        "pageTemplate": "Article Page",
+        "pageLanguage": "en_US"
+      },
+      {
+        "id": "wknd-002", "type": "article",
+        "title": "Bali Surf: Catching the Perfect Wave",
+        "description": "Your complete guide to the best surf spots in Bali, from the legendary Uluwatu to hidden gems off the beaten path.",
+        "abstract": "Bali remains one of the world's premier surfing destinations. We spent three months riding every break on the island.",
+        "text": "Bali's coastline offers an extraordinary variety of surf breaks that cater to beginners and experts alike. Uluwatu, perched beneath dramatic limestone cliffs on the Bukit Peninsula, serves up powerful left-handers that barrel along the reef — it's Indonesia's most iconic wave and has been featured in every major surf film since Morning of the Earth (1972). Padang Padang, made famous by the Rip Curl Cup, produces perfect barrels when the swell hits 6 feet or above, but it's a shallow reef break that demands respect. For intermediates, Canggu has become the go-to zone with its beach breaks at Batu Bolong and the punchy reef at Echo Beach. Beginners should head to Kuta Beach, where gentle waves and sandy bottoms provide the ideal learning ground. The hidden gem? Medewi on Bali's west coast — a long left-hand point break that peels for 200 meters, far from the crowds. Best season is April through October when the southwest swell delivers consistent overhead waves.",
+        "url": "https://wknd.site/us/en/magazine/bali-surfing",
+        "tags": ["Surfing", "Bali", "Travel", "Water Sports"],
+        "publicationDate": "2025-09-01T00:00:00Z",
+        "site": "WKND", "source_apps": ["AEM"],
+        "pageTemplate": "Article Page",
+        "pageLanguage": "en_US"
+      },
+      {
+        "id": "wknd-003", "type": "article",
+        "title": "Western Australia by Camper Van",
+        "description": "Hit the open road through Western Australia's stunning coastline and rugged outback in the ultimate van life adventure.",
+        "abstract": "Two weeks, 4,000 kilometers, and one vintage VW van through Western Australia's most spectacular landscapes.",
+        "text": "The Indian Ocean Drive from Perth to Geraldton is one of Australia's most underrated road trips. We packed a 1978 VW Kombi and headed north, camping under some of the clearest night skies on Earth. Day one took us to the Pinnacles Desert in Nambung National Park — thousands of limestone pillars rising from golden sand dunes, especially magical at sunset. Continuing north, we discovered the lobster fishing town of Cervantes, where you can buy freshly caught Western Rock Lobster right off the boats. Kalbarri National Park blew us away — the Nature's Window rock arch frames the Murchison River gorge in a natural picture frame, and the new Kalbarri Skywalk platforms extend 25 meters over the canyon, 100 meters above the river. At Shark Bay World Heritage Area, we swam with dolphins at Monkey Mia and drove the 110km Francois Peron Peninsula track. The red earth, turquoise water, and empty beaches of WA's Coral Coast make this the perfect escape from crowded tourist circuits.",
+        "url": "https://wknd.site/us/en/magazine/western-australia-by-van",
+        "tags": ["Road Trip", "Australia", "Camping", "Adventure Travel"],
+        "publicationDate": "2025-07-20T00:00:00Z",
+        "site": "WKND", "source_apps": ["AEM"],
+        "pageTemplate": "Article Page",
+        "pageLanguage": "en_US"
+      },
+      {
+        "id": "wknd-004", "type": "article",
+        "title": "Mountain Biking in Moab",
+        "description": "Red rock, singletrack, and adrenaline — why Moab, Utah is the mountain biking capital of the world.",
+        "abstract": "Moab's slickrock trails, desert mesas, and jaw-dropping scenery create the ultimate mountain biking playground.",
+        "text": "Moab, Utah sits at the confluence of the Colorado and Green Rivers, surrounded by red sandstone formations that create some of the most visually stunning mountain biking terrain on the planet. The Slickrock Trail is the undisputed icon — a 10.5-mile loop across petrified sand dunes of Navajo Sandstone, where the grippy rock surface allows riders to climb and descend slopes that would be impossible on dirt. The Whole Enchilada is Moab's epic all-day ride — 26 miles and 7,000 feet of descent from the La Sal Mountains through alpine forest, desert slickrock, and canyon singletrack down to the Colorado River. Porcupine Rim offers 14 miles of cliff-edge riding with views across Castle Valley and the La Sal Mountains that will make you forget to pedal. For technical riders, Captain Ahab combines steep drops, ledges, and exposure above Kane Creek Canyon. The Mag 7 shuttle trail descends through seven distinct geological zones. Best seasons are spring (March-May) and fall (September-November) when temperatures are mild.",
+        "url": "https://wknd.site/us/en/magazine/moab-mountain-biking",
+        "tags": ["Mountain Biking", "Utah", "Extreme Sports", "Desert"],
+        "publicationDate": "2025-10-01T00:00:00Z",
+        "site": "WKND", "source_apps": ["AEM"],
+        "pageTemplate": "Article Page",
+        "pageLanguage": "en_US"
+      },
+      {
+        "id": "wknd-005", "type": "article",
+        "title": "Skiing the Swiss Alps: Zermatt Edition",
+        "description": "Experience world-class skiing beneath the mighty Matterhorn in one of Europe's most legendary alpine resorts.",
+        "abstract": "Zermatt offers 360km of pistes, year-round skiing on the Theodul Glacier, and views of the Matterhorn from every run.",
+        "text": "Zermatt, nestled at 1,620 meters in the canton of Valais, is a car-free village that has been welcoming skiers since the 1860s. The resort's 360 kilometers of marked runs span three interconnected ski areas: Sunnegga-Rothorn, Gornergrat, and Klein Matterhorn/Cervinia. The Matterhorn Glacier Paradise at 3,883 meters is Europe's highest cable car station, offering summer skiing and panoramic views of 38 four-thousand-meter peaks. The run from Klein Matterhorn to Zermatt — a 2,200-meter vertical drop — is one of the longest in the Alps. Intermediate skiers will love the wide cruisers on Gornergrat, while advanced riders should tackle the Triftji bump run or the off-piste itinerary from Stockhorn. The village itself is pure Alpine charm: wooden chalets, horse-drawn carriages (no cars allowed), and world-class restaurants including the Michelin-starred After Seven. Don't miss the sunrise ski — first tracks on the Theodul Glacier as the Matterhorn turns pink with alpenglow is a once-in-a-lifetime experience.",
+        "url": "https://wknd.site/us/en/magazine/zermatt-skiing",
+        "tags": ["Skiing", "Switzerland", "Winter Sports", "Alps"],
+        "publicationDate": "2025-12-01T00:00:00Z",
+        "site": "WKND", "source_apps": ["AEM"],
+        "pageTemplate": "Article Page",
+        "pageLanguage": "en_US"
+      },
+      {
+        "id": "wknd-006", "type": "article",
+        "title": "Rock Climbing in Yosemite",
+        "description": "From beginner bouldering to the legendary El Capitan big walls, Yosemite is the birthplace and spiritual home of American rock climbing.",
+        "abstract": "Yosemite Valley's granite monoliths have defined rock climbing for over a century. Here's your guide to getting on the rock.",
+        "text": "Yosemite National Park in California's Sierra Nevada mountains is the most important climbing destination in the world. The Valley's sheer granite walls — El Capitan (3,000 feet), Half Dome (2,000 feet), and Cathedral Rocks — have shaped the evolution of rock climbing and continue to push the boundaries of what's possible. El Capitan's Nose route, first climbed by Warren Harding in 1958 over 47 days, is now speed-climbed in under 2 hours. Alex Honnold's free solo ascent of the Freerider route in 2017 is considered the greatest athletic achievement in the sport's history. For mere mortals, Yosemite offers incredible climbing at every level: Swan Slab for beginners learning to crack climb, Royal Arches for intermediate multi-pitch adventures, and the Rostrum for those ready to tackle a Grade V big wall. The bouldering in Camp 4 — home of the Midnight Lightning problem — is legendary. Best climbing seasons are spring and fall when temperatures are mild and the walls are dry.",
+        "url": "https://wknd.site/us/en/magazine/yosemite-rock-climbing",
+        "tags": ["Rock Climbing", "Yosemite", "Extreme Sports", "California"],
+        "publicationDate": "2025-06-15T00:00:00Z",
+        "site": "WKND", "source_apps": ["AEM"],
+        "pageTemplate": "Article Page",
+        "pageLanguage": "en_US"
+      },
+      {
+        "id": "wknd-007", "type": "article",
+        "title": "Costa Rica Jungle Trekking",
+        "description": "Navigate tropical rainforests, volcanic landscapes, and cloud forests in Central America's most biodiverse country.",
+        "abstract": "Costa Rica packs more biodiversity per square mile than almost anywhere on Earth. We trekked through its wildest corners.",
+        "text": "Costa Rica covers just 0.03% of the Earth's surface but contains nearly 6% of the world's biodiversity. The Corcovado National Park on the Osa Peninsula is the crown jewel — National Geographic called it 'the most biologically intense place on Earth.' A three-day trek from Carate to Sirena Station takes you through primary rainforest where you might spot all four Costa Rican monkey species, tapirs, scarlet macaws, and even jaguars. The trail involves river crossings that must be timed with the tides and jungle camping under a symphony of howler monkeys. Monteverde Cloud Forest Reserve offers mystical hiking through moss-draped canopy — the hanging bridges trail at 90 meters above the forest floor is unforgettable. For volcanic adventure, Arenal Volcano National Park features trails across old lava flows with hot springs for recovery. Rincón de la Vieja offers the most diverse terrain: volcanic mud pots, waterfalls, dry tropical forest, and a summit hike to the active crater at 1,916 meters.",
+        "url": "https://wknd.site/us/en/magazine/costa-rica-trekking",
+        "tags": ["Trekking", "Costa Rica", "Jungle", "Wildlife"],
+        "publicationDate": "2025-11-10T00:00:00Z",
+        "site": "WKND", "source_apps": ["AEM"],
+        "pageTemplate": "Article Page",
+        "pageLanguage": "en_US"
+      },
+      {
+        "id": "wknd-008", "type": "article",
+        "title": "San Diego: Surf, Skate & Sun",
+        "description": "Where laid-back California culture meets world-class waves and endless sunshine — San Diego is the ultimate action sports playground.",
+        "abstract": "San Diego combines perfect weather, incredible surf, legendary skateparks, and a thriving outdoor culture.",
+        "text": "San Diego sits at the sweet spot where Southern California's beach culture, Mexican-American heritage, and outdoor lifestyle converge. The city averages 266 sunny days per year and boasts 70 miles of coastline, making it an all-season playground. For surfers, Black's Beach beneath the Torrey Pines cliffs delivers the most powerful beach break in SoCal — heavy peaks that barrel on solid west swells. Windansea in La Jolla is the classic SoCal point break with a local crew that has surfed there since the 1940s. The beginner-friendly waves at Mission Beach and Pacific Beach offer mellow rides with a social atmosphere. On the skate side, Washington Street Skatepark downtown and the Memorial Bowl in Ocean Beach carry on San Diego's deep skateboarding heritage. For hikers, Torrey Pines State Natural Reserve overlooks the Pacific with trails through rare Torrey Pine groves. Sunset Cliffs at dusk — watching surfers line up below the ancient sandstone formations as the sky turns fire orange — is pure Southern California magic.",
+        "url": "https://wknd.site/us/en/magazine/san-diego-guide",
+        "tags": ["Surfing", "Skateboarding", "San Diego", "California"],
+        "publicationDate": "2025-05-20T00:00:00Z",
+        "site": "WKND", "source_apps": ["AEM"],
+        "pageTemplate": "Article Page",
+        "pageLanguage": "en_US"
+      }
+    ]
+  }
+}

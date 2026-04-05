@@ -2,21 +2,21 @@
   "sources": [
     {
       "id": "",
-      "name": "Sample Documents",
-      "description": "Sample source for indexing a local documents directory.",
-      "sourceDir": "/opt/documents",
-      "prefixFromReplace": "/opt/documents",
-      "prefixToReplace": "https://docs.example.com/files",
-      "site": "Sample",
+      "name": "Celestial Gallery",
+      "description": "Space photography and astronomical assets from the Celestial Gallery collection.",
+      "sourceDir": "/opt/celestial-gallery",
+      "prefixFromReplace": "/opt/celestial-gallery",
+      "prefixToReplace": "https://gallery.example.com/celestial",
+      "site": "Celestial Gallery",
       "locale": "en_US",
-      "contentType": "Static File",
+      "contentType": "Astronomical Image",
       "chunk": 100,
       "typeInId": false,
       "fileSizeField": "fileSize",
       "fileExtensionField": "fileExtension",
       "encoding": "UTF-8",
       "turSNSites": [
-        "Sample"
+        "celestial-gallery"
       ]
     }
   ]

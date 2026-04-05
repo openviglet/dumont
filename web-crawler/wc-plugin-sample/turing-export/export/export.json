@@ -1,0 +1,96 @@
+{
+  "se": [
+    {
+      "id": "00000000-0000-0000-0000-lucene000010",
+      "title": "Lucene (Wikipedia)",
+      "description": "Local Lucene instance for Wikipedia sample",
+      "enabled": 1,
+      "endpointUrl": "./turing-sample",
+      "turSEVendor": { "id": "LUCENE" }
+    }
+  ],
+  "snSites": [
+    {
+      "id": "a1b2c3d4-wiki-0001-abcd-wikipedia00001",
+      "name": "wikipedia",
+      "description": "A curated collection of Wikipedia articles. Demonstrates web-crawled content with tags, full text search, and faceted navigation.",
+      "rowsPerPage": 10,
+      "wildcardNoResults": 1, "wildcardAlways": 0, "exactMatch": 0,
+      "facet": true, "facetType": "AND", "facetItemType": "OR", "facetSort": "COUNT",
+      "hl": true, "hlPre": "<mark>", "hlPost": "</mark>",
+      "mlt": true, "itemsPerFacet": 50,
+      "spellCheck": 1, "spellCheckFixes": 3, "spotlightWithResults": 1,
+      "searchTemplate": "wikipedia", "thesaurus": false,
+      "defaultField": "_text_",
+      "defaultTitleField": "title",
+      "defaultTextField": "text",
+      "defaultDescriptionField": "abstract",
+      "defaultDateField": "publication_date",
+      "defaultImageField": "image",
+      "defaultURLField": "url",
+      "turSEInstance": "00000000-0000-0000-0000-lucene000010",
+      "turSNRankingExpressions": [], "turSNSiteMergeProviders": [],
+      "turSNSiteSpotlights": [
+        {
+          "id": "spot-wiki-001", "name": "Albert Einstein", "description": "Spotlight for Einstein",
+          "language": "en_US",
+          "turSNSiteSpotlightTerms": [{ "name": "einstein" }, { "name": "relativity" }],
+          "turSNSiteSpotlightDocuments": [
+            { "title": "Albert Einstein", "type": "article", "position": 1, "link": "/wiki/Albert_Einstein", "referenceId": "wiki-001" }
+          ]
+        }
+      ],
+      "turSNSiteCustomSorts": [],
+      "turSNSiteLocales": [
+        { "id": "loc-wiki-en", "language": "en_US", "core": "wikipedia_en_US" }
+      ],
+      "turSNSiteFields": [
+        { "id": "wf-001", "name": "title", "type": "TEXT", "multiValued": 0 },
+        { "id": "wf-002", "name": "abstract", "type": "TEXT", "multiValued": 0 },
+        { "id": "wf-003", "name": "text", "type": "TEXT", "multiValued": 0 },
+        { "id": "wf-004", "name": "url", "type": "STRING", "multiValued": 0 },
+        { "id": "wf-005", "name": "image", "type": "STRING", "multiValued": 0 },
+        { "id": "wf-006", "name": "tags", "type": "STRING", "multiValued": 1 },
+        { "id": "wf-007", "name": "publication_date", "type": "DATE", "multiValued": 0 },
+        { "id": "wf-008", "name": "modification_date", "type": "DATE", "multiValued": 0 },
+        { "id": "wf-009", "name": "site", "type": "STRING", "multiValued": 0 },
+        { "id": "wf-010", "name": "source_apps", "type": "STRING", "multiValued": 0 },
+        { "id": "wf-011", "name": "type", "type": "STRING", "multiValued": 0 }
+      ],
+      "turSNSiteFieldExts": [
+        {
+          "id": "wfe-001", "externalId": "wf-006", "name": "tags",
+          "description": "Tags", "facetName": "Tags",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "STRING", "multiValued": 1,
+          "facet": 1, "hl": 0, "mlt": 1, "enabled": 1, "required": 0,
+          "facetRange": "DISABLED", "facetType": "OR", "facetSort": "COUNT", "facetPosition": 1,
+          "secondaryFacet": false, "showAllFacetItems": true
+        },
+        {
+          "id": "wfe-002", "externalId": "wf-009", "name": "site",
+          "description": "Site", "facetName": "Site",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "STRING", "multiValued": 0,
+          "facet": 1, "hl": 0, "mlt": 0, "enabled": 1, "required": 0,
+          "facetRange": "DISABLED", "facetType": "AND", "facetSort": "COUNT", "facetPosition": 2,
+          "secondaryFacet": true, "showAllFacetItems": true
+        },
+        {
+          "id": "wfe-003", "externalId": "wf-001", "name": "title",
+          "description": "Title", "facetName": "Title",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "TEXT", "multiValued": 0,
+          "facet": 0, "hl": 1, "mlt": 1, "enabled": 1, "required": 1
+        },
+        {
+          "id": "wfe-004", "externalId": "wf-002", "name": "abstract",
+          "description": "Abstract", "facetName": "Abstract",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "TEXT", "multiValued": 0,
+          "facet": 0, "hl": 1, "mlt": 1, "enabled": 1, "required": 0
+        }
+      ]
+    }
+  ]
+}

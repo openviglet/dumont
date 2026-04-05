@@ -1,0 +1,94 @@
+{
+  "se": [
+    {
+      "id": "00000000-0000-0000-0000-lucene000040",
+      "title": "Lucene (Celestial Gallery)",
+      "description": "Local Lucene instance for Celestial Gallery sample",
+      "enabled": 1,
+      "endpointUrl": "./turing-sample",
+      "turSEVendor": { "id": "LUCENE" }
+    }
+  ],
+  "snSites": [
+    {
+      "id": "e5f6a7b8-space-0001-efab-celestial00001",
+      "name": "celestial-gallery",
+      "description": "A curated collection of space photography and astronomical objects. Demonstrates file-based asset indexing with metadata.",
+      "rowsPerPage": 10,
+      "wildcardNoResults": 1, "wildcardAlways": 0, "exactMatch": 0,
+      "facet": true, "facetType": "AND", "facetItemType": "OR", "facetSort": "COUNT",
+      "hl": true, "hlPre": "<mark>", "hlPost": "</mark>",
+      "mlt": true, "itemsPerFacet": 50,
+      "spellCheck": 1, "spellCheckFixes": 3, "spotlightWithResults": 1,
+      "searchTemplate": "celestial-gallery", "thesaurus": false,
+      "defaultField": "_text_",
+      "defaultTitleField": "title",
+      "defaultTextField": "text",
+      "defaultDescriptionField": "text",
+      "defaultDateField": "publication_date",
+      "defaultImageField": "image",
+      "defaultURLField": "url",
+      "turSEInstance": "00000000-0000-0000-0000-lucene000040",
+      "turSNRankingExpressions": [], "turSNSiteMergeProviders": [],
+      "turSNSiteSpotlights": [
+        {
+          "id": "spot-cel-001", "name": "Nebula", "description": "Spotlight for nebula searches",
+          "language": "en_US",
+          "turSNSiteSpotlightTerms": [{ "name": "nebula" }, { "name": "pillars of creation" }],
+          "turSNSiteSpotlightDocuments": [
+            { "title": "Pillars of Creation", "type": "image", "position": 1, "link": "/celestial/pillars-of-creation", "referenceId": "cel-001" }
+          ]
+        }
+      ],
+      "turSNSiteCustomSorts": [],
+      "turSNSiteLocales": [
+        { "id": "loc-cel-en", "language": "en_US", "core": "celestial-gallery_en_US" }
+      ],
+      "turSNSiteFields": [
+        { "id": "sf-001", "name": "title", "type": "TEXT", "multiValued": 0 },
+        { "id": "sf-002", "name": "text", "type": "TEXT", "multiValued": 0 },
+        { "id": "sf-003", "name": "url", "type": "STRING", "multiValued": 0 },
+        { "id": "sf-004", "name": "image", "type": "STRING", "multiValued": 0 },
+        { "id": "sf-005", "name": "fileSize", "type": "STRING", "multiValued": 0 },
+        { "id": "sf-006", "name": "fileExtension", "type": "STRING", "multiValued": 0 },
+        { "id": "sf-007", "name": "site", "type": "STRING", "multiValued": 0 },
+        { "id": "sf-008", "name": "publication_date", "type": "DATE", "multiValued": 0 },
+        { "id": "sf-009", "name": "type", "type": "STRING", "multiValued": 0 }
+      ],
+      "turSNSiteFieldExts": [
+        {
+          "id": "sfe-001", "externalId": "sf-006", "name": "fileExtension",
+          "description": "File Type", "facetName": "File Type",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "STRING", "multiValued": 0,
+          "facet": 1, "hl": 0, "mlt": 0, "enabled": 1, "required": 0,
+          "facetRange": "DISABLED", "facetType": "OR", "facetSort": "COUNT", "facetPosition": 1,
+          "secondaryFacet": false, "showAllFacetItems": true
+        },
+        {
+          "id": "sfe-002", "externalId": "sf-007", "name": "site",
+          "description": "Collection", "facetName": "Collection",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "STRING", "multiValued": 0,
+          "facet": 1, "hl": 0, "mlt": 0, "enabled": 1, "required": 0,
+          "facetRange": "DISABLED", "facetType": "AND", "facetSort": "COUNT", "facetPosition": 2,
+          "secondaryFacet": true, "showAllFacetItems": true
+        },
+        {
+          "id": "sfe-003", "externalId": "sf-001", "name": "title",
+          "description": "Title", "facetName": "Title",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "TEXT", "multiValued": 0,
+          "facet": 0, "hl": 1, "mlt": 1, "enabled": 1, "required": 1
+        },
+        {
+          "id": "sfe-004", "externalId": "sf-002", "name": "text",
+          "description": "Description", "facetName": "Description",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "TEXT", "multiValued": 0,
+          "facet": 0, "hl": 1, "mlt": 1, "enabled": 1, "required": 0
+        }
+      ]
+    }
+  ]
+}

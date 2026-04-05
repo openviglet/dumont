@@ -1,0 +1,94 @@
+{
+  "wikipedia": {
+    "en_US": [
+      {
+        "id": "wiki-001", "type": "article",
+        "title": "Albert Einstein",
+        "abstract": "Albert Einstein was a German-born theoretical physicist who developed the theory of relativity, one of the two pillars of modern physics. His work is also known for its influence on the philosophy of science.",
+        "text": "Albert Einstein (14 March 1879 – 18 April 1955) was a German-born theoretical physicist who is widely held to be one of the greatest and most influential scientists of all time. He is best known for developing the theory of relativity, but he also made important contributions to quantum mechanics. His mass–energy equivalence formula E = mc², which arises from relativity theory, has been called 'the world's most famous equation'. He received the 1921 Nobel Prize in Physics 'for his services to theoretical physics, and especially for his discovery of the law of the photoelectric effect', a pivotal step in the development of quantum theory. Einstein published more than 300 scientific papers and more than 150 non-scientific works. His intellectual achievements and originality made 'Einstein' synonymous with 'genius'. Born in the German Empire, he moved to Switzerland in 1895, renouncing his German citizenship the following year. In 1933, while visiting the United States, Adolf Hitler came to power and Einstein did not return to Germany.",
+        "url": "https://en.wikipedia.org/wiki/Albert_Einstein",
+        "tags": ["Physics", "Nobel laureates", "German scientists", "Theory of relativity", "20th-century scientists"],
+        "publication_date": "2001-11-01T00:00:00Z",
+        "modification_date": "2026-03-15T00:00:00Z",
+        "site": "Wikipedia", "source_apps": "WEB-CRAWLER"
+      },
+      {
+        "id": "wiki-002", "type": "article",
+        "title": "Great Wall of China",
+        "abstract": "The Great Wall of China is a series of fortifications that were built across the historical northern borders of ancient Chinese states and Imperial China as protection against nomadic groups from the Eurasian Steppe.",
+        "text": "The Great Wall of China is a series of fortifications that were built across the historical northern borders of ancient Chinese states and Imperial China. The total length of all sections ever built is more than 21,196 kilometers (13,170 miles). The best-known sections were built by the Ming dynasty (1368–1644). The wall's primary purpose was to protect the Chinese Empire from invasions and raids by nomadic groups from the north. Several walls were built from as early as the 7th century BC, with selective stretches later joined by Qin Shi Huang (220–206 BC), the first emperor of China. Little of the Qin wall remains. The Great Wall has been rebuilt, maintained, and enhanced over various dynasties. The majority of the existing wall is from the Ming Dynasty. Apart from defense, other purposes include border controls, allowing the imposition of duties on goods transported along the Silk Road, regulation of trade, and encouraging immigration. The Great Wall is generally recognized as one of the most impressive architectural feats in history and was declared a UNESCO World Heritage Site in 1987.",
+        "url": "https://en.wikipedia.org/wiki/Great_Wall_of_China",
+        "tags": ["World Heritage Sites", "Chinese architecture", "Ancient fortifications", "Ming dynasty", "Tourist attractions"],
+        "publication_date": "2001-10-15T00:00:00Z",
+        "modification_date": "2026-02-20T00:00:00Z",
+        "site": "Wikipedia", "source_apps": "WEB-CRAWLER"
+      },
+      {
+        "id": "wiki-003", "type": "article",
+        "title": "Apollo 11",
+        "abstract": "Apollo 11 was the American spaceflight that first landed humans on the Moon. Commander Neil Armstrong and lunar module pilot Buzz Aldrin landed the Apollo Lunar Module Eagle on July 20, 1969.",
+        "text": "Apollo 11 (July 16–24, 1969) was the American spaceflight that first landed humans on the Moon. Commander Neil Armstrong and lunar module pilot Buzz Aldrin formed the American crew that landed the Apollo Lunar Module Eagle on July 20, 1969, at 20:17 UTC. Armstrong became the first person to step onto the lunar surface six hours and 39 minutes later, and Aldrin joined him 19 minutes after that. They spent about two and a quarter hours together exploring the site they named Tranquility Base upon landing. Armstrong and Aldrin collected 47.5 pounds of lunar material to bring back to Earth as pilot Michael Collins flew the Command Module Columbia in lunar orbit. Armstrong and Aldrin spent 21 hours and 36 minutes on the lunar surface at Tranquility Base before lifting off to rejoin Columbia in lunar orbit. The Apollo 11 mission was a triumph of engineering, human courage, and Cold War ambition. President Kennedy had declared in 1961 that America would land a man on the Moon before the decade was out. With just five months to spare, NASA achieved this extraordinary goal.",
+        "url": "https://en.wikipedia.org/wiki/Apollo_11",
+        "tags": ["Space exploration", "NASA", "Moon landings", "1969 events", "Cold War"],
+        "publication_date": "2001-09-20T00:00:00Z",
+        "modification_date": "2026-01-10T00:00:00Z",
+        "site": "Wikipedia", "source_apps": "WEB-CRAWLER"
+      },
+      {
+        "id": "wiki-004", "type": "article",
+        "title": "Amazon Rainforest",
+        "abstract": "The Amazon rainforest is a moist broadleaf tropical rainforest in the Amazon biome that covers most of the Amazon basin of South America. It is the world's largest tropical rainforest, covering over 5.5 million square kilometers.",
+        "text": "The Amazon rainforest, also called Amazon jungle or Amazonia, is a moist broadleaf tropical rainforest in the Amazon biome that covers most of the Amazon basin of South America. This basin encompasses 7,000,000 km², of which 5,500,000 km² are covered by the rainforest. This region includes territory belonging to nine nations, with the majority in Brazil (60%), followed by Peru (13%) and with minor amounts in Colombia, Venezuela, Ecuador, Bolivia, Guyana, Suriname, and French Guiana. The Amazon represents over half of the planet's remaining rainforests, and comprises the largest and most biodiverse tract of tropical rainforest in the world, with an estimated 390 billion individual trees in about 16,000 species. More than 30 million people of 350 different ethnic groups live in the Amazon, which is subdivided into 3,344 formally acknowledged indigenous territories. The Amazon rainforest is crucial to the global climate system, acting as a massive carbon sink. Scientists estimate that it stores between 150 and 200 billion tons of carbon. Deforestation threatens this vital ecosystem.",
+        "url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+        "tags": ["Rainforests", "Ecology", "South America", "Biodiversity", "Climate change"],
+        "publication_date": "2002-01-10T00:00:00Z",
+        "modification_date": "2026-03-01T00:00:00Z",
+        "site": "Wikipedia", "source_apps": "WEB-CRAWLER"
+      },
+      {
+        "id": "wiki-005", "type": "article",
+        "title": "Leonardo da Vinci",
+        "abstract": "Leonardo di ser Piero da Vinci was an Italian polymath of the High Renaissance who was active as a painter, draughtsman, engineer, scientist, theorist, sculptor, and architect.",
+        "text": "Leonardo di ser Piero da Vinci (15 April 1452 – 2 May 1519) was an Italian polymath of the High Renaissance. He is widely considered one of the most diversely talented individuals to have ever lived. Leonardo is identified as one of the greatest painters in the history of art and is often credited as the founder of the High Renaissance. Despite having many lost works and fewer than 25 major works attributed to him, including numerous unfinished works, he created some of the most influential paintings in Western art. His magnum opus, the Mona Lisa, is his best known work and is the most famous painting in the world. The Last Supper is the most reproduced religious painting of all time. Leonardo was also revered for his technological ingenuity. He conceptualized flying machines, a type of armored fighting vehicle, concentrated solar power, a ratio machine, and the double hull. His notebooks reveal a curious mind and sharp intellect, studying anatomy, astronomy, botany, cartography, painting, and paleontology. He is regarded as the prime exemplar of the 'Universal Genius' or 'Renaissance Man', an individual of unquenchable curiosity and feverishly inventive imagination.",
+        "url": "https://en.wikipedia.org/wiki/Leonardo_da_Vinci",
+        "tags": ["Renaissance artists", "Italian painters", "Inventors", "Polymath", "Art history"],
+        "publication_date": "2001-08-15T00:00:00Z",
+        "modification_date": "2026-02-28T00:00:00Z",
+        "site": "Wikipedia", "source_apps": "WEB-CRAWLER"
+      },
+      {
+        "id": "wiki-006", "type": "article",
+        "title": "Quantum Computing",
+        "abstract": "Quantum computing is a type of computation that harnesses quantum mechanical phenomena such as superposition, interference, and entanglement. Unlike classical computers that use bits, quantum computers use qubits.",
+        "text": "Quantum computing is a type of computation that harnesses quantum mechanical phenomena such as superposition, interference, and entanglement to perform calculations. Devices that perform quantum computations are known as quantum computers. While current quantum computers are too small to outperform classical computers for most practical applications, larger quantum computers are predicted to be capable of solving certain computational problems—such as integer factorization using Shor's algorithm—substantially faster than classical computers. The study of quantum computing is a subfield of quantum information science. The field of quantum computing started in the 1980s, when physicist Richard Feynman and Yuri Manin proposed the idea of a quantum computer. In 1994, Peter Shor developed a quantum algorithm for factoring integers that could theoretically factor large numbers exponentially faster than any known classical algorithm. Google's Sycamore processor achieved quantum supremacy in 2019 by performing a specific task in 200 seconds that would take a classical supercomputer approximately 10,000 years. IBM, Google, Microsoft, and startups like IonQ and Rigetti are racing to build practical quantum computers.",
+        "url": "https://en.wikipedia.org/wiki/Quantum_computing",
+        "tags": ["Computer science", "Quantum mechanics", "Emerging technologies", "Physics", "Cryptography"],
+        "publication_date": "2003-05-01T00:00:00Z",
+        "modification_date": "2026-03-20T00:00:00Z",
+        "site": "Wikipedia", "source_apps": "WEB-CRAWLER"
+      },
+      {
+        "id": "wiki-007", "type": "article",
+        "title": "Machu Picchu",
+        "abstract": "Machu Picchu is a 15th-century Inca citadel located in the Eastern Cordillera of southern Peru on a 2,430-meter mountain ridge. It was built as an estate for the Inca emperor Pachacuti.",
+        "text": "Machu Picchu is a 15th-century Inca citadel located in the Eastern Cordillera of southern Peru on a 2,430-meter (7,970-foot) mountain ridge. It is located in the Machupicchu District within Urubamba Province above the Sacred Valley, which is 80 kilometres northwest of Cusco. Most archaeologists believe that Machu Picchu was constructed as an estate for the Inca emperor Pachacuti (1438–1472). Often mistakenly referred to as the 'Lost City of the Incas', it is the most familiar icon of Inca civilization. The Incas built the estate around 1450 but abandoned it a century later, at the time of the Spanish conquest. Although known locally, it was unknown to the outside world before American historian Hiram Bingham brought it to international attention in 1911. Machu Picchu was built in the classical Inca style, with polished dry-stone walls. Its three primary structures are the Intihuatana (ritual stone associated with the sun), the Temple of the Sun, and the Room of the Three Windows. It was declared a UNESCO World Heritage Site in 1983 and a Peruvian Historical Sanctuary.",
+        "url": "https://en.wikipedia.org/wiki/Machu_Picchu",
+        "tags": ["Inca civilization", "World Heritage Sites", "Peru", "Archaeological sites", "Tourist attractions"],
+        "publication_date": "2002-03-01T00:00:00Z",
+        "modification_date": "2026-01-25T00:00:00Z",
+        "site": "Wikipedia", "source_apps": "WEB-CRAWLER"
+      },
+      {
+        "id": "wiki-008", "type": "article",
+        "title": "Deep Ocean Exploration",
+        "abstract": "Deep-sea exploration is the investigation of physical, chemical, and biological conditions on the sea bed and in the deep ocean for scientific or commercial purposes.",
+        "text": "Deep-sea exploration is the investigation of physical, chemical, and biological conditions on the sea bed and in the deep ocean. Deep-sea exploration is considered a relatively recent human activity compared to other areas of geophysical research, as the deeper depths of the sea have been explored only during the last few decades. The ocean depths still remain as one of the last great frontiers of exploration on Earth. Approximately 80% of the ocean floor remains unmapped and unexplored. The Mariana Trench, located in the western Pacific Ocean, is the deepest known part of the world's oceans, reaching a depth of approximately 11,034 meters (36,201 feet) at the Challenger Deep. In 1960, Jacques Piccard and Don Walsh descended to the bottom of the Challenger Deep in the bathyscaphe Trieste. In 2012, filmmaker James Cameron made a solo descent. Deep-sea exploration has revealed astonishing ecosystems: hydrothermal vents supporting life without sunlight, bioluminescent organisms, and species adapted to crushing pressures. The discoveries have transformed our understanding of the origins of life and the potential for life on other planets.",
+        "url": "https://en.wikipedia.org/wiki/Deep-sea_exploration",
+        "tags": ["Oceanography", "Marine biology", "Exploration", "Science", "Mariana Trench"],
+        "publication_date": "2004-06-15T00:00:00Z",
+        "modification_date": "2026-02-10T00:00:00Z",
+        "site": "Wikipedia", "source_apps": "WEB-CRAWLER"
+      }
+    ]
+  }
+}

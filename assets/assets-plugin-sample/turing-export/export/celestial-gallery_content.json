@@ -1,0 +1,86 @@
+{
+  "celestial-gallery": {
+    "en_US": [
+      {
+        "id": "cel-001", "type": "image",
+        "title": "Pillars of Creation — Eagle Nebula",
+        "text": "The Pillars of Creation are towering columns of interstellar gas and dust in the Eagle Nebula (M16), located approximately 6,500 light-years from Earth in the constellation Serpens. First photographed by the Hubble Space Telescope in 1995, this image became one of the most iconic photographs in the history of astronomy. The pillars are composed primarily of molecular hydrogen gas and dust, and are in the process of being eroded by photoevaporation from the ultraviolet light of nearby hot stars. New stars are being born inside the pillars — stellar nurseries hidden within the dense gas columns. The James Webb Space Telescope captured a stunning new view in 2022, revealing never-before-seen details in infrared light, including newborn stars that are invisible in the Hubble image. The tallest pillar is approximately 4 light-years long — roughly the distance from our Sun to the nearest star, Alpha Centauri.",
+        "url": "https://gallery.example.com/celestial/pillars-of-creation.tiff",
+        "fileSize": "245760000",
+        "fileExtension": "tiff",
+        "site": "Celestial Gallery",
+        "publication_date": "1995-04-01T00:00:00Z"
+      },
+      {
+        "id": "cel-002", "type": "image",
+        "title": "Andromeda Galaxy — Our Cosmic Neighbor",
+        "text": "The Andromeda Galaxy (M31) is the nearest large spiral galaxy to the Milky Way, located approximately 2.537 million light-years from Earth. It is the most distant object visible to the naked eye under dark skies, appearing as a faint smudge about six times the width of the full Moon. Andromeda contains roughly one trillion stars — more than twice the number in our Milky Way — and spans approximately 220,000 light-years in diameter. The galaxy is approaching the Milky Way at about 110 kilometers per second; the two galaxies are expected to collide and merge in approximately 4.5 billion years, forming a giant elliptical galaxy nicknamed 'Milkomeda.' The Hubble Space Telescope's panoramic mosaic of Andromeda, released in 2015, is the largest image ever assembled by Hubble — containing 1.5 billion pixels and resolving over 100 million individual stars.",
+        "url": "https://gallery.example.com/celestial/andromeda-galaxy.tiff",
+        "fileSize": "512000000",
+        "fileExtension": "tiff",
+        "site": "Celestial Gallery",
+        "publication_date": "2015-01-05T00:00:00Z"
+      },
+      {
+        "id": "cel-003", "type": "image",
+        "title": "Saturn's Rings — The Jewel of the Solar System",
+        "text": "Saturn's ring system is the most extensive and complex of any planet in our solar system. The rings are composed primarily of water ice particles, ranging in size from tiny grains to boulders as large as houses. The main rings span approximately 282,000 kilometers from edge to edge — nearly three-quarters of the distance between Earth and the Moon — yet they are remarkably thin, averaging only about 10 meters in thickness. Cassini spacecraft observations (2004-2017) revealed incredible detail: gravitational interactions with Saturn's moons create waves, gaps, and intricate structures including the Encke Gap, the Cassini Division, and propeller-shaped disturbances caused by embedded moonlets. The rings are relatively young, estimated at only 100 million to 400 million years old — the dinosaurs may have looked up at a ringless Saturn. NASA's research suggests the rings are gradually disappearing, pulled into Saturn as 'ring rain.'",
+        "url": "https://gallery.example.com/celestial/saturn-rings.png",
+        "fileSize": "189440000",
+        "fileExtension": "png",
+        "site": "Celestial Gallery",
+        "publication_date": "2017-09-15T00:00:00Z"
+      },
+      {
+        "id": "cel-004", "type": "image",
+        "title": "Crab Nebula — Supernova Remnant",
+        "text": "The Crab Nebula (M1) is the remnant of a supernova explosion that was observed by Chinese and Japanese astronomers in 1054 AD. Located about 6,500 light-years from Earth in the constellation Taurus, this expanding cloud of gas and dust is powered by a rapidly spinning neutron star (pulsar) at its center. The Crab Pulsar rotates approximately 30 times per second, emitting beams of radiation from radio waves to gamma rays. The nebula is approximately 11 light-years across and is expanding at a rate of about 1,500 kilometers per second. The Crab Nebula was the first astronomical object identified with a historical supernova explosion and has been studied at every wavelength of light, making it one of the most thoroughly observed objects in the sky outside our solar system. Its complex filamentary structure contains heavy elements forged in the supernova — the raw materials for future stars and planets.",
+        "url": "https://gallery.example.com/celestial/crab-nebula.fits",
+        "fileSize": "327680000",
+        "fileExtension": "fits",
+        "site": "Celestial Gallery",
+        "publication_date": "2005-12-01T00:00:00Z"
+      },
+      {
+        "id": "cel-005", "type": "image",
+        "title": "Pale Blue Dot — Earth from 6 Billion Kilometers",
+        "text": "The Pale Blue Dot is a photograph of Earth taken on February 14, 1990, by the Voyager 1 space probe from a record distance of about 6 billion kilometers (40.5 AU) as it was leaving the solar system. In the photograph, Earth appears as a tiny speck approximately 0.12 pixels in size, caught in a scattered ray of sunlight. The image was taken at the suggestion of astronomer Carl Sagan, who later wrote: 'Look again at that dot. That is here. That is home. That is us. On it everyone you love, everyone you know, everyone you ever heard of, every human being who ever was, lived out their lives.' The photograph became one of the most iconic images in the history of space exploration and inspired Sagan's 1994 book of the same name. In 2020, NASA released a reprocessed version of the image using modern digital techniques, providing a cleaner view while preserving the original composition.",
+        "url": "https://gallery.example.com/celestial/pale-blue-dot.png",
+        "fileSize": "5242880",
+        "fileExtension": "png",
+        "site": "Celestial Gallery",
+        "publication_date": "1990-02-14T00:00:00Z"
+      },
+      {
+        "id": "cel-006", "type": "image",
+        "title": "JWST Deep Field — The Deepest View of the Universe",
+        "text": "The James Webb Space Telescope's First Deep Field, released on July 11, 2022, is the deepest and sharpest infrared image of the distant universe ever taken. The image shows the galaxy cluster SMACS 0723 as it appeared 4.6 billion years ago, with the cluster's combined mass acting as a gravitational lens that magnifies much more distant galaxies behind it. Some of the galaxies visible in this image appeared when the universe was less than one billion years old. The image covers a patch of sky approximately the size of a grain of sand held at arm's length, yet contains thousands of galaxies, including the faintest objects ever observed in the infrared. JWST's 6.5-meter gold-plated beryllium primary mirror and its position at the L2 Lagrange point, 1.5 million kilometers from Earth, enable this unprecedented sensitivity. The deep field image took 12.5 hours of exposure time — Hubble required weeks to achieve a similar depth at shorter wavelengths.",
+        "url": "https://gallery.example.com/celestial/jwst-deep-field.tiff",
+        "fileSize": "786432000",
+        "fileExtension": "tiff",
+        "site": "Celestial Gallery",
+        "publication_date": "2022-07-11T00:00:00Z"
+      },
+      {
+        "id": "cel-007", "type": "image",
+        "title": "Mars Olympus Mons — The Solar System's Tallest Volcano",
+        "text": "Olympus Mons on Mars is the tallest known volcano and mountain in the solar system. It rises approximately 21.9 kilometers (13.6 miles) above the surrounding Martian plain — nearly 2.5 times the height of Mount Everest above sea level. The volcano's base spans approximately 600 kilometers in diameter, roughly the size of France. Olympus Mons is a shield volcano, formed by highly fluid lava flows that gradually built up over millions of years. The caldera at its summit is 80 kilometers wide and contains six nested collapse craters. The enormous size of Olympus Mons is partly due to the lack of plate tectonics on Mars — the volcano sits over a stationary hotspot, allowing lava to accumulate in one location for billions of years. On Earth, the tectonic plates move over hotspots, creating chains of smaller volcanoes like the Hawaiian Islands. Mars Reconnaissance Orbiter and European Space Agency's Mars Express have captured detailed images revealing lava flows estimated to be only 2 million years old.",
+        "url": "https://gallery.example.com/celestial/olympus-mons.jpg",
+        "fileSize": "143360000",
+        "fileExtension": "jpg",
+        "site": "Celestial Gallery",
+        "publication_date": "2010-06-01T00:00:00Z"
+      },
+      {
+        "id": "cel-008", "type": "image",
+        "title": "Black Hole M87* — The First Image of a Shadow",
+        "text": "On April 10, 2019, the Event Horizon Telescope (EHT) collaboration released the first-ever direct image of a black hole's shadow — the supermassive black hole at the center of the galaxy Messier 87, located 55 million light-years from Earth. The black hole, designated M87*, has a mass of 6.5 billion times that of our Sun. The image shows a bright ring of superheated gas orbiting the black hole at nearly the speed of light, surrounding a dark central region — the black hole's 'shadow,' where light cannot escape. The image was captured using a planet-wide network of eight radio telescopes synchronized by atomic clocks, effectively creating an Earth-sized virtual telescope. The data required — 5 petabytes — was so vast it had to be physically shipped on hard drives. This achievement confirmed predictions of Einstein's general relativity and opened a new era of black hole science. In 2022, the EHT released an image of Sagittarius A*, the black hole at the center of our own Milky Way galaxy.",
+        "url": "https://gallery.example.com/celestial/m87-black-hole.fits",
+        "fileSize": "409600000",
+        "fileExtension": "fits",
+        "site": "Celestial Gallery",
+        "publication_date": "2019-04-10T00:00:00Z"
+      }
+    ]
+  }
+}

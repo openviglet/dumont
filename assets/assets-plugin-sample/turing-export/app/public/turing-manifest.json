@@ -1,0 +1,11 @@
+{
+  "name": "celestial-gallery",
+  "version": "2026.2",
+  "author": "Alexandre Oliveira",
+  "repository": "https://github.com/openviglet/turing",
+  "description": "celestial-gallery — Turing ES example application",
+  "snSite": "celestial-gallery",
+  "locale": "en_US",
+  "framework": "react",
+  "buildTool": "vite"
+}

@@ -23,16 +23,16 @@
     },
     {
       "id": "",
-      "name": "Sample PostgreSQL",
-      "description": "Example PostgreSQL source for importing articles. Update the connection settings before use.",
+      "name": "Retro Arcade Games",
+      "description": "Classic arcade game catalog from a PostgreSQL database.",
       "driver": "org.postgresql.Driver",
-      "url": "jdbc:postgresql://localhost:5432/mydb",
+      "url": "jdbc:postgresql://localhost:5432/arcadedb",
       "dbUsername": "postgres",
       "dbPassword": "changeme",
-      "query": "SELECT id, title, content AS text, summary AS abstract, author, created_at AS publication_date, updated_at AS modification_date, category AS tags FROM articles",
-      "site": "Articles",
+      "query": "SELECT id, title, description AS text, summary AS abstract, developer AS author, release_date AS publication_date, updated_at AS modification_date, genres AS tags FROM games",
+      "site": "Retro Arcade",
       "locale": "en_US",
-      "contentType": "Article",
+      "contentType": "Game",
       "chunk": 50,
       "typeInId": false,
       "multiValuedSeparator": ",",
@@ -41,7 +41,7 @@
       "encoding": "UTF-8",
       "maxContentMegaByteSize": 10,
       "turSNSites": [
-        "Articles"
+        "retro-arcade"
       ]
     }
   ]

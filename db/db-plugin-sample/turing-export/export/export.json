@@ -1,0 +1,96 @@
+{
+  "se": [
+    {
+      "id": "00000000-0000-0000-0000-lucene000030",
+      "title": "Lucene (Retro Arcade)",
+      "description": "Local Lucene instance for Retro Arcade sample",
+      "enabled": 1,
+      "endpointUrl": "./turing-sample",
+      "turSEVendor": { "id": "LUCENE" }
+    }
+  ],
+  "snSites": [
+    {
+      "id": "d4e5f6a7-arcade-0001-defa-arcade000001",
+      "name": "retro-arcade",
+      "description": "A nostalgic catalog of classic arcade games from the golden age of gaming.",
+      "rowsPerPage": 10,
+      "wildcardNoResults": 1, "wildcardAlways": 0, "exactMatch": 0,
+      "facet": true, "facetType": "AND", "facetItemType": "OR", "facetSort": "COUNT",
+      "hl": true, "hlPre": "<mark>", "hlPost": "</mark>",
+      "mlt": true, "itemsPerFacet": 50,
+      "spellCheck": 1, "spellCheckFixes": 3, "spotlightWithResults": 1,
+      "searchTemplate": "retro-arcade", "thesaurus": false,
+      "defaultField": "_text_",
+      "defaultTitleField": "title",
+      "defaultTextField": "text",
+      "defaultDescriptionField": "abstract",
+      "defaultDateField": "publication_date",
+      "defaultImageField": "image",
+      "defaultURLField": "url",
+      "turSEInstance": "00000000-0000-0000-0000-lucene000030",
+      "turSNRankingExpressions": [], "turSNSiteMergeProviders": [],
+      "turSNSiteSpotlights": [
+        {
+          "id": "spot-arc-001", "name": "Pac-Man", "description": "Spotlight for Pac-Man",
+          "language": "en_US",
+          "turSNSiteSpotlightTerms": [{ "name": "pac-man" }, { "name": "pacman" }, { "name": "maze" }],
+          "turSNSiteSpotlightDocuments": [
+            { "title": "Pac-Man", "type": "game", "position": 1, "link": "/games/pac-man", "referenceId": "arc-001" }
+          ]
+        }
+      ],
+      "turSNSiteCustomSorts": [],
+      "turSNSiteLocales": [
+        { "id": "loc-arc-en", "language": "en_US", "core": "retro-arcade_en_US" }
+      ],
+      "turSNSiteFields": [
+        { "id": "rf-001", "name": "title", "type": "TEXT", "multiValued": 0 },
+        { "id": "rf-002", "name": "abstract", "type": "TEXT", "multiValued": 0 },
+        { "id": "rf-003", "name": "text", "type": "TEXT", "multiValued": 0 },
+        { "id": "rf-004", "name": "url", "type": "STRING", "multiValued": 0 },
+        { "id": "rf-005", "name": "image", "type": "STRING", "multiValued": 0 },
+        { "id": "rf-006", "name": "tags", "type": "STRING", "multiValued": 1 },
+        { "id": "rf-007", "name": "author", "type": "STRING", "multiValued": 0 },
+        { "id": "rf-008", "name": "publication_date", "type": "DATE", "multiValued": 0 },
+        { "id": "rf-009", "name": "modification_date", "type": "DATE", "multiValued": 0 },
+        { "id": "rf-010", "name": "site", "type": "STRING", "multiValued": 0 },
+        { "id": "rf-011", "name": "type", "type": "STRING", "multiValued": 0 }
+      ],
+      "turSNSiteFieldExts": [
+        {
+          "id": "rfe-001", "externalId": "rf-006", "name": "tags",
+          "description": "Genre", "facetName": "Genre",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "STRING", "multiValued": 1,
+          "facet": 1, "hl": 0, "mlt": 1, "enabled": 1, "required": 0,
+          "facetRange": "DISABLED", "facetType": "OR", "facetSort": "COUNT", "facetPosition": 1,
+          "secondaryFacet": false, "showAllFacetItems": true
+        },
+        {
+          "id": "rfe-002", "externalId": "rf-007", "name": "author",
+          "description": "Developer", "facetName": "Developer",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "STRING", "multiValued": 0,
+          "facet": 1, "hl": 0, "mlt": 1, "enabled": 1, "required": 0,
+          "facetRange": "DISABLED", "facetType": "OR", "facetSort": "COUNT", "facetPosition": 2,
+          "secondaryFacet": false, "showAllFacetItems": true
+        },
+        {
+          "id": "rfe-003", "externalId": "rf-001", "name": "title",
+          "description": "Title", "facetName": "Title",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "TEXT", "multiValued": 0,
+          "facet": 0, "hl": 1, "mlt": 1, "enabled": 1, "required": 1
+        },
+        {
+          "id": "rfe-004", "externalId": "rf-002", "name": "abstract",
+          "description": "Abstract", "facetName": "Abstract",
+          "facetLocales": [], "customFacets": [],
+          "snType": "SE", "type": "TEXT", "multiValued": 0,
+          "facet": 0, "hl": 1, "mlt": 1, "enabled": 1, "required": 0
+        }
+      ]
+    }
+  ]
+}
