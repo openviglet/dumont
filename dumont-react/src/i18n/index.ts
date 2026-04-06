@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
+import { registerVigTranslations } from "@openviglet/viglet-design-system";
 
 import enIntegration from "./locales/en/integration.json";
 import ptIntegration from "./locales/pt/integration.json";
@@ -31,5 +32,7 @@ i18n
       caches: ["localStorage"],
     },
   });
+
+registerVigTranslations(i18n);
 
 export default i18n;
