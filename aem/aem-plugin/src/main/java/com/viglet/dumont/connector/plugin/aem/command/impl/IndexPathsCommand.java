@@ -68,7 +68,11 @@ public class IndexPathsCommand implements IndexingCommand {
         log.debug("Processing path: {}", path);
 
         if (event.equals(DumAemEvent.DEINDEXING)) {
-            createDeIndexJob(path);
+            if (session.isRecursive()) {
+                deindexRecursive(path);
+            } else {
+                createDeIndexJob(path);
+            }
             return;
         }
 
@@ -76,6 +80,29 @@ public class IndexPathsCommand implements IndexingCommand {
                 .ifPresentOrElse(
                         infinityJson -> nodeNavigator.navigateAndIndex(session, path, infinityJson),
                         () -> createDeIndexJob(path));
+    }
+
+    /**
+     * De-indexes a path and all its children recursively by collecting all
+     * accessible paths from the AEM content tree and creating de-index jobs for each.
+     */
+    private void deindexRecursive(String path) {
+        log.info("Recursive deindexing for path: {}", path);
+        createDeIndexJob(path);
+
+        DumAemCommonsUtils.getInfinityJson(path, session.getConfiguration(), false)
+                .ifPresent(infinityJson -> {
+                    List<String> childPaths = nodeNavigator.collectAccessiblePaths(
+                            session, path, infinityJson);
+                    childPaths.stream()
+                            .filter(childPath -> !childPath.equals(path))
+                            .forEach(childPath -> {
+                                log.debug("Recursive deindex child: {}", childPath);
+                                createDeIndexJob(childPath);
+                            });
+                    log.info("Recursive deindexing completed: {} paths for root: {}",
+                            childPaths.size() + 1, path);
+                });
     }
 
     /**

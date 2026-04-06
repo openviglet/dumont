@@ -1,5 +1,9 @@
 server:
   port: 30130
+  servlet:
+    session:
+      cookie:
+        name: DUMJSESSIONID
 
 turing:
   url: http://localhost:2700
