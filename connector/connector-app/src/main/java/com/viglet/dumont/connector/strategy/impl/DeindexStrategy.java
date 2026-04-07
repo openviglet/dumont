@@ -20,6 +20,7 @@ import static com.viglet.dumont.commons.indexing.DumIndexingStatus.DEINDEXED;
 import static com.viglet.dumont.connector.commons.logging.DumConnectorLoggingUtils.setSuccessStatus;
 import static com.viglet.turing.client.sn.job.TurSNJobAction.DELETE;
 
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.batch.JobItemBatchProcessor;
@@ -46,8 +47,13 @@ public class DeindexStrategy implements JobProcessingStrategy {
 
     @Override
     public void process(DumJobItemWithSession jobItem, JobItemBatchProcessor batchProcessor) {
-        // Delete from indexing service
-        indexingService.deindexedStatus(jobItem);
+        try {
+            // Delete from indexing service
+            indexingService.deindexedStatus(jobItem);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            log.warn("Record already deleted by another transaction for contentId: {}",
+                    jobItem.turSNJobItem().getId());
+        }
 
         // Add to batch processor
         batchProcessor.add(jobItem.turSNJobItem(), jobItem.session());
