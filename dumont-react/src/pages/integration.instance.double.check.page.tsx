@@ -27,7 +27,7 @@ import { Play } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "@openviglet/viglet-design-system";
 
 const NO_SOURCE = "";
 

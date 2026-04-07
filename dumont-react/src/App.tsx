@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { Toaster } from "sonner";
+import { Toaster } from "@openviglet/viglet-design-system";
 import { ThemeProvider } from "./components/theme-provider";
 import { BreadcrumbProvider } from "./contexts/breadcrumb.context";
 import { PluginProvider } from "./contexts/plugin.context";

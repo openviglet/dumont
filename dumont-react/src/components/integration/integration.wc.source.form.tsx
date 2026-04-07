@@ -19,7 +19,7 @@ import { useMemo, useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { toast } from "sonner"
+import { toast } from "@openviglet/viglet-design-system"
 import { FormActions } from "../ui/form-actions"
 import { SectionCard } from "../ui/section-card"
 

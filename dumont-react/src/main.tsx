@@ -1,6 +1,6 @@
 import i18n from "@/i18n";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@openviglet/viglet-design-system";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

@@ -8,7 +8,7 @@ import { IconFolder } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "@openviglet/viglet-design-system";
 
 export default function IntegrationInstanceAssetsSourcePage() {
   const navigate = useNavigate();
