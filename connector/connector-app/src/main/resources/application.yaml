@@ -22,6 +22,10 @@ dumont:
   dependencies.enabled: false
   reactive.indexing: false
   reactive.parallelism: 10
+  dns:
+    cache:
+      ttl: 60
+      negative.ttl: 0
   aem.querybuilder: true
   aem.querybuilder.parallelism: 10
   scheduler:
