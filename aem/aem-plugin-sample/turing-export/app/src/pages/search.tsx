@@ -25,7 +25,7 @@ import {
   type TurFacetGroup,
   type TurFacetItem,
   type TurPaginationItem,
-} from "@openviglet/turing-react-sdk";
+} from "@viglet/turing-react-sdk";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 /* ── Tag color map ── */

@@ -6,11 +6,11 @@ import { TurIntegrationDbSourceService } from "@/services/integration/integratio
 
 import type { TurIntegrationDbSource } from "@/models/integration/integration-db-source.model";
 import { IconDatabase } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "@openviglet/viglet-design-system";
 
 export default function IntegrationInstanceDbSourcePage() {
   const navigate = useNavigate();

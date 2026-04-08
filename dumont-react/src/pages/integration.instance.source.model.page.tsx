@@ -1,5 +1,5 @@
-import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { ROUTES } from "@/app/routes.const";
+import { SubPageHeader } from "@/components/sub.page.header";
 import {
   Form,
   FormControl,
@@ -12,17 +12,17 @@ import {
 import { FormActions } from "@/components/ui/form-actions";
 import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/ui/section-card";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 
+import { TargetAttributeList } from "@/components/integration/target.attribute.list";
 import type { TurIntegrationAemPluginModel } from "@/models/integration/integration-aem-plugin-model.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
-import { TargetAttributeList } from "@/components/integration/target.attribute.list";
 import { IconBox, IconSettings, IconTarget } from "@tabler/icons-react";
-import { useMemo, useEffect, useState } from "react";
+import { toast } from "@viglet/viglet-design-system";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "@openviglet/viglet-design-system";
 
 const emptyModel: TurIntegrationAemPluginModel = {
   id: "",

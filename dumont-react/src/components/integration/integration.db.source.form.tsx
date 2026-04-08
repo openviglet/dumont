@@ -1,6 +1,4 @@
-import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service";
-"use client"
-import { ROUTES } from "@/app/routes.const"
+import { ROUTES } from "@/app/routes.const";
 import {
   Form,
   FormControl,
@@ -9,25 +7,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Input
-} from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { TurIntegrationDbSource } from "@/models/integration/integration-db-source.model"
-import { IconDatabase, IconFileDescription, IconSettings, IconUpload } from "@tabler/icons-react"
-import { useMemo, useEffect } from "react"
+} from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import type { TurIntegrationDbSource } from "@/models/integration/integration-db-source.model";
+import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service";
+import { IconDatabase, IconFileDescription, IconSettings, IconUpload } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
+import { useEffect, useMemo } from "react";
 import {
   useForm
-} from "react-hook-form"
-import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
-import { toast } from "@openviglet/viglet-design-system"
-import { FormActions } from "../ui/form-actions"
-import { FormItemTwoColumns } from "../ui/form-item-two-columns"
-import { GradientSwitch } from "../ui/gradient-switch"
-import { SectionCard } from "../ui/section-card"
+} from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { FormActions } from "../ui/form-actions";
+import { FormItemTwoColumns } from "../ui/form-item-two-columns";
+import { GradientSwitch } from "../ui/gradient-switch";
+import { SectionCard } from "../ui/section-card";
+"use client"
 
 interface Props {
   value: TurIntegrationDbSource;

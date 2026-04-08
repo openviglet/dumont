@@ -1,9 +1,9 @@
 "use client"
 
+import { toast } from "@viglet/viglet-design-system"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
-import { toast } from "@openviglet/viglet-design-system"
 
 import { ROUTES } from "@/app/routes.const"
 import {
@@ -30,7 +30,7 @@ import type { TurSNSite } from "@/models/sn/sn-site.model"
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service"
 import { TurSNFieldService } from "@/services/sn/sn.field.service"
 import { TurSNSiteService } from "@/services/sn/sn.service"
-import { IconFileText, IconMap, IconGavel, IconList } from "@tabler/icons-react"
+import { IconFileText, IconGavel, IconList, IconMap } from "@tabler/icons-react"
 import { useTranslation } from "react-i18next"
 import { FormActions } from "../ui/form-actions"
 import { FormItemTwoColumns } from "../ui/form-item-two-columns"

@@ -1,6 +1,6 @@
-import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { ROUTES } from "@/app/routes.const";
 import { BadgeFieldType } from "@/components/badge-field-type";
+import { SubPageHeader } from "@/components/sub.page.header";
 import {
   Form,
   FormControl,
@@ -23,16 +23,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 
 import type { TurIntegrationAemAttributeSpec } from "@/models/integration/integration-aem-attribute-spec.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { IconFileDescription, IconSettings } from "@tabler/icons-react";
-import { useMemo, useEffect, useState } from "react";
+import { toast } from "@viglet/viglet-design-system";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "@openviglet/viglet-design-system";
 
 const SE_FIELD_TYPES = [
   "INT", "LONG", "STRING", "TEXT", "ARRAY", "DATE", "BOOL", "FLOAT", "DOUBLE", "CURRENCY",

@@ -24,10 +24,10 @@ import {
   IconLink,
   IconSettings,
 } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { toast } from "@openviglet/viglet-design-system";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { Stepper } from "../ui/stepper";
 import { DynamicIndexingRuleFields } from "./dynamic.indexing.rule.field";

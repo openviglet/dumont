@@ -1,20 +1,20 @@
+import { ROUTES } from "@/app/routes.const";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { TurIntegrationAssetsSource } from "@/models/integration/integration-assets-source.model";
 import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service";
+import { IconFolder, IconReplace, IconSettings } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
+import { useEffect, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { FormActions } from "../ui/form-actions";
+import { FormItemTwoColumns } from "../ui/form-item-two-columns";
+import { GradientSwitch } from "../ui/gradient-switch";
+import { SectionCard } from "../ui/section-card";
 "use client"
-import { ROUTES } from "@/app/routes.const"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { TurIntegrationAssetsSource } from "@/models/integration/integration-assets-source.model"
-import { IconFolder, IconSettings, IconReplace } from "@tabler/icons-react"
-import { useMemo, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
-import { toast } from "@openviglet/viglet-design-system"
-import { FormActions } from "../ui/form-actions"
-import { FormItemTwoColumns } from "../ui/form-item-two-columns"
-import { GradientSwitch } from "../ui/gradient-switch"
-import { SectionCard } from "../ui/section-card"
 
 interface Props { value: TurIntegrationAssetsSource; isNew: boolean; integrationId: string; sourceId: string; tab: string; }
 

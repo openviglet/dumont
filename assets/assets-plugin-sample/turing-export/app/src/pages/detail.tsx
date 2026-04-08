@@ -11,7 +11,7 @@ import {
   IconTelescope,
   IconWorld,
 } from "@tabler/icons-react";
-import type { ResolvedDocument } from "@openviglet/turing-react-sdk";
+import type { ResolvedDocument } from "@viglet/turing-react-sdk";
 import { useLocation, useNavigate } from "react-router-dom";
 
 /* ── File extension badge colors ── */

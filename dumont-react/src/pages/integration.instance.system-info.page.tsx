@@ -1,7 +1,7 @@
 import { SubPageHeader } from "@/components/sub.page.header";
+import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/ui/section-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import {
     IconCpu,
     IconDatabase,
@@ -13,11 +13,11 @@ import {
     IconServer,
     IconVariable,
 } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { toast } from "@openviglet/viglet-design-system";
 
 interface ConnectorMemory {
     maxMemory: number;
@@ -104,11 +104,10 @@ function InfoRow({ label, value, property }: Readonly<{ label: string; value: st
 function StatusBadge({ status, t }: Readonly<{ status: string; t: (key: string) => string }>) {
     const isUp = status === "UP";
     return (
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-            isUp
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${isUp
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                 : "bg-red-500/10 text-red-600 dark:text-red-400"
-        }`}>
+            }`}>
             <span className={`size-1.5 rounded-full ${isUp ? "bg-emerald-500" : "bg-red-500"}`} />
             {isUp ? t("integration.connectorSystemInfo.up") : t("integration.connectorSystemInfo.down")}
         </span>
@@ -204,135 +203,135 @@ export default function IntegrationInstanceSystemInfoPage() {
                     </TabsList>
 
                     <TabsContent value="overview" className="space-y-4 mt-4">
-                {/* Application */}
-                <SectionCard variant="blue">
-                    <SectionCard.StaticHeader
-                        icon={IconDeviceDesktop}
-                        title={t("integration.connectorSystemInfo.application")}
-                        description={t("integration.connectorSystemInfo.applicationDesc")}
-                    />
-                    <SectionCard.Content>
-                        <div className="flex items-center justify-between py-2 border-b">
-                            <span className="text-sm text-muted-foreground">{t("integration.connectorSystemInfo.status")}</span>
-                            <StatusBadge status={status} t={t} />
-                        </div>
-                        <InfoRow label={t("integration.connectorSystemInfo.name")} value={info?.appName ?? "Unknown"} />
-                        <InfoRow label={t("integration.connectorSystemInfo.version")} value={info?.appVersion ?? "Unknown"} />
-                        <InfoRow label={t("integration.connectorSystemInfo.javaVersion")} value={info?.javaVersion ?? "Unknown"} />
-                        <InfoRow label={t("integration.connectorSystemInfo.javaVendor")} value={info?.javaVendor ?? "Unknown"} />
-                        <InfoRow label={t("integration.connectorSystemInfo.jvm")} value={info?.javaVmName ?? "Unknown"} />
-                        <InfoRow label={t("integration.connectorSystemInfo.os")} value={`${info?.osName ?? ""} ${info?.osVersion ?? ""} (${info?.osArch ?? ""})`} />
-                    </SectionCard.Content>
-                </SectionCard>
-
-                {/* Indexing Provider */}
-                {info?.indexing && (
-                    <SectionCard variant="violet">
-                        <SectionCard.StaticHeader
-                            icon={IconDatabase}
-                            title={t("integration.connectorSystemInfo.indexingProvider")}
-                            description={t("integration.connectorSystemInfo.indexingProviderDesc")}
-                        />
-                        <SectionCard.Content>
-                            <InfoRow label={t("integration.connectorSystemInfo.provider")} value={info.indexing.provider?.value?.toUpperCase() ?? "N/A"} property={info.indexing.provider?.property} />
-                            {info.indexing.provider?.value === "turing" && (
-                                <>
-                                    <InfoRow label={t("integration.connectorSystemInfo.turingUrl")} value={info.indexing.turingUrl?.value ?? "N/A"} property={info.indexing.turingUrl?.property} />
-                                    <InfoRow label={t("integration.connectorSystemInfo.turingSolrEndpoint")} value={info.indexing.turingSolrEndpoint?.value ?? "N/A"} property={info.indexing.turingSolrEndpoint?.property} />
-                                </>
-                            )}
-                            {info.indexing.provider?.value === "solr" && (
-                                <>
-                                    <InfoRow label={t("integration.connectorSystemInfo.solrUrl")} value={info.indexing.solrUrl?.value ?? "N/A"} property={info.indexing.solrUrl?.property} />
-                                    <InfoRow label={t("integration.connectorSystemInfo.solrCollection")} value={info.indexing.solrCollection?.value ?? "N/A"} property={info.indexing.solrCollection?.property} />
-                                </>
-                            )}
-                            {info.indexing.provider?.value === "elasticsearch" && (
-                                <>
-                                    <InfoRow label={t("integration.connectorSystemInfo.elasticsearchUrl")} value={info.indexing.elasticsearchUrl?.value ?? "N/A"} property={info.indexing.elasticsearchUrl?.property} />
-                                    <InfoRow label={t("integration.connectorSystemInfo.elasticsearchIndex")} value={info.indexing.elasticsearchIndex?.value ?? "N/A"} property={info.indexing.elasticsearchIndex?.property} />
-                                    <InfoRow label={t("integration.connectorSystemInfo.elasticsearchUsername")} value={info.indexing.elasticsearchUsername?.value ?? "N/A"} property={info.indexing.elasticsearchUsername?.property} />
-                                </>
-                            )}
-                        </SectionCard.Content>
-                    </SectionCard>
-                )}
-
-                {/* Physical RAM */}
-                {physicalPercent >= 0 && (
-                    <SectionCard variant="cyan">
-                        <SectionCard.StaticHeader
-                            icon={IconServer}
-                            title={t("systemInfo.physicalMemory")}
-                            description={t("systemInfo.physicalMemoryDesc")}
-                        />
-                        <SectionCard.Content>
-                            <div className="space-y-1">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">{t("systemInfo.ramUsage")}</span>
-                                    <span className="font-medium">{physicalPercent}%</span>
+                        {/* Application */}
+                        <SectionCard variant="blue">
+                            <SectionCard.StaticHeader
+                                icon={IconDeviceDesktop}
+                                title={t("integration.connectorSystemInfo.application")}
+                                description={t("integration.connectorSystemInfo.applicationDesc")}
+                            />
+                            <SectionCard.Content>
+                                <div className="flex items-center justify-between py-2 border-b">
+                                    <span className="text-sm text-muted-foreground">{t("integration.connectorSystemInfo.status")}</span>
+                                    <StatusBadge status={status} t={t} />
                                 </div>
-                                <ProgressBar value={physicalPercent} color="bg-cyan-500" />
-                                <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                                    <span>{t("systemInfo.used")} {formatBytes(physicalUsed)}</span>
-                                    <span>{t("systemInfo.totalLabel")} {formatBytes(mem?.totalPhysicalMemory ?? 0)}</span>
+                                <InfoRow label={t("integration.connectorSystemInfo.name")} value={info?.appName ?? "Unknown"} />
+                                <InfoRow label={t("integration.connectorSystemInfo.version")} value={info?.appVersion ?? "Unknown"} />
+                                <InfoRow label={t("integration.connectorSystemInfo.javaVersion")} value={info?.javaVersion ?? "Unknown"} />
+                                <InfoRow label={t("integration.connectorSystemInfo.javaVendor")} value={info?.javaVendor ?? "Unknown"} />
+                                <InfoRow label={t("integration.connectorSystemInfo.jvm")} value={info?.javaVmName ?? "Unknown"} />
+                                <InfoRow label={t("integration.connectorSystemInfo.os")} value={`${info?.osName ?? ""} ${info?.osVersion ?? ""} (${info?.osArch ?? ""})`} />
+                            </SectionCard.Content>
+                        </SectionCard>
+
+                        {/* Indexing Provider */}
+                        {info?.indexing && (
+                            <SectionCard variant="violet">
+                                <SectionCard.StaticHeader
+                                    icon={IconDatabase}
+                                    title={t("integration.connectorSystemInfo.indexingProvider")}
+                                    description={t("integration.connectorSystemInfo.indexingProviderDesc")}
+                                />
+                                <SectionCard.Content>
+                                    <InfoRow label={t("integration.connectorSystemInfo.provider")} value={info.indexing.provider?.value?.toUpperCase() ?? "N/A"} property={info.indexing.provider?.property} />
+                                    {info.indexing.provider?.value === "turing" && (
+                                        <>
+                                            <InfoRow label={t("integration.connectorSystemInfo.turingUrl")} value={info.indexing.turingUrl?.value ?? "N/A"} property={info.indexing.turingUrl?.property} />
+                                            <InfoRow label={t("integration.connectorSystemInfo.turingSolrEndpoint")} value={info.indexing.turingSolrEndpoint?.value ?? "N/A"} property={info.indexing.turingSolrEndpoint?.property} />
+                                        </>
+                                    )}
+                                    {info.indexing.provider?.value === "solr" && (
+                                        <>
+                                            <InfoRow label={t("integration.connectorSystemInfo.solrUrl")} value={info.indexing.solrUrl?.value ?? "N/A"} property={info.indexing.solrUrl?.property} />
+                                            <InfoRow label={t("integration.connectorSystemInfo.solrCollection")} value={info.indexing.solrCollection?.value ?? "N/A"} property={info.indexing.solrCollection?.property} />
+                                        </>
+                                    )}
+                                    {info.indexing.provider?.value === "elasticsearch" && (
+                                        <>
+                                            <InfoRow label={t("integration.connectorSystemInfo.elasticsearchUrl")} value={info.indexing.elasticsearchUrl?.value ?? "N/A"} property={info.indexing.elasticsearchUrl?.property} />
+                                            <InfoRow label={t("integration.connectorSystemInfo.elasticsearchIndex")} value={info.indexing.elasticsearchIndex?.value ?? "N/A"} property={info.indexing.elasticsearchIndex?.property} />
+                                            <InfoRow label={t("integration.connectorSystemInfo.elasticsearchUsername")} value={info.indexing.elasticsearchUsername?.value ?? "N/A"} property={info.indexing.elasticsearchUsername?.property} />
+                                        </>
+                                    )}
+                                </SectionCard.Content>
+                            </SectionCard>
+                        )}
+
+                        {/* Physical RAM */}
+                        {physicalPercent >= 0 && (
+                            <SectionCard variant="cyan">
+                                <SectionCard.StaticHeader
+                                    icon={IconServer}
+                                    title={t("systemInfo.physicalMemory")}
+                                    description={t("systemInfo.physicalMemoryDesc")}
+                                />
+                                <SectionCard.Content>
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-muted-foreground">{t("systemInfo.ramUsage")}</span>
+                                            <span className="font-medium">{physicalPercent}%</span>
+                                        </div>
+                                        <ProgressBar value={physicalPercent} color="bg-cyan-500" />
+                                        <div className="flex justify-between text-xs text-muted-foreground pt-1">
+                                            <span>{t("systemInfo.used")} {formatBytes(physicalUsed)}</span>
+                                            <span>{t("systemInfo.totalLabel")} {formatBytes(mem?.totalPhysicalMemory ?? 0)}</span>
+                                        </div>
+                                    </div>
+                                    <InfoRow label={t("systemInfo.totalRam")} value={formatBytes(mem?.totalPhysicalMemory ?? 0)} />
+                                    <InfoRow label={t("systemInfo.freeRam")} value={formatBytes(mem?.freePhysicalMemory ?? 0)} />
+                                </SectionCard.Content>
+                            </SectionCard>
+                        )}
+
+                        {/* JVM Heap Memory */}
+                        <SectionCard variant="emerald">
+                            <SectionCard.StaticHeader
+                                icon={IconCpu}
+                                title={t("systemInfo.jvmHeap")}
+                                description={t("systemInfo.jvmHeapDesc")}
+                            />
+                            <SectionCard.Content>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">{t("systemInfo.heapUsage")}</span>
+                                        <span className="font-medium">{heapPercent}%</span>
+                                    </div>
+                                    <ProgressBar value={heapPercent} color="bg-emerald-500" />
+                                    <div className="flex justify-between text-xs text-muted-foreground pt-1">
+                                        <span>{t("systemInfo.used")} {formatBytes(mem?.usedMemory ?? 0)}</span>
+                                        <span>{t("systemInfo.max")} {formatBytes(mem?.maxMemory ?? 0)}</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <InfoRow label={t("systemInfo.totalRam")} value={formatBytes(mem?.totalPhysicalMemory ?? 0)} />
-                            <InfoRow label={t("systemInfo.freeRam")} value={formatBytes(mem?.freePhysicalMemory ?? 0)} />
-                        </SectionCard.Content>
-                    </SectionCard>
-                )}
+                                <InfoRow label={t("systemInfo.totalAllocated")} value={formatBytes(mem?.totalMemory ?? 0)} />
+                                <InfoRow label={t("systemInfo.freeAllocated")} value={formatBytes(mem?.freeMemory ?? 0)} />
+                                <InfoRow label={t("systemInfo.maxHeap")} value={formatBytes(mem?.maxMemory ?? 0)} />
+                            </SectionCard.Content>
+                        </SectionCard>
 
-                {/* JVM Heap Memory */}
-                <SectionCard variant="emerald">
-                    <SectionCard.StaticHeader
-                        icon={IconCpu}
-                        title={t("systemInfo.jvmHeap")}
-                        description={t("systemInfo.jvmHeapDesc")}
-                    />
-                    <SectionCard.Content>
-                        <div className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">{t("systemInfo.heapUsage")}</span>
-                                <span className="font-medium">{heapPercent}%</span>
-                            </div>
-                            <ProgressBar value={heapPercent} color="bg-emerald-500" />
-                            <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                                <span>{t("systemInfo.used")} {formatBytes(mem?.usedMemory ?? 0)}</span>
-                                <span>{t("systemInfo.max")} {formatBytes(mem?.maxMemory ?? 0)}</span>
-                            </div>
-                        </div>
-                        <InfoRow label={t("systemInfo.totalAllocated")} value={formatBytes(mem?.totalMemory ?? 0)} />
-                        <InfoRow label={t("systemInfo.freeAllocated")} value={formatBytes(mem?.freeMemory ?? 0)} />
-                        <InfoRow label={t("systemInfo.maxHeap")} value={formatBytes(mem?.maxMemory ?? 0)} />
-                    </SectionCard.Content>
-                </SectionCard>
-
-                {/* Disk */}
-                <SectionCard variant="amber">
-                    <SectionCard.StaticHeader
-                        icon={IconDisc}
-                        title={t("systemInfo.diskSpace")}
-                        description={t("systemInfo.diskSpaceDesc")}
-                    />
-                    <SectionCard.Content>
-                        <div className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">{t("systemInfo.diskUsage")}</span>
-                                <span className="font-medium">{diskPercent}%</span>
-                            </div>
-                            <ProgressBar value={diskPercent} color="bg-amber-500" />
-                            <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                                <span>{t("systemInfo.used")} {formatBytes(disk?.usedSpace ?? 0)}</span>
-                                <span>{t("systemInfo.totalLabel")} {formatBytes(disk?.totalSpace ?? 0)}</span>
-                            </div>
-                        </div>
-                        <InfoRow label={t("systemInfo.totalLabel")} value={formatBytes(disk?.totalSpace ?? 0)} />
-                        <InfoRow label={t("systemInfo.available")} value={formatBytes(disk?.usableSpace ?? 0)} />
-                        <InfoRow label={t("systemInfo.usedMemory")} value={formatBytes(disk?.usedSpace ?? 0)} />
-                    </SectionCard.Content>
-                </SectionCard>
+                        {/* Disk */}
+                        <SectionCard variant="amber">
+                            <SectionCard.StaticHeader
+                                icon={IconDisc}
+                                title={t("systemInfo.diskSpace")}
+                                description={t("systemInfo.diskSpaceDesc")}
+                            />
+                            <SectionCard.Content>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">{t("systemInfo.diskUsage")}</span>
+                                        <span className="font-medium">{diskPercent}%</span>
+                                    </div>
+                                    <ProgressBar value={diskPercent} color="bg-amber-500" />
+                                    <div className="flex justify-between text-xs text-muted-foreground pt-1">
+                                        <span>{t("systemInfo.used")} {formatBytes(disk?.usedSpace ?? 0)}</span>
+                                        <span>{t("systemInfo.totalLabel")} {formatBytes(disk?.totalSpace ?? 0)}</span>
+                                    </div>
+                                </div>
+                                <InfoRow label={t("systemInfo.totalLabel")} value={formatBytes(disk?.totalSpace ?? 0)} />
+                                <InfoRow label={t("systemInfo.available")} value={formatBytes(disk?.usableSpace ?? 0)} />
+                                <InfoRow label={t("systemInfo.usedMemory")} value={formatBytes(disk?.usedSpace ?? 0)} />
+                            </SectionCard.Content>
+                        </SectionCard>
                     </TabsContent>
 
                     <TabsContent value="variables" className="mt-4">

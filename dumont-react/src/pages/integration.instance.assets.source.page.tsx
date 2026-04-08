@@ -2,13 +2,13 @@ import { ROUTES } from "@/app/routes.const";
 import { IntegrationAssetsSourceForm } from "@/components/integration/integration.assets.source.form";
 import { SubPageHeader } from "@/components/sub.page.header";
 import { GradientButton } from "@/components/ui/gradient-button";
-import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service";
 import type { TurIntegrationAssetsSource } from "@/models/integration/integration-assets-source.model";
+import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service";
 import { IconFolder } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "@openviglet/viglet-design-system";
 
 export default function IntegrationInstanceAssetsSourcePage() {
   const navigate = useNavigate();

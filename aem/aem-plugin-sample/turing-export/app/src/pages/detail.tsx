@@ -13,7 +13,7 @@ import {
   IconServer,
   IconTag,
 } from "@tabler/icons-react";
-import type { ResolvedDocument } from "@openviglet/turing-react-sdk";
+import type { ResolvedDocument } from "@viglet/turing-react-sdk";
 import { useLocation, useNavigate } from "react-router-dom";
 
 /* ── Tag color map (same as search) ── */

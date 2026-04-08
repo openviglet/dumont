@@ -4,10 +4,10 @@ import { SubPageHeader } from "@/components/sub.page.header";
 import type { TurIntegrationIndexingRule } from "@/models/integration/integration-indexing-rule.model";
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service";
 import { IconTools } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "@openviglet/viglet-design-system";
 
 export default function IntegrationInstanceIndexingRulePage() {
   const navigate = useNavigate();

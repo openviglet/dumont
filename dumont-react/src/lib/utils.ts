@@ -1,1 +1,5 @@
-export { cn, truncateMiddle, getHashedColor } from "@openviglet/viglet-design-system";
+export {
+  cn,
+  getHashedColor,
+  truncateMiddle,
+} from "@viglet/viglet-design-system";

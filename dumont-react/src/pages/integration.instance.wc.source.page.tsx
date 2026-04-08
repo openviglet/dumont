@@ -2,13 +2,13 @@ import { ROUTES } from "@/app/routes.const";
 import { IntegrationWcSourceForm } from "@/components/integration/integration.wc.source.form";
 import { SubPageHeader } from "@/components/sub.page.header";
 import { GradientButton } from "@/components/ui/gradient-button";
-import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service";
 import type { TurIntegrationWcSource } from "@/models/integration/integration-wc-source.model";
+import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service";
 import { IconGlobe } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "@openviglet/viglet-design-system";
 
 export default function IntegrationInstanceWcSourcePage() {
   const navigate = useNavigate();

@@ -23,11 +23,11 @@ import type { TurIntegrationMonitoring } from "@/models/integration/integration-
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurIntegrationDoubleCheckService } from "@/services/integration/integration-double-check.service";
 import { IconListCheck } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
 import { Play } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { toast } from "@openviglet/viglet-design-system";
 
 const NO_SOURCE = "";
 

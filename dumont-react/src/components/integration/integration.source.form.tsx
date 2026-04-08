@@ -1,7 +1,5 @@
-import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
-"use client"
-import { ROUTES } from "@/app/routes.const"
-import { LanguageSelect } from "@/components/language-select"
+import { ROUTES } from "@/app/routes.const";
+import { LanguageSelect } from "@/components/language-select";
 import {
   Form,
   FormControl,
@@ -10,29 +8,31 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Input
-} from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model"
-import type { TurLocale } from "@/models/locale/locale.model"
-import { TurLocaleService } from "@/services/locale/locale.service"
-import { IconBox, IconFileDescription, IconLanguage, IconSend, IconSettings, IconUser } from "@tabler/icons-react"
-import { useMemo, useEffect, useState } from "react"
+} from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
+import type { TurLocale } from "@/models/locale/locale.model";
+import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
+import { TurLocaleService } from "@/services/locale/locale.service";
+import { IconBox, IconFileDescription, IconLanguage, IconSend, IconSettings, IconUser } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
+import { useEffect, useMemo, useState } from "react";
 import {
   useForm
-} from "react-hook-form"
-import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
-import { toast } from "@openviglet/viglet-design-system"
-import { FormActions } from "../ui/form-actions"
-import { FormItemTwoColumns } from "../ui/form-item-two-columns"
-import { GradientSwitch } from "../ui/gradient-switch"
-import { SectionCard } from "../ui/section-card"
-import { AttributeSpecificationList } from "./attribute.specification.list"
-import { DynamicSourceLocales } from "./dynamic.source.locale"
-import { PluginModelList } from "./plugin.model.list"
+} from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { FormActions } from "../ui/form-actions";
+import { FormItemTwoColumns } from "../ui/form-item-two-columns";
+import { GradientSwitch } from "../ui/gradient-switch";
+import { SectionCard } from "../ui/section-card";
+import { AttributeSpecificationList } from "./attribute.specification.list";
+import { DynamicSourceLocales } from "./dynamic.source.locale";
+import { PluginModelList } from "./plugin.model.list";
+"use client"
 
 interface Props {
   value: TurIntegrationAemSource;

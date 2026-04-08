@@ -1,6 +1,5 @@
-import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service";
-"use client"
-import { ROUTES } from "@/app/routes.const"
+import { ROUTES } from "@/app/routes.const";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -9,19 +8,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import type { TurIntegrationWcSource } from "@/models/integration/integration-wc-source.model"
-import { IconGlobe, IconFilter, IconFileDescription, IconSettings, IconPlus, IconTrash } from "@tabler/icons-react"
-import { useMemo, useEffect } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
-import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
-import { toast } from "@openviglet/viglet-design-system"
-import { FormActions } from "../ui/form-actions"
-import { SectionCard } from "../ui/section-card"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { TurIntegrationWcSource } from "@/models/integration/integration-wc-source.model";
+import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service";
+import { IconFileDescription, IconFilter, IconGlobe, IconPlus, IconSettings, IconTrash } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
+import { useEffect, useMemo } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { FormActions } from "../ui/form-actions";
+import { SectionCard } from "../ui/section-card";
+"use client"
 
 interface Props {
   value: TurIntegrationWcSource;

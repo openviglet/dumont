@@ -12,7 +12,7 @@ import {
   IconUser,
   IconWorld,
 } from "@tabler/icons-react";
-import type { ResolvedDocument } from "@openviglet/turing-react-sdk";
+import type { ResolvedDocument } from "@viglet/turing-react-sdk";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 

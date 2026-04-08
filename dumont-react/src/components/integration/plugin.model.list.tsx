@@ -1,14 +1,14 @@
+import { ROUTES } from "@/app/routes.const";
+import { GradientButton } from "@/components/ui/gradient-button";
+import type { TurIntegrationAemPluginModel } from "@/models/integration/integration-aem-plugin-model.model";
+import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
+import { IconBox, IconPlus, IconTarget, IconTrash } from "@tabler/icons-react";
+import { toast } from "@viglet/viglet-design-system";
+import { useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
 "use client"
-import { ROUTES } from "@/app/routes.const"
-import { GradientButton } from "@/components/ui/gradient-button"
-import type { TurIntegrationAemPluginModel } from "@/models/integration/integration-aem-plugin-model.model"
-import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model"
-import { IconBox, IconPlus, IconTarget, IconTrash } from "@tabler/icons-react"
-import { useMemo, useCallback } from "react"
-import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
-import { toast } from "@openviglet/viglet-design-system"
 
 interface PluginModelListProps {
   source: TurIntegrationAemSource;
