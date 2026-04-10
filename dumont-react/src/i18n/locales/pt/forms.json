@@ -261,6 +261,20 @@
       "saveChanges": "Salvar Alterações",
       "delete": "Excluir"
     },
+    "classSelect": {
+      "selectClass": "Selecione um extrator...",
+      "none": "Nenhum (sem extrator)",
+      "manualEntry": "Digitar nome da classe manualmente",
+      "useList": "Usar lista"
+    },
+    "importExport": {
+      "import": "Importar JSON",
+      "export": "Exportar JSON",
+      "importSuccess": "Configuração importada com sucesso.",
+      "importFailed": "Falha ao interpretar o arquivo JSON. Verifique o formato.",
+      "importApplied": "Configuração importada. Revise os campos e prossiga.",
+      "exportSuccess": "Configuração exportada."
+    },
     "duration": {
       "milliseconds": "Milissegundos",
       "seconds": "Segundos",

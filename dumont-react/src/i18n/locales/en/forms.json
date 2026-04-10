@@ -261,6 +261,20 @@
       "saveChanges": "Save Changes",
       "delete": "Delete"
     },
+    "classSelect": {
+      "selectClass": "Select an extractor...",
+      "none": "None (no extractor)",
+      "manualEntry": "Type class name manually",
+      "useList": "Use list"
+    },
+    "importExport": {
+      "import": "Import JSON",
+      "export": "Export JSON",
+      "importSuccess": "Configuration imported successfully.",
+      "importFailed": "Failed to parse JSON file. Check the format.",
+      "importApplied": "Configuration imported. Review the fields and proceed.",
+      "exportSuccess": "Configuration exported."
+    },
     "duration": {
       "milliseconds": "Milliseconds",
       "seconds": "Seconds",

@@ -1,6 +1,7 @@
 import { ROUTES } from "@/app/routes.const";
 import { BadgeFieldType } from "@/components/badge-field-type";
 import { GradientButton } from "@/components/ui/gradient-button";
+import { getClassLabel } from "@/components/integration/aem-class-labels";
 import type { TurIntegrationAemAttributeSpec } from "@/models/integration/integration-aem-attribute-spec.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
@@ -87,8 +88,8 @@ export function AttributeSpecificationList({ source, onSourceUpdated }: Readonly
                   )}
                 </div>
                 {spec.className && (
-                  <p className="text-xs text-muted-foreground font-mono truncate mt-0.5">
-                    {spec.className}
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                    <span className="font-medium">{getClassLabel(spec.className)}</span>
                   </p>
                 )}
               </div>

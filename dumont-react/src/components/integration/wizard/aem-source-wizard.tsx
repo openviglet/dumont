@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { WizardStepper, type WizardStepperStep } from "@/components/ui/wizard-stepper";
+import { SourceImportExportBar } from "../source-import-export-bar";
 import { StepConnection } from "./steps/step-connection";
 import { StepContent } from "./steps/step-content";
 import { StepFieldMapping } from "./steps/step-field-mapping";
@@ -198,7 +199,7 @@ export function AemSourceWizard({
 
         {/* Navigation */}
         <div className="flex items-center justify-between pt-4 pb-4 border-t mt-8">
-          <div>
+          <div className="flex items-center gap-2">
             {currentStep > 0 ? (
               <GradientButton
                 type="button"
@@ -217,6 +218,14 @@ export function AemSourceWizard({
                 {t("forms.formActions.cancel")}
               </GradientButton>
             )}
+            <SourceImportExportBar
+              showExport={false}
+              onImport={(data) => {
+                form.reset({ ...form.getValues(), ...data, id: "" });
+                setConnectionTested(false);
+                toast.success(t("forms.importExport.importApplied"));
+              }}
+            />
           </div>
 
           <div>

@@ -25,6 +25,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 
+import { AemClassSelect } from "@/components/integration/aem-class-select";
 import type { TurIntegrationAemAttributeSpec } from "@/models/integration/integration-aem-attribute-spec.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { IconFileDescription, IconSettings } from "@tabler/icons-react";
@@ -150,7 +151,11 @@ export default function IntegrationInstanceSourceSpecPage() {
                   <FormItem>
                     <FormLabel>{t("forms.integrationSource.specClassName")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="com.example.AttributeHandler" />
+                      <AemClassSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        category="extractor"
+                      />
                     </FormControl>
                     <FormDescription>{t("forms.integrationSource.specClassNameDesc")}</FormDescription>
                     <FormMessage />

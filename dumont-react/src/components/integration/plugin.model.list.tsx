@@ -1,5 +1,6 @@
 import { ROUTES } from "@/app/routes.const";
 import { GradientButton } from "@/components/ui/gradient-button";
+import { getClassLabel } from "@/components/integration/aem-class-labels";
 import type { TurIntegrationAemPluginModel } from "@/models/integration/integration-aem-plugin-model.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
@@ -90,8 +91,8 @@ export function PluginModelList({ source, onSourceUpdated }: Readonly<PluginMode
                     )}
                   </div>
                   {model.className && (
-                    <p className="text-xs text-muted-foreground font-mono truncate mt-0.5">
-                      {model.className}
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                      <span className="font-medium">{getClassLabel(model.className)}</span>
                     </p>
                   )}
                 </div>

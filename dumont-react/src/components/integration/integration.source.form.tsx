@@ -52,6 +52,8 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
   const { control, register } = form;
   const navigate = useNavigate()
   const [locales, setLocales] = useState<TurLocale[]>([]);
+  const authorEnabled = form.watch("author");
+  const publishEnabled = form.watch("publish");
   useEffect(() => {
     form.reset(value);
     turLocaleService.query().then(setLocales)
@@ -273,35 +275,39 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="authorSNSite"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("forms.integrationSource.authorSnSite")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="author-site" type="text" />
-                      </FormControl>
-                      <FormDescription>{t("forms.integrationSource.authorSnSite")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {authorEnabled && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="authorSNSite"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("forms.integrationSource.authorSnSite")}</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="author-site" type="text" />
+                          </FormControl>
+                          <FormDescription>{t("forms.integrationSource.authorSnSite")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="authorURLPrefix"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("forms.integrationSource.authorUrlPrefix")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="https://author.example.com" type="url" />
-                      </FormControl>
-                      <FormDescription>{t("forms.integrationSource.authorUrlPrefix")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="authorURLPrefix"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("forms.integrationSource.authorUrlPrefix")}</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="https://author.example.com" type="url" />
+                          </FormControl>
+                          <FormDescription>{t("forms.integrationSource.authorUrlPrefix")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
               </SectionCard.Content>
             </SectionCard>
 
@@ -332,35 +338,39 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="publishSNSite"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("forms.integrationSource.publishSnSite")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="publish-site" type="text" />
-                      </FormControl>
-                      <FormDescription>{t("forms.integrationSource.publishSnSite")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {publishEnabled && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="publishSNSite"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("forms.integrationSource.publishSnSite")}</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="publish-site" type="text" />
+                          </FormControl>
+                          <FormDescription>{t("forms.integrationSource.publishSnSite")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="publishURLPrefix"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("forms.integrationSource.publishUrlPrefix")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="https://www.example.com" type="url" />
-                      </FormControl>
-                      <FormDescription>{t("forms.integrationSource.publishUrlPrefix")}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="publishURLPrefix"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("forms.integrationSource.publishUrlPrefix")}</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="https://www.example.com" type="url" />
+                          </FormControl>
+                          <FormDescription>{t("forms.integrationSource.publishUrlPrefix")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
               </SectionCard.Content>
             </SectionCard>
 

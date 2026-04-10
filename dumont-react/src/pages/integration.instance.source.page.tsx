@@ -6,6 +6,7 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurIntegrationConnectorService } from "@/services/integration/integration-connector.service";
 
+import { SourceImportExportBar } from "@/components/integration/source-import-export-bar";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { IconGitCommit } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
@@ -139,7 +140,15 @@ export default function IntegrationInstanceSourcePage() {
         open={open}
         setOpen={setOpen} />
 
-      <div className="flex justify-end pb-4 px-6">
+      <div className="flex justify-between pb-4 px-6">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
+          <SourceImportExportBar
+            source={integrationAemSource}
+            onImport={(data) => {
+              setIntegrationAemSource((prev) => ({ ...prev, ...data } as TurIntegrationAemSource));
+            }}
+          />
+        </div>
         <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
           <GradientButton
             type="button"

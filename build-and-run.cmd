@@ -4,16 +4,6 @@ SETLOCAL
 SET ROOT=%~dp0
 
 ECHO ========================================
-ECHO [1/4] Compiling dumont-react...
-ECHO ========================================
-cd /d "%ROOT%dumont-react"
-call npm run compile
-IF %ERRORLEVEL% NEQ 0 (
-    ECHO ERROR: dumont-react compile failed.
-    EXIT /B 1
-)
-
-ECHO ========================================
 ECHO [2/4] Building connector (skip tests)...
 ECHO ========================================
 cd /d "%ROOT%connector"
