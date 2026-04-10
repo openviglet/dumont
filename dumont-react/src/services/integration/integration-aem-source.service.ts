@@ -80,4 +80,32 @@ export class TurIntegrationAemSourceService {
       `${this.connectorUrl}/${source.id}/reindexAll`
     );
   }
+
+  async testConnection(payload: {
+    endpoint: string;
+    username: string;
+    password: string;
+  }): Promise<{ success: boolean; message: string }> {
+    const { data } = await this.axiosInstance.post<{
+      success: boolean;
+      message: string;
+    }>(`${this.aemUrl}/test-connection`, payload);
+    return data;
+  }
+
+  async browse(payload: {
+    endpoint: string;
+    username: string;
+    password: string;
+    path: string;
+  }): Promise<{
+    success: boolean;
+    children: { name: string; path: string; primaryType: string }[];
+  }> {
+    const { data } = await this.axiosInstance.post<{
+      success: boolean;
+      children: { name: string; path: string; primaryType: string }[];
+    }>(`${this.aemUrl}/browse`, payload);
+    return data;
+  }
 }

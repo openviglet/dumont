@@ -1,5 +1,6 @@
 import { ROUTES } from "@/app/routes.const";
 import { IntegrationSourceForm } from "@/components/integration/integration.source.form";
+import { AemSourceWizard } from "@/components/integration/wizard/aem-source-wizard";
 import { SubPageHeader } from "@/components/sub.page.header";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
@@ -115,6 +116,20 @@ export default function IntegrationInstanceSourcePage() {
       setDryScanning(false);
     }
   }
+  if (isNew) {
+    return (
+      <>
+        <SubPageHeader icon={IconGitCommit} name={t("forms.wizard.newSource")}
+          feature={t("integration.sources.title")}
+          description={t("forms.wizard.newSourceDesc")}
+          onDelete={() => {}}
+          open={false}
+          setOpen={() => {}} />
+        <AemSourceWizard integrationId={id} />
+      </>
+    );
+  }
+
   return (
     <>
       <SubPageHeader icon={IconGitCommit} name={t("integration.sources.title")}

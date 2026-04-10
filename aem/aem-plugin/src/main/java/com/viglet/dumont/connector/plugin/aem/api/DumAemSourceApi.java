@@ -164,7 +164,13 @@ public class DumAemSourceApi {
     public DumAemSource dumAemSourceAdd(@RequestBody DumAemSource dumAemSource) {
         dumAemSource.getLocalePaths().forEach(localePath -> localePath.setDumAemSource(dumAemSource));
         dumAemSource.getAttributeSpecifications().forEach(spec -> spec.setDumAemSource(dumAemSource));
-        dumAemSource.getModels().forEach(model -> model.setDumAemSource(dumAemSource));
+        dumAemSource.getModels().forEach(model -> {
+            model.setDumAemSource(dumAemSource);
+            model.getTargetAttrs().forEach(targetAttr -> {
+                targetAttr.setDumAemModel(model);
+                targetAttr.getSourceAttrs().forEach(sourceAttr -> sourceAttr.setDumAemTargetAttribute(targetAttr));
+            });
+        });
         this.dumAemSourceRepository.save(dumAemSource);
         return dumAemSource;
     }
