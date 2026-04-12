@@ -31,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
@@ -55,16 +57,19 @@ public class DumConnectorApi {
     private final DumConnectorPlugin plugin;
     private final DumConnectorContentAuditTask auditTask;
     private final DumConnectorIndexAllByTabService indexAllByTabService;
+    private final String apiKey;
 
     public DumConnectorApi(DumConnectorIndexingService indexingService,
             DumConnectorSolrService dumConnectorSolr, DumConnectorPlugin plugin,
             DumConnectorContentAuditTask auditTask,
-            DumConnectorIndexAllByTabService indexAllByTabService) {
+            DumConnectorIndexAllByTabService indexAllByTabService,
+            @Value("${turing.apiKey}") String apiKey) {
         this.indexingService = indexingService;
         this.dumConnectorSolr = dumConnectorSolr;
         this.plugin = plugin;
         this.auditTask = auditTask;
         this.indexAllByTabService = indexAllByTabService;
+        this.apiKey = apiKey;
     }
 
     @GetMapping("status")
@@ -72,6 +77,7 @@ public class DumConnectorApi {
         Map<String, String> status = new HashMap<>();
         status.put(STATUS_KEY, "ok");
         status.put("provider", plugin.getProviderName());
+        status.put("apiKey", apiKey);
         return status;
     }
 

@@ -42,6 +42,7 @@ public class DumApiKeyFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         return !uri.startsWith("/api")
                 || uri.startsWith("/api/v2/aem/status")
-                || uri.startsWith("/api/v2/aem/index/");
+                || uri.startsWith("/api/v2/aem/index/")
+                || uri.startsWith("/api/v2/connector/status");
     }
 }

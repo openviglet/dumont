@@ -16,8 +16,14 @@ export function PluginProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     axios
-      .get<{ status: string; provider: string }>("/api/v2/connector/status")
-      .then(({ data }) => setProvider(data.provider))
+      .get<{ status: string; provider: string; apiKey?: string }>("/api/v2/connector/status")
+      .then(({ data }) => {
+        setProvider(data.provider);
+        // In standalone mode, set the API key for all subsequent requests
+        if (data.apiKey) {
+          axios.defaults.headers.common["Key"] = data.apiKey;
+        }
+      })
       .catch(() => setProvider(null))
       .finally(() => setLoading(false));
   }, []);
