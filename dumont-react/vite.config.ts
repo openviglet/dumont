@@ -25,6 +25,7 @@ export default defineConfig({
         i18next: { singleton: true, requiredVersion: "*" },
         axios: { singleton: true, requiredVersion: "*" },
         sonner: { singleton: true, requiredVersion: "*" },
+        "next-themes": { singleton: true, requiredVersion: "*" },
       },
     }),
   ],
