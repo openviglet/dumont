@@ -32,7 +32,7 @@ import { TurSNFieldService } from "@/services/sn/sn.field.service"
 import { TurSNSiteService } from "@/services/sn/sn.service"
 import { IconFileText, IconGavel, IconList, IconMap } from "@tabler/icons-react"
 import { useTranslation } from "react-i18next"
-import { FormActions } from "../ui/form-actions"
+import { StickySaveBar } from "../ui/sticky-save-bar"
 import { FormItemTwoColumns } from "../ui/form-item-two-columns"
 import { SectionCard } from "../ui/section-card"
 import { DynamicIndexingRuleFields } from "./dynamic.indexing.rule.field"
@@ -180,6 +180,10 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
     <div className="px-6 py-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
+          <StickySaveBar
+            title={form.watch("name") || (isNew ? t("integration.indexingRules.newRule") : t("integration.indexingRules.title"))}
+            onCancel={() => navigate(`${ROUTES.INTEGRATION_INSTANCE}/${integrationId}/indexing-rule`)}
+          />
           <div className="space-y-4">
             {/* Section: Basic Info */}
             <SectionCard variant="blue">
@@ -374,10 +378,6 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
           </div>
 
           {/* Action Footer */}
-          <FormActions className="mt-6">
-            <FormActions.Cancel onClick={() => navigate(`${ROUTES.INTEGRATION_INSTANCE}/${integrationId}/indexing-rule`)} />
-            <FormActions.Submit />
-          </FormActions>
         </form>
       </Form>
     </div>

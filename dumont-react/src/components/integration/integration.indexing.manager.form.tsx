@@ -7,7 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { FormActions } from "@/components/ui/form-actions";
+import { StickySaveBar } from "@/components/ui/sticky-save-bar";
 import {
   Select,
   SelectContent,
@@ -24,7 +24,8 @@ import {
   IconLink,
   IconSettings,
 } from "@tabler/icons-react";
-import { toast } from "@viglet/viglet-design-system";
+import { GradientButton, toast } from "@viglet/viglet-design-system";
+import { IconDeviceFloppy, IconRotate } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -173,6 +174,21 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
         className="space-y-0"
         autoComplete="off"
       >
+        <StickySaveBar
+          title={t("integration.indexingManager.title")}
+          actions={
+            <>
+              <GradientButton type="button" size="sm" variant="outline" onClick={() => form.reset()}>
+                <IconRotate className="size-4" />
+                {t("forms.common.reset")}
+              </GradientButton>
+              <GradientButton type="submit" size="sm" loading={submitting}>
+                <IconDeviceFloppy className="size-4" />
+                {actionLabel}
+              </GradientButton>
+            </>
+          }
+        />
         <Stepper completedSteps={[step1Done, step2Done, step3Done]}>
           {/* Step 1: Source */}
           <Stepper.Step index={0}>
@@ -293,11 +309,6 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
           <AdvancedSettings form={form} />
         )}
 
-        {/* Footer */}
-        <FormActions>
-          <FormActions.Cancel onClick={() => form.reset()}>{t("forms.common.reset")}</FormActions.Cancel>
-          <FormActions.Submit loading={submitting}>{actionLabel}</FormActions.Submit>
-        </FormActions>
       </form>
     </Form>
   );

@@ -19,7 +19,7 @@ import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { FormActions } from "../ui/form-actions";
+import { StickySaveBar } from "../ui/sticky-save-bar";
 import { SectionCard } from "../ui/section-card";
 "use client"
 
@@ -72,6 +72,10 @@ export const IntegrationWcSourceForm: React.FC<Props> = ({ value, isNew, integra
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6">
+        <StickySaveBar
+          title={form.watch("title") || (isNew ? t("integration.wcSources.newSource") : t("integration.wcSources.title"))}
+          onCancel={() => navigate(sourceInstanceRoute)}
+        />
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general"><IconSettings className="size-4" />{t("forms.wcSource.general")}</TabsTrigger>
@@ -208,10 +212,6 @@ export const IntegrationWcSourceForm: React.FC<Props> = ({ value, isNew, integra
           </TabsContent>
         </Tabs>
 
-        <FormActions>
-          <FormActions.Cancel onClick={() => navigate(sourceInstanceRoute)} />
-          <FormActions.Submit />
-        </FormActions>
       </form>
     </Form>
   )

@@ -23,7 +23,7 @@ import {
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { FormActions } from "../ui/form-actions";
+import { StickySaveBar } from "../ui/sticky-save-bar";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { SectionCard } from "../ui/section-card";
@@ -82,6 +82,10 @@ export const IntegrationDbSourceForm: React.FC<Props> = ({ value, isNew, integra
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6">
+        <StickySaveBar
+          title={form.watch("name") || (isNew ? t("integration.dbSources.newSource") : t("integration.dbSources.title"))}
+          onCancel={() => navigate(sourceInstanceRoute)}
+        />
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general">
@@ -523,10 +527,6 @@ export const IntegrationDbSourceForm: React.FC<Props> = ({ value, isNew, integra
           </TabsContent>
         </Tabs>
 
-        <FormActions>
-          <FormActions.Cancel onClick={() => navigate(sourceInstanceRoute)} />
-          <FormActions.Submit />
-        </FormActions>
       </form>
     </Form>
   )

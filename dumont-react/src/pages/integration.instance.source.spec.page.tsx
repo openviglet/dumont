@@ -10,7 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { FormActions } from "@/components/ui/form-actions";
+import { StickySaveBar } from "@/components/ui/sticky-save-bar";
 import { FormItemTwoColumns } from "@/components/ui/form-item-two-columns";
 import { GradientSwitch } from "@/components/ui/gradient-switch";
 import { Input } from "@/components/ui/input";
@@ -121,6 +121,10 @@ export default function IntegrationInstanceSourceSpecPage() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6">
+          <StickySaveBar
+            title={form.watch("name") || t("forms.integrationSource.specUntitled")}
+            onCancel={() => navigate(specTabRoute)}
+          />
           <SectionCard variant="blue">
             <SectionCard.Header
               icon={IconSettings}
@@ -283,10 +287,6 @@ export default function IntegrationInstanceSourceSpecPage() {
             </SectionCard.Content>
           </SectionCard>
 
-          <FormActions>
-            <FormActions.Cancel onClick={() => navigate(specTabRoute)} />
-            <FormActions.Submit />
-          </FormActions>
         </form>
       </Form>
     </>

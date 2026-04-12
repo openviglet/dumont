@@ -9,7 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { FormActions } from "@/components/ui/form-actions";
+import { StickySaveBar } from "@/components/ui/sticky-save-bar";
 import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/ui/section-card";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
@@ -97,6 +97,10 @@ export default function IntegrationInstanceSourceModelPage() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6">
+          <StickySaveBar
+            title={form.watch("type") || t("forms.integrationSource.modelUntitled")}
+            onCancel={() => navigate(modelTabRoute)}
+          />
           <SectionCard variant="violet">
             <SectionCard.Header
               icon={IconSettings}
@@ -163,10 +167,6 @@ export default function IntegrationInstanceSourceModelPage() {
             </SectionCard.Content>
           </SectionCard>
 
-          <FormActions>
-            <FormActions.Cancel onClick={() => navigate(modelTabRoute)} />
-            <FormActions.Submit />
-          </FormActions>
         </form>
       </Form>
     </>
