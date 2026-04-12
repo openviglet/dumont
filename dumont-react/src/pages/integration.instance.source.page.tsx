@@ -19,7 +19,15 @@ import { useNavigate, useParams } from "react-router-dom";
 export default function IntegrationInstanceSourcePage() {
   const navigate = useNavigate();
   const { id, sourceId, tab = "general" } = useParams() as { id: string, sourceId: string, tab?: string };
-  const [integrationAemSource, setIntegrationAemSource] = useState<TurIntegrationAemSource>({} as TurIntegrationAemSource);
+  const [integrationAemSource, setIntegrationAemSource] = useState<TurIntegrationAemSource>({
+    id: "", name: "", endpoint: "", username: "", password: "",
+    rootPath: "", contentType: "", subType: "", oncePattern: "",
+    defaultLocale: "", localeClass: "", deltaClass: "",
+    author: false, publish: false,
+    authorSNSite: "", publishSNSite: "",
+    authorURLPrefix: "", publishURLPrefix: "",
+    localePaths: [], attributeSpecifications: [], models: [],
+  });
   const [isNew, setIsNew] = useState<boolean>(true);
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
   const turIntegrationConnectorService = useMemo(() => new TurIntegrationConnectorService(id), [id]);

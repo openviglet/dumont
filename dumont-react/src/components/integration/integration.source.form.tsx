@@ -46,8 +46,30 @@ const turLocaleService = new TurLocaleService();
 export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onSourceUpdated }) => {
   const { t } = useTranslation();
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(integrationId), [integrationId]);
+  const sanitize = (src: TurIntegrationAemSource): TurIntegrationAemSource => ({
+    ...src,
+    name: src.name ?? "",
+    endpoint: src.endpoint ?? "",
+    username: src.username ?? "",
+    password: src.password ?? "",
+    rootPath: src.rootPath ?? "",
+    contentType: src.contentType ?? "",
+    subType: src.subType ?? "",
+    oncePattern: src.oncePattern ?? "",
+    defaultLocale: src.defaultLocale ?? "",
+    localeClass: src.localeClass ?? "",
+    deltaClass: src.deltaClass ?? "",
+    authorSNSite: src.authorSNSite ?? "",
+    publishSNSite: src.publishSNSite ?? "",
+    authorURLPrefix: src.authorURLPrefix ?? "",
+    publishURLPrefix: src.publishURLPrefix ?? "",
+    localePaths: src.localePaths ?? [],
+    attributeSpecifications: src.attributeSpecifications ?? [],
+    models: src.models ?? [],
+  });
+
   const form = useForm<TurIntegrationAemSource>({
-    defaultValues: value
+    defaultValues: sanitize(value)
   });
   const { control, register } = form;
   const navigate = useNavigate()
@@ -55,7 +77,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
   const authorEnabled = form.watch("author");
   const publishEnabled = form.watch("publish");
   useEffect(() => {
-    form.reset(value);
+    form.reset(sanitize(value));
     turLocaleService.query().then(setLocales)
   }, [form, value]);
 
