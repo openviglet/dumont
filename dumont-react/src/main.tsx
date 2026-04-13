@@ -1,5 +1,11 @@
 import i18n from "@/i18n";
-import { toast } from "@viglet/viglet-design-system";
+import {
+  BackendStatusProvider,
+  ErrorBoundary,
+  reportBackendOffline,
+  reportBackendOnline,
+  toast,
+} from "@viglet/viglet-design-system";
 import axios from "axios";
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -24,11 +30,33 @@ axios.interceptors.request.use((config) => {
   return config;
 });
 
+/**
+ * Status codes that indicate the backend is effectively unreachable:
+ * - no response at all (network/DNS/connection refused)
+ * - 502 Bad Gateway / 503 Service Unavailable / 504 Gateway Timeout
+ *   (these are what the Vite dev proxy / nginx / CDN returns when the upstream is down)
+ */
+function isBackendUnreachable(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) return false;
+  if (!error.response) return true;
+  const status = error.response.status;
+  return status === 502 || status === 503 || status === 504;
+}
+
 axios.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    reportBackendOnline();
+    return response;
+  },
   (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 422) {
-      toast.error(i18n.t("common.apiKeyMismatch"));
+    if (isBackendUnreachable(error)) {
+      reportBackendOffline();
+    } else if (axios.isAxiosError(error) && error.response) {
+      // Any HTTP response from the backend (even 4xx) proves it is reachable.
+      reportBackendOnline();
+      if (error.response.status === 422) {
+        toast.error(i18n.t("common.apiKeyMismatch"));
+      }
     }
     return Promise.reject(error);
   }
@@ -37,7 +65,11 @@ axios.interceptors.response.use(
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename="/dumont">
-      <App />
+      <ErrorBoundary>
+        <BackendStatusProvider healthEndpoint="/api/v2/ping">
+          <App />
+        </BackendStatusProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   </React.StrictMode>
 );
