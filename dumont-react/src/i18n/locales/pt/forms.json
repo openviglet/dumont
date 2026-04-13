@@ -265,7 +265,13 @@
       "selectClass": "Selecione um extrator...",
       "none": "Nenhum (sem extrator)",
       "manualEntry": "Digitar nome da classe manualmente",
-      "useList": "Usar lista"
+      "useList": "Usar lista",
+      "placeholder": "Escolha da lista ou digite uma classe customizada (com.exemplo.MeuExtrator)",
+      "noMatch": "Nenhuma classe conhecida corresponde. Você ainda pode usar esse valor customizado.",
+      "clear": "Limpar campo",
+      "recommended": "Recomendadas (built-in)",
+      "fromClasspath": "Do classpath JVM",
+      "scanning": "Escaneando classpath..."
     },
     "importExport": {
       "import": "Importar JSON",
@@ -865,9 +871,11 @@
       "modelDetailDesc": "Configure o tipo de conteúdo, subtipo e mapeamentos de atributos de destino.",
       "modelType": "Tipo de Conteúdo",
       "modelTypeDesc": "O tipo de conteúdo do AEM (ex.: cq:Page).",
+      "modelTypePlaceholder": "Selecione o tipo de conteúdo...",
       "modelTypeRequired": "O tipo de conteúdo é obrigatório.",
       "modelSubType": "Subtipo",
       "modelSubTypeDesc": "O subtipo de conteúdo do AEM (ex.: cq:PageContent).",
+      "modelSubTypePlaceholder": "Selecione o subtipo do asset...",
       "modelClassName": "Nome da Classe",
       "modelClassNameDesc": "Classe Java responsável por processar este modelo de conteúdo.",
       "targetAttrs": "Atributos de Destino",

@@ -265,7 +265,13 @@
       "selectClass": "Select an extractor...",
       "none": "None (no extractor)",
       "manualEntry": "Type class name manually",
-      "useList": "Use list"
+      "useList": "Use list",
+      "placeholder": "Pick from list or type custom class (com.example.MyExtractor)",
+      "noMatch": "No known class matches. You can still use this custom value.",
+      "clear": "Clear field",
+      "recommended": "Recommended (built-in)",
+      "fromClasspath": "From JVM classpath",
+      "scanning": "Scanning classpath..."
     },
     "importExport": {
       "import": "Import JSON",
@@ -865,9 +871,11 @@
       "modelDetailDesc": "Configure the content type, subtype, and target attribute mappings.",
       "modelType": "Content Type",
       "modelTypeDesc": "The AEM content type (e.g., cq:Page).",
+      "modelTypePlaceholder": "Select content type...",
       "modelTypeRequired": "Content type is required.",
       "modelSubType": "Sub Type",
       "modelSubTypeDesc": "The AEM content subtype (e.g., cq:PageContent).",
+      "modelSubTypePlaceholder": "Select asset sub type...",
       "modelClassName": "Class Name",
       "modelClassNameDesc": "Java class responsible for processing this content model.",
       "targetAttrs": "Target Attributes",

@@ -14,13 +14,17 @@ import org.apache.hc.core5.http.HttpHeaders;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
+import com.viglet.dumont.connector.plugin.aem.service.DumAemExtractorScannerService;
+import com.viglet.dumont.connector.plugin.aem.service.DumAemExtractorScannerService.ExtractorClass;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +36,20 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "AEM Source Wizard", description = "AEM Source Wizard operations")
 @Slf4j
 public class DumAemSourceWizardApi {
+
+    private final DumAemExtractorScannerService extractorScanner;
+
+    public DumAemSourceWizardApi(DumAemExtractorScannerService extractorScanner) {
+        this.extractorScanner = extractorScanner;
+    }
+
+    @Operation(summary = "List Java extractor classes available in the JVM classpath")
+    @GetMapping("/extractors")
+    public List<ExtractorClass> listExtractors(
+            @RequestParam(defaultValue = "attribute") String category,
+            @RequestParam(required = false) String query) {
+        return extractorScanner.list(category, query);
+    }
 
     @Operation(summary = "Test connection to an AEM instance")
     @PostMapping("/test-connection")

@@ -108,4 +108,16 @@ export class TurIntegrationAemSourceService {
     }>(`${this.aemUrl}/browse`, payload);
     return data;
   }
+
+  async listExtractors(
+    category: "attribute" | "content" | "url" | "delta",
+    query?: string,
+  ): Promise<{ fqcn: string; simpleName: string; packageName: string; category: string }[]> {
+    const { data } = await this.axiosInstance.get<
+      { fqcn: string; simpleName: string; packageName: string; category: string }[]
+    >(`${this.aemUrl}/extractors`, {
+      params: { category, ...(query ? { query } : {}) },
+    });
+    return data;
+  }
 }

@@ -10,7 +10,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { StickySaveBar } from "@/components/ui/sticky-save-bar";
+import { AemClassSelect } from "@/components/integration/aem-class-select";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SectionCard } from "@/components/ui/section-card";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 
@@ -135,9 +143,23 @@ export default function IntegrationInstanceSourceModelPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("forms.integrationSource.modelType")}</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="cq:Page" />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <FormControl>
+                        <SelectTrigger className="w-60">
+                          <SelectValue placeholder={t("forms.integrationSource.modelTypePlaceholder")} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="cq:Page">
+                          <span className="font-medium">Page</span>
+                          <span className="text-xs text-muted-foreground font-mono ml-2">cq:Page</span>
+                        </SelectItem>
+                        <SelectItem value="dam:Asset">
+                          <span className="font-medium">Asset</span>
+                          <span className="text-xs text-muted-foreground font-mono ml-2">dam:Asset</span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormDescription>{t("forms.integrationSource.modelTypeDesc")}</FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -147,16 +169,40 @@ export default function IntegrationInstanceSourceModelPage() {
               <FormField
                 control={form.control}
                 name="subType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("forms.integrationSource.modelSubType")}</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="cq:PageContent" />
-                    </FormControl>
-                    <FormDescription>{t("forms.integrationSource.modelSubTypeDesc")}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const currentType = form.watch("type");
+                  const isAsset = currentType === "dam:Asset";
+                  return (
+                    <FormItem>
+                      <FormLabel>{t("forms.integrationSource.modelSubType")}</FormLabel>
+                      {isAsset ? (
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                          <FormControl>
+                            <SelectTrigger className="w-60">
+                              <SelectValue placeholder={t("forms.integrationSource.modelSubTypePlaceholder")} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="static-file">
+                              <span className="font-medium">Static File</span>
+                              <span className="text-xs text-muted-foreground font-mono ml-2">static-file</span>
+                            </SelectItem>
+                            <SelectItem value="contentFragment">
+                              <span className="font-medium">Content Fragment</span>
+                              <span className="text-xs text-muted-foreground font-mono ml-2">contentFragment</span>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <FormControl>
+                          <Input {...field} placeholder="cq:PageContent" />
+                        </FormControl>
+                      )}
+                      <FormDescription>{t("forms.integrationSource.modelSubTypeDesc")}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
@@ -166,7 +212,12 @@ export default function IntegrationInstanceSourceModelPage() {
                   <FormItem>
                     <FormLabel>{t("forms.integrationSource.modelClassName")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="com.example.ModelHandler" />
+                      <AemClassSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        category="model"
+                        integrationId={id}
+                      />
                     </FormControl>
                     <FormDescription>{t("forms.integrationSource.modelClassNameDesc")}</FormDescription>
                     <FormMessage />

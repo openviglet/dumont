@@ -159,6 +159,7 @@ export default function IntegrationInstanceSourceSpecPage() {
                         value={field.value}
                         onChange={field.onChange}
                         category="extractor"
+                        integrationId={id}
                       />
                     </FormControl>
                     <FormDescription>{t("forms.integrationSource.specClassNameDesc")}</FormDescription>

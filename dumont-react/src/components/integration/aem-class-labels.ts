@@ -74,14 +74,7 @@ export const AEM_EXTRACTOR_CLASSES: AemClassOption[] = [
   },
 ];
 
-export const AEM_MODEL_CLASSES: AemClassOption[] = [
-  {
-    fqcn: "com.viglet.dumont.connector.aem.sample.ext.DumAemExtSampleModelJson",
-    label: "Sample Model JSON",
-    description: "Processes page model.json for field extraction.",
-    category: "model",
-  },
-];
+export const AEM_MODEL_CLASSES: AemClassOption[] = [];
 
 const ALL_CLASSES = [...AEM_EXTRACTOR_CLASSES, ...AEM_MODEL_CLASSES];
 
