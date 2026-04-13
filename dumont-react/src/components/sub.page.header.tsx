@@ -1,4 +1,4 @@
-import { IconDotsVertical, IconPlus } from "@tabler/icons-react";
+import { IconDotsVertical, IconDownload, IconPlus } from "@tabler/icons-react";
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { DialogDelete } from "./dialog.delete";
@@ -28,12 +28,14 @@ interface Props {
   description: string;
   urlBase?: string;
   onDelete?: () => void;
+  onExport?: () => void;
+  exportLabel?: string;
   open?: boolean;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   children?: React.ReactNode;
 }
 
-const SubPageHeaderComponent: React.FC<Props> = ({ icon: Icon, feature, description, urlBase, onDelete, name, open, setOpen, children }) => {
+const SubPageHeaderComponent: React.FC<Props> = ({ icon: Icon, feature, description, urlBase, onDelete, onExport, exportLabel, name, open, setOpen, children }) => {
   const navigate = useNavigate();
 
   const actions: ActionProps[] = [];
@@ -99,6 +101,18 @@ const SubPageHeaderComponent: React.FC<Props> = ({ icon: Icon, feature, descript
                 })}
               </DropdownMenuContent>
             </DropdownMenu>
+          )}
+          {onExport && (
+            <GradientButton
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={onExport}
+              aria-label={exportLabel ?? "Export"}
+              title={exportLabel ?? "Export"}
+            >
+              <IconDownload className="size-5!" />
+            </GradientButton>
           )}
           {open !== undefined && onDelete !== undefined && setOpen !== undefined && (
             <DialogDelete feature={feature} name={name} onDelete={onDelete} open={open} setOpen={setOpen} />

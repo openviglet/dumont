@@ -41,9 +41,11 @@ interface Props {
   sourceId: string;
   tab: string;
   onSourceUpdated: (source: TurIntegrationAemSource) => void;
+  /** Optional extra content rendered directly below the StickySaveBar. */
+  headerActions?: React.ReactNode;
 }
 const turLocaleService = new TurLocaleService();
-export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onSourceUpdated }) => {
+export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onSourceUpdated, headerActions }) => {
   const { t } = useTranslation();
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(integrationId), [integrationId]);
   const sanitize = (src: TurIntegrationAemSource): TurIntegrationAemSource => ({
@@ -121,6 +123,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
           title={form.watch("name") || (isNew ? t("integration.sources.newSource") : t("integration.sources.title"))}
           onCancel={() => navigate(sourceInstanceRoute)}
         />
+        {headerActions}
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general">

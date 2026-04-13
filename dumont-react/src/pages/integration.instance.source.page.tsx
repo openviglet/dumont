@@ -6,7 +6,7 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurIntegrationConnectorService } from "@/services/integration/integration-connector.service";
 
-import { SourceImportExportBar } from "@/components/integration/source-import-export-bar";
+import { exportSourceToJson } from "@/components/integration/source-import-export";
 import type { BreadcrumbItem } from "@/contexts/breadcrumb.context";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
@@ -132,6 +132,20 @@ export default function IntegrationInstanceSourcePage() {
       setDryScanning(false);
     }
   }
+
+  function handleExport() {
+    if (!integrationAemSource?.name) return;
+    const json = exportSourceToJson(integrationAemSource);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${integrationAemSource.name}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(t("forms.importExport.exportSuccess"));
+  }
+
   if (isNew) {
     return (
       <>
@@ -152,49 +166,52 @@ export default function IntegrationInstanceSourcePage() {
         feature={t("integration.sources.title")}
         description={t("integration.sources.description")}
         onDelete={onDelete}
+        onExport={handleExport}
+        exportLabel={t("forms.importExport.export")}
         open={open}
         setOpen={setOpen} />
 
-      <div className="flex justify-between pb-4 px-6">
-        <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
-          <SourceImportExportBar
-            source={integrationAemSource}
-            onImport={(data) => {
-              setIntegrationAemSource((prev) => ({ ...prev, ...data } as TurIntegrationAemSource));
-            }}
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
-          <GradientButton
-            type="button"
-            variant="outline"
-            onClick={onDryScan}
-            disabled={isActionDisabled}
-            loading={dryScanning}
-          >
-            {t("integration.sources.dryScan")}
-          </GradientButton>
-          <GradientButton
-            type="button"
-            variant="outline"
-            onClick={onReindexAll}
-            disabled={isActionDisabled}
-            loading={reindexingAll}
-          >
-            {t("integration.sources.reindexAll")}
-          </GradientButton>
-          <GradientButton
-            type="button"
-            variant="outline"
-            onClick={onIndexAll}
-            disabled={isActionDisabled}
-            loading={indexingAll}
-          >
-            {t("integration.sources.indexAll")}
-          </GradientButton>
-        </div>
-      </div>
-      <IntegrationSourceForm value={integrationAemSource} isNew={isNew} integrationId={id} sourceId={sourceId} tab={tab} onSourceUpdated={setIntegrationAemSource} />
+      <IntegrationSourceForm
+        value={integrationAemSource}
+        isNew={isNew}
+        integrationId={id}
+        sourceId={sourceId}
+        tab={tab}
+        onSourceUpdated={setIntegrationAemSource}
+        headerActions={
+          <div className="flex justify-end">
+            <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
+              <GradientButton
+                type="button"
+                variant="outline"
+                onClick={onDryScan}
+                disabled={isActionDisabled}
+                loading={dryScanning}
+              >
+                {t("integration.sources.dryScan")}
+              </GradientButton>
+              <GradientButton
+                type="button"
+                variant="outline"
+                onClick={onReindexAll}
+                disabled={isActionDisabled}
+                loading={reindexingAll}
+              >
+                {t("integration.sources.reindexAll")}
+              </GradientButton>
+              <GradientButton
+                type="button"
+                variant="outline"
+                onClick={onIndexAll}
+                disabled={isActionDisabled}
+                loading={indexingAll}
+              >
+                {t("integration.sources.indexAll")}
+              </GradientButton>
+            </div>
+          </div>
+        }
+      />
 
     </>
   )

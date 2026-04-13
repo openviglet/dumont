@@ -86,6 +86,26 @@ export function StepContent({
         </p>
       </div>
 
+      <FormField
+        control={form.control}
+        name="name"
+        rules={{ required: t("forms.common.nameRequired") }}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>{t("forms.common.name")}</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                placeholder={t("forms.wizard.sourceNamePlaceholder")}
+                type="text"
+              />
+            </FormControl>
+            <FormDescription>{t("forms.wizard.sourceNameDesc")}</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <div>
         <FormLabel className="text-sm font-medium">
           {t("forms.integrationSource.contentType")}

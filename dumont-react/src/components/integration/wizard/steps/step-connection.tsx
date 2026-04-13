@@ -79,26 +79,6 @@ export function StepConnection({
 
       <FormField
         control={form.control}
-        name="name"
-        rules={{ required: t("forms.common.nameRequired") }}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>{t("forms.common.name")}</FormLabel>
-            <FormControl>
-              <Input
-                {...field}
-                placeholder={t("forms.wizard.sourceNamePlaceholder")}
-                type="text"
-              />
-            </FormControl>
-            <FormDescription>{t("forms.wizard.sourceNameDesc")}</FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
         name="endpoint"
         rules={{ required: t("forms.integration.endpointRequired") }}
         render={({ field }) => (

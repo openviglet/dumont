@@ -19,7 +19,6 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { WizardStepper, type WizardStepperStep } from "@/components/ui/wizard-stepper";
-import { SourceImportExportBar } from "../source-import-export-bar";
 import { StepConnection } from "./steps/step-connection";
 import { StepContent } from "./steps/step-content";
 import { StepFieldMapping } from "./steps/step-field-mapping";
@@ -90,12 +89,11 @@ export function AemSourceWizard({
   const watchSpecs = form.watch("attributeSpecifications");
 
   const step1Done =
-    !!watchName &&
     !!watchEndpoint &&
     !!watchUsername &&
     !!watchPassword &&
     connectionTested;
-  const step2Done = !!watchRootPath && !!watchContentType;
+  const step2Done = !!watchName && !!watchRootPath && !!watchContentType;
   const step3Done = watchAuthor || watchPublish;
   const step4Done = Array.isArray(watchSpecs) && watchSpecs.length > 0;
 
@@ -218,14 +216,6 @@ export function AemSourceWizard({
                 {t("forms.formActions.cancel")}
               </GradientButton>
             )}
-            <SourceImportExportBar
-              showExport={false}
-              onImport={(data) => {
-                form.reset({ ...form.getValues(), ...data, id: "" });
-                setConnectionTested(false);
-                toast.success(t("forms.importExport.importApplied"));
-              }}
-            />
           </div>
 
           <div>
