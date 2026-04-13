@@ -230,11 +230,8 @@ function Pagination({
 
 /* ── Main search content ── */
 function SearchContent() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const turing = useTuringUrlSearch(searchParams, (s: string) =>
-    setSearchParams(s)
-  );
+  const turing = useTuringUrlSearch();
   const query = turing.params.q ?? "*";
   const isLanding = query === "*" && turing.status !== "loading";
   const hasResults = turing.documents.length > 0;
@@ -481,12 +478,14 @@ function SearchContent() {
 
 export default function SearchPage() {
   const site = resolveSiteName();
+  const [searchParams, setSearchParams] = useSearchParams();
   return (
     <TuringProvider
       config={{
         site,
         locale: import.meta.env.VITE_LOCALE,
       }}
+      urlSync={{ searchParams, setSearchParams: (s) => setSearchParams(s) }}
     >
       <SearchContent />
     </TuringProvider>
