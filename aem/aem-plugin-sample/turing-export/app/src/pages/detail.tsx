@@ -134,7 +134,7 @@ export default function DetailPage() {
   const tags = toArray(fields.tags);
   const sourceApps = toArray(fields.source_apps);
   const title = fields.title ?? doc.title ?? "Untitled";
-  const text = fields.text ?? "";
+  const text = typeof fields.text === "string" ? fields.text : "";
   const description = fields.description ?? doc.description ?? "";
   const abstract = fields.abstract ?? "";
   const pageTemplate = fields.pageTemplate ?? "";
