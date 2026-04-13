@@ -1,0 +1,69 @@
+name: Publish GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # ── Marketplace ──
+      - name: Build Marketplace examples
+        run: |
+          for dir in */*-plugin-sample/turing-export/app; do
+            [ -d "$dir" ] || continue
+            project=$(basename "$(dirname "$(dirname "$dir")")")
+            echo "::group::Building $project"
+            (cd "$dir" && npm run package)
+            echo "::endgroup::"
+          done
+
+      # ── Assemble site ──
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p _site/marketplace
+
+          for dir in */*-plugin-sample/turing-export/app; do
+            [ -d "$dir" ] || continue
+            site=$(node -p "require('./$dir/package.json').name.replace(/^turing-example-/, '')")
+            mkdir -p "_site/marketplace/$site"
+            cp "$dir"/*.zip "_site/marketplace/$site/"
+            cp "$dir"/dist/turing-manifest.json "_site/marketplace/$site/" 2>/dev/null || true
+            cp "$dir"/README.md "_site/marketplace/$site/" 2>/dev/null || true
+          done
+
+      - name: Copy static pages assets
+        run: cp -r .github/pages/* _site/
+
+      - name: Add CNAME
+        run: echo "dumont.viglet.org" > _site/CNAME
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

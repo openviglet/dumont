@@ -34,6 +34,74 @@ updates:
         patterns:
           - "*"
 
+  - package-ecosystem: "npm"
+    directory: "/aem/aem-plugin-sample/turing-export/app"
+    schedule:
+      interval: "weekly"
+    target-branch: "2026.2"
+    open-pull-requests-limit: 15
+    ignore:
+      - dependency-name: "eslint"
+        versions: [">=10.0.0"]
+      - dependency-name: "@eslint/js"
+        versions: [">=10.0.0"]
+    groups:
+      react:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/assets/assets-plugin-sample/turing-export/app"
+    schedule:
+      interval: "weekly"
+    target-branch: "2026.2"
+    open-pull-requests-limit: 15
+    ignore:
+      - dependency-name: "eslint"
+        versions: [">=10.0.0"]
+      - dependency-name: "@eslint/js"
+        versions: [">=10.0.0"]
+    groups:
+      react:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/db/db-plugin-sample/turing-export/app"
+    schedule:
+      interval: "weekly"
+    target-branch: "2026.2"
+    open-pull-requests-limit: 15
+    ignore:
+      - dependency-name: "eslint"
+        versions: [">=10.0.0"]
+      - dependency-name: "@eslint/js"
+        versions: [">=10.0.0"]
+    groups:
+      react:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/web-crawler/wc-plugin-sample/turing-export/app"
+    schedule:
+      interval: "weekly"
+    target-branch: "2026.2"
+    open-pull-requests-limit: 15
+    ignore:
+      - dependency-name: "eslint"
+        versions: [">=10.0.0"]
+      - dependency-name: "@eslint/js"
+        versions: [">=10.0.0"]
+    groups:
+      react:
+        applies-to: version-updates
+        patterns:
+          - "*"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

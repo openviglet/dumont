@@ -1,0 +1,61 @@
+# Viglet Dumont DEP
+
+> Data Exchange Platform — connectors and integrations that ingest, transform and deliver content to search and AI platforms.
+
+## Documentation
+
+- [Dumont Docs](https://docs.viglet.org/dumont/): Official documentation
+- [GitHub Repository](https://github.com/openviglet/dumont): Source code (Apache 2.0)
+
+## Marketplace
+
+- [Marketplace Index](https://dumont.viglet.org/marketplace/marketplace.json): JSON catalog of available connector samples and templates
+
+### Available Packages
+
+- [WKND (AEM)](https://dumont.viglet.org/marketplace/wknd/): Adobe Experience Manager connector sample using the WKND reference site
+- [Celestial Gallery (Assets)](https://dumont.viglet.org/marketplace/celestial-gallery/): Assets connector sample indexing astrophotography
+- [Retro Arcade (Database)](https://dumont.viglet.org/marketplace/retro-arcade/): JDBC connector sample indexing a retro arcade catalog
+- [Wikipedia (Web Crawler)](https://dumont.viglet.org/marketplace/wikipedia/): Web crawler connector sample ingesting Wikipedia articles
+
+## Connectors
+
+- **AEM** (Adobe Experience Manager) — pages, assets and metadata ingestion
+- **Assets** — file-based asset ingestion with thumbnails and metadata extraction
+- **Database** — JDBC connector with SQL mapping and incremental delta
+- **Web Crawler** — URL filtering, content extraction and link following
+- **Filesystem** — local and remote filesystem ingestion
+
+## APIs
+
+- Connector API: `POST /api/v2/connector/index` — Orchestrates indexing, reindex and audit
+- Source APIs: `/api/v2/{aem,db,wc,assets}/source` — CRUD plus index/crawl actions per connector type
+- Monitoring API: `/api/v2/connector/monitoring/indexing` — Indexing stats and search
+- Indexing Rules API: `/api/v2/connector/indexing-rule` — CRUD for indexing rules
+- System Info API: `/api/v2/connector/system-info` — Runtime info and variables
+- AI Summary API: `GET /api/v2/connector/summary` — LLM-powered insights (proxied via Turing)
+
+## Authentication
+
+- HTTP header `Key: {apiKey}` on every `/api/**` request (or `?Key=…` query param)
+- Mismatched keys return HTTP 422 (to avoid Turing login redirects)
+
+## Indexing Providers
+
+- `turing` (default): indexes through the Viglet Turing Java SDK
+- `solr`: direct calls to an Apache Solr cluster
+- `elasticsearch`: direct calls to an Elasticsearch cluster
+
+## Ecosystem
+
+- [Viglet Turing ES](https://turing.viglet.org/): Companion Enterprise Search platform that Dumont feeds
+- Shared `turing-marketplace` format — Dumont samples include `export.json`, `*_content.json` and an `app/` SPA bundle
+
+## Key Features
+
+- Multiple pluggable connectors (AEM, Assets, DB, Web Crawler, Filesystem)
+- Three indexing backends (Turing, Solr, Elasticsearch) selected by property
+- Embedded message queue (Apache ActiveMQ Artemis) for async indexing
+- Scheduler support with cron expressions
+- Module-federated React frontend — runs standalone or mounted inside Turing
+- AI-powered connector insights via Spring AI and Turing's LLM service
