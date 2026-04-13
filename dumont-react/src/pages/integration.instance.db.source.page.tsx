@@ -1,11 +1,9 @@
 import { ROUTES } from "@/app/routes.const";
 import { IntegrationDbSourceForm } from "@/components/integration/integration.db.source.form";
-import { SubPageHeader } from "@/components/sub.page.header";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service";
 
 import type { TurIntegrationDbSource } from "@/models/integration/integration-db-source.model";
-import { IconDatabase } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
@@ -84,37 +82,25 @@ export default function IntegrationInstanceDbSourcePage() {
   }
 
   return (
-    <>
-      <SubPageHeader icon={IconDatabase} name={t("integration.dbSources.title")}
-        feature={t("integration.dbSources.title")}
-        description={t("integration.dbSources.description")}
-        onDelete={onDelete}
-        open={open}
-        setOpen={setOpen} />
-
-      <div className="flex justify-end pb-4 px-6">
-        <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
-          <GradientButton
-            type="button"
-            variant="outline"
-            onClick={onReindexAll}
-            disabled={isActionDisabled}
-            loading={reindexingAll}
-          >
+    <IntegrationDbSourceForm
+      value={integrationDbSource}
+      isNew={isNew}
+      integrationId={id}
+      sourceId={sourceId}
+      tab={tab}
+      onDelete={onDelete}
+      open={open}
+      setOpen={setOpen}
+      headerActions={
+        <>
+          <GradientButton type="button" variant="outline" size="sm" onClick={onReindexAll} disabled={isActionDisabled} loading={reindexingAll}>
             {t("integration.dbSources.reindexAll")}
           </GradientButton>
-          <GradientButton
-            type="button"
-            variant="outline"
-            onClick={onIndexAll}
-            disabled={isActionDisabled}
-            loading={indexingAll}
-          >
+          <GradientButton type="button" variant="outline" size="sm" onClick={onIndexAll} disabled={isActionDisabled} loading={indexingAll}>
             {t("integration.dbSources.indexAll")}
           </GradientButton>
-        </div>
-      </div>
-      <IntegrationDbSourceForm value={integrationDbSource} isNew={isNew} integrationId={id} sourceId={sourceId} tab={tab} />
-    </>
+        </>
+      }
+    />
   )
 }

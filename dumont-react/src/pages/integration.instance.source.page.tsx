@@ -1,8 +1,6 @@
 import { ROUTES } from "@/app/routes.const";
 import { IntegrationSourceForm } from "@/components/integration/integration.source.form";
 import { AemSourceWizard } from "@/components/integration/wizard/aem-source-wizard";
-import { SubPageHeader } from "@/components/sub.page.header";
-import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurIntegrationConnectorService } from "@/services/integration/integration-connector.service";
 
@@ -10,7 +8,6 @@ import { exportSourceToJson } from "@/components/integration/source-import-expor
 import type { BreadcrumbItem } from "@/contexts/breadcrumb.context";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
-import { IconGitCommit } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
@@ -147,72 +144,28 @@ export default function IntegrationInstanceSourcePage() {
   }
 
   if (isNew) {
-    return (
-      <>
-        <SubPageHeader icon={IconGitCommit} name={t("forms.wizard.newSource")}
-          feature={t("integration.sources.title")}
-          description={t("forms.wizard.newSourceDesc")}
-          onDelete={() => {}}
-          open={false}
-          setOpen={() => {}} />
-        <AemSourceWizard integrationId={id} />
-      </>
-    );
+    return <AemSourceWizard integrationId={id} />;
   }
 
   return (
-    <>
-      <SubPageHeader icon={IconGitCommit} name={t("integration.sources.title")}
-        feature={t("integration.sources.title")}
-        description={t("integration.sources.description")}
-        onDelete={onDelete}
-        onExport={handleExport}
-        exportLabel={t("forms.importExport.export")}
-        open={open}
-        setOpen={setOpen} />
-
-      <IntegrationSourceForm
-        value={integrationAemSource}
-        isNew={isNew}
-        integrationId={id}
-        sourceId={sourceId}
-        tab={tab}
-        onSourceUpdated={setIntegrationAemSource}
-        headerActions={
-          <div className="flex justify-end">
-            <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
-              <GradientButton
-                type="button"
-                variant="outline"
-                onClick={onDryScan}
-                disabled={isActionDisabled}
-                loading={dryScanning}
-              >
-                {t("integration.sources.dryScan")}
-              </GradientButton>
-              <GradientButton
-                type="button"
-                variant="outline"
-                onClick={onReindexAll}
-                disabled={isActionDisabled}
-                loading={reindexingAll}
-              >
-                {t("integration.sources.reindexAll")}
-              </GradientButton>
-              <GradientButton
-                type="button"
-                variant="outline"
-                onClick={onIndexAll}
-                disabled={isActionDisabled}
-                loading={indexingAll}
-              >
-                {t("integration.sources.indexAll")}
-              </GradientButton>
-            </div>
-          </div>
-        }
-      />
-
-    </>
+    <IntegrationSourceForm
+      value={integrationAemSource}
+      isNew={isNew}
+      integrationId={id}
+      sourceId={sourceId}
+      tab={tab}
+      onSourceUpdated={setIntegrationAemSource}
+      onDelete={onDelete}
+      onExport={handleExport}
+      open={open}
+      setOpen={setOpen}
+      onDryScan={onDryScan}
+      onReindexAll={onReindexAll}
+      onIndexAll={onIndexAll}
+      indexingDisabled={isActionDisabled}
+      dryScanning={dryScanning}
+      reindexingAll={reindexingAll}
+      indexingAll={indexingAll}
+    />
   )
 }

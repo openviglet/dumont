@@ -1,6 +1,5 @@
 import { ROUTES } from "@/app/routes.const";
 import { BadgeFieldType } from "@/components/badge-field-type";
-import { SubPageHeader } from "@/components/sub.page.header";
 import {
   Form,
   FormControl,
@@ -10,8 +9,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { StickySaveBar } from "@/components/ui/sticky-save-bar";
 import { FormItemTwoColumns } from "@/components/ui/form-item-two-columns";
+import { GradientButton } from "@/components/ui/gradient-button";
 import { GradientSwitch } from "@/components/ui/gradient-switch";
 import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/ui/section-card";
@@ -28,8 +27,8 @@ import { TurIntegrationAemSourceService } from "@/services/integration/integrati
 import { AemClassSelect } from "@/components/integration/aem-class-select";
 import type { TurIntegrationAemAttributeSpec } from "@/models/integration/integration-aem-attribute-spec.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
-import { IconFileDescription, IconSettings } from "@tabler/icons-react";
-import { toast } from "@viglet/viglet-design-system";
+import { IconDeviceFloppy, IconFileDescription, IconSettings, IconX } from "@tabler/icons-react";
+import { StickyPageHeader, toast } from "@viglet/viglet-design-system";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -111,20 +110,25 @@ export default function IntegrationInstanceSourceSpecPage() {
   }
 
   return (
-    <>
-      <SubPageHeader
-        icon={IconFileDescription}
-        feature={t("forms.integrationSource.specifications")}
-        name={form.watch("name") || t("forms.integrationSource.specUntitled")}
-        description={t("forms.integrationSource.specDetailDesc")}
-      />
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6">
-          <StickySaveBar
-            title={form.watch("name") || t("forms.integrationSource.specUntitled")}
-            onCancel={() => navigate(specTabRoute)}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
+        <StickyPageHeader>
+          <StickyPageHeader.Title
+            icon={IconFileDescription}
+            feature={t("forms.integrationSource.specifications")}
+            description={t("forms.integrationSource.specDetailDesc")}
           />
+          <StickyPageHeader.Actions>
+            <GradientButton type="submit" size="sm">
+              <IconDeviceFloppy className="size-4" />
+              {t("forms.formActions.saveChanges")}
+            </GradientButton>
+            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(specTabRoute)}>
+              <IconX className="size-4" />
+              {t("forms.formActions.cancel")}
+            </GradientButton>
+          </StickyPageHeader.Actions>
+        </StickyPageHeader>
           <SectionCard variant="blue">
             <SectionCard.Header
               icon={IconSettings}
@@ -288,8 +292,7 @@ export default function IntegrationInstanceSourceSpecPage() {
             </SectionCard.Content>
           </SectionCard>
 
-        </form>
-      </Form>
-    </>
+      </form>
+    </Form>
   );
 }

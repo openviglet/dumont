@@ -17,16 +17,17 @@ import type { TurIntegrationAemSource } from "@/models/integration/integration-a
 import type { TurLocale } from "@/models/locale/locale.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurLocaleService } from "@/services/locale/locale.service";
-import { IconBox, IconFileDescription, IconLanguage, IconSend, IconSettings, IconUser, IconWorld } from "@tabler/icons-react";
-import { toast } from "@viglet/viglet-design-system";
+import { IconBox, IconDeviceFloppy, IconDownload, IconEye, IconFileDescription, IconGitCommit, IconLanguage, IconRefresh, IconSend, IconSettings, IconTrash, IconUpload, IconUser, IconWorld, IconX } from "@tabler/icons-react";
+import { StickyPageHeader, toast } from "@viglet/viglet-design-system";
 import { useEffect, useMemo, useState } from "react";
 import {
   useForm
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { StickySaveBar } from "../ui/sticky-save-bar";
+import { DialogDelete } from "../dialog.delete";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
+import { GradientButton } from "../ui/gradient-button";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { SectionCard } from "../ui/section-card";
 import { AttributeSpecificationList } from "./attribute.specification.list";
@@ -41,11 +42,26 @@ interface Props {
   sourceId: string;
   tab: string;
   onSourceUpdated: (source: TurIntegrationAemSource) => void;
-  /** Optional extra content rendered directly below the StickySaveBar. */
-  headerActions?: React.ReactNode;
+  onDelete?: () => void;
+  onExport?: () => void;
+  open?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  onDryScan?: () => void;
+  onReindexAll?: () => void;
+  onIndexAll?: () => void;
+  /** Disables the indexing/reindex/dry-scan menu items (e.g., when the source is new). */
+  indexingDisabled?: boolean;
+  dryScanning?: boolean;
+  reindexingAll?: boolean;
+  indexingAll?: boolean;
 }
 const turLocaleService = new TurLocaleService();
-export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onSourceUpdated, headerActions }) => {
+export const IntegrationSourceForm: React.FC<Props> = ({
+  value, isNew, integrationId, sourceId, tab, onSourceUpdated,
+  onDelete, onExport, open, setOpen,
+  onDryScan, onReindexAll, onIndexAll,
+  indexingDisabled, dryScanning, reindexingAll, indexingAll,
+}) => {
   const { t } = useTranslation();
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(integrationId), [integrationId]);
   const sanitize = (src: TurIntegrationAemSource): TurIntegrationAemSource => ({
@@ -118,12 +134,43 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6">
-        <StickySaveBar
-          title={form.watch("name") || (isNew ? t("integration.sources.newSource") : t("integration.sources.title"))}
-          onCancel={() => navigate(sourceInstanceRoute)}
-        />
-        {headerActions}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
+        <StickyPageHeader>
+          <StickyPageHeader.Title icon={IconGitCommit} feature={t("integration.sources.title")} description={t("integration.sources.description")} />
+          <StickyPageHeader.Actions>
+            {/* Dropdown items (3-dot menu) */}
+            {onExport && (
+              <StickyPageHeader.Action label={t("forms.importExport.export")} icon={IconDownload} onClick={onExport} />
+            )}
+            {onDryScan && (
+              <StickyPageHeader.Action label={t("integration.sources.dryScan")} icon={IconEye} onClick={onDryScan} disabled={indexingDisabled || dryScanning} />
+            )}
+            {onReindexAll && (
+              <StickyPageHeader.Action label={t("integration.sources.reindexAll")} icon={IconRefresh} onClick={onReindexAll} disabled={indexingDisabled || reindexingAll} />
+            )}
+            {onIndexAll && (
+              <StickyPageHeader.Action label={t("integration.sources.indexAll")} icon={IconUpload} onClick={onIndexAll} disabled={indexingDisabled || indexingAll} />
+            )}
+            {open !== undefined && onDelete && setOpen && (
+              <StickyPageHeader.Action label={t("forms.formActions.delete") /* falls back to "Delete" */} icon={IconTrash} onClick={() => setOpen(true)} />
+            )}
+
+            {/* Dialog rendered without its own trigger — opened by the dropdown item above */}
+            {open !== undefined && onDelete && setOpen && (
+              <DialogDelete trigger={null} feature={t("integration.sources.title")} name={form.watch("name") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
+            )}
+
+            {/* Visible buttons */}
+            <GradientButton type="submit" size="sm">
+              <IconDeviceFloppy className="size-4" />
+              {t("forms.formActions.saveChanges")}
+            </GradientButton>
+            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(sourceInstanceRoute)}>
+              <IconX className="size-4" />
+              {t("forms.formActions.cancel")}
+            </GradientButton>
+          </StickyPageHeader.Actions>
+        </StickyPageHeader>
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general">

@@ -1,6 +1,6 @@
 "use client"
 
-import { toast } from "@viglet/viglet-design-system"
+import { StickyPageHeader, toast } from "@viglet/viglet-design-system"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
@@ -30,10 +30,11 @@ import type { TurSNSite } from "@/models/sn/sn-site.model"
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service"
 import { TurSNFieldService } from "@/services/sn/sn.field.service"
 import { TurSNSiteService } from "@/services/sn/sn.service"
-import { IconFileText, IconGavel, IconList, IconMap } from "@tabler/icons-react"
+import { IconDeviceFloppy, IconFileText, IconGavel, IconList, IconMap, IconTools, IconX } from "@tabler/icons-react"
 import { useTranslation } from "react-i18next"
-import { StickySaveBar } from "../ui/sticky-save-bar"
+import { DialogDelete } from "../dialog.delete"
 import { FormItemTwoColumns } from "../ui/form-item-two-columns"
+import { GradientButton } from "../ui/gradient-button"
 import { SectionCard } from "../ui/section-card"
 import { DynamicIndexingRuleFields } from "./dynamic.indexing.rule.field"
 // Constants
@@ -46,12 +47,18 @@ interface IntegrationIndexingRulesFormProps {
   value: TurIntegrationIndexingRule;
   integrationId: string;
   isNew: boolean;
+  onDelete?: () => void;
+  open?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesFormProps> = ({
   value,
   integrationId,
-  isNew
+  isNew,
+  onDelete,
+  open,
+  setOpen,
 }) => {
   const { t } = useTranslation();
   console.log("isNew", isNew);
@@ -177,14 +184,29 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
   const isAttributeFieldDisabled = !selectedSource || isLoadingFields;
 
   return (
-    <div className="px-6 py-8">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <StickySaveBar
-            title={form.watch("name") || (isNew ? t("integration.indexingRules.newRule") : t("integration.indexingRules.title"))}
-            onCancel={() => navigate(`${ROUTES.INTEGRATION_INSTANCE}/${integrationId}/indexing-rule`)}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
+        <StickyPageHeader>
+          <StickyPageHeader.Title
+            icon={IconTools}
+            feature={t("integration.indexingRules.title")}
+            description={t("integration.indexingRules.description")}
           />
-          <div className="space-y-4">
+          <StickyPageHeader.Actions>
+            {onDelete && open !== undefined && setOpen && (
+              <DialogDelete feature={t("integration.indexingRules.title")} name={form.watch("name") ?? ""} onDelete={onDelete} open={open} setOpen={setOpen} />
+            )}
+            <GradientButton type="submit" size="sm">
+              <IconDeviceFloppy className="size-4" />
+              {t("forms.formActions.saveChanges")}
+            </GradientButton>
+            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(`${ROUTES.INTEGRATION_INSTANCE}/${integrationId}/indexing-rule`)}>
+              <IconX className="size-4" />
+              {t("forms.formActions.cancel")}
+            </GradientButton>
+          </StickyPageHeader.Actions>
+        </StickyPageHeader>
+        <div className="space-y-4">
             {/* Section: Basic Info */}
             <SectionCard variant="blue">
               <SectionCard.Header icon={IconFileText} title={t("forms.integrationRules.ruleDetails")} description={t("forms.integrationRules.ruleDetailsDesc")} />
@@ -378,9 +400,8 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
           </div>
 
           {/* Action Footer */}
-        </form>
-      </Form>
-    </div>
+      </form>
+    </Form>
   );
 }
 

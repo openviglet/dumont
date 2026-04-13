@@ -4,21 +4,32 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TurIntegrationAssetsSource } from "@/models/integration/integration-assets-source.model";
 import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service";
-import { IconFolder, IconReplace, IconSettings } from "@tabler/icons-react";
-import { toast } from "@viglet/viglet-design-system";
+import { IconDeviceFloppy, IconFolder, IconReplace, IconSettings, IconX } from "@tabler/icons-react";
+import { StickyPageHeader, toast } from "@viglet/viglet-design-system";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { StickySaveBar } from "../ui/sticky-save-bar";
+import { DialogDelete } from "../dialog.delete";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
+import { GradientButton } from "../ui/gradient-button";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { SectionCard } from "../ui/section-card";
 "use client"
 
-interface Props { value: TurIntegrationAssetsSource; isNew: boolean; integrationId: string; sourceId: string; tab: string; }
+interface Props {
+  value: TurIntegrationAssetsSource;
+  isNew: boolean;
+  integrationId: string;
+  sourceId: string;
+  tab: string;
+  onDelete?: () => void;
+  open?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  headerActions?: React.ReactNode;
+}
 
-export const IntegrationAssetsSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab }) => {
+export const IntegrationAssetsSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onDelete, open, setOpen, headerActions }) => {
   const { t } = useTranslation();
   const service = useMemo(() => new TurIntegrationAssetsSourceService(integrationId), [integrationId]);
   const form = useForm<TurIntegrationAssetsSource>({ defaultValues: value });
@@ -45,11 +56,24 @@ export const IntegrationAssetsSourceForm: React.FC<Props> = ({ value, isNew, int
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6">
-        <StickySaveBar
-          title={form.watch("name") || (isNew ? t("integration.assetsSources.newSource") : t("integration.assetsSources.title"))}
-          onCancel={() => navigate(sourceInstanceRoute)}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
+        <StickyPageHeader>
+          <StickyPageHeader.Title icon={IconFolder} feature={t("integration.assetsSources.title")} description={t("integration.assetsSources.description")} />
+          <StickyPageHeader.Actions>
+            {open !== undefined && onDelete && setOpen && (
+              <DialogDelete feature={t("integration.assetsSources.title")} name={form.watch("name") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
+            )}
+            {headerActions}
+            <GradientButton type="submit" size="sm">
+              <IconDeviceFloppy className="size-4" />
+              {t("forms.formActions.saveChanges")}
+            </GradientButton>
+            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(sourceInstanceRoute)}>
+              <IconX className="size-4" />
+              {t("forms.formActions.cancel")}
+            </GradientButton>
+          </StickyPageHeader.Actions>
+        </StickyPageHeader>
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general"><IconSettings className="size-4" />{t("forms.assetsSource.general")}</TabsTrigger>

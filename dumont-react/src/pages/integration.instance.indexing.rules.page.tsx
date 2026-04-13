@@ -1,9 +1,7 @@
 import { ROUTES } from "@/app/routes.const";
 import { IntegrationIndexingRulesForm } from "@/components/integration/integration.indexing.rules.form";
-import { SubPageHeader } from "@/components/sub.page.header";
 import type { TurIntegrationIndexingRule } from "@/models/integration/integration-indexing-rule.model";
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service";
-import { IconTools } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,14 +37,13 @@ export default function IntegrationInstanceIndexingRulePage() {
     setOpen(false);
   }
   return (
-    <>
-      <SubPageHeader icon={IconTools} feature={t("integration.indexingRules.title")} name={integrationIndexingRules.name}
-        description={t("integration.indexingRules.description")}
-        onDelete={onDelete}
-        open={open}
-        setOpen={setOpen}
-      />
-      <IntegrationIndexingRulesForm value={integrationIndexingRules} integrationId={id} isNew={isNew} />
-    </>
+    <IntegrationIndexingRulesForm
+      value={integrationIndexingRules}
+      integrationId={id}
+      isNew={isNew}
+      onDelete={onDelete}
+      open={open}
+      setOpen={setOpen}
+    />
   )
 }

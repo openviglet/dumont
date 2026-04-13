@@ -1,5 +1,4 @@
 import { ROUTES } from "@/app/routes.const";
-import { SubPageHeader } from "@/components/sub.page.header";
 import {
   Form,
   FormControl,
@@ -9,7 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { StickySaveBar } from "@/components/ui/sticky-save-bar";
 import { AemClassSelect } from "@/components/integration/aem-class-select";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,13 +18,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SectionCard } from "@/components/ui/section-card";
+import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 
 import { TargetAttributeList } from "@/components/integration/target.attribute.list";
 import type { TurIntegrationAemPluginModel } from "@/models/integration/integration-aem-plugin-model.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
-import { IconBox, IconSettings, IconTarget } from "@tabler/icons-react";
-import { toast } from "@viglet/viglet-design-system";
+import { IconBox, IconDeviceFloppy, IconSettings, IconTarget, IconX } from "@tabler/icons-react";
+import { StickyPageHeader, toast } from "@viglet/viglet-design-system";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -115,20 +114,25 @@ export default function IntegrationInstanceSourceModelPage() {
   }
 
   return (
-    <>
-      <SubPageHeader
-        icon={IconBox}
-        feature={t("forms.integrationSource.models")}
-        name={form.watch("type") || t("forms.integrationSource.modelUntitled")}
-        description={t("forms.integrationSource.modelDetailDesc")}
-      />
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6">
-          <StickySaveBar
-            title={form.watch("type") || t("forms.integrationSource.modelUntitled")}
-            onCancel={() => navigate(modelTabRoute)}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
+        <StickyPageHeader>
+          <StickyPageHeader.Title
+            icon={IconBox}
+            feature={t("forms.integrationSource.models")}
+            description={t("forms.integrationSource.modelDetailDesc")}
           />
+          <StickyPageHeader.Actions>
+            <GradientButton type="submit" size="sm">
+              <IconDeviceFloppy className="size-4" />
+              {t("forms.formActions.saveChanges")}
+            </GradientButton>
+            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(modelTabRoute)}>
+              <IconX className="size-4" />
+              {t("forms.formActions.cancel")}
+            </GradientButton>
+          </StickyPageHeader.Actions>
+        </StickyPageHeader>
           <SectionCard variant="violet">
             <SectionCard.Header
               icon={IconSettings}
@@ -238,8 +242,7 @@ export default function IntegrationInstanceSourceModelPage() {
             </SectionCard.Content>
           </SectionCard>
 
-        </form>
-      </Form>
-    </>
+      </form>
+    </Form>
   );
 }
