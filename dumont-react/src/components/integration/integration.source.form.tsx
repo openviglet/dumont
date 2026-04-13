@@ -17,7 +17,7 @@ import type { TurIntegrationAemSource } from "@/models/integration/integration-a
 import type { TurLocale } from "@/models/locale/locale.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurLocaleService } from "@/services/locale/locale.service";
-import { IconBox, IconFileDescription, IconLanguage, IconSend, IconSettings, IconUser } from "@tabler/icons-react";
+import { IconBox, IconFileDescription, IconLanguage, IconSend, IconSettings, IconUser, IconWorld } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -126,6 +126,14 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
             <TabsTrigger value="general">
               <IconSettings className="size-4" />
               {t("forms.integrationSource.general")}
+            </TabsTrigger>
+            <TabsTrigger value="environments">
+              <IconWorld className="size-4" />
+              {t("forms.integrationSource.environments")}
+            </TabsTrigger>
+            <TabsTrigger value="locales">
+              <IconLanguage className="size-4" />
+              {t("forms.integrationSource.locales")}
             </TabsTrigger>
             <TabsTrigger value="specifications">
               <IconFileDescription className="size-4" />
@@ -273,7 +281,10 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
                 />
               </SectionCard.Content>
             </SectionCard>
+          </TabsContent>
 
+          {/* Environments Tab */}
+          <TabsContent value="environments" className="space-y-4 mt-3">
             {/* Author Configuration */}
             <SectionCard variant="violet">
               <SectionCard.Header icon={IconUser} title={t("forms.integrationSource.authorConfig")} description={t("forms.integrationSource.authorConfigDesc")} />
@@ -399,7 +410,10 @@ export const IntegrationSourceForm: React.FC<Props> = ({ value, isNew, integrati
                 )}
               </SectionCard.Content>
             </SectionCard>
+          </TabsContent>
 
+          {/* Locales Tab */}
+          <TabsContent value="locales" className="space-y-4 mt-3">
             {/* Locales Configuration */}
             <SectionCard variant="amber">
               <SectionCard.Header icon={IconLanguage} title={t("forms.integrationSource.localesConfig")} description={t("forms.integrationSource.localesConfigDesc")} />

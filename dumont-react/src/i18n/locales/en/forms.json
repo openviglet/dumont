@@ -807,6 +807,8 @@
     "integrationSource": {
       "general": "General Configuration",
       "generalDesc": "Basic information and connection settings for the AEM integration source.",
+      "environments": "Environments",
+      "locales": "Locales",
       "endpoint": "Endpoint",
       "username": "Username",
       "password": "Password",

@@ -43,7 +43,7 @@ export default function IntegrationInstanceSourceModelPage() {
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
   const [source, setSource] = useState<TurIntegrationAemSource | null>(null);
   const isNew = modelIndex === "new";
-  const index = isNew ? -1 : parseInt(modelIndex, 10);
+  const index = isNew ? -1 : Number.parseInt(modelIndex, 10);
 
   const modelTabRoute = `${ROUTES.INTEGRATION_INSTANCE}/${id}/source/${sourceId}/models`;
 
@@ -56,7 +56,27 @@ export default function IntegrationInstanceSourceModelPage() {
       setSource(s);
       const models = Array.isArray(s.models) ? s.models : [];
       if (!isNew && index >= 0 && index < models.length) {
-        form.reset(models[index]);
+        const model = models[index];
+        // Sanitize nullable fields so react-hook-form / useFieldArray don't crash
+        form.reset({
+          ...model,
+          id: model.id ?? "",
+          type: model.type ?? "",
+          subType: model.subType ?? "",
+          className: model.className ?? "",
+          targetAttrs: (model.targetAttrs ?? []).map((ta) => ({
+            ...ta,
+            id: ta.id ?? "",
+            name: ta.name ?? "",
+            sourceAttrs: (ta.sourceAttrs ?? []).map((sa) => ({
+              ...sa,
+              id: sa.id ?? "",
+              name: sa.name ?? "",
+              className: sa.className ?? "",
+              text: sa.text ?? "",
+            })),
+          })),
+        });
       } else if (isNew) {
         form.reset(emptyModel);
       }

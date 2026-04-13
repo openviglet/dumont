@@ -7,6 +7,8 @@ import { TurIntegrationAemSourceService } from "@/services/integration/integrati
 import { TurIntegrationConnectorService } from "@/services/integration/integration-connector.service";
 
 import { SourceImportExportBar } from "@/components/integration/source-import-export-bar";
+import type { BreadcrumbItem } from "@/contexts/breadcrumb.context";
+import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { IconGitCommit } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
@@ -35,19 +37,24 @@ export default function IntegrationInstanceSourcePage() {
   const [indexingAll, setIndexingAll] = useState(false);
   const [reindexingAll, setReindexingAll] = useState(false);
   const [dryScanning, setDryScanning] = useState(false);
+  const [breadcrumb, setBreadcrumb] = useState<BreadcrumbItem | undefined>(undefined);
   const { t } = useTranslation();
+
+  useSubPageBreadcrumb(breadcrumb);
 
   useEffect(() => {
     if (sourceId !== "new") {
       turIntegrationAemSourceService.get(sourceId).then((source) => {
         setIntegrationAemSource(source);
         if (source.name) {
+          setBreadcrumb({ label: source.name });
         }
       });
       setIsNew(false);
     } else {
+      setBreadcrumb({ label: t("forms.wizard.newSource") });
     }
-  }, [id, sourceId, turIntegrationAemSourceService]);
+  }, [id, sourceId, turIntegrationAemSourceService, t]);
 
   async function onDelete() {
     try {

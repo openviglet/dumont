@@ -1,4 +1,5 @@
 import { ROUTES } from "@/app/routes.const";
+import { BadgeColorful } from "@/components/badge-colorful";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { getClassLabel } from "@/components/integration/aem-class-labels";
 import type { TurIntegrationAemPluginModel } from "@/models/integration/integration-aem-plugin-model.model";
@@ -9,7 +10,6 @@ import { toast } from "@viglet/viglet-design-system";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-"use client"
 
 interface PluginModelListProps {
   source: TurIntegrationAemSource;
@@ -85,9 +85,7 @@ export function PluginModelList({ source, onSourceUpdated }: Readonly<PluginMode
                       {model.type || t("forms.integrationSource.modelUntitled")}
                     </span>
                     {model.subType && (
-                      <span className="text-xs bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-2 py-0.5 rounded-full">
-                        {model.subType}
-                      </span>
+                      <BadgeColorful text={model.subType} />
                     )}
                   </div>
                   {model.className && (

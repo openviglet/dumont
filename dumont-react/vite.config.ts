@@ -26,6 +26,7 @@ export default defineConfig({
         axios: { singleton: true, requiredVersion: "*" },
         sonner: { singleton: true, requiredVersion: "*" },
         "next-themes": { singleton: true, requiredVersion: "*" },
+        "@viglet/viglet-design-system": { singleton: true, requiredVersion: "*" },
       },
     }),
   ],

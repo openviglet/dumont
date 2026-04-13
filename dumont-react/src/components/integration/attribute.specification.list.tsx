@@ -1,4 +1,5 @@
 import { ROUTES } from "@/app/routes.const";
+import { BadgeColorful } from "@/components/badge-colorful";
 import { BadgeFieldType } from "@/components/badge-field-type";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { getClassLabel } from "@/components/integration/aem-class-labels";
@@ -10,7 +11,6 @@ import { toast } from "@viglet/viglet-design-system";
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-"use client"
 
 interface AttributeSpecificationListProps {
   source: TurIntegrationAemSource;
@@ -95,14 +95,10 @@ export function AttributeSpecificationList({ source, onSourceUpdated }: Readonly
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {spec.multiValued && (
-                  <span className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 px-2 py-0.5 rounded-full font-medium">
-                    {t("forms.integrationSource.multiValued")}
-                  </span>
+                  <BadgeColorful text={t("forms.integrationSource.multiValued")} />
                 )}
                 {spec.facet && (
-                  <span className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 px-2 py-0.5 rounded-full font-medium">
-                    {t("forms.integrationSource.facet")}
-                  </span>
+                  <BadgeColorful text={t("forms.integrationSource.facet")} />
                 )}
                 <BadgeFieldType type={spec.type} variation="long" />
                 <GradientButton
