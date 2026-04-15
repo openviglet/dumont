@@ -13,6 +13,7 @@ turing:
 
 dumont:
   allowedOrigins: "http://localhost:5173,http://localhost:2700"
+  multi-tenant: false
   job.size: 50
   cron: "-"
   cron.zone: UTC
