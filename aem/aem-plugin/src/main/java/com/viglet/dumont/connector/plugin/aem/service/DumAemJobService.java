@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
@@ -44,14 +45,17 @@ public class DumAemJobService {
         private final DumAemService dumAemService;
         private final DumConnectorContext dumConnectorContext;
         private final DumAemContentDefinitionService dumAemContentDefinitionService;
+        private final DumAemObjectService dumAemObjectService;
 
         public DumAemJobService(
                         DumAemService dumAemService,
                         DumConnectorContext dumConnectorContext,
-                        DumAemContentDefinitionService dumAemContentDefinitionService) {
+                        DumAemContentDefinitionService dumAemContentDefinitionService,
+                        DumAemObjectService dumAemObjectService) {
                 this.dumAemService = dumAemService;
                 this.dumConnectorContext = dumConnectorContext;
                 this.dumAemContentDefinitionService = dumAemContentDefinitionService;
+                this.dumAemObjectService = dumAemObjectService;
         }
 
         public TurSNJobItem deIndexJob(DumAemSession dumAemSession, List<String> sites,
@@ -105,15 +109,52 @@ public class DumAemJobService {
         public void indexingPublish(DumAemSession dumAemSession,
                         DumAemObjectGeneric aemObjectGeneric) {
                 if (dumAemSession.getConfiguration().isPublish()) {
-                        DumAemObject aemObject = new DumAemObject(aemObjectGeneric, DumAemEnv.PUBLISHING);
                         if (aemObjectGeneric.isDelivered()) {
-                                indexByEnvironment(dumAemSession, aemObject);
+                                indexByEnvironment(dumAemSession,
+                                                publishAemObject(dumAemSession, aemObjectGeneric));
                         } else if (dumAemSession.isStandalone()) {
-                                forcingDeIndex(dumAemSession, aemObject);
+                                forcingDeIndex(dumAemSession,
+                                                new DumAemObject(aemObjectGeneric, DumAemEnv.PUBLISHING));
                         } else {
-                                ignoringDeIndexLog(dumAemSession, aemObject);
+                                ignoringDeIndexLog(dumAemSession,
+                                                new DumAemObject(aemObjectGeneric, DumAemEnv.PUBLISHING));
                         }
                 }
+        }
+
+        /**
+         * Builds the {@link DumAemObject} used for publish-side indexing.
+         * <p>
+         * When a {@code publishURLPrefix} is configured, this re-fetches the
+         * content's infinity.json from the publish host (with a cache-busting
+         * timestamp) so attribute extraction reflects what is actually live on
+         * publish. The decision that the content is delivered has already been
+         * made from author-side replication metadata, so the publish-side
+         * payload is wrapped with {@link DumAemEvent#PUBLISHING} to preserve
+         * {@code delivered=true} regardless of whether replication flags are
+         * present on publish. When publish is unreachable or no publish prefix
+         * is configured, falls back to the author-side payload.
+         */
+        private DumAemObject publishAemObject(DumAemSession dumAemSession,
+                        DumAemObjectGeneric aemObjectGeneric) {
+                DumAemConfiguration config = dumAemSession.getConfiguration();
+                if (StringUtils.isBlank(config.getPublishURLPrefix())) {
+                        return new DumAemObject(aemObjectGeneric, DumAemEnv.PUBLISHING);
+                }
+                return DumAemCommonsUtils
+                                .getInfinityJson(aemObjectGeneric.getPath(), config, false,
+                                                DumAemEnv.PUBLISHING)
+                                .map(publishJson -> new DumAemObject(
+                                                dumAemObjectService.getDumAemObjectGeneric(
+                                                                aemObjectGeneric.getPath(), publishJson,
+                                                                DumAemEvent.PUBLISHING),
+                                                DumAemEnv.PUBLISHING))
+                                .orElseGet(() -> {
+                                        log.warn("Publish infinity.json not available for {} — "
+                                                        + "falling back to author payload for indexing.",
+                                                        aemObjectGeneric.getPath());
+                                        return new DumAemObject(aemObjectGeneric, DumAemEnv.PUBLISHING);
+                                });
         }
 
         private void ignoringDeIndexLog(DumAemSession dumAemSession,

@@ -66,6 +66,7 @@ import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.context.DumAemLocalePathContext;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtContentInterface;
@@ -253,8 +254,32 @@ public class DumAemCommonsUtils {
 
     public static Optional<JSONObject> getInfinityJson(String url,
             DumAemConfiguration dumAemConfiguration, boolean useCache) {
-        String infinityJsonUrl = String.format(url.endsWith(JSON) ? "%s%s" : "%s%s.infinity.json",
-                dumAemConfiguration.getUrl(), url);
+        return getInfinityJson(url, dumAemConfiguration, useCache, null);
+    }
+
+    /**
+     * Fetches infinity.json for the given path, routing the request through the
+     * author or publish URL prefix depending on the target environment.
+     * <p>
+     * When {@code environment} is {@link DumAemEnv#PUBLISHING} and a
+     * {@code publishURLPrefix} is configured on the source, the request is sent
+     * to the publish host with a {@code ?t=<timestamp>} cache-buster appended to
+     * mitigate publish-side caching. Otherwise the call falls back to the
+     * current author URL ({@code dumAemConfiguration.getUrl()}) with no
+     * cache-buster, preserving the previous behavior.
+     */
+    public static Optional<JSONObject> getInfinityJson(String url,
+            DumAemConfiguration dumAemConfiguration, boolean useCache,
+            DumAemEnv environment) {
+        boolean targetPublish = environment == DumAemEnv.PUBLISHING
+                && StringUtils.isNotBlank(dumAemConfiguration.getPublishURLPrefix());
+        String urlPrefix = targetPublish
+                ? dumAemConfiguration.getPublishURLPrefix()
+                : dumAemConfiguration.getUrl();
+        String cacheBuster = targetPublish ? "?t=" + System.currentTimeMillis() : "";
+        String infinityJsonUrl = String.format(
+                url.endsWith(JSON) ? "%s%s%s" : "%s%s.infinity.json%s",
+                urlPrefix, url, cacheBuster);
         try {
             return getResponseBody(infinityJsonUrl, dumAemConfiguration, useCache)
                     .<Optional<JSONObject>>map(responseBody -> {
@@ -262,7 +287,7 @@ public class DumAemCommonsUtils {
                             try {
                                 return getInfinityJson(
                                         new JSONArray(responseBody).toList().getFirst().toString(),
-                                        dumAemConfiguration, useCache);
+                                        dumAemConfiguration, useCache, environment);
                             } catch (JSONException e) {
                                 log.error(e.getMessage(), e);
                                 return getInfinityJsonNotFound(infinityJsonUrl);

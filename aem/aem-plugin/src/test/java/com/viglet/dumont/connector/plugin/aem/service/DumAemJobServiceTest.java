@@ -72,11 +72,15 @@ class DumAemJobServiceTest {
     @Mock
     private DumAemContentMappingService dumAemContentMappingService;
 
+    @Mock
+    private DumAemObjectService dumAemObjectService;
+
     private DumAemJobService service;
 
     @BeforeEach
     void setUp() {
-        service = new DumAemJobService(dumAemService, dumConnectorContext, dumAemContentDefinitionService);
+        service = new DumAemJobService(dumAemService, dumConnectorContext,
+                dumAemContentDefinitionService, dumAemObjectService);
     }
 
     @Nested

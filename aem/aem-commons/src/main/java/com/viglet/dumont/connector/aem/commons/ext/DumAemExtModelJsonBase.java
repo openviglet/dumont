@@ -19,9 +19,11 @@ package com.viglet.dumont.connector.aem.commons.ext;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -126,10 +128,27 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
                 .orElseGet(() -> aemObject.getCreatedDate().getTime());
     }
 
+    /**
+     * Builds the model.json URL for the given AEM object, routing through the
+     * publish URL prefix with a {@code ?t=<timestamp>} cache-buster when the
+     * object is being indexed for the {@link DumAemEnv#PUBLISHING} environment
+     * and a {@code publishURLPrefix} is configured. Otherwise falls back to the
+     * author URL ({@code configuration.getUrl()}).
+     */
+    private String buildModelJsonUrl(DumAemObject aemObject,
+            DumAemConfiguration configuration) {
+        if (aemObject.getEnvironment() == DumAemEnv.PUBLISHING
+                && StringUtils.isNotBlank(configuration.getPublishURLPrefix())) {
+            return configuration.getPublishURLPrefix() + aemObject.getPath()
+                    + MODEL_JSON_EXTENSION + "?t=" + System.currentTimeMillis();
+        }
+        return configuration.getUrl() + aemObject.getPath() + MODEL_JSON_EXTENSION;
+    }
+
     @Override
     public final DumAemAttrMap consume(DumAemObject aemObject,
             DumAemConfiguration configuration) {
-        String url = configuration.getUrl() + aemObject.getPath() + MODEL_JSON_EXTENSION;
+        String url = buildModelJsonUrl(aemObject, configuration);
         try {
             return DumAemCommonsUtils.getResponseBody(url, configuration, false)
                     .filter(DumCommonsUtils::isValidJson)
