@@ -55,6 +55,7 @@ public class DumStaticResourceConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "/dumont");
         registry.addViewController("/dumont").setViewName(FORWARD_DUMONT_INDEX);
         registry.addViewController("/dumont/").setViewName(FORWARD_DUMONT_INDEX);
     }
