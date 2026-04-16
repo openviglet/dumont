@@ -29,6 +29,13 @@ jobs:
         with:
           node-version: 24.13.0
 
+      - name: Cache node_modules
+        uses: actions/cache@v5
+        with:
+          path: dumont-react/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('dumont-react/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-modules-
+
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
