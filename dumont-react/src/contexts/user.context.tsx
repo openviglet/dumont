@@ -13,11 +13,11 @@ const dumUserService = new DumUserService();
 
 function redirectToLoginIfNeeded() {
   const { pathname, search } = globalThis.location;
-  if (pathname.startsWith("/dumont/login") || pathname.startsWith("/dumont/setup")) {
+  if (pathname.startsWith("/login") || pathname.startsWith("/setup")) {
     return;
   }
   const returnUrl = pathname + search;
-  globalThis.location.href = `/dumont/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+  globalThis.location.href = `/login?returnUrl=${encodeURIComponent(returnUrl)}`;
 }
 
 export function UserProvider({ children }: Readonly<{ children: React.ReactNode }>) {

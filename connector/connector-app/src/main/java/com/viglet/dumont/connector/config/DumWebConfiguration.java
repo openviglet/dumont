@@ -164,8 +164,8 @@ public class DumWebConfiguration {
                     && (configProperties.getAuthentication() == null
                         || configProperties.getAuthentication().isThirdparty())) {
                 http.oauth2Login(oauth2 -> oauth2
-                        .loginPage("/dumont/login")
-                        .defaultSuccessUrl("/dumont/admin", true)
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/admin", true)
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(oAuth2UserService)
                                 .oidcUserService(oidcUserService)));
@@ -183,9 +183,13 @@ public class DumWebConfiguration {
                                     mvc.matcher("/login/**"),
                                     mvc.matcher("/setup/**"),
                                     mvc.matcher("/admin/**"),
-                                    mvc.matcher("/dumont/**"),
                                     mvc.matcher("/"),
                                     mvc.matcher("/assets/**"),
+                                    mvc.matcher("/remoteEntry.js"),
+                                    mvc.matcher("/*.js"),
+                                    mvc.matcher("/*.css"),
+                                    mvc.matcher("/*.svg"),
+                                    mvc.matcher("/*.ico"),
                                     mvc.matcher("/fonts/**"),
                                     mvc.matcher("/favicon.ico"),
                                     mvc.matcher("/*.png"),
@@ -201,7 +205,7 @@ public class DumWebConfiguration {
                     .invalidateHttpSession(true)
                     .clearAuthentication(true)
                     .deleteCookies(sessionCookieName, "XSRF-TOKEN")
-                    .logoutSuccessUrl("/dumont/login"));
+                    .logoutSuccessUrl("/login"));
         }
         return http.build();
     }

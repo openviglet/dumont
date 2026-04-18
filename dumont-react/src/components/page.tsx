@@ -12,14 +12,16 @@ interface PageProps {
 }
 
 /**
- * Detects whether Dumont is running standalone (served by its own backend at
- * /dumont/*) or as a Module Federation remote loaded inside another host
- * (e.g. Turing, which already renders its own PageHeader + breadcrumb).
+ * Detects whether Dumont is running standalone (served by its own backend) or
+ * as a Module Federation remote loaded inside another host (e.g. Turing, which
+ * already renders its own PageHeader + breadcrumb). The flag is set in
+ * `main.tsx` during the standalone bootstrap and is absent when the app is
+ * mounted via `loadRemote`.
  */
 function isStandalone(): boolean {
   return (
     globalThis.window !== undefined
-    && globalThis.location.pathname.startsWith("/dumont")
+    && (globalThis as unknown as { __DUMONT_STANDALONE__?: boolean }).__DUMONT_STANDALONE__ === true
   );
 }
 

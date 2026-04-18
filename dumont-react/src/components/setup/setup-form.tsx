@@ -28,11 +28,11 @@ export function SetupForm({ className, ...props }: React.ComponentProps<"form">)
       .status()
       .then((status) => {
         if (!status.required) {
-          globalThis.location.href = "/dumont/login";
+          globalThis.location.href = "/login";
         }
       })
       .catch(() => {
-        globalThis.location.href = "/dumont/login";
+        globalThis.location.href = "/login";
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -53,7 +53,7 @@ export function SetupForm({ className, ...props }: React.ComponentProps<"form">)
     setupService
       .setAdminPassword(values.password)
       .then(() => {
-        globalThis.location.href = "/dumont/login";
+        globalThis.location.href = "/login";
       })
       .catch(() => {
         setError(t("setup.setupFailed"));

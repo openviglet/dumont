@@ -39,12 +39,12 @@ export default defineConfig({
       },
     },
   },
-  base: "/dumont/",
+  base: "/",
   build: {
     emptyOutDir: true,
     chunkSizeWarningLimit: 1000,
     target: "esnext",
-    outDir: "../connector/connector-app/src/main/resources/public/dumont/",
+    outDir: "../connector/connector-app/src/main/resources/public/",
   },
   resolve: {
     alias: {

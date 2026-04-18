@@ -40,7 +40,8 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 @Configuration
 @AutoConfigureAfter(DispatcherServletAutoConfiguration.class)
 public class DumStaticResourceConfiguration implements WebMvcConfigurer {
-    private static final String FORWARD_DUMONT_INDEX = "forward:/dumont/index.html";
+    private static final String FORWARD_INDEX = "forward:/index.html";
+    private static final String INDEX_HTML = "/public/index.html";
 
     @Value("${dumont.allowedOrigins:http://localhost:5173,http://localhost:2700}")
     private String allowedOrigins;
@@ -49,31 +50,41 @@ public class DumStaticResourceConfiguration implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**").allowedOrigins(allowedOrigins).allowedMethods("PUT", "DELETE", "GET", "POST")
                 .allowCredentials(false).maxAge(3600);
-        registry.addMapping("/dumont/**").allowedOrigins(allowedOrigins).allowedMethods("GET")
+        registry.addMapping("/assets/**").allowedOrigins(allowedOrigins).allowedMethods("GET")
+                .allowCredentials(false).maxAge(3600);
+        registry.addMapping("/remoteEntry.js").allowedOrigins(allowedOrigins).allowedMethods("GET")
                 .allowCredentials(false).maxAge(3600);
     }
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addRedirectViewController("/", "/dumont");
-        registry.addViewController("/dumont").setViewName(FORWARD_DUMONT_INDEX);
-        registry.addViewController("/dumont/").setViewName(FORWARD_DUMONT_INDEX);
+        registry.addViewController("/").setViewName(FORWARD_INDEX);
     }
 
     @Override
     public void addResourceHandlers(@NotNull ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/dumont/**")
-                .addResourceLocations("classpath:/public/dumont/")
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/public/")
                 .setCacheControl(org.springframework.http.CacheControl.noCache())
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver() {
                     @Override
                     protected Resource getResource(@NotNull String resourcePath, @NotNull Resource location)
                             throws IOException {
+                        // Do not SPA-fallback API, error, actuator or H2 console paths.
+                        if (resourcePath.startsWith("api/")
+                                || resourcePath.startsWith("error")
+                                || resourcePath.startsWith("actuator/")
+                                || resourcePath.startsWith("h2/")
+                                || resourcePath.startsWith("oauth2/")
+                                || resourcePath.startsWith("login/oauth2/")
+                                || resourcePath.startsWith("logout")) {
+                            return null;
+                        }
                         Resource requestedResource = location.createRelative(resourcePath);
                         return requestedResource.exists() && requestedResource.isReadable()
                                 ? requestedResource
-                                : new ClassPathResource("/public/dumont/index.html");
+                                : new ClassPathResource(INDEX_HTML);
                     }
                 });
     }

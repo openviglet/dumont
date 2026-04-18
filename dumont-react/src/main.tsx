@@ -60,9 +60,9 @@ axios.interceptors.response.use(
         toast.error(i18n.t("common.apiKeyMismatch"));
       } else if (error.response.status === 401) {
         const { pathname, search } = globalThis.location;
-        if (!pathname.startsWith("/dumont/login") && !pathname.startsWith("/dumont/setup")) {
+        if (!pathname.startsWith("/login") && !pathname.startsWith("/setup")) {
           const returnUrl = pathname + search;
-          globalThis.location.href = `/dumont/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+          globalThis.location.href = `/login?returnUrl=${encodeURIComponent(returnUrl)}`;
         }
       }
     }
@@ -70,9 +70,14 @@ axios.interceptors.response.use(
   }
 );
 
+// Marker read by components that render differently when embedded as a remote.
+// Set here in the standalone bootstrap; unset when Dumont is mounted via
+// Module Federation inside another host (e.g. Turing).
+(globalThis as unknown as { __DUMONT_STANDALONE__?: boolean }).__DUMONT_STANDALONE__ = true;
+
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter basename="/dumont">
+    <BrowserRouter basename="/">
       <ErrorBoundary>
         <BackendStatusProvider healthEndpoint="/api/v2/ping">
           <App />

@@ -23,7 +23,7 @@ const providerMeta: Record<string, { icon: string; label: string }> = {
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   const [searchParams] = useSearchParams();
-  const returnUrl = searchParams.get("returnUrl") || `/dumont${ROUTES.CONSOLE}`;
+  const returnUrl = searchParams.get("returnUrl") || ROUTES.CONSOLE;
   const { t } = useTranslation();
   const form = useForm<DumRestInfo>();
   const [error, setError] = useState("");
@@ -37,7 +37,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       .status()
       .then((status) => {
         if (status.required) {
-          globalThis.location.href = "/dumont/setup";
+          globalThis.location.href = "/setup";
         }
       })
       .catch(() => {
