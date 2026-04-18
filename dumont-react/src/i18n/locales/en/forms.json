@@ -1180,7 +1180,8 @@
       "style": "Style",
       "variations": "Variations",
       "shuffle": "Shuffle",
-      "useThisAvatar": "Use This Avatar"
+      "useThisAvatar": "Use This Avatar",
+      "remove": "Remove"
     },
     "iconPicker": {
       "noIconSelected": "No icon selected",
