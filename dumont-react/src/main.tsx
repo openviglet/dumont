@@ -1,3 +1,5 @@
+import "@/lib/axios"; // Register CSRF interceptors (must come before axios is used elsewhere).
+
 import i18n from "@/i18n";
 import {
   BackendStatusProvider,
@@ -56,6 +58,12 @@ axios.interceptors.response.use(
       reportBackendOnline();
       if (error.response.status === 422) {
         toast.error(i18n.t("common.apiKeyMismatch"));
+      } else if (error.response.status === 401) {
+        const { pathname, search } = globalThis.location;
+        if (!pathname.startsWith("/dumont/login") && !pathname.startsWith("/dumont/setup")) {
+          const returnUrl = pathname + search;
+          globalThis.location.href = `/dumont/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+        }
       }
     }
     return Promise.reject(error);

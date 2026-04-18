@@ -1,0 +1,1 @@
+call mvn spring-boot:run -pl connector/connector-app -am "-Dskip.npm"

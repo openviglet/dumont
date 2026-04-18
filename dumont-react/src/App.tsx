@@ -8,6 +8,9 @@ import AdminUserPage from "./app/console/admin-settings/admin.user.page";
 import AdminUsersListPage from "./app/console/admin-settings/admin.users.list.page";
 import ConsoleRootPage from "./app/console/console.root.page";
 import HomePage from "./app/console/home/home.page";
+import UserAccountPage from "./app/console/user/user.account.page";
+import UserPreferencesPage from "./app/console/user/preferences/user.preferences.page";
+import UserProfilePage from "./app/console/user/profile/user.profile.page";
 import LoginPage from "./app/login/login.page";
 import { ROUTES } from "./app/routes.const";
 import SetupPage from "./app/setup/setup.page";
@@ -50,6 +53,11 @@ function App() {
                   <Route path="groups/:id" element={<AdminGroupPage />} />
                   <Route path="roles" element={<AdminRolesListPage />} />
                   <Route path="roles/:id" element={<AdminRolePage />} />
+                </Route>
+                <Route path="user/account" element={<UserAccountPage />}>
+                  <Route index element={<Navigate to="profile" replace />} />
+                  <Route path="profile" element={<UserProfilePage />} />
+                  <Route path="preferences" element={<UserPreferencesPage />} />
                 </Route>
                 {/* Mount dumont routes under integration/instance/:id/* so useParams().id works */}
                 <Route path="integration/instance/:id/*" element={<DumontRoutes />} />

@@ -11,14 +11,29 @@ const UserContext = React.createContext<UserContextValue | null>(null);
 
 const dumUserService = new DumUserService();
 
-export function UserProvider({ children }: { children: React.ReactNode }) {
+function redirectToLoginIfNeeded() {
+  const { pathname, search } = globalThis.location;
+  if (pathname.startsWith("/dumont/login") || pathname.startsWith("/dumont/setup")) {
+    return;
+  }
+  const returnUrl = pathname + search;
+  globalThis.location.href = `/dumont/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+}
+
+export function UserProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [user, setUser] = React.useState<DumUser>({} as DumUser);
 
   const refreshUser = React.useCallback(() => {
     dumUserService
       .get()
-      .then((u) => setUser(u ?? ({} as DumUser)))
-      .catch(() => setUser({} as DumUser));
+      .then((u) => {
+        if (u && u.username) {
+          setUser(u);
+        } else {
+          redirectToLoginIfNeeded();
+        }
+      })
+      .catch(() => redirectToLoginIfNeeded());
   }, []);
 
   React.useEffect(() => {

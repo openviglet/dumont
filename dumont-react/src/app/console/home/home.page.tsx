@@ -1,6 +1,7 @@
 import { ROUTES } from "@/app/routes.const"
 import { DumontLogo } from "@/components/logo/dumont-logo"
 import { PageHeader } from "@/components/page-header"
+import { useCurrentUser } from "@/contexts/user.context"
 import type { Icon } from "@tabler/icons-react"
 import {
   IconAdjustmentsSearch,
@@ -62,6 +63,8 @@ function getGreetingKey(): string {
 
 export default function HomePage() {
   const { t } = useTranslation()
+  const { user } = useCurrentUser()
+  const firstName = user?.firstName || user?.username || "there"
 
   return (
     <>
@@ -73,7 +76,7 @@ export default function HomePage() {
             <DumontLogo className="size-10" />
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
-                {t(getGreetingKey())}
+                {t(getGreetingKey())}, {firstName}.
               </h1>
               <p className="text-muted-foreground text-sm mt-1">
                 {t("home.welcome")}

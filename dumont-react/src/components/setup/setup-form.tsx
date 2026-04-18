@@ -1,4 +1,3 @@
-import { ROUTES } from "@/app/routes.const";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { GradientButton } from "@/components/ui/gradient-button";
@@ -29,11 +28,11 @@ export function SetupForm({ className, ...props }: React.ComponentProps<"form">)
       .status()
       .then((status) => {
         if (!status.required) {
-          globalThis.location.href = ROUTES.LOGIN;
+          globalThis.location.href = "/dumont/login";
         }
       })
       .catch(() => {
-        globalThis.location.href = ROUTES.LOGIN;
+        globalThis.location.href = "/dumont/login";
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -54,7 +53,7 @@ export function SetupForm({ className, ...props }: React.ComponentProps<"form">)
     setupService
       .setAdminPassword(values.password)
       .then(() => {
-        globalThis.location.href = ROUTES.LOGIN;
+        globalThis.location.href = "/dumont/login";
       })
       .catch(() => {
         setError(t("setup.setupFailed"));
