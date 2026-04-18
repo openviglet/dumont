@@ -12,8 +12,21 @@ turing:
     endpoint: http://localhost:8983
 
 dumont:
+  url: http://localhost:30130
   allowedOrigins: "http://localhost:5173,http://localhost:2700"
   multi-tenant: false
+  # Authentication / permission model.
+  # permissions=false grants ROLE_ADMIN + all privileges to every authenticated user.
+  permissions: true
+  # When keycloak=true, Spring Security delegates login to the Keycloak realm
+  # configured under spring.security.oauth2.client.provider.keycloak.
+  keycloak: false
+  keycloak-admin-id: ~
+  authentication:
+    # Enable third-party OAuth2 login buttons (Google, GitHub, ...)
+    thirdparty: true
+    # Enable the /api/v2/user/register self-service sign-up endpoint.
+    new-user: false
   job.size: 50
   cron: "-"
   cron.zone: UTC
