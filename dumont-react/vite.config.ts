@@ -2,11 +2,38 @@ import { federation } from "@module-federation/vite";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
+
+// Redirect CJS use-sync-external-store imports to ESM shims.
+// React 19 has useSyncExternalStore built-in, but the CJS shim
+// does require('react') which breaks Rolldown's browser CJS interop
+// under Module Federation (top-level await in MF virtual modules).
+function syncExternalStoreShimPlugin(): Plugin {
+  const shimDir = path.resolve(__dirname, "./src/shims");
+  return {
+    name: "use-sync-external-store-shim",
+    enforce: "pre",
+    resolveId(source) {
+      if (source === "use-sync-external-store/shim/with-selector") {
+        return path.join(shimDir, "use-sync-external-store-with-selector.js");
+      }
+      if (source === "use-sync-external-store/shim") {
+        return path.join(shimDir, "use-sync-external-store-shim.js");
+      }
+      if (
+        source === "use-sync-external-store/with-selector" ||
+        source === "use-sync-external-store/with-selector.js"
+      ) {
+        return path.join(shimDir, "use-sync-external-store-with-selector.js");
+      }
+    },
+  };
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    syncExternalStoreShimPlugin(),
     react(),
     tailwindcss(),
     federation({
@@ -43,10 +70,20 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     chunkSizeWarningLimit: 1000,
-    target: "esnext",
     outDir: "../connector/connector-app/src/main/resources/public/",
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("@radix-ui") || id.includes("radix-ui")) return "vendor-ui";
+            return "vendor-lib";
+          }
+        },
+      },
+    },
   },
   resolve: {
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
