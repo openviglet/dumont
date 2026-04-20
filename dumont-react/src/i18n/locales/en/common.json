@@ -118,7 +118,11 @@
     "heroTagline": "Data Exchange Platform for connecting content sources to search.",
     "featureIndexing": "Indexing",
     "featureConnector": "Connectors",
-    "featureExchange": "Exchange"
+    "featureExchange": "Exchange",
+    "settingsAnimations": "Animations",
+    "settingsExplosion": "Explosion",
+    "settingsFormulas": "Formulas",
+    "settingsLanguage": "Language"
   },
   "setup": {
     "title": "First-time setup",
