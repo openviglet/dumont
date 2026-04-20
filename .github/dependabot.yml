@@ -23,11 +23,6 @@ updates:
       interval: "weekly"
     target-branch: "2026.2"
     open-pull-requests-limit: 15
-    ignore:
-      - dependency-name: "eslint"
-        versions: [">=10.0.0"]
-      - dependency-name: "@eslint/js"
-        versions: [">=10.0.0"]
     groups:
       react:
         applies-to: version-updates
@@ -40,11 +35,6 @@ updates:
       interval: "weekly"
     target-branch: "2026.2"
     open-pull-requests-limit: 15
-    ignore:
-      - dependency-name: "eslint"
-        versions: [">=10.0.0"]
-      - dependency-name: "@eslint/js"
-        versions: [">=10.0.0"]
     groups:
       react:
         applies-to: version-updates
@@ -57,11 +47,6 @@ updates:
       interval: "weekly"
     target-branch: "2026.2"
     open-pull-requests-limit: 15
-    ignore:
-      - dependency-name: "eslint"
-        versions: [">=10.0.0"]
-      - dependency-name: "@eslint/js"
-        versions: [">=10.0.0"]
     groups:
       react:
         applies-to: version-updates
@@ -74,11 +59,6 @@ updates:
       interval: "weekly"
     target-branch: "2026.2"
     open-pull-requests-limit: 15
-    ignore:
-      - dependency-name: "eslint"
-        versions: [">=10.0.0"]
-      - dependency-name: "@eslint/js"
-        versions: [">=10.0.0"]
     groups:
       react:
         applies-to: version-updates
@@ -91,11 +71,6 @@ updates:
       interval: "weekly"
     target-branch: "2026.2"
     open-pull-requests-limit: 15
-    ignore:
-      - dependency-name: "eslint"
-        versions: [">=10.0.0"]
-      - dependency-name: "@eslint/js"
-        versions: [">=10.0.0"]
     groups:
       react:
         applies-to: version-updates
