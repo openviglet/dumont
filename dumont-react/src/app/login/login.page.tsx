@@ -1,77 +1,58 @@
 import { LoginForm } from "@/components/login/login-form";
 import { DumontLogo } from "@/components/logo/dumont-logo";
 import { ModeToggle } from "@/components/mode-toggle";
+import { Login } from "@viglet/viglet-design-system";
 import { Globe, Search, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { LoginFloatingBg } from "./login-floating-bg";
 import { LoginSettingsButton, useLoginSettings } from "./login-settings";
-import "./login-animations.css";
 
 const LoginPage = () => {
   const { t } = useTranslation();
   const { settings, update } = useLoginSettings();
-  return (
-    <div className={`relative min-h-svh flex items-center justify-center overflow-hidden ${settings.animations ? "bg-slate-50 dark:bg-slate-950" : "bg-blue-200 dark:bg-slate-950"}`}>
-      <LoginFloatingBg settings={settings} />
 
-      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+  return (
+    <Login color="#059669" colorDark="#10b981">
+      <Login.Background
+        withFormulas={settings.formulas}
+        withBonds={settings.formulas}
+        withLightning={settings.animations}
+        withExplosion={settings.explosion}
+        withOrbs={settings.animations}
+        withGrid
+      />
+
+      <Login.Settings>
         <LoginSettingsButton settings={settings} onUpdate={update} />
         <ModeToggle />
-      </div>
+      </Login.Settings>
 
-      <div className="relative z-20 flex flex-col items-center w-full max-w-md px-6 py-4">
-        <div className="login-fade-in mb-3">
-          <div className={`${settings.animations ? "login-logo-ring" : ""} flex h-16 w-16 items-center justify-center rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm shadow-lg ring-1 ring-blue-200/50 dark:ring-blue-500/20`}>
-            <DumontLogo size={52} />
-          </div>
-        </div>
+      <Login.Content>
+        <Login.Logo pulsePaused={!settings.animations}>
+          <DumontLogo size={52} />
+        </Login.Logo>
 
-        <div className="login-fade-in-d1 text-center mb-1">
-          <h1 className="text-2xl font-bold tracking-tight bg-linear-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-            Viglet Dumont DEP
-          </h1>
-        </div>
+        <Login.Title>Viglet Dumont DEP</Login.Title>
+        <Login.Tagline>{t("login.heroTagline")}</Login.Tagline>
 
-        <div className="login-fade-in-d1 text-center mb-4">
-          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-            {t("login.heroTagline")}
-          </p>
-        </div>
+        <Login.Features>
+          <Login.FeaturePill icon={<Search className="h-3.5 w-3.5 text-emerald-500" />}>
+            {t("login.featureIndexing")}
+          </Login.FeaturePill>
+          <Login.FeaturePill icon={<Sparkles className="h-3.5 w-3.5 text-teal-500" />}>
+            {t("login.featureConnector")}
+          </Login.FeaturePill>
+          <Login.FeaturePill icon={<Globe className="h-3.5 w-3.5 text-cyan-500" />}>
+            {t("login.featureExchange")}
+          </Login.FeaturePill>
+        </Login.Features>
 
-        <div className="login-fade-in-d2 flex flex-wrap justify-center gap-2 mb-5">
-          <div className="login-feature-pill flex items-center gap-1.5 rounded-full px-3 py-1">
-            <Search className="h-3.5 w-3.5 text-blue-500" />
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-              {t("login.featureIndexing")}
-            </span>
-          </div>
-          <div className="login-feature-pill flex items-center gap-1.5 rounded-full px-3 py-1">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-              {t("login.featureConnector")}
-            </span>
-          </div>
-          <div className="login-feature-pill flex items-center gap-1.5 rounded-full px-3 py-1">
-            <Globe className="h-3.5 w-3.5 text-cyan-500" />
-            <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-              {t("login.featureExchange")}
-            </span>
-          </div>
-        </div>
+        <Login.Card>
+          <LoginForm />
+        </Login.Card>
 
-        <div className="login-fade-in-d3 w-full">
-          <div className="login-glass-card rounded-2xl">
-            <LoginForm />
-          </div>
-        </div>
-
-        <div className="login-fade-in-d3 mt-4 text-center">
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            Viglet Dumont DEP &mdash; Data Exchange Platform
-          </p>
-        </div>
-      </div>
-    </div>
+        <Login.Footer>Viglet Dumont DEP &mdash; Data Exchange Platform</Login.Footer>
+      </Login.Content>
+    </Login>
   );
 };
 
