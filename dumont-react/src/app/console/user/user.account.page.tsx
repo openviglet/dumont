@@ -5,7 +5,7 @@ import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import { IconSettings, IconUser, IconWorld } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { SubPage } from "@viglet/viglet-design-system";
+import { SubPage } from "@viglet/viglet-design-system/router";
 
 export default function UserAccountPage() {
   const { t } = useTranslation();

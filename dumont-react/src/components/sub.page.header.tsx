@@ -1,1 +1,1 @@
-export { SubPageHeader } from "@viglet/viglet-design-system";
+export { SubPageHeader } from "@viglet/viglet-design-system/router";

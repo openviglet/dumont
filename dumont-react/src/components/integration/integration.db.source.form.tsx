@@ -16,7 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import type { TurIntegrationDbSource } from "@/models/integration/integration-db-source.model";
 import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service";
 import { IconDatabase, IconDeviceFloppy, IconFileDescription, IconSettings, IconUpload, IconX } from "@tabler/icons-react";
-import { StickyPageHeader, toast } from "@viglet/viglet-design-system";
+import { toast } from "@viglet/viglet-design-system";
+import { StickyPageHeader } from "@viglet/viglet-design-system/router";
 import { useEffect, useMemo } from "react";
 import {
   useForm

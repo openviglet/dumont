@@ -18,7 +18,8 @@ import type { TurLocale } from "@/models/locale/locale.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurLocaleService } from "@/services/locale/locale.service";
 import { IconBox, IconDeviceFloppy, IconDownload, IconEye, IconFileDescription, IconGitCommit, IconLanguage, IconRefresh, IconSend, IconSettings, IconTrash, IconUpload, IconUser, IconWorld, IconX } from "@tabler/icons-react";
-import { StickyPageHeader, toast } from "@viglet/viglet-design-system";
+import { toast } from "@viglet/viglet-design-system";
+import { StickyPageHeader } from "@viglet/viglet-design-system/router";
 import { useEffect, useMemo, useState } from "react";
 import {
   useForm

@@ -25,7 +25,8 @@ import { TargetAttributeList } from "@/components/integration/target.attribute.l
 import type { TurIntegrationAemPluginModel } from "@/models/integration/integration-aem-plugin-model.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { IconBox, IconDeviceFloppy, IconSettings, IconTarget, IconX } from "@tabler/icons-react";
-import { StickyPageHeader, toast } from "@viglet/viglet-design-system";
+import { toast } from "@viglet/viglet-design-system";
+import { StickyPageHeader } from "@viglet/viglet-design-system/router";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";

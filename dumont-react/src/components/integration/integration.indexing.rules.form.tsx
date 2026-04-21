@@ -1,6 +1,7 @@
 "use client"
 
-import { StickyPageHeader, toast } from "@viglet/viglet-design-system"
+import { toast } from "@viglet/viglet-design-system"
+import { StickyPageHeader } from "@viglet/viglet-design-system/router"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
