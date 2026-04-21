@@ -75,14 +75,19 @@ axios.interceptors.response.use(
 // Module Federation inside another host (e.g. Turing).
 (globalThis as unknown as { __DUMONT_STANDALONE__?: boolean }).__DUMONT_STANDALONE__ = true;
 
-createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <BrowserRouter basename="/">
-      <ErrorBoundary>
-        <BackendStatusProvider healthEndpoint="/api/v2/ping">
-          <App />
-        </BackendStatusProvider>
-      </ErrorBoundary>
-    </BrowserRouter>
-  </React.StrictMode>
-);
+// `?loading=1` holds the index.html boot loader for design/regression testing
+// (see the guard in index.html). Bail out before React mounts — the static
+// markup inside `#root` stays visible, animations keep playing.
+if (!(globalThis as Record<string, unknown>).__DUMONT_LOADING_TEST__) {
+  createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <BrowserRouter basename="/">
+        <ErrorBoundary>
+          <BackendStatusProvider healthEndpoint="/api/v2/ping">
+            <App />
+          </BackendStatusProvider>
+        </ErrorBoundary>
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+}
