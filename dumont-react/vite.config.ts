@@ -1,6 +1,7 @@
 import { federation } from "@module-federation/vite";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { vigletBootLoader } from "@viglet/viglet-design-system/vite";
 import path from "node:path";
 import { defineConfig, type Plugin } from "vite";
 
@@ -34,6 +35,15 @@ function syncExternalStoreShimPlugin(): Plugin {
 export default defineConfig({
   plugins: [
     syncExternalStoreShimPlugin(),
+    vigletBootLoader({
+      title: "Viglet Dumont",
+      subtitle: "Content Connector",
+      color: "#006400",
+      colorDark: "#10b981",
+      prefix: "dumont",
+      storageKey: "dumont-ui-theme",
+      testFlag: "__DUMONT_LOADING_TEST__",
+    }),
     react(),
     tailwindcss(),
     federation({
