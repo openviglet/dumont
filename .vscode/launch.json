@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // 
+    "version": "0.2.0",
+    "configurations": [
+        // How to debug a customized Dumont distribution.
+        // A customization is a full Dumont deployment that bundles a client-specific plugin
+        // under its libs/ folder.
+        // Steps:
+        //   1. Start you customized Dumont distribution with the JVM option -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+        //      If you need to debug startup code, edit run.cmd and change suspend=n to suspend=y.
+        //   2. You should now be able to put breakpoints in the current source-code.
+        {
+            "type": "java",
+            "name": "Attach to Custom Remote Dumont",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": "5005"
+        },
+    ]
+}
