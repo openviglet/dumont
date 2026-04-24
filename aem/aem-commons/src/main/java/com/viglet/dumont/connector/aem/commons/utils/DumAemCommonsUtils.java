@@ -290,18 +290,52 @@ public class DumAemCommonsUtils {
                                         dumAemConfiguration, useCache, environment);
                             } catch (JSONException e) {
                                 log.error(e.getMessage(), e);
-                                return getInfinityJsonNotFound(infinityJsonUrl);
+                                return jsonNotFound(infinityJsonUrl);
                             }
                         } else if (isResponseBodyJSONObject(responseBody)) {
                             return Optional.of(new JSONObject(responseBody));
                         }
-                        return getInfinityJsonNotFound(infinityJsonUrl);
-                    }).orElseGet(() -> getInfinityJsonNotFound(infinityJsonUrl));
+                        return jsonNotFound(infinityJsonUrl);
+                    }).orElseGet(() -> jsonNotFound(infinityJsonUrl));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            return getInfinityJsonNotFound(infinityJsonUrl);
+            return jsonNotFound(infinityJsonUrl);
         }
 
+    }
+
+    public static Optional<JSONObject> getModelJson(String path,
+            DumAemConfiguration dumAemConfiguration) {
+        return getModelJson(path, dumAemConfiguration, null);
+    }
+
+    /**
+     * Fetches model.json for the given path, routing the request through the
+     * author or publish URL prefix depending on the target environment.
+     */
+    public static Optional<JSONObject> getModelJson(String path,
+            DumAemConfiguration dumAemConfiguration, DumAemEnv environment) {
+        boolean targetPublish = environment == DumAemEnv.PUBLISHING
+                && StringUtils.isNotBlank(dumAemConfiguration.getPublishURLPrefix());
+        String urlPrefix = targetPublish
+                ? dumAemConfiguration.getPublishURLPrefix()
+                : dumAemConfiguration.getUrl();
+        String cacheBuster = targetPublish ? "?t=" + System.currentTimeMillis() : "";
+        String modelJsonUrl = String.format(
+                path.endsWith(JSON) ? "%s%s%s" : "%s%s.model.json%s",
+                urlPrefix, path, cacheBuster);
+        try {
+            return getResponseBody(modelJsonUrl, dumAemConfiguration, false)
+                    .<Optional<JSONObject>>map(responseBody -> {
+                        if (isResponseBodyJSONObject(responseBody)) {
+                            return Optional.of(new JSONObject(responseBody));
+                        }
+                        return jsonNotFound(modelJsonUrl);
+                    }).orElseGet(() -> jsonNotFound(modelJsonUrl));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return jsonNotFound(modelJsonUrl);
+        }
     }
 
     public static Optional<JSONObject> getDepthJson(String path,
@@ -319,21 +353,21 @@ public class DumAemCommonsUtils {
                                         dumAemConfiguration, depth);
                             } catch (JSONException e) {
                                 log.error(e.getMessage(), e);
-                                return getInfinityJsonNotFound(depthJsonUrl);
+                                return jsonNotFound(depthJsonUrl);
                             }
                         } else if (isResponseBodyJSONObject(responseBody)) {
                             return Optional.of(new JSONObject(responseBody));
                         }
-                        return getInfinityJsonNotFound(depthJsonUrl);
-                    }).orElseGet(() -> getInfinityJsonNotFound(depthJsonUrl));
+                        return jsonNotFound(depthJsonUrl);
+                    }).orElseGet(() -> jsonNotFound(depthJsonUrl));
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            return getInfinityJsonNotFound(depthJsonUrl);
+            return jsonNotFound(depthJsonUrl);
         }
     }
 
-    private static Optional<JSONObject> getInfinityJsonNotFound(String infinityJsonUrl) {
-        log.warn("Request Not Found {}", infinityJsonUrl);
+    private static Optional<JSONObject> jsonNotFound(String url) {
+        log.warn("Request Not Found {}", url);
         return Optional.empty();
     }
 

@@ -176,8 +176,8 @@ class DumAemObjectGenericTest {
     class DependenciesTests {
 
         @Test
-        @DisplayName("Should extract content dependencies")
-        void shouldExtractContentDependencies() {
+        @DisplayName("Should start with empty dependency set (extraction now happens in DumAemJobService)")
+        void shouldStartWithEmptyDependencySet() {
             JSONObject jcrContent = new JSONObject();
             jcrContent.put("reference", "/content/dam/mysite/image.jpg");
 
@@ -188,7 +188,23 @@ class DumAemObjectGenericTest {
             DumAemObjectGeneric object = new DumAemObjectGeneric(TEST_PATH, jcrNode);
 
             assertNotNull(object.getDependencies());
-            assertTrue(object.getDependencies().contains("/content/dam/mysite/image.jpg"));
+            assertTrue(object.getDependencies().isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should accept dependencies via addDependencies and deduplicate")
+        void shouldAddDependenciesAndDeduplicate() {
+            JSONObject jcrNode = new JSONObject();
+            jcrNode.put("jcr:primaryType", TEST_TYPE);
+
+            DumAemObjectGeneric object = new DumAemObjectGeneric(TEST_PATH, jcrNode);
+            object.addDependencies(java.util.List.of("/content/a", "/content/b"));
+            object.addDependencies(java.util.List.of("/content/b", "/content/c"));
+
+            assertEquals(3, object.getDependencies().size());
+            assertTrue(object.getDependencies().contains("/content/a"));
+            assertTrue(object.getDependencies().contains("/content/b"));
+            assertTrue(object.getDependencies().contains("/content/c"));
         }
     }
 

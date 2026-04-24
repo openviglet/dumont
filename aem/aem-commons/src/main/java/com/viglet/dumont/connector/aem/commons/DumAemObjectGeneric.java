@@ -41,7 +41,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +91,7 @@ public class DumAemObjectGeneric {
         this.path = nodePath;
         this.url = nodePath + HTML;
         this.type = jcrNode.has(JCR_PRIMARYTYPE) ? jcrNode.getString(JCR_PRIMARYTYPE) : EMPTY_VALUE;
-        this.dependencies = DumAemCommonsUtils.getDependencies(jcrNode);
+        this.dependencies = new HashSet<>();
         try {
             if (jcrNode.has(JCR_CONTENT)) {
                 processJcrContent(jcrNode, event);
@@ -222,6 +224,17 @@ public class DumAemObjectGeneric {
             if (DumAemCommonsUtils.hasProperty(jcrDataRootNode, CQ_MODEL)) {
                 this.model = jcrDataRootNode.getString(CQ_MODEL);
             }
+        }
+    }
+
+    public void addDependencies(Collection<String> more) {
+        if (more == null || more.isEmpty()) {
+            return;
+        }
+        if (this.dependencies == null) {
+            this.dependencies = new HashSet<>(more);
+        } else {
+            this.dependencies.addAll(more);
         }
     }
 

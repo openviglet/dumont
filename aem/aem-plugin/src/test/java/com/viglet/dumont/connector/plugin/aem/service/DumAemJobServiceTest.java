@@ -80,7 +80,7 @@ class DumAemJobServiceTest {
     @BeforeEach
     void setUp() {
         service = new DumAemJobService(dumAemService, dumConnectorContext,
-                dumAemContentDefinitionService, dumAemObjectService);
+                dumAemContentDefinitionService, dumAemObjectService, false);
     }
 
     @Nested

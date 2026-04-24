@@ -20,6 +20,7 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
@@ -46,16 +47,19 @@ public class DumAemJobService {
         private final DumConnectorContext dumConnectorContext;
         private final DumAemContentDefinitionService dumAemContentDefinitionService;
         private final DumAemObjectService dumAemObjectService;
+        private final boolean dependenciesEnabled;
 
         public DumAemJobService(
                         DumAemService dumAemService,
                         DumConnectorContext dumConnectorContext,
                         DumAemContentDefinitionService dumAemContentDefinitionService,
-                        DumAemObjectService dumAemObjectService) {
+                        DumAemObjectService dumAemObjectService,
+                        @Value("${dumont.dependencies.enabled:true}") boolean dependenciesEnabled) {
                 this.dumAemService = dumAemService;
                 this.dumConnectorContext = dumConnectorContext;
                 this.dumAemContentDefinitionService = dumAemContentDefinitionService;
                 this.dumAemObjectService = dumAemObjectService;
+                this.dependenciesEnabled = dependenciesEnabled;
         }
 
         public TurSNJobItem deIndexJob(DumAemSession dumAemSession, List<String> sites,
@@ -331,8 +335,33 @@ public class DumAemJobService {
                         return;
                 }
                 configureObjectDataPath(dumAemSession, aemObjectGeneric);
+                extractDependencies(dumAemSession, aemObjectGeneric);
                 indexObject(dumAemSession, aemObjectGeneric);
 
+        }
+
+        /**
+         * When {@code dumont.dependencies.enabled=true}, collects every
+         * {@code /content} path referenced in the content's infinity.json and
+         * model.json and stores them as dependencies on the AEM object.
+         * Duplicates across the two sources are deduplicated by the underlying
+         * {@code Set}. When the flag is disabled, the dependency set stays
+         * empty and no model.json request is issued.
+         */
+        private void extractDependencies(DumAemSession dumAemSession,
+                        DumAemObjectGeneric aemObjectGeneric) {
+                if (!dependenciesEnabled) {
+                        return;
+                }
+                aemObjectGeneric.addDependencies(
+                                DumAemCommonsUtils.getDependencies(aemObjectGeneric.getJcrNode()));
+                DumAemConfiguration config = dumAemSession.getConfiguration();
+                DumAemCommonsUtils.getModelJson(aemObjectGeneric.getPath(), config)
+                                .map(DumAemCommonsUtils::getDependencies)
+                                .ifPresent(aemObjectGeneric::addDependencies);
+                log.debug("Collected {} dependencies for {}",
+                                aemObjectGeneric.getDependencies().size(),
+                                aemObjectGeneric.getPath());
         }
 
         private boolean isObjectEligibleForIndexing(DumAemSession dumAemSession,

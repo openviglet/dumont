@@ -24,6 +24,7 @@ public class DumAemObject extends DumAemObjectGeneric {
             DumAemEnv environment) {
         super(dumAemObjectGeneric.getPath(), dumAemObjectGeneric.getJcrNode());
         this.environment = environment;
+        addDependencies(dumAemObjectGeneric.getDependencies());
     }
 
     public String getUrlPrefix(DumAemConfiguration configuration) {

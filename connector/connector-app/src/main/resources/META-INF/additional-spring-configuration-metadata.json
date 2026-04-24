@@ -109,6 +109,51 @@
       "name": "dumont.indexing.elasticsearch.password",
       "type": "java.lang.String",
       "description": "Password for authenticating with the Elasticsearch instance."
+    },
+    {
+      "name": "dumont.url",
+      "type": "java.lang.String",
+      "description": "Base URL where the Dumont connector is reachable by external clients."
+    },
+    {
+      "name": "dumont.multi-tenant",
+      "type": "java.lang.Boolean",
+      "description": "Enable multi-tenant mode, exposing per-tenant isolation across the connector."
+    },
+    {
+      "name": "dumont.permissions",
+      "type": "java.lang.Boolean",
+      "description": "Enforce role/privilege checks. When false, every authenticated user gets ROLE_ADMIN and all privileges."
+    },
+    {
+      "name": "dumont.keycloak",
+      "type": "java.lang.Boolean",
+      "description": "When true, Spring Security delegates login to the Keycloak realm configured under spring.security.oauth2.client.provider.keycloak."
+    },
+    {
+      "name": "dumont.keycloak-admin-id",
+      "type": "java.lang.String",
+      "description": "Keycloak subject/user id that should be mapped to the local admin account."
+    },
+    {
+      "name": "dumont.authentication.thirdparty",
+      "type": "java.lang.Boolean",
+      "description": "Show third-party OAuth2 login buttons (Google, GitHub, ...) on the login page."
+    },
+    {
+      "name": "dumont.authentication.new-user",
+      "type": "java.lang.Boolean",
+      "description": "Enable the /api/v2/user/register self-service sign-up endpoint."
+    },
+    {
+      "name": "dumont.dns.cache.ttl",
+      "type": "java.lang.Integer",
+      "description": "JVM DNS positive lookup cache TTL in seconds."
+    },
+    {
+      "name": "dumont.dns.cache.negative.ttl",
+      "type": "java.lang.Integer",
+      "description": "JVM DNS negative (failed) lookup cache TTL in seconds."
     }
   ]
 }
