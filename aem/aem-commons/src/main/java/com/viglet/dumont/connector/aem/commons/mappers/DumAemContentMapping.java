@@ -17,4 +17,5 @@ public class DumAemContentMapping {
     private List<TurSNAttributeSpec> targetAttrDefinitions;
     private List<DumAemModel> models;
     private String deltaClassName;
+    private String dependencyClassName;
 }

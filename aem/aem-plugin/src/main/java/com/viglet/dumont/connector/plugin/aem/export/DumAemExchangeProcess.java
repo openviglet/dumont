@@ -303,6 +303,7 @@ public class DumAemExchangeProcess {
                 .defaultLocale(dumAemSourceExchange.getDefaultLocale())
                 .localeClass(dumAemSourceExchange.getLocaleClass())
                 .deltaClass(dumAemSourceExchange.getDeltaClass())
+                .dependencyClass(dumAemSourceExchange.getDependencyClass())
                 .authorURLPrefix(dumAemSourceExchange.getAuthorURLPrefix())
                 .publishURLPrefix(dumAemSourceExchange.getPublishURLPrefix())
                 .oncePattern(dumAemSourceExchange.getOncePattern())

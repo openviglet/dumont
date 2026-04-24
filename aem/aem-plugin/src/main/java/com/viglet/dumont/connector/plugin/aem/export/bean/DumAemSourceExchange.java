@@ -35,6 +35,7 @@ public class DumAemSourceExchange {
     private Locale defaultLocale;
     private String localeClass;
     private String deltaClass;
+    private String dependencyClass;
     private String endpoint;
     private String oncePattern;
     private String username;

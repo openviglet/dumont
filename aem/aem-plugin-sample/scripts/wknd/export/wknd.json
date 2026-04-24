@@ -6,6 +6,7 @@
       "defaultLocale": "en_US",
       "localeClass": "com.viglet.dumont.connector.aem.commons.ext.DumAemExtLocale",
       "deltaClass": "com.viglet.dumont.connector.aem.sample.ext.DumAemExtSampleDeltaDate",
+      "dependencyClass": "com.viglet.dumont.connector.aem.sample.ext.DumAemExtSampleDependency",
       "endpoint": "http://localhost:4502",
       "username": "admin",
       "password": "admin",

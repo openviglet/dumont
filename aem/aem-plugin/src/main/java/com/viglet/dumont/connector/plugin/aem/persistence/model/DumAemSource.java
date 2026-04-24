@@ -82,6 +82,8 @@ public class DumAemSource implements Serializable {
         @Column
         private String deltaClass;
         @Column
+        private String dependencyClass;
+        @Column
         private boolean author;
         @Column
         private boolean publish;

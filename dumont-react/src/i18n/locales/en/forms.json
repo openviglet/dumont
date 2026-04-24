@@ -837,6 +837,8 @@
       "defaultLocale": "Default Locale",
       "localeClass": "Locale Class",
       "deltaClass": "Delta Class",
+      "dependencyClass": "Dependency Class",
+      "dependencyClassDesc": "Optional custom class that decides, per content, whether its /content dependencies (from infinity.json and model.json) should be extracted and indexed. Must implement DumAemExtDependencyInterface.",
       "localePaths": "Locale Paths",
       "localePathsDesc": "Define specific paths for different locales.",
       "specifications": "Specifications",

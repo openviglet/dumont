@@ -78,6 +78,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
     defaultLocale: src.defaultLocale ?? "",
     localeClass: src.localeClass ?? "",
     deltaClass: src.deltaClass ?? "",
+    dependencyClass: src.dependencyClass ?? "",
     authorSNSite: src.authorSNSite ?? "",
     publishSNSite: src.publishSNSite ?? "",
     authorURLPrefix: src.authorURLPrefix ?? "",
@@ -515,6 +516,21 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                         <Input {...field} placeholder="com.example.DeltaProvider" type="text" />
                       </FormControl>
                       <FormDescription>{t("forms.integrationSource.deltaClass")}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="dependencyClass"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("forms.integrationSource.dependencyClass")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="com.example.DependencyProvider" type="text" />
+                      </FormControl>
+                      <FormDescription>{t("forms.integrationSource.dependencyClassDesc")}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

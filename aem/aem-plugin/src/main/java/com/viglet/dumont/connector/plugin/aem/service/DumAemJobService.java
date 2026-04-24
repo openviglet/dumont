@@ -353,9 +353,15 @@ public class DumAemJobService {
                 if (!dependenciesEnabled) {
                         return;
                 }
+                DumAemConfiguration config = dumAemSession.getConfiguration();
+                if (!dumAemContentDefinitionService.shouldIndexDependencies(
+                                aemObjectGeneric, config, dumAemSession.getContentMapping())) {
+                        log.debug("Custom dependencyClass opted out of dependency indexing for {}",
+                                        aemObjectGeneric.getPath());
+                        return;
+                }
                 aemObjectGeneric.addDependencies(
                                 DumAemCommonsUtils.getDependencies(aemObjectGeneric.getJcrNode()));
-                DumAemConfiguration config = dumAemSession.getConfiguration();
                 DumAemCommonsUtils.getModelJson(aemObjectGeneric.getPath(), config)
                                 .map(DumAemCommonsUtils::getDependencies)
                                 .ifPresent(aemObjectGeneric::addDependencies);

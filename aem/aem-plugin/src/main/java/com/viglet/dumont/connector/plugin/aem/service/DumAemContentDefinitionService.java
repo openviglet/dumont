@@ -30,8 +30,10 @@ import org.springframework.stereotype.Service;
 import com.viglet.dumont.commons.cache.DumCustomClassCache;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDeltaDate;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDeltaDateInterface;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDependencyInterface;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemContentMapping;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
@@ -62,6 +64,28 @@ public class DumAemContentDefinitionService {
         public String getDeltaClassName(DumAemContentMapping dumAemContentMapping) {
                 return Optional.ofNullable(dumAemContentMapping)
                                 .map(DumAemContentMapping::getDeltaClassName).orElse(null);
+        }
+
+        public String getDependencyClassName(DumAemContentMapping dumAemContentMapping) {
+                return Optional.ofNullable(dumAemContentMapping)
+                                .map(DumAemContentMapping::getDependencyClassName).orElse(null);
+        }
+
+        /**
+         * Decides whether the given content should have its dependencies
+         * extracted and indexed. When {@code dependencyClass} is configured on
+         * the source, the custom class is invoked to implement per-content
+         * business logic. When no class is configured (or it cannot be
+         * resolved), the default is to extract dependencies.
+         */
+        public boolean shouldIndexDependencies(DumAemObjectGeneric aemObject,
+                        DumAemConfiguration dumAemSourceContext,
+                        DumAemContentMapping dumAemContentMapping) {
+                return Optional.ofNullable(getDependencyClassName(dumAemContentMapping))
+                                .flatMap(DumCustomClassCache::getCustomClassMap)
+                                .map(classInstance -> ((DumAemExtDependencyInterface) classInstance)
+                                                .consume(aemObject, dumAemSourceContext))
+                                .orElse(true);
         }
 
         public Date getDeltaDate(DumAemObject aemObject,
