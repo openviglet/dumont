@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -360,14 +362,57 @@ public class DumAemJobService {
                                         aemObjectGeneric.getPath());
                         return;
                 }
-                aemObjectGeneric.addDependencies(
-                                DumAemCommonsUtils.getDependencies(aemObjectGeneric.getJcrNode()));
-                DumAemCommonsUtils.getModelJson(aemObjectGeneric.getPath(), config)
+                String currentPath = aemObjectGeneric.getPath();
+                aemObjectGeneric.addDependencies(filterSelfReferences(currentPath,
+                                DumAemCommonsUtils.getDependencies(aemObjectGeneric.getJcrNode())));
+                DumAemCommonsUtils.getModelJson(currentPath, config)
                                 .map(DumAemCommonsUtils::getDependencies)
+                                .map(deps -> filterSelfReferences(currentPath, deps))
                                 .ifPresent(aemObjectGeneric::addDependencies);
                 log.debug("Collected {} dependencies for {}",
                                 aemObjectGeneric.getDependencies().size(),
                                 aemObjectGeneric.getPath());
+        }
+
+        private static final int MAX_DEPENDENCY_PATH_LENGTH = 500;
+        private static final String EXPERIENCE_FRAGMENTS_PREFIX = "/content/experience-fragments/";
+        private static final String DAM_PREFIX = "/content/dam/";
+
+        /**
+         * Restricts dependencies to Experience Fragments and Content Fragments
+         * (which live under {@code /content/dam}). Drops:
+         * <ul>
+         * <li>Paths outside {@code /content/experience-fragments/} and
+         * {@code /content/dam/} — pages and other content are not tracked as
+         * dependencies.</li>
+         * <li>Paths with an extension on the last segment (e.g. {@code .html},
+         * {@code .json}, {@code .svg}, {@code .jpg}). These are renditions or
+         * URL variants; only the canonical XF/CF root is kept.</li>
+         * <li>Paths pointing into a JCR content sub-tree — both the JCR form
+         * ({@code .../jcr:content/...}) and the URL-encoded form
+         * ({@code .../_jcr_content/...}).</li>
+         * <li>Paths longer than the {@code objectId} column.</li>
+         * </ul>
+         */
+        private static Set<String> filterSelfReferences(String currentPath, Set<String> deps) {
+                if (deps == null || deps.isEmpty()) {
+                        return deps;
+                }
+                return deps.stream()
+                                .filter(dep -> dep.startsWith(EXPERIENCE_FRAGMENTS_PREFIX)
+                                                || dep.startsWith(DAM_PREFIX))
+                                .filter(dep -> !hasExtension(dep))
+                                .filter(dep -> !dep.contains("/jcr:content"))
+                                .filter(dep -> !dep.contains("/_jcr_content"))
+                                .filter(dep -> !dep.equals(currentPath))
+                                .filter(dep -> dep.length() <= MAX_DEPENDENCY_PATH_LENGTH)
+                                .collect(Collectors.toSet());
+        }
+
+        private static boolean hasExtension(String path) {
+                int lastSlash = path.lastIndexOf('/');
+                String lastSegment = lastSlash >= 0 ? path.substring(lastSlash + 1) : path;
+                return lastSegment.indexOf('.') >= 0;
         }
 
         private boolean isObjectEligibleForIndexing(DumAemSession dumAemSession,

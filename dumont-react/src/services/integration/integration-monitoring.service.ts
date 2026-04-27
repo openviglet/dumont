@@ -1,3 +1,4 @@
+import type { TurIntegrationIndexingDetail } from "@/models/integration/integration-indexing-detail.model";
 import type { TurIntegrationMonitoring } from "@/models/integration/integration-monitoring.model";
 import type { TurIntegrationMonitoringPage } from "@/models/integration/integration-monitoring-page.model";
 import type { TurIntegrationMonitoringRequest } from "@/models/integration/integration-monitoring-request.model";
@@ -31,6 +32,13 @@ export class TurIntegrationMonitoringService {
     const { data } = await this.axiosInstance.post<TurIntegrationMonitoringPage>(
       `${this.endpointPrefix}/_search`,
       request
+    );
+    return data;
+  }
+
+  async getItem(itemId: string | number): Promise<TurIntegrationIndexingDetail> {
+    const { data } = await this.axiosInstance.get<TurIntegrationIndexingDetail>(
+      `${this.endpointPrefix}/item/${itemId}`
     );
     return data;
   }

@@ -1,22 +1,43 @@
+import { reportBackendOffline, reportBackendOnline, toast } from "@viglet/viglet-design-system";
 import axios, { type AxiosRequestConfig } from "axios";
+import i18next from "i18next";
 
 /**
- * CSRF token handling for mutating requests.
+ * Mirrors the Turing host axios setup. Imported by both the standalone entry
+ * (main.tsx) and the Module Federation entry (DumontRoutes.tsx) so it applies
+ * in both modes — Turing's vite config does not share `axios`, so Dumont's
+ * axios instance is independent and must configure itself.
  *
- * Spring Security protects /api/** with a CSRF cookie (XSRF-TOKEN) that is
- * HttpOnly, so JavaScript cannot read it directly. Instead, we fetch the
- * token from /api/csrf (exposed by DumCsrfController) and attach it via
- * X-XSRF-TOKEN on POST/PUT/DELETE/PATCH requests.
+ * Pattern matches `turing-app/src/main.tsx` + `turing-app/src/lib/axios.ts`:
+ *  - baseURL = `${VITE_API_URL}/api` (services use `/v2/...` paths and `/api`
+ *    is added implicitly).
+ *  - Default `Content-Type: application/json` + `X-Requested-With` header.
+ *  - CSRF token attached on mutating requests, with one retry on 403.
+ *  - Backend offline/online reporting + global 422 (API key) toast + 401 redirect.
  */
+// Fallback to empty string keeps baseURL relative ("/api") when VITE_API_URL
+// is unset — required when Dumont is loaded as a Module Federation remote and
+// the host doesn't propagate Dumont's .env to the bundle.
+axios.defaults.baseURL = `${import.meta.env.VITE_API_URL ?? ""}/api`;
+axios.defaults.withCredentials = true;
+axios.defaults.xsrfCookieName = "XSRF-TOKEN";
+axios.defaults.xsrfHeaderName = "X-XSRF-TOKEN";
 
 const CSRF_HEADER = "X-XSRF-TOKEN";
-const CSRF_ENDPOINT = "/api/csrf";
+const CSRF_ENDPOINT = "/csrf";
 let csrfToken: string | null = null;
 
 const csrfClient = axios.create({ withCredentials: true });
 
 function isMutatingMethod(method?: string): boolean {
   return ["post", "put", "delete", "patch"].includes(method?.toLowerCase() || "");
+}
+
+function isBackendUnreachable(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) return false;
+  if (!error.response) return true;
+  const status = error.response.status;
+  return status === 502 || status === 503 || status === 504;
 }
 
 function readCsrfTokenFromHeaders(headers: unknown): string | null {
@@ -81,14 +102,14 @@ async function ensureCsrfToken(): Promise<void> {
   csrfToken = headerToken || bodyToken || cookieToken || null;
 }
 
-axios.defaults.withCredentials = true;
-axios.defaults.xsrfCookieName = "XSRF-TOKEN";
-axios.defaults.xsrfHeaderName = CSRF_HEADER;
-
 axios.interceptors.request.use(
   async (config) => {
-    const requestUrl = config.url || "";
+    if (!(config.data instanceof FormData)) {
+      config.headers["Content-Type"] = "application/json";
+    }
+    config.headers["X-Requested-With"] = "XMLHttpRequest";
 
+    const requestUrl = config.url || "";
     if (requestUrl.includes(CSRF_ENDPOINT) || !isMutatingMethod(config.method)) {
       return config;
     }
@@ -102,7 +123,6 @@ axios.interceptors.request.use(
     }
 
     setRequestHeader(config, csrfToken);
-
     return config;
   },
   (error) => Promise.reject(error),
@@ -110,6 +130,7 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
   (response) => {
+    reportBackendOnline();
     const tokenFromHeader = readCsrfTokenFromHeaders(response.headers);
     if (tokenFromHeader) {
       csrfToken = tokenFromHeader;
@@ -117,6 +138,21 @@ axios.interceptors.response.use(
     return response;
   },
   async (error) => {
+    if (isBackendUnreachable(error)) {
+      reportBackendOffline();
+    } else if (axios.isAxiosError(error) && error.response) {
+      reportBackendOnline();
+      if (error.response.status === 422) {
+        toast.error(i18next.t("common.apiKeyMismatch"));
+      } else if (error.response.status === 401) {
+        const { pathname, search } = globalThis.location;
+        if (!pathname.startsWith("/login") && !pathname.startsWith("/setup")) {
+          const returnUrl = pathname + search;
+          globalThis.location.href = `/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+        }
+      }
+    }
+
     const tokenFromHeader = readCsrfTokenFromHeaders(error.response?.headers);
     if (tokenFromHeader) {
       csrfToken = tokenFromHeader;

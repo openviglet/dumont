@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -220,6 +221,10 @@ public class DumConnectorIndexingService {
         public List<DumConnectorIndexingModel> findAll() {
                 return dumConnectorIndexingRepository
                                 .findAllByOrderByModificationDateDesc(Limit.of(50));
+        }
+
+        public Optional<DumConnectorIndexingModel> findById(int id) {
+                return dumConnectorIndexingRepository.findWithDependenciesById(id);
         }
 
         public List<String> getAllSources(String provider) {

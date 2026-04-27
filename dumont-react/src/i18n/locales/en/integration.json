@@ -129,7 +129,33 @@
     "monitoring": {
       "title": "Monitoring",
       "description": "Verify the current status of AEM content indexing.",
-      "all": "All"
+      "all": "All",
+      "item": {
+        "title": "Indexing Detail",
+        "description": "Details for the indexed content.",
+        "loadFailed": "Failed to load indexing item.",
+        "viewDetails": "View details",
+        "backToList": "Back to monitoring",
+        "openSearch": "Open in search",
+        "overview": "Overview",
+        "overviewDesc": "Indexing record information.",
+        "objectId": "Object ID",
+        "status": "Status",
+        "environment": "Environment",
+        "locale": "Locale",
+        "provider": "Provider",
+        "source": "Source",
+        "modificationDate": "Modification Date",
+        "created": "Create Date",
+        "checksum": "Checksum",
+        "transactionId": "Transaction ID",
+        "sites": "Sites",
+        "sitesDesc": "Sites associated with the content.",
+        "noSites": "No sites associated.",
+        "dependencies": "Dependencies",
+        "dependenciesDesc": "Content this item depends on.",
+        "noDependencies": "No dependencies."
+      }
     },
     "indexingStats": {
       "title": "Indexing Stats",

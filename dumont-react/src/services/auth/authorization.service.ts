@@ -4,14 +4,13 @@ import axios from "axios";
 
 /**
  * Session-based login + discovery + self-registration client (mirrors
- * TurAuthorizationService). Uses fetch for endpoints that must NOT be prefixed
- * by the axios interceptor with `/api`, letting the interceptor only touch
- * axios.get/post for REST calls elsewhere.
+ * TurAuthorizationService). The /api prefix is implicit via
+ * axios.defaults.baseURL — services use /-paths and let baseURL prepend it.
  */
 export class DumAuthorizationService {
   async login(username: string, password: string): Promise<DumRestInfo> {
     const baseURL = axios.defaults.baseURL ?? "";
-    const response = await fetch(`${baseURL}/api/login`, {
+    const response = await fetch(`${baseURL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -24,7 +23,7 @@ export class DumAuthorizationService {
   }
 
   async discovery(): Promise<DumDiscoveryAPI> {
-    const response = await axios.create().get<DumDiscoveryAPI>("/api/v2/discovery");
+    const response = await axios.create().get<DumDiscoveryAPI>("/v2/discovery");
     return response.data;
   }
 
@@ -36,7 +35,7 @@ export class DumAuthorizationService {
     email: string;
   }): Promise<void> {
     const baseURL = axios.defaults.baseURL ?? "";
-    const response = await fetch(`${baseURL}/api/v2/user/register`, {
+    const response = await fetch(`${baseURL}/v2/user/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

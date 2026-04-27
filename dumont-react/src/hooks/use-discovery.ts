@@ -12,7 +12,7 @@ let inflight: Promise<DumDiscoveryAPI> | undefined;
 function fetchDiscovery(): Promise<DumDiscoveryAPI> {
   if (cached) return Promise.resolve(cached);
   inflight ??= axios
-    .get<DumDiscoveryAPI>("/api/v2/discovery")
+    .get<DumDiscoveryAPI>("/v2/discovery")
     .then(({ data }) => {
       cached = data;
       inflight = undefined;

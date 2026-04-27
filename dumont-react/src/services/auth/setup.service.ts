@@ -5,14 +5,14 @@ export interface SetupStatus {
 }
 
 /**
- * First-access setup (mirrors TurSetupService). Uses fetch (not axios) so the
- * request goes through the `/api` prefix interceptor while preserving
- * credentials for the session cookie.
+ * First-access setup (mirrors TurSetupService). Uses fetch (not axios) but
+ * still resolves against `axios.defaults.baseURL` ("/api") so the URL is
+ * built consistently with the rest of the app.
  */
 export class DumSetupService {
   async status(): Promise<SetupStatus> {
     const baseURL = axios.defaults.baseURL ?? "";
-    const response = await fetch(`${baseURL}/api/setup`, {
+    const response = await fetch(`${baseURL}/setup`, {
       method: "GET",
       credentials: "include",
     });
@@ -24,7 +24,7 @@ export class DumSetupService {
 
   async setAdminPassword(password: string): Promise<void> {
     const baseURL = axios.defaults.baseURL ?? "";
-    const response = await fetch(`${baseURL}/api/setup`, {
+    const response = await fetch(`${baseURL}/setup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

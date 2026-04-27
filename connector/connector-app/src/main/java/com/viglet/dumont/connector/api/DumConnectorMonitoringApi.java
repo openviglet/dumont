@@ -74,6 +74,14 @@ public class DumConnectorMonitoringApi {
                 return generateMonitoringResponse(indexing);
         }
 
+        @GetMapping("item/{id}")
+        public ResponseEntity<DumConnectorIndexingModel> monitoringIndexingItem(
+                        @PathVariable int id) {
+                return indexingService.findById(id)
+                                .map(ResponseEntity::ok)
+                                .orElseGet(() -> ResponseEntity.notFound().build());
+        }
+
         @PostMapping
         public ResponseEntity<DumConnectorMonitoring> indexContentId(
                         @RequestBody List<String> contentIds) {

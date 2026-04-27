@@ -94,6 +94,9 @@ public class DumAemCommonsUtils {
         throw new IllegalStateException("Utility class");
     }
 
+    private static final String CQ_PAGE_PRIMARY_TYPE = "cq:Page";
+    private static final String JCR_PRIMARY_TYPE_FIELD = "jcr:primaryType";
+
     public static Set<String> getDependencies(JSONObject infinityJson) {
         final JsonMapper mapper = JsonMapper.builder().build();
         JsonNode root = mapper.readTree(infinityJson.toString());
@@ -102,16 +105,25 @@ public class DumAemCommonsUtils {
 
     private static Set<String> getContentValues(JsonNode node) {
         Set<String> results = new HashSet<>();
-        extractContentValues(node, results);
+        extractContentValues(node, results, true);
         return results;
     }
 
-    private static void extractContentValues(JsonNode node, Set<String> results) {
+    /**
+     * Walks the {@code infinity.json} tree collecting every {@code /content}
+     * value, but stops at child {@code cq:Page} sub-trees so dependencies stay
+     * scoped to the current page. The root itself is a {@code cq:Page} and is
+     * always traversed (controlled by {@code isRoot}).
+     */
+    private static void extractContentValues(JsonNode node, Set<String> results, boolean isRoot) {
         if (node.isObject()) {
-            node.properties().forEach(property -> extractContentValues(property.getValue(), results));
+            if (!isRoot && isChildPage(node)) {
+                return;
+            }
+            node.properties().forEach(property -> extractContentValues(property.getValue(), results, false));
         } else if (node.isArray()) {
             for (JsonNode item : node) {
-                extractContentValues(item, results);
+                extractContentValues(item, results, false);
             }
         } else if (node.isString()) {
             String value = node.asString();
@@ -119,6 +131,12 @@ public class DumAemCommonsUtils {
                 results.add(value);
             }
         }
+    }
+
+    private static boolean isChildPage(JsonNode node) {
+        JsonNode primaryType = node.get(JCR_PRIMARY_TYPE_FIELD);
+        return primaryType != null && primaryType.isString()
+                && CQ_PAGE_PRIMARY_TYPE.equals(primaryType.asString());
     }
 
     public static boolean isTypeEqualContentType(DumAemObjectGeneric dumAemObject,

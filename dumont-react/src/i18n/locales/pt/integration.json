@@ -129,7 +129,33 @@
     "monitoring": {
       "title": "Monitoramento",
       "description": "Verifique o status atual da indexação de conteúdo AEM.",
-      "all": "Todos"
+      "all": "Todos",
+      "item": {
+        "title": "Detalhe da Indexação",
+        "description": "Detalhes do conteúdo indexado.",
+        "loadFailed": "Falha ao carregar o item de indexação.",
+        "viewDetails": "Ver detalhes",
+        "backToList": "Voltar para monitoramento",
+        "openSearch": "Abrir na busca",
+        "overview": "Visão Geral",
+        "overviewDesc": "Informações do registro de indexação.",
+        "objectId": "ID do Objeto",
+        "status": "Status",
+        "environment": "Ambiente",
+        "locale": "Idioma",
+        "provider": "Provedor",
+        "source": "Fonte",
+        "modificationDate": "Data de Modificação",
+        "created": "Data de Criação",
+        "checksum": "Checksum",
+        "transactionId": "ID da Transação",
+        "sites": "Sites",
+        "sitesDesc": "Sites associados ao conteúdo.",
+        "noSites": "Nenhum site associado.",
+        "dependencies": "Dependências",
+        "dependenciesDesc": "Conteúdos dos quais este item depende.",
+        "noDependencies": "Sem dependências."
+      }
     },
     "indexingStats": {
       "title": "Estatísticas de Indexação",

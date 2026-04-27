@@ -27,9 +27,10 @@ import type { TurIntegrationIndexing } from "@/models/integration/integration-in
 import { exportToXlsx } from "@/lib/export-xlsx";
 import { type Locale, formatDistanceToNow } from 'date-fns';
 import { useDateLocale } from "@/hooks/use-date-locale";
-import { ArrowUpDown, Download, RefreshCcw } from "lucide-react";
+import { ArrowUpDown, Download, Eye, RefreshCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { ROUTES } from "@/app/routes.const";
 import { BadgeAemEnv } from "../badge-aem-env";
 import { BadgeIndexingStatus } from "../badge-indexing-status";
 import { BadgeLocale } from "../badge-locale";
@@ -60,7 +61,11 @@ function buildSortableColumns(t: (key: string) => string): Record<string, string
     };
 }
 
-function buildColumns(t: (key: string) => string, dateLocale: Locale): ColumnDef<TurIntegrationIndexing>[] {
+function buildColumns(
+    t: (key: string) => string,
+    dateLocale: Locale,
+    onViewDetails: (itemId: string | number) => void,
+): ColumnDef<TurIntegrationIndexing>[] {
   return [
     {
         accessorKey: "modificationDate",
@@ -143,6 +148,21 @@ function buildColumns(t: (key: string) => string, dateLocale: Locale): ColumnDef
                 <BadgeSites sites={row.getValue("sites")} />
             ),
     },
+    {
+        id: "actions",
+        header: t("forms.common.actions"),
+        cell: ({ row }) => (
+            <GradientButton
+                variant="outline"
+                size="icon-sm"
+                aria-label={t("integration.monitoring.item.viewDetails")}
+                title={t("integration.monitoring.item.viewDetails")}
+                onClick={() => onViewDetails(row.original.id)}
+            >
+                <Eye className="h-3.5 w-3.5" />
+            </GradientButton>
+        ),
+    },
   ];
 }
 
@@ -161,7 +181,20 @@ export const AemMonitoringGrid: React.FC<PropsWithChildren<Props>> = ({
 }) => {
     const { t } = useTranslation();
     const dateLocale = useDateLocale();
-    const columns = useMemo(() => buildColumns(t, dateLocale), [t, dateLocale]);
+    const navigate = useNavigate();
+    const { id: integrationId, source } = useParams<{ id: string; source?: string }>();
+    const handleViewDetails = useMemo(
+        () => (itemId: string | number) => {
+            if (!integrationId) return;
+            const sourceSegment = source ?? "all";
+            navigate(`${ROUTES.INTEGRATION_INSTANCE}/${integrationId}/monitoring/${sourceSegment}/${itemId}`);
+        },
+        [integrationId, navigate, source],
+    );
+    const columns = useMemo(
+        () => buildColumns(t, dateLocale, handleViewDetails),
+        [t, dateLocale, handleViewDetails],
+    );
     const SORTABLE_COLUMNS = useMemo(() => buildSortableColumns(t), [t]);
     const table = useReactTable({
         data: gridItemList,

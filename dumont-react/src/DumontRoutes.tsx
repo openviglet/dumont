@@ -1,3 +1,5 @@
+import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
+
 import { IconAdjustmentsSearch, IconChartBar, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconSparkles, IconTools } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -12,6 +14,7 @@ import IntegrationInstanceIndexingRulesListPage from "./pages/integration.instan
 import IntegrationInstanceIndexingRulesPage from "./pages/integration.instance.indexing.rules.page";
 import IntegrationInstanceIndexingStatsPage from "./pages/integration.instance.indexing.stats.page";
 import IntegrationInstanceInsightsPage from "./pages/integration.instance.insights.page";
+import IntegrationInstanceMonitoringItemPage from "./pages/integration.instance.monitoring.item.page";
 import IntegrationInstanceMonitoringPage from "./pages/integration.instance.monitoring.page";
 import IntegrationInstanceSourceListPage from "./pages/integration.instance.source.list.page";
 import IntegrationInstanceSourceModelPage from "./pages/integration.instance.source.model.page";
@@ -69,6 +72,7 @@ export default function DumontRoutes() {
       {/* Monitoring */}
       <Route path="monitoring" element={<Page turIcon={IconGraph} title={t("integration.nav.monitoring")} urlBase="monitoring" />}>
         <Route index element={<Navigate to="all" replace />} />
+        <Route path=":source/:itemId" element={<IntegrationInstanceMonitoringItemPage />} />
         <Route path=":source" element={<IntegrationInstanceMonitoringPage />} />
       </Route>
       {/* Indexing Stats */}

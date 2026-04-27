@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -34,6 +36,11 @@ public interface DumConnectorIndexingRepository
                 extends JpaRepository<DumConnectorIndexingModel, Integer>,
                 JpaSpecificationExecutor<DumConnectorIndexingModel> {
         List<DumConnectorIndexingModel> findByDependenciesReferenceId(int referenceId);
+
+        @Query("SELECT i FROM DumConnectorIndexingModel i "
+                        + "LEFT JOIN FETCH i.dependencies "
+                        + "WHERE i.id = :id")
+        Optional<DumConnectorIndexingModel> findWithDependenciesById(@Param("id") int id);
 
         boolean existsByObjectIdAndSourceAndEnvironmentAndProvider(String objectId, String source,
                         String environment, String provider);

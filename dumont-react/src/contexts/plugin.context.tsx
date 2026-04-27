@@ -16,7 +16,7 @@ export function PluginProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     axios
-      .get<{ status: string; provider: string; apiKey?: string }>("/api/v2/connector/status")
+      .get<{ status: string; provider: string; apiKey?: string }>("/v2/connector/status")
       .then(({ data }) => {
         setProvider(data.provider);
         // In standalone mode, set the API key for all subsequent requests
