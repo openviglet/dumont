@@ -55,7 +55,7 @@ public class DumAemAttrProcess {
                                         if (DumAemAttrUtils.hasCustomClass(targetAttr)) {
                                                 dumAemTargetAttrValueMap.merge(process(
                                                                 dumAemSession, context));
-                                        } else {
+                                        } else if (targetAttr.getSourceAttrs() != null) {
                                                 targetAttr.getSourceAttrs().stream()
                                                                 .filter(Objects::nonNull)
                                                                 .forEach(sourceAttr -> dumAemTargetAttrValueMap
@@ -64,6 +64,9 @@ public class DumAemAttrProcess {
                                                                                                 targetAttr,
                                                                                                 sourceAttr,
                                                                                                 context)));
+                                        } else {
+                                                log.warn("TargetAttr '{}' has no sourceAttrs and no custom class — skipping",
+                                                                targetAttr.getName());
                                         }
                                 });
                 return dumAemTargetAttrValueMap;

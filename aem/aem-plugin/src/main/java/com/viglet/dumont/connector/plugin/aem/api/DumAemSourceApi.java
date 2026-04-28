@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
+import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemPluginModel;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemAttributeSpecificationRepository;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemPluginModelRepository;
@@ -139,7 +140,7 @@ public class DumAemSourceApi {
             dumAemSourceEdit.getModels().clear();
             if (dumAemSource.getModels() != null) {
                 dumAemSource.getModels().forEach(model -> {
-                    model.setDumAemSource(dumAemSourceEdit);
+                    wireModelHierarchy(model, dumAemSourceEdit);
                     dumAemSourceEdit.getModels().add(model);
                 });
             }
@@ -147,6 +148,20 @@ public class DumAemSourceApi {
             DumAemSource saved = this.dumAemSourceRepository.save(dumAemSourceEdit);
             return ResponseEntity.ok(saved);
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private static void wireModelHierarchy(DumAemPluginModel model, DumAemSource source) {
+        model.setDumAemSource(source);
+        if (model.getTargetAttrs() == null) {
+            return;
+        }
+        model.getTargetAttrs().forEach(targetAttr -> {
+            targetAttr.setDumAemModel(model);
+            if (targetAttr.getSourceAttrs() != null) {
+                targetAttr.getSourceAttrs().forEach(
+                        sourceAttr -> sourceAttr.setDumAemTargetAttribute(targetAttr));
+            }
+        });
     }
 
     @Transactional
@@ -164,13 +179,7 @@ public class DumAemSourceApi {
     public DumAemSource dumAemSourceAdd(@RequestBody DumAemSource dumAemSource) {
         dumAemSource.getLocalePaths().forEach(localePath -> localePath.setDumAemSource(dumAemSource));
         dumAemSource.getAttributeSpecifications().forEach(spec -> spec.setDumAemSource(dumAemSource));
-        dumAemSource.getModels().forEach(model -> {
-            model.setDumAemSource(dumAemSource);
-            model.getTargetAttrs().forEach(targetAttr -> {
-                targetAttr.setDumAemModel(model);
-                targetAttr.getSourceAttrs().forEach(sourceAttr -> sourceAttr.setDumAemTargetAttribute(targetAttr));
-            });
-        });
+        dumAemSource.getModels().forEach(model -> wireModelHierarchy(model, dumAemSource));
         this.dumAemSourceRepository.save(dumAemSource);
         return dumAemSource;
     }
