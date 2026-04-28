@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<springProperty scope="context" name="REDIS_URI" source="dumont.redis.uri" defaultValue="redis://localhost:6379/0" />
+	<springProperty scope="context" name="REDIS_ENABLED" source="dumont.redis.enabled" defaultValue="false" />
+	<springProperty scope="context" name="REDIS_KEY_SERVER" source="dumont.redis.key.server" defaultValue="dumontLog:server" />
+	<springProperty scope="context" name="REDIS_KEY_INDEXING" source="dumont.redis.key.indexing" defaultValue="dumontLog:indexing" />
+	<springProperty scope="context" name="REDIS_MAX_SERVER" source="dumont.redis.maxEntries.server" defaultValue="10000" />
+	<springProperty scope="context" name="REDIS_MAX_INDEXING" source="dumont.redis.maxEntries.indexing" defaultValue="50000" />
+
+	<appender name="REDIS_GENERAL_SYNC" class="com.viglet.dumont.commons.logging.DumRedisAppender">
+		<enabled>${REDIS_ENABLED}</enabled>
+		<connectionString>${REDIS_URI}</connectionString>
+		<key>${REDIS_KEY_SERVER}</key>
+		<maxEntries>${REDIS_MAX_SERVER}</maxEntries>
+	</appender>
+
+	<appender name="REDIS_STATUS_SYNC" class="com.viglet.dumont.commons.logging.DumRedisIndexingAppender">
+		<enabled>${REDIS_ENABLED}</enabled>
+		<connectionString>${REDIS_URI}</connectionString>
+		<key>${REDIS_KEY_INDEXING}</key>
+		<maxEntries>${REDIS_MAX_INDEXING}</maxEntries>
+	</appender>
+
+	<appender name="ASYNC_REDIS_GENERAL" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="REDIS_GENERAL_SYNC" />
+		<queueSize>512</queueSize>
+		<discardingThreshold>0</discardingThreshold>
+		<neverBlock>true</neverBlock>
+	</appender>
+	<appender name="ASYNC_REDIS_STATUS" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="REDIS_STATUS_SYNC" />
+		<queueSize>256</queueSize>
+		<discardingThreshold>0</discardingThreshold>
+		<neverBlock>true</neverBlock>
+	</appender>
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<Pattern>%msg%n</Pattern>
+		</encoder>
+	</appender>
+
+	<logger name="redis.clients.jedis" level="OFF" />
+	<logger name="com.hazelcast.internal.diagnostics.HealthMonitor" level="OFF" />
+
+	<logger name="com.viglet.dumont.commons.logging.DumLoggingIndexingLog" level="info" additivity="false">
+		<appender-ref ref="ASYNC_REDIS_STATUS" />
+	</logger>
+
+	<logger name="com.viglet.dumont.connector.DumConnectorApplication" level="info" additivity="false">
+		<appender-ref ref="CONSOLE" />
+	</logger>
+	<logger name="com.viglet.dumont.connector.onstartup.DumConnectorOnStartup" level="info" additivity="false">
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
+	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
+	<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}" />
+	<include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+
+	<root level="INFO">
+		<appender-ref ref="ASYNC_REDIS_GENERAL" />
+	</root>
+</configuration>

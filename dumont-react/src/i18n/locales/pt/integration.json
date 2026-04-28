@@ -154,7 +154,16 @@
         "noSites": "Nenhum site associado.",
         "dependencies": "Dependências",
         "dependenciesDesc": "Conteúdos dos quais este item depende.",
-        "noDependencies": "Sem dependências."
+        "noDependencies": "Sem dependências.",
+        "tabDetail": "Detalhe",
+        "tabHistory": "Histórico",
+        "history": "Histórico de Indexação",
+        "historyDesc": "Registros persistentes de indexação para este conteúdo (motor: {{engine}}).",
+        "historyLoading": "Carregando histórico...",
+        "noHistory": "Sem registros de log para este conteúdo.",
+        "historyDate": "Data",
+        "historyResult": "Resultado",
+        "historyDetails": "Detalhes"
       }
     },
     "indexingStats": {

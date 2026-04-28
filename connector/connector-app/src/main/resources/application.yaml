@@ -59,6 +59,29 @@ dumont:
       # Optional authentication
       username: ~
       password: ~
+  # Persistent indexing log (mirrors turing.logging.*).
+  # Switch logback config via `logging.config=classpath:logback-spring-mongo.xml`
+  # or `classpath:logback-spring-redis.xml` to actually persist entries.
+  logging:
+    engine: none        # none | mongodb | redis
+    database: dumontLog
+    collection:
+      server: server
+      indexing: indexing
+    purge:
+      days: 30
+  mongodb:
+    enabled: false
+    uri: mongodb://localhost:27017
+  redis:
+    enabled: false
+    uri: redis://localhost:6379/0
+    key:
+      server: dumontLog:server
+      indexing: dumontLog:indexing
+    maxEntries:
+      server: 10000
+      indexing: 50000
 
 spring:
   h2:

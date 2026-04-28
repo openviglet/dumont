@@ -72,6 +72,7 @@ export default function DumontRoutes() {
       {/* Monitoring */}
       <Route path="monitoring" element={<Page turIcon={IconGraph} title={t("integration.nav.monitoring")} urlBase="monitoring" />}>
         <Route index element={<Navigate to="all" replace />} />
+        <Route path=":source/:itemId/:tab" element={<IntegrationInstanceMonitoringItemPage />} />
         <Route path=":source/:itemId" element={<IntegrationInstanceMonitoringItemPage />} />
         <Route path=":source" element={<IntegrationInstanceMonitoringPage />} />
       </Route>

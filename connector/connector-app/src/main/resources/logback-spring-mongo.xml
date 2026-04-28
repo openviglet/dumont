@@ -1,38 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-	<appender name="MONGO_GENERAL" class="com.viglet.dumont.commons.logging.DumMongoDBAppender">
-		<enabled>true</enabled>
-		<connectionString>mongodb://localhost:27017</connectionString>
-		<databaseName>turingLog</databaseName>
-		<collectionName>aem</collectionName>
+	<springProperty scope="context" name="MONGO_URI" source="dumont.mongodb.uri" defaultValue="mongodb://localhost:27017" />
+	<springProperty scope="context" name="MONGO_ENABLED" source="dumont.mongodb.enabled" defaultValue="false" />
+	<springProperty scope="context" name="LOG_DATABASE" source="dumont.logging.database" defaultValue="dumontLog" />
+	<springProperty scope="context" name="LOG_COLL_SERVER" source="dumont.logging.collection.server" defaultValue="server" />
+	<springProperty scope="context" name="LOG_COLL_INDEXING" source="dumont.logging.collection.indexing" defaultValue="indexing" />
+
+	<appender name="MONGO_GENERAL_SYNC" class="com.viglet.dumont.commons.logging.DumMongoDBAppender">
+		<enabled>${MONGO_ENABLED}</enabled>
+		<connectionString>${MONGO_URI}</connectionString>
+		<databaseName>${LOG_DATABASE}</databaseName>
+		<collectionName>${LOG_COLL_SERVER}</collectionName>
 	</appender>
-	<appender name="MONGO_STATUS" class="com.viglet.dumont.commons.logging.DumMongoDBIndexingAppender">
-		<enabled>true</enabled>
-		<connectionString>mongodb://localhost:27017</connectionString>
-		<databaseName>turingLog</databaseName>
-		<collectionName>indexing</collectionName>
+	<appender name="MONGO_STATUS_SYNC" class="com.viglet.dumont.commons.logging.DumMongoDBIndexingAppender">
+		<enabled>${MONGO_ENABLED}</enabled>
+		<connectionString>${MONGO_URI}</connectionString>
+		<databaseName>${LOG_DATABASE}</databaseName>
+		<collectionName>${LOG_COLL_INDEXING}</collectionName>
 	</appender>
+
+	<appender name="ASYNC_MONGO_GENERAL" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="MONGO_GENERAL_SYNC" />
+		<queueSize>512</queueSize>
+		<discardingThreshold>0</discardingThreshold>
+		<neverBlock>true</neverBlock>
+	</appender>
+	<appender name="ASYNC_MONGO_STATUS" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="MONGO_STATUS_SYNC" />
+		<queueSize>256</queueSize>
+		<discardingThreshold>0</discardingThreshold>
+		<neverBlock>true</neverBlock>
+	</appender>
+
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<Pattern>
-				%msg%n
-			</Pattern>
+			<Pattern>%msg%n</Pattern>
 		</encoder>
 	</appender>
+
 	<logger name="org.mongodb.driver" level="OFF" />
+	<logger name="com.hazelcast.internal.diagnostics.HealthMonitor" level="OFF" />
+
+	<logger name="com.viglet.dumont.commons.logging.DumLoggingIndexingLog" level="info" additivity="false">
+		<appender-ref ref="ASYNC_MONGO_STATUS" />
+	</logger>
+
 	<logger name="com.viglet.dumont.connector.DumConnectorApplication" level="info" additivity="false">
 		<appender-ref ref="CONSOLE" />
-	</logger>
-	<logger name="com.viglet.dumont.commons.logging.DumLoggingIndexingLog" level="info" additivity="false">
-		<appender-ref ref="MONGO_STATUS" />
 	</logger>
 	<logger name="com.viglet.dumont.connector.onstartup.DumConnectorOnStartup" level="info" additivity="false">
 		<appender-ref ref="CONSOLE" />
 	</logger>
+
 	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
 	<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}" />
 	<include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+
 	<root level="INFO">
-		<appender-ref ref="MONGO_GENERAL" />
+		<appender-ref ref="ASYNC_MONGO_GENERAL" />
 	</root>
 </configuration>

@@ -154,7 +154,16 @@
         "noSites": "No sites associated.",
         "dependencies": "Dependencies",
         "dependenciesDesc": "Content this item depends on.",
-        "noDependencies": "No dependencies."
+        "noDependencies": "No dependencies.",
+        "tabDetail": "Detail",
+        "tabHistory": "History",
+        "history": "Indexing History",
+        "historyDesc": "Persistent indexing log entries for this content (engine: {{engine}}).",
+        "historyLoading": "Loading history...",
+        "noHistory": "No log entries for this content.",
+        "historyDate": "Date",
+        "historyResult": "Result",
+        "historyDetails": "Details"
       }
     },
     "indexingStats": {
