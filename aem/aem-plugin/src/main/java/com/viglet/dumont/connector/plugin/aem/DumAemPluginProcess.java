@@ -179,12 +179,9 @@ public class DumAemPluginProcess {
                 DumAemSession session = sessionService.getDumAemSession(source, pathList, true);
                 List<String> paths = pathList.getPaths();
 
-                // Create and execute the indexing command
                 IndexingCommand command = commandFactory.createIndexPathsCommand(session, paths);
-                executor.executeStandalone(command);
-
-                // Process dependencies after main indexing
-                dependencyHandler.processDependencies(session, paths);
+                executor.executeStandalone(command,
+                                () -> dependencyHandler.processDependencies(session, paths));
         }
 
         /**

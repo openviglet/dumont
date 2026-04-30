@@ -77,13 +77,28 @@ public class IndexingExecutor {
     /**
      * Executes a standalone command without exclusive lock.
      * Multiple standalone commands can run concurrently for the same source.
-     * 
+     *
      * @param command the command to execute
      */
     public void executeStandalone(IndexingCommand command) {
+        executeStandalone(command, null);
+    }
+
+    /**
+     * Executes a standalone command and runs a post-action before finishing.
+     * The post-action runs inside the same lifecycle, so any items it adds to
+     * the batch processor are flushed by the final {@code finish} call.
+     *
+     * @param command    the command to execute
+     * @param postAction optional action to run after the command and before finish
+     */
+    public void executeStandalone(IndexingCommand command, Runnable postAction) {
         try {
             log.info("Starting standalone execution: {}", command.getDescription());
             command.execute();
+            if (postAction != null) {
+                postAction.run();
+            }
             finish(command.getSession(), true);
         } catch (Exception e) {
             log.error("Error executing {}: {}", command.getDescription(), e.getMessage(), e);
