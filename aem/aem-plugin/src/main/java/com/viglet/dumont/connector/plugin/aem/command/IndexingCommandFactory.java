@@ -20,9 +20,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.plugin.aem.command.impl.IndexAllCommand;
 import com.viglet.dumont.connector.plugin.aem.command.impl.IndexAllQueryBuilderCommand;
 import com.viglet.dumont.connector.plugin.aem.command.impl.IndexPathsCommand;
+import com.viglet.dumont.connector.plugin.aem.command.impl.IndexPathsQueryBuilderCommand;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemJobService;
@@ -73,12 +75,23 @@ public class IndexingCommandFactory {
 
     /**
      * Creates a command to index specific paths.
-     * 
+     * <p>
+     * When QueryBuilder is enabled and the session is recursive (and not a
+     * deindex event), uses {@link IndexPathsQueryBuilderCommand} to discover
+     * descendants in pages and process them in parallel. Otherwise falls back
+     * to the sequential {@link IndexPathsCommand}.
+     *
      * @param session the AEM session
      * @param paths   the list of paths to index
      * @return the index paths command
      */
     public IndexingCommand createIndexPathsCommand(DumAemSession session, List<String> paths) {
+        if (queryBuilderEnabled
+                && session.isRecursive()
+                && session.getEvent() != DumAemEvent.DEINDEXING) {
+            log.info("Using QueryBuilder strategy for standalone source: {}", session.getSource());
+            return new IndexPathsQueryBuilderCommand(session, paths, nodeNavigator, jobService, parallelism);
+        }
         return new IndexPathsCommand(session, paths, nodeNavigator, jobService);
     }
 }

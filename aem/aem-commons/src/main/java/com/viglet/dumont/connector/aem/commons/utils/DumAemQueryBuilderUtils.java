@@ -72,7 +72,20 @@ public class DumAemQueryBuilderUtils {
      */
     public static long discoverPaths(DumAemConfiguration configuration,
             Consumer<List<String>> pageConsumer) {
-        String rootPath = configuration.getRootPath();
+        return discoverPaths(configuration, configuration.getRootPath(), pageConsumer);
+    }
+
+    /**
+     * Discovers content paths under a specific root, paginated, streaming each
+     * page to the consumer as it arrives.
+     *
+     * @param configuration the AEM source configuration
+     * @param rootPath      the path to scope the query to (overrides {@code configuration.getRootPath()})
+     * @param pageConsumer  receives a batch of paths for each page
+     * @return the total number of paths discovered
+     */
+    public static long discoverPaths(DumAemConfiguration configuration, String rootPath,
+            Consumer<List<String>> pageConsumer) {
         String contentType = configuration.getContentType();
 
         log.info("QueryBuilder: discovering all '{}' under '{}'",
