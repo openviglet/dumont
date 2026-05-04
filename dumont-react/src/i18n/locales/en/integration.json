@@ -21,7 +21,8 @@
       "doubleCheck": "Double Check",
       "systemInfo": "System Information",
       "insights": "AI Insights",
-      "sample": "Sample"
+      "sample": "Sample",
+      "queue": "Queue"
     },
     "detail": {
       "title": "Settings",

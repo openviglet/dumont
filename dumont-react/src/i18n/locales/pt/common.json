@@ -15,7 +15,8 @@
   },
   "sidebar": {
     "brandName": "Dumont",
-    "brandTagline": "Plataforma de Troca de Dados"
+    "brandTagline": "Plataforma de Troca de Dados",
+    "indexing": "Indexação"
   },
   "home": {
     "title": "Início",

@@ -21,7 +21,8 @@
       "doubleCheck": "Verificação Dupla",
       "systemInfo": "Informações do Sistema",
       "insights": "Insights de IA",
-      "sample": "Exemplo"
+      "sample": "Exemplo",
+      "queue": "Fila"
     },
     "detail": {
       "title": "Configurações",

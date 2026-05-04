@@ -7,6 +7,7 @@ import {
   IconGlobe,
   IconGraph,
   IconHome,
+  IconInbox,
   IconInfoCircle,
   IconListCheck,
   IconSparkles,
@@ -19,18 +20,26 @@ import { useTranslation } from "react-i18next"
 import { ROUTES } from "@/app/routes.const"
 import { NavMain } from "@/components/nav-main"
 import { usePlugin } from "@/contexts/plugin.context"
+import { TurIntegrationQueueService } from "@/services/integration/integration-queue.service"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { DumontLogo } from "./logo/dumont-logo"
 import { ModeToggleSidebar } from "./mode-toggle"
+
+const QUEUE_POLL_INTERVAL_MS = 10_000
+const formatCount = (value?: number) => (value ?? 0).toLocaleString()
 
 interface SidebarNavItem {
   key: string
@@ -74,6 +83,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toggleSidebar, state, isMobile } = useSidebar();
   const { provider } = usePlugin();
   const isCollapsed = state === "collapsed";
+
+  const [queueSize, setQueueSize] = React.useState<number | undefined>(undefined);
+
+  React.useEffect(() => {
+    const service = new TurIntegrationQueueService(STANDALONE_ID);
+    let cancelled = false;
+
+    const fetchQueue = () => {
+      service
+        .getStatus()
+        .then((status) => {
+          if (!cancelled) setQueueSize(status.queue);
+        })
+        .catch(() => {
+          // Silent: 422 (api key mismatch) is handled globally by axios
+          // interceptor; transient errors should not break the sidebar.
+        });
+    };
+
+    fetchQueue();
+    const id = window.setInterval(fetchQueue, QUEUE_POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
 
   const toNavItems = React.useCallback(
     (items: SidebarNavItem[]) => items.map(({ titleKey, url, icon }) => ({ title: t(titleKey), url, icon })),
@@ -136,6 +171,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>{t("sidebar.indexing")}</SidebarGroupLabel>
+          <SidebarGroupContent className="flex flex-col gap-2 pt-4">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={`${t("integration.nav.queue")}: ${formatCount(queueSize)}`}
+                  variant="outline"
+                >
+                  <IconInbox className="size-5!" />
+                  <span>{t("integration.nav.queue")}</span>
+                </SidebarMenuButton>
+                {!isCollapsed && (
+                  <SidebarMenuBadge>{formatCount(queueSize)}</SidebarMenuBadge>
+                )}
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         <NavMain groups={navGroups} />
       </SidebarContent>
       <SidebarFooter>
