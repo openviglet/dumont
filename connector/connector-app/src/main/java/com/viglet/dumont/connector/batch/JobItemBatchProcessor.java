@@ -55,17 +55,29 @@ public class JobItemBatchProcessor {
     /**
      * Adds a job item to the buffer.
      * Automatically flushes when batch size is reached.
-     * 
+     *
      * @param item    the job item to add
      * @param session the connector session
      */
     public synchronized void add(TurSNJobItem item, DumConnectorSession session) {
-        buffer.add(item);
-        logQueueInfo();
+        addDeferred(item);
 
         if (buffer.size() >= batchSize) {
             flush(session);
         }
+    }
+
+    /**
+     * Adds a job item to the buffer without triggering an auto-flush.
+     * The caller is responsible for invoking {@link #flush(DumConnectorSession)}
+     * once the batch is complete. Useful when adding many items under a lock
+     * where the JMS send must not happen until after the lock is released.
+     *
+     * @param item the job item to add
+     */
+    public synchronized void addDeferred(TurSNJobItem item) {
+        buffer.add(item);
+        logQueueInfo();
     }
 
     /**

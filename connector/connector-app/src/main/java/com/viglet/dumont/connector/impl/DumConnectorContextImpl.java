@@ -106,13 +106,18 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     @Override
     public void finishIndexing(DumConnectorSession session, boolean standalone) {
         String source = session.getSource();
+
+        // Flush pending items BEFORE acquiring the write lock. The JMS send may
+        // block on Artemis producer flow control; holding the write lock during
+        // that wait blocks every addJobItem call in producer threads.
+        batchProcessor.flush(session);
+
         ReadWriteLock lock = getLock(source);
         lock.writeLock().lock();
         try {
-            // Flush any remaining items in the batch processor
-            batchProcessor.flush(session);
-
-            // Handle deindexing if not standalone
+            // Handle deindexing if not standalone — queues delete jobs in the
+            // buffer and updates the DB, but no longer flushes (flush happens
+            // after the lock is released).
             if (!standalone) {
                 deIndexObjects(session);
             }
@@ -131,6 +136,11 @@ public class DumConnectorContextImpl implements DumConnectorContext {
             lock.writeLock().unlock();
             locksBySource.remove(source);
             indexingService.finishProcessing(source);
+        }
+
+        // Final flush for delete jobs queued during deindex — outside the lock.
+        if (!standalone) {
+            batchProcessor.flush(session);
         }
     }
 
@@ -169,6 +179,9 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
     /**
      * Handles deindexing of objects that should be removed from the index.
+     * Caller is responsible for flushing the batch processor afterwards
+     * (kept outside this method so the flush can run without holding the
+     * source's write lock).
      */
     private void deIndexObjects(DumConnectorSession session) {
         List<DumConnectorIndexingModel> deindexedItems = indexingService.getShouldBeDeIndexedList(session);
@@ -182,9 +195,6 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
         // Remove from indexing database
         indexingService.deleteContentsToBeDeIndexed(session);
-
-        // Flush remaining items
-        batchProcessor.flush(session);
     }
 
     /**
@@ -209,6 +219,9 @@ public class DumConnectorContextImpl implements DumConnectorContext {
                 dumConnectorIndexing.getLocale(),
                 attributes);
 
-        batchProcessor.add(deleteJobItem, session);
+        // Use addDeferred so a large deindex list never triggers an auto-flush
+        // while the source's write lock is held. finishIndexing flushes
+        // explicitly after releasing the lock.
+        batchProcessor.addDeferred(deleteJobItem);
     }
 }
