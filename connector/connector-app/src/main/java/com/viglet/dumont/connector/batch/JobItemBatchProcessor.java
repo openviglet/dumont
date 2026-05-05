@@ -55,15 +55,25 @@ public class JobItemBatchProcessor {
     /**
      * Adds a job item to the buffer.
      * Automatically flushes when batch size is reached.
+     * The buffer mutation runs under the instance monitor; the JMS send,
+     * if triggered, happens AFTER the monitor is released so that other
+     * threads calling {@link #add} are not blocked waiting on Artemis
+     * producer flow control.
      *
      * @param item    the job item to add
      * @param session the connector session
      */
-    public synchronized void add(TurSNJobItem item, DumConnectorSession session) {
-        addDeferred(item);
-
-        if (buffer.size() >= batchSize) {
-            flush(session);
+    public void add(TurSNJobItem item, DumConnectorSession session) {
+        TurSNJobItems toSend = null;
+        synchronized (this) {
+            buffer.add(item);
+            logQueueInfo();
+            if (buffer.size() >= batchSize) {
+                toSend = drainBuffer(session);
+            }
+        }
+        if (toSend != null) {
+            sendBatch(toSend);
         }
     }
 
@@ -82,16 +92,30 @@ public class JobItemBatchProcessor {
 
     /**
      * Flushes all buffered items to the message queue.
-     * 
+     * The buffer is drained atomically under the instance monitor; the
+     * JMS send happens AFTER the monitor is released so that producer
+     * threads calling {@link #add} or {@link #addDeferred} are not
+     * blocked while Artemis flow control throttles this thread.
+     *
      * @param session the connector session
      */
-    public synchronized void flush(DumConnectorSession session) {
+    public void flush(DumConnectorSession session) {
+        TurSNJobItems toSend;
+        synchronized (this) {
+            toSend = drainBuffer(session);
+        }
+        if (toSend != null) {
+            sendBatch(toSend);
+        }
+    }
+
+    private TurSNJobItems drainBuffer(DumConnectorSession session) {
         if (buffer.size() == 0) {
-            log.info("No job to send to connector queue.");
-            return;
+            log.debug("No job to drain from buffer.");
+            return null;
         }
 
-        log.info("Sending {} jobs to connector queue.", buffer.size());
+        log.info("Draining {} jobs from buffer.", buffer.size());
 
         if (log.isDebugEnabled()) {
             for (TurSNJobItem turSNJobItem : buffer) {
@@ -99,21 +123,18 @@ public class JobItemBatchProcessor {
             }
         }
 
-        // Update status for all items
-        for (TurSNJobItem turSNJobItem : buffer) {
-            setSuccessStatus(turSNJobItem, session, SENT_TO_QUEUE);
-        }
-
-        // Create a copy to send
         TurSNJobItems itemsToSend = new TurSNJobItems();
         for (TurSNJobItem turSNJobItem : buffer) {
+            setSuccessStatus(turSNJobItem, session, SENT_TO_QUEUE);
             itemsToSend.add(turSNJobItem);
         }
-
-        jmsMessagingTemplate.convertAndSend(CONNECTOR_INDEXING_QUEUE, itemsToSend);
         buffer.clear();
+        return itemsToSend;
+    }
 
-        log.info("Successfully sent batch to connector queue.");
+    private void sendBatch(TurSNJobItems items) {
+        jmsMessagingTemplate.convertAndSend(CONNECTOR_INDEXING_QUEUE, items);
+        log.info("Successfully sent batch of {} jobs to connector queue.", items.size());
     }
 
     /**
