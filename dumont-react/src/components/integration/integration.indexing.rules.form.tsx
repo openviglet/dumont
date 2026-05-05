@@ -71,9 +71,28 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
     [integrationId]
   );
 
+  // Internal form shape: values wrapped as { value: string } so useFieldArray can manage them
+  type IndexingRuleFormShape = Omit<TurIntegrationIndexingRule, "values"> & {
+    values: { value: string }[];
+  };
+
+  const toFormShape = (rule: TurIntegrationIndexingRule): IndexingRuleFormShape => ({
+    ...rule,
+    values: (rule.values ?? []).map((v) =>
+      typeof v === "string" ? { value: v } : (v as { value: string })
+    ),
+  });
+
+  const fromFormShape = (data: IndexingRuleFormShape): TurIntegrationIndexingRule => ({
+    ...data,
+    values: (data.values ?? [])
+      .map((v) => v?.value)
+      .filter((v): v is string => typeof v === "string"),
+  });
+
   // Form setup with default values
-  const form = useForm<TurIntegrationIndexingRule>({
-    defaultValues: value
+  const form = useForm<IndexingRuleFormShape>({
+    defaultValues: toFormShape(value)
   });
   const { control, register, setValue, watch } = form;
 
@@ -113,7 +132,7 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
 
   // Reset form when value changes
   useEffect(() => {
-    form.reset(value);
+    form.reset(toFormShape(value));
     // Store the attribute to be set after fields are loaded
     pendingAttributeRef.current = value.attribute || null;
   }, [form, value]);
@@ -155,22 +174,23 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
   }, [turSNSiteFields, setValue]);
 
   // Form submission handler - memoized with useCallback
-  const onSubmit = useCallback(async (data: TurIntegrationIndexingRule) => {
+  const onSubmit = useCallback(async (data: IndexingRuleFormShape) => {
+    const payload = fromFormShape(data);
     try {
       if (isNew) {
-        const result = await turIntegrationIndexingRuleService.create(data);
+        const result = await turIntegrationIndexingRuleService.create(payload);
         if (result) {
           form.reset(data); // Reset dirty state after successful save
-          toast.success(t("forms.integrationRules.created", { name: data.name }));
+          toast.success(t("forms.integrationRules.created", { name: payload.name }));
           navigate(`${ROUTES.INTEGRATION_INSTANCE}/${integrationId}/indexing-rule`);
         } else {
           toast.error(t("forms.integrationRules.createFailed"));
         }
       } else {
-        const result = await turIntegrationIndexingRuleService.update(data);
+        const result = await turIntegrationIndexingRuleService.update(payload);
         if (result) {
           form.reset(data); // Reset dirty state after successful save
-          toast.success(t("forms.integrationRules.updated", { name: data.name }));
+          toast.success(t("forms.integrationRules.updated", { name: payload.name }));
         } else {
           toast.error(t("forms.integrationRules.updateFailed"));
         }
