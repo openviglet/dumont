@@ -39,6 +39,7 @@
         <turing.version>2026.2.6</turing.version>
         <tika.version>3.3.0</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
+        <mongodb.version>5.7.0</mongodb.version>
         <sonar.organization>viglet</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -352,12 +353,22 @@
             <dependency>
                 <groupId>org.mongodb</groupId>
                 <artifactId>bson</artifactId>
-                <version>5.7.0</version>
+                <version>${mongodb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>bson-record-codec</artifactId>
+                <version>${mongodb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-core</artifactId>
+                <version>${mongodb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mongodb</groupId>
                 <artifactId>mongodb-driver-sync</artifactId>
-                <version>5.7.0</version>
+                <version>${mongodb.version}</version>
             </dependency>
             <dependency>
                 <groupId>redis.clients</groupId>

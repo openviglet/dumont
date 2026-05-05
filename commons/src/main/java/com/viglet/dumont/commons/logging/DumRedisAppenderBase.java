@@ -14,14 +14,17 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.ConnectionPoolConfig;
+import redis.clients.jedis.DefaultJedisClientConfig;
+import redis.clients.jedis.RedisClient;
+import redis.clients.jedis.util.JedisURIHelper;
 
 /**
  * Base class for Redis-backed Logback appenders. Mirrors
- * {@code TurRedisAppenderBase}: manages a {@link JedisPool} life cycle and
- * exposes the configuration knobs ({@code connectionString}, {@code key},
- * {@code maxEntries}). Subclasses are responsible for the actual {@code LPUSH}.
+ * {@code TurRedisAppenderBase}: manages a {@link RedisClient} life cycle
+ * (built on a pooled connection provider) and exposes the configuration knobs
+ * ({@code connectionString}, {@code key}, {@code maxEntries}). Subclasses are
+ * responsible for the actual {@code LPUSH}.
  */
 @Slf4j
 @Setter
@@ -30,15 +33,20 @@ public class DumRedisAppenderBase extends AppenderBase<ILoggingEvent> {
     protected String connectionString;
     protected String key;
     protected int maxEntries;
-    protected JedisPool pool;
+    protected RedisClient pool;
 
     @Override
     public void start() {
         try {
-            JedisPoolConfig cfg = new JedisPoolConfig();
+            URI uri = URI.create(connectionString);
+            ConnectionPoolConfig cfg = new ConnectionPoolConfig();
             cfg.setMaxTotal(50);
             cfg.setMaxWait(Duration.ofSeconds(2));
-            this.pool = new JedisPool(cfg, URI.create(connectionString));
+            this.pool = RedisClient.builder()
+                    .hostAndPort(JedisURIHelper.getHostAndPort(uri))
+                    .clientConfig(DefaultJedisClientConfig.builder(uri).build())
+                    .poolConfig(cfg)
+                    .build();
             super.start();
         } catch (Exception e) {
             addError("Failed to initialize Redis Appender", e);
