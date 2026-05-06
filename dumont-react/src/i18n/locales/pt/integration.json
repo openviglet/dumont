@@ -21,6 +21,7 @@
       "doubleCheck": "Verificação Dupla",
       "systemInfo": "Informações do Sistema",
       "insights": "Insights de IA",
+      "plugins": "Plugins",
       "sample": "Exemplo",
       "queue": "Fila"
     },
@@ -260,6 +261,46 @@
       "failedGenerate": "Falha ao gerar resumo.",
       "failedConnect": "Falha ao conectar ao serviço de resumo. Tente novamente.",
       "regenerate": "Regenerar"
+    },
+    "plugins": {
+      "title": "Plugins",
+      "feature": "Plugin",
+      "description": "Gerencie plugins PF4J. Faça upload de um JAR para instalar uma nova extensão em tempo de execução.",
+      "empty": "Nenhum plugin instalado.",
+      "loadFailed": "Falha ao carregar plugins.",
+      "upload": {
+        "title": "Instalar plugin",
+        "hint": "Envie um único arquivo JAR PF4J (.jar). Reinicie o Dumont se precisar recarregar extensões.",
+        "button": "Enviar JAR",
+        "uploading": "Enviando..."
+      },
+      "uploadSuccess": "Plugin {{id}} enviado.",
+      "uploadFailed": "Falha ao enviar plugin: {{error}}",
+      "startSuccess": "Plugin {{id}} iniciado.",
+      "startFailed": "Falha ao iniciar plugin {{id}}.",
+      "stopSuccess": "Plugin {{id}} parado.",
+      "stopFailed": "Falha ao parar plugin {{id}}.",
+      "disableSuccess": "Plugin {{id}} desabilitado.",
+      "disableFailed": "Falha ao desabilitar plugin {{id}}.",
+      "enableSuccess": "Plugin {{id}} habilitado.",
+      "enableFailed": "Falha ao habilitar plugin {{id}}.",
+      "deleteSuccess": "Plugin {{id}} excluído.",
+      "deleteFailed": "Falha ao excluir plugin {{id}}.",
+      "column": {
+        "id": "ID",
+        "version": "Versão",
+        "provider": "Fornecedor",
+        "description": "Descrição",
+        "state": "Estado",
+        "actions": "Ações"
+      },
+      "action": {
+        "start": "Iniciar",
+        "stop": "Parar",
+        "disable": "Desabilitar",
+        "enable": "Habilitar",
+        "delete": "Excluir"
+      }
     }
   }
 }

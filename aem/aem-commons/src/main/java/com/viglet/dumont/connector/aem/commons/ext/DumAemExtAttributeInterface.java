@@ -16,13 +16,15 @@
 
 package com.viglet.dumont.connector.aem.commons.ext;
 
+import org.pf4j.ExtensionPoint;
+
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
 import com.viglet.turing.client.sn.TurMultiValue;
 
-public interface DumAemExtAttributeInterface {
+public interface DumAemExtAttributeInterface extends ExtensionPoint {
     TurMultiValue consume(DumAemTargetAttr dumAemTargetAttr, DumAemSourceAttr dumAemSourceAttr,
             DumAemObject aemObject, DumAemConfiguration dumAemConfiguration);
 }

@@ -16,6 +16,8 @@
 
 package com.viglet.dumont.connector.aem.commons.ext;
 
+import org.pf4j.ExtensionPoint;
+
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 
@@ -29,6 +31,6 @@ import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
  * Return {@code true} to include the content's dependencies, {@code false}
  * to skip extraction for that specific content.
  */
-public interface DumAemExtDependencyInterface {
+public interface DumAemExtDependencyInterface extends ExtensionPoint {
     boolean consume(DumAemObjectGeneric aemObject, DumAemConfiguration dumAemConfiguration);
 }

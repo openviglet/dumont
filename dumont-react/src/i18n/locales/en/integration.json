@@ -21,6 +21,7 @@
       "doubleCheck": "Double Check",
       "systemInfo": "System Information",
       "insights": "AI Insights",
+      "plugins": "Plugins",
       "sample": "Sample",
       "queue": "Queue"
     },
@@ -260,6 +261,46 @@
       "failedGenerate": "Failed to generate summary.",
       "failedConnect": "Failed to connect to the summary service. Please try again.",
       "regenerate": "Regenerate"
+    },
+    "plugins": {
+      "title": "Plugins",
+      "feature": "Plugin",
+      "description": "Manage PF4J plugins. Drop a JAR here to install a new extension at runtime.",
+      "empty": "No plugins installed.",
+      "loadFailed": "Failed to load plugins.",
+      "upload": {
+        "title": "Install plugin",
+        "hint": "Upload a single PF4J JAR file (.jar). Restart Dumont if you need to reload extensions.",
+        "button": "Upload JAR",
+        "uploading": "Uploading..."
+      },
+      "uploadSuccess": "Plugin {{id}} uploaded.",
+      "uploadFailed": "Failed to upload plugin: {{error}}",
+      "startSuccess": "Plugin {{id}} started.",
+      "startFailed": "Failed to start plugin {{id}}.",
+      "stopSuccess": "Plugin {{id}} stopped.",
+      "stopFailed": "Failed to stop plugin {{id}}.",
+      "disableSuccess": "Plugin {{id}} disabled.",
+      "disableFailed": "Failed to disable plugin {{id}}.",
+      "enableSuccess": "Plugin {{id}} enabled.",
+      "enableFailed": "Failed to enable plugin {{id}}.",
+      "deleteSuccess": "Plugin {{id}} deleted.",
+      "deleteFailed": "Failed to delete plugin {{id}}.",
+      "column": {
+        "id": "ID",
+        "version": "Version",
+        "provider": "Provider",
+        "description": "Description",
+        "state": "State",
+        "actions": "Actions"
+      },
+      "action": {
+        "start": "Start",
+        "stop": "Stop",
+        "disable": "Disable",
+        "enable": "Enable",
+        "delete": "Delete"
+      }
     }
   }
 }

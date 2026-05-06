@@ -40,6 +40,7 @@
         <tika.version>3.3.0</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <mongodb.version>5.7.0</mongodb.version>
+        <pf4j.version>3.13.0</pf4j.version>
         <sonar.organization>viglet</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -510,6 +511,11 @@
                 <groupId>com.oracle.ojdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>19.3.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pf4j</groupId>
+                <artifactId>pf4j</artifactId>
+                <version>${pf4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

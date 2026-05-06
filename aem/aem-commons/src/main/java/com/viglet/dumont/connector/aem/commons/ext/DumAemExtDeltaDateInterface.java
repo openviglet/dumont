@@ -18,9 +18,11 @@ package com.viglet.dumont.connector.aem.commons.ext;
 
 import java.util.Date;
 
+import org.pf4j.ExtensionPoint;
+
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 
-public interface DumAemExtDeltaDateInterface {
+public interface DumAemExtDeltaDateInterface extends ExtensionPoint {
     Date consume(DumAemObject aemObject, DumAemConfiguration dumAemConfiguration);
 }

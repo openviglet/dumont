@@ -161,6 +161,10 @@
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.pf4j</groupId>
+            <artifactId>pf4j</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <finalName>dumont-connector</finalName>

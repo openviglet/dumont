@@ -44,6 +44,9 @@ dumont:
   aem.querybuilder.parallelism: 10
   scheduler:
     enabled: false
+  plugins:
+    # PF4J plugins directory. Single-JAR plugins dropped here are loaded on startup.
+    directory: ./plugins
   indexing:
     # Indexing provider: turing, solr, or elasticsearch
     # Default is turing (if not specified)

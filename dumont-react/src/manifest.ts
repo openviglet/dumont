@@ -25,7 +25,8 @@ const manifest: DumontManifest = {
     { titleKey: "integration.nav.indexingStats", url: "/indexing-stats", icon: "IconChartBar", order: 50 },
     { titleKey: "integration.nav.doubleCheck", url: "/double-check", icon: "IconListCheck", order: 60 },
     { titleKey: "integration.nav.insights", url: "/insights", icon: "IconSparkles", order: 90 },
-    { titleKey: "integration.nav.systemInfo", url: "/system-info", icon: "IconInfoCircle", order: 100 },
+    { titleKey: "integration.nav.plugins", url: "/plugins", icon: "IconPuzzle", order: 100 },
+    { titleKey: "integration.nav.systemInfo", url: "/system-info", icon: "IconInfoCircle", order: 110 },
   ],
 };
 

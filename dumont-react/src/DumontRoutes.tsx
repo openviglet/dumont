@@ -1,6 +1,6 @@
 import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
 
-import { IconAdjustmentsSearch, IconChartBar, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconSparkles, IconTools } from "@tabler/icons-react";
+import { IconAdjustmentsSearch, IconChartBar, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Page } from "./components/page";
@@ -16,6 +16,7 @@ import IntegrationInstanceIndexingStatsPage from "./pages/integration.instance.i
 import IntegrationInstanceInsightsPage from "./pages/integration.instance.insights.page";
 import IntegrationInstanceMonitoringItemPage from "./pages/integration.instance.monitoring.item.page";
 import IntegrationInstanceMonitoringPage from "./pages/integration.instance.monitoring.page";
+import IntegrationInstancePluginsPage from "./pages/integration.instance.plugins.page";
 import IntegrationInstanceSourceListPage from "./pages/integration.instance.source.list.page";
 import IntegrationInstanceSourceModelPage from "./pages/integration.instance.source.model.page";
 import IntegrationInstanceSourcePage from "./pages/integration.instance.source.page";
@@ -91,6 +92,10 @@ export default function DumontRoutes() {
       {/* System Information */}
       <Route path="system-info" element={<Page turIcon={IconInfoCircle} title={t("integration.nav.systemInfo")} urlBase="system-info" />}>
         <Route index element={<IntegrationInstanceSystemInfoPage />} />
+      </Route>
+      {/* Plugins */}
+      <Route path="plugins" element={<Page turIcon={IconPuzzle} title={t("integration.nav.plugins")} urlBase="plugins" />}>
+        <Route index element={<IntegrationInstancePluginsPage />} />
       </Route>
     </Routes>
   );

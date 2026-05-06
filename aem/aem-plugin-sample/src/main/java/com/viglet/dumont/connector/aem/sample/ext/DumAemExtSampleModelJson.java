@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.pf4j.Extension;
+
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtModelJsonBase;
@@ -29,6 +31,7 @@ import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel.DumAemSampleModelElement;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel.DumAemSampleModelItem;
 
+@Extension
 public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampleModel> {
     public static final String FRAGMENT_PATH = "fragmentPath";
     public static final String PAGE_TITLE = "pageTitle";

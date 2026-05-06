@@ -13,6 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.annotation.PostConstruct;
 
+import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -64,6 +67,12 @@ public class DumAemExtractorScannerService {
 
     private final Map<String, List<ExtractorClass>> cache = new ConcurrentHashMap<>();
 
+    private final ObjectProvider<PluginManager> pluginManagerProvider;
+
+    public DumAemExtractorScannerService(ObjectProvider<PluginManager> pluginManagerProvider) {
+        this.pluginManagerProvider = pluginManagerProvider;
+    }
+
     @PostConstruct
     public void scanAll() {
         long start = System.currentTimeMillis();
@@ -81,6 +90,8 @@ public class DumAemExtractorScannerService {
         for (String pkg : SCAN_PACKAGES) {
             scanPackage(pkg, resolver, readerFactory, filters, byCategory);
         }
+
+        scanPlugins(byCategory);
 
         byCategory.forEach((category, list) -> {
             list.sort((a, b) -> a.simpleName().compareToIgnoreCase(b.simpleName()));
@@ -139,6 +150,28 @@ public class DumAemExtractorScannerService {
             return filter.match(reader, readerFactory);
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    private void scanPlugins(Map<String, List<ExtractorClass>> byCategory) {
+        PluginManager pluginManager = pluginManagerProvider.getIfAvailable();
+        if (pluginManager == null) {
+            return;
+        }
+        for (PluginWrapper plugin : pluginManager.getStartedPlugins()) {
+            CATEGORY_TO_INTERFACE.forEach((category, iface) -> {
+                @SuppressWarnings({ "unchecked", "rawtypes" })
+                List<? extends Object> extensions = pluginManager.getExtensions(
+                        (Class) iface, plugin.getPluginId());
+                for (Object ext : extensions) {
+                    String fqcn = ext.getClass().getName();
+                    int lastDot = fqcn.lastIndexOf('.');
+                    String simpleName = lastDot >= 0 ? fqcn.substring(lastDot + 1) : fqcn;
+                    String packageName = lastDot >= 0 ? fqcn.substring(0, lastDot) : "";
+                    byCategory.get(category).add(
+                            new ExtractorClass(fqcn, simpleName, packageName, category));
+                }
+            });
         }
     }
 

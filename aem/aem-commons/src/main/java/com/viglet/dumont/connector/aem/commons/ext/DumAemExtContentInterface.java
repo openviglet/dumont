@@ -16,11 +16,13 @@
 
 package com.viglet.dumont.connector.aem.commons.ext;
 
+import org.pf4j.ExtensionPoint;
+
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 
-public interface DumAemExtContentInterface {
+public interface DumAemExtContentInterface extends ExtensionPoint {
     DumAemAttrMap consume(DumAemObject aemObject,
             DumAemConfiguration dumAemConfiguration);
 }

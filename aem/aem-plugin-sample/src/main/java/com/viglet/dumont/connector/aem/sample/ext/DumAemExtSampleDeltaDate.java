@@ -21,10 +21,14 @@ package com.viglet.dumont.connector.aem.sample.ext;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
+
+import org.pf4j.Extension;
+
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDeltaDateInterface;
 
+@Extension
 public class DumAemExtSampleDeltaDate implements DumAemExtDeltaDateInterface {
     @Override
     public Date consume(DumAemObject aemObject, DumAemConfiguration dumAemSourceContext) {

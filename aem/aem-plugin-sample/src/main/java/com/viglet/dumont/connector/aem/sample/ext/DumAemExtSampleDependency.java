@@ -18,6 +18,8 @@
 
 package com.viglet.dumont.connector.aem.sample.ext;
 
+import org.pf4j.Extension;
+
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDependencyInterface;
@@ -32,6 +34,7 @@ import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDependencyInterface;
  * static assets and do not benefit from reverse-indexing. Every other page
  * under WKND opts in.
  */
+@Extension
 public class DumAemExtSampleDependency implements DumAemExtDependencyInterface {
 
     private static final String FAQS_PATH_SEGMENT = "/faqs";
