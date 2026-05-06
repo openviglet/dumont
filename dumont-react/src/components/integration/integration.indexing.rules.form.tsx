@@ -28,7 +28,11 @@ import { Textarea } from "@/components/ui/textarea"
 import type { TurIntegrationIndexingRule } from "@/models/integration/integration-indexing-rule.model"
 import type { TurSNSiteField } from "@/models/sn/sn-site-field.model"
 import type { TurSNSite } from "@/models/sn/sn-site.model"
+import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service"
+import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service"
+import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service"
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service"
+import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service"
 import { TurSNFieldService } from "@/services/sn/sn.field.service"
 import { TurSNSiteService } from "@/services/sn/sn.service"
 import { IconDeviceFloppy, IconFileText, IconGavel, IconList, IconMap, IconTools, IconX } from "@tabler/icons-react"
@@ -62,7 +66,6 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
   setOpen,
 }) => {
   const { t } = useTranslation();
-  console.log("isNew", isNew);
   // Services - memoized to prevent recreation on each render
   const turSNSiteService = useMemo(() => new TurSNSiteService(), []);
   const turSNFieldService = useMemo(() => new TurSNFieldService(), []);
@@ -70,6 +73,29 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
     () => new TurIntegrationIndexingRuleService(integrationId),
     [integrationId]
   );
+  const aemSourceService = useMemo(
+    () => new TurIntegrationAemSourceService(integrationId),
+    [integrationId]
+  );
+  const dbSourceService = useMemo(
+    () => new TurIntegrationDbSourceService(integrationId),
+    [integrationId]
+  );
+  const wcSourceService = useMemo(
+    () => new TurIntegrationWcSourceService(integrationId),
+    [integrationId]
+  );
+  const assetsSourceService = useMemo(
+    () => new TurIntegrationAssetsSourceService(integrationId),
+    [integrationId]
+  );
+
+  type ConnectorSourceOption = {
+    key: string;
+    label: string;
+    type: string;
+    snSiteNames: string[];
+  };
 
   // Internal form shape: values wrapped as { value: string } so useFieldArray can manage them
   type IndexingRuleFormShape = Omit<TurIntegrationIndexingRule, "values"> & {
@@ -98,6 +124,7 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
 
   // State
   const [turSNSites, setTurSNSites] = useState<TurSNSite[]>([]);
+  const [connectorSources, setConnectorSources] = useState<ConnectorSourceOption[]>([]);
   const [turSNSiteFields, setTurSNSiteFields] = useState<TurSNSiteField[]>([]);
   const [isLoadingFields, setIsLoadingFields] = useState(false);
 
@@ -109,13 +136,20 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
   // Watch selected source for dependent field loading
   const selectedSource = watch("source");
 
-  // Find selected site - memoized for performance
-  const selectedSite = useMemo(
-    () => turSNSites.find((site) => site.name === selectedSource),
-    [turSNSites, selectedSource]
+  // Find selected connector source - memoized for performance
+  const selectedConnectorSource = useMemo(
+    () => connectorSources.find((s) => s.key === selectedSource),
+    [connectorSources, selectedSource]
   );
 
-  // Load initial data (sites only)
+  // Resolve the SN site whose fields will populate the attribute dropdown
+  const selectedSite = useMemo(() => {
+    const firstSnSiteName = selectedConnectorSource?.snSiteNames?.[0];
+    if (!firstSnSiteName) return undefined;
+    return turSNSites.find((site) => site.name === firstSnSiteName);
+  }, [turSNSites, selectedConnectorSource]);
+
+  // Load initial data: SN sites (for field lookup) + connector sources (AEM/DB/WC/Assets)
   useEffect(() => {
     const loadSites = async () => {
       try {
@@ -126,9 +160,67 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
         toast.error(t("forms.integrationRules.siteLoadFailed"));
       }
     };
-
     loadSites();
   }, [turSNSiteService]);
+
+  useEffect(() => {
+    const loadSources = async () => {
+      const [aem, db, wc, assets] = await Promise.allSettled([
+        aemSourceService.query(),
+        dbSourceService.query(),
+        wcSourceService.query(),
+        assetsSourceService.query(),
+      ]);
+      const items: ConnectorSourceOption[] = [];
+      if (aem.status === "fulfilled") {
+        aem.value.forEach((s) =>
+          items.push({
+            key: s.name,
+            label: s.name,
+            type: "AEM",
+            snSiteNames: [s.authorSNSite, s.publishSNSite].filter(
+              (n): n is string => !!n
+            ),
+          })
+        );
+      }
+      if (db.status === "fulfilled") {
+        db.value.forEach((s) =>
+          items.push({
+            key: s.name,
+            label: s.name,
+            type: "DB",
+            snSiteNames: s.turSNSites ?? [],
+          })
+        );
+      }
+      if (wc.status === "fulfilled") {
+        wc.value.forEach((s) =>
+          items.push({
+            key: s.id,
+            label: s.title,
+            type: "Web Crawler",
+            snSiteNames: s.turSNSites ?? [],
+          })
+        );
+      }
+      if (assets.status === "fulfilled") {
+        assets.value.forEach((s) =>
+          items.push({
+            key: s.name,
+            label: s.name,
+            type: "Assets",
+            snSiteNames: s.turSNSites ?? [],
+          })
+        );
+      }
+      if ([aem, db, wc, assets].every((r) => r.status === "rejected")) {
+        toast.error(t("forms.integrationRules.sourceLoadFailed"));
+      }
+      setConnectorSources(items);
+    };
+    loadSources();
+  }, [aemSourceService, dbSourceService, wcSourceService, assetsSourceService, t]);
 
   // Reset form when value changes
   useEffect(() => {
@@ -283,29 +375,29 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
             <SectionCard variant="violet">
               <SectionCard.Header icon={IconMap} title={t("forms.integrationRules.whereApply")} description={t("forms.integrationRules.whereApplyDesc")} />
               <SectionCard.Content>
-                {/* Semantic Navigation Site */}
+                {/* Connector Source */}
                 <FormField
                   control={control}
                   name="source"
-                  rules={{ required: t("forms.integrationRules.siteRequired") }}
+                  rules={{ required: t("forms.integrationRules.sourceRequired") }}
                   render={({ field }) => (
                     <FormItemTwoColumns>
                       <FormItemTwoColumns.Left>
-                        <FormItemTwoColumns.Label>{t("forms.integrationRules.chooseSite")}</FormItemTwoColumns.Label>
+                        <FormItemTwoColumns.Label>{t("forms.integrationRules.chooseSource")}</FormItemTwoColumns.Label>
                         <FormItemTwoColumns.Description>
-                          {t("forms.integrationRules.chooseSiteDesc")}
+                          {t("forms.integrationRules.chooseSourceDesc")}
                         </FormItemTwoColumns.Description>
                       </FormItemTwoColumns.Left>
                       <FormItemTwoColumns.Right>
                         <FormControl>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder={t("forms.integrationRules.selectSite")} />
+                              <SelectValue placeholder={t("forms.integrationRules.selectSource")} />
                             </SelectTrigger>
                             <SelectContent>
-                              {turSNSites.map((site) => (
-                                <SelectItem key={site.id} value={site.name}>
-                                  {site.name}
+                              {connectorSources.map((source) => (
+                                <SelectItem key={`${source.type}:${source.key}`} value={source.key}>
+                                  {source.label} ({source.type})
                                 </SelectItem>
                               ))}
                             </SelectContent>

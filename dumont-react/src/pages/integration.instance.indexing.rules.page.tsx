@@ -3,7 +3,7 @@ import { IntegrationIndexingRulesForm } from "@/components/integration/integrati
 import type { TurIntegrationIndexingRule } from "@/models/integration/integration-indexing-rule.model";
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service";
 import { toast } from "@viglet/viglet-design-system";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -11,7 +11,10 @@ export default function IntegrationInstanceIndexingRulePage() {
   const navigate = useNavigate();
   const { id, ruleId } = useParams() as { id: string, ruleId: string };
   const [integrationIndexingRules, setIntegrationIndexingRules] = useState<TurIntegrationIndexingRule>({} as TurIntegrationIndexingRule);
-  const turIntegrationIndexingRuleService = new TurIntegrationIndexingRuleService(id || "");
+  const turIntegrationIndexingRuleService = useMemo(
+    () => new TurIntegrationIndexingRuleService(id || ""),
+    [id]
+  );
   const [isNew, setIsNew] = useState<boolean>(true);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
@@ -20,7 +23,7 @@ export default function IntegrationInstanceIndexingRulePage() {
       turIntegrationIndexingRuleService.get(ruleId).then(setIntegrationIndexingRules);
       setIsNew(false);
     }
-  }, [id, ruleId, turIntegrationIndexingRuleService]);
+  }, [ruleId, turIntegrationIndexingRuleService]);
   async function onDelete() {
     try {
       if (await turIntegrationIndexingRuleService.delete(integrationIndexingRules)) {
