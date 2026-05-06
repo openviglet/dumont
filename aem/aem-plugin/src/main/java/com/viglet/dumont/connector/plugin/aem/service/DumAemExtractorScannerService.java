@@ -91,8 +91,6 @@ public class DumAemExtractorScannerService {
             scanPackage(pkg, resolver, readerFactory, filters, byCategory);
         }
 
-        scanPlugins(byCategory);
-
         byCategory.forEach((category, list) -> {
             list.sort((a, b) -> a.simpleName().compareToIgnoreCase(b.simpleName()));
             cache.put(category, Collections.unmodifiableList(list));
@@ -153,26 +151,29 @@ public class DumAemExtractorScannerService {
         }
     }
 
-    private void scanPlugins(Map<String, List<ExtractorClass>> byCategory) {
+    private List<ExtractorClass> livePluginClasses(String category) {
+        Class<?> iface = CATEGORY_TO_INTERFACE.get(category);
+        if (iface == null) {
+            return List.of();
+        }
         PluginManager pluginManager = pluginManagerProvider.getIfAvailable();
         if (pluginManager == null) {
-            return;
+            return List.of();
         }
+        List<ExtractorClass> result = new ArrayList<>();
         for (PluginWrapper plugin : pluginManager.getStartedPlugins()) {
-            CATEGORY_TO_INTERFACE.forEach((category, iface) -> {
-                @SuppressWarnings({ "unchecked", "rawtypes" })
-                List<? extends Object> extensions = pluginManager.getExtensions(
-                        (Class) iface, plugin.getPluginId());
-                for (Object ext : extensions) {
-                    String fqcn = ext.getClass().getName();
-                    int lastDot = fqcn.lastIndexOf('.');
-                    String simpleName = lastDot >= 0 ? fqcn.substring(lastDot + 1) : fqcn;
-                    String packageName = lastDot >= 0 ? fqcn.substring(0, lastDot) : "";
-                    byCategory.get(category).add(
-                            new ExtractorClass(fqcn, simpleName, packageName, category));
-                }
-            });
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            List<? extends Object> extensions = pluginManager.getExtensions(
+                    (Class) iface, plugin.getPluginId());
+            for (Object ext : extensions) {
+                String fqcn = ext.getClass().getName();
+                int lastDot = fqcn.lastIndexOf('.');
+                String simpleName = lastDot >= 0 ? fqcn.substring(lastDot + 1) : fqcn;
+                String packageName = lastDot >= 0 ? fqcn.substring(0, lastDot) : "";
+                result.add(new ExtractorClass(fqcn, simpleName, packageName, category));
+            }
         }
+        return result;
     }
 
     private ExtractorClass toExtractorClass(MetadataReader reader, String category) {
@@ -185,14 +186,22 @@ public class DumAemExtractorScannerService {
 
     /**
      * Returns extractor classes for the given category, optionally filtered by
-     * a substring matching either the simple name or the full FQCN.
+     * a substring matching either the simple name or the full FQCN. Classpath
+     * results come from the startup scan (cached); plugin results are queried
+     * live so newly-loaded plugins appear without a restart.
      */
     public List<ExtractorClass> list(String category, String query) {
         if (category == null) category = "attribute";
-        List<ExtractorClass> all = cache.getOrDefault(category.toLowerCase(Locale.ROOT), List.of());
-        if (query == null || query.isBlank()) return all;
+        String key = category.toLowerCase(Locale.ROOT);
+        List<ExtractorClass> classpath = cache.getOrDefault(key, List.of());
+        List<ExtractorClass> plugins = livePluginClasses(key);
+        List<ExtractorClass> merged = new ArrayList<>(classpath.size() + plugins.size());
+        merged.addAll(classpath);
+        merged.addAll(plugins);
+        merged.sort((a, b) -> a.simpleName().compareToIgnoreCase(b.simpleName()));
+        if (query == null || query.isBlank()) return merged;
         String q = query.toLowerCase(Locale.ROOT);
-        return all.stream()
+        return merged.stream()
                 .filter(c -> c.simpleName().toLowerCase(Locale.ROOT).contains(q)
                         || c.fqcn().toLowerCase(Locale.ROOT).contains(q))
                 .filter(Objects::nonNull)

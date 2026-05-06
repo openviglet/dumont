@@ -22,6 +22,7 @@ import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,11 +36,14 @@ public class DumPluginManagementService {
 
     private final PluginManager pluginManager;
     private final Path pluginsPath;
+    private final ApplicationEventPublisher events;
 
     public DumPluginManagementService(
             PluginManager pluginManager,
+            ApplicationEventPublisher events,
             @Value("${dumont.plugins.directory:./plugins}") String pluginsDirectory) {
         this.pluginManager = pluginManager;
+        this.events = events;
         this.pluginsPath = Paths.get(pluginsDirectory).toAbsolutePath().normalize();
     }
 
@@ -52,13 +56,13 @@ public class DumPluginManagementService {
     public synchronized DumPluginInfo upload(MultipartFile file) {
         String filename = file.getOriginalFilename();
         if (filename == null || !filename.toLowerCase().endsWith(".jar")) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Only .jar files are accepted");
         }
         String safeName = Paths.get(filename).getFileName().toString();
         Path target = pluginsPath.resolve(safeName).normalize();
         if (!target.startsWith(pluginsPath)) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Invalid filename");
         }
         try {
@@ -75,14 +79,15 @@ public class DumPluginManagementService {
             pluginId = pluginManager.loadPlugin(target);
         } catch (RuntimeException e) {
             log.warn("Failed to load plugin {}: {}", safeName, e.getMessage());
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Failed to load plugin: " + e.getMessage(), e);
         }
         if (pluginId == null) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Plugin loaded but no plugin id was resolved");
         }
         log.info("Plugin uploaded and loaded: {} ({})", pluginId, safeName);
+        events.publishEvent(new PluginsChangedEvent(pluginId, "upload"));
         return findOrThrow(pluginId);
     }
 
@@ -90,6 +95,7 @@ public class DumPluginManagementService {
         requireExists(id);
         PluginState state = pluginManager.startPlugin(id);
         log.info("Plugin {} started -> {}", id, state);
+        events.publishEvent(new PluginsChangedEvent(id, "start"));
         return findOrThrow(id);
     }
 
@@ -97,34 +103,38 @@ public class DumPluginManagementService {
         requireExists(id);
         PluginState state = pluginManager.stopPlugin(id);
         log.info("Plugin {} stopped -> {}", id, state);
+        events.publishEvent(new PluginsChangedEvent(id, "stop"));
         return findOrThrow(id);
     }
 
     public synchronized DumPluginInfo disable(String id) {
         requireExists(id);
         if (!pluginManager.disablePlugin(id)) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Failed to disable plugin " + id);
         }
+        events.publishEvent(new PluginsChangedEvent(id, "disable"));
         return findOrThrow(id);
     }
 
     public synchronized DumPluginInfo enable(String id) {
         requireExists(id);
         if (!pluginManager.enablePlugin(id)) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Failed to enable plugin " + id);
         }
+        events.publishEvent(new PluginsChangedEvent(id, "enable"));
         return findOrThrow(id);
     }
 
     public synchronized void delete(String id) {
         requireExists(id);
         if (!pluginManager.deletePlugin(id)) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Failed to delete plugin " + id);
         }
         log.info("Plugin {} deleted", id);
+        events.publishEvent(new PluginsChangedEvent(id, "delete"));
     }
 
     private void requireExists(String id) {

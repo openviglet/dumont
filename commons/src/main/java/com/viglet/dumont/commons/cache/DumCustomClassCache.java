@@ -31,6 +31,15 @@ public class DumCustomClassCache {
     }
 
     /**
+     * Clears all cached instances. Called after plugin lifecycle changes so that
+     * the next resolution picks up newly-loaded classloaders or drops references
+     * to instances from a stopped/replaced plugin.
+     */
+    public static void clear() {
+        customClassMap.clear();
+    }
+
+    /**
      * Retrieve an instance of a class from a thread-safe cache. The class will be
      * instantiated if not present.
      *
