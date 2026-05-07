@@ -53,7 +53,8 @@
             "default": "Titles",
             "pt_BR": "Títulos",
             "en_US": "Titles"
-          }
+          },
+          "className": "com.viglet.dumont.connector.aem.sample.ext.DumAemExtSampleContentTitle"
         },
         {
           "name": "tags",

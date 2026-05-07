@@ -10,6 +10,10 @@
 
 package com.viglet.dumont.connector.api.plugin;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+
 import org.pf4j.PluginWrapper;
 
 public record DumPluginInfo(
@@ -18,17 +22,29 @@ public record DumPluginInfo(
         String description,
         String provider,
         String state,
-        String path) {
+        String path,
+        Instant lastModified) {
 
     public static DumPluginInfo from(PluginWrapper wrapper) {
+        Path pluginPath = wrapper.getPluginPath();
         return new DumPluginInfo(
                 wrapper.getPluginId(),
                 wrapper.getDescriptor().getVersion(),
                 wrapper.getDescriptor().getPluginDescription(),
                 wrapper.getDescriptor().getProvider(),
                 wrapper.getPluginState().toString(),
-                wrapper.getPluginPath() != null
-                        ? wrapper.getPluginPath().getFileName().toString()
-                        : null);
+                pluginPath != null ? pluginPath.getFileName().toString() : null,
+                lastModifiedOf(pluginPath));
+    }
+
+    private static Instant lastModifiedOf(Path path) {
+        if (path == null) {
+            return null;
+        }
+        try {
+            return Files.getLastModifiedTime(path).toInstant();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

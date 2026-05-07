@@ -2,6 +2,7 @@ import { SubPageHeader } from "@/components/sub.page.header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useDateLocale } from "@/hooks/use-date-locale";
 import type { TurPlugin } from "@/models/system/plugin.model";
 import { TurPluginService } from "@/services/system/plugin.service";
 import {
@@ -14,6 +15,7 @@ import {
     IconUpload,
 } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
+import { type Locale, formatDistanceToNow } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -29,10 +31,32 @@ function stateBadgeVariant(state: string): BadgeVariant {
     }
 }
 
+function renderLastModified(iso: string | null, locale: Locale) {
+    if (!iso) return <span>—</span>;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return <span>—</span>;
+    const formatted = d.toLocaleString(undefined, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    });
+    const timeAgo = formatDistanceToNow(d, { addSuffix: true, locale });
+    return (
+        <div className="flex flex-col">
+            <span className="font-mono text-sm">{formatted}</span>
+            <span className="text-xs text-muted-foreground italic">({timeAgo})</span>
+        </div>
+    );
+}
+
 export default function IntegrationInstancePluginsPage() {
     const { id } = useParams() as { id: string };
     const service = useMemo(() => new TurPluginService(id), [id]);
     const { t } = useTranslation();
+    const dateLocale = useDateLocale();
     const [plugins, setPlugins] = useState<TurPlugin[]>([]);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -107,6 +131,7 @@ export default function IntegrationInstancePluginsPage() {
                         accept=".jar"
                         className="hidden"
                         onChange={onUpload}
+                        aria-label={t("integration.plugins.upload.button")}
                     />
                     <Button onClick={onPickFile} disabled={uploading}>
                         <IconUpload className="size-4" />
@@ -125,13 +150,14 @@ export default function IntegrationInstancePluginsPage() {
                                 <TableHead>{t("integration.plugins.column.provider")}</TableHead>
                                 <TableHead>{t("integration.plugins.column.description")}</TableHead>
                                 <TableHead>{t("integration.plugins.column.state")}</TableHead>
+                                <TableHead>{t("integration.plugins.column.lastModified")}</TableHead>
                                 <TableHead className="text-right">{t("integration.plugins.column.actions")}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {plugins.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-6">
+                                    <TableCell colSpan={7} className="text-center text-muted-foreground py-6">
                                         {t("integration.plugins.empty")}
                                     </TableCell>
                                 </TableRow>
@@ -144,6 +170,9 @@ export default function IntegrationInstancePluginsPage() {
                                     <TableCell className="text-muted-foreground">{p.description ?? "—"}</TableCell>
                                     <TableCell>
                                         <Badge variant={stateBadgeVariant(p.state)}>{p.state}</Badge>
+                                    </TableCell>
+                                    <TableCell className="whitespace-nowrap">
+                                        {renderLastModified(p.lastModified, dateLocale)}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="inline-flex gap-1">

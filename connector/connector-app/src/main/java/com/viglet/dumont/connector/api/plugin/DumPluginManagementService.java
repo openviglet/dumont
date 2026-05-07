@@ -65,6 +65,12 @@ public class DumPluginManagementService {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Invalid filename");
         }
+
+        // On Windows, the JAR is locked by the PluginClassLoader while the plugin
+        // is loaded. Unload any plugin sitting on the same filename so we can
+        // overwrite it transparently (acts as an in-place upgrade).
+        unloadPluginAtFilename(safeName);
+
         try {
             Files.createDirectories(pluginsPath);
             try (var in = file.getInputStream()) {
@@ -86,9 +92,29 @@ public class DumPluginManagementService {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Plugin loaded but no plugin id was resolved");
         }
+        try {
+            pluginManager.startPlugin(pluginId);
+        } catch (RuntimeException e) {
+            log.warn("Plugin {} loaded but failed to start: {}", pluginId, e.getMessage());
+        }
         log.info("Plugin uploaded and loaded: {} ({})", pluginId, safeName);
         events.publishEvent(new PluginsChangedEvent(pluginId, "upload"));
         return findOrThrow(pluginId);
+    }
+
+    private void unloadPluginAtFilename(String filename) {
+        for (PluginWrapper pw : pluginManager.getPlugins()) {
+            Path path = pw.getPluginPath();
+            if (path == null || path.getFileName() == null) {
+                continue;
+            }
+            if (path.getFileName().toString().equalsIgnoreCase(filename)) {
+                String id = pw.getPluginId();
+                log.info("Unloading existing plugin {} ({}) for replacement", id, filename);
+                pluginManager.unloadPlugin(id);
+                return;
+            }
+        }
     }
 
     public synchronized DumPluginInfo start(String id) {

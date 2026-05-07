@@ -1,0 +1,867 @@
+{
+  "wknd-author" : {
+    "en_US" : [ {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca",
+      "title" : "Canada",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en",
+      "title" : "WKND Adventures and Travel",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/about-us",
+      "title" : "About Us",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/about-us.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures",
+      "title" : "Adventures",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/bali-surf-camp",
+      "title" : "Bali Surf Camp",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/bali-surf-camp.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/beervana-portland",
+      "title" : "Beervana in Portland",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/beervana-portland.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/climbing-new-zealand",
+      "title" : "Climbing New Zealand",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/climbing-new-zealand.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/colorado-rock-climbing",
+      "title" : "Colorado Rock Climbing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/colorado-rock-climbing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/cycling-southern-utah",
+      "title" : "Cycling Southern Utah",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/cycling-southern-utah.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/cycling-tuscany",
+      "title" : "Cycling Tuscany",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/cycling-tuscany.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/downhill-skiing-wyoming",
+      "title" : "Downhill Skiing Wyoming",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/downhill-skiing-wyoming.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/gastronomic-marais-tour",
+      "title" : "Gastronomic Marais Tour",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/gastronomic-marais-tour.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/napa-wine-tasting",
+      "title" : "Napa Wine Tasting",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/napa-wine-tasting.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/riverside-camping-australia",
+      "title" : "Riverside Camping",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/riverside-camping-australia.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/ski-touring-mont-blanc",
+      "title" : "Ski Touring Mont Blanc",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/ski-touring-mont-blanc.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/surf-camp-costa-rica",
+      "title" : "Surf Camp in Costa Rica",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/surf-camp-costa-rica.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/tahoe-skiing",
+      "title" : "Tahoe Skiing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/tahoe-skiing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/west-coast-cycling",
+      "title" : "West Coast Cycling",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/west-coast-cycling.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/whistler-mountain-biking",
+      "title" : "Whistler Mountain Biking",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/whistler-mountain-biking.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/adventures/yosemite-backpacking",
+      "title" : "Yosemite Backpacking",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/adventures/yosemite-backpacking.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/errors",
+      "title" : "Error Handler Pages",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/errors.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/errors/404",
+      "title" : "Page not found",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/errors/404.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/errors/500",
+      "title" : "Internal Server Error",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/errors/500.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/errors/sign-in",
+      "title" : "Sign In",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/errors/sign-in.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/faqs",
+      "title" : "FAQs",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/faqs.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine",
+      "title" : "Magazine",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine/arctic-surfing",
+      "title" : "Arctic Surfing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine/arctic-surfing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine/guide-la-skateparks",
+      "title" : "Ultimate Guide to LA Skateparks",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine/guide-la-skateparks.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine/members-only",
+      "title" : "Members Only",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine/members-only.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine/members-only/alaskan-adventure",
+      "title" : "Alaskan Adventure",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine/members-only/alaskan-adventure.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine/members-only/fly-fishing-the-amazon",
+      "title" : "Fly Fishing the Amazon",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine/members-only/fly-fishing-the-amazon.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine/san-diego-surf",
+      "title" : "San Diego Surf Spots",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine/san-diego-surf.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine/ski-touring",
+      "title" : "Ski Touring",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine/ski-touring.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/en/magazine/western-australia",
+      "title" : "Western Australia",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/en/magazine/western-australia.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ca/fr",
+      "title" : "Français",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ca/fr.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ch",
+      "title" : "Switzerland",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ch.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ch/de",
+      "title" : "Deutsch",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ch/de.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ch/fr",
+      "title" : "Français",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ch/fr.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/ch/it",
+      "title" : "Italiano",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/ch/it.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/de",
+      "title" : "Germany",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/de.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/de/de",
+      "title" : "Deutsch",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/de/de.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/es",
+      "title" : "Spain",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/es.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/fr",
+      "title" : "France",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/fr.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/fr/fr",
+      "title" : "Français",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/fr/fr.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/it",
+      "title" : "Italy",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/it.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/it/it",
+      "title" : "Italiano",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/it/it.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters",
+      "title" : "Language Masters",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/de",
+      "title" : "Deutsch",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/de.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en",
+      "title" : "WKND Adventures and Travel",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/about-us",
+      "title" : "About Us",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/about-us.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures",
+      "title" : "Adventures",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/bali-surf-camp",
+      "title" : "Bali Surf Camp",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/bali-surf-camp.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/beervana-portland",
+      "title" : "Beervana in Portland",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/beervana-portland.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/climbing-new-zealand",
+      "title" : "Climbing New Zealand",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/climbing-new-zealand.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/colorado-rock-climbing",
+      "title" : "Colorado Rock Climbing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/colorado-rock-climbing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/cycling-southern-utah",
+      "title" : "Cycling Southern Utah",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/cycling-southern-utah.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/cycling-tuscany",
+      "title" : "Cycling Tuscany",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/cycling-tuscany.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/downhill-skiing-wyoming",
+      "title" : "Downhill Skiing Wyoming",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/downhill-skiing-wyoming.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/gastronomic-marais-tour",
+      "title" : "Gastronomic Marais Tour",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/gastronomic-marais-tour.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/napa-wine-tasting",
+      "title" : "Napa Wine Tasting",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/napa-wine-tasting.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/riverside-camping-australia",
+      "title" : "Riverside Camping",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/riverside-camping-australia.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/ski-touring-mont-blanc",
+      "title" : "Ski Touring Mont Blanc",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/ski-touring-mont-blanc.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/surf-camp-costa-rica",
+      "title" : "Surf Camp in Costa Rica",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/surf-camp-costa-rica.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/tahoe-skiing",
+      "title" : "Tahoe Skiing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/tahoe-skiing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/west-coast-cycling",
+      "title" : "West Coast Cycling",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/west-coast-cycling.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/whistler-mountain-biking",
+      "title" : "Whistler Mountain Biking",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/whistler-mountain-biking.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/adventures/yosemite-backpacking",
+      "title" : "Yosemite Backpacking",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/adventures/yosemite-backpacking.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/errors",
+      "title" : "Error Handler Pages",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/errors.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/errors/404",
+      "title" : "Page not found",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/errors/404.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/errors/500",
+      "title" : "Internal Server Error",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/errors/500.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/errors/sign-in",
+      "title" : "Sign In",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/errors/sign-in.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/faqs",
+      "title" : "FAQs",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/faqs.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine",
+      "title" : "Magazine",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine/arctic-surfing",
+      "title" : "Arctic Surfing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine/arctic-surfing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine/guide-la-skateparks",
+      "title" : "Ultimate Guide to LA Skateparks",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine/guide-la-skateparks.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine/members-only",
+      "title" : "Members Only",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine/members-only.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine/members-only/alaskan-adventure",
+      "title" : "Alaskan Adventure",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine/members-only/alaskan-adventure.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine/members-only/fly-fishing-the-amazon",
+      "title" : "Fly Fishing the Amazon",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine/members-only/fly-fishing-the-amazon.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine/san-diego-surf",
+      "title" : "San Diego Surf Spots",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine/san-diego-surf.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine/ski-touring",
+      "title" : "Ski Touring",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine/ski-touring.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/en/magazine/western-australia",
+      "title" : "Western Australia",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/en/magazine/western-australia.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/es",
+      "title" : "Español",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/es.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/fr",
+      "title" : "Français",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/fr.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/language-masters/it",
+      "title" : "Italiano",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/language-masters/it.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us",
+      "title" : "United States",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/ar",
+      "title" : "Arabic",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/ar.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/de",
+      "title" : "German",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/de.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en",
+      "title" : "WKND Adventures and Travel",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/about-us",
+      "title" : "About Us",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/about-us.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures",
+      "title" : "Adventures",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/bali-surf-camp",
+      "title" : "Bali Surf Camp",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/bali-surf-camp.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/beervana-portland",
+      "title" : "Beervana in Portland",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/beervana-portland.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/climbing-new-zealand",
+      "title" : "Climbing New Zealand",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/climbing-new-zealand.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/colorado-rock-climbing",
+      "title" : "Colorado Rock Climbing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/colorado-rock-climbing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/cycling-southern-utah",
+      "title" : "Cycling Southern Utah",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/cycling-southern-utah.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/cycling-tuscany",
+      "title" : "Cycling Tuscany",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/cycling-tuscany.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/downhill-skiing-wyoming",
+      "title" : "Downhill Skiing Wyoming",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/downhill-skiing-wyoming.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/gastronomic-marais-tour",
+      "title" : "Gastronomic Marais Tour",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/gastronomic-marais-tour.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/napa-wine-tasting",
+      "title" : "Napa Wine Tasting",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/napa-wine-tasting.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/riverside-camping-australia",
+      "title" : "Riverside Camping",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/riverside-camping-australia.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/ski-touring-mont-blanc",
+      "title" : "Ski Touring Mont Blanc",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/ski-touring-mont-blanc.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/surf-camp-costa-rica",
+      "title" : "Surf Camp in Costa Rica",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/surf-camp-costa-rica.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/tahoe-skiing",
+      "title" : "Tahoe Skiing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/tahoe-skiing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/west-coast-cycling",
+      "title" : "West Coast Cycling",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/west-coast-cycling.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/whistler-mountain-biking",
+      "title" : "Whistler Mountain Biking",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/whistler-mountain-biking.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/adventures/yosemite-backpacking",
+      "title" : "Yosemite Backpacking",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/adventures/yosemite-backpacking.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/errors",
+      "title" : "Error Handler Pages",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/errors.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/errors/404",
+      "title" : "Page not found",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/errors/404.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/errors/500",
+      "title" : "Internal Server Error",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/errors/500.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/errors/sign-in",
+      "title" : "Sign In",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/errors/sign-in.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/faqs",
+      "title" : "FAQs",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/faqs.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine",
+      "title" : "Magazine",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine/arctic-surfing",
+      "title" : "Arctic Surfing",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine/arctic-surfing.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine/guide-la-skateparks",
+      "title" : "Ultimate Guide to LA Skateparks",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine/guide-la-skateparks.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine/members-only",
+      "title" : "Members Only",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine/members-only.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine/members-only/alaskan-adventure",
+      "title" : "Alaskan Adventure",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine/members-only/alaskan-adventure.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine/members-only/fly-fishing-the-amazon",
+      "title" : "Fly Fishing the Amazon",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine/members-only/fly-fishing-the-amazon.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine/san-diego-surf",
+      "title" : "San Diego Surf Spots",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine/san-diego-surf.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine/ski-touring",
+      "title" : "Ski Touring",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine/ski-touring.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/en/magazine/western-australia",
+      "title" : "Western Australia",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/en/magazine/western-australia.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/es",
+      "title" : "Español",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/es.html"
+    }, {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/us/fr",
+      "title" : "French",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/us/fr.html"
+    } ],
+    "es" : [ {
+      "site" : "WKND Site",
+      "id" : "/content/wknd/es/es",
+      "title" : "Español",
+      "type" : "cq:Page",
+      "source_apps" : [ "AEM" ],
+      "url" : "http://localhost:4502/content/wknd/es/es.html"
+    } ]
+  }
+}
