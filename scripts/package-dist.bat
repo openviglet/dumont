@@ -65,7 +65,6 @@ rem AEM Plugin
 copy "aem\aem-plugin\target\aem-plugin.jar"               "%STAGE%\connector\libs\aem\" >nul
 copy "aem\aem-plugin-sample\target\aem-plugin-sample.jar"  "%STAGE%\connector\libs\aem\" >nul
 copy "aem\aem-plugin-sample\scripts\wknd\export\wknd.json"  "%STAGE%\connector\export\" >nul
-copy "aem\aem-plugin-sample\scripts\wknd\export\wknd2.json" "%STAGE%\connector\export\" >nul
 
 rem DB Plugin
 copy "db\db-plugin\target\db-plugin.jar"                    "%STAGE%\connector\libs\db\" >nul

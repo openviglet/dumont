@@ -16,18 +16,18 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SKIP_BUILD=false
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --skip-build) SKIP_BUILD=true; shift ;;
-    *)            echo "Unknown option: $1"; exit 1 ;;
-  esac
+    case "$1" in
+        --skip-build) SKIP_BUILD=true; shift ;;
+        *)            echo "Unknown option: $1"; exit 1 ;;
+    esac
 done
 
 cd "$PROJECT_ROOT"
 
 # --------------- Build ---------------
 if [ "$SKIP_BUILD" = false ]; then
-  echo "==> Building Dumont..."
-  ./mvnw clean install -DskipTests -Dgpg.skip=true -Dturing.open-browser=false
+    echo "==> Building Dumont..."
+    ./mvnw clean install -DskipTests -Dgpg.skip=true -Dturing.open-browser=false
 fi
 
 # =====================================================================
@@ -52,7 +52,6 @@ cp "connector/connector-app/target/dumont-connector.jar" "$STAGE/connector/"
 cp "aem/aem-plugin/target/aem-plugin.jar"               "$STAGE/connector/libs/aem/"
 cp "aem/aem-plugin-sample/target/aem-plugin-sample.jar"  "$STAGE/connector/libs/aem/"
 cp "aem/aem-plugin-sample/scripts/wknd/export/wknd.json"  "$STAGE/connector/export/"
-cp "aem/aem-plugin-sample/scripts/wknd/export/wknd2.json" "$STAGE/connector/export/"
 
 # DB Plugin
 cp "db/db-plugin/target/db-plugin.jar"                    "$STAGE/connector/libs/db/"
@@ -114,10 +113,10 @@ cp "$SCRIPT_DIR/installer/appimage/dumont.png" "$APPDIR/dumont.png"
 ARCH="$(uname -m)"
 APPIMAGETOOL="${PROJECT_ROOT}/target/appimagetool"
 if [ ! -f "$APPIMAGETOOL" ]; then
-  echo "    Downloading appimagetool..."
-  TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${ARCH}.AppImage"
-  curl -fSL -o "$APPIMAGETOOL" "$TOOL_URL"
-  chmod +x "$APPIMAGETOOL"
+    echo "    Downloading appimagetool..."
+    TOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${ARCH}.AppImage"
+    curl -fSL -o "$APPIMAGETOOL" "$TOOL_URL"
+    chmod +x "$APPIMAGETOOL"
 fi
 
 APPIMAGE_OUTPUT="${PROJECT_ROOT}/target/Dumont-DEP-${ARCH}.AppImage"
@@ -129,12 +128,12 @@ echo "    $(du -h "$APPIMAGE_OUTPUT" | cut -f1)"
 #  3. Windows Installer (NSIS) — only if makensis is available
 # =====================================================================
 if command -v makensis &>/dev/null; then
-  EXE_OUTPUT="${PROJECT_ROOT}/target/${DIST_NAME}.exe"
-  echo "==> Creating Windows installer: $EXE_OUTPUT"
-  makensis -V2 -DOUTDIR="../../target" -DSTAGE="$STAGE" "$SCRIPT_DIR/installer/dumont.nsi"
-  echo "    $(du -h "$EXE_OUTPUT" | cut -f1)"
+    EXE_OUTPUT="${PROJECT_ROOT}/target/${DIST_NAME}.exe"
+    echo "==> Creating Windows installer: $EXE_OUTPUT"
+    makensis -V2 -DOUTDIR="../../target" -DSTAGE="$STAGE" "$SCRIPT_DIR/installer/dumont.nsi"
+    echo "    $(du -h "$EXE_OUTPUT" | cut -f1)"
 else
-  echo "==> Skipping Windows installer (makensis not found)"
+    echo "==> Skipping Windows installer (makensis not found)"
 fi
 
 # =====================================================================

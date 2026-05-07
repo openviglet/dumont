@@ -533,7 +533,6 @@ SectionGroup "Connectors" SecConnectors
         CreateDirectory "$LOCALAPPDATA\Viglet\Dumont\aem\export"
         SetOutPath "$LOCALAPPDATA\Viglet\Dumont\aem\export"
         File "${STAGE}\connector\export\wknd.json"
-        File "${STAGE}\connector\export\wknd2.json"
     SectionEnd
 
     ; ------------------------------------------------------------------
