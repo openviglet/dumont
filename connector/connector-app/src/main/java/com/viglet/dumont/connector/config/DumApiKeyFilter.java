@@ -86,6 +86,7 @@ public class DumApiKeyFilter extends OncePerRequestFilter {
                 || uri.startsWith("/api/v2/discovery")
                 || uri.startsWith("/api/v2/aem/status")
                 || uri.startsWith("/api/v2/aem/index/")
+                || uri.startsWith("/api/v2/aem/webhook/")
                 || uri.startsWith("/api/v2/connector/status")
                 || uri.startsWith("/api/csrf")
                 || uri.startsWith("/api/setup")

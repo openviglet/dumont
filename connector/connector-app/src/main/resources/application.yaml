@@ -42,6 +42,14 @@ dumont:
       negative.ttl: 0
   aem.querybuilder: true
   aem.querybuilder.parallelism: 10
+  aem:
+    webhook:
+      adobe-io:
+        # Adobe Developer Console "API Key (Client ID)" of the OAuth Server-to-Server credential.
+        # Used to validate the `recipient_client_id` field on incoming
+        # POST /api/v2/aem/webhook/{source} requests from Adobe I/O Events.
+        # Leave empty to keep the endpoint open (dev only — logs a WARN at startup).
+        client-id: ~
   scheduler:
     enabled: false
   plugins:
