@@ -89,18 +89,75 @@ function toArray(value: unknown): string[] {
   return [];
 }
 
+/** AEM tag fields can be a single string with `\r\n`-separated values. */
+function toFormattedTags(value: unknown): string[] {
+  return toArray(value)
+    .flatMap((s) => String(s).split(/\r?\n/))
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/** Resolve an AEM image path to an absolute URL using `VITE_AEM_URL`. */
+function resolveImageUrl(path: string): string {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = (import.meta.env.VITE_AEM_URL ?? "").replace(/\/+$/, "");
+  return `${base}${path.startsWith("/") ? "" : "/"}${path}`;
+}
+
+/** Pick the first usable image from a `pageImages` field. */
+function firstPageImage(value: unknown): string {
+  const first = toFormattedTags(value)[0];
+  return first ? resolveImageUrl(first) : "";
+}
+
 /* ── Facet sidebar ── */
 function FacetSidebar({
   groups,
+  facetToRemove,
   onNavigate,
+  onClearAll,
 }: Readonly<{
   groups: TurFacetGroup[];
+  facetToRemove?: TurFacetGroup;
   onNavigate: (href: string) => void;
+  onClearAll: () => void;
 }>) {
-  if (!groups || groups.length === 0) return null;
+  const hasApplied = Boolean(facetToRemove?.facets?.length);
+  if ((!groups || groups.length === 0) && !hasApplied) return null;
 
   return (
     <aside className="w-64 shrink-0 space-y-6">
+      {hasApplied && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-widest text-primary/80 flex items-center gap-1.5">
+              <IconFilter className="size-3.5" />
+              Applied
+            </span>
+            <button
+              type="button"
+              onClick={onClearAll}
+              className="text-[10px] uppercase tracking-wider text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+            >
+              Clear all
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {facetToRemove!.facets.map((facet: TurFacetItem) => (
+              <button
+                key={`applied-${facet.label}-${facet.link}`}
+                type="button"
+                onClick={() => onNavigate(facet.link)}
+                className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/25 transition-colors cursor-pointer"
+              >
+                <span className="truncate max-w-40">{facet.label}</span>
+                <IconX className="size-3 shrink-0" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-2 text-sm font-semibold text-foreground/80 uppercase tracking-widest">
         <IconFilter className="size-4" />
         Filter
@@ -156,23 +213,39 @@ function ArticleCard({
   onClick: () => void;
 }>) {
   const fields = doc.raw.fields;
-  const tags = toArray(fields.tags);
+  const tags = toFormattedTags(fields["wknd-shared"]);
   const gradient = getCardGradient(tags);
+  const image = firstPageImage(fields.pageImages);
 
   return (
     <button
       onClick={onClick}
       className="group relative flex flex-col overflow-hidden rounded-xl border border-border/50 bg-card text-left transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aspect-[4/3]"
     >
-      {/* Simulated image area with gradient */}
+      {/* Image area (falls back to gradient if no image) */}
       <div className="absolute inset-0">
+        {image && (
+          <img
+            src={image}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+          />
+        )}
         <div className={cn(
           "absolute inset-0 bg-linear-to-t",
           gradient
         )} />
-        {/* Decorative pattern to simulate image texture */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_40%,white_1px,transparent_1px)] bg-[length:20px_20px]" />
-        <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_70%_60%,white_2px,transparent_2px)] bg-[length:40px_40px]" />
+        {!image && (
+          <>
+            {/* Decorative pattern to simulate image texture */}
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_40%,white_1px,transparent_1px)] bg-[length:20px_20px]" />
+            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_70%_60%,white_2px,transparent_2px)] bg-[length:40px_40px]" />
+          </>
+        )}
       </div>
 
       {/* Content overlay at bottom */}
@@ -271,6 +344,7 @@ function SearchContent() {
   const isLanding = query === "*" && turing.status !== "loading";
   const hasResults = turing.documents.length > 0;
   const facetGroups = turing.data?.widget?.facet ?? [];
+  const facetToRemove = turing.data?.widget?.facetToRemove;
   const pagination = turing.data?.pagination ?? [];
   const totalCount = turing.data?.queryContext?.count ?? 0;
 
@@ -420,7 +494,12 @@ function SearchContent() {
             {/* Facets sidebar */}
             <FacetSidebar
               groups={facetGroups}
+              facetToRemove={facetToRemove}
               onNavigate={turing.navigate}
+              onClearAll={() => {
+                const link = turing.data?.widget?.cleanUpFacets;
+                if (link) turing.navigate(link);
+              }}
             />
 
             {/* Results area */}

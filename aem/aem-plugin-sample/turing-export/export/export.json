@@ -23,10 +23,10 @@
   ],
   "snSites": [
     {
-      "defaultDateField": "publication_date",
-      "defaultDescriptionField": "abstract",
+      "defaultDateField": "modificationDate",
+      "defaultDescriptionField": "pageDescription",
       "defaultField": "_text_",
-      "defaultImageField": "image",
+      "defaultImageField": "pageImages",
       "defaultTextField": "text",
       "defaultTitleField": "title",
       "defaultURLField": "url",
@@ -1053,10 +1053,10 @@
       "wildcardNoResults": 0
     },
     {
-      "defaultDateField": "publication_date",
-      "defaultDescriptionField": "abstract",
+      "defaultDateField": "modificationDate",
+      "defaultDescriptionField": "pageDescription",
       "defaultField": "_text_",
-      "defaultImageField": "image",
+      "defaultImageField": "pageImages",
       "defaultTextField": "text",
       "defaultTitleField": "title",
       "defaultURLField": "url",

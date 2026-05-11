@@ -77,6 +77,14 @@ function toArray(value: unknown): string[] {
   return [];
 }
 
+/** AEM tag fields can be a single string with `\r\n`-separated values. */
+function toFormattedTags(value: unknown): string[] {
+  return toArray(value)
+    .flatMap((s) => String(s).split(/\r?\n/))
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function formatDate(value: unknown): string {
   if (!value) return "";
   try {
@@ -131,7 +139,7 @@ export default function DetailPage() {
   }
 
   const fields = doc.raw.fields;
-  const tags = toArray(fields.tags);
+  const tags = toFormattedTags(fields["wknd-shared"]);
   const sourceApps = toArray(fields.source_apps);
   const title = fields.title ?? doc.title ?? "Untitled";
   const text = typeof fields.text === "string" ? fields.text : "";
