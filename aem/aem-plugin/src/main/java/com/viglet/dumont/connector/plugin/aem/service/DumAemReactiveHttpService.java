@@ -25,6 +25,7 @@ import javax.net.ssl.SSLException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 
@@ -84,7 +85,18 @@ public class DumAemReactiveHttpService {
                                                 .maxInMemorySize(16 * 1024 * 1024))
                                 .defaultHeader(HttpHeaders.USER_AGENT,
                                                 "Dumont-AEM-Connector/2026.1")
+                                .filter(tracingFilter())
                                 .build();
+        }
+
+        private ExchangeFilterFunction tracingFilter() {
+                return ExchangeFilterFunction.ofRequestProcessor(request -> {
+                        if (log.isTraceEnabled()) {
+                                log.trace("HTTP --> {} {} headers={}", request.method(),
+                                                request.url(), request.headers());
+                        }
+                        return Mono.just(request);
+                });
         }
 
         private void configureSsl(SslContextSpec sslContextSpec) {
@@ -115,6 +127,11 @@ public class DumAemReactiveHttpService {
                                 dumAemSourceContext.getPassword());
                 return webClient.get().uri(escapedUrl).header(HttpHeaders.AUTHORIZATION, basicAuth)
                                 .retrieve().bodyToMono(String.class)
+                                .doOnNext(responseBody -> {
+                                        if (log.isTraceEnabled()) {
+                                                log.trace("HTTP <-- {} body={}", url, responseBody);
+                                        }
+                                })
                                 .map(responseBody -> {
                                         if (!DumCommonsUtils.isValidJson(responseBody)) {
                                                 throw new IllegalArgumentException(

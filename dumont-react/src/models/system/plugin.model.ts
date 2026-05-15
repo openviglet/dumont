@@ -5,5 +5,7 @@ export interface TurPlugin {
   provider: string | null;
   state: string;
   path: string | null;
+  filename: string | null;
+  error: string | null;
   lastModified: string | null;
 }

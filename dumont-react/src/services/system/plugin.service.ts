@@ -49,4 +49,8 @@ export class TurPluginService {
   async delete(id: string): Promise<void> {
     await this.axiosInstance.delete(`${this.url}/${id}`);
   }
+
+  async deleteFailed(filename: string): Promise<void> {
+    await this.axiosInstance.delete(`${this.url}/file/${encodeURIComponent(filename)}`);
+  }
 }

@@ -72,4 +72,10 @@ public class DumPluginApi {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("file/{filename}")
+    public ResponseEntity<Void> deleteFailed(@PathVariable String filename) {
+        service.deleteFailed(filename);
+        return ResponseEntity.noContent().build();
+    }
 }

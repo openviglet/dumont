@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,10 +24,10 @@ import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,22 +36,30 @@ import lombok.extern.slf4j.Slf4j;
 public class DumPluginManagementService {
 
     private final PluginManager pluginManager;
+    private final DumFailedPluginRegistry failedRegistry;
     private final Path pluginsPath;
     private final ApplicationEventPublisher events;
 
     public DumPluginManagementService(
             PluginManager pluginManager,
+            DumFailedPluginRegistry failedRegistry,
             ApplicationEventPublisher events,
             @Value("${dumont.plugins.directory:./plugins}") String pluginsDirectory) {
         this.pluginManager = pluginManager;
+        this.failedRegistry = failedRegistry;
         this.events = events;
         this.pluginsPath = Paths.get(pluginsDirectory).toAbsolutePath().normalize();
     }
 
     public List<DumPluginInfo> list() {
-        return pluginManager.getPlugins().stream()
+        List<DumPluginInfo> all = new ArrayList<>();
+        pluginManager.getPlugins().stream()
                 .map(DumPluginInfo::from)
-                .toList();
+                .forEach(all::add);
+        failedRegistry.list().stream()
+                .map(DumPluginInfo::from)
+                .forEach(all::add);
+        return all;
     }
 
     public synchronized DumPluginInfo upload(MultipartFile file) {
@@ -70,6 +79,7 @@ public class DumPluginManagementService {
         // is loaded. Unload any plugin sitting on the same filename so we can
         // overwrite it transparently (acts as an in-place upgrade).
         unloadPluginAtFilename(safeName);
+        failedRegistry.remove(safeName);
 
         try {
             Files.createDirectories(pluginsPath);
@@ -84,11 +94,14 @@ public class DumPluginManagementService {
         try {
             pluginId = pluginManager.loadPlugin(target);
         } catch (RuntimeException e) {
-            log.warn("Failed to load plugin {}: {}", safeName, e.getMessage());
+            String reason = rootCauseMessage(e);
+            log.warn("Failed to load plugin {}: {}", safeName, reason);
+            failedRegistry.register(target, reason);
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
-                    "Failed to load plugin: " + e.getMessage(), e);
+                    "Failed to load plugin: " + reason, e);
         }
         if (pluginId == null) {
+            failedRegistry.register(target, "Plugin loaded but no plugin id was resolved");
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
                     "Plugin loaded but no plugin id was resolved");
         }
@@ -163,6 +176,28 @@ public class DumPluginManagementService {
         events.publishEvent(new PluginsChangedEvent(id, "delete"));
     }
 
+    public synchronized void deleteFailed(String filename) {
+        String safeName = Paths.get(filename).getFileName().toString();
+        Path target = pluginsPath.resolve(safeName).normalize();
+        if (!target.startsWith(pluginsPath)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_CONTENT,
+                    "Invalid filename");
+        }
+        if (failedRegistry.get(safeName) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Failed plugin not found: " + safeName);
+        }
+        try {
+            Files.deleteIfExists(target);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to delete plugin file: " + e.getMessage(), e);
+        }
+        failedRegistry.remove(safeName);
+        log.info("Failed plugin file {} deleted", safeName);
+        events.publishEvent(new PluginsChangedEvent(safeName, "delete-failed"));
+    }
+
     private void requireExists(String id) {
         if (pluginManager.getPlugin(id) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Plugin not found: " + id);
@@ -178,5 +213,14 @@ public class DumPluginManagementService {
 
     PluginWrapper getRaw(String id) {
         return pluginManager.getPlugin(id);
+    }
+
+    private static String rootCauseMessage(Throwable t) {
+        Throwable current = t;
+        while (current.getCause() != null && current.getCause() != current) {
+            current = current.getCause();
+        }
+        String msg = current.getMessage();
+        return msg != null ? msg : current.getClass().getSimpleName();
     }
 }

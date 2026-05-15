@@ -18,6 +18,7 @@ package com.viglet.dumont.connector.aem.commons.ext;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.jspecify.annotations.NonNull;
@@ -42,9 +43,11 @@ public class DumAemExtContentTags implements DumAemExtAttributeInterface {
             DumAemSourceAttr dumAemSourceAttr, DumAemObject aemObject,
             DumAemConfiguration dumAemConfiguration) {
         log.debug("Executing DumAemExtContentTags");
-        return new TurMultiValue(new TurMultiValue(getTags(aemObject, dumAemConfiguration)
+        List<String> tags = getTags(aemObject, dumAemConfiguration)
                 .map(t -> t.getTags().stream().map(DumAemContentTag::getTagID).toList())
-                .orElse(Collections.emptyList())));
+                .orElse(Collections.emptyList());
+        log.debug("Tags found for {}: {}", aemObject.getPath(), tags);
+        return new TurMultiValue(new TurMultiValue(tags));
     }
 
     public static Optional<@NonNull DumAemContentTags> getTags(DumAemObject aemObject,

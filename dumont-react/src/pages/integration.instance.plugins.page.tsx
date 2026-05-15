@@ -6,6 +6,7 @@ import { useDateLocale } from "@/hooks/use-date-locale";
 import type { TurPlugin } from "@/models/system/plugin.model";
 import { TurPluginService } from "@/services/system/plugin.service";
 import {
+    IconAlertTriangle,
     IconBan,
     IconCheck,
     IconPlayerPlay,
@@ -109,6 +110,13 @@ export default function IntegrationInstancePluginsPage() {
         }
     };
 
+    const onDelete = (plugin: TurPlugin) => {
+        if (plugin.state === "FAILED" && plugin.filename) {
+            return action("delete", plugin, () => service.deleteFailed(plugin.filename!));
+        }
+        return action("delete", plugin, () => service.delete(plugin.id));
+    };
+
     return (
         <>
             <SubPageHeader
@@ -162,10 +170,28 @@ export default function IntegrationInstancePluginsPage() {
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {plugins.map((p) => (
-                                <TableRow key={p.id}>
-                                    <TableCell className="font-medium">{p.id}</TableCell>
-                                    <TableCell>{p.version}</TableCell>
+                            {plugins.map((p) => {
+                                const isFailed = p.state === "FAILED";
+                                const rowKey = p.filename ?? p.id;
+                                return (
+                                <TableRow key={rowKey}>
+                                    <TableCell className="font-medium">
+                                        <div className="flex flex-col gap-1">
+                                            <span>{p.id}</span>
+                                            {isFailed && (
+                                                <span className="text-xs text-muted-foreground font-mono">
+                                                    {p.filename}
+                                                </span>
+                                            )}
+                                            {isFailed && p.error && (
+                                                <span className="flex items-start gap-1 text-xs text-destructive">
+                                                    <IconAlertTriangle className="size-3.5 shrink-0 mt-0.5" />
+                                                    <span className="break-all">{p.error}</span>
+                                                </span>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{p.version ?? "—"}</TableCell>
                                     <TableCell>{p.provider ?? "—"}</TableCell>
                                     <TableCell className="text-muted-foreground">{p.description ?? "—"}</TableCell>
                                     <TableCell>
@@ -176,7 +202,7 @@ export default function IntegrationInstancePluginsPage() {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="inline-flex gap-1">
-                                            {p.state !== "STARTED" && p.state !== "DISABLED" && (
+                                            {!isFailed && p.state !== "STARTED" && p.state !== "DISABLED" && (
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
@@ -194,7 +220,7 @@ export default function IntegrationInstancePluginsPage() {
                                                     <IconPlayerStop className="size-4" />
                                                 </Button>
                                             )}
-                                            {p.state !== "DISABLED" && (
+                                            {!isFailed && p.state !== "DISABLED" && (
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
@@ -215,14 +241,15 @@ export default function IntegrationInstancePluginsPage() {
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => action("delete", p, () => service.delete(p.id))}
+                                                onClick={() => onDelete(p)}
                                                 title={t("integration.plugins.action.delete")}>
                                                 <IconTrash className="size-4 text-destructive" />
                                             </Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </div>

@@ -23,18 +23,37 @@ public record DumPluginInfo(
         String provider,
         String state,
         String path,
+        String filename,
+        String error,
         Instant lastModified) {
 
     public static DumPluginInfo from(PluginWrapper wrapper) {
         Path pluginPath = wrapper.getPluginPath();
+        String filename = pluginPath != null ? pluginPath.getFileName().toString() : null;
         return new DumPluginInfo(
                 wrapper.getPluginId(),
                 wrapper.getDescriptor().getVersion(),
                 wrapper.getDescriptor().getPluginDescription(),
                 wrapper.getDescriptor().getProvider(),
                 wrapper.getPluginState().toString(),
-                pluginPath != null ? pluginPath.getFileName().toString() : null,
+                filename,
+                filename,
+                null,
                 lastModifiedOf(pluginPath));
+    }
+
+    public static DumPluginInfo from(DumFailedPluginRegistry.FailedPlugin failure) {
+        String id = failure.pluginId() != null ? failure.pluginId() : failure.filename();
+        return new DumPluginInfo(
+                id,
+                failure.version(),
+                null,
+                failure.provider(),
+                "FAILED",
+                failure.filename(),
+                failure.filename(),
+                failure.error(),
+                failure.lastModified());
     }
 
     private static Instant lastModifiedOf(Path path) {
