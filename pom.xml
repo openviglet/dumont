@@ -309,7 +309,7 @@
             <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
-                <version>20251224</version>
+                <version>20260522</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -490,7 +490,7 @@
             <dependency>
                 <groupId>co.elastic.clients</groupId>
                 <artifactId>elasticsearch-java</artifactId>
-                <version>9.4.0</version>
+                <version>9.4.1</version>
             </dependency>
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
