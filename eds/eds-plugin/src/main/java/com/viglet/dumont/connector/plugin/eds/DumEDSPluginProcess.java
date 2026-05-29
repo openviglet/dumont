@@ -146,6 +146,37 @@ public class DumEDSPluginProcess {
         }
     }
 
+    /**
+     * Full reindex: drops the source's crawl state so the incremental skip and
+     * removal-detection passes start from a clean slate, then runs the normal
+     * pipeline. Every discovered page is re-fetched and re-enqueued regardless
+     * of its {@code lastModified}.
+     */
+    public List<DumEDSFetchedPage> reindex(DumEDSSource source) {
+        int cleared = crawlStateService.deleteAll(source);
+        log.info("Reindex: cleared {} crawl-state row(s) for source {}", cleared,
+                source.getTitle());
+        return start(source);
+    }
+
+    /**
+     * Dry scan: runs discovery + sitemap merge + exclude filtering only — no
+     * fetching, no indexing, no state mutation. Returns what <em>would</em> be
+     * crawled so an operator can validate indexes/exclude patterns before
+     * committing to a full run.
+     */
+    public DryScanResult dryScan(DumEDSSource source) {
+        List<DumEDSDiscoveredPage> discovered = discoverAndFilter(source);
+        List<String> paths = discovered.stream().map(DumEDSDiscoveredPage::path).toList();
+        log.info("Dry scan for source {}: {} page(s) would be crawled", source.getTitle(),
+                paths.size());
+        return new DryScanResult(paths.size(), paths);
+    }
+
+    /** Outcome of a {@link #dryScan(DumEDSSource)} — the count and paths that would be crawled. */
+    public record DryScanResult(int discovered, List<String> paths) {
+    }
+
     private void removeNotFoundPaths(DumEDSSource source, DumConnectorSession session,
             Map<String, DumEDSCrawlState> priorStates, Set<String> notFoundPaths) {
         if (notFoundPaths.isEmpty()) {

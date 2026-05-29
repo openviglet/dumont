@@ -36,4 +36,8 @@ public interface DumEDSCrawlStateRepository extends JpaRepository<DumEDSCrawlSta
     @Query("delete from DumEDSCrawlState s where s.dumEDSSource = :source and s.path = :path")
     int deleteByDumEDSSourceAndPath(@Param("source") DumEDSSource source,
             @Param("path") String path);
+
+    @Modifying
+    @Query("delete from DumEDSCrawlState s where s.dumEDSSource = :source")
+    int deleteByDumEDSSource(@Param("source") DumEDSSource source);
 }

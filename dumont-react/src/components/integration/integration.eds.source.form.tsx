@@ -18,12 +18,15 @@ import {
   IconCloudComputing,
   IconCode,
   IconDeviceFloppy,
+  IconEye,
   IconFileDescription,
   IconFilter,
   IconListNumbers,
   IconPlus,
+  IconRefresh,
   IconSettings,
   IconTrash,
+  IconUpload,
   IconWorld,
   IconX,
 } from "@tabler/icons-react";
@@ -47,7 +50,13 @@ interface Props {
   onDelete?: () => void;
   open?: boolean;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
-  headerActions?: React.ReactNode;
+  onIndex?: () => void;
+  onReindex?: () => void;
+  onDryScan?: () => void;
+  indexingDisabled?: boolean;
+  indexing?: boolean;
+  reindexing?: boolean;
+  dryScanning?: boolean;
 }
 
 export const IntegrationEdsSourceForm: React.FC<Props> = ({
@@ -59,7 +68,13 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
   onDelete,
   open,
   setOpen,
-  headerActions,
+  onIndex,
+  onReindex,
+  onDryScan,
+  indexingDisabled,
+  indexing,
+  reindexing,
+  dryScanning,
 }) => {
   const { t } = useTranslation();
   const service = useMemo(
@@ -134,8 +149,43 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
             description={t("integration.edsSources.description")}
           />
           <StickyPageHeader.Actions>
+            {/* Dropdown items (3-dot menu) */}
+            {onDryScan && (
+              <StickyPageHeader.Action
+                label={t("integration.edsSources.dryScan")}
+                icon={IconEye}
+                onClick={onDryScan}
+                disabled={indexingDisabled || dryScanning}
+              />
+            )}
+            {onReindex && (
+              <StickyPageHeader.Action
+                label={t("integration.edsSources.reindexAll")}
+                icon={IconRefresh}
+                onClick={onReindex}
+                disabled={indexingDisabled || reindexing}
+              />
+            )}
+            {onIndex && (
+              <StickyPageHeader.Action
+                label={t("integration.edsSources.indexAll")}
+                icon={IconUpload}
+                onClick={onIndex}
+                disabled={indexingDisabled || indexing}
+              />
+            )}
+            {open !== undefined && onDelete && setOpen && (
+              <StickyPageHeader.Action
+                label={t("forms.formActions.delete")}
+                icon={IconTrash}
+                onClick={() => setOpen(true)}
+              />
+            )}
+
+            {/* Dialog rendered without its own trigger — opened by the dropdown item above */}
             {open !== undefined && onDelete && setOpen && (
               <DialogDelete
+                trigger={null}
                 feature={t("integration.edsSources.title")}
                 name={form.watch("title") || ""}
                 onDelete={onDelete}
@@ -143,7 +193,8 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
                 setOpen={setOpen}
               />
             )}
-            {headerActions}
+
+            {/* Visible buttons */}
             <GradientButton type="submit" size="sm">
               <IconDeviceFloppy className="size-4" />
               {t("forms.formActions.saveChanges")}

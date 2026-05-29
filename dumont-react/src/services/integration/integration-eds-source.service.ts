@@ -10,8 +10,10 @@ import axios, { type AxiosInstance } from "axios";
  *  - POST   /api/v2/eds/source           create
  *  - PUT    /api/v2/eds/source/{id}      update
  *  - DELETE /api/v2/eds/source/{id}      delete
- *  - GET    /api/v2/eds/source/{id}/index trigger crawl
- *  - GET    /api/v2/eds/health           health roll-up
+ *  - GET    /api/v2/eds/source/{id}/index    incremental crawl + index
+ *  - GET    /api/v2/eds/source/{id}/reindex  clear state + reindex everything
+ *  - GET    /api/v2/eds/source/{id}/dry-scan discover only (no fetch/index)
+ *  - GET    /api/v2/eds/health              health roll-up
  */
 export class TurIntegrationEdsSourceService {
   private integrationId: string;
@@ -70,5 +72,18 @@ export class TurIntegrationEdsSourceService {
 
   async index(source: TurIntegrationEdsSource): Promise<void> {
     await this.axiosInstance.get(`${this.edsUrl}/${source.id}/index`);
+  }
+
+  async reindex(source: TurIntegrationEdsSource): Promise<void> {
+    await this.axiosInstance.get(`${this.edsUrl}/${source.id}/reindex`);
+  }
+
+  async dryScan(
+    source: TurIntegrationEdsSource,
+  ): Promise<{ discovered: number; paths: string[] }> {
+    const { data } = await this.axiosInstance.get<{ discovered: number; paths: string[] }>(
+      `${this.edsUrl}/${source.id}/dry-scan`,
+    );
+    return data;
   }
 }

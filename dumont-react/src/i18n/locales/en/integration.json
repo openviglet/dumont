@@ -88,6 +88,12 @@
       "indexAll": "Index all",
       "indexStarted": "Indexing started for {{name}}",
       "indexFailed": "Failed to start indexing for {{name}}",
+      "reindexAll": "Reindex all",
+      "reindexStarted": "Reindexing started for {{name}}",
+      "reindexFailed": "Failed to start reindexing for {{name}}",
+      "dryScan": "Dry scan",
+      "dryScanDone": "Dry scan for {{name}}: {{count}} page(s) would be crawled",
+      "dryScanFailed": "Dry scan failed for {{name}}",
       "alreadyRunning": "A process is already running for {{name}}. Please wait for it to finish."
     },
     "dbSources": {

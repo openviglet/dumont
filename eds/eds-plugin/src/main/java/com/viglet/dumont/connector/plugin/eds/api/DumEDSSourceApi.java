@@ -198,10 +198,25 @@ public class DumEDSSourceApi {
     }
 
     @GetMapping("/{id}/index")
-    @Operation(summary = "Trigger EDS discovery + indexing for a source")
+    @Operation(summary = "Trigger EDS discovery + incremental indexing for a source")
     public ResponseEntity<Object> index(@PathVariable String id) {
         dumEDSSourceRepository.findById(id).ifPresent(dumEDSPluginProcess::start);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/reindex")
+    @Operation(summary = "Clear crawl state and reindex every page of a source")
+    public ResponseEntity<Object> reindex(@PathVariable String id) {
+        dumEDSSourceRepository.findById(id).ifPresent(dumEDSPluginProcess::reindex);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/dry-scan")
+    @Operation(summary = "Discover + filter only (no fetch/index): preview what would be crawled")
+    public ResponseEntity<Object> dryScan(@PathVariable String id) {
+        return dumEDSSourceRepository.findById(id)
+                .map(source -> ResponseEntity.ok((Object) dumEDSPluginProcess.dryScan(source)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/export")

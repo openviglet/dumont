@@ -100,6 +100,16 @@ public class DumEDSCrawlStateService {
         return repository.deleteByDumEDSSourceAndPath(source, path);
     }
 
+    /**
+     * Clears every crawl-state row for a source. Used by "reindex all": with no
+     * prior state, the next pipeline run re-fetches and re-sends every page
+     * (nothing is skipped as unchanged).
+     */
+    @Transactional
+    public int deleteAll(DumEDSSource source) {
+        return repository.deleteByDumEDSSource(source);
+    }
+
     @Transactional
     public List<DumEDSCrawlState> findAll(DumEDSSource source) {
         return repository.findByDumEDSSource(source);
