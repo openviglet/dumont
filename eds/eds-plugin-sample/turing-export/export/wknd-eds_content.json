@@ -1,0 +1,239 @@
+{
+  "wknd-eds": {
+    "en_US": [
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/",
+        "url": "https://main--wknd--hlxsites.aem.live/",
+        "path": "/",
+        "title": "WKND Adventures and Travel",
+        "description": "WKND is a fictitious adventure and travel website created by Adobe to demonstrate how anyone can use Adobe Experience Manager.",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/media_1a1f015e843aeee634ff6722bcbf1c64c739a2464.jpg?width=1200&format=pjpg&optimize=medium",
+        "modificationDate": "2025-05-26T18:59:44.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/about-us",
+        "url": "https://main--wknd--hlxsites.aem.live/about-us",
+        "path": "/about-us",
+        "title": "Our Contributors",
+        "description": "Meet the outstanding individuals responsible for bringing you the most compelling stories across the globe.",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/default-meta-image.png?width=1200&format=pjpg&optimize=medium",
+        "section": "about-us",
+        "modificationDate": "2023-02-09T15:00:09.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/adventures",
+        "url": "https://main--wknd--hlxsites.aem.live/adventures",
+        "path": "/adventures",
+        "title": "Adventures",
+        "description": "With WKND Adventures, you don't just see the world -- you experience its cultures, flavors and wonders.",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/media_18299a981d4b2fae5867656b242a5dcf68d06955d.png?width=1200&format=pjpg&optimize=medium",
+        "section": "adventures",
+        "modificationDate": "2025-03-24T16:46:35.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/adventures/bali-surf-camp",
+        "url": "https://main--wknd--hlxsites.aem.live/adventures/bali-surf-camp",
+        "path": "/adventures/bali-surf-camp",
+        "title": "Bali Surf Camp",
+        "description": "Surfing in Bali is on the bucket list of every surfer - whether you're a beginner or someone who's been surfing for decades, there will ...",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/adventures/media_12a3ca275daf661469c537c2a91f4c3f79b43d2c4.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "adventures",
+        "modificationDate": "2024-05-13T14:16:37.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/adventures/climbing-new-zealand",
+        "url": "https://main--wknd--hlxsites.aem.live/adventures/climbing-new-zealand",
+        "path": "/adventures/climbing-new-zealand",
+        "title": "Climbing New Zealand",
+        "description": "Let us help you make your New Zealand climbing vacation a memory you will cherish forever! Come join us for a guided rock climbing adventure in the mountains that trained Sir Edmund Hilary.",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/adventures/media_128f606c26f43eb753f97cdb13e4dbfb94fec3ace.png?width=1200&format=pjpg&optimize=medium",
+        "section": "adventures",
+        "modificationDate": "2023-02-07T16:54:38.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/adventures-for-students",
+        "url": "https://main--wknd--hlxsites.aem.live/adventures-for-students",
+        "path": "/adventures-for-students",
+        "title": "Explore WKND Adventures: Built for Students Who Crave More",
+        "description": "WKND is a fictitious adventure and travel website created by Adobe to demonstrate how anyone can use Adobe Experience Manager.",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/media_18299a981d4b2fae5867656b242a5dcf68d06955d.png?width=1200&format=pjpg&optimize=medium",
+        "section": "adventures-for-students",
+        "modificationDate": "2025-05-29T18:07:28.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/authors/ian-provo",
+        "url": "https://main--wknd--hlxsites.aem.live/authors/ian-provo",
+        "path": "/authors/ian-provo",
+        "title": "Ian Provo",
+        "description": "0",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/authors/media_182c0eb8bb070bf369598d7d8732c8c48b84997f2.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "authors",
+        "modificationDate": "2023-02-09T14:51:49.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/authors/jacob-wester",
+        "url": "https://main--wknd--hlxsites.aem.live/authors/jacob-wester",
+        "path": "/authors/jacob-wester",
+        "title": "Jacob Wester",
+        "description": "0",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/authors/media_18848bc6b96d02b09a1b6f5c5164824b4e04a5589.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "authors",
+        "modificationDate": "2023-02-09T14:51:41.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/authors/jake-hammer",
+        "url": "https://main--wknd--hlxsites.aem.live/authors/jake-hammer",
+        "path": "/authors/jake-hammer",
+        "title": "Jake Hammer",
+        "description": "0",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/authors/media_1f40e3118907b15ffb10dd48d2a0437c7becc775a.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "authors",
+        "modificationDate": "2023-02-09T14:51:22.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/authors/justin-barr",
+        "url": "https://main--wknd--hlxsites.aem.live/authors/justin-barr",
+        "path": "/authors/justin-barr",
+        "title": "Justin Barr",
+        "description": "0",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/authors/media_17d56677293ed4c3fcfd3ec3bfe4e4dcdb728e16d.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "authors",
+        "modificationDate": "2023-02-09T14:50:26.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/authors/kumar-selveraj",
+        "url": "https://main--wknd--hlxsites.aem.live/authors/kumar-selveraj",
+        "path": "/authors/kumar-selveraj",
+        "title": "Kumar Selveraj",
+        "description": "0",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/authors/media_114f6ebe6248b3e074af833a14914da15658ace3a.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "authors",
+        "modificationDate": "2023-02-09T14:50:11.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/authors/sofia-sjoberg",
+        "url": "https://main--wknd--hlxsites.aem.live/authors/sofia-sjoberg",
+        "path": "/authors/sofia-sjoberg",
+        "title": "Sofia Sjöberg",
+        "description": "0",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/authors/media_11e08061387226f6b605cc2f6b592641d35163e8d.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "authors",
+        "modificationDate": "2023-02-07T16:54:38.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/authors/stacey-roswells",
+        "url": "https://main--wknd--hlxsites.aem.live/authors/stacey-roswells",
+        "path": "/authors/stacey-roswells",
+        "title": "Stacey Roswells",
+        "description": "0",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/authors/media_111bb50367a104b03d39d30aa7c26c7b538df2392.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "authors",
+        "modificationDate": "2023-02-09T14:50:01.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/faqs",
+        "url": "https://main--wknd--hlxsites.aem.live/faqs",
+        "path": "/faqs",
+        "title": "FAQs",
+        "description": "WKND is a collective of outdoors, music, crafts, adventure sports, and travel enthusiasts that want to share our experiences, connections, and expertise with the world. ...",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/media_1fef3f2de4248826004e88a420fe05dab622d15b8.jpeg?width=1200&format=pjpg&optimize=medium",
+        "section": "faqs",
+        "modificationDate": "2024-06-18T11:49:48.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/magazine",
+        "url": "https://main--wknd--hlxsites.aem.live/magazine",
+        "path": "/magazine",
+        "title": "Magazine",
+        "description": "0",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/default-meta-image.png?width=1200&format=pjpg&optimize=medium",
+        "section": "magazine",
+        "modificationDate": "2024-06-18T11:49:48.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/magazine/arctic-surfing",
+        "url": "https://main--wknd--hlxsites.aem.live/magazine/arctic-surfing",
+        "path": "/magazine/arctic-surfing",
+        "title": "Aloha Spirits in Northern Norway",
+        "description": "We traveled to Northern Norway to document the joy of surfing in extreme, but breathtakingly beautiful conditions.",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/magazine/media_12c9c858e3e0634f5ede270d0ebf02d1525f31768.png?width=1200&format=pjpg&optimize=medium",
+        "section": "magazine",
+        "modificationDate": "2023-02-07T16:54:38.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/magazine/guide-la-skateparks",
+        "url": "https://main--wknd--hlxsites.aem.live/magazine/guide-la-skateparks",
+        "path": "/magazine/guide-la-skateparks",
+        "title": "Ultimate Guide to LA Skateparks",
+        "description": "Breaking down the top skate destinations in all of Los Angeles. You don't want to miss this!",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/magazine/media_1069d7bc75518611f128b2fc7a4e401a01b7f8ad1.png?width=1200&format=pjpg&optimize=medium",
+        "section": "magazine",
+        "modificationDate": "2023-02-07T16:54:38.000Z"
+      },
+      {
+        "id": "https://main--wknd--hlxsites.aem.live/magazine/western-australia",
+        "url": "https://main--wknd--hlxsites.aem.live/magazine/western-australia",
+        "path": "/magazine/western-australia",
+        "title": "Camping in Western Australia",
+        "description": "The Australian West coast is a camper’s heaven. Endless miles of desert roads leading to secret beaches, vast canyons and crystal clear rivers, and the very few people you are likely to meet on your journey will be some of the most easy-going characters you’ll find anywhere in the world.",
+        "source_apps": [
+          "EDS"
+        ],
+        "image": "/magazine/media_116f9fbfb7aa6924b27eaf68bdecc539c277b22e6.png?width=1200&format=pjpg&optimize=medium",
+        "section": "magazine",
+        "modificationDate": "2024-07-30T15:29:13.000Z"
+      }
+    ]
+  }
+}

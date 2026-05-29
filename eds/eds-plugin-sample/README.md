@@ -134,6 +134,33 @@ changed pages are re-fetched, and paths that have vanished are deleted from the 
 | `turSNSites` | Target Turing Semantic Navigation site(s) — editable in the UI's General tab |
 | `fieldMappings` | Optional `sourceField` → `targetField` renames (empty here) |
 
+## Search UI & Turing Marketplace export (`turing-export/`)
+
+Alongside the connector, this sample ships a ready-made **search front end** and a **Turing
+site export**, mirroring `aem/aem-plugin-sample/turing-export`:
+
+```
+turing-export/
+├── export/
+│   ├── export.json            # Turing SN site config (creates the `wknd-eds` site)
+│   └── wknd-eds_content.json  # content snapshot built from the live WKND query-index
+├── app/                       # React + Turing SDK search SPA (magazine-style UI)
+└── zip-dist.mjs               # packages export/*.json + app/dist → wknd-eds.zip
+```
+
+Build the marketplace package:
+
+```bash
+cd turing-export/app
+npm run package     # tsc + vite build, then zips → app/wknd-eds.zip
+```
+
+Import `wknd-eds.zip` into Turing (Marketplace): it creates the **`wknd-eds`** SN site (the
+same site the connector seed indexes into via `turSNSites`), seeds a content snapshot, and
+registers the `wknd-eds` search template (the SPA). After import, run the connector's
+`/index` to refresh the site with live content. See
+[turing-export/app/README.md](turing-export/app/README.md) for the field mapping and dev server.
+
 ## Writing Your Own Extensions
 
 1. Implement a commons interface:

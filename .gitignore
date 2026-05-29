@@ -55,6 +55,9 @@ dependency-reduced-pom.xml
 /web-crawler/wc-plugin-sample/turing-export/app/node_modules
 aem/aem-plugin-sample/turing-export/app/wknd.zip
 /aem/aem-plugin-sample/turing-export/app/dist
+/eds/eds-plugin-sample/turing-export/app/node_modules
+/eds/eds-plugin-sample/turing-export/app/dist
+eds/eds-plugin-sample/turing-export/app/wknd-eds.zip
 /eds/eds-plugin/target/
 /eds/eds-commons/target
 /eds/eds-plugin-sample/target
