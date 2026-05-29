@@ -953,6 +953,8 @@
       "description": "Description",
       "locale": "Locale",
       "localeDesc": "Locale tag (e.g., pt-BR, en-US) applied to every indexed document.",
+      "turSNSites": "Turing Sites",
+      "turSNSitesDesc": "Turing Semantic Navigation site(s) that receive the indexed documents.",
       "userAgent": "User-Agent",
       "userAgentDesc": "Identifies the connector to the EDS site. Default: Viglet-Dumont-EDS/<version>.",
       "fetchTimeoutMs": "Fetch timeout (ms)",

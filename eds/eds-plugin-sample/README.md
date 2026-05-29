@@ -26,9 +26,9 @@ Turing instance — nothing to install on the Adobe side.
 ### Custom Extensions (`src/main/java`)
 
 - **`DumEDSExtPathLocale`** — a `DumEDSExtLocaleInterface` that infers the page `Locale`
-  from the first path segment (`/pt-br/...` → `pt-BR`). WKND has no locale prefix, so every
-  page resolves to `en-US`; the class is wired in `wknd.json` via `localeClass` to show how a
-  multi-locale EDS site would be configured.
+  from the first path segment (`/pt-br/...` → `pt-BR`). WKND is English-only, so the sample
+  pins an explicit `locale` (`en_US`) instead of wiring this resolver; the class is kept as a
+  reference for how a multi-locale EDS site would set `localeClass` (and leave `locale` unset).
 - **`DumEDSExtMetaName`** — a `DumEDSExtInterface` reference implementation that reads a
   custom `<meta name="...">` tag (WKND exposes `<meta name="theme">`). Subclass and override
   `metaName()` to capture site-specific metadata the built-in extractor doesn't pick up.
@@ -105,7 +105,7 @@ changed pages are re-fetched, and paths that have vanished are deleted from the 
   "sources": [
     {
       "title": "WKND",
-      "localeClass": "com.viglet.dumont.connector.eds.sample.ext.DumEDSExtPathLocale",
+      "locale": "en_US",
       "baseUrl": "https://main--wknd--hlxsites.aem.live",
       "sitemapFallback": "/sitemap.xml",
       "bodySelector": "main",
@@ -130,8 +130,8 @@ changed pages are re-fetched, and paths that have vanished are deleted from the 
 | `removeSelectors` | Chrome elements stripped before body extraction |
 | `excludePatterns` | Glob patterns dropping WKND's demo/draft noise (`/drafts/**`, `/experiments/**`, …) |
 | `facetPathPattern` / `facets` | Derives a `section` facet from the first path segment |
-| `localeClass` | Per-page locale resolver (this sample's `DumEDSExtPathLocale`) |
-| `turSNSites` | Target Turing Semantic Navigation site(s) |
+| `locale` | Fixed locale applied to every document (`en_US`; WKND is English-only) |
+| `turSNSites` | Target Turing Semantic Navigation site(s) — editable in the UI's General tab |
 | `fieldMappings` | Optional `sourceField` → `targetField` renames (empty here) |
 
 ## Writing Your Own Extensions

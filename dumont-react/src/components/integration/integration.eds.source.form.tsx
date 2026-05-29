@@ -24,6 +24,7 @@ import {
   IconPlus,
   IconSettings,
   IconTrash,
+  IconWorld,
   IconX,
 } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
@@ -33,6 +34,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
+import { SNSiteSelect } from "./sn-site-select";
 import { GradientButton } from "../ui/gradient-button";
 import { SectionCard } from "../ui/section-card";
 
@@ -72,6 +74,12 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
   const removeSelectors = useFieldArray({ control: form.control, name: "removeSelectors" });
   const facets = useFieldArray({ control: form.control, name: "facets" });
   const fieldMappings = useFieldArray({ control: form.control, name: "fieldMappings" });
+
+  // turSNSites is a plain string[] (Turing SN site names), so it's managed via
+  // watch/setValue rather than useFieldArray (which expects objects).
+  const turSNSites = form.watch("turSNSites") ?? [];
+  const setTurSNSites = (next: string[]) =>
+    form.setValue("turSNSites", next, { shouldDirty: true });
 
   useEffect(() => {
     form.reset(value);
@@ -319,6 +327,49 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
                     )}
                   />
                 </div>
+              </SectionCard.Content>
+            </SectionCard>
+
+            <SectionCard variant="emerald">
+              <SectionCard.Header
+                icon={IconWorld}
+                title={t("forms.edsSource.turSNSites")}
+                description={t("forms.edsSource.turSNSitesDesc")}
+              />
+              <SectionCard.Content>
+                {turSNSites.map((site, index) => (
+                  <div key={`sn-site-${index}`} className="flex items-center gap-2">
+                    <SNSiteSelect
+                      value={site}
+                      onValueChange={(newValue) => {
+                        const next = [...turSNSites];
+                        next[index] = newValue;
+                        setTurSNSites(next);
+                      }}
+                      integrationId={integrationId}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setTurSNSites(turSNSites.filter((_, i) => i !== index))
+                      }
+                    >
+                      <IconTrash className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTurSNSites([...turSNSites, ""])}
+                >
+                  <IconPlus className="size-4 mr-1" />
+                  {t("forms.common.add")}
+                </Button>
               </SectionCard.Content>
             </SectionCard>
           </TabsContent>
