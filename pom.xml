@@ -6,7 +6,7 @@
     <groupId>com.viglet.dumont</groupId>
     <artifactId>dumont</artifactId>
     <packaging>pom</packaging>
-    <version>2026.2.18</version>
+    <version>2026.3.1</version>
     <name>Dumont DEP Master</name>
     <description>Viglet Dumont ES</description>
     <url>https://github.com/openviglet/dumont</url>
@@ -36,7 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>4.0.6</spring-boot.version>
-        <turing.version>2026.2.7</turing.version>
+        <turing.version>2026.3.1</turing.version>
         <tika.version>3.3.0</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <mongodb.version>5.7.0</mongodb.version>

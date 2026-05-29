@@ -9,7 +9,7 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
-    target-branch: "2026.2"
+    target-branch: "2026.3"
     open-pull-requests-limit: 15
     groups:
       java:
@@ -21,7 +21,7 @@ updates:
     directory: "/dumont-react"
     schedule:
       interval: "weekly"
-    target-branch: "2026.2"
+    target-branch: "2026.3"
     open-pull-requests-limit: 15
     ignore:
       # Pinned — MF 1.14.5 + Rolldown in Vite 8.0.9 break the build with REQUIRE_TLA
@@ -38,7 +38,7 @@ updates:
     directory: "/aem/aem-plugin-sample/turing-export/app"
     schedule:
       interval: "weekly"
-    target-branch: "2026.2"
+    target-branch: "2026.3"
     open-pull-requests-limit: 15
     groups:
       react:
@@ -50,7 +50,7 @@ updates:
     directory: "/assets/assets-plugin-sample/turing-export/app"
     schedule:
       interval: "weekly"
-    target-branch: "2026.2"
+    target-branch: "2026.3"
     open-pull-requests-limit: 15
     groups:
       react:
@@ -62,7 +62,7 @@ updates:
     directory: "/db/db-plugin-sample/turing-export/app"
     schedule:
       interval: "weekly"
-    target-branch: "2026.2"
+    target-branch: "2026.3"
     open-pull-requests-limit: 15
     groups:
       react:
@@ -74,7 +74,7 @@ updates:
     directory: "/web-crawler/wc-plugin-sample/turing-export/app"
     schedule:
       interval: "weekly"
-    target-branch: "2026.2"
+    target-branch: "2026.3"
     open-pull-requests-limit: 15
     groups:
       react:
@@ -86,7 +86,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: "2026.2"
+    target-branch: "2026.3"
     labels:
       - "dependencies"
     commit-message:
