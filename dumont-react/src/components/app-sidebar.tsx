@@ -1,6 +1,7 @@
 import {
   IconAdjustmentsSearch,
   IconChartBar,
+  IconCloudComputing,
   IconDatabase,
   IconFolder,
   IconGitCommit,
@@ -69,6 +70,10 @@ const assetsSourceItems: SidebarNavItem[] = [
   { key: "assetsSources", titleKey: "integration.nav.assetsSources", url: `${BASE}/assets-source`, icon: IconFolder },
 ]
 
+const edsSourceItems: SidebarNavItem[] = [
+  { key: "edsSources", titleKey: "integration.nav.edsSources", url: `${BASE}/eds-source`, icon: IconCloudComputing },
+]
+
 const commonItems: SidebarNavItem[] = [
   { key: "indexingRules", titleKey: "integration.nav.indexingRules", url: `${BASE}/indexing-rule`, icon: IconTools },
   { key: "indexingManager", titleKey: "integration.nav.indexingManager", url: `${BASE}/indexing-manager`, icon: IconAdjustmentsSearch },
@@ -121,6 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isDb = provider === "JDBC-DATABASE";
   const isWc = provider === "WEB-CRAWLER";
   const isAssets = provider === "ASSETS";
+  const isEds = provider === "EDS";
 
   const navGroups = React.useMemo(
     () => {
@@ -144,11 +150,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         groups.push({ label: "Assets", items: toNavItems(assetsSourceItems) });
       }
 
+      if (isEds) {
+        groups.push({ label: "EDS (aem.live)", items: toNavItems(edsSourceItems) });
+      }
+
       groups.push({ label: t("integration.title"), items: toNavItems(commonItems) });
 
       return groups;
     },
-    [t, toNavItems, isAem, isDb, isWc, isAssets]
+    [t, toNavItems, isAem, isDb, isWc, isAssets, isEds]
   )
 
   return (

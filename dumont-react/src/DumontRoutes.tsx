@@ -1,6 +1,6 @@
 import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
 
-import { IconAdjustmentsSearch, IconChartBar, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools } from "@tabler/icons-react";
+import { IconAdjustmentsSearch, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Page } from "./components/page";
@@ -9,6 +9,8 @@ import IntegrationInstanceAssetsSourcePage from "./pages/integration.instance.as
 import IntegrationInstanceDbSourceListPage from "./pages/integration.instance.db.source.list.page";
 import IntegrationInstanceDbSourcePage from "./pages/integration.instance.db.source.page";
 import IntegrationInstanceDoubleCheckPage from "./pages/integration.instance.double.check.page";
+import IntegrationInstanceEdsSourceListPage from "./pages/integration.instance.eds.source.list.page";
+import IntegrationInstanceEdsSourcePage from "./pages/integration.instance.eds.source.page";
 import IntegrationInstanceIndexingManagerPage from "./pages/integration.instance.indexing.manager.page";
 import IntegrationInstanceIndexingRulesListPage from "./pages/integration.instance.indexing.rules.list.page";
 import IntegrationInstanceIndexingRulesPage from "./pages/integration.instance.indexing.rules.page";
@@ -59,6 +61,12 @@ export default function DumontRoutes() {
         <Route index element={<IntegrationInstanceAssetsSourceListPage />} />
         <Route path=":sourceId" element={<IntegrationInstanceAssetsSourcePage />} />
         <Route path=":sourceId/:tab" element={<IntegrationInstanceAssetsSourcePage />} />
+      </Route>
+      {/* EDS Sources (Adobe Edge Delivery Services / aem.live) */}
+      <Route path="eds-source" element={<Page turIcon={IconCloudComputing} title={t("integration.nav.edsSources")} urlBase="eds-source" />}>
+        <Route index element={<IntegrationInstanceEdsSourceListPage />} />
+        <Route path=":sourceId" element={<IntegrationInstanceEdsSourcePage />} />
+        <Route path=":sourceId/:tab" element={<IntegrationInstanceEdsSourcePage />} />
       </Route>
       {/* Indexing Rules */}
       <Route path="indexing-rule" element={<Page turIcon={IconTools} title={t("integration.nav.indexingRules")} urlBase="indexing-rule" />}>

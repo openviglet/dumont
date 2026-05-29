@@ -1,0 +1,49 @@
+{
+  "sources": [
+    {
+      "title": "WKND",
+      "description": "Adobe WKND demo site (Edge Delivery Services) reindexed via the Dumont EDS plugin",
+      "localeClass": "com.viglet.dumont.connector.eds.sample.ext.DumEDSExtPathLocale",
+      "baseUrl": "https://main--wknd--hlxsites.aem.live",
+      "sitemapFallback": "/sitemap.xml",
+      "bodySelector": "main",
+      "userAgent": "Viglet-Dumont-EDS/1.0 (WKND sample)",
+      "fetchTimeoutMs": 15000,
+      "requestsPerSecond": 5,
+      "maxConcurrent": 4,
+      "facetPathPattern": "/{section}/**",
+      "turSNSites": [
+        "wknd"
+      ],
+      "indexes": [
+        "/query-index.json"
+      ],
+      "excludePatterns": [
+        "/drafts/**",
+        "/experiments/**",
+        "/mystique/**",
+        "/block-library/**",
+        "/tools/**",
+        "/search",
+        "/footer",
+        "/nav",
+        "/fragments/**"
+      ],
+      "removeSelectors": [
+        "header",
+        "nav",
+        "footer",
+        "aside",
+        ".breadcrumb"
+      ],
+      "facets": [
+        {
+          "name": "section",
+          "ordinal": 0,
+          "allowedValues": "adventures,magazine,authors,faqs,about-us,adventures-for-students"
+        }
+      ],
+      "fieldMappings": []
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+<project name="eds-plugin-sample" default="wknd">
+    <target name="wknd">
+        <exec executable="mvnw.cmd">
+            <arg value="clean"/>
+            <arg value="install"/>
+            <arg value="package"/>
+            <arg value="-am"/>
+            <arg value="-DskipTests"/>
+        </exec>
+        <delete dir="dist/wknd"/>
+        <mkdir dir="dist/wknd/libs"/>
+        <copy todir="dist/wknd/">
+            <fileset dir="scripts/wknd/"/>
+        </copy>
+        <copy file="target/eds-plugin-sample.jar" todir="dist/wknd/plugins/"/>
+        <copy file="../eds-plugin/target/eds-plugin.jar" todir="dist/wknd/libs/"/>
+        <copy file="../../connector/connector-app/target/dumont-connector.jar" todir="dist/wknd/"/>
+    </target>
+</project>

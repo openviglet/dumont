@@ -184,6 +184,7 @@
                 <module>db</module>
                 <module>aem</module>
                 <module>web-crawler</module>
+                <module>eds</module>
             </modules>
         </profile>
         <profile>
@@ -304,6 +305,16 @@
             <dependency>
                 <groupId>com.viglet.dumont</groupId>
                 <artifactId>aem-commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.viglet.dumont</groupId>
+                <artifactId>eds-commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.viglet.dumont</groupId>
+                <artifactId>eds-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

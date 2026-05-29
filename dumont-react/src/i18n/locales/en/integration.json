@@ -14,6 +14,7 @@
       "dbSources": "Database Sources",
       "wcSources": "Web Crawler Sources",
       "assetsSources": "Assets Sources",
+      "edsSources": "EDS Sources",
       "indexingRules": "Indexing Rules",
       "indexingManager": "Indexing Manager",
       "monitoring": "Monitoring",
@@ -74,6 +75,20 @@
       "crawl": "Start Crawl",
       "crawlStarted": "Crawling started for {{name}}",
       "crawlFailed": "Failed to start crawling for {{name}}"
+    },
+    "edsSources": {
+      "title": "EDS Sources",
+      "description": "Adobe Edge Delivery Services (aem.live) sites indexed via their public query-index.json.",
+      "feature": "EDS Source",
+      "blankTitle": "You don't seem to have any EDS sources.",
+      "blankDescription": "Create a new EDS source to index an aem.live site via its query-index.json.",
+      "newSource": "New EDS Source",
+      "deleted": "The {{name}} EDS Source was deleted",
+      "notDeleted": "The {{name}} EDS Source was not deleted",
+      "indexAll": "Index all",
+      "indexStarted": "Indexing started for {{name}}",
+      "indexFailed": "Failed to start indexing for {{name}}",
+      "alreadyRunning": "A process is already running for {{name}}. Please wait for it to finish."
     },
     "dbSources": {
       "title": "Database Sources",
