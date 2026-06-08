@@ -1,0 +1,24 @@
+{
+  "name": "@viglet/dumont-frontend",
+  "private": true,
+  "version": "2026.3.1",
+  "packageManager": "pnpm@10.33.0",
+  "description": "Viglet Dumont DEP — JavaScript workspace (dumont-react micro-frontend + connector plugin samples)",
+  "scripts": {
+    "build:app": "pnpm --filter dumont-react run compile:build",
+    "dev:app": "pnpm --filter dumont-react run dev",
+    "lint": "pnpm -r run lint",
+    "clean": "rimraf \"**/node_modules\" \"**/dist\" \"**/build\""
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "@swc/core",
+      "@tailwindcss/oxide"
+    ]
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=10"
+  }
+}

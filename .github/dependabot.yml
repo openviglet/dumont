@@ -1,12 +1,15 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# Package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
+# Dependabot configuration for the Dumont monorepo.
+# Frontend uses a pnpm workspace at the repo root (`pnpm-workspace.yaml`) —
+# Dependabot discovers every workspace member (dumont-react + the connector
+# plugin samples) from the root `pnpm-lock.yaml`, so a single `npm` block
+# covers them all.
+#
 # https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
 updates:
-  - package-ecosystem: "maven" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "maven"
+    directory: "/"
     schedule:
       interval: "weekly"
     target-branch: "2026.3"
@@ -18,64 +21,18 @@ updates:
           - "*"
 
   - package-ecosystem: "npm"
-    directory: "/dumont-react"
+    directory: "/"
     schedule:
       interval: "weekly"
     target-branch: "2026.3"
     open-pull-requests-limit: 15
     ignore:
-      # Pinned — MF 1.14.5 + Rolldown in Vite 8.0.9 break the build with REQUIRE_TLA
-      # (react-dom CJS → MF TLA virtual). Unpin once upstream fixes land.
+      # Pinned across the whole workspace — MF + Rolldown in recent Vite break the
+      # build with REQUIRE_TLA (react-dom CJS → MF TLA virtual). typescript is held
+      # back so tsc output stays stable. Unpin once upstream fixes land.
+      - dependency-name: "typescript"
       - dependency-name: "vite"
       - dependency-name: "@module-federation/vite"
-    groups:
-      react:
-        applies-to: version-updates
-        patterns:
-          - "*"
-
-  - package-ecosystem: "npm"
-    directory: "/aem/aem-plugin-sample/turing-export/app"
-    schedule:
-      interval: "weekly"
-    target-branch: "2026.3"
-    open-pull-requests-limit: 15
-    groups:
-      react:
-        applies-to: version-updates
-        patterns:
-          - "*"
-
-  - package-ecosystem: "npm"
-    directory: "/assets/assets-plugin-sample/turing-export/app"
-    schedule:
-      interval: "weekly"
-    target-branch: "2026.3"
-    open-pull-requests-limit: 15
-    groups:
-      react:
-        applies-to: version-updates
-        patterns:
-          - "*"
-
-  - package-ecosystem: "npm"
-    directory: "/db/db-plugin-sample/turing-export/app"
-    schedule:
-      interval: "weekly"
-    target-branch: "2026.3"
-    open-pull-requests-limit: 15
-    groups:
-      react:
-        applies-to: version-updates
-        patterns:
-          - "*"
-
-  - package-ecosystem: "npm"
-    directory: "/web-crawler/wc-plugin-sample/turing-export/app"
-    schedule:
-      interval: "weekly"
-    target-branch: "2026.3"
-    open-pull-requests-limit: 15
     groups:
       react:
         applies-to: version-updates
