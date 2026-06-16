@@ -1,0 +1,125 @@
+/*
+ *
+ * Copyright (C) 2016-2026 the original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.viglet.dumont.connector.commons.spi.structured;
+
+import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
+import com.viglet.turing.commons.se.field.TurSEFieldType;
+
+/**
+ * Declaration of a single field in a {@link DumStructuredSchema}.
+ *
+ * <p>
+ * A structured source declares its fields <em>once</em> — name, search-engine type, whether the
+ * field is multi-valued, a facet, and/or mandatory — instead of carrying loose CSS-selector
+ * strings around. The declaration maps directly to a Turing {@link TurSNJobAttributeSpec}, so the
+ * schema is published alongside the document and the indexing side knows the field shape up front.
+ *
+ * @param name        the field name as it appears in the indexed document (required)
+ * @param type        the search-engine field type (defaults to {@link TurSEFieldType#STRING})
+ * @param multiValued whether the field may hold more than one value
+ * @param facet       whether the field is exposed as a facet
+ * @param mandatory   whether a record without this field is invalid (skipped, never fabricated)
+ * @param description an optional human-readable description
+ *
+ * @author Alexandre Oliveira
+ * @since 2026.3.1
+ */
+public record DumStructuredField(String name, TurSEFieldType type, boolean multiValued,
+        boolean facet, boolean mandatory, String description) {
+
+    public DumStructuredField {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Structured field name is required");
+        }
+        if (type == null) {
+            type = TurSEFieldType.STRING;
+        }
+    }
+
+    /** A single-valued, non-facet, optional {@link TurSEFieldType#STRING} field. */
+    public static DumStructuredField string(String name) {
+        return builder(name).type(TurSEFieldType.STRING).build();
+    }
+
+    /** A single-valued, non-facet, optional {@link TurSEFieldType#TEXT} field. */
+    public static DumStructuredField text(String name) {
+        return builder(name).type(TurSEFieldType.TEXT).build();
+    }
+
+    /** A multi-valued, faceted {@link TurSEFieldType#STRING} field. */
+    public static DumStructuredField facet(String name) {
+        return builder(name).type(TurSEFieldType.STRING).multiValued(true).facet(true).build();
+    }
+
+    public static Builder builder(String name) {
+        return new Builder(name);
+    }
+
+    /** Maps this declaration to the Turing SDK attribute spec published with every document. */
+    public TurSNJobAttributeSpec toAttributeSpec() {
+        return TurSNJobAttributeSpec.builder()
+                .name(name)
+                .type(type)
+                .multiValued(multiValued)
+                .facet(facet)
+                .mandatory(mandatory)
+                .description(description)
+                .build();
+    }
+
+    public static final class Builder {
+        private final String name;
+        private TurSEFieldType type = TurSEFieldType.STRING;
+        private boolean multiValued;
+        private boolean facet;
+        private boolean mandatory;
+        private String description;
+
+        private Builder(String name) {
+            this.name = name;
+        }
+
+        public Builder type(TurSEFieldType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder multiValued(boolean multiValued) {
+            this.multiValued = multiValued;
+            return this;
+        }
+
+        public Builder facet(boolean facet) {
+            this.facet = facet;
+            return this;
+        }
+
+        public Builder mandatory(boolean mandatory) {
+            this.mandatory = mandatory;
+            return this;
+        }
+
+        public Builder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public DumStructuredField build() {
+            return new DumStructuredField(name, type, multiValued, facet, mandatory, description);
+        }
+    }
+}

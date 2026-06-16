@@ -1,0 +1,72 @@
+/*
+ *
+ * Copyright (C) 2016-2026 the original author or authors.
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program. If
+ * not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.viglet.dumont.connector.commons.spi.structured;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
+/**
+ * The structured-source SPI: a connector contract for sources whose value is their
+ * <em>structure</em> (tabular listings, per-item detail pages with a typed schema) rather than
+ * free-form HTML.
+ *
+ * <p>
+ * A source author implements two operations — {@link #discover()} to enumerate the content ids, and
+ * {@link #extract(String)} to turn one id into a schema-bound, typed {@link DumStructuredRecord} —
+ * plus a declared {@link #schema()}. The generic indexing loop (discover &rarr; extract &rarr;
+ * ground &rarr; publish) is provided once by {@link DumStructuredSourcePlugin}, so a new source is a
+ * small declarative adapter, not a bespoke crawler. This generalizes the AEM connector's shape
+ * (discover paths, extract a typed object) to arbitrary structured web sources, sitting above the
+ * generic web-crawler link-spider.
+ *
+ * @author Alexandre Oliveira
+ * @since 2026.3.1
+ */
+public interface DumStructuredSource {
+
+    /** The source name/id as received by the connector API. */
+    String getSourceName();
+
+    /** The provider name reported for routing (e.g. {@code "STRUCTURED"}, a sub-type, ...). */
+    String getProviderName();
+
+    /** The Turing SN sites this source publishes to. */
+    Collection<String> getSiteNames();
+
+    /** The field manifest this source declares once and binds every record to. */
+    DumStructuredSchema schema();
+
+    /**
+     * Enumerate the ids of every item this source can index. Implementations typically parse a
+     * sitemap, a listing page, or a tabular catalog. Returning an empty list is valid.
+     */
+    List<String> discover();
+
+    /**
+     * Extract one item into a typed, schema-bound record. Returns {@link Optional#empty()} when the
+     * id cannot be extracted (not found, transient error) — the indexing loop skips it rather than
+     * publishing an empty document.
+     */
+    Optional<DumStructuredRecord> extract(String contentId);
+
+    /** The locale of the published documents; defaults to {@link Locale#US}. */
+    default Locale getLocale() {
+        return Locale.US;
+    }
+}

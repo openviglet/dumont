@@ -29,14 +29,24 @@ relations (what a task *enables*) live in the task text.
 > generic web-crawler link-spider. Once this lands, indexing a new structured source
 > is a small declarative adapter + a field manifest, not a bespoke stack.
 
-- [ ] **D01** · **Structured-source SPI** — define a connector contract
+- [x] **D01** · **Structured-source SPI** — define a connector contract
       `discover() → contentIds` + `extract(id) → typed record` that sits above
       `DumWCPluginProcess` and implements `DumConnectorPlugin`. Extraction returns a
       **schema-bound, typed record** (not loose CSS-selector strings). Generalizes
       the AEM connector's shape to arbitrary structured web sources. Done: a sample
       structured source indexes into Turing through the new SPI with a declared
       field set; the web crawler remains usable unchanged.\
-      ↳ Enables D02, D03, D10, D11, D13.
+      ↳ Enables D02, D03, D10, D11, D13.\
+      **Shipped:** `connector-commons` package
+      `com.viglet.dumont.connector.commons.spi.structured` — `DumStructuredSource`
+      (`discover()` + `extract(id) → DumStructuredRecord`), `DumStructuredSchema` /
+      `DumStructuredField` (field manifest → `TurSNJobAttributeSpec`),
+      `DumStructuredRecord` (grounding enforced at write time — blanks/empties dropped,
+      type-validated), `DumStructuredSourceProvider`, and `DumStructuredSourcePlugin`
+      (generic discover→extract→ground→publish loop via `DumConnectorContext`,
+      implements `DumConnectorPlugin`). Proven end-to-end by
+      `DumStructuredSourcePluginTest` (sample tabular catalog; absent field omitted,
+      mandatory-missing record skipped). Web crawler untouched.
 - [ ] **D02** · **Declarative extraction strategies** — ship reusable strategies the
       way cursarei's `engine.py` does: **Sitemap** (parse `sitemap.xml`, classify URLs
       → level), **HtmlListing** (anchors under a selector → detail pages), and
