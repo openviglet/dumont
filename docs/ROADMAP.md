@@ -46,13 +46,10 @@ relations (what a task *enables*) live in the task text.
 > **D06** Sitemap & robots awareness (robots.txt → sitemap entry-point discovery +
 > capped `Crawl-delay` / per-source request delay; enables D08, D12) · **D07** Pluggable
 > fetcher SPI (`DumWCFetcher` seam + per-source selection + UA strategy + adaptive
-> 429/403 back-off; enables D11, pairs with D12).
+> 429/403 back-off; enables D11, pairs with D12) · **D08** Bounded parallel crawl per
+> source (thread-safe queue + bounded worker pool, configurable cap; per-host delay
+> floor preserved via a shared rate gate).
 
-- [ ] **D08** · **Bounded parallel crawl per source** — replace the single
-      `LinkedList` queue with a thread-safe queue + a bounded executor, with global
-      politeness preserved (per-host delay floor). Done: a multi-page source crawls
-      concurrently with a configurable worker cap and no per-host rate violation.\
-      ↳ **Depends on:** D06.
 - [ ] **D09** · **Safe-run policy + failure report** — a crawl that returns **zero
       indexable items keeps the previously indexed data** (no destructive overwrite —
       port cursarei `engine.py`'s guard), and every run emits a per-source failure

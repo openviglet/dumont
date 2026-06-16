@@ -71,6 +71,9 @@ public class DumWCSource implements Serializable {
     /** {@code User-Agent} rotation strategy (roadmap D07): {@code PER_SOURCE} (default) or {@code PER_REQUEST}. */
     @Column
     private String userAgentStrategy;
+    /** Bounded concurrent crawl worker cap (roadmap D08); {@code null}/{@code <= 0} uses the {@code dumont.wc.workers} default. */
+    @Column
+    private Integer workers;
 
     @Builder.Default
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)

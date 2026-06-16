@@ -77,3 +77,13 @@
   the steady-state per-request delay toward the cap. Default path unchanged. Proven by
   `DumWCFetcherRegistryTest`, `DumWCPluginProcessBackoffTest`, `DumWCUserAgentStrategyTest`.
   Enables D11; pairs with D12.
+- **D08** — Bounded parallel crawl per source: `wc-plugin` `DumWCPluginProcess` drains the queue
+  (now `ConcurrentLinkedQueue`; `visitedLinks`/`indexedLinks` → concurrent sets) across a bounded
+  `Executors.newFixedThreadPool`, sized by `effectiveWorkers(DumWCSource.workers, dumont.wc.workers
+  default 4)`. An `AtomicInteger` of in-flight links drives termination (queue empty + nothing
+  processing → `CountDownLatch` releases the pool); a worker cap of `≤ 1` keeps the original
+  single-threaded drain. Global politeness is preserved by `DumWCHostRateLimiter`, a shared per-host
+  gate that reserves the next slot honoring the delay floor (max of per-source `crawlDelay` and
+  robots `Crawl-delay`), so workers overlap fetch latency and parsing without a per-host rate
+  violation; different hosts never wait on one another. Proven by `DumWCHostRateLimiterTest`,
+  `DumWCPluginProcessWorkersTest`.

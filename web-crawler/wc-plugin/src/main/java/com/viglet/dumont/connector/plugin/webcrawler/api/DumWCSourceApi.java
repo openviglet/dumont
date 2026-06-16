@@ -108,6 +108,7 @@ public class DumWCSourceApi {
             existing.setCrawlDelay(wcSource.getCrawlDelay());
             existing.setFetcher(wcSource.getFetcher());
             existing.setUserAgentStrategy(wcSource.getUserAgentStrategy());
+            existing.setWorkers(wcSource.getWorkers());
             existing.setTurSNSites(wcSource.getTurSNSites());
             existing.setStartingPoints(wcSource.getStartingPoints());
             existing.setAllowUrls(wcSource.getAllowUrls());

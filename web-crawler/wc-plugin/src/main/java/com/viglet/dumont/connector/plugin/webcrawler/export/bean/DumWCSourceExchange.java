@@ -30,6 +30,7 @@ public class DumWCSourceExchange {
     private Integer crawlDelay;
     private String fetcher;
     private String userAgentStrategy;
+    private Integer workers;
     @Builder.Default
     private Collection<String> startingPoints = new HashSet<>();
     @Builder.Default

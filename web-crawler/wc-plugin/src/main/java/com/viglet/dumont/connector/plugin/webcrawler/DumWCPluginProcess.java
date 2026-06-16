@@ -11,13 +11,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
@@ -70,6 +75,9 @@ public class DumWCPluginProcess {
     public static final String WEB_CRAWLER = "WEB-CRAWLER";
     private static final Pattern CHARSET_PATTERN = Pattern.compile("charset\\s*=\\s*([^;\\s]+)",
             Pattern.CASE_INSENSITIVE);
+    // D08: how long an idle worker waits before re-polling when the queue is momentarily empty but
+    // other workers may still discover links.
+    private static final long IDLE_BACKOFF_MS = 10L;
     private final List<String> startingPoints = new ArrayList<>();
     private final List<String> allowUrls = new ArrayList<>();
     private final List<String> allowStartsWithUrls = new ArrayList<>();
@@ -78,9 +86,13 @@ public class DumWCPluginProcess {
     private final List<String> notAllowExtensions = new ArrayList<>();
     private final DumWCStartingPointRepository dumWCStartingPointsRepository;
     private final String userAgent = RandomUserAgentGenerator.getNextNonMobile();
-    private final Set<String> visitedLinks = new HashSet<>();
-    private final Set<String> indexedLinks = new HashSet<>();
-    private final Queue<String> queueLinks = new LinkedList<>();
+    private final Set<String> visitedLinks = ConcurrentHashMap.newKeySet();
+    private final Set<String> indexedLinks = ConcurrentHashMap.newKeySet();
+    private final Queue<String> queueLinks = new ConcurrentLinkedQueue<>();
+    // D08: tracks links queued-but-not-yet-fully-processed so the worker pool knows when to stop.
+    private final AtomicInteger pending = new AtomicInteger();
+    // D08: per-host politeness gate, shared by every worker so the delay floor holds across threads.
+    private final DumWCHostRateLimiter hostRateLimiter = new DumWCHostRateLimiter();
     private String website;
     private Collection<String> snSites;
     private final int timeout;
@@ -90,9 +102,11 @@ public class DumWCPluginProcess {
     private final int backoffMaxRetries;
     private final long backoffBaseMs;
     private final long backoffMaxMs;
+    private final int defaultWorkers;
     private String username;
     private String password;
-    private long requestDelayMs;
+    // D08: read by every worker before each fetch; adaptive back-off mutates it, hence volatile.
+    private volatile long requestDelayMs;
     // D07: resolved per crawl from the source's config — default path keeps the jsoup fetcher.
     private DumWCFetcher fetcher;
     private DumWCUserAgentStrategy userAgentStrategy = DumWCUserAgentStrategy.PER_SOURCE;
@@ -110,6 +124,7 @@ public class DumWCPluginProcess {
             @Value("${dumont.wc.backoff.maxRetries:3}") int backoffMaxRetries,
             @Value("${dumont.wc.backoff.baseMs:1000}") long backoffBaseMs,
             @Value("${dumont.wc.backoff.maxMs:30000}") long backoffMaxMs,
+            @Value("${dumont.wc.workers:4}") int workers,
             DumWCAllowUrlRepository dumWCAllowUrlRepository,
             DumWCNotAllowUrlRepository dumWCNotAllowUrlRepository,
             DumWCFileExtensionRepository dumWCFileExtensionRepository,
@@ -124,6 +139,7 @@ public class DumWCPluginProcess {
         this.backoffMaxRetries = backoffMaxRetries;
         this.backoffBaseMs = backoffBaseMs;
         this.backoffMaxMs = backoffMaxMs;
+        this.defaultWorkers = workers;
         this.dumWCAllowUrlRepository = dumWCAllowUrlRepository;
         this.dumWCNotAllowUrlRepository = dumWCNotAllowUrlRepository;
         this.dumWCFileExtensionRepository = dumWCFileExtensionRepository;
@@ -191,12 +207,79 @@ public class DumWCPluginProcess {
         dumConnectorContext.finishIndexing(source, false);
     }
 
+    /**
+     * Drain the seeded queue (roadmap D08). A worker cap of {@code <= 1} keeps the original
+     * single-threaded drain; anything higher fans the crawl across a bounded thread pool. Politeness
+     * is unaffected by the worker count: per-host spacing is enforced inside {@link #fetch} via the
+     * shared {@link DumWCHostRateLimiter}, so more workers overlap fetch latency and post-fetch
+     * parsing without ever exceeding a host's rate floor.
+     */
     private void getPagesFromQueue(DumWCSource dumWCSource, DumConnectorSession source) {
-        while (!queueLinks.isEmpty()) {
-            String url = queueLinks.poll();
-            getPage(dumWCSource, url, source);
-            applyRequestDelay();
+        pending.set(queueLinks.size());
+        if (pending.get() == 0) {
+            return;
         }
+        int workers = effectiveWorkers(dumWCSource.getWorkers(), defaultWorkers);
+        if (workers <= 1) {
+            drainSequentially(dumWCSource, source);
+        } else {
+            crawlConcurrently(dumWCSource, source, workers);
+        }
+    }
+
+    /** The bounded worker cap for a crawl: the per-source override when positive, else the default. */
+    static int effectiveWorkers(Integer configuredWorkers, int defaultWorkers) {
+        int workers = configuredWorkers != null && configuredWorkers > 0 ? configuredWorkers
+                : defaultWorkers;
+        return Math.max(1, workers);
+    }
+
+    private void drainSequentially(DumWCSource dumWCSource, DumConnectorSession source) {
+        for (String url = queueLinks.poll(); url != null; url = queueLinks.poll()) {
+            getPage(dumWCSource, url, source);
+        }
+    }
+
+    private void crawlConcurrently(DumWCSource dumWCSource, DumConnectorSession source, int workers) {
+        log.info("Crawling with {} worker(s)", workers);
+        ExecutorService pool = Executors.newFixedThreadPool(workers);
+        CountDownLatch done = new CountDownLatch(1);
+        for (int i = 0; i < workers; i++) {
+            pool.execute(() -> work(dumWCSource, source, done));
+        }
+        try {
+            done.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    /**
+     * One crawl worker: pull a URL, process it (which may enqueue freshly-discovered links), and
+     * decrement the in-flight counter. The crawl is complete when the counter hits zero — i.e. the
+     * queue is empty and nothing is still being processed — at which point the latch releases every
+     * worker. An empty poll while work is still in flight backs off briefly rather than busy-spinning.
+     */
+    private void work(DumWCSource dumWCSource, DumConnectorSession source, CountDownLatch done) {
+        while (pending.get() > 0 && !Thread.currentThread().isInterrupted()) {
+            String url = queueLinks.poll();
+            if (url == null) {
+                sleep(IDLE_BACKOFF_MS);
+                continue;
+            }
+            try {
+                getPage(dumWCSource, url, source);
+            } catch (RuntimeException e) {
+                log.error("Crawl task failed for {}: {}", url, e.getMessage(), e);
+            } finally {
+                if (pending.decrementAndGet() <= 0) {
+                    done.countDown();
+                }
+            }
+        }
+        done.countDown();
     }
 
     private static boolean sitemapEnabled(DumWCSource dumWCSource) {
@@ -215,8 +298,24 @@ public class DumWCPluginProcess {
         return Math.max(configured, robots);
     }
 
-    private void applyRequestDelay() {
-        sleep(requestDelayMs);
+    /**
+     * Block until this thread may issue a request to the host of {@code url} (roadmap D08): the
+     * shared {@link DumWCHostRateLimiter} reserves the next slot honoring the per-host delay floor,
+     * and this worker sleeps for the gap. Different hosts never wait on one another.
+     */
+    private void awaitHostSlot(String url) {
+        long now = System.currentTimeMillis();
+        long start = hostRateLimiter.reserve(hostOf(url), requestDelayMs, now);
+        sleep(start - now);
+    }
+
+    private static String hostOf(String url) {
+        try {
+            String host = URI.create(url).getHost();
+            return host == null ? "" : host;
+        } catch (IllegalArgumentException e) {
+            return "";
+        }
     }
 
     private static void sleep(long ms) {
@@ -301,6 +400,7 @@ public class DumWCPluginProcess {
      * so the rest of the crawl slows down too. Any other HTTP error propagates unchanged.
      */
     private DumWCFetchResponse fetch(String url) throws IOException {
+        awaitHostSlot(url);
         for (int attempt = 0;; attempt++) {
             try {
                 return fetcher.fetch(buildRequest(url));
@@ -377,8 +477,14 @@ public class DumWCPluginProcess {
     }
 
     private void addPageToQueue(String pageUrl) {
-        if (canBeAddToQueue(pageUrl) && visitedLinks.add(pageUrl) && !queueLinks.offer(pageUrl)) {
-            log.error("Item didn't add to queue: {}", pageUrl);
+        if (canBeAddToQueue(pageUrl) && visitedLinks.add(pageUrl)) {
+            // D08: count the link as in-flight before it lands in the queue, so a worker can never
+            // observe an empty queue with a zero counter while a sibling is still enqueuing.
+            pending.incrementAndGet();
+            if (!queueLinks.offer(pageUrl)) {
+                pending.decrementAndGet();
+                log.error("Item didn't add to queue: {}", pageUrl);
+            }
         }
     }
 
