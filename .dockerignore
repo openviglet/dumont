@@ -1,0 +1,30 @@
+# Keep the Docker build context small and reproducible. The Dockerfile builds
+# from this context (no git clone), so exclude everything that is rebuilt inside
+# the image or is host/IDE-specific. NOTE: .git is intentionally NOT ignored —
+# the git-commit-id Maven plugin reads it to stamp the build version.
+
+# Build output (rebuilt in-container)
+**/target
+target
+
+# Node / frontend deps (reinstalled in-container; avoids host-native binaries)
+node_modules
+**/node_modules
+node
+dumont-react/node
+
+# Runtime / local data
+store
+**/store
+*.log
+
+# IDE / OS
+.idea
+.vscode
+*.iml
+.DS_Store
+
+# Git tooling output and misc
+*.AppImage
+dist
+**/dist

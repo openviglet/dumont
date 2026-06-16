@@ -1,7 +1,8 @@
 # Builds the Viglet Dumont ES Docker image from the root Dockerfile and pushes
 # it to the GitHub Container Registry (ghcr.io). The Dockerfile is multi-stage
-# and self-contained (it clones + builds the source itself), so this workflow
-# only needs Docker Buildx — no JDK/Maven setup. For more information see:
+# and builds from the checked-out repository (the build context) — no clone,
+# so this workflow only needs the checkout + Docker Buildx (no JDK/Maven setup).
+# For more information see:
 # https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
 
 name: Publish Docker Image
@@ -49,9 +50,6 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: |
-            REPO_BRANCH=${{ github.ref_name }}
             CACHE_BUST=${{ github.sha }}
-          secrets: |
-            github_token=${{ secrets.GITHUB_TOKEN }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

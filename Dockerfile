@@ -1,25 +1,18 @@
 # Multi-stage build for Viglet Dumont ES.
-# Ported from viglet/cloud docker/Dockerfile.dumont — the `viglet/jdk-build`
-# base (eclipse-temurin:25-jdk + git) is inlined here so the build is
-# self-contained and needs no externally published base image.
+# Builds straight from THIS repository's working tree (the Docker build context).
+# The Dockerfile lives in the repo, so there is nothing to clone — the source is
+# already here. See .dockerignore for what is kept out of the context (target/,
+# node_modules, ...); .git is kept so the git-commit-id plugin can stamp the
+# build version.
 FROM eclipse-temurin:25-jdk AS build
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
-ARG REPO_BRANCH=2026.3
 ARG CACHE_BUST=none
-# Reference CACHE_BUST in the RUN so a new SHA invalidates the git clone layer.
-# `github_token` is a BuildKit secret. It's only present at build time via the
-# runtime mount and never lands in any image layer. Optional — falls back to
-# anonymous clone if the secret is empty.
-RUN --mount=type=secret,id=github_token,required=false \
-    echo "cache_bust=${CACHE_BUST}" && \
-    if [ -s /run/secrets/github_token ]; then \
-        URL="https://x-access-token:$(cat /run/secrets/github_token)@github.com/openviglet/dumont.git"; \
-    else \
-        URL="https://github.com/openviglet/dumont.git"; \
-    fi && \
-    git clone --depth 1 --branch ${REPO_BRANCH} "$URL" .
+COPY . .
 RUN chmod +x mvnw
+# Build the connector + all connector plugins (samples excluded). The frontend
+# (dumont-react) is built by the connector-app module via the frontend Maven
+# plugin. Caches speed up rebuilds; nothing is fetched from the project's own
+# Git remote.
 RUN --mount=type=cache,target=/root/.m2 \
     --mount=type=cache,target=/src/dumont-react/node_modules \
     --mount=type=cache,target=/src/dumont-react/node \
