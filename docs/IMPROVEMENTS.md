@@ -23,6 +23,7 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 ## Table of contents
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
+- [II. Connector convergence — one ingestion contract (Track G, D20–D23)](#ii-connector-convergence--one-ingestion-contract-track-g-d20d23)
 - [V. Field-level provenance (D16)](#v-field-level-provenance-d16)
 - [VI. Index-time embeddings (D17)](#vi-index-time-embeddings-d17)
 - [VII. Cross-source entity resolution & dedup (D18)](#vii-cross-source-entity-resolution--dedup-d18)
@@ -60,6 +61,45 @@ dry-run preview) opened the adoption layer and D15 (field-coverage & drift monit
 partial degradation visible and the sidecar→native parity gate (D11) measurable rather than
 manual — all shipped. D16 (field-level provenance) is the highest-leverage *next* step on the
 trust track. Track F follows the RAG maturity on the Turing side.
+
+## II. Connector convergence — one ingestion contract (Track G, D20–D23)
+
+**Problem.** Every benefit Tracks A/D/E/F deliver — grounding-by-construction (D03), dry-run
+preview (D14), field-coverage & drift (D15), enrichment (D04), provenance (D16) — is wired into
+the **structured SPI** (`DumStructuredSourcePlugin`: `schema()` + `discover()` + `extract(id)`).
+The original connectors (AEM, DB, Assets, WC) predate it and each hand-roll their own
+"discover → extract → publish" loop emitting a **loose `Map<String,Object>`** with `specs = null`.
+Consequence: a DB or AEM source cannot get coverage/drift or a preview, because nothing declares
+*which fields it should have* — coverage % is undefined without a schema. The connectors and the
+framework are two parallel worlds.
+
+**Why an adapter, not a rewrite.** The non-goal "the structured-source framework sits beside the
+AEM/CMS connectors under the same SPI" is the target end-state, not a prohibition: bring each
+connector **under** the SPI through a thin adapter that *reuses its existing extraction*, so we
+add the trust/adoption surface without touching crawl logic, auth, delta, or politeness.
+
+**Design.**
+- A shared adapter seam wraps a connector's per-item mapping as a `DumStructuredSource`: schema
+  from the connector's declared field config, `discover()` from its id enumeration, `extract(id)`
+  from its single-item fetch. It then runs through the generic plugin — grounding, preview and
+  coverage are inherited, not re-implemented (**D20**, piloted on DB — the cleanest tabular fit).
+- **AEM (D21)** is ~closest: `DumAemAttributeSpecification` already *is* schema-as-code (1:1 with
+  `DumStructuredField`) and `discoverContentIds()` already exists; the only real work is detaching
+  field extraction (`DumAemAttrProcess`) from the author/publish job-item pipeline.
+- **Assets (D22)** has a stable fixed field set to declare; `discover()` is the directory walk and
+  `extract(id)` resolves one file.
+- **WC (D23)** is deliberately *not* converted — a generic link-spider has no enumerable typed
+  record set; the framework was built to sit *above* it (D02 strategies are the structured path).
+  It gets only a lightweight coverage signal off its declared `DumWCAttributeMapping` names, plus a
+  documented migration path for structured sites still on WC.
+
+**Touch points.** New adapter in `connector-commons` `spi.structured`; per-connector
+`DumStructuredSource` facades in `db`/`aem`/`assets` plugins; `discoverContentIds`/`indexById`
+implemented for DB and Assets (today `UnsupportedOperationException`); WC coverage seam reusing D15.
+
+**Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: AEM/DB/Assets sources index through the
+structured plugin at parity with their legacy paths and gain coverage/drift + preview; WC reports
+per-field coverage without a contract it cannot honor.
 
 ## V. Field-level provenance (D16)
 

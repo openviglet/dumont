@@ -144,6 +144,56 @@ This track has no remaining pending tasks.
       parameters; bumping the recipe re-applies to both. Directly accelerates D11.\
       ↳ **Depends on:** D02, D04.
 
+## Track G — Connector convergence (loose-map connectors → structured SPI)
+
+> **Objective**: the Track A/D/E/F machinery — grounding-by-construction (D03), dry-run
+> preview (D14), field-coverage & drift (D15), enrichment (D04), provenance (D16) — only
+> reaches sources built on the structured SPI. AEM, DB and Assets each already do
+> "discover ids → extract per-item fields → publish" by hand, just without a declared
+> schema or the typed `extract(id)` contract. Bring each **under the same SPI via a thin
+> adapter** (schema derived from the connector's own field config + `discover()` over its id
+> enumeration + `extract(id)` over its single-item fetch) so they inherit that whole surface
+> **without a rewrite**. This *realizes* the existing non-goal ("the framework sits beside
+> the AEM/CMS connectors under the same SPI") — it adapts, never replaces. The web crawler
+> stays the generic link-spider the framework sits *above*; structured sites it serves
+> migrate to D02 strategies, and it gets only lightweight coverage telemetry.
+
+- [ ] **D20** · **Structured-source adapter seam + DB pilot** — define the thin adapter that
+      presents an existing connector's per-item mapping as a `DumStructuredSource`, running it
+      through `DumStructuredSourcePlugin` so grounding / preview / coverage come for free. Prove
+      it on the **DB connector** (the most naturally tabular): a declared column→field schema
+      (`TurSEFieldType` + multiValued / facet / mandatory), an id-list query for `discover()`,
+      and a single-row `extract(id)` (`… WHERE <pk> = ?`) — replacing today's all-rows batch loop
+      (which leaves `discoverContentIds`/`indexById` unimplemented). Done: a DB source indexes
+      through the structured plugin at parity with the legacy path, and its coverage history (D15)
+      + dry-run preview (D14) work.\
+      ↳ **Depends on:** D01, D03, D14, D15.
+- [ ] **D21** · **AEM structured adapter** — reuse AEM's existing field-spec
+      (`DumAemAttributeSpecification` already carries name / type / multiValued / facet / mandatory,
+      a 1:1 map to `DumStructuredField`) to expose an AEM source as a `DumStructuredSource`:
+      `schema()` wraps the attribute specs, `discover()` delegates to the existing path /
+      QueryBuilder enumeration, `extract(id)` reuses `DumAemAttrProcess` field extraction decoupled
+      from the author/publish job-item pipeline. Author/publish + delta semantics stay intact (the
+      adapter extracts one environment; the loop drives environments). Done: an AEM source's
+      coverage/drift + preview work and indexing stays at parity with the legacy author/publish flow.\
+      ↳ **Depends on:** D20.
+- [ ] **D22** · **Assets structured adapter** — declare the Assets fixed field set as schema-as-code
+      (`id`, `url`, `title`, `date`, `type` + optional `fileSize` / `fileExtension` / `image`, and
+      an optional Tika `content` field), with `discover()` = directory walk returning ids and
+      `extract(id)` = resolve a single file → typed record (replacing the ad-hoc map and the
+      unimplemented `discoverContentIds`/`indexById`). Done: an Assets source's coverage/drift +
+      preview work; first-class field declarations replace the loose attribute map.\
+      ↳ **Depends on:** D20.
+- [ ] **D23** · **Web-crawler coverage adapter (no conversion)** — the WC connector stays the
+      generic breadth link-spider (Track A objective + non-goals); a typed `discover()`/`extract(id)`
+      contract a link-following crawl cannot satisfy is **not** the goal. Instead, treat the source's
+      declared `DumWCAttributeMapping` names as an implicit field set and emit a per-page
+      field-presence signal, so a WC source still gets D15 coverage/drift telemetry (and surfaces a
+      mapping that silently stops matching) without pretending to be a structured source. Document the
+      migration path for *structured* sites currently crawled by WC → D02 strategies. Done: a WC
+      source reports per-field coverage across crawls and raises drift when a mapping breaks.\
+      ↳ **Depends on:** D15. Complements D09.
+
 ---
 
 ## Non-goals (do NOT add as tasks)
