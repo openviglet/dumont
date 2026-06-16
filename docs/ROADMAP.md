@@ -47,14 +47,28 @@ relations (what a task *enables*) live in the task text.
       implements `DumConnectorPlugin`). Proven end-to-end by
       `DumStructuredSourcePluginTest` (sample tabular catalog; absent field omitted,
       mandatory-missing record skipped). Web crawler untouched.
-- [ ] **D02** · **Declarative extraction strategies** — ship reusable strategies the
+- [x] **D02** · **Declarative extraction strategies** — ship reusable strategies the
       way cursarei's `engine.py` does: **Sitemap** (parse `sitemap.xml`, classify URLs
       → level), **HtmlListing** (anchors under a selector → detail pages), and
       **TabularListing** (parse `table`-style catalog listings, the SIGAA shape — the
       capability the CSS-selector model lacks today). A new source picks a strategy +
       config instead of writing a crawler. Done: each strategy has a unit test and a
       sample source; a tabular catalog is indexed end-to-end.\
-      ↳ **Depends on:** D01.
+      ↳ **Depends on:** D01.\
+      **Shipped:** `connector-commons` package
+      `com.viglet.dumont.connector.commons.spi.structured.strategy` — `DumHtmlFetcher`
+      (fetch seam; `DumJsoupFetcher` in production, in-memory fetcher for tests),
+      `DumDiscoveryStrategy` + `DumDiscoveredUrl` (url + classified level),
+      `DumSitemapStrategy` / `DumUrlLevelRule` (sitemap-index following, pattern →
+      level classification, level filtering), `DumHtmlListingStrategy` /
+      `DumListingSource` (anchors under a selector → absolute detail URLs),
+      `DumHtmlFieldExtractor` / `DumFieldRule` (declarative CSS → field mapping for the
+      detail-page extract half, grounding enforced), and `DumTabularListingStrategy` /
+      `DumColumnRule` (the SIGAA table shape — discover + extract in one, column-by-index
+      or by selector, header/blank rows skipped). Each strategy has a unit test; proven
+      end-to-end by `DumTabularSourcePluginTest` (a strategy-only `DumStructuredSource`
+      indexes a tabular catalog through `DumStructuredSourcePlugin`, absent cell omitted).
+      Web crawler untouched.
 - [ ] **D03** · **Schema-as-code + conservative grounding** — let a source declare its
       fields once (name, `TurSEFieldType`, multi-valued, facet, mandatory) via
       `TurSNJobAttributeSpec`, and enforce the grounding contract end-to-end: a record
