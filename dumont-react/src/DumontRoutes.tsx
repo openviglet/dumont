@@ -1,6 +1,6 @@
 import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
 
-import { IconAdjustmentsSearch, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools } from "@tabler/icons-react";
+import { IconAdjustmentsSearch, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools, IconWand } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Page } from "./components/page";
@@ -19,6 +19,7 @@ import IntegrationInstanceInsightsPage from "./pages/integration.instance.insigh
 import IntegrationInstanceMonitoringItemPage from "./pages/integration.instance.monitoring.item.page";
 import IntegrationInstanceMonitoringPage from "./pages/integration.instance.monitoring.page";
 import IntegrationInstancePluginsPage from "./pages/integration.instance.plugins.page";
+import IntegrationInstanceSourceInferencePage from "./pages/integration.instance.source.inference.page";
 import IntegrationInstanceSourceListPage from "./pages/integration.instance.source.list.page";
 import IntegrationInstanceSourceModelPage from "./pages/integration.instance.source.model.page";
 import IntegrationInstanceSourcePage from "./pages/integration.instance.source.page";
@@ -67,6 +68,10 @@ export default function DumontRoutes() {
         <Route index element={<IntegrationInstanceEdsSourceListPage />} />
         <Route path=":sourceId" element={<IntegrationInstanceEdsSourcePage />} />
         <Route path=":sourceId/:tab" element={<IntegrationInstanceEdsSourcePage />} />
+      </Route>
+      {/* AI Source Inference (D13) */}
+      <Route path="source-inference" element={<Page turIcon={IconWand} title={t("integration.sourceInference.title")} urlBase="source-inference" />}>
+        <Route index element={<IntegrationInstanceSourceInferencePage />} />
       </Route>
       {/* Indexing Rules */}
       <Route path="indexing-rule" element={<Page turIcon={IconTools} title={t("integration.nav.indexingRules")} urlBase="indexing-rule" />}>

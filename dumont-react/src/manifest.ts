@@ -12,6 +12,7 @@ import {
   IconPuzzle,
   IconSparkles,
   IconTools,
+  IconWand,
 } from "@tabler/icons-react";
 import type { Icon } from "@tabler/icons-react";
 
@@ -50,6 +51,7 @@ const ICON_COMPONENTS: Record<string, Icon> = {
   IconSparkles,
   IconPuzzle,
   IconInfoCircle,
+  IconWand,
 };
 
 /**
@@ -70,6 +72,7 @@ const manifest: DumontManifest = {
     { titleKey: "integration.nav.wcSources", url: "/wc-source", icon: "IconGlobe", order: 10, provider: "WEB-CRAWLER" },
     { titleKey: "integration.nav.assetsSources", url: "/assets-source", icon: "IconFolder", order: 10, provider: "ASSETS" },
     { titleKey: "integration.nav.edsSources", url: "/eds-source", icon: "IconCloudComputing", order: 10, provider: "EDS" },
+    { titleKey: "integration.nav.sourceInference", url: "/source-inference", icon: "IconWand", order: 15 },
     { titleKey: "integration.nav.indexingRules", url: "/indexing-rule", icon: "IconTools", order: 20 },
     { titleKey: "integration.nav.indexingManager", url: "/indexing-manager", icon: "IconAdjustmentsSearch", order: 30 },
     { titleKey: "integration.nav.monitoring", url: "/monitoring", icon: "IconGraph", order: 40 },

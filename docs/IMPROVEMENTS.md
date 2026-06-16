@@ -23,7 +23,6 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 ## Table of contents
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
-- [II. AI-assisted source inference (D13)](#ii-ai-assisted-source-inference-d13)
 - [III. Dry-run preview & schema diff (D14)](#iii-dry-run-preview--schema-diff-d14)
 - [IV. Field-coverage & drift monitoring (D15)](#iv-field-coverage--drift-monitoring-d15)
 - [V. Field-level provenance (D16)](#v-field-level-provenance-d16)
@@ -58,42 +57,11 @@ Track F (semantics — embeddings, entity resolution, reusable taxonomy) is the
 platform the product name claims: it doesn't just move documents, it makes them
 semantically richer and de-duplicated on the way through.
 
-The ordering is deliberate. Tracks A–C are prerequisites; D13/D15 are the highest
-leverage *next* steps because they make the framework adoptable and the sidecar→native
-parity gate (D11) measurable rather than manual. Track F follows the RAG maturity on
+The ordering is deliberate. Tracks A–C are prerequisites; D13 (shipped — AI-assisted
+inference) opened the adoption layer, and D14/D15 are the highest-leverage *next* steps
+because they make the framework adoptable and the sidecar→native parity gate (D11)
+measurable rather than manual. Track F follows the RAG maturity on
 the Turing side.
-
-## II. AI-assisted source inference (D13)
-
-**Problem.** STRATEGY's promise is "index a new source = a declarative adapter + a field
-manifest". But *writing* that manifest still requires a developer to read the page,
-pick the strategy and author selectors + a `TurSNJobAttributeSpec`. That keeps onboarding
-a dev task and caps adoption — the framework is necessary but not sufficient.
-
-**Design.** A `POST /api/v2/connector/source/infer` (working name) that, given a URL:
-1. Fetches a sample and classifies the shape into one of the D02 strategies (Sitemap /
-   HtmlListing / TabularListing).
-2. Proposes a **draft** strategy config and a draft field manifest (each field: name,
-   `TurSEFieldType`, multi-valued, facet, mandatory).
-3. Returns the draft to the React source wizard for a human to **edit and confirm**.
-
-Reuses Turing's existing LLM surface — `TurSummaryAPI` / `ChatModel` over the configured
-`RestClient` (same pattern as `DumConnectorSummaryApi`). **No new model wiring** in
-Dumont.
-
-**Hard constraints.**
-- The draft **never auto-publishes**. A human confirms before any source is created or
-  indexed. This is in the ROADMAP non-goals.
-- Inference obeys the grounding contract: it may propose *omitting* a field it cannot
-  ground; it must not propose a default/placeholder value.
-- The LLM proposes *structure* (which selector, which field type), not *content* — the
-  actual values always come from the live extraction, never the model.
-
-**Touch points.** New API in `connector-app` `api/`; `RestClient` → Turing; React source
-creation wizard in `dumont-react`.
-
-**Done.** Pointing the wizard at a tabular catalog yields an editable strategy + field
-draft that, after confirmation, indexes end-to-end.
 
 ## III. Dry-run preview & schema diff (D14)
 

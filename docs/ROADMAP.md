@@ -88,16 +88,10 @@ This track has no remaining pending tasks.
 > that turns the framework into a product capability — see [STRATEGY.md](STRATEGY.md)
 > §"The second bet".
 
-- [ ] **D13** · **AI-assisted source inference** — given a URL, classify the source shape
-      (Sitemap / HtmlListing / TabularListing — the D02 strategies) and propose a **draft**:
-      a strategy config plus a field manifest (`TurSNJobAttributeSpec` — name, `TurSEFieldType`,
-      multi-valued, facet). The draft is a starting point a human **edits and confirms**; it
-      never auto-publishes. Reuses Turing's existing LLM surface (`TurSummaryAPI` / `ChatModel`)
-      over the configured `RestClient` — no new model wiring. This is the move that makes the
-      declarative framework actually cheap to adopt. Done: pointing the React source wizard at
-      a tabular catalog yields an editable strategy + field draft that, after confirmation,
-      indexes end-to-end. Grounding still holds — inference may omit, never fabricate.\
-      ↳ **Depends on:** D01, D02, D03.
+> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D13** AI-assisted source inference
+> (URL → shape classification + editable strategy/field-manifest draft over Turing's LLM
+> surface; a confirmed tabular draft materializes + indexes end-to-end, grounding-safe).
+
 - [ ] **D14** · **Dry-run preview & schema diff** — promote the current "Dry Scan" to a
       preview index: extract a sample of N records, validate them against the declared schema
       (D03), and show **field coverage** plus a **diff of what would change** (new / changed /

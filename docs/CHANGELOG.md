@@ -110,3 +110,21 @@
   re-index. `DumWCCrawlReport` gains an `unchanged` counter; a re-run where every page is `304` is no
   longer a total failure. Proven by `DumWCPluginProcessIncrementalTest`, `DumWCSitemapTest`. Builds on
   D06; pairs with D07.
+
+## Track D — Adoption & authoring
+
+- **D13** — AI-assisted source inference: `connector-commons`
+  `…spi.structured.infer` — `DumSourceInferrer` fetches a sample, computes structural
+  signals, and (behind the `DumSourceInferenceModel` seam — no model wiring in commons)
+  classifies the source into a `DumSourceShape` (Sitemap / HtmlListing / TabularListing /
+  Unknown) and proposes an editable `DumSourceDraft` (strategy config + a `DumInferredField`
+  manifest → `TurSNJobAttributeSpec`). Grounding holds: it proposes structure (selectors,
+  field types) not content, drops blank-named fields, and degrades to `UNKNOWN` on any
+  failure rather than guessing. `DumSourceDraftMaterializer` turns a confirmed tabular draft
+  into a live `DumStructuredSource` the generic D01 plugin indexes end-to-end. `connector-app`
+  `…infer.DumTuringSourceInferenceModel` is the production model over Turing's `POST
+  /api/v2/summary` (same path as `DumTuringClassifier`); `DumConnectorSourceInferenceApi`
+  exposes `POST /api/v2/connector/source/infer` (propose) + `/infer/index` (index the
+  human-confirmed draft — never auto-publishes). `dumont-react` source-inference wizard
+  (`/source-inference`) renders the editable draft. Proven by `DumSourceInferrerTest`,
+  `DumInferredSourceIndexingTest`, `DumTuringSourceInferenceModelTest`.
