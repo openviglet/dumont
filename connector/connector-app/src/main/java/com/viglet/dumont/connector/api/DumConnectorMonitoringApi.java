@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
+import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.domain.DumConnectorMonitoring;
 import com.viglet.dumont.connector.domain.DumConnectorMonitoringPage;
 import com.viglet.dumont.connector.domain.DumConnectorMonitoringRequest;
@@ -44,19 +44,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Connector API", description = "Connector API")
 public class DumConnectorMonitoringApi {
         private final DumConnectorIndexingService indexingService;
-        private final DumConnectorPlugin plugin;
+        private final DumConnectorPluginRegistry pluginRegistry;
 
         public DumConnectorMonitoringApi(DumConnectorIndexingService indexingService,
-                        DumConnectorPlugin plugin) {
+                        DumConnectorPluginRegistry pluginRegistry) {
                 this.indexingService = indexingService;
-                this.plugin = plugin;
+                this.pluginRegistry = pluginRegistry;
         }
 
         @GetMapping("unprocessed/{source}")
         public ResponseEntity<DumConnectorMonitoring> monitoringUnprocessed(
                         @PathVariable String source) {
                 List<DumConnectorIndexingModel> indexing = indexingService
-                                .getUnprocessedBySourceAndProvider(source, plugin.getProviderName());
+                                .getUnprocessedBySourceAndProvider(source,
+                                                pluginRegistry.resolveProviderBySource(source));
                 return generateMonitoringResponse(indexing);
         }
 
@@ -70,7 +71,8 @@ public class DumConnectorMonitoringApi {
         public ResponseEntity<DumConnectorMonitoring> monitoringIndexingBySource(
                         @PathVariable String source) {
                 List<DumConnectorIndexingModel> indexing = indexingService
-                                .getBySourceAndProvider(source, plugin.getProviderName());
+                                .getBySourceAndProvider(source,
+                                                pluginRegistry.resolveProviderBySource(source));
                 return generateMonitoringResponse(indexing);
         }
 
@@ -85,15 +87,17 @@ public class DumConnectorMonitoringApi {
         @PostMapping
         public ResponseEntity<DumConnectorMonitoring> indexContentId(
                         @RequestBody List<String> contentIds) {
+                // Across all active providers (null provider = no provider filter).
                 List<DumConnectorIndexingModel> indexing = indexingService.findAllByProviderAndObjectIdIn(
-                                plugin.getProviderName(), contentIds);
+                                null, contentIds);
                 return generateMonitoringResponse(indexing);
         }
 
         @PostMapping("_search")
         public ResponseEntity<DumConnectorMonitoringPage> search(
                         @RequestBody DumConnectorMonitoringRequest request) {
-                return ResponseEntity.ok(indexingService.search(request, plugin.getProviderName()));
+                // null provider = search across all active providers.
+                return ResponseEntity.ok(indexingService.search(request, null));
         }
 
         @GetMapping("stats")
@@ -103,15 +107,15 @@ public class DumConnectorMonitoringApi {
 
         @GetMapping("stats/count")
         public ResponseEntity<Map<String, Long>> monitoringStatsCount() {
-                return ResponseEntity.ok(indexingService
-                                .countByProviderGroupBySource(plugin.getProviderName()));
+                // null provider = count across all active providers.
+                return ResponseEntity.ok(indexingService.countByProviderGroupBySource(null));
         }
 
         @GetMapping("stats/{source}")
         public ResponseEntity<List<DumConnectorIndexingStatsModel>> monitoringStatsBySource(
                         @PathVariable String source) {
-                return ResponseEntity.ok(indexingService
-                                .getStatsBySourceAndProvider(source, plugin.getProviderName()));
+                return ResponseEntity.ok(indexingService.getStatsBySourceAndProvider(source,
+                                pluginRegistry.resolveProviderBySource(source)));
         }
 
         private ResponseEntity<DumConnectorMonitoring> generateMonitoringResponse(
@@ -121,8 +125,9 @@ public class DumConnectorMonitoringApi {
         }
 
         private DumConnectorMonitoring getMonitoring(List<DumConnectorIndexingModel> indexing) {
+                // null provider = list sources across all active providers.
                 return DumConnectorMonitoring.builder()
-                                .sources(indexingService.getAllSources(plugin.getProviderName()))
+                                .sources(indexingService.getAllSources(null))
                                 .indexing(indexing).build();
         }
 }

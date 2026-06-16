@@ -44,7 +44,7 @@ const PROVIDER_LABELS: Record<string, string> = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation();
   const { toggleSidebar, state, isMobile } = useSidebar();
-  const { provider } = usePlugin();
+  const { providers } = usePlugin();
   const isCollapsed = state === "collapsed";
 
   const [queueSize, setQueueSize] = React.useState<number | undefined>(undefined);
@@ -89,10 +89,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         { items: [{ title: t("home.title"), url: ROUTES.HOME, icon: IconHome }] },
       ];
 
-      // Source items (those with a `provider`) only show for the active connector.
-      const activeSources = sorted.filter((item) => item.provider && item.provider === provider);
-      if (provider && activeSources.length > 0) {
-        groups.push({ label: PROVIDER_LABELS[provider] ?? provider, items: activeSources.map(toNav) });
+      // Source items (those with a `provider`) show one group per active connector.
+      for (const provider of providers) {
+        const activeSources = sorted.filter((item) => item.provider && item.provider === provider);
+        if (activeSources.length > 0) {
+          groups.push({
+            label: PROVIDER_LABELS[provider] ?? provider,
+            items: activeSources.map(toNav),
+          });
+        }
       }
 
       // Common items (no `provider`) are always shown.
@@ -101,7 +106,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       return groups;
     },
-    [t, toNav, provider]
+    [t, toNav, providers]
   )
 
   return (

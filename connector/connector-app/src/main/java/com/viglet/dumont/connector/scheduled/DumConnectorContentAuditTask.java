@@ -37,6 +37,7 @@ import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel.OperationType;
+import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,16 +45,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class DumConnectorContentAuditTask {
-    private final DumConnectorPlugin plugin;
+    private final DumConnectorPluginRegistry pluginRegistry;
     private final DumConnectorIndexingService indexingService;
     private final boolean queryBuilderEnabled;
     private final int parallelism;
 
-    public DumConnectorContentAuditTask(DumConnectorPlugin plugin,
+    public DumConnectorContentAuditTask(DumConnectorPluginRegistry pluginRegistry,
             DumConnectorIndexingService indexingService,
             @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled,
             @Value("${dumont.aem.querybuilder.parallelism:10}") int parallelism) {
-        this.plugin = plugin;
+        this.pluginRegistry = pluginRegistry;
         this.indexingService = indexingService;
         this.queryBuilderEnabled = queryBuilderEnabled;
         this.parallelism = Math.max(1, parallelism);
@@ -61,29 +62,31 @@ public class DumConnectorContentAuditTask {
 
     @Scheduled(cron = "${dumont.audit.cron:-}", zone = "${dumont.audit.cron.zone:UTC}")
     public void auditContent() {
-        String provider = plugin.getProviderName();
-        List<String> sources = indexingService.getAllSources(provider);
+        for (DumConnectorPlugin plugin : pluginRegistry.connectorPlugins()) {
+            String provider = plugin.getProviderName();
+            List<String> sources = indexingService.getAllSources(provider);
 
-        if (sources.isEmpty()) {
-            log.info("No sources found for provider '{}', skipping audit.", provider);
-            return;
+            if (sources.isEmpty()) {
+                log.info("No sources found for provider '{}', skipping audit.", provider);
+                continue;
+            }
+
+            log.info("Starting content audit for provider '{}' ({} source(s))",
+                    provider, sources.size());
+            for (String source : sources) {
+                auditSource(plugin, source, provider);
+            }
         }
-
-        log.info("Starting content audit for {} source(s)", sources.size());
-
-        for (String source : sources) {
-            auditSource(source, provider);
-        }
-
         log.info("Content audit completed.");
     }
 
     @Async
-    public void auditSourceAsync(String source, String provider) {
-        auditSource(source, provider);
+    public void auditSourceAsync(String source) {
+        DumConnectorPlugin plugin = pluginRegistry.resolveBySource(source);
+        auditSource(plugin, source, plugin.getProviderName());
     }
 
-    private void auditSource(String source, String provider) {
+    private void auditSource(DumConnectorPlugin plugin, String source, String provider) {
         log.info("Auditing source '{}' (queryBuilder={}, parallelism={})",
                 source, queryBuilderEnabled, parallelism);
         Date startTime = new Date();
@@ -96,10 +99,10 @@ public class DumConnectorContentAuditTask {
             AtomicReference<Locale> firstLocale = new AtomicReference<>();
 
             if (queryBuilderEnabled) {
-                auditParallel(discoveredIds, source, provider, created,
+                auditParallel(plugin, discoveredIds, source, provider, created,
                         allEnvironments, allSites, firstLocale);
             } else {
-                auditSequential(discoveredIds, source, provider, created,
+                auditSequential(plugin, discoveredIds, source, provider, created,
                         allEnvironments, allSites, firstLocale);
             }
 
@@ -128,12 +131,12 @@ public class DumConnectorContentAuditTask {
         }
     }
 
-    private void auditParallel(List<String> discoveredIds, String source, String provider,
-            AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
+    private void auditParallel(DumConnectorPlugin plugin, List<String> discoveredIds, String source,
+            String provider, AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
             ConcurrentLinkedQueue<String> allSites, AtomicReference<Locale> firstLocale) {
         try (ForkJoinPool pool = new ForkJoinPool(parallelism)) {
             pool.submit(() -> discoveredIds.parallelStream()
-                    .forEach(objectId -> processAuditObject(objectId, source, provider,
+                    .forEach(objectId -> processAuditObject(plugin, objectId, source, provider,
                             created, allEnvironments, allSites, firstLocale))).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -143,20 +146,20 @@ public class DumConnectorContentAuditTask {
         }
     }
 
-    private void auditSequential(List<String> discoveredIds, String source, String provider,
-            AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
+    private void auditSequential(DumConnectorPlugin plugin, List<String> discoveredIds, String source,
+            String provider, AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
             ConcurrentLinkedQueue<String> allSites, AtomicReference<Locale> firstLocale) {
         for (String objectId : discoveredIds) {
-            processAuditObject(objectId, source, provider, created,
+            processAuditObject(plugin, objectId, source, provider, created,
                     allEnvironments, allSites, firstLocale);
         }
     }
 
-    private void processAuditObject(String objectId, String source, String provider,
-            AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
+    private void processAuditObject(DumConnectorPlugin plugin, String objectId, String source,
+            String provider, AtomicInteger created, ConcurrentLinkedQueue<String> allEnvironments,
             ConcurrentLinkedQueue<String> allSites, AtomicReference<Locale> firstLocale) {
         try {
-            AuditResult result = auditObject(objectId, source, provider);
+            AuditResult result = auditObject(plugin, objectId, source, provider);
             created.addAndGet(result.created);
             allEnvironments.addAll(result.environments);
             allSites.addAll(result.sites);
@@ -168,7 +171,8 @@ public class DumConnectorContentAuditTask {
 
     private record AuditResult(int created, Set<String> environments, Set<String> sites, Locale locale) {}
 
-    private AuditResult auditObject(String objectId, String source, String provider) {
+    private AuditResult auditObject(DumConnectorPlugin plugin, String objectId, String source,
+            String provider) {
         Locale locale = plugin.resolveLocale(source, objectId);
         List<DumConnectorPlugin.EnvironmentInfo> environments =
                 plugin.resolveEnvironments(source, objectId);

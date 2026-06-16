@@ -73,8 +73,11 @@ public interface DumConnectorIndexingRepository
 
         List<DumConnectorIndexingModel> findAllByOrderByModificationDateDesc(Limit limit);
 
-        List<DumConnectorIndexingModel> findAllByProviderAndObjectIdIn(String provider,
-                        Collection<String> objectIds);
+        @Query("SELECT i FROM DumConnectorIndexingModel i "
+                        + "WHERE (:provider IS NULL OR i.provider = :provider) AND i.objectId IN :objectIds")
+        List<DumConnectorIndexingModel> findAllByProviderAndObjectIdIn(
+                        @Param("provider") String provider,
+                        @Param("objectIds") Collection<String> objectIds);
 
         @Transactional
         void deleteByObjectIdAndSourceAndEnvironmentAndProvider(String objectId, String source,
@@ -94,7 +97,8 @@ public interface DumConnectorIndexingRepository
         void deleteBySourceAndProviderAndTransactionIdNot(String source, String provider,
                         String transactionId);
 
-        @Query("SELECT DISTINCT i.source FROM DumConnectorIndexingModel i WHERE i.provider = :provider")
+        @Query("SELECT DISTINCT i.source FROM DumConnectorIndexingModel i "
+                        + "WHERE (:provider IS NULL OR i.provider = :provider)")
         List<String> findAllSources(@Param("provider") String provider);
 
         @Query("SELECT DISTINCT i.objectId FROM DumConnectorIndexingModel i WHERE i.source = :source AND "
@@ -125,19 +129,22 @@ public interface DumConnectorIndexingRepository
         List<String> findObjectIdsByDependencies(@Param("source") String source,
                         @Param("provider") String provider, @Param("ids") List<String> ids);
 
-        @Query("SELECT DISTINCT i.environment FROM DumConnectorIndexingModel i WHERE i.provider = :provider")
+        @Query("SELECT DISTINCT i.environment FROM DumConnectorIndexingModel i "
+                        + "WHERE (:provider IS NULL OR i.provider = :provider)")
         List<String> findAllEnvironments(@Param("provider") String provider);
 
         @Query("SELECT DISTINCT i.environment FROM DumConnectorIndexingModel i WHERE i.source = :source AND i.provider = :provider AND i.environment IS NOT NULL")
         List<String> findAllEnvironmentsBySourceAndProvider(@Param("source") String source, @Param("provider") String provider);
 
-        @Query("SELECT DISTINCT i.locale FROM DumConnectorIndexingModel i WHERE i.provider = :provider")
+        @Query("SELECT DISTINCT i.locale FROM DumConnectorIndexingModel i "
+                        + "WHERE (:provider IS NULL OR i.provider = :provider)")
         List<Locale> findAllLocales(@Param("provider") String provider);
 
         @Query("SELECT DISTINCT i.locale FROM DumConnectorIndexingModel i WHERE i.source = :source AND i.provider = :provider AND i.locale IS NOT NULL")
         List<Locale> findAllLocalesBySourceAndProvider(@Param("source") String source, @Param("provider") String provider);
 
-        @Query("SELECT DISTINCT s FROM DumConnectorIndexingModel i JOIN i.sites s WHERE i.provider = :provider")
+        @Query("SELECT DISTINCT s FROM DumConnectorIndexingModel i JOIN i.sites s "
+                        + "WHERE (:provider IS NULL OR i.provider = :provider)")
         List<String> findAllSites(@Param("provider") String provider);
 
         long countBySourceAndProviderAndModificationDateGreaterThanEqual(String source,
@@ -145,6 +152,7 @@ public interface DumConnectorIndexingRepository
 
         long countByProvider(String provider);
 
-        @Query("SELECT i.source, COUNT(i) FROM DumConnectorIndexingModel i WHERE i.provider = :provider GROUP BY i.source")
+        @Query("SELECT i.source, COUNT(i) FROM DumConnectorIndexingModel i "
+                        + "WHERE (:provider IS NULL OR i.provider = :provider) GROUP BY i.source")
         List<Object[]> countByProviderGroupBySource(@Param("provider") String provider);
 }

@@ -20,14 +20,12 @@ package com.viglet.dumont.connector.plugin.webcrawler;
 
 import java.util.List;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumWCSourceRepository;
 
-@Primary
-@Component
+@Component("wc")
 public class DumWCPlugin implements DumConnectorPlugin {
     private final DumWCSourceRepository dumWCSourceRepository;
     private final DumWCPluginProcess dumWCPluginProcess;
@@ -45,6 +43,11 @@ public class DumWCPlugin implements DumConnectorPlugin {
     @Override
     public String getProviderName() {
         return "WEB-CRAWLER";
+    }
+
+    @Override
+    public boolean ownsSource(String source) {
+        return dumWCSourceRepository.findById(source).isPresent();
     }
 
     @Override

@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
@@ -43,7 +42,6 @@ import com.viglet.dumont.connector.plugin.aem.service.DumAemSourceService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Primary
 @Component("aem")
 public class DumAemPlugin implements DumConnectorPlugin {
     private final DumAemPluginProcess dumAemPluginProcess;
@@ -92,6 +90,11 @@ public class DumAemPlugin implements DumConnectorPlugin {
     @Override
     public String getProviderName() {
         return dumAemService.getProviderName();
+    }
+
+    @Override
+    public boolean ownsSource(String source) {
+        return dumAemSourceService.getDumAemSourceByName(source).isPresent();
     }
 
     @Override

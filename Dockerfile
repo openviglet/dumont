@@ -32,10 +32,21 @@ LABEL org.opencontainers.image.revision=$CACHE_BUST
 RUN groupadd -r java && useradd -r -g java -u 1001 java
 WORKDIR /app
 COPY --from=build /src/connector/connector-app/target/dumont-connector.jar app.jar
+# Bundle every connector plugin (AEM, EDS, DB, Web Crawler, Assets) so a single
+# image supports all connector types at once. They are added to the application
+# classpath at startup via Spring Boot's PropertiesLauncher `loader.path`, which
+# lets each plugin's Spring components be discovered and several plugins coexist.
+COPY --from=build /src/aem/aem-plugin/target/aem-plugin.jar /app/libs/aem-plugin.jar
+COPY --from=build /src/eds/eds-plugin/target/eds-plugin.jar /app/libs/eds-plugin.jar
+COPY --from=build /src/db/db-plugin/target/db-plugin.jar /app/libs/db-plugin.jar
+COPY --from=build /src/web-crawler/wc-plugin/target/web-crawler-plugin.jar /app/libs/web-crawler-plugin.jar
+COPY --from=build /src/assets/assets-plugin/target/assets-plugin.jar /app/libs/assets-plugin.jar
 RUN mkdir -p /app/store && chown -R java:java /app
 USER java
 VOLUME ["/app/store"]
 EXPOSE 30130
 ENV JAVA_OPTS="-Xmx512m -Xms512m"
 ENV DEBUG_OPTS=""
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} ${DEBUG_OPTS} -Djava.security.egd=file:/dev/./urandom -Dlogging.config=classpath:logback-spring-console.xml -jar /app/app.jar"]
+# LOADER_PATH points PropertiesLauncher at the bundled connector plugins.
+ENV LOADER_PATH="/app/libs"
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} ${DEBUG_OPTS} -Djava.security.egd=file:/dev/./urandom -Dloader.path=${LOADER_PATH} -Dlogging.config=classpath:logback-spring-console.xml -jar /app/app.jar"]

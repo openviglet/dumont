@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
+import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel.OperationType;
@@ -54,29 +55,32 @@ public class DumConnectorApi {
     private static final String STATUS_KEY = "status";
     private final DumConnectorIndexingService indexingService;
     private final DumConnectorSolrService dumConnectorSolr;
-    private final DumConnectorPlugin plugin;
+    private final DumConnectorPluginRegistry pluginRegistry;
     private final DumConnectorContentAuditTask auditTask;
     private final DumConnectorIndexAllByTabService indexAllByTabService;
     private final String apiKey;
 
     public DumConnectorApi(DumConnectorIndexingService indexingService,
-            DumConnectorSolrService dumConnectorSolr, DumConnectorPlugin plugin,
+            DumConnectorSolrService dumConnectorSolr, DumConnectorPluginRegistry pluginRegistry,
             DumConnectorContentAuditTask auditTask,
             DumConnectorIndexAllByTabService indexAllByTabService,
             @Value("${turing.apiKey}") String apiKey) {
         this.indexingService = indexingService;
         this.dumConnectorSolr = dumConnectorSolr;
-        this.plugin = plugin;
+        this.pluginRegistry = pluginRegistry;
         this.auditTask = auditTask;
         this.indexAllByTabService = indexAllByTabService;
         this.apiKey = apiKey;
     }
 
     @GetMapping("status")
-    public Map<String, String> status() {
-        Map<String, String> status = new HashMap<>();
+    public Map<String, Object> status() {
+        List<String> providers = pluginRegistry.providerNames();
+        Map<String, Object> status = new HashMap<>();
         status.put(STATUS_KEY, "ok");
-        status.put("provider", plugin.getProviderName());
+        // Backward-compatible single value: first active provider (null when none active).
+        status.put("provider", providers.isEmpty() ? null : providers.getFirst());
+        status.put("providers", providers);
         status.put("apiKey", apiKey);
         return status;
     }
@@ -95,14 +99,15 @@ public class DumConnectorApi {
 
     @GetMapping("validate/{source}")
     public DumConnectorValidateDifference validateSource(@PathVariable String source) {
-        return dumConnectorSolr.validateContent(source, plugin.getProviderName());
+        return dumConnectorSolr.validateContent(source,
+                pluginRegistry.resolveProviderBySource(source));
     }
 
     @GetMapping("monitoring/index/{source}")
     public ResponseEntity<List<DumConnectorIndexingModel>> monitoryIndexByName(
             @PathVariable String source) {
         List<DumConnectorIndexingModel> indexingModelList = indexingService.getBySourceAndProvider(source,
-                plugin.getProviderName());
+                pluginRegistry.resolveProviderBySource(source));
         return indexingModelList.isEmpty() ? ResponseEntity.notFound().build()
                 : ResponseEntity.ok(indexingModelList);
     }
@@ -112,6 +117,7 @@ public class DumConnectorApi {
         if (!indexingService.tryStartProcessing(name)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(statusAlreadyRunning());
         }
+        DumConnectorPlugin plugin = pluginRegistry.resolveBySource(name);
         indexingService.trackIndexingStart(name, plugin.getProviderName(),
                 OperationType.INDEX_ALL);
         plugin.indexAll(name);
@@ -121,14 +127,14 @@ public class DumConnectorApi {
     @PostMapping("index/{name}")
     public ResponseEntity<Map<String, String>> indexContentId(@PathVariable String name,
             @RequestBody List<String> contentId) {
-        plugin.indexById(name, contentId);
+        pluginRegistry.resolveBySource(name).indexById(name, contentId);
         return ResponseEntity.ok(statusSent());
     }
 
     @GetMapping("index/{name}")
     public ResponseEntity<Map<String, String>> indexContentId(@PathVariable String name,
             @RequestParam String id) {
-        plugin.indexById(name, List.of(id));
+        pluginRegistry.resolveBySource(name).indexById(name, List.of(id));
         return ResponseEntity.ok(statusSent());
     }
 
@@ -137,6 +143,7 @@ public class DumConnectorApi {
         if (!indexingService.tryStartProcessing(name)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(statusAlreadyRunning());
         }
+        DumConnectorPlugin plugin = pluginRegistry.resolveBySource(name);
         indexingService.deleteByProviderAndSource(plugin.getProviderName(), name);
         indexingService.trackIndexingStart(name, plugin.getProviderName(),
                 OperationType.REINDEX_ALL);
@@ -147,6 +154,7 @@ public class DumConnectorApi {
     @PostMapping("reindex/{name}")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name,
             @RequestBody List<String> contentIds) {
+        DumConnectorPlugin plugin = pluginRegistry.resolveBySource(name);
         indexingService.deleteByProviderAndSourceAndObjectIdIn(plugin.getProviderName(), name,
                 contentIds);
         plugin.indexById(name, contentIds);
@@ -156,6 +164,7 @@ public class DumConnectorApi {
     @GetMapping("reindex/{name}")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name,
             @RequestParam String id) {
+        DumConnectorPlugin plugin = pluginRegistry.resolveBySource(name);
         indexingService.deleteByProviderAndSourceAndObjectIdIn(plugin.getProviderName(), name,
                 List.of(id));
         plugin.indexById(name, List.of(id));
@@ -172,7 +181,7 @@ public class DumConnectorApi {
 
     @GetMapping("audit/{source}")
     public ResponseEntity<Map<String, String>> auditSource(@PathVariable String source) {
-        auditTask.auditSourceAsync(source, plugin.getProviderName());
+        auditTask.auditSourceAsync(source);
         return ResponseEntity.ok(statusSent());
     }
 

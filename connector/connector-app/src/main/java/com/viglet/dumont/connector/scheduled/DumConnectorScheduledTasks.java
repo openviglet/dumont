@@ -22,6 +22,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
+import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.service.DumConnectorConfigVarService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class DumConnectorScheduledTasks {
-    private final DumConnectorPlugin dumConnectorPlugin;
+    private final DumConnectorPluginRegistry pluginRegistry;
     private final DumConnectorConfigVarService configVarService;
 
-    public DumConnectorScheduledTasks(DumConnectorPlugin dumConnectorPlugin,
+    public DumConnectorScheduledTasks(DumConnectorPluginRegistry pluginRegistry,
             DumConnectorConfigVarService configVarService) {
-        this.dumConnectorPlugin = dumConnectorPlugin;
+        this.pluginRegistry = pluginRegistry;
         this.configVarService = configVarService;
     }
 
@@ -43,7 +44,9 @@ public class DumConnectorScheduledTasks {
         if (configVarService.hasNotFirstTime()) {
             log.info("This is the first time, waiting next schedule.");
         } else {
-            dumConnectorPlugin.crawl();
+            for (DumConnectorPlugin plugin : pluginRegistry.connectorPlugins()) {
+                plugin.crawl();
+            }
         }
     }
 

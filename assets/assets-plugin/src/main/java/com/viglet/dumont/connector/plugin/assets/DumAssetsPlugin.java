@@ -1,12 +1,10 @@
 package com.viglet.dumont.connector.plugin.assets;
 
 import java.util.List;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.plugin.assets.persistence.repository.DumAssetsSourceRepository;
 
-@Primary
 @Component("assets")
 public class DumAssetsPlugin implements DumConnectorPlugin {
     private final DumAssetsSourceRepository repository;
@@ -22,6 +20,11 @@ public class DumAssetsPlugin implements DumConnectorPlugin {
 
     @Override
     public String getProviderName() { return "ASSETS"; }
+
+    @Override
+    public boolean ownsSource(String source) {
+        return repository.findByName(source).isPresent();
+    }
 
     @Override
     public void indexAll(String source) {

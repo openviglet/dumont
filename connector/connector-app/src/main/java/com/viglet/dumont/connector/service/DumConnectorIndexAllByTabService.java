@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
+import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,17 +34,18 @@ public class DumConnectorIndexAllByTabService {
     private static final int CHUNK_SIZE = 50;
     private final DumConnectorIndexingService indexingService;
     private final DumConnectorSolrService solrService;
-    private final DumConnectorPlugin plugin;
+    private final DumConnectorPluginRegistry pluginRegistry;
 
     public DumConnectorIndexAllByTabService(DumConnectorIndexingService indexingService,
-            DumConnectorSolrService solrService, DumConnectorPlugin plugin) {
+            DumConnectorSolrService solrService, DumConnectorPluginRegistry pluginRegistry) {
         this.indexingService = indexingService;
         this.solrService = solrService;
-        this.plugin = plugin;
+        this.pluginRegistry = pluginRegistry;
     }
 
     @Async
     public void indexAllByTabAsync(String source, String tab) {
+        DumConnectorPlugin plugin = pluginRegistry.resolveBySource(source);
         String provider = plugin.getProviderName();
         log.info("Starting async index-all-by-tab '{}' for source '{}'", tab, source);
         try {

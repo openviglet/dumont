@@ -27,6 +27,18 @@ public interface DumConnectorPlugin {
 
     String getProviderName();
 
+    /**
+     * Whether this plugin owns (manages) the given source. Used to route connector-level
+     * requests to the correct plugin when several connector plugins are active in the same
+     * application instance. Each plugin answers by looking the source up in its own store.
+     *
+     * @param source the source name/id as received by the connector API
+     * @return {@code true} if this plugin manages the source; {@code false} by default
+     */
+    default boolean ownsSource(String source) {
+        return false;
+    }
+
     void indexAll(String source);
 
     void indexById(String source, List<String> contentId);

@@ -17,7 +17,6 @@ package com.viglet.dumont.connector.plugin.eds;
 
 import java.util.List;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
@@ -26,7 +25,6 @@ import com.viglet.dumont.connector.plugin.eds.persistence.repository.DumEDSSourc
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Primary
 @Component("eds")
 public class DumEDSPlugin implements DumConnectorPlugin {
 
@@ -49,6 +47,11 @@ public class DumEDSPlugin implements DumConnectorPlugin {
     @Override
     public String getProviderName() {
         return PROVIDER_NAME;
+    }
+
+    @Override
+    public boolean ownsSource(String source) {
+        return dumEDSSourceRepository.findByTitle(source).isPresent();
     }
 
     @Override

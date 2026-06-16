@@ -19,13 +19,11 @@ package com.viglet.dumont.connector.plugin.db;
 
 import java.util.List;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.plugin.db.persistence.repository.DumDbSourceRepository;
 
-@Primary
 @Component("db")
 public class DumDbPlugin implements DumConnectorPlugin {
 
@@ -45,6 +43,11 @@ public class DumDbPlugin implements DumConnectorPlugin {
     @Override
     public String getProviderName() {
         return "JDBC-DATABASE";
+    }
+
+    @Override
+    public boolean ownsSource(String source) {
+        return dumDbSourceRepository.findByName(source).isPresent();
     }
 
     @Override

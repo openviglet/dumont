@@ -1,38 +1,50 @@
 import axios from "axios";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-export type PluginProvider = "AEM" | "JDBC-DATABASE" | "WEB-CRAWLER" | string;
+export type PluginProvider = "AEM" | "JDBC-DATABASE" | "WEB-CRAWLER" | "ASSETS" | "EDS" | string;
 
 interface PluginContextValue {
+  /** All active connector providers (multiple plugins can run in one connector instance). */
+  providers: PluginProvider[];
+  /** First active provider, for backward compatibility. Null when none active. */
   provider: PluginProvider | null;
   loading: boolean;
 }
 
-const PluginContext = createContext<PluginContextValue>({ provider: null, loading: true });
+const PluginContext = createContext<PluginContextValue>({
+  providers: [],
+  provider: null,
+  loading: true,
+});
 
 export function PluginProvider({ children }: { children: ReactNode }) {
-  const [provider, setProvider] = useState<PluginProvider | null>(null);
+  const [providers, setProviders] = useState<PluginProvider[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
-      .get<{ status: string; provider: string; apiKey?: string }>("/v2/connector/status")
+      .get<{ status: string; provider?: string; providers?: string[]; apiKey?: string }>(
+        "/v2/connector/status"
+      )
       .then(({ data }) => {
-        setProvider(data.provider);
+        // Prefer the multi-provider list; fall back to the legacy single `provider`.
+        const list = data.providers ?? (data.provider ? [data.provider] : []);
+        setProviders(list);
         // In standalone mode, set the API key for all subsequent requests
         if (data.apiKey) {
           axios.defaults.headers.common["Key"] = data.apiKey;
         }
       })
-      .catch(() => setProvider(null))
+      .catch(() => setProviders([]))
       .finally(() => setLoading(false));
   }, []);
 
-  return (
-    <PluginContext value={{ provider, loading }}>
-      {children}
-    </PluginContext>
+  const value = useMemo<PluginContextValue>(
+    () => ({ providers, provider: providers[0] ?? null, loading }),
+    [providers, loading]
   );
+
+  return <PluginContext value={value}>{children}</PluginContext>;
 }
 
 export function usePlugin(): PluginContextValue {
