@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.TenantId;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.viglet.dumont.connector.commons.DumConnectorIndexingRuleType;
@@ -72,6 +73,11 @@ public class DumConnectorIndexingRuleModel implements Serializable {
     @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
     private String id;
+
+    // T398 / §XIV.9 — Hibernate discriminator tenant id (per-tenant isolation).
+    @TenantId
+    @Column(name = "tenant_id", updatable = false)
+    private String tenantId;
 
     @Column(length = 50)
     private String name;

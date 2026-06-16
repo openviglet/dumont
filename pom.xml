@@ -37,6 +37,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>4.0.6</spring-boot.version>
         <turing.version>2026.3.4</turing.version>
+        <!-- Shared backend platform — external project (github.com/openviglet/viglet-core),
+             published to GitHub Packages and versioned independently. -->
+        <viglet-core.version>2026.3.4</viglet-core.version>
         <tika.version>3.3.1</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <mongodb.version>5.8.0</mongodb.version>
@@ -254,6 +257,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- viglet-core — shared backend platform; the BOM pins every module version. -->
+            <dependency>
+                <groupId>com.viglet.core</groupId>
+                <artifactId>viglet-core-bom</artifactId>
+                <version>${viglet-core.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -525,4 +536,21 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <repositories>
+        <!-- viglet-core is published here. GitHub Packages requires auth even to
+             download: add a matching <server id="github-viglet-core"> with a PAT
+             (read:packages) to ~/.m2/settings.xml. Local builds resolve the same
+             version from ~/.m2 (mvn install) without hitting this repo. -->
+        <repository>
+            <id>github-viglet-core</id>
+            <name>GitHub openviglet viglet-core</name>
+            <url>https://maven.pkg.github.com/openviglet/viglet-core</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

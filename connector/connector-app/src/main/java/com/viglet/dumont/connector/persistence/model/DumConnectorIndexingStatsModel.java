@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -62,6 +64,10 @@ public class DumConnectorIndexingStatsModel implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    // T398 / §XIV.9 — Hibernate discriminator tenant id (per-tenant isolation).
+    @TenantId
+    @Column(name = "tenant_id", updatable = false)
+    private String tenantId;
     @Column
     private String provider;
     @Column

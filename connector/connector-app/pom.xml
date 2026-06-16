@@ -20,6 +20,14 @@
     </properties>
 
     <dependencies>
+        <!-- T398 / §XIV.9 — shared multi-tenancy kernel + lifted surface
+             (context, platform-admin, infra-scope, resolution-filter base,
+             membership / quota / teardown services). Version pinned by the
+             viglet-core-bom imported in the root pom. -->
+        <dependency>
+            <groupId>com.viglet.core</groupId>
+            <artifactId>viglet-core-tenancy</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

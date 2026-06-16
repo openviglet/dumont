@@ -27,6 +27,13 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("dumont")
 public class DumAuthConfigProperties {
+    /**
+     * Master switch for multi-tenancy (T398 / §XIV.9). When {@code true}, the
+     * shared {@code viglet-core-tenancy} resolution filter + {@code @TenantId} row
+     * isolation are active; when {@code false} (default) Dumont behaves as a single
+     * tenant ({@code dumont}) and the filter is a no-op.
+     */
+    private boolean multiTenant = false;
     private boolean permissions = true;
     private boolean keycloak = false;
     private String keycloakAdminId;

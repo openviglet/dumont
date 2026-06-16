@@ -19,6 +19,8 @@ package com.viglet.dumont.connector.persistence.model;
 import java.io.Serial;
 import java.io.Serializable;
 
+import org.hibernate.annotations.TenantId;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
@@ -54,6 +56,10 @@ public class DumConnectorDependencyModel implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true, length = 11)
     private int id;
+    // T398 / §XIV.9 — Hibernate discriminator tenant id (per-tenant isolation).
+    @TenantId
+    @Column(name = "tenant_id", updatable = false)
+    private String tenantId;
     @Column(length = 500)
     private String objectId;
     @ManyToOne

@@ -48,6 +48,7 @@ import com.viglet.dumont.connector.config.security.DumLogoutHandler;
 import com.viglet.dumont.connector.config.security.DumOAuth2UserService;
 import com.viglet.dumont.connector.config.security.DumOidcUserService;
 import com.viglet.dumont.connector.properties.DumAuthConfigProperties;
+import com.viglet.dumont.connector.tenant.DumTenantFilter;
 
 /**
  * Main Spring Security configuration for Dumont, mirroring the Turing
@@ -98,6 +99,7 @@ public class DumWebConfiguration {
                         DumAuthenticationEntryPoint authenticationEntryPoint,
                         DumOAuth2UserService oAuth2UserService,
                         DumOidcUserService oidcUserService,
+                        DumTenantFilter tenantFilter,
                         ObjectProvider<ClientRegistrationRepository> clientRegistrationRepository) throws Exception {
 
                 http.headers(header -> header.frameOptions(
@@ -106,6 +108,9 @@ public class DumWebConfiguration {
                 http.cors(Customizer.withDefaults());
                 // API Key filter first — bypasses session auth for Turing → Dumont calls.
                 http.addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class);
+                // T398 / §XIV.9 — resolve + bind the request tenant after authentication
+                // (no-op when dumont.multi-tenant=false). The shared base owns the gate.
+                http.addFilterAfter(tenantFilter, BasicAuthenticationFilter.class);
                 http.userDetailsService(userDetailsService);
                 http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
                 http.securityContext(securityContext -> securityContext

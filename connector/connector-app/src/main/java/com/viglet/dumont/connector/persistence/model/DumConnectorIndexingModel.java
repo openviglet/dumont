@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.TenantId;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 
@@ -71,6 +72,11 @@ public class DumConnectorIndexingModel implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true, length = 11)
     private int id;
+    // T398 / §XIV.9 — Hibernate discriminator tenant id; stamped on insert and
+    // added to every read as WHERE tenant_id = ? when multi-tenancy is on.
+    @TenantId
+    @Column(name = "tenant_id", updatable = false)
+    private String tenantId;
     @Column(length = 500)
     private String objectId;
     @Column
