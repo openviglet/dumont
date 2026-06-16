@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
@@ -37,6 +38,9 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePro
 import com.viglet.dumont.connector.commons.spi.structured.infer.DumSourceDraft;
 import com.viglet.dumont.connector.commons.spi.structured.infer.DumSourceDraftMaterializer;
 import com.viglet.dumont.connector.commons.spi.structured.infer.DumSourceInferrer;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumInMemoryPreviewSnapshotStore;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshotStore;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumStructuredPreview;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumJsoupFetcher;
 import com.viglet.dumont.connector.config.DumTuringCsrfService;
@@ -72,6 +76,9 @@ public class DumConnectorSourceInferenceApi {
     private final DumConnectorContext connectorContext;
     private final DumSourceInferrer inferrer;
     private final DumHtmlFetcher fetcher;
+    // App-wide baseline store (the controller is a singleton): an index run captures a snapshot a
+    // later preview of the same source diffs against. Survives the connector's lifetime, not restarts.
+    private final DumPreviewSnapshotStore previewSnapshotStore = new DumInMemoryPreviewSnapshotStore();
 
     public DumConnectorSourceInferenceApi(RestClient restClient, DumTuringCsrfService csrfService,
             DumConnectorContext connectorContext) {
@@ -106,7 +113,8 @@ public class DumConnectorSourceInferenceApi {
                     fetcher, request.url().trim(), request.sourceName().trim(), PROVIDER_NAME, sites,
                     resolveLocale(request.locale()));
 
-            new InferredPlugin(connectorContext, source).indexAll(source.getSourceName());
+            new InferredPlugin(connectorContext, source, previewSnapshotStore)
+                    .indexAll(source.getSourceName());
 
             log.info("Indexed confirmed inferred source '{}' to sites {}", source.getSourceName(), sites);
             return ResponseEntity.ok(new IndexResult(true, source.getSourceName(),
@@ -122,6 +130,35 @@ public class DumConnectorSourceInferenceApi {
         }
     }
 
+    @Operation(summary = "Dry-run preview of a confirmed draft: coverage + schema/document diff, no write")
+    @PostMapping("/preview")
+    public ResponseEntity<PreviewResult> preview(@RequestBody InferIndexRequest request,
+            @RequestParam(name = "sampleSize", defaultValue = "20") int sampleSize) {
+        if (request == null || request.draft() == null || request.url() == null
+                || request.url().isBlank() || request.sourceName() == null
+                || request.sourceName().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(new PreviewResult(false, null, "url, sourceName and a confirmed draft are required"));
+        }
+        Collection<String> sites = request.siteNames() == null ? List.of() : request.siteNames();
+        try {
+            DumStructuredSource source = DumSourceDraftMaterializer.materialize(request.draft(),
+                    fetcher, request.url().trim(), request.sourceName().trim(), PROVIDER_NAME, sites,
+                    resolveLocale(request.locale()));
+
+            DumStructuredPreview preview = new InferredPlugin(connectorContext, source,
+                    previewSnapshotStore).preview(source.getSourceName(), sampleSize);
+
+            return ResponseEntity.ok(new PreviewResult(true, preview, null));
+        } catch (UnsupportedOperationException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new PreviewResult(false, null, e.getMessage()));
+        } catch (RuntimeException e) {
+            log.error("Failed to preview confirmed inferred source '{}'", request.sourceName(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PreviewResult(false, null, "Preview failed: " + e.getMessage()));
+        }
+    }
+
     private static Locale resolveLocale(String locale) {
         if (locale == null || locale.isBlank()) {
             return Locale.US;
@@ -134,8 +171,9 @@ public class DumConnectorSourceInferenceApi {
             implements DumStructuredSourceProvider {
         private final DumStructuredSource source;
 
-        InferredPlugin(DumConnectorContext context, DumStructuredSource source) {
-            super(context);
+        InferredPlugin(DumConnectorContext context, DumStructuredSource source,
+                DumPreviewSnapshotStore previewSnapshotStore) {
+            super(context, null, previewSnapshotStore);
             this.source = source;
         }
 
@@ -171,5 +209,9 @@ public class DumConnectorSourceInferenceApi {
 
     /** Response of {@code POST /infer/index}. */
     public record IndexResult(boolean success, String source, String message) {
+    }
+
+    /** Response of {@code POST /infer/preview} — the dry-run report (or an error). */
+    public record PreviewResult(boolean success, DumStructuredPreview preview, String message) {
     }
 }

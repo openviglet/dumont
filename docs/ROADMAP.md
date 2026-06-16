@@ -90,15 +90,11 @@ This track has no remaining pending tasks.
 
 > **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D13** AI-assisted source inference
 > (URL → shape classification + editable strategy/field-manifest draft over Turing's LLM
-> surface; a confirmed tabular draft materializes + indexes end-to-end, grounding-safe).
+> surface; a confirmed tabular draft materializes + indexes end-to-end, grounding-safe) ·
+> **D14** Dry-run preview & schema diff (bounded sample → per-field coverage + schema/document
+> diff vs the last indexed baseline, writes nothing).
 
-- [ ] **D14** · **Dry-run preview & schema diff** — promote the current "Dry Scan" to a
-      preview index: extract a sample of N records, validate them against the declared schema
-      (D03), and show **field coverage** plus a **diff of what would change** (new / changed /
-      removed documents, newly-empty fields) before any write. De-risks both first onboarding
-      and re-config of a live source. Done: a preview run writes nothing and reports per-field
-      coverage plus an add/change/remove count for the sample.\
-      ↳ **Depends on:** D03.
+This track has no remaining pending tasks.
 
 ## Track E — Data quality & trust (make Dumont trustworthy in production)
 

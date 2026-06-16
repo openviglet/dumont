@@ -28,6 +28,11 @@ import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnrichmentChain;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumInMemoryPreviewSnapshotStore;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshot;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshotStore;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumStructuredPreview;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumStructuredPreviewer;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.commons.sn.field.TurSNFieldName;
@@ -68,15 +73,23 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
 
     protected final DumConnectorContext dumConnectorContext;
     protected final DumEnrichmentChain enrichmentChain;
+    protected final DumPreviewSnapshotStore previewSnapshotStore;
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext) {
-        this(dumConnectorContext, DumEnrichmentChain.empty());
+        this(dumConnectorContext, DumEnrichmentChain.empty(), new DumInMemoryPreviewSnapshotStore());
     }
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
             DumEnrichmentChain enrichmentChain) {
+        this(dumConnectorContext, enrichmentChain, new DumInMemoryPreviewSnapshotStore());
+    }
+
+    protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
+            DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore) {
         this.dumConnectorContext = dumConnectorContext;
         this.enrichmentChain = enrichmentChain != null ? enrichmentChain : DumEnrichmentChain.empty();
+        this.previewSnapshotStore = previewSnapshotStore != null ? previewSnapshotStore
+                : new DumInMemoryPreviewSnapshotStore();
     }
 
     /** The provider that resolves this plugin's configured structured sources. */
@@ -101,9 +114,14 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     public void indexAll(String source) {
         provider().resolve(source).ifPresentOrElse(structuredSource -> {
             DumConnectorSession session = newSession(structuredSource);
+            // Capture a fingerprint of every published document so a later dry-run preview (D14) can
+            // diff against the last full index. Only indexAll captures it — a partial indexById run
+            // would otherwise mark the rest of the catalog as removed.
+            DumPreviewSnapshot.Builder snapshot = DumPreviewSnapshot.builder(structuredSource.schema());
             structuredSource.discover()
-                    .forEach(contentId -> indexOne(structuredSource, contentId, session));
+                    .forEach(contentId -> indexOne(structuredSource, contentId, session, snapshot));
             dumConnectorContext.finishIndexing(session, false);
+            previewSnapshotStore.save(source, snapshot.build());
         }, () -> log.error("Structured source '{}' not found", source));
     }
 
@@ -111,9 +129,22 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     public void indexById(String source, List<String> contentId) {
         provider().resolve(source).ifPresentOrElse(structuredSource -> {
             DumConnectorSession session = newSession(structuredSource);
-            contentId.forEach(id -> indexOne(structuredSource, id, session));
+            contentId.forEach(id -> indexOne(structuredSource, id, session, null));
             dumConnectorContext.finishIndexing(session, true);
         }, () -> log.error("Structured source '{}' not found", source));
+    }
+
+    /**
+     * Dry-run preview (roadmap <strong>D14</strong>): extract a bounded sample of {@code sampleSize}
+     * records, validate them against the declared schema, and diff them against the last indexed
+     * baseline — <strong>writing nothing</strong>. Returns {@code null} when the source is unknown.
+     */
+    public DumStructuredPreview preview(String source, int sampleSize) {
+        return provider().resolve(source)
+                .map(structuredSource -> DumStructuredPreviewer.preview(structuredSource, sampleSize,
+                        enrichmentChain,
+                        previewSnapshotStore.load(source).orElseGet(DumPreviewSnapshot::empty)))
+                .orElse(null);
     }
 
     @Override
@@ -130,15 +161,16 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 .orElse(null);
     }
 
-    private void indexOne(DumStructuredSource source, String contentId, DumConnectorSession session) {
+    private void indexOne(DumStructuredSource source, String contentId, DumConnectorSession session,
+            DumPreviewSnapshot.Builder snapshot) {
         source.extract(contentId).ifPresentOrElse(
-                record -> publish(source, enrichmentChain.apply(source, record), session),
+                record -> publish(source, enrichmentChain.apply(source, record), session, snapshot),
                 () -> log.warn("No record extracted for id '{}' in source '{}'", contentId,
                         source.getSourceName()));
     }
 
     private void publish(DumStructuredSource source, DumStructuredRecord record,
-            DumConnectorSession session) {
+            DumConnectorSession session, DumPreviewSnapshot.Builder snapshot) {
         List<String> missing = record.missingMandatoryFields();
         if (!missing.isEmpty()) {
             log.warn("Skipping record '{}' in source '{}' — missing mandatory field(s): {}",
@@ -147,6 +179,9 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         }
         dumConnectorContext.addJobItem(new DumJobItemWithSession(
                 toJobItem(source, record), session, Set.of(), false));
+        if (snapshot != null) {
+            snapshot.add(record.id(), record.values());
+        }
     }
 
     /**

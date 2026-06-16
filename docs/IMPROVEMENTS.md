@@ -23,7 +23,6 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 ## Table of contents
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
-- [III. Dry-run preview & schema diff (D14)](#iii-dry-run-preview--schema-diff-d14)
 - [IV. Field-coverage & drift monitoring (D15)](#iv-field-coverage--drift-monitoring-d15)
 - [V. Field-level provenance (D16)](#v-field-level-provenance-d16)
 - [VI. Index-time embeddings (D17)](#vi-index-time-embeddings-d17)
@@ -57,34 +56,10 @@ Track F (semantics — embeddings, entity resolution, reusable taxonomy) is the
 platform the product name claims: it doesn't just move documents, it makes them
 semantically richer and de-duplicated on the way through.
 
-The ordering is deliberate. Tracks A–C are prerequisites; D13 (shipped — AI-assisted
-inference) opened the adoption layer, and D14/D15 are the highest-leverage *next* steps
-because they make the framework adoptable and the sidecar→native parity gate (D11)
-measurable rather than manual. Track F follows the RAG maturity on
-the Turing side.
-
-## III. Dry-run preview & schema diff (D14)
-
-**Problem.** "Dry Scan" today tells you a crawl *ran*; it does not tell you *what the
-index would look like afterward*. Re-configuring a live source (new selector, changed
-schema) is therefore a blind write — you find out it broke coverage after it shipped.
-
-**Design.** Promote Dry Scan to a **preview index**:
-- Extract a bounded sample of N records.
-- Validate each against the declared schema (D03) — flag fields that fail type/mandatory.
-- Compute a **diff vs the current index**: new / changed / removed documents, and
-  fields that would become newly-empty (the grounding-relevant case).
-- Report per-field **coverage** over the sample.
-- Write nothing.
-
-This shares its coverage computation with D15 (same metric, different trigger: preview
-vs scheduled run).
-
-**Touch points.** `DumConnectorApi` / `DumConnectorMonitoringApi`; `dumont-react` source
-page (extend the existing Dry Scan action + a results panel).
-
-**Done.** A preview run writes nothing and reports per-field coverage plus an
-add/change/remove count for the sample.
+The ordering is deliberate. Tracks A–C are prerequisites; D13/D14 (shipped — AI-assisted
+inference + dry-run preview) opened the adoption layer, and D15 is the highest-leverage
+*next* step because it makes partial degradation visible and the sidecar→native parity gate
+(D11) measurable rather than manual. Track F follows the RAG maturity on the Turing side.
 
 ## IV. Field-coverage & drift monitoring (D15)
 

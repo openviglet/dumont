@@ -60,7 +60,21 @@
       "confirmIndex": "Confirm & Index",
       "sourceNameRequired": "A source name is required before indexing.",
       "indexed": "Indexing started for {{source}}",
-      "indexFailed": "Indexing the confirmed source failed."
+      "indexFailed": "Indexing the confirmed source failed.",
+      "dryRunPreview": "Dry-run preview",
+      "previewed": "Preview ready — nothing was written.",
+      "previewFailed": "Preview failed — could not fetch or extract a sample.",
+      "previewTitle": "3. Dry-run preview",
+      "previewDesc": "Sampled {{sampled}} of {{discovered}} discovered records. Nothing was written to the index.",
+      "diffAdded": "{{count}} added",
+      "diffChanged": "{{count}} changed",
+      "diffRemoved": "{{count}} removed",
+      "diffUnchanged": "{{count}} unchanged",
+      "firstRun": "First run — no prior index to diff against.",
+      "coverage": "Field coverage",
+      "colCoverage": "Coverage",
+      "schemaDiff": "Schema changes vs. the last index",
+      "skipped": "{{count}} record(s) would be skipped (missing a mandatory field)"
     },
     "detail": {
       "title": "Settings",

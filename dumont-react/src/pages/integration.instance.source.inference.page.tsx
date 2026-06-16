@@ -23,10 +23,11 @@ import {
   FIELD_TYPES,
   type DumInferredField,
   type DumSourceDraft,
+  type DumStructuredPreview,
   type TurSEFieldType,
 } from "@/models/integration/integration-source-inference.model";
 import { TurIntegrationSourceInferenceService } from "@/services/integration/integration-source-inference.service";
-import { IconPlus, IconTrash, IconWand } from "@tabler/icons-react";
+import { IconEye, IconPlus, IconTrash, IconWand } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -47,6 +48,8 @@ export default function IntegrationInstanceSourceInferencePage() {
   const [url, setUrl] = useState("");
   const [inferring, setInferring] = useState(false);
   const [indexing, setIndexing] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [preview, setPreview] = useState<DumStructuredPreview | null>(null);
   const [draft, setDraft] = useState<DumSourceDraft | null>(null);
   const [sourceName, setSourceName] = useState("");
   const [siteNames, setSiteNames] = useState("");
@@ -101,6 +104,38 @@ export default function IntegrationInstanceSourceInferencePage() {
     setDraft((d) => (d ? { ...d, fields: d.fields.filter((_, i) => i !== index) } : d));
   }
 
+  function buildRequest(d: DumSourceDraft) {
+    return {
+      url: url.trim(),
+      sourceName: sourceName.trim(),
+      siteNames: siteNames.split(",").map((s) => s.trim()).filter(Boolean),
+      locale: locale.trim() || undefined,
+      draft: d,
+    };
+  }
+
+  async function onPreview() {
+    if (!draft || !sourceName.trim()) {
+      toast.error(t("integration.sourceInference.sourceNameRequired"));
+      return;
+    }
+    setPreviewing(true);
+    try {
+      const result = await service.preview(buildRequest(draft));
+      if (result.success && result.preview) {
+        setPreview(result.preview);
+        toast.success(t("integration.sourceInference.previewed"));
+      } else {
+        toast.error(result.message ?? t("integration.sourceInference.previewFailed"));
+      }
+    } catch (error) {
+      console.error("Preview error", error);
+      toast.error(t("integration.sourceInference.previewFailed"));
+    } finally {
+      setPreviewing(false);
+    }
+  }
+
   async function onConfirmIndex() {
     if (!draft || !sourceName.trim()) {
       toast.error(t("integration.sourceInference.sourceNameRequired"));
@@ -108,13 +143,7 @@ export default function IntegrationInstanceSourceInferencePage() {
     }
     setIndexing(true);
     try {
-      const result = await service.index({
-        url: url.trim(),
-        sourceName: sourceName.trim(),
-        siteNames: siteNames.split(",").map((s) => s.trim()).filter(Boolean),
-        locale: locale.trim() || undefined,
-        draft,
-      });
+      const result = await service.index(buildRequest(draft));
       if (result.success) {
         toast.success(t("integration.sourceInference.indexed", { source: result.source }));
       } else {
@@ -360,7 +389,17 @@ export default function IntegrationInstanceSourceInferencePage() {
                     </Table>
                   </div>
 
-                  <div className="flex justify-end pt-3 border-t">
+                  <div className="flex justify-end gap-2 pt-3 border-t">
+                    <GradientButton
+                      type="button"
+                      variant="outline"
+                      onClick={onPreview}
+                      loading={previewing}
+                      disabled={!isTabular || draft.fields.length === 0 || !sourceName.trim()}
+                    >
+                      <IconEye className="size-4 mr-1" />
+                      {t("integration.sourceInference.dryRunPreview")}
+                    </GradientButton>
                     <GradientButton
                       type="button"
                       variant="success"
@@ -376,7 +415,132 @@ export default function IntegrationInstanceSourceInferencePage() {
             </SectionCard.Content>
           </SectionCard>
         )}
+
+        {/* Step 3 — dry-run preview (D14): coverage + diff, nothing written */}
+        {preview && <PreviewPanel preview={preview} />}
       </div>
     </>
+  );
+}
+
+function PreviewPanel({ preview }: { preview: DumStructuredPreview }) {
+  const { t } = useTranslation();
+  const diff = preview.documentDiff;
+  const schema = preview.schemaDiff;
+  const hasSchemaChange =
+    schema.addedFields.length > 0 ||
+    schema.removedFields.length > 0 ||
+    schema.changedFields.length > 0;
+
+  return (
+    <SectionCard variant="cyan">
+      <SectionCard.StaticHeader
+        icon={IconEye}
+        title={t("integration.sourceInference.previewTitle")}
+        description={t("integration.sourceInference.previewDesc", {
+          sampled: preview.sampled,
+          discovered: preview.discovered,
+        })}
+      />
+      <SectionCard.Content>
+        {/* Document diff summary */}
+        <div className="flex flex-wrap gap-2 py-2">
+          <Badge variant="outline" className="text-emerald-600 border-emerald-300">
+            {t("integration.sourceInference.diffAdded", { count: diff.added })}
+          </Badge>
+          <Badge variant="outline" className="text-amber-600 border-amber-300">
+            {t("integration.sourceInference.diffChanged", { count: diff.changed })}
+          </Badge>
+          <Badge variant="outline" className="text-rose-600 border-rose-300">
+            {t("integration.sourceInference.diffRemoved", { count: diff.removed })}
+          </Badge>
+          <Badge variant="outline" className="text-muted-foreground">
+            {t("integration.sourceInference.diffUnchanged", { count: diff.unchanged })}
+          </Badge>
+          {!preview.baseline && (
+            <span className="text-sm italic text-muted-foreground self-center">
+              {t("integration.sourceInference.firstRun")}
+            </span>
+          )}
+        </div>
+
+        {/* Per-field coverage */}
+        <div className="py-3 border-t">
+          <span className="text-sm font-medium">
+            {t("integration.sourceInference.coverage")}
+          </span>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("integration.sourceInference.colName")}</TableHead>
+                <TableHead>{t("integration.sourceInference.colType")}</TableHead>
+                <TableHead className="text-center">
+                  {t("integration.sourceInference.colMandatory")}
+                </TableHead>
+                <TableHead className="text-right">
+                  {t("integration.sourceInference.colCoverage")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {preview.coverage.map((c) => (
+                <TableRow key={c.field}>
+                  <TableCell>{c.field}</TableCell>
+                  <TableCell className="text-muted-foreground">{c.type}</TableCell>
+                  <TableCell className="text-center">{c.mandatory ? "✓" : ""}</TableCell>
+                  <TableCell className="text-right">
+                    <span
+                      className={
+                        c.percent === 0
+                          ? "text-rose-600"
+                          : c.percent < 50
+                            ? "text-amber-600"
+                            : "text-emerald-600"
+                      }
+                    >
+                      {c.present}/{c.total} ({c.percent}%)
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Schema diff vs the baseline */}
+        {hasSchemaChange && (
+          <div className="py-3 border-t space-y-1 text-sm">
+            <span className="font-medium">{t("integration.sourceInference.schemaDiff")}</span>
+            {schema.addedFields.length > 0 && (
+              <p className="text-emerald-600">
+                + {schema.addedFields.join(", ")}
+              </p>
+            )}
+            {schema.removedFields.length > 0 && (
+              <p className="text-rose-600">− {schema.removedFields.join(", ")}</p>
+            )}
+            {schema.changedFields.map((fc) => (
+              <p key={fc.field} className="text-amber-600">
+                ~ {fc.field}: {fc.change}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Records that would be skipped (missing a mandatory field) */}
+        {preview.skipped.length > 0 && (
+          <div className="py-3 border-t text-sm">
+            <span className="font-medium text-amber-600">
+              {t("integration.sourceInference.skipped", { count: preview.skipped.length })}
+            </span>
+            <p className="text-muted-foreground">
+              {preview.skipped
+                .map((s) => `${s.id} (${s.missingMandatoryFields.join(", ")})`)
+                .join("; ")}
+            </p>
+          </div>
+        )}
+      </SectionCard.Content>
+    </SectionCard>
   );
 }

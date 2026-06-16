@@ -128,3 +128,16 @@
   human-confirmed draft — never auto-publishes). `dumont-react` source-inference wizard
   (`/source-inference`) renders the editable draft. Proven by `DumSourceInferrerTest`,
   `DumInferredSourceIndexingTest`, `DumTuringSourceInferenceModelTest`.
+- **D14** — Dry-run preview & schema diff: `connector-commons`
+  `…spi.structured.preview` — `DumStructuredPreviewer` extracts a bounded sample through the
+  same `discover → extract → enrich` path, computes per-field coverage, reports records that
+  would be skipped (missing a mandatory field), and diffs the would-be documents against the
+  last indexed baseline (add / change / remove + newly-empty fields) plus a schema diff —
+  writing nothing. The baseline is a compact `DumPreviewSnapshot` (schema fingerprint + per-id
+  digest, no values) captured by `DumStructuredSourcePlugin` at the end of each full `indexAll`
+  via a `DumPreviewSnapshotStore` (`DumInMemoryPreviewSnapshotStore` default); first onboarding
+  (empty baseline) reads as all-added. `connector-app` `DumConnectorSourceInferenceApi` exposes
+  `POST /api/v2/connector/source/infer/preview?sampleSize=N`; the `dumont-react`
+  source-inference wizard gains a "Dry-run preview" action + a coverage / diff panel. Shares its
+  coverage metric with D15. Proven by `DumStructuredPreviewerTest`,
+  `DumStructuredPreviewPluginTest`.

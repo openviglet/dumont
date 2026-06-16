@@ -60,7 +60,21 @@
       "confirmIndex": "Confirmar e Indexar",
       "sourceNameRequired": "Um nome de fonte é obrigatório antes de indexar.",
       "indexed": "Indexação iniciada para {{source}}",
-      "indexFailed": "A indexação da fonte confirmada falhou."
+      "indexFailed": "A indexação da fonte confirmada falhou.",
+      "dryRunPreview": "Pré-visualização (dry-run)",
+      "previewed": "Pré-visualização pronta — nada foi gravado.",
+      "previewFailed": "Falha na pré-visualização — não foi possível buscar ou extrair uma amostra.",
+      "previewTitle": "3. Pré-visualização (dry-run)",
+      "previewDesc": "Amostra de {{sampled}} de {{discovered}} registros descobertos. Nada foi gravado no índice.",
+      "diffAdded": "{{count}} adicionado(s)",
+      "diffChanged": "{{count}} alterado(s)",
+      "diffRemoved": "{{count}} removido(s)",
+      "diffUnchanged": "{{count}} inalterado(s)",
+      "firstRun": "Primeira execução — sem índice anterior para comparar.",
+      "coverage": "Cobertura de campos",
+      "colCoverage": "Cobertura",
+      "schemaDiff": "Mudanças de esquema vs. a última indexação",
+      "skipped": "{{count}} registro(s) seriam ignorados (campo obrigatório ausente)"
     },
     "detail": {
       "title": "Configurações",

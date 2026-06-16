@@ -1,13 +1,14 @@
 import type {
   DumInferIndexResult,
+  DumInferPreviewResult,
   DumSourceDraft,
 } from "@/models/integration/integration-source-inference.model";
 import axios, { type AxiosInstance } from "axios";
 
 /**
- * Calls the D13 source-inference endpoints. The integration segment is stripped
- * by the standalone axios interceptor, so these resolve to
- * `/api/v2/connector/source/infer` and `/api/v2/connector/source/infer/index`.
+ * Calls the D13 source-inference + D14 dry-run preview endpoints. The integration segment
+ * is stripped by the standalone axios interceptor, so these resolve to
+ * `/api/v2/connector/source/infer`, `/infer/index` and `/infer/preview`.
  */
 export class TurIntegrationSourceInferenceService {
   private integrationId: string;
@@ -39,6 +40,25 @@ export class TurIntegrationSourceInferenceService {
     const { data } = await this.axiosInstance.post<DumInferIndexResult>(
       `${this.baseUrl}/index`,
       request
+    );
+    return data;
+  }
+
+  /** Dry-run preview of a confirmed draft (D14) — coverage + schema/document diff, writes nothing. */
+  async preview(
+    request: {
+      url: string;
+      sourceName: string;
+      siteNames: string[];
+      locale?: string;
+      draft: DumSourceDraft;
+    },
+    sampleSize = 20
+  ): Promise<DumInferPreviewResult> {
+    const { data } = await this.axiosInstance.post<DumInferPreviewResult>(
+      `${this.baseUrl}/preview`,
+      request,
+      { params: { sampleSize } }
     );
     return data;
   }
