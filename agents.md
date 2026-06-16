@@ -2,6 +2,27 @@
 
 ## Development Guidelines
 
+### Roadmap & docs maintenance
+
+The roadmap lives in `docs/` and follows the same model as the sibling Turing docs.
+Each file has one job — keep them in sync and never duplicate content:
+
+| File | Single responsibility |
+|------|-----------------------|
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | **Active backlog only** — pending `D##` tasks with deps + "done" criteria. The source of truth for what's *not yet* shipped. |
+| [`docs/CHANGELOG.md`](docs/CHANGELOG.md) | **Shipped ledger** — one terse line per shipped task (what + where + commit). `git log` is the authoritative detail. |
+| [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md) | Design rationale (what & why) for *unshipped* tasks only. |
+| [`docs/STRATEGY.md`](docs/STRATEGY.md) | Positioning, moat, bets, non-goals. |
+
+**When a task ships (always do this on completion):**
+1. **Move** its entry from `ROADMAP.md` → `CHANGELOG.md` as a one-liner under its
+   track, referencing the commit. **Delete** the task from `ROADMAP.md` — shipped
+   work is not left there, even checked off. Stable `D##` IDs are never reused, so
+   `↳ Depends on:` lines on other tasks still resolve via the CHANGELOG.
+2. **Remove** the task's design subsection from `IMPROVEMENTS.md` — do not leave a
+   shipped implementation report there or in `ROADMAP.md` (`git log` is the history).
+3. Keep entries terse: implementation detail belongs in code/commits, not the docs.
+
 ### Project Structure
 - **connector/connector-app**: Spring Boot 4 backend (Java 21), main application — runs on port 30130
 - **connector/connector-commons**: Connector API interfaces and common classes

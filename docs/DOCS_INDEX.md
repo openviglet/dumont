@@ -19,7 +19,8 @@ layer (it crawls/ingests content from external sources and publishes it into
 | Document | Holds | When to read |
 |----------|-------|--------------|
 | [STRATEGY.md](STRATEGY.md) | Positioning, moat, the two bets (ingestion + adoption/trust), non-goals | Understand the "why" |
-| [ROADMAP.md](ROADMAP.md) | Tracks A–F with stable `D##` task IDs and done criteria | Decide the "what" and "when" |
+| [ROADMAP.md](ROADMAP.md) | Tracks A–F with stable `D##` task IDs and done criteria — **active backlog only** | Decide the "what" and "when" |
+| [CHANGELOG.md](CHANGELOG.md) | Shipped ledger — one line per shipped `D##` task (what + where + commit) | See what already shipped |
 | [IMPROVEMENTS.md](IMPROVEMENTS.md) | Design rationale per active `D##` task | Implement the "how" |
 
 ## Workflow
@@ -30,6 +31,9 @@ layer (it crawls/ingests content from external sources and publishes it into
 - A task that needs another done first carries an **`↳ Depends on:`** line.
 - Design rationale (the what & why behind a task) → **IMPROVEMENTS.md**; remove a task's
   detail there once it ships (`git log` is authoritative history).
+- **When a task ships → move its one-liner from ROADMAP to [CHANGELOG.md](CHANGELOG.md)**
+  and delete it from ROADMAP (active backlog only). See `agents.md` → "Roadmap & docs
+  maintenance".
 - Strategy/positioning change → update **STRATEGY.md**.
 
 ## Companion docs in sibling repos
