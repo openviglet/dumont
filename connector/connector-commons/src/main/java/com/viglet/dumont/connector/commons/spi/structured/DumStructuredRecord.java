@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.viglet.dumont.connector.commons.ground.DumGrounding;
 import com.viglet.turing.commons.se.field.TurSEFieldType;
 
 /**
@@ -190,7 +191,7 @@ public final class DumStructuredRecord {
         }
 
         private static boolean isBlank(Object value) {
-            return value == null || (value instanceof CharSequence cs && cs.toString().isBlank());
+            return DumGrounding.isBlank(value);
         }
 
         public DumStructuredRecord build() {

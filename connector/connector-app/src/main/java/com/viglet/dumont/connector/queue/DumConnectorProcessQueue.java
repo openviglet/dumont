@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
+import com.viglet.dumont.connector.commons.ground.DumGrounding;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
@@ -59,6 +60,11 @@ public class DumConnectorProcessQueue {
         }
         log.info("Processing job from queue with provider: {}", indexingPlugin.getProviderName());
         for (TurSNJobItem turSNJobItem : turSNJobItems) {
+            // Grounding contract, enforced end-to-end (roadmap D03): no matter how a connector
+            // assembled its attributes, an absent field must not reach the backend as an empty
+            // value and pollute facets. The structured SPI already grounds at record-build time;
+            // this is the single boundary that also covers the loose-map connectors.
+            turSNJobItem.setAttributes(DumGrounding.groundAttributes(turSNJobItem.getAttributes()));
             if (!locales.contains(turSNJobItem.getLocale())) {
                 locales.add(turSNJobItem.getLocale());
             }

@@ -32,16 +32,9 @@ relations (what a task *enables*) live in the task text.
 > **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D01** Structured-source SPI
 > (`discover()/extract(id)→DumStructuredRecord` + schema-as-code + generic publish
 > loop) · **D02** Declarative extraction strategies (Sitemap / HtmlListing /
-> TabularListing). Both enable the tasks below.
+> TabularListing) · **D03** Schema-as-code + conservative grounding enforced
+> end-to-end. All enable the tasks below.
 
-- [ ] **D03** · **Schema-as-code + conservative grounding** — let a source declare its
-      fields once (name, `TurSEFieldType`, multi-valued, facet, mandatory) via
-      `TurSNJobAttributeSpec`, and enforce the grounding contract end-to-end: a record
-      with an absent field emits **no attribute** for it (not `""`). Pairs with Turing
-      **T381/T382**. Done: a source with optional fields produces documents where
-      absent fields are absent in the `TurSNJobItem`; facets are not polluted by empty
-      values.\
-      ↳ **Depends on:** D01. **Enables** D13, D14, D15, D16.
 - [ ] **D04** · **Pluggable enrichment stage** — a hook in the indexing chain to
       derive/normalize fields before publish (canonical taxonomy mapping, region
       derivation, and **optional LLM enrichment** for thin descriptions / ambiguous

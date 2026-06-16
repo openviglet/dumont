@@ -26,3 +26,10 @@
   plus `DumHtmlFieldExtractor` / `DumFieldRule` and the `DumHtmlFetcher` seam.
   Each strategy unit-tested; tabular catalog indexed end-to-end by
   `DumTabularSourcePluginTest`. (`a63f11c`)
+- **D03** — Conservative grounding enforced end-to-end: `connector-commons`
+  `…commons.ground.DumGrounding` lifts the grounding rule (drop null / blank / empty)
+  into one reusable op; `DumStructuredRecord` reuses its blank predicate, and
+  `DumConnectorProcessQueue` grounds every `TurSNJobItem` at the single indexing
+  boundary — so the loose-map connectors (web crawler, AEM, DB, assets) can no longer
+  leak `""` into facets, not just the structured SPI. Proven by `DumGroundingTest` +
+  `DumConnectorProcessQueueTest`. Pairs with Turing **T381/T382**.
