@@ -61,6 +61,10 @@ public class DumWCSource implements Serializable {
     private String username;
     @Column
     private String password;
+    @Column
+    private Boolean enableSitemap;
+    @Column
+    private Integer crawlDelay;
 
     @Builder.Default
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)

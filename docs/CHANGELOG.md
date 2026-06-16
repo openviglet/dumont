@@ -55,3 +55,12 @@
   → BOM / `<meta charset>` → UTF-8 default — keeping the detected charset on output so
   pt-BR accents survive serialization. Proven by `DumWCPluginProcessCharsetTest`
   (Latin-1 + UTF-8 fixtures, header-wins precedence). Enables D07.
+- **D06** — Sitemap & robots awareness: `wc-plugin` `DumWCPluginProcess`, gated per source
+  by `DumWCSource.enableSitemap`, fetches `robots.txt` and seeds entry points from its
+  `Sitemap:` directives (falling back to `/sitemap.xml`), following `<sitemapindex>`
+  documents up to `dumont.wc.sitemap.maxDepth` — so a source with only a root URL crawls
+  via its sitemap. Requests are spaced by `effectiveDelayMs` = max(per-source
+  `DumWCSource.crawlDelay`, advertised `Crawl-delay` capped at `dumont.wc.crawlDelay.maxMs`),
+  and the queue now drains once after all seeds (fixing the sitemap-only case). Parsing
+  split into testable `DumWCRobotsTxt` / `DumWCSitemap` records; proven by
+  `DumWCRobotsTxtTest`, `DumWCSitemapTest`, `DumWCPluginProcessDelayTest`. Enables D08, D12.

@@ -81,8 +81,11 @@ public class DumWCPluginProcess {
     private Collection<String> snSites;
     private final int timeout;
     private final String referrer;
+    private final long maxCrawlDelayMs;
+    private final int sitemapMaxDepth;
     private String username;
     private String password;
+    private long requestDelayMs;
     private final DumWCAllowUrlRepository dumWCAllowUrlRepository;
     private final DumWCNotAllowUrlRepository dumWCNotAllowUrlRepository;
     private final DumWCFileExtensionRepository dumWCFileExtensionRepository;
@@ -91,6 +94,8 @@ public class DumWCPluginProcess {
 
     public DumWCPluginProcess(@Value("${dumont.wc.timeout:5000}") int timeout,
             @Value("${dumont.wc.referrer:https://www.google.com}") String referrer,
+            @Value("${dumont.wc.crawlDelay.maxMs:30000}") long maxCrawlDelayMs,
+            @Value("${dumont.wc.sitemap.maxDepth:3}") int sitemapMaxDepth,
             DumWCAllowUrlRepository dumWCAllowUrlRepository,
             DumWCNotAllowUrlRepository dumWCNotAllowUrlRepository,
             DumWCFileExtensionRepository dumWCFileExtensionRepository,
@@ -99,6 +104,8 @@ public class DumWCPluginProcess {
             DumConnectorContext dumConnectorContext) {
         this.timeout = timeout;
         this.referrer = referrer;
+        this.maxCrawlDelayMs = maxCrawlDelayMs;
+        this.sitemapMaxDepth = sitemapMaxDepth;
         this.dumWCAllowUrlRepository = dumWCAllowUrlRepository;
         this.dumWCNotAllowUrlRepository = dumWCNotAllowUrlRepository;
         this.dumWCFileExtensionRepository = dumWCFileExtensionRepository;
@@ -138,10 +145,16 @@ public class DumWCPluginProcess {
         this.username = dumWCSource.getUsername();
         this.password = dumWCSource.getPassword();
         log.info("User Agent: {}", userAgent);
-        startingPoints.forEach(url -> {
-            queueLinks.offer(this.website + url);
-            getPagesFromQueue(dumWCSource, dumConnectorSession);
-        });
+        // D06: robots.txt feeds both sitemap discovery and the advertised crawl delay.
+        DumWCRobotsTxt robots = sitemapEnabled(dumWCSource) ? fetchRobotsTxt() : DumWCRobotsTxt.EMPTY;
+        this.requestDelayMs = effectiveDelayMs(dumWCSource.getCrawlDelay(), robots.crawlDelayMs(),
+                maxCrawlDelayMs);
+        log.info("Request delay: {} ms", requestDelayMs);
+        startingPoints.forEach(url -> queueLinks.offer(this.website + url));
+        if (sitemapEnabled(dumWCSource)) {
+            seedFromSitemaps(robots);
+        }
+        getPagesFromQueue(dumWCSource, dumConnectorSession);
         finished(dumConnectorContext, dumConnectorSession);
     }
 
@@ -159,7 +172,112 @@ public class DumWCPluginProcess {
         while (!queueLinks.isEmpty()) {
             String url = queueLinks.poll();
             getPage(dumWCSource, url, source);
+            applyRequestDelay();
         }
+    }
+
+    private static boolean sitemapEnabled(DumWCSource dumWCSource) {
+        return Boolean.TRUE.equals(dumWCSource.getEnableSitemap());
+    }
+
+    /**
+     * The delay to enforce between requests (roadmap D06): the larger of the per-source configured
+     * delay and the {@code Crawl-delay} advertised in {@code robots.txt}, the latter capped so a
+     * hostile or misconfigured directive cannot stall a crawl indefinitely.
+     */
+    static long effectiveDelayMs(Integer configuredDelayMs, long robotsCrawlDelayMs,
+            long maxCrawlDelayMs) {
+        long configured = configuredDelayMs != null && configuredDelayMs > 0 ? configuredDelayMs : 0L;
+        long robots = robotsCrawlDelayMs > 0 ? Math.min(robotsCrawlDelayMs, maxCrawlDelayMs) : 0L;
+        return Math.max(configured, robots);
+    }
+
+    private void applyRequestDelay() {
+        if (requestDelayMs <= 0) {
+            return;
+        }
+        try {
+            Thread.sleep(requestDelayMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Discover entry points from the sitemaps advertised in {@code robots.txt}, falling back to the
+     * conventional {@code /sitemap.xml} when none are advertised (roadmap D06). Sitemap-index
+     * documents are followed up to {@code dumont.wc.sitemap.maxDepth} levels.
+     */
+    private void seedFromSitemaps(DumWCRobotsTxt robots) {
+        List<String> roots = robots.sitemaps().isEmpty()
+                ? List.of(baseUrl() + "/sitemap.xml")
+                : robots.sitemaps();
+        Set<String> pages = new HashSet<>();
+        Set<String> visitedSitemaps = new HashSet<>();
+        roots.forEach(sitemap -> collectSitemapPages(sitemap, sitemapMaxDepth, pages, visitedSitemaps));
+        log.info("Sitemap discovery seeded {} entry point(s) from {} sitemap(s)", pages.size(),
+                visitedSitemaps.size());
+        pages.forEach(this::seedEntryPoint);
+    }
+
+    private void collectSitemapPages(String sitemapUrl, int depthLeft, Set<String> pages,
+            Set<String> visitedSitemaps) {
+        if (depthLeft < 0 || !visitedSitemaps.add(sitemapUrl)) {
+            return;
+        }
+        DumWCSitemap sitemap = fetchSitemap(sitemapUrl);
+        if (sitemap == null) {
+            return;
+        }
+        if (sitemap.index()) {
+            sitemap.locations()
+                    .forEach(child -> collectSitemapPages(child, depthLeft - 1, pages, visitedSitemaps));
+        } else {
+            pages.addAll(sitemap.locations());
+        }
+    }
+
+    private void seedEntryPoint(String absoluteUrl) {
+        String pageUrl = getPageUrl(absoluteUrl);
+        if (pageUrl.startsWith(this.website) && visitedLinks.add(pageUrl)) {
+            queueLinks.offer(pageUrl);
+        }
+    }
+
+    private DumWCRobotsTxt fetchRobotsTxt() {
+        String robotsUrl = baseUrl() + "/robots.txt";
+        try {
+            return DumWCRobotsTxt.parse(fetchAsString(robotsUrl), userAgent);
+        } catch (IOException e) {
+            log.warn("Could not fetch robots.txt at {}: {}", robotsUrl, e.getMessage());
+            return DumWCRobotsTxt.EMPTY;
+        }
+    }
+
+    private DumWCSitemap fetchSitemap(String sitemapUrl) {
+        try {
+            return DumWCSitemap.parse(connection(sitemapUrl).execute().bodyAsBytes(), sitemapUrl);
+        } catch (IOException | RuntimeException e) {
+            log.warn("Could not fetch sitemap at {}: {}", sitemapUrl, e.getMessage());
+            return null;
+        }
+    }
+
+    private String fetchAsString(String url) throws IOException {
+        return connection(url).execute().body();
+    }
+
+    private Connection connection(String url) {
+        Connection connection = Jsoup.connect(url).userAgent(userAgent).referrer(referrer)
+                .timeout(timeout).ignoreContentType(true);
+        if (isBasicAuth()) {
+            connection.header(AUTHORIZATION, "%s %s".formatted(BASIC, getBasicAuth()));
+        }
+        return connection;
+    }
+
+    private String baseUrl() {
+        return this.website.endsWith("/") ? removeLastChar(this.website) : this.website;
     }
 
     private void getPage(DumWCSource dumWCSource, String url, DumConnectorSession source) {

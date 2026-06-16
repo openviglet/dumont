@@ -104,6 +104,8 @@ public class DumWCSourceApi {
             existing.setLocaleClass(wcSource.getLocaleClass());
             existing.setUsername(wcSource.getUsername());
             existing.setPassword(wcSource.getPassword());
+            existing.setEnableSitemap(wcSource.getEnableSitemap());
+            existing.setCrawlDelay(wcSource.getCrawlDelay());
             existing.setTurSNSites(wcSource.getTurSNSites());
             existing.setStartingPoints(wcSource.getStartingPoints());
             existing.setAllowUrls(wcSource.getAllowUrls());

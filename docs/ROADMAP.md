@@ -42,13 +42,10 @@ relations (what a task *enables*) live in the task text.
 > ordinary non-English, JS-rendered or rate-limited sites — independent of cursarei.
 
 > **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D05** Charset auto-detect
-> (HTTP `Content-Type` header / `<meta charset>` / BOM → UTF-8 default). Enables D07.
+> (HTTP `Content-Type` header / `<meta charset>` / BOM → UTF-8 default; enables D07) ·
+> **D06** Sitemap & robots awareness (robots.txt → sitemap entry-point discovery +
+> capped `Crawl-delay` / per-source request delay; enables D08, D12).
 
-- [ ] **D06** · **Sitemap & robots awareness** — discover entry points from
-      `robots.txt` → `sitemap.xml` (instead of manual starting points only), and honor
-      `Crawl-delay` (capped) plus a configurable per-source request delay. Done: a
-      source with only a root URL discovers pages via its sitemap and spaces requests
-      per the advertised/configured delay.
 - [ ] **D07** · **Pluggable fetcher SPI** — extract the fetch step behind an interface
       so the default Jsoup fetcher can be swapped for a **TLS-fingerprint-impersonating**
       client or a **headless renderer** per source, with a configurable user-agent

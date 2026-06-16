@@ -26,6 +26,8 @@ public class DumWCSourceExchange {
     private Collection<String> turSNSites = new HashSet<>();
     private String username;
     private String password;
+    private Boolean enableSitemap;
+    private Integer crawlDelay;
     @Builder.Default
     private Collection<String> startingPoints = new HashSet<>();
     @Builder.Default
