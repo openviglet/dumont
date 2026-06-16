@@ -23,7 +23,6 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 ## Table of contents
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
-- [IV. Field-coverage & drift monitoring (D15)](#iv-field-coverage--drift-monitoring-d15)
 - [V. Field-level provenance (D16)](#v-field-level-provenance-d16)
 - [VI. Index-time embeddings (D17)](#vi-index-time-embeddings-d17)
 - [VII. Cross-source entity resolution & dedup (D18)](#vii-cross-source-entity-resolution--dedup-d18)
@@ -56,33 +55,11 @@ Track F (semantics — embeddings, entity resolution, reusable taxonomy) is the
 platform the product name claims: it doesn't just move documents, it makes them
 semantically richer and de-duplicated on the way through.
 
-The ordering is deliberate. Tracks A–C are prerequisites; D13/D14 (shipped — AI-assisted
-inference + dry-run preview) opened the adoption layer, and D15 is the highest-leverage
-*next* step because it makes partial degradation visible and the sidecar→native parity gate
-(D11) measurable rather than manual. Track F follows the RAG maturity on the Turing side.
-
-## IV. Field-coverage & drift monitoring (D15)
-
-**Problem.** The worst failure mode of a structured-source connector is **silent**: a
-catalog changes its HTML, a selector stops matching, a field quietly goes to 0%
-coverage, and nobody notices until search/RAG quality visibly degrades — long after the
-run "succeeded". D09's failure report covers *total* failure (zero items); it does not
-catch *partial* degradation.
-
-**Design.**
-- After each run, record per-field coverage % (fraction of documents in which the field
-  is present — naturally available once D03's schema is in force).
-- Keep a short history per source and flag **drift**: a field whose coverage drops beyond
-  a threshold between consecutive runs.
-- Surface via `DumConnectorMonitoringApi` (`/monitoring/indexing`) and a `dumont-react`
-  panel built on `SectionCard`; reuse `AiSummaryPanel` (the shared Turing/Dumont
-  abstraction) for an LLM-written health summary.
-
-**Touch points.** `DumConnectorMonitoringApi`; coverage history store; `dumont-react`
-monitoring/health panel.
-
-**Done.** A fixture whose layout changes between two runs raises a drift flag naming the
-affected fields; coverage history is queryable per source.
+The ordering is deliberate. Tracks A–C are prerequisites; D13/D14 (AI-assisted inference +
+dry-run preview) opened the adoption layer and D15 (field-coverage & drift monitoring) made
+partial degradation visible and the sidecar→native parity gate (D11) measurable rather than
+manual — all shipped. D16 (field-level provenance) is the highest-leverage *next* step on the
+trust track. Track F follows the RAG maturity on the Turing side.
 
 ## V. Field-level provenance (D16)
 

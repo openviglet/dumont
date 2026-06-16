@@ -141,3 +141,19 @@
   source-inference wizard gains a "Dry-run preview" action + a coverage / diff panel. Shares its
   coverage metric with D15. Proven by `DumStructuredPreviewerTest`,
   `DumStructuredPreviewPluginTest`.
+
+## Track E — Data quality & trust
+
+- **D15** — Field-coverage & drift monitoring: `connector-commons`
+  `…spi.structured.coverage` — `DumCoverageMonitor` derives per-field coverage from the same
+  full-run fingerprint D14 captures (no extra extraction pass) and flags **drift** (a field whose
+  coverage drops ≥ `dumont.coverage.driftThreshold` points between two runs — the signal of a
+  layout/selector break); `DumCoverageSnapshot` / `DumFieldCoverage` / `DumCoverageDrift` records +
+  a `DumCoverageHistoryStore` SPI (`DumInMemoryCoverageHistoryStore` default). `DumStructuredSourcePlugin`
+  appends a coverage snapshot to the history at the end of every `indexAll`. `connector-app`
+  `DumJpaCoverageHistoryStore` (`dum_coverage_run`) persists the series per source;
+  `DumConnectorMonitoringApi` exposes `coverage/{source}`, `coverage/{source}/drift`, and an LLM
+  `coverage/{source}/summary` (via `DumCoverageHealthService` over Turing's `POST /api/v2/summary`).
+  `dumont-react` `coverage` page renders the latest-run coverage, a drift banner naming affected
+  fields, run history, and an `AiSummaryPanel` health summary. Proven by `DumCoverageMonitorTest`,
+  `DumStructuredCoveragePluginTest`. Complements D09.

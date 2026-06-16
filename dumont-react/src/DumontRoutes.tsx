@@ -1,6 +1,6 @@
 import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
 
-import { IconAdjustmentsSearch, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools, IconWand } from "@tabler/icons-react";
+import { IconActivityHeartbeat, IconAdjustmentsSearch, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools, IconWand } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Page } from "./components/page";
@@ -8,6 +8,7 @@ import IntegrationInstanceAssetsSourceListPage from "./pages/integration.instanc
 import IntegrationInstanceAssetsSourcePage from "./pages/integration.instance.assets.source.page";
 import IntegrationInstanceDbSourceListPage from "./pages/integration.instance.db.source.list.page";
 import IntegrationInstanceDbSourcePage from "./pages/integration.instance.db.source.page";
+import IntegrationInstanceCoveragePage from "./pages/integration.instance.coverage.page";
 import IntegrationInstanceDoubleCheckPage from "./pages/integration.instance.double.check.page";
 import IntegrationInstanceEdsSourceListPage from "./pages/integration.instance.eds.source.list.page";
 import IntegrationInstanceEdsSourcePage from "./pages/integration.instance.eds.source.page";
@@ -93,6 +94,10 @@ export default function DumontRoutes() {
       {/* Indexing Stats */}
       <Route path="indexing-stats" element={<Page turIcon={IconChartBar} title={t("integration.nav.indexingStats")} urlBase="indexing-stats" />}>
         <Route index element={<IntegrationInstanceIndexingStatsPage />} />
+      </Route>
+      {/* Field Coverage & Drift (D15) */}
+      <Route path="coverage" element={<Page turIcon={IconActivityHeartbeat} title={t("integration.nav.coverage")} urlBase="coverage" />}>
+        <Route index element={<IntegrationInstanceCoveragePage />} />
       </Route>
       {/* Double Check */}
       <Route path="double-check" element={<Page turIcon={IconListCheck} title={t("integration.nav.doubleCheck")} urlBase="double-check" />}>

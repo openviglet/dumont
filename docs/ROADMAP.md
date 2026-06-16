@@ -102,14 +102,11 @@ This track has no remaining pending tasks.
 > This is what the parity gate (D11) and the RAG consumer both need — and the lever that
 > moves Dumont from "a pipe that ran" to "a pipe you can trust".
 
-- [ ] **D15** · **Field-coverage & drift monitoring** — per source, track field-coverage %
-      across runs and flag **drift**: a field whose coverage drops sharply between two runs is
-      almost always a layout/selector break, today invisible until search quality degrades.
-      Surface via `DumConnectorMonitoringApi` and a `dumont-react` panel (`SectionCard`), and
-      reuse `AiSummaryPanel` for an LLM health summary. Done: a fixture whose layout changes
-      between two runs raises a drift flag naming the affected fields; coverage history is
-      queryable per source.\
-      ↳ **Depends on:** D03. Complements D09.
+> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D15** Field-coverage & drift monitoring
+> (per-run per-field coverage captured at `indexAll`, persisted history per source, drift flag
+> when a field's coverage drops sharply between two runs; surfaced on `DumConnectorMonitoringApi`
+> + a `dumont-react` panel with an `AiSummaryPanel` health summary). Complements D09.
+
 - [ ] **D16** · **Field-level provenance** — for each published attribute, record where it
       came from (source, strategy, selector/path), its `last-seen` run and an optional
       confidence, and carry a compact provenance into the `TurSNJobItem` so the search/RAG

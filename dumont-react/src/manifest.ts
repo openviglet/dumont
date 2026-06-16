@@ -1,4 +1,5 @@
 import {
+  IconActivityHeartbeat,
   IconAdjustmentsSearch,
   IconChartBar,
   IconCloudComputing,
@@ -38,6 +39,7 @@ export interface DumontManifest {
  * icon here is the ONLY change needed; the host never has to be touched.
  */
 const ICON_COMPONENTS: Record<string, Icon> = {
+  IconActivityHeartbeat,
   IconGitCommit,
   IconDatabase,
   IconGlobe,
@@ -77,6 +79,7 @@ const manifest: DumontManifest = {
     { titleKey: "integration.nav.indexingManager", url: "/indexing-manager", icon: "IconAdjustmentsSearch", order: 30 },
     { titleKey: "integration.nav.monitoring", url: "/monitoring", icon: "IconGraph", order: 40 },
     { titleKey: "integration.nav.indexingStats", url: "/indexing-stats", icon: "IconChartBar", order: 50 },
+    { titleKey: "integration.nav.coverage", url: "/coverage", icon: "IconActivityHeartbeat", order: 55 },
     { titleKey: "integration.nav.doubleCheck", url: "/double-check", icon: "IconListCheck", order: 60 },
     { titleKey: "integration.nav.insights", url: "/insights", icon: "IconSparkles", order: 90 },
     { titleKey: "integration.nav.plugins", url: "/plugins", icon: "IconPuzzle", order: 100 },

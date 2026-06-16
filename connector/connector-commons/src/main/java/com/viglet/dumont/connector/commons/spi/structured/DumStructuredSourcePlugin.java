@@ -27,6 +27,9 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageMonitor;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumInMemoryCoverageHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnrichmentChain;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumInMemoryPreviewSnapshotStore;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshot;
@@ -74,22 +77,34 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     protected final DumConnectorContext dumConnectorContext;
     protected final DumEnrichmentChain enrichmentChain;
     protected final DumPreviewSnapshotStore previewSnapshotStore;
+    protected final DumCoverageHistoryStore coverageHistoryStore;
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext) {
-        this(dumConnectorContext, DumEnrichmentChain.empty(), new DumInMemoryPreviewSnapshotStore());
+        this(dumConnectorContext, DumEnrichmentChain.empty(), new DumInMemoryPreviewSnapshotStore(),
+                new DumInMemoryCoverageHistoryStore());
     }
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
             DumEnrichmentChain enrichmentChain) {
-        this(dumConnectorContext, enrichmentChain, new DumInMemoryPreviewSnapshotStore());
+        this(dumConnectorContext, enrichmentChain, new DumInMemoryPreviewSnapshotStore(),
+                new DumInMemoryCoverageHistoryStore());
     }
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
             DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore) {
+        this(dumConnectorContext, enrichmentChain, previewSnapshotStore,
+                new DumInMemoryCoverageHistoryStore());
+    }
+
+    protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
+            DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore,
+            DumCoverageHistoryStore coverageHistoryStore) {
         this.dumConnectorContext = dumConnectorContext;
         this.enrichmentChain = enrichmentChain != null ? enrichmentChain : DumEnrichmentChain.empty();
         this.previewSnapshotStore = previewSnapshotStore != null ? previewSnapshotStore
                 : new DumInMemoryPreviewSnapshotStore();
+        this.coverageHistoryStore = coverageHistoryStore != null ? coverageHistoryStore
+                : new DumInMemoryCoverageHistoryStore();
     }
 
     /** The provider that resolves this plugin's configured structured sources. */
@@ -121,7 +136,12 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             structuredSource.discover()
                     .forEach(contentId -> indexOne(structuredSource, contentId, session, snapshot));
             dumConnectorContext.finishIndexing(session, false);
-            previewSnapshotStore.save(source, snapshot.build());
+            DumPreviewSnapshot baseline = snapshot.build();
+            previewSnapshotStore.save(source, baseline);
+            // Per-field coverage of this run, appended to the source's history so a later run can be
+            // checked for drift (D15) — derived from the same fingerprint, no extra pass over the source.
+            coverageHistoryStore.record(source, baseline.documents().size(),
+                    DumCoverageMonitor.coverage(structuredSource.schema(), baseline));
         }, () -> log.error("Structured source '{}' not found", source));
     }
 
