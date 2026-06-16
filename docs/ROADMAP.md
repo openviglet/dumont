@@ -33,16 +33,8 @@ relations (what a task *enables*) live in the task text.
 > (`discover()/extract(id)→DumStructuredRecord` + schema-as-code + generic publish
 > loop) · **D02** Declarative extraction strategies (Sitemap / HtmlListing /
 > TabularListing) · **D03** Schema-as-code + conservative grounding enforced
-> end-to-end. All enable the tasks below.
-
-- [ ] **D04** · **Pluggable enrichment stage** — a hook in the indexing chain to
-      derive/normalize fields before publish (canonical taxonomy mapping, region
-      derivation, and **optional LLM enrichment** for thin descriptions / ambiguous
-      classification — mirrors cursarei's `enrich_course` / `llm_area`). Enrichment is
-      **grounding-safe**: it may normalize or classify, never fabricate a sourced
-      attribute. Done: a source enriches at least one derived field and one
-      LLM-classified field, with the LLM path behind config + cache.\
-      ↳ **Depends on:** D01. **Enables** D17, D18, D19.
+> end-to-end · **D04** Pluggable enrichment stage (grounding-safe derive/normalize +
+> config-gated, cached LLM classification). All enable the tasks below.
 
 ## Track B — Web-crawler hardening (real-world sources)
 

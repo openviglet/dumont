@@ -33,3 +33,15 @@
   boundary — so the loose-map connectors (web crawler, AEM, DB, assets) can no longer
   leak `""` into facets, not just the structured SPI. Proven by `DumGroundingTest` +
   `DumConnectorProcessQueueTest`. Pairs with Turing **T381/T382**.
+- **D04** — Pluggable enrichment stage: `connector-commons`
+  `…spi.structured.enrich` — `DumEnricher` SPI + `DumEnrichmentChain` (merges
+  contributions through the schema-bound record builder, so enrichment is grounding-safe
+  by construction and a failing enricher is isolated), applied in
+  `DumStructuredSourcePlugin` between extract and publish. Two ready enrichers:
+  `DumNormalizationEnricher` (deterministic derive/normalize — taxonomy map, region
+  derivation) and `DumClassificationEnricher` (LLM label, behind `enabled` config + a
+  `DumEnrichmentCache` TTL cache, never overrides sourced data). The LLM call sits behind
+  the `DumClassifier` seam; `connector-app` `…enrich.DumTuringClassifier` is the
+  production impl over Turing's `POST /api/v2/summary` (no new model wiring). Proven by
+  `DumStructuredEnrichmentPluginTest` + the per-component tests and `DumTuringClassifierTest`.
+  Enables D17/D18/D19.

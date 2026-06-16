@@ -27,6 +27,7 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnrichmentChain;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.commons.sn.field.TurSNFieldName;
@@ -45,6 +46,14 @@ import lombok.extern.slf4j.Slf4j;
  * reimplement crawling or the index pipeline.
  *
  * <p>
+ * <strong>Enrichment (roadmap D04).</strong> Between extraction and publish each record passes
+ * through an optional {@link DumEnrichmentChain} that may derive or normalize fields (canonical
+ * taxonomy, region derivation, an LLM-classified label). Enrichment is grounding-safe by
+ * construction — contributions are merged through the schema-bound record builder — so the
+ * mandatory-field check below runs on the <em>enriched</em> record (a derived field may satisfy a
+ * mandatory field), and no enricher can inject an undeclared field or fabricate a value.
+ *
+ * <p>
  * <strong>Grounding.</strong> Records that miss a mandatory field are skipped (logged), never
  * fabricated. The published attribute map carries only the fields the source actually supplied —
  * {@link DumStructuredRecord} already dropped blanks and empties — so no field reaches the index as
@@ -58,9 +67,16 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
 
     protected final DumConnectorContext dumConnectorContext;
+    protected final DumEnrichmentChain enrichmentChain;
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext) {
+        this(dumConnectorContext, DumEnrichmentChain.empty());
+    }
+
+    protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
+            DumEnrichmentChain enrichmentChain) {
         this.dumConnectorContext = dumConnectorContext;
+        this.enrichmentChain = enrichmentChain != null ? enrichmentChain : DumEnrichmentChain.empty();
     }
 
     /** The provider that resolves this plugin's configured structured sources. */
@@ -116,7 +132,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
 
     private void indexOne(DumStructuredSource source, String contentId, DumConnectorSession session) {
         source.extract(contentId).ifPresentOrElse(
-                record -> publish(source, record, session),
+                record -> publish(source, enrichmentChain.apply(source, record), session),
                 () -> log.warn("No record extracted for id '{}' in source '{}'", contentId,
                         source.getSourceName()));
     }
