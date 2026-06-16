@@ -1,9 +1,10 @@
 package com.viglet.dumont.connector.plugin.webcrawler;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -17,6 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -61,6 +64,8 @@ public class DumWCPluginProcess {
     public static final String AUTHORIZATION = "Authorization";
     public static final String BASIC = "Basic";
     public static final String WEB_CRAWLER = "WEB-CRAWLER";
+    private static final Pattern CHARSET_PATTERN = Pattern.compile("charset\\s*=\\s*([^;\\s]+)",
+            Pattern.CASE_INSENSITIVE);
     private final List<String> startingPoints = new ArrayList<>();
     private final List<String> allowUrls = new ArrayList<>();
     private final List<String> allowStartsWithUrls = new ArrayList<>();
@@ -343,12 +348,42 @@ public class DumWCPluginProcess {
         if (isBasicAuth()) {
             connection.header(AUTHORIZATION, "%s %s".formatted(BASIC, getBasicAuth()));
         }
-        Document document = connection.get();
+        Connection.Response response = connection.execute();
+        return parseDocument(response.bodyAsBytes(), response.contentType(), response.url().toString());
+    }
 
+    /**
+     * Parse an HTML body, auto-detecting its charset instead of assuming ISO-8859-1
+     * (roadmap D05). Detection precedence follows the same order Jsoup applies: the
+     * HTTP {@code Content-Type} header charset wins, then a byte-order mark, then the
+     * {@code <meta charset>} declaration, defaulting to UTF-8 when nothing is declared.
+     * Output settings keep the detected charset so non-Latin-1 text (e.g. pt-BR
+     * accents) survives serialization.
+     */
+    static Document parseDocument(byte[] body, String contentType, String baseUri) throws IOException {
+        Document document = Jsoup.parse(new ByteArrayInputStream(body), charsetFromContentType(contentType), baseUri);
         document.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
-        document.outputSettings().charset(StandardCharsets.ISO_8859_1);
-        document.charset(StandardCharsets.ISO_8859_1);
+        document.outputSettings().charset(document.charset());
         return document;
+    }
+
+    /**
+     * Extract a supported charset name from an HTTP {@code Content-Type} header, or
+     * {@code null} when absent/unsupported so Jsoup falls back to BOM / {@code <meta charset>}
+     * / UTF-8 detection.
+     */
+    static String charsetFromContentType(String contentType) {
+        if (contentType == null) {
+            return null;
+        }
+        Matcher matcher = CHARSET_PATTERN.matcher(contentType);
+        if (matcher.find()) {
+            String charset = matcher.group(1).trim().replace("\"", "");
+            if (Charset.isSupported(charset)) {
+                return charset;
+            }
+        }
+        return null;
     }
 
     private String getBasicAuth() {

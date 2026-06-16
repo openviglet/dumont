@@ -41,10 +41,9 @@ relations (what a task *enables*) live in the task text.
 > **Objective**: close the gaps that make the current `DumWCPluginProcess` fail on
 > ordinary non-English, JS-rendered or rate-limited sites — independent of cursarei.
 
-- [ ] **D05** · **Charset auto-detect** — replace the hardcoded ISO-8859-1 read with
-      detection from the HTTP `Content-Type` header / `<meta charset>` / BOM, defaulting
-      to UTF-8. Done: a UTF-8 pt-BR page indexes with correct accents; a regression
-      test covers a known-Latin-1 and a known-UTF-8 fixture.
+> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D05** Charset auto-detect
+> (HTTP `Content-Type` header / `<meta charset>` / BOM → UTF-8 default). Enables D07.
+
 - [ ] **D06** · **Sitemap & robots awareness** — discover entry points from
       `robots.txt` → `sitemap.xml` (instead of manual starting points only), and honor
       `Crawl-delay` (capped) plus a configurable per-source request delay. Done: a

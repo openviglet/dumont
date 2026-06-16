@@ -45,3 +45,13 @@
   production impl over Turing's `POST /api/v2/summary` (no new model wiring). Proven by
   `DumStructuredEnrichmentPluginTest` + the per-component tests and `DumTuringClassifierTest`.
   Enables D17/D18/D19.
+
+## Track B — Web-crawler hardening (real-world sources)
+
+- **D05** — Charset auto-detect: `wc-plugin` `DumWCPluginProcess.getHTML` no longer
+  forces ISO-8859-1. It now fetches via `connection.execute()` and routes the body
+  through `parseDocument(bytes, contentType, baseUri)`, which detects the charset in
+  the same precedence Jsoup applies — HTTP `Content-Type` header (`charsetFromContentType`)
+  → BOM / `<meta charset>` → UTF-8 default — keeping the detected charset on output so
+  pt-BR accents survive serialization. Proven by `DumWCPluginProcessCharsetTest`
+  (Latin-1 + UTF-8 fixtures, header-wins precedence). Enables D07.
