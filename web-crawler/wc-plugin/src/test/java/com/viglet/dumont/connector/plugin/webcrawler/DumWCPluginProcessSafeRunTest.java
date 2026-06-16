@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.plugin.webcrawler.fetch.DumWCFetcherRegistry;
+import com.viglet.dumont.connector.plugin.webcrawler.state.DumWCCrawlStateService;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCAllowUrl;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCSource;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCStartingPoint;
@@ -105,6 +106,7 @@ class DumWCPluginProcessSafeRunTest {
         DumWCAttributeMappingRepository attrRepo = mock(DumWCAttributeMappingRepository.class);
         DumWCStartingPointRepository startRepo = mock(DumWCStartingPointRepository.class);
         DumWCFetcherRegistry registry = mock(DumWCFetcherRegistry.class);
+        DumWCCrawlStateService crawlStateService = mock(DumWCCrawlStateService.class);
 
         when(startRepo.findByDumWCSource(any()))
                 .thenReturn(Optional.of(List.of(new DumWCStartingPoint(PAGE, null))));
@@ -113,9 +115,11 @@ class DumWCPluginProcessSafeRunTest {
                     .thenReturn(Optional.of(List.of(new DumWCAllowUrl("/*", null))));
         }
         when(registry.resolve(any())).thenReturn(fetcher);
+        when(crawlStateService.loadByUrl(any())).thenReturn(new java.util.HashMap<>());
 
         return new DumWCPluginProcess(2000, "https://www.google.com", 30_000L, 3, 0, 0L, 0L, 1,
-                allowRepo, notAllowRepo, extRepo, attrRepo, startRepo, registry, context);
+                allowRepo, notAllowRepo, extRepo, attrRepo, startRepo, registry, crawlStateService,
+                context);
     }
 
     /** A no-op-named {@link DumWCFetcher} delegating its single fetch to {@code behavior}. */

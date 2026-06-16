@@ -41,7 +41,9 @@ import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.plugin.webcrawler.fetch.DumWCFetcherRegistry;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCAttributeMapping;
+import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCCrawlState;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCSource;
+import com.viglet.dumont.connector.plugin.webcrawler.state.DumWCCrawlStateService;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumWCAllowUrlRepository;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumWCAttributeMappingRepository;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumWCFileExtensionRepository;
@@ -58,6 +60,7 @@ import com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtLocaleInterfac
 import com.viglet.turing.client.sn.TurMultiValue;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
+import com.viglet.turing.commons.sn.field.TurSNFieldName;
 
 import generator.RandomUserAgentGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -117,7 +120,14 @@ public class DumWCPluginProcess {
     private final DumWCFileExtensionRepository dumWCFileExtensionRepository;
     private final DumWCAttributeMappingRepository dumWCAttributeMappingRepository;
     private final DumWCFetcherRegistry dumWCFetcherRegistry;
+    private final DumWCCrawlStateService dumWCCrawlStateService;
     private final DumConnectorContext dumConnectorContext;
+    // D12: per-(source,url) conditional-fetch state loaded once per crawl; read-only during the run.
+    private Map<String, DumWCCrawlState> priorStates = new HashMap<>();
+    // D12: <lastmod> observed in the sitemap for a queued URL, carried to the index step so it can be
+    // persisted for the next crawl's pre-fetch skip. Written during single-threaded seeding, read by
+    // workers — a concurrent map keeps that hand-off safe.
+    private final Map<String, String> sitemapLastmodByUrl = new ConcurrentHashMap<>();
 
     public DumWCPluginProcess(@Value("${dumont.wc.timeout:5000}") int timeout,
             @Value("${dumont.wc.referrer:https://www.google.com}") String referrer,
@@ -133,6 +143,7 @@ public class DumWCPluginProcess {
             DumWCAttributeMappingRepository dumWCAttributeMappingRepository,
             DumWCStartingPointRepository dumWCStartingPointsRepository,
             DumWCFetcherRegistry dumWCFetcherRegistry,
+            DumWCCrawlStateService dumWCCrawlStateService,
             DumConnectorContext dumConnectorContext) {
         this.timeout = timeout;
         this.referrer = referrer;
@@ -148,11 +159,16 @@ public class DumWCPluginProcess {
         this.dumWCAttributeMappingRepository = dumWCAttributeMappingRepository;
         this.dumWCStartingPointsRepository = dumWCStartingPointsRepository;
         this.dumWCFetcherRegistry = dumWCFetcherRegistry;
+        this.dumWCCrawlStateService = dumWCCrawlStateService;
         this.dumConnectorContext = dumConnectorContext;
     }
 
     public void start(DumWCSource dumWCSource) {
         this.report = new DumWCCrawlReport();
+        // D12: prior conditional-fetch validators for this source — drives the conditional GETs and
+        // the sitemap pre-fetch skip below. Empty on a first crawl (everything is fetched).
+        this.priorStates = dumWCCrawlStateService.loadByUrl(dumWCSource);
+        this.sitemapLastmodByUrl.clear();
         DumConnectorSession dumConnectorSession = getSource(dumWCSource);
         dumWCFileExtensionRepository.findByDumWCSource(dumWCSource)
                 .ifPresent(source -> source.forEach(dumWCFileExtension -> this.notAllowExtensions
@@ -194,7 +210,7 @@ public class DumWCPluginProcess {
         log.info("Request delay: {} ms", requestDelayMs);
         startingPoints.forEach(url -> queueLinks.offer(this.website + url));
         if (sitemapEnabled(dumWCSource)) {
-            seedFromSitemaps(robots);
+            seedFromSitemaps(robots, dumWCSource, dumConnectorSession);
         }
         getPagesFromQueue(dumWCSource, dumConnectorSession);
         finished(dumConnectorSession);
@@ -358,19 +374,22 @@ public class DumWCPluginProcess {
      * conventional {@code /sitemap.xml} when none are advertised (roadmap D06). Sitemap-index
      * documents are followed up to {@code dumont.wc.sitemap.maxDepth} levels.
      */
-    private void seedFromSitemaps(DumWCRobotsTxt robots) {
+    private void seedFromSitemaps(DumWCRobotsTxt robots, DumWCSource dumWCSource,
+            DumConnectorSession session) {
         List<String> roots = robots.sitemaps().isEmpty()
                 ? List.of(baseUrl() + "/sitemap.xml")
                 : robots.sitemaps();
-        Set<String> pages = new HashSet<>();
+        // D12: <loc> → <lastmod>, so an unchanged URL can be skipped before any fetch. A page without
+        // a declared lastmod maps to null and is always queued (the HTTP-conditional GET still applies).
+        Map<String, String> pages = new HashMap<>();
         Set<String> visitedSitemaps = new HashSet<>();
         roots.forEach(sitemap -> collectSitemapPages(sitemap, sitemapMaxDepth, pages, visitedSitemaps));
-        log.info("Sitemap discovery seeded {} entry point(s) from {} sitemap(s)", pages.size(),
+        log.info("Sitemap discovery found {} entry point(s) from {} sitemap(s)", pages.size(),
                 visitedSitemaps.size());
-        pages.forEach(this::seedEntryPoint);
+        pages.forEach((url, lastmod) -> seedEntryPoint(url, lastmod, dumWCSource, session));
     }
 
-    private void collectSitemapPages(String sitemapUrl, int depthLeft, Set<String> pages,
+    private void collectSitemapPages(String sitemapUrl, int depthLeft, Map<String, String> pages,
             Set<String> visitedSitemaps) {
         if (depthLeft < 0 || !visitedSitemaps.add(sitemapUrl)) {
             return;
@@ -383,15 +402,34 @@ public class DumWCPluginProcess {
             sitemap.locations()
                     .forEach(child -> collectSitemapPages(child, depthLeft - 1, pages, visitedSitemaps));
         } else {
-            pages.addAll(sitemap.locations());
+            sitemap.locations().forEach(loc -> pages.putIfAbsent(loc, sitemap.lastmodOf(loc)));
         }
     }
 
-    private void seedEntryPoint(String absoluteUrl) {
+    /**
+     * Seed one sitemap entry point. When the source declares a {@code <lastmod>} that matches what we
+     * stored for this URL last crawl (roadmap D12), the page is skipped <em>before any fetch</em>: it
+     * is re-emitted as unchanged so its bookkeeping is refreshed (surviving the deindex pass) and the
+     * URL never enters the queue. Otherwise the URL is queued and its lastmod remembered, to be
+     * persisted once the page is indexed so the next crawl can make the same comparison.
+     */
+    private void seedEntryPoint(String absoluteUrl, String lastmod, DumWCSource dumWCSource,
+            DumConnectorSession session) {
         String pageUrl = getPageUrl(absoluteUrl);
-        if (pageUrl.startsWith(this.website) && visitedLinks.add(pageUrl)) {
-            queueLinks.offer(pageUrl);
+        if (!pageUrl.startsWith(this.website) || !visitedLinks.add(pageUrl)) {
+            return;
         }
+        DumWCCrawlState prior = priorStates.get(pageUrl);
+        if (dumWCCrawlStateService.isSitemapUnchanged(prior, lastmod)) {
+            log.debug("Sitemap lastmod unchanged, skipping fetch: {}", pageUrl);
+            report.recordNotModified();
+            keepUnchanged(prior, pageUrl, dumWCSource, session);
+            return;
+        }
+        if (lastmod != null && !lastmod.isBlank()) {
+            sitemapLastmodByUrl.put(pageUrl, lastmod);
+        }
+        queueLinks.offer(pageUrl);
     }
 
     private DumWCRobotsTxt fetchRobotsTxt() {
@@ -442,8 +480,15 @@ public class DumWCPluginProcess {
     }
 
     private DumWCFetchRequest buildRequest(String url) {
+        // D12: revalidate against the validators stored for this URL (if any), so an unchanged page
+        // comes back as 304 with no body. robots.txt / sitemap URLs carry no stored state, so they
+        // are fetched unconditionally — the conditional path only ever applies to crawled pages.
+        DumWCCrawlState prior = priorStates.get(url);
+        String ifNoneMatch = prior != null ? prior.getEtag() : null;
+        String ifModifiedSince = prior != null ? prior.getLastModified() : null;
         return new DumWCFetchRequest(url, currentUserAgent(), referrer, timeout,
-                isBasicAuth() ? "%s %s".formatted(BASIC, getBasicAuth()) : null);
+                isBasicAuth() ? "%s %s".formatted(BASIC, getBasicAuth()) : null, ifNoneMatch,
+                ifModifiedSince);
     }
 
     private String currentUserAgent() {
@@ -478,7 +523,14 @@ public class DumWCPluginProcess {
     private void getPage(DumWCSource dumWCSource, String url, DumConnectorSession source) {
         try {
             log.info("{}: {}", url, dumWCSource.getTurSNSites());
-            Document document = getHTML(url);
+            DumWCFetchResponse response = fetch(url);
+            if (response.notModified()) {
+                // D12: the conditional GET confirmed the page is unchanged — no body was transferred.
+                // Re-emit it as unchanged so its bookkeeping is refreshed without a re-index.
+                handleNotModified(url, dumWCSource, source);
+                return;
+            }
+            Document document = parseDocument(response.body(), response.contentType(), response.url());
             String checksum = getCRC32Checksum(document.html().getBytes());
             getPageLinks(document);
             String pageUrl = getPageUrl(url);
@@ -487,6 +539,9 @@ public class DumWCPluginProcess {
                 log.info("WC is creating a Job Item: {}", url);
                 addTurSNJobItem(dumWCSource, document, url, checksum, source);
                 report.recordIndexed();
+                // D12: persist the fresh validators so the next crawl can revalidate this URL cheaply.
+                dumWCCrawlStateService.upsert(dumWCSource, url, response.etag(),
+                        response.lastModified(), sitemapLastmodByUrl.get(pageUrl), checksum, true);
             } else {
                 log.debug("Ignored: {}", url);
             }
@@ -500,6 +555,43 @@ public class DumWCPluginProcess {
             log.error(e.getMessage(), e);
             report.recordFailure(url, 0, e.getMessage());
         }
+    }
+
+    /**
+     * Handle a {@code 304 Not Modified} for a crawled page (roadmap D12): record it as unchanged and
+     * — when we hold a prior checksum — re-emit it as an unchanged item so its indexing bookkeeping is
+     * refreshed and it survives the run's deindex pass, all without a body fetch or a re-index.
+     */
+    private void handleNotModified(String url, DumWCSource dumWCSource, DumConnectorSession session) {
+        report.recordNotModified();
+        keepUnchanged(priorStates.get(url), url, dumWCSource, session);
+    }
+
+    /**
+     * Keep a page that was skipped this crawl (304 or sitemap {@code lastmod} unchanged) alive in the
+     * index. The stored checksum drives the existing {@code UnchangedStrategy}: re-emitting a job item
+     * with that checksum refreshes the page's transaction id (so the safe-run deindex pass spares it)
+     * without sending anything to the search engine. With no prior checksum there is nothing to keep
+     * alive — the page has never been indexed — so this is a no-op.
+     */
+    private void keepUnchanged(DumWCCrawlState prior, String url, DumWCSource dumWCSource,
+            DumConnectorSession session) {
+        if (prior == null || StringUtils.isBlank(prior.getChecksum())) {
+            return;
+        }
+        dumWCCrawlStateService.touch(prior);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put(TurSNFieldName.ID, url);
+        TurSNJobItem turSNJobItem = new TurSNJobItem(TurSNJobAction.CREATE,
+                new ArrayList<>(snSites), localeOf(dumWCSource), attributes, null,
+                prior.getChecksum());
+        dumConnectorContext.addJobItem(new DumJobItemWithSession(turSNJobItem, session,
+                Collections.emptySet(), false));
+    }
+
+    /** A locale for an unchanged re-emit — the source's when declared, else {@link Locale#US}. */
+    private static Locale localeOf(DumWCSource dumWCSource) {
+        return dumWCSource.getLocale() != null ? dumWCSource.getLocale() : Locale.US;
     }
 
     private void getPageLinks(Document document) {
@@ -666,11 +758,6 @@ public class DumWCPluginProcess {
 
     private static String removeLastChar(String pageUrl) {
         return pageUrl.substring(0, pageUrl.length() - 1);
-    }
-
-    private Document getHTML(String url) throws IOException {
-        DumWCFetchResponse response = fetch(url);
-        return parseDocument(response.body(), response.contentType(), response.url());
     }
 
     /**

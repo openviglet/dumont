@@ -50,18 +50,12 @@ relations (what a task *enables*) live in the task text.
 > source (thread-safe queue + bounded worker pool, configurable cap; per-host delay
 > floor preserved via a shared rate gate) · **D09** Safe-run policy + failure report
 > (a zero-yield run keeps the previously indexed data; every run logs a per-source
-> report of blocks / dead URLs / other failures).
+> report of blocks / dead URLs / other failures) · **D12** Incremental fetch
+> (HTTP-conditional re-crawl: persisted `ETag`/`Last-Modified` + conditional GETs →
+> `304` skip; sitemap `<lastmod>` skip *before* fetch; skipped pages kept alive as
+> unchanged through the existing pipeline).
 
-- [ ] **D12** · **Incremental fetch (HTTP-conditional re-crawl)** — re-crawl only what
-      changed: persist `ETag` / `Last-Modified` per content id and issue conditional GETs
-      (`If-None-Match` / `If-Modified-Since`); prefer `sitemap.xml` `<lastmod>` to skip
-      unchanged URLs *before* fetching. Complements the existing checksum reindex/skip
-      (which fires *after* the body is fetched) by avoiding the fetch entirely — decisive
-      on the cursarei workload (4,000 courses) where most pages are unchanged between runs
-      and makes a frequent `dumont.cron` schedule affordable. Done: a re-run of an
-      unchanged source issues conditional requests and re-indexes ~0 documents; a source
-      advertising `lastmod` skips unchanged URLs without a body fetch.\
-      ↳ **Depends on:** D06. Pairs with D07.
+This track has no remaining pending tasks.
 
 ## Track C — cursarei reference connector
 

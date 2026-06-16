@@ -5,6 +5,7 @@ package com.viglet.dumont.connector.plugin.webcrawler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -62,6 +63,23 @@ class DumWCSitemapTest {
         assertTrue(sitemap.index());
         assertEquals(2, sitemap.locations().size());
         assertTrue(sitemap.locations().contains("https://example.com/sitemap-1.xml"));
+    }
+
+    @Test
+    @DisplayName("A urlset captures <lastmod> per <loc> for incremental skip (D12)")
+    void capturesLastmod() throws IOException {
+        byte[] body = xml("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+                  <url><loc>https://example.com/a</loc><lastmod>2026-01-01</lastmod></url>
+                  <url><loc>https://example.com/b</loc></url>
+                </urlset>
+                """);
+
+        DumWCSitemap sitemap = DumWCSitemap.parse(body, BASE);
+
+        assertEquals("2026-01-01", sitemap.lastmodOf("https://example.com/a"));
+        assertNull(sitemap.lastmodOf("https://example.com/b"));
     }
 
     @Test

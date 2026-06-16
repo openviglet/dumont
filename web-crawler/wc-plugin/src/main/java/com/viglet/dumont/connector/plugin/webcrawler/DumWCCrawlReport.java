@@ -45,11 +45,19 @@ final class DumWCCrawlReport {
     }
 
     private final AtomicInteger indexed = new AtomicInteger();
+    // D12: pages revalidated as unchanged (HTTP 304 / sitemap lastmod) — fetched cheaply or not at all,
+    // re-emitted as unchanged so they survive the deindex pass. A healthy outcome, not a failure.
+    private final AtomicInteger notModified = new AtomicInteger();
     private final Queue<Failure> failures = new ConcurrentLinkedQueue<>();
 
     /** Count one item the crawl produced for indexing. */
     void recordIndexed() {
         indexed.incrementAndGet();
+    }
+
+    /** Count one page revalidated as unchanged (roadmap D12): no re-index, but a successful outcome. */
+    void recordNotModified() {
+        notModified.incrementAndGet();
     }
 
     /** Record a failed fetch; {@code statusCode} is {@code 0} for a dead URL with no HTTP response. */
@@ -61,6 +69,10 @@ final class DumWCCrawlReport {
         return indexed.get();
     }
 
+    int notModifiedCount() {
+        return notModified.get();
+    }
+
     int failureCount() {
         return failures.size();
     }
@@ -69,14 +81,19 @@ final class DumWCCrawlReport {
         return List.copyOf(failures);
     }
 
-    /** No indexable item was produced — the trigger for the safe-run guard. */
+    /**
+     * No successful outcome at all — neither a fresh index nor an unchanged revalidation (roadmap
+     * D12). This is the trigger for the safe-run guard: a run that only failed (or did nothing) must
+     * not deindex the previously indexed data. A re-run where every page came back {@code 304} is
+     * <em>not</em> a total failure — the pages were verified.
+     */
     boolean isTotalFailure() {
-        return indexed.get() == 0;
+        return indexed.get() == 0 && notModified.get() == 0;
     }
 
     /**
-     * The per-source failure report: indexed count, total failures, a block/dead/other breakdown and
-     * a count by HTTP status (status {@code 0} = dead URL with no response).
+     * The per-source failure report: indexed and unchanged counts, total failures, a block/dead/other
+     * breakdown and a count by HTTP status (status {@code 0} = dead URL with no response).
      */
     String summary() {
         long blocked = failures.stream().filter(Failure::blocked).count();
@@ -84,7 +101,8 @@ final class DumWCCrawlReport {
         long other = failureCount() - blocked - dead;
         Map<Integer, Long> byStatus = failures.stream()
                 .collect(Collectors.groupingBy(Failure::statusCode, Collectors.counting()));
-        return "indexed=%d, failures=%d (blocked=%d, dead=%d, other=%d), byStatus=%s".formatted(
-                indexedCount(), failureCount(), blocked, dead, other, byStatus);
+        return "indexed=%d, unchanged=%d, failures=%d (blocked=%d, dead=%d, other=%d), byStatus=%s"
+                .formatted(indexedCount(), notModifiedCount(), failureCount(), blocked, dead, other,
+                        byStatus);
     }
 }

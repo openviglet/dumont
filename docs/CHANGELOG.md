@@ -96,3 +96,17 @@
   normally so stale documents are still deindexed. Every run logs the report (`summary()`) so an
   empty result is never silent. Proven by `DumWCCrawlReportTest`, `DumWCPluginProcessSafeRunTest`.
   Complements D15.
+- **D12** — Incremental fetch (HTTP-conditional re-crawl): the D07 fetch SPI now carries conditional
+  validators — `DumWCFetchRequest.ifNoneMatch`/`ifModifiedSince` (sent as `If-None-Match` /
+  `If-Modified-Since`) and `DumWCFetchResponse.etag`/`lastModified` + `notModified()` (304).
+  `DumWCJsoupFetcher` sends the validators and reads the response headers; a 304 is a normal response
+  (below jsoup's 400 error threshold). New per-(source,url) state — `DumWCCrawlState` +
+  `DumWCCrawlStateRepository` + `DumWCCrawlStateService` (mirrors the EDS crawl-state service) — stores
+  `etag`/`lastModified`/`sitemapLastmod`/`checksum`. `DumWCPluginProcess` loads it per crawl, issues
+  conditional GETs from it, and on `304` skips re-indexing with no body transfer; where `DumWCSitemap`
+  now parses `<lastmod>`, an unchanged value skips the URL *before any fetch*. A skipped page is
+  re-emitted as an unchanged job item (its stored checksum routes through the existing
+  `UnchangedStrategy`), refreshing its transaction id so it survives the D09 deindex pass without a
+  re-index. `DumWCCrawlReport` gains an `unchanged` counter; a re-run where every page is `304` is no
+  longer a total failure. Proven by `DumWCPluginProcessIncrementalTest`, `DumWCSitemapTest`. Builds on
+  D06; pairs with D07.

@@ -23,15 +23,14 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 ## Table of contents
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
-- [II. Incremental fetch — re-crawl only what changed (D12)](#ii-incremental-fetch--re-crawl-only-what-changed-d12)
-- [III. AI-assisted source inference (D13)](#iii-ai-assisted-source-inference-d13)
-- [IV. Dry-run preview & schema diff (D14)](#iv-dry-run-preview--schema-diff-d14)
-- [V. Field-coverage & drift monitoring (D15)](#v-field-coverage--drift-monitoring-d15)
-- [VI. Field-level provenance (D16)](#vi-field-level-provenance-d16)
-- [VII. Index-time embeddings (D17)](#vii-index-time-embeddings-d17)
-- [VIII. Cross-source entity resolution & dedup (D18)](#viii-cross-source-entity-resolution--dedup-d18)
-- [IX. Reusable recipe & taxonomy library (D19)](#ix-reusable-recipe--taxonomy-library-d19)
-- [X. Cross-cutting decisions & restrictions](#x-cross-cutting-decisions--restrictions)
+- [II. AI-assisted source inference (D13)](#ii-ai-assisted-source-inference-d13)
+- [III. Dry-run preview & schema diff (D14)](#iii-dry-run-preview--schema-diff-d14)
+- [IV. Field-coverage & drift monitoring (D15)](#iv-field-coverage--drift-monitoring-d15)
+- [V. Field-level provenance (D16)](#v-field-level-provenance-d16)
+- [VI. Index-time embeddings (D17)](#vi-index-time-embeddings-d17)
+- [VII. Cross-source entity resolution & dedup (D18)](#vii-cross-source-entity-resolution--dedup-d18)
+- [VIII. Reusable recipe & taxonomy library (D19)](#viii-reusable-recipe--taxonomy-library-d19)
+- [IX. Cross-cutting decisions & restrictions](#ix-cross-cutting-decisions--restrictions)
 
 ---
 
@@ -64,32 +63,7 @@ leverage *next* steps because they make the framework adoptable and the sidecar�
 parity gate (D11) measurable rather than manual. Track F follows the RAG maturity on
 the Turing side.
 
-## II. Incremental fetch — re-crawl only what changed (D12)
-
-**Problem.** The checksum reindex/skip strategy fires *after* the page body is fetched
-— it saves an index write, not a network round-trip. On the cursarei workload (4,000
-courses across 120+ catalogs) the dominant cost of a re-run is the fetching itself, and
-most pages are unchanged between runs. A frequent `dumont.cron` schedule is unaffordable
-under that model.
-
-**Design.**
-- Persist `ETag` and `Last-Modified` per content id (alongside the existing checksum
-  state) and issue conditional GETs (`If-None-Match` / `If-Modified-Since`). A `304 Not
-  Modified` ends the work for that id with **zero body transfer**.
-- Where a `sitemap.xml` advertises `<lastmod>` (discovered via D06), compare it to the
-  last-seen value and skip the URL **before any fetch**.
-- This is strictly additive to the checksum path: checksum still guards the case of a
-  server that returns `200` with an unchanged body and no validators.
-
-**Touch points.** Fetch step in
-[`DumWCPluginProcess`](../web-crawler/wc-plugin/src/main/java/com/viglet/dumont/connector/plugin/webcrawler/DumWCPluginProcess.java);
-per-content-id state store. Sits naturally behind the D07 fetcher SPI so a swapped
-fetcher inherits the conditional logic.
-
-**Done.** A re-run of an unchanged source issues conditional requests and re-indexes ~0
-documents; a `lastmod`-advertising source skips unchanged URLs without a body fetch.
-
-## III. AI-assisted source inference (D13)
+## II. AI-assisted source inference (D13)
 
 **Problem.** STRATEGY's promise is "index a new source = a declarative adapter + a field
 manifest". But *writing* that manifest still requires a developer to read the page,
@@ -121,7 +95,7 @@ creation wizard in `dumont-react`.
 **Done.** Pointing the wizard at a tabular catalog yields an editable strategy + field
 draft that, after confirmation, indexes end-to-end.
 
-## IV. Dry-run preview & schema diff (D14)
+## III. Dry-run preview & schema diff (D14)
 
 **Problem.** "Dry Scan" today tells you a crawl *ran*; it does not tell you *what the
 index would look like afterward*. Re-configuring a live source (new selector, changed
@@ -144,7 +118,7 @@ page (extend the existing Dry Scan action + a results panel).
 **Done.** A preview run writes nothing and reports per-field coverage plus an
 add/change/remove count for the sample.
 
-## V. Field-coverage & drift monitoring (D15)
+## IV. Field-coverage & drift monitoring (D15)
 
 **Problem.** The worst failure mode of a structured-source connector is **silent**: a
 catalog changes its HTML, a selector stops matching, a field quietly goes to 0%
@@ -167,7 +141,7 @@ monitoring/health panel.
 **Done.** A fixture whose layout changes between two runs raises a drift flag naming the
 affected fields; coverage history is queryable per source.
 
-## VI. Field-level provenance (D16)
+## V. Field-level provenance (D16)
 
 **Problem.** The grounding contract guarantees an *absent* field is omitted — good. But
 for a *present* field there is no record of **where it came from**. When Dumont feeds a
@@ -188,7 +162,7 @@ emission; the enrichment merge in D18 consumes provenance.
 **Done.** A published document carries per-field provenance; a field dropped because the
 source stopped declaring it is visible as "last-seen: run N".
 
-## VII. Index-time embeddings (D17)
+## VI. Index-time embeddings (D17)
 
 **Problem.** Hybrid/semantic RAG on the Turing side needs embeddings. Generating them in
 a separate pass over the indexed corpus is a second full traversal and a consistency
@@ -205,7 +179,7 @@ Turing hybrid ranking consumer.
 **Done.** A source emits embedding vectors alongside its documents; Turing hybrid ranking
 consumes them. Pairs with `turing/2026.1/docs/RAG_HYBRID_CONFIG.md`.
 
-## VIII. Cross-source entity resolution & dedup (D18)
+## VII. Cross-source entity resolution & dedup (D18)
 
 **Problem.** The same real-world entity arrives more than once: the same course across
 institution mirror sites, or one item under both a canonical URL and tracking-parameter
@@ -223,7 +197,7 @@ before publish.
 **Done.** A fixture with the same entity from two sources indexes as one canonical
 document with merged, provenance-tagged fields.
 
-## IX. Reusable recipe & taxonomy library (D19)
+## VIII. Reusable recipe & taxonomy library (D19)
 
 **Problem.** D11 calls for "one shared `TabularListing` recipe → the SIGAA federals". If
 that recipe is copied per source, the leverage evaporates: 50 institutions become 50
@@ -240,7 +214,7 @@ normalization in the enrichment stage (D04).
 **Done.** Two institutions index via the same versioned recipe with only per-source
 parameters; bumping the recipe re-applies to both.
 
-## X. Cross-cutting decisions & restrictions
+## IX. Cross-cutting decisions & restrictions
 
 These constrain every task above:
 
