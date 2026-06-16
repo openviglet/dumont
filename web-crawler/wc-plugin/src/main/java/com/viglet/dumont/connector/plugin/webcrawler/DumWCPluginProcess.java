@@ -24,7 +24,6 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Entities;
@@ -35,6 +34,7 @@ import com.viglet.dumont.commons.cache.DumCustomClassCache;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.plugin.webcrawler.fetch.DumWCFetcherRegistry;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCAttributeMapping;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCSource;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumWCAllowUrlRepository;
@@ -43,6 +43,11 @@ import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumW
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumWCNotAllowUrlRepository;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumWCStartingPointRepository;
 import com.viglet.dumont.connector.webcrawler.commons.DumWCContext;
+import com.viglet.dumont.connector.webcrawler.commons.fetch.DumWCFetchException;
+import com.viglet.dumont.connector.webcrawler.commons.fetch.DumWCFetchRequest;
+import com.viglet.dumont.connector.webcrawler.commons.fetch.DumWCFetchResponse;
+import com.viglet.dumont.connector.webcrawler.commons.fetch.DumWCFetcher;
+import com.viglet.dumont.connector.webcrawler.commons.fetch.DumWCUserAgentStrategy;
 import com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtInterface;
 import com.viglet.dumont.connector.webcrawler.commons.ext.DumWCExtLocaleInterface;
 import com.viglet.turing.client.sn.TurMultiValue;
@@ -61,7 +66,6 @@ public class DumWCPluginProcess {
     public static final String A_HREF = "a[href]";
     public static final String ABS_HREF = "abs:href";
     public static final String WILD_CARD = "*";
-    public static final String AUTHORIZATION = "Authorization";
     public static final String BASIC = "Basic";
     public static final String WEB_CRAWLER = "WEB-CRAWLER";
     private static final Pattern CHARSET_PATTERN = Pattern.compile("charset\\s*=\\s*([^;\\s]+)",
@@ -83,34 +87,49 @@ public class DumWCPluginProcess {
     private final String referrer;
     private final long maxCrawlDelayMs;
     private final int sitemapMaxDepth;
+    private final int backoffMaxRetries;
+    private final long backoffBaseMs;
+    private final long backoffMaxMs;
     private String username;
     private String password;
     private long requestDelayMs;
+    // D07: resolved per crawl from the source's config — default path keeps the jsoup fetcher.
+    private DumWCFetcher fetcher;
+    private DumWCUserAgentStrategy userAgentStrategy = DumWCUserAgentStrategy.PER_SOURCE;
     private final DumWCAllowUrlRepository dumWCAllowUrlRepository;
     private final DumWCNotAllowUrlRepository dumWCNotAllowUrlRepository;
     private final DumWCFileExtensionRepository dumWCFileExtensionRepository;
     private final DumWCAttributeMappingRepository dumWCAttributeMappingRepository;
+    private final DumWCFetcherRegistry dumWCFetcherRegistry;
     private final DumConnectorContext dumConnectorContext;
 
     public DumWCPluginProcess(@Value("${dumont.wc.timeout:5000}") int timeout,
             @Value("${dumont.wc.referrer:https://www.google.com}") String referrer,
             @Value("${dumont.wc.crawlDelay.maxMs:30000}") long maxCrawlDelayMs,
             @Value("${dumont.wc.sitemap.maxDepth:3}") int sitemapMaxDepth,
+            @Value("${dumont.wc.backoff.maxRetries:3}") int backoffMaxRetries,
+            @Value("${dumont.wc.backoff.baseMs:1000}") long backoffBaseMs,
+            @Value("${dumont.wc.backoff.maxMs:30000}") long backoffMaxMs,
             DumWCAllowUrlRepository dumWCAllowUrlRepository,
             DumWCNotAllowUrlRepository dumWCNotAllowUrlRepository,
             DumWCFileExtensionRepository dumWCFileExtensionRepository,
             DumWCAttributeMappingRepository dumWCAttributeMappingRepository,
             DumWCStartingPointRepository dumWCStartingPointsRepository,
+            DumWCFetcherRegistry dumWCFetcherRegistry,
             DumConnectorContext dumConnectorContext) {
         this.timeout = timeout;
         this.referrer = referrer;
         this.maxCrawlDelayMs = maxCrawlDelayMs;
         this.sitemapMaxDepth = sitemapMaxDepth;
+        this.backoffMaxRetries = backoffMaxRetries;
+        this.backoffBaseMs = backoffBaseMs;
+        this.backoffMaxMs = backoffMaxMs;
         this.dumWCAllowUrlRepository = dumWCAllowUrlRepository;
         this.dumWCNotAllowUrlRepository = dumWCNotAllowUrlRepository;
         this.dumWCFileExtensionRepository = dumWCFileExtensionRepository;
         this.dumWCAttributeMappingRepository = dumWCAttributeMappingRepository;
         this.dumWCStartingPointsRepository = dumWCStartingPointsRepository;
+        this.dumWCFetcherRegistry = dumWCFetcherRegistry;
         this.dumConnectorContext = dumConnectorContext;
     }
 
@@ -144,7 +163,11 @@ public class DumWCPluginProcess {
         this.snSites = dumWCSource.getTurSNSites();
         this.username = dumWCSource.getUsername();
         this.password = dumWCSource.getPassword();
-        log.info("User Agent: {}", userAgent);
+        // D07: pick the fetch backend and user-agent strategy declared on the source.
+        this.fetcher = dumWCFetcherRegistry.resolve(dumWCSource.getFetcher());
+        this.userAgentStrategy = DumWCUserAgentStrategy.fromConfig(dumWCSource.getUserAgentStrategy());
+        log.info("User Agent: {} | fetcher: {} | strategy: {}", userAgent, fetcher.name(),
+                userAgentStrategy);
         // D06: robots.txt feeds both sitemap discovery and the advertised crawl delay.
         DumWCRobotsTxt robots = sitemapEnabled(dumWCSource) ? fetchRobotsTxt() : DumWCRobotsTxt.EMPTY;
         this.requestDelayMs = effectiveDelayMs(dumWCSource.getCrawlDelay(), robots.crawlDelayMs(),
@@ -193,11 +216,15 @@ public class DumWCPluginProcess {
     }
 
     private void applyRequestDelay() {
-        if (requestDelayMs <= 0) {
+        sleep(requestDelayMs);
+    }
+
+    private static void sleep(long ms) {
+        if (ms <= 0) {
             return;
         }
         try {
-            Thread.sleep(requestDelayMs);
+            Thread.sleep(ms);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -256,7 +283,7 @@ public class DumWCPluginProcess {
 
     private DumWCSitemap fetchSitemap(String sitemapUrl) {
         try {
-            return DumWCSitemap.parse(connection(sitemapUrl).execute().bodyAsBytes(), sitemapUrl);
+            return DumWCSitemap.parse(fetch(sitemapUrl).body(), sitemapUrl);
         } catch (IOException | RuntimeException e) {
             log.warn("Could not fetch sitemap at {}: {}", sitemapUrl, e.getMessage());
             return null;
@@ -264,16 +291,60 @@ public class DumWCPluginProcess {
     }
 
     private String fetchAsString(String url) throws IOException {
-        return connection(url).execute().body();
+        return fetch(url).bodyAsString();
     }
 
-    private Connection connection(String url) {
-        Connection connection = Jsoup.connect(url).userAgent(userAgent).referrer(referrer)
-                .timeout(timeout).ignoreContentType(true);
-        if (isBasicAuth()) {
-            connection.header(AUTHORIZATION, "%s %s".formatted(BASIC, getBasicAuth()));
+    /**
+     * Fetch a URL through the source's {@link DumWCFetcher} (roadmap D07), retrying with adaptive
+     * back-off when the host throttles us ({@code 429}/{@code 403}): each throttled attempt waits
+     * an exponentially growing delay and raises the steady-state per-request delay toward the cap,
+     * so the rest of the crawl slows down too. Any other HTTP error propagates unchanged.
+     */
+    private DumWCFetchResponse fetch(String url) throws IOException {
+        for (int attempt = 0;; attempt++) {
+            try {
+                return fetcher.fetch(buildRequest(url));
+            } catch (DumWCFetchException e) {
+                if (!isThrottled(e.statusCode()) || attempt >= backoffMaxRetries) {
+                    throw e;
+                }
+                long wait = backoffDelayMs(attempt, backoffBaseMs, backoffMaxMs);
+                log.warn("Throttled ({}) on {}; backing off {} ms then retry {}/{}", e.statusCode(),
+                        url, wait, attempt + 1, backoffMaxRetries);
+                adaptDelayAfterThrottle();
+                sleep(wait);
+            }
         }
-        return connection;
+    }
+
+    private DumWCFetchRequest buildRequest(String url) {
+        return new DumWCFetchRequest(url, currentUserAgent(), referrer, timeout,
+                isBasicAuth() ? "%s %s".formatted(BASIC, getBasicAuth()) : null);
+    }
+
+    private String currentUserAgent() {
+        return userAgentStrategy == DumWCUserAgentStrategy.PER_REQUEST
+                ? RandomUserAgentGenerator.getNextNonMobile()
+                : userAgent;
+    }
+
+    private static boolean isThrottled(int statusCode) {
+        return statusCode == 429 || statusCode == 403;
+    }
+
+    /** Exponential back-off: {@code baseMs * 2^attempt}, clamped to {@code maxMs}. */
+    static long backoffDelayMs(int attempt, long baseMs, long maxMs) {
+        if (baseMs <= 0) {
+            return 0L;
+        }
+        long delay = baseMs << Math.min(attempt, 16);
+        return delay < 0 || delay > maxMs ? maxMs : delay;
+    }
+
+    /** Slow the whole crawl after a throttle: double the per-request delay up to the configured cap. */
+    private void adaptDelayAfterThrottle() {
+        long raised = requestDelayMs <= 0 ? backoffBaseMs : requestDelayMs * 2;
+        requestDelayMs = Math.min(raised, maxCrawlDelayMs);
     }
 
     private String baseUrl() {
@@ -462,12 +533,8 @@ public class DumWCPluginProcess {
     }
 
     private Document getHTML(String url) throws IOException {
-        Connection connection = Jsoup.connect(url).userAgent(userAgent).referrer(referrer).timeout(timeout);
-        if (isBasicAuth()) {
-            connection.header(AUTHORIZATION, "%s %s".formatted(BASIC, getBasicAuth()));
-        }
-        Connection.Response response = connection.execute();
-        return parseDocument(response.bodyAsBytes(), response.contentType(), response.url().toString());
+        DumWCFetchResponse response = fetch(url);
+        return parseDocument(response.body(), response.contentType(), response.url());
     }
 
     /**

@@ -28,6 +28,8 @@ public class DumWCSourceExchange {
     private String password;
     private Boolean enableSitemap;
     private Integer crawlDelay;
+    private String fetcher;
+    private String userAgentStrategy;
     @Builder.Default
     private Collection<String> startingPoints = new HashSet<>();
     @Builder.Default

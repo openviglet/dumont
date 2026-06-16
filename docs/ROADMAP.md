@@ -44,14 +44,10 @@ relations (what a task *enables*) live in the task text.
 > **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D05** Charset auto-detect
 > (HTTP `Content-Type` header / `<meta charset>` / BOM → UTF-8 default; enables D07) ·
 > **D06** Sitemap & robots awareness (robots.txt → sitemap entry-point discovery +
-> capped `Crawl-delay` / per-source request delay; enables D08, D12).
+> capped `Crawl-delay` / per-source request delay; enables D08, D12) · **D07** Pluggable
+> fetcher SPI (`DumWCFetcher` seam + per-source selection + UA strategy + adaptive
+> 429/403 back-off; enables D11, pairs with D12).
 
-- [ ] **D07** · **Pluggable fetcher SPI** — extract the fetch step behind an interface
-      so the default Jsoup fetcher can be swapped for a **TLS-fingerprint-impersonating**
-      client or a **headless renderer** per source, with a configurable user-agent
-      strategy and adaptive back-off on 429/403. Done: a source can select a non-default
-      fetcher via config; the default path is unchanged.\
-      ↳ **Depends on:** D05.
 - [ ] **D08** · **Bounded parallel crawl per source** — replace the single
       `LinkedList` queue with a thread-safe queue + a bounded executor, with global
       politeness preserved (per-host delay floor). Done: a multi-page source crawls

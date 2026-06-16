@@ -64,3 +64,16 @@
   and the queue now drains once after all seeds (fixing the sitemap-only case). Parsing
   split into testable `DumWCRobotsTxt` / `DumWCSitemap` records; proven by
   `DumWCRobotsTxtTest`, `DumWCSitemapTest`, `DumWCPluginProcessDelayTest`. Enables D08, D12.
+- **D07** — Pluggable fetcher SPI: `wc-commons`
+  `…webcrawler.commons.fetch` — `DumWCFetcher` seam (`fetch(DumWCFetchRequest) →
+  DumWCFetchResponse`, raw bytes for D05 charset detection) + `DumWCFetchException`
+  (carries the HTTP status so back-off is fetcher-agnostic) + `DumWCUserAgentStrategy`
+  (`PER_SOURCE` default / `PER_REQUEST` rotation). `wc-plugin` `…webcrawler.fetch` —
+  default `DumWCJsoupFetcher` (the unchanged jsoup posture) + `DumWCFetcherRegistry`
+  (selects per source via `DumWCSource.fetcher`, else the `dumont.wc.fetcher` default;
+  unknown → default). `DumWCPluginProcess` routes every fetch (page / robots.txt /
+  sitemap) through the resolved fetcher, applies the UA strategy, and retries 429/403
+  with exponential back-off (`backoffDelayMs`, `dumont.wc.backoff.*`) that also raises
+  the steady-state per-request delay toward the cap. Default path unchanged. Proven by
+  `DumWCFetcherRegistryTest`, `DumWCPluginProcessBackoffTest`, `DumWCUserAgentStrategyTest`.
+  Enables D11; pairs with D12.

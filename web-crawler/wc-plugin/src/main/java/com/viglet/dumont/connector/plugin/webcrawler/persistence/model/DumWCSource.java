@@ -65,6 +65,12 @@ public class DumWCSource implements Serializable {
     private Boolean enableSitemap;
     @Column
     private Integer crawlDelay;
+    /** Selects the fetch backend (roadmap D07); {@code null}/blank uses the default jsoup fetcher. */
+    @Column
+    private String fetcher;
+    /** {@code User-Agent} rotation strategy (roadmap D07): {@code PER_SOURCE} (default) or {@code PER_REQUEST}. */
+    @Column
+    private String userAgentStrategy;
 
     @Builder.Default
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
