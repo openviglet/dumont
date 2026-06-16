@@ -93,6 +93,8 @@ public class DumWCPluginProcess {
     private final AtomicInteger pending = new AtomicInteger();
     // D08: per-host politeness gate, shared by every worker so the delay floor holds across threads.
     private final DumWCHostRateLimiter hostRateLimiter = new DumWCHostRateLimiter();
+    // D09: per-source crawl outcome — drives the safe-run guard and the failure report. Reset per run.
+    private DumWCCrawlReport report = new DumWCCrawlReport();
     private String website;
     private Collection<String> snSites;
     private final int timeout;
@@ -150,6 +152,7 @@ public class DumWCPluginProcess {
     }
 
     public void start(DumWCSource dumWCSource) {
+        this.report = new DumWCCrawlReport();
         DumConnectorSession dumConnectorSession = getSource(dumWCSource);
         dumWCFileExtensionRepository.findByDumWCSource(dumWCSource)
                 .ifPresent(source -> source.forEach(dumWCFileExtension -> this.notAllowExtensions
@@ -194,7 +197,7 @@ public class DumWCPluginProcess {
             seedFromSitemaps(robots);
         }
         getPagesFromQueue(dumWCSource, dumConnectorSession);
-        finished(dumConnectorContext, dumConnectorSession);
+        finished(dumConnectorSession);
     }
 
     private static DumConnectorSession getSource(DumWCSource dumWCSource) {
@@ -202,9 +205,30 @@ public class DumWCPluginProcess {
                 WEB_CRAWLER, dumWCSource.getLocale());
     }
 
-    private static void finished(DumConnectorContext dumConnectorContext,
-            DumConnectorSession source) {
-        dumConnectorContext.finishIndexing(source, false);
+    /**
+     * Conclude the crawl under the D09 safe-run policy. Every run logs a per-source failure report
+     * (status codes, blocks, dead URLs) so an empty result is never silent. A run that produced no
+     * indexable item ({@link DumWCCrawlReport#isTotalFailure()}) finishes as <em>standalone</em>, so
+     * the shared context skips its destructive deindex pass and the previously indexed data survives
+     * a total failure — porting cursarei {@code engine.py}'s guard against a transient outage or a
+     * fresh block wiping a good index. A run that indexed at least one item finishes normally, so
+     * documents the source no longer serves are still deindexed.
+     */
+    private void finished(DumConnectorSession source) {
+        boolean totalFailure = report.isTotalFailure();
+        if (totalFailure) {
+            log.warn("Crawl of source '{}' produced no indexable item — keeping previously indexed "
+                    + "data (safe-run guard). Failure report: {}", source.getSource(),
+                    report.summary());
+        } else {
+            log.info("Crawl of source '{}' report: {}", source.getSource(), report.summary());
+        }
+        dumConnectorContext.finishIndexing(source, totalFailure);
+    }
+
+    /** The outcome of the most recent {@link #start(DumWCSource)} (roadmap D09) — for inspection. */
+    DumWCCrawlReport lastReport() {
+        return report;
     }
 
     /**
@@ -462,14 +486,20 @@ public class DumWCPluginProcess {
                 indexedLinks.add(pageUrl);
                 log.info("WC is creating a Job Item: {}", url);
                 addTurSNJobItem(dumWCSource, document, url, checksum, source);
-                return;
+                report.recordIndexed();
             } else {
                 log.debug("Ignored: {}", url);
             }
+        } catch (DumWCFetchException e) {
+            // D09: an HTTP error carries its status, so the report can tell a block (403/429) from a
+            // dead URL (404) from any other failure.
+            log.error("Fetch failed ({}) for {}: {}", e.statusCode(), url, e.getMessage());
+            report.recordFailure(url, e.statusCode(), e.getMessage());
         } catch (IOException e) {
+            // D09: no HTTP status reached us (DNS/connect/read failure) — a dead URL.
             log.error(e.getMessage(), e);
+            report.recordFailure(url, 0, e.getMessage());
         }
-        new TurSNJobItem();
     }
 
     private void getPageLinks(Document document) {

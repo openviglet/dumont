@@ -48,13 +48,10 @@ relations (what a task *enables*) live in the task text.
 > fetcher SPI (`DumWCFetcher` seam + per-source selection + UA strategy + adaptive
 > 429/403 back-off; enables D11, pairs with D12) · **D08** Bounded parallel crawl per
 > source (thread-safe queue + bounded worker pool, configurable cap; per-host delay
-> floor preserved via a shared rate gate).
+> floor preserved via a shared rate gate) · **D09** Safe-run policy + failure report
+> (a zero-yield run keeps the previously indexed data; every run logs a per-source
+> report of blocks / dead URLs / other failures).
 
-- [ ] **D09** · **Safe-run policy + failure report** — a crawl that returns **zero
-      indexable items keeps the previously indexed data** (no destructive overwrite —
-      port cursarei `engine.py`'s guard), and every run emits a per-source failure
-      report (status codes, blocks, dead URLs) instead of a silent empty result. Done:
-      an injected total-failure run leaves the index intact and writes a failure report.
 - [ ] **D12** · **Incremental fetch (HTTP-conditional re-crawl)** — re-crawl only what
       changed: persist `ETag` / `Last-Modified` per content id and issue conditional GETs
       (`If-None-Match` / `If-Modified-Since`); prefer `sitemap.xml` `<lastmod>` to skip

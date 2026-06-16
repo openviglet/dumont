@@ -87,3 +87,12 @@
   robots `Crawl-delay`), so workers overlap fetch latency and parsing without a per-host rate
   violation; different hosts never wait on one another. Proven by `DumWCHostRateLimiterTest`,
   `DumWCPluginProcessWorkersTest`.
+- **D09** — Safe-run policy + failure report: `wc-plugin` `DumWCPluginProcess` accumulates a
+  per-source `DumWCCrawlReport` (indexed count + typed failures — `403`/`429` block, `404`/no-status
+  dead URL, other) over the crawl. A run that produced no indexable item finishes as *standalone*
+  (`finishIndexing(session, true)`), so `DumConnectorContextImpl` skips its destructive deindex pass
+  and the previously indexed data survives a total failure (porting cursarei `engine.py`'s guard
+  against a transient outage / fresh block wiping a good index); a run that indexed ≥1 item finishes
+  normally so stale documents are still deindexed. Every run logs the report (`summary()`) so an
+  empty result is never silent. Proven by `DumWCCrawlReportTest`, `DumWCPluginProcessSafeRunTest`.
+  Complements D15.
