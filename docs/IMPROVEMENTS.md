@@ -24,6 +24,7 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
 - [II. Connector convergence — one ingestion contract (Track G, D20–D23)](#ii-connector-convergence--one-ingestion-contract-track-g-d20d23)
+- [III. AEM extraction model redesign (Track H, D24–D27)](#iii-aem-extraction-model-redesign-track-h-d24d27)
 - [V. Field-level provenance (D16)](#v-field-level-provenance-d16)
 - [VI. Index-time embeddings (D17)](#vi-index-time-embeddings-d17)
 - [VII. Cross-source entity resolution & dedup (D18)](#vii-cross-source-entity-resolution--dedup-d18)
@@ -100,6 +101,53 @@ implemented for DB and Assets (today `UnsupportedOperationException`); WC covera
 **Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: AEM/DB/Assets sources index through the
 structured plugin at parity with their legacy paths and gain coverage/drift + preview; WC reports
 per-field coverage without a contract it cannot honor.
+
+## III. AEM extraction model redesign (Track H, D24–D27)
+
+**Problem.** The AEM connector ships *two* extraction paradigms: a declarative property→field
+mapping (`DumAemPluginModel` → `targetAttr` ← `sourceAttr`) and a code-based content extractor
+(`DumAemExtContentInterface` / `DumAemExtModelJsonBase`). Every serious deployment **abandons the
+declarative one** and pours all logic into a single monolithic content-extractor — the Insper
+portal's `DumAemExtInsperModelJson` is the canonical case: ~480 lines fusing template routing,
+component-tree traversal, business derivation (`inscricaoAberta`, `dateSort`, `preco`,
+`dateOfClassesText`, `alphabet`) and normalization (timezone, `html2Text`, PT months). When every
+real source rejects the parameterized layer for a god-class, the parameterization is modelling the
+wrong thing. That class is the indexing **Achilles' heel**: untestable in parts, un-reusable across
+institutions, schema-less, and able to break **silently**.
+
+**Root cause.** The unit of mapping is wrong. AEM content is a **tree of typed components grouped
+by content type** (a news article, an event, a course/offer, an institutional page), not a bag of
+JCR properties. A property→field table cannot express "flatten all contests across all banners,
+filter by open enrolment, take the earliest future start date" — so it always degrades to code. And
+`templateNameAliases()` collapsing 8 templates into 4 types is the domain quietly telling us the
+real unit is the **content type**, not the source.
+
+**Design.** Realign the *mapping* layer to the domain (crawl/auth/delta/navigator stay untouched),
+on top of the contract D21 establishes:
+- **Component-extractor SPI (D24).** Externalize the god-class into a registry of small,
+  per-component extractors — the fluent `DumAemModelJsonQuery` API is *already* component-oriented,
+  so this is mostly "stop inlining". Each extractor is independently unit-testable.
+- **Schema-per-content-type + routing (D25).** A template routes to a content type with its own
+  `DumStructuredSchema`; `extract(id)` picks schema + extractor composition by resolved type.
+  Coverage/drift then reads per type.
+- **Derivations → enrichers (D26).** The derived fields move to the D04 enrichment chain; the
+  cross-cutting normalizers become shared. Extraction emits only *sourced* fields.
+- **Versioned recipes (D27).** Component extractors + content-type schemas become versioned,
+  parameterized artifacts (D19), so one "course-offer" recipe applies across institutions.
+
+**Why incremental.** D21 (wrap as-is) delivers the contract + coverage at ~zero risk and *measures*
+the pain first; each Track H task then peels one layer, deliverable on its own. The risk to avoid is
+building a bespoke AEM-mapping framework before the structured SPI + D04 prove insufficient — which
+is why D24 starts by refactoring the existing extension, not inventing a new engine.
+
+**Touch points.** `aem-commons` ext SPI (`DumAemExtModelJsonBase`, `DumAemModelJsonQuery`,
+`DumAemAttrMap`); the D21 AEM `DumStructuredSource` adapter; `DumStructuredSchema` per content type;
+the D04 `DumEnrichmentChain`; the D19 recipe library; sample extension `DumAemExtInsperModelJson` as
+the reference migration.
+
+**Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: the AEM Achilles'-heel god-class becomes a
+composition of tested component extractors + typed per-type schemas + named enrichers, observable
+(coverage/drift/provenance) and reusable across institutions via versioned recipes.
 
 ## V. Field-level provenance (D16)
 

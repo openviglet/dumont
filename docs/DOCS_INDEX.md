@@ -19,7 +19,7 @@ layer (it crawls/ingests content from external sources and publishes it into
 | Document | Holds | When to read |
 |----------|-------|--------------|
 | [STRATEGY.md](STRATEGY.md) | Positioning, moat, the two bets (ingestion + adoption/trust), non-goals | Understand the "why" |
-| [ROADMAP.md](ROADMAP.md) | Tracks A–F with stable `D##` task IDs and done criteria — **active backlog only** | Decide the "what" and "when" |
+| [ROADMAP.md](ROADMAP.md) | Tracks A–H with stable `D##` task IDs and done criteria — **active backlog only** | Decide the "what" and "when" |
 | [CHANGELOG.md](CHANGELOG.md) | Shipped ledger — one line per shipped `D##` task (what + where + commit) | See what already shipped |
 | [IMPROVEMENTS.md](IMPROVEMENTS.md) | Design rationale per active `D##` task | Implement the "how" |
 | [STRUCTURED_VS_TRADITIONAL.md](STRUCTURED_VS_TRADITIONAL.md) | Conceptual reference: the two ways to model a source, when to use each, market direction | Understand the structured-source bet in depth |

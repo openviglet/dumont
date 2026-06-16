@@ -174,9 +174,12 @@ This track has no remaining pending tasks.
       `schema()` wraps the attribute specs, `discover()` delegates to the existing path /
       QueryBuilder enumeration, `extract(id)` reuses `DumAemAttrProcess` field extraction decoupled
       from the author/publish job-item pipeline. Author/publish + delta semantics stay intact (the
-      adapter extracts one environment; the loop drives environments). Done: an AEM source's
-      coverage/drift + preview work and indexing stays at parity with the legacy author/publish flow.\
-      ↳ **Depends on:** D20.
+      adapter extracts one environment; the loop drives environments). It wraps today's extraction
+      — including a monolithic content-extractor (`DumAemExtModelJsonBase` subclass) — **as-is**, to
+      gain the contract + coverage immediately; **Track H** then redesigns that extraction. Done: an
+      AEM source's coverage/drift + preview work and indexing stays at parity with the legacy
+      author/publish flow.\
+      ↳ **Depends on:** D20. Bridges to Track H.
 - [ ] **D22** · **Assets structured adapter** — declare the Assets fixed field set as schema-as-code
       (`id`, `url`, `title`, `date`, `type` + optional `fileSize` / `fileExtension` / `image`, and
       an optional Tika `content` field), with `discover()` = directory walk returning ids and
@@ -194,6 +197,49 @@ This track has no remaining pending tasks.
       source reports per-field coverage across crawls and raises drift when a mapping breaks.\
       ↳ **Depends on:** D15. Complements D09.
 
+## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
+
+> **Objective**: today's AEM mapping offers a declarative *property→field* layer that real
+> deployments abandon — every serious source (e.g. the Insper portal,
+> `DumAemExtInsperModelJson`) drops it for a **single monolithic content-extractor** that fuses
+> template routing + component-tree traversal + business derivation + normalization. That
+> god-class is the indexing Achilles' heel: untestable in parts, un-reusable across institutions,
+> schema-less, and able to break **silently**. The mismatch is structural — AEM content is a
+> *tree of typed components grouped by content type*, not a bag of JCR properties. This track
+> realigns the AEM extraction model to that reality, **building on the contract D21 establishes**
+> and reusing the connector's crawl/auth/delta/navigator untouched (it redesigns the *mapping*
+> layer, it does not rip out the connector). The component shapes recur across institutions, so
+> the endgame ties into the D19 recipe library for multi-tenant reuse.
+
+- [ ] **D24** · **AEM component-extractor SPI** — externalize the monolithic content-extractor into
+      a registry of small, per-component extractors (`(typed component) → field contributions`),
+      composed per page. Reuses the existing fluent `DumAemModelJsonQuery` component API (already
+      component-oriented) — each extractor (banner, course-box/offer, teacher, event-details, news,
+      generic-banner, instructors…) becomes its own independently unit-tested unit. Done: the Insper
+      extension is expressed as N registered component extractors composed by the adapter, at parity
+      with the god-class — no behaviour change, but each component testable in isolation.\
+      ↳ **Depends on:** D21.
+- [ ] **D25** · **Schema-per-content-type + template routing** — replace "one source = one schema"
+      with a content-type model: each template (via the alias map, e.g. `noticias` / `evento` /
+      `educacao-executiva` / `institucional`) routes to a **content type with its own
+      `DumStructuredSchema`**, and `extract(id)` selects the schema + extractor composition by the
+      resolved type. Done: an AEM source declares multiple content-type schemas; a page indexes
+      against the schema of its resolved type, and D15 coverage/drift is reported per content type.\
+      ↳ **Depends on:** D24.
+- [ ] **D26** · **Derivations → enrichment chain** — move the business derivations currently fused
+      into extraction (`inscricaoAberta`, `dateSort`, `preco` aggregation, `dateOfClassesText`
+      formatting, `alphabet`) into D04 enrichers, and the cross-cutting normalizations (timezone,
+      `html2Text`, PT month names) into shared normalizers. Grounding-safe by construction; each rule
+      individually testable and reusable across sources. Done: `extract(id)` emits only *sourced*
+      fields; every derived field is produced by a named enricher in the chain.\
+      ↳ **Depends on:** D25, D04.
+- [ ] **D27** · **Versioned AEM recipes** — promote component extractors + content-type schemas to
+      first-class **versioned, parameterized artifacts** (the D19 recipe library), so the same
+      "course-offer" recipe applies across institutions (Insper, cursarei federals) with only
+      per-source parameters. Done: two institutions index a shared content type via the same
+      versioned recipe + per-source params; bumping the recipe re-applies to both.\
+      ↳ **Depends on:** D24, D25, D19.
+
 ---
 
 ## Non-goals (do NOT add as tasks)
@@ -204,7 +250,9 @@ This track has no remaining pending tasks.
 - Any path that fabricates field values to satisfy a schema (violates the grounding
   contract).
 - Replacing the AEM/CMS connectors — the structured-source framework sits beside them
-  under the same SPI.
+  under the same SPI. (Restructuring a connector's *extraction/mapping* model under that SPI —
+  Track G adapters, Track H's AEM redesign — is in-scope; ripping out its crawl/auth/delta/
+  navigator is not.)
 - **AI-assisted authoring that auto-publishes or guesses (D13).** Inference drafts a
   manifest a human confirms; it never indexes on its own and never fills a field it could
   not ground.
