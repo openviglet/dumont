@@ -33,8 +33,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.viglet.dumont.connector.commons.spi.structured.parity.DumParityCriteria;
+import com.viglet.dumont.connector.commons.spi.structured.parity.DumParityReport;
 import com.viglet.dumont.connector.plugin.catalog.DumCatalogIndexer;
 import com.viglet.dumont.connector.plugin.catalog.export.DumCatalogExchangeProcess;
+import com.viglet.dumont.connector.plugin.catalog.migration.DumCatalogParityService;
 import com.viglet.dumont.connector.plugin.catalog.persistence.model.DumCatalogSource;
 import com.viglet.dumont.connector.plugin.catalog.persistence.repository.DumCatalogSourceRepository;
 
@@ -50,12 +53,15 @@ public class DumCatalogSourceApi {
     private final DumCatalogSourceRepository sourceRepository;
     private final DumCatalogIndexer indexer;
     private final DumCatalogExchangeProcess exchangeProcess;
+    private final DumCatalogParityService parityService;
 
     public DumCatalogSourceApi(DumCatalogSourceRepository sourceRepository,
-            DumCatalogIndexer indexer, DumCatalogExchangeProcess exchangeProcess) {
+            DumCatalogIndexer indexer, DumCatalogExchangeProcess exchangeProcess,
+            DumCatalogParityService parityService) {
         this.sourceRepository = sourceRepository;
         this.indexer = indexer;
         this.exchangeProcess = exchangeProcess;
+        this.parityService = parityService;
     }
 
     @GetMapping
@@ -93,6 +99,11 @@ public class DumCatalogSourceApi {
             existing.setAuthHeaderName(catalogSource.getAuthHeaderName());
             existing.setAuthHeaderValue(catalogSource.getAuthHeaderValue());
             existing.setLocale(catalogSource.getLocale());
+            // Native-migration binding (D11) is configurable here; the state flip itself is gated
+            // by the parity endpoints, never set directly through a plain update.
+            existing.setLeva(catalogSource.getLeva());
+            existing.setNativeRecipe(catalogSource.getNativeRecipe());
+            existing.setNativeListingUrl(catalogSource.getNativeListingUrl());
             existing.getTurSNSites().clear();
             if (catalogSource.getTurSNSites() != null) {
                 existing.getTurSNSites().addAll(catalogSource.getTurSNSites());
@@ -122,6 +133,60 @@ public class DumCatalogSourceApi {
     public ResponseEntity<Object> sourceIndexAll(@PathVariable String id) {
         indexer.indexAllByIdAsync(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/parity")
+    @Operation(summary = "Parity gate (D11): compare this source's native recipe vs the sidecar run")
+    public ResponseEntity<DumParityReport> sourceParity(@PathVariable String id,
+            @RequestParam(required = false) Double tolerance,
+            @RequestParam(required = false) Double minCoverage,
+            @RequestParam(required = false) Integer sampleSize) {
+        return runGate(() -> parityService.parity(id, criteria(tolerance, minCoverage, sampleSize)));
+    }
+
+    @PostMapping("/{id}/migrate/native")
+    @Operation(summary = "Flip this source to the native recipe — only when the parity gate passes")
+    public ResponseEntity<DumParityReport> sourceMigrateNative(@PathVariable String id,
+            @RequestParam(required = false) Double tolerance,
+            @RequestParam(required = false) Double minCoverage,
+            @RequestParam(required = false) Integer sampleSize) {
+        return runGate(
+                () -> parityService.migrateToNative(id, criteria(tolerance, minCoverage, sampleSize)));
+    }
+
+    @PostMapping("/{id}/migrate/sidecar")
+    @Operation(summary = "Roll a source back to the sidecar (Python) leg")
+    public ResponseEntity<DumCatalogSource> sourceMigrateSidecar(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(parityService.rollbackToSidecar(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private ResponseEntity<DumParityReport> runGate(java.util.function.Supplier<DumParityReport> gate) {
+        try {
+            return ResponseEntity.ok(gate.get());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    private static DumParityCriteria criteria(Double tolerance, Double minCoverage,
+            Integer sampleSize) {
+        DumParityCriteria criteria = DumParityCriteria.defaults();
+        if (tolerance != null) {
+            criteria = criteria.withCountTolerance(tolerance);
+        }
+        if (minCoverage != null) {
+            criteria = criteria.withMinUrlCoverage(minCoverage);
+        }
+        if (sampleSize != null) {
+            criteria = criteria.withMaxSampleUrls(sampleSize);
+        }
+        return criteria;
     }
 
     @GetMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)

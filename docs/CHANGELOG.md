@@ -129,6 +129,24 @@
   native declarative strategies one wave at a time (D11), gated on parity. Proven by
   `DumCatalogStructuredSourceTest` (mapping + grounding + envelope) and `DumCatalogPluginTest`
   (end-to-end discover→extract→ground→publish, mandatory-skip). Pairs with cursarei V05.1.
+- **D11** — Leg-by-leg native migration: the per-source **parity gate** that lets a catalog source
+  flip from the sidecar (Python) leg to a native declarative strategy, one leva at a time.
+  `connector-commons` `…spi.structured.parity` — `DumParityGate` compares a candidate
+  `DumStructuredSource` against a baseline on the two checks the migration needs (record count within
+  `DumParityCriteria.countTolerance`, canonical-URL coverage ≥ `minUrlCoverage`) and returns a
+  read-only `DumParityReport` (counts, coverage, bounded missing/extra URL samples, pass + reasons);
+  connector-agnostic, it speaks only the structured SPI. `catalog-plugin` `…plugin.catalog.migration` —
+  `DumSigaaFederalRecipe` registers the shared SIGAA-federal `TabularListing` recipe (the first, highest-
+  leverage leva, on the D19 library, published on `DumCatalogSchema` so a native doc matches the sidecar
+  it replaces); `DumCatalogSource` gains `migrationState` (SIDECAR default / NATIVE), `leva`,
+  `nativeRecipe`, `nativeListingUrl`; `DumCatalogSourceProvider` resolves a NATIVE source to the recipe-
+  materialized strategy (falling back to the sidecar + a log if the recipe is unregistered — D09 safe-run),
+  else the D10 bridge. `DumCatalogParityService.migrateToNative` re-runs the gate and persists the flip
+  **only** when it passes; `rollbackToSidecar` is always allowed. `DumCatalogSourceApi` exposes
+  `GET /{id}/parity` (read-only gate) + `POST /{id}/migrate/{native,sidecar}`. Sources with the hardest
+  anti-bot posture stay on the sidecar indefinitely. Proven by `DumParityGateTest` (parity / count+coverage
+  fail / tolerant growth) and `DumCatalogMigrationTest` (gated flip, blocked degraded crawl, native
+  resolution). ↳ Builds on D02, D04, D07, D10, D19. Pairs with cursarei V05.3 / V07.
 
 ## Track D — Adoption & authoring
 

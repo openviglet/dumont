@@ -66,16 +66,12 @@ This track has no remaining pending tasks.
 > **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D10** Catalog bridge (sidecar) connector
 > (`catalog-plugin` over the structured SPI — ingests already-normalized catalog JSON per
 > institution over HTTP, grounding-safe, mandatory `title`/`url`; the bridge that takes the Turing
-> search/RAG wins live while the Python engine stays the anti-WAF fallback).
+> search/RAG wins live while the Python engine stays the anti-WAF fallback) · **D11** Leg-by-leg
+> native migration (per-source **parity gate** `DumParityGate` — count within tolerance + canonical-URL
+> coverage vs the Python run; the shared SIGAA-federal recipe as the first leva; a catalog source flips
+> sidecar→native only when the gate passes, hardest anti-bot sources stay on the sidecar).
 
-- [ ] **D11** · **Leg-by-leg native migration** — move institutions from the sidecar
-      (D10) to **native declarative strategies** (D02), one leva at a time, starting
-      with the SIGAA federals (one shared TabularListing recipe → highest leverage).
-      Each leva flips only after a per-source **parity gate** (count + URL sample vs the
-      Python run). Sources with the hardest anti-bot posture may remain on the sidecar
-      indefinitely. Done (per leva): the leva indexes natively at parity and the Python
-      leg is retired for those sources only.\
-      ↳ **Depends on:** D02, D04, D07, D10. Pairs with cursarei **V05.3 / V07**.
+This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring (lower the cost of a new source)
 

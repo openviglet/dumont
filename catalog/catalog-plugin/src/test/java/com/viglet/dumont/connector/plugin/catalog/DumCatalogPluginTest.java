@@ -27,10 +27,14 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
+import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetcher;
 import com.viglet.dumont.connector.plugin.catalog.fetch.DumCatalogFetcher;
 import com.viglet.dumont.connector.plugin.catalog.persistence.model.DumCatalogSource;
 import com.viglet.dumont.connector.plugin.catalog.persistence.repository.DumCatalogSourceRepository;
@@ -77,6 +81,13 @@ class DumCatalogPluginTest {
         }
     }
 
+    /** A provider with an empty recipe library — every source resolves to the sidecar leg. */
+    private static DumCatalogSourceProvider sidecarProvider(DumCatalogSourceRepository repository,
+            DumCatalogFetcher fetcher) {
+        return new DumCatalogSourceProvider(repository, fetcher, new DumRecipeLibrary(),
+                DumHtmlFetcher.ofPages(Map.of()));
+    }
+
     private DumCatalogSource ufmg() {
         DumCatalogSource entity = new DumCatalogSource();
         entity.setName("ufmg");
@@ -93,7 +104,7 @@ class DumCatalogPluginTest {
         when(repository.findByName("ufmg")).thenReturn(Optional.of(entity));
 
         DumCatalogFetcher fetcher = s -> CATALOG_JSON;
-        DumCatalogSourceProvider provider = new DumCatalogSourceProvider(repository, fetcher);
+        DumCatalogSourceProvider provider = sidecarProvider(repository, fetcher);
         CapturingContext context = new CapturingContext();
         DumCatalogPlugin plugin = new DumCatalogPlugin(context, provider);
 
@@ -116,7 +127,7 @@ class DumCatalogPluginTest {
         when(repository.findByName("ufmg")).thenReturn(Optional.of(ufmg()));
         when(repository.findByName("absent")).thenReturn(Optional.empty());
         DumCatalogPlugin plugin = new DumCatalogPlugin(new CapturingContext(),
-                new DumCatalogSourceProvider(repository, s -> CATALOG_JSON));
+                sidecarProvider(repository, s -> CATALOG_JSON));
 
         assertThat(plugin.ownsSource("ufmg")).isTrue();
         assertThat(plugin.ownsSource("absent")).isFalse();

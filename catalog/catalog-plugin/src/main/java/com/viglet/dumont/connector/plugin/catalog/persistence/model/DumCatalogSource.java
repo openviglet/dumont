@@ -21,12 +21,15 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
+import com.viglet.dumont.connector.plugin.catalog.migration.DumCatalogMigrationState;
 import com.viglet.dumont.spring.jpa.DumUuid;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -82,6 +85,28 @@ public class DumCatalogSource implements Serializable {
 
     @Column
     private String locale;
+
+    /**
+     * Which indexing leg this source runs on (roadmap <strong>D11</strong>). Defaults to
+     * {@link DumCatalogMigrationState#SIDECAR}; flips to {@code NATIVE} only after a passing parity
+     * gate. A {@code null} value (legacy rows) is read as {@code SIDECAR}.
+     */
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "migration_state", length = 16)
+    private DumCatalogMigrationState migrationState = DumCatalogMigrationState.SIDECAR;
+
+    /** The migration leva this source belongs to (e.g. {@code "sigaa-federals"}), for grouping. */
+    @Column
+    private String leva;
+
+    /** The recipe ref this source binds to when {@code NATIVE} (e.g. {@code "sigaa-federal"}). */
+    @Column(name = "native_recipe")
+    private String nativeRecipe;
+
+    /** The public listing URL the native recipe crawls when {@code NATIVE}. */
+    @Column(name = "native_listing_url", length = 2000)
+    private String nativeListingUrl;
 
     @Builder.Default
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
