@@ -135,13 +135,6 @@ This track has no remaining pending tasks.
 > stays the generic link-spider the framework sits *above*; structured sites it serves
 > migrate to D02 strategies, and it gets only lightweight coverage telemetry.
 
-- [ ] **D22** · **Assets structured adapter** — declare the Assets fixed field set as schema-as-code
-      (`id`, `url`, `title`, `date`, `type` + optional `fileSize` / `fileExtension` / `image`, and
-      an optional Tika `content` field), with `discover()` = directory walk returning ids and
-      `extract(id)` = resolve a single file → typed record (replacing the ad-hoc map and the
-      unimplemented `discoverContentIds`/`indexById`). Done: an Assets source's coverage/drift +
-      preview work; first-class field declarations replace the loose attribute map.\
-      ↳ **Depends on:** D20.
 - [ ] **D23** · **Web-crawler coverage adapter (no conversion)** — the WC connector stays the
       generic breadth link-spider (Track A objective + non-goals); a typed `discover()`/`extract(id)`
       contract a link-following crawl cannot satisfy is **not** the goal. Instead, treat the source's

@@ -34,6 +34,7 @@ public class DumAssetsSource implements Serializable {
     @Column private boolean typeInId;
     @Column private String fileSizeField;
     @Column private String fileExtensionField;
+    @Column private String contentField;
     @Column private String encoding;
     @Column private boolean showOutput;
 

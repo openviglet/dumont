@@ -287,3 +287,18 @@
   Parity follow-ups split out of this conversion: **D28** (dependency-graph reindex — structured
   `publish` currently emits no dependency set), **D29** (single-item deindex in structured
   `indexById`), **D30** (extraction parity harness), **D31** (parallel extraction, perf).
+- **D22** — Assets structured adapter: the filesystem Assets connector now indexes through the
+  structured SPI instead of its bespoke directory-walk + loose attribute map. `assets-plugin`
+  `…plugin.assets.source` — `DumAssetsStructuredSource` (the fixed field set declared as schema-as-code:
+  `title`/`url` mandatory + `date`, plus optional `image`, `fileSize`, `fileExtension` and a Tika
+  `content` field gated by the new `DumAssetsSource.contentField`; `discover()` = directory walk
+  returning one id per file, skipping `.DS_Store`; `extract(id)` = resolve a single file → typed record,
+  Tika content via `DumFileUtils`) and `DumAssetsSourceProvider`. `DumAssetsPlugin` now extends
+  `DumStructuredSourcePlugin` wired to the persistent coverage/preview/provenance stores, so D14 dry-run
+  preview and D15 coverage/drift work for an Assets source for free; `toJobItem` re-stamps the document
+  `type` + `source_apps` (legacy parity), the document id is the prefix-replaced `url` with the optional
+  `typeInId` prefix. The unimplemented `discoverContentIds`/`indexById` are now satisfied by the shared
+  loop; `DumAssetsPluginProcess` is reduced to the `@Async` `/{id}/indexAll` dispatcher; new
+  `filesystem(...)` provenance factory. Proven by `DumAssetsStructuredSourceTest` (temp-dir end-to-end:
+  discover/extract + `.DS_Store` skip, grounding, type/source_apps stamp, Tika content, coverage history,
+  dry-run preview). ↳ Builds on D20.

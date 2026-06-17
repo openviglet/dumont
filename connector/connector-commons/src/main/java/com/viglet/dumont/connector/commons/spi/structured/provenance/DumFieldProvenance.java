@@ -78,6 +78,15 @@ public record DumFieldProvenance(String strategy, String selector, Double confid
         return new DumFieldProvenance("aem", locator, null, null);
     }
 
+    /**
+     * A filesystem origin (roadmap D22, Assets connector); {@code locator} names the file facet the
+     * value was read from (e.g. {@code "path"}, {@code "name"}, {@code "lastModified"},
+     * {@code "size"}, {@code "tika:content"}).
+     */
+    public static DumFieldProvenance filesystem(String locator) {
+        return new DumFieldProvenance("filesystem", locator, null, null);
+    }
+
     /** A value an enricher derived (roadmap D04); {@code name} identifies the enricher. */
     public static DumFieldProvenance enrichment(String name) {
         String suffix = (name == null || name.isBlank()) ? "" : ":" + name.trim();

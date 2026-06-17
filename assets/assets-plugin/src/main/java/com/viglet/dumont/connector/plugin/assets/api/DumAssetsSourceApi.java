@@ -57,6 +57,7 @@ public class DumAssetsSourceApi {
             e.setLocale(source.getLocale()); e.setContentType(source.getContentType());
             e.setChunk(source.getChunk()); e.setTypeInId(source.isTypeInId());
             e.setFileSizeField(source.getFileSizeField()); e.setFileExtensionField(source.getFileExtensionField());
+            e.setContentField(source.getContentField());
             e.setEncoding(source.getEncoding()); e.setShowOutput(source.isShowOutput());
             e.getTurSNSites().clear();
             if (source.getTurSNSites() != null) e.getTurSNSites().addAll(source.getTurSNSites());
