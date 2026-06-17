@@ -29,6 +29,7 @@ import org.jsoup.select.Elements;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumFieldProvenance;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -112,7 +113,10 @@ public final class DumTabularListingStrategy {
         columnRules.forEach(rule -> values.put(rule.field(), rule.resolve(row, cells)));
         String id = resolveId(values, rowNumber);
         DumStructuredRecord.Builder record = DumStructuredRecord.builder(id, schema);
-        values.forEach(record::set);
+        // D16: tag each cell value with the column locator it was read from, so the published
+        // document can cite where the field came from.
+        columnRules.forEach(rule -> record.set(rule.field(), values.get(rule.field()),
+                DumFieldProvenance.tabular(rule.locator())));
         DumStructuredRecord built = record.build();
         // Header rows / separators map to nothing — skip them rather than emit an id-only document.
         return built.values().isEmpty() ? Optional.empty() : Optional.of(built);

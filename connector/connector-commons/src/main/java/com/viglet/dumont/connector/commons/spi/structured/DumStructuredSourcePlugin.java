@@ -31,12 +31,17 @@ import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHi
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageMonitor;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumInMemoryCoverageHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnrichmentChain;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumInMemoryProvenanceHistoryStore;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenance;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceHistoryStore;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceSnapshot;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumInMemoryPreviewSnapshotStore;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshot;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshotStore;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumStructuredPreview;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumStructuredPreviewer;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
+import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.commons.sn.field.TurSNFieldName;
 
@@ -78,6 +83,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     protected final DumEnrichmentChain enrichmentChain;
     protected final DumPreviewSnapshotStore previewSnapshotStore;
     protected final DumCoverageHistoryStore coverageHistoryStore;
+    protected final DumProvenanceHistoryStore provenanceHistoryStore;
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext) {
         this(dumConnectorContext, DumEnrichmentChain.empty(), new DumInMemoryPreviewSnapshotStore(),
@@ -99,12 +105,22 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
             DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore,
             DumCoverageHistoryStore coverageHistoryStore) {
+        this(dumConnectorContext, enrichmentChain, previewSnapshotStore, coverageHistoryStore,
+                new DumInMemoryProvenanceHistoryStore());
+    }
+
+    protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
+            DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore,
+            DumCoverageHistoryStore coverageHistoryStore,
+            DumProvenanceHistoryStore provenanceHistoryStore) {
         this.dumConnectorContext = dumConnectorContext;
         this.enrichmentChain = enrichmentChain != null ? enrichmentChain : DumEnrichmentChain.empty();
         this.previewSnapshotStore = previewSnapshotStore != null ? previewSnapshotStore
                 : new DumInMemoryPreviewSnapshotStore();
         this.coverageHistoryStore = coverageHistoryStore != null ? coverageHistoryStore
                 : new DumInMemoryCoverageHistoryStore();
+        this.provenanceHistoryStore = provenanceHistoryStore != null ? provenanceHistoryStore
+                : new DumInMemoryProvenanceHistoryStore();
     }
 
     /** The provider that resolves this plugin's configured structured sources. */
@@ -133,8 +149,12 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // diff against the last full index. Only indexAll captures it — a partial indexById run
             // would otherwise mark the rest of the catalog as removed.
             DumPreviewSnapshot.Builder snapshot = DumPreviewSnapshot.builder(structuredSource.schema());
-            structuredSource.discover()
-                    .forEach(contentId -> indexOne(structuredSource, contentId, session, snapshot));
+            // Per-field provenance of this run (D16), accumulated alongside the fingerprint so a later
+            // run can answer "when was each field last seen" — no extra pass over the source.
+            DumProvenanceSnapshot.Builder provenance =
+                    DumProvenanceSnapshot.builder(structuredSource.schema());
+            structuredSource.discover().forEach(
+                    contentId -> indexOne(structuredSource, contentId, session, snapshot, provenance));
             dumConnectorContext.finishIndexing(session, false);
             DumPreviewSnapshot baseline = snapshot.build();
             previewSnapshotStore.save(source, baseline);
@@ -142,6 +162,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // checked for drift (D15) — derived from the same fingerprint, no extra pass over the source.
             coverageHistoryStore.record(source, baseline.documents().size(),
                     DumCoverageMonitor.coverage(structuredSource.schema(), baseline));
+            provenanceHistoryStore.record(source, provenance.documentCount(), provenance.fields());
         }, () -> log.error("Structured source '{}' not found", source));
     }
 
@@ -149,7 +170,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     public void indexById(String source, List<String> contentId) {
         provider().resolve(source).ifPresentOrElse(structuredSource -> {
             DumConnectorSession session = newSession(structuredSource);
-            contentId.forEach(id -> indexOne(structuredSource, id, session, null));
+            contentId.forEach(id -> indexOne(structuredSource, id, session, null, null));
             dumConnectorContext.finishIndexing(session, true);
         }, () -> log.error("Structured source '{}' not found", source));
     }
@@ -182,15 +203,17 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     }
 
     private void indexOne(DumStructuredSource source, String contentId, DumConnectorSession session,
-            DumPreviewSnapshot.Builder snapshot) {
+            DumPreviewSnapshot.Builder snapshot, DumProvenanceSnapshot.Builder provenance) {
         source.extract(contentId).ifPresentOrElse(
-                record -> publish(source, enrichmentChain.apply(source, record), session, snapshot),
+                record -> publish(source, enrichmentChain.apply(source, record), session, snapshot,
+                        provenance),
                 () -> log.warn("No record extracted for id '{}' in source '{}'", contentId,
                         source.getSourceName()));
     }
 
     private void publish(DumStructuredSource source, DumStructuredRecord record,
-            DumConnectorSession session, DumPreviewSnapshot.Builder snapshot) {
+            DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
+            DumProvenanceSnapshot.Builder provenance) {
         List<String> missing = record.missingMandatoryFields();
         if (!missing.isEmpty()) {
             log.warn("Skipping record '{}' in source '{}' — missing mandatory field(s): {}",
@@ -202,21 +225,28 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         if (snapshot != null) {
             snapshot.add(record.id(), record.values());
         }
+        if (provenance != null) {
+            provenance.add(record.values(), record.provenance());
+        }
     }
 
     /**
      * Build the {@link TurSNJobItem} for a record: grounded attributes (plus the record id under the
-     * standard {@code id} field) and the declared schema specs. Subclasses may override to add
-     * provider-specific attributes (e.g. {@code source_apps}).
+     * standard {@code id} field) and the declared schema specs. When the record carries field-level
+     * provenance (roadmap D16), a compact reserved {@code dum_provenance} attribute + spec are added
+     * so the search/RAG side can cite and audit where each attribute came from. Subclasses may
+     * override to add provider-specific attributes (e.g. {@code source_apps}).
      */
     protected TurSNJobItem toJobItem(DumStructuredSource source, DumStructuredRecord record) {
         Map<String, Object> attributes = new HashMap<>(record.values());
         attributes.putIfAbsent(TurSNFieldName.ID, record.id());
+        List<TurSNJobAttributeSpec> specs = new ArrayList<>(source.schema().toAttributeSpecs());
+        DumProvenance.contribute(source.getSourceName(), record, attributes, specs);
         return new TurSNJobItem(TurSNJobAction.CREATE,
                 new ArrayList<>(source.getSiteNames()),
                 source.getLocale(),
                 attributes,
-                source.schema().toAttributeSpecs());
+                specs);
     }
 
     private DumConnectorSession newSession(DumStructuredSource source) {

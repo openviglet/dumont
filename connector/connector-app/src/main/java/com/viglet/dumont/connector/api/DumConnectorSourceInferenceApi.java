@@ -33,6 +33,7 @@ import org.springframework.web.client.RestClient;
 
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePlugin;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourceProvider;
@@ -83,11 +84,16 @@ public class DumConnectorSourceInferenceApi {
     // Persisted coverage history (D15): an index run appends its per-field coverage so drift across
     // runs is queryable through the monitoring API.
     private final DumCoverageHistoryStore coverageHistoryStore;
+    // Persisted provenance history (D16): an index run appends its per-field origin so last-seen is
+    // queryable through the monitoring API.
+    private final DumProvenanceHistoryStore provenanceHistoryStore;
 
     public DumConnectorSourceInferenceApi(RestClient restClient, DumTuringCsrfService csrfService,
-            DumConnectorContext connectorContext, DumCoverageHistoryStore coverageHistoryStore) {
+            DumConnectorContext connectorContext, DumCoverageHistoryStore coverageHistoryStore,
+            DumProvenanceHistoryStore provenanceHistoryStore) {
         this.connectorContext = connectorContext;
         this.coverageHistoryStore = coverageHistoryStore;
+        this.provenanceHistoryStore = provenanceHistoryStore;
         this.fetcher = new DumJsoupFetcher();
         this.inferrer = new DumSourceInferrer(fetcher,
                 new DumTuringSourceInferenceModel(restClient, csrfService));
@@ -118,8 +124,8 @@ public class DumConnectorSourceInferenceApi {
                     fetcher, request.url().trim(), request.sourceName().trim(), PROVIDER_NAME, sites,
                     resolveLocale(request.locale()));
 
-            new InferredPlugin(connectorContext, source, previewSnapshotStore, coverageHistoryStore)
-                    .indexAll(source.getSourceName());
+            new InferredPlugin(connectorContext, source, previewSnapshotStore, coverageHistoryStore,
+                    provenanceHistoryStore).indexAll(source.getSourceName());
 
             log.info("Indexed confirmed inferred source '{}' to sites {}", source.getSourceName(), sites);
             return ResponseEntity.ok(new IndexResult(true, source.getSourceName(),
@@ -178,13 +184,14 @@ public class DumConnectorSourceInferenceApi {
 
         InferredPlugin(DumConnectorContext context, DumStructuredSource source,
                 DumPreviewSnapshotStore previewSnapshotStore) {
-            this(context, source, previewSnapshotStore, null);
+            this(context, source, previewSnapshotStore, null, null);
         }
 
         InferredPlugin(DumConnectorContext context, DumStructuredSource source,
                 DumPreviewSnapshotStore previewSnapshotStore,
-                DumCoverageHistoryStore coverageHistoryStore) {
-            super(context, null, previewSnapshotStore, coverageHistoryStore);
+                DumCoverageHistoryStore coverageHistoryStore,
+                DumProvenanceHistoryStore provenanceHistoryStore) {
+            super(context, null, previewSnapshotStore, coverageHistoryStore, provenanceHistoryStore);
             this.source = source;
         }
 

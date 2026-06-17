@@ -105,16 +105,12 @@ This track has no remaining pending tasks.
 > **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D15** Field-coverage & drift monitoring
 > (per-run per-field coverage captured at `indexAll`, persisted history per source, drift flag
 > when a field's coverage drops sharply between two runs; surfaced on `DumConnectorMonitoringApi`
-> + a `dumont-react` panel with an `AiSummaryPanel` health summary). Complements D09.
+> + a `dumont-react` panel with an `AiSummaryPanel` health summary). **D16** Field-level provenance
+> (each published field tagged with its origin and carried into the `TurSNJobItem` as a compact
+> `dum_provenance` attribute; per-source last-seen history so a dropped field stays auditable).
+> Complements D09.
 
-- [ ] **D16** · **Field-level provenance** — for each published attribute, record where it
-      came from (source, strategy, selector/path), its `last-seen` run and an optional
-      confidence, and carry a compact provenance into the `TurSNJobItem` so the search/RAG
-      side can **cite and audit**. Elevates the grounding contract from "omit absent" to
-      "every present field is traceable to a source". Done: a published document carries
-      per-field provenance; a field dropped because the source stopped declaring it is visible
-      as "last-seen: run N".\
-      ↳ **Depends on:** D03. Pairs with Turing **Block R** (citation / grounding).
+This track has no remaining pending tasks.
 
 ## Track F — Enrichment & semantics (the differentiator)
 

@@ -26,6 +26,7 @@ import org.jsoup.nodes.Element;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumFieldProvenance;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -70,7 +71,9 @@ public final class DumHtmlFieldExtractor {
     public DumStructuredRecord extract(String id, Element scope) {
         DumStructuredRecord.Builder record = DumStructuredRecord.builder(id, schema);
         for (DumFieldRule rule : rules) {
-            record.set(rule.field(), rule.resolve(scope));
+            // D16: tag each value with the CSS selector it was read from, so the published document
+            // can cite where the field came from.
+            record.set(rule.field(), rule.resolve(scope), DumFieldProvenance.css(rule.selector()));
         }
         return record.build();
     }

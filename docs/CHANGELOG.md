@@ -157,3 +157,16 @@
   `dumont-react` `coverage` page renders the latest-run coverage, a drift banner naming affected
   fields, run history, and an `AiSummaryPanel` health summary. Proven by `DumCoverageMonitorTest`,
   `DumStructuredCoveragePluginTest`. Complements D09.
+- **D16** — Field-level provenance: `connector-commons` `…spi.structured.provenance` —
+  `DumFieldProvenance` (strategy, selector/path, confidence) is attached to a field as it is set on a
+  `DumStructuredRecord` (provenance stays a faithful subset of the grounded values); the HTML/tabular
+  extractors tag each value with its selector and the enrichment chain re-tags overridden fields. At
+  publish, `DumProvenance` emits a compact reserved `dum_provenance` multi-valued attribute + spec
+  (`field|source|strategy|selector|confidence` per present field) into every `TurSNJobItem` so the
+  search/RAG side can cite/audit. `DumStructuredSourcePlugin` appends a `DumProvenanceSnapshot` to a
+  per-source `DumProvenanceHistoryStore` (`DumInMemoryProvenanceHistoryStore` default) each `indexAll`;
+  `DumProvenanceMonitor` reads the series back so a field a source stopped declaring is visible as
+  last-seen N runs ago with the origin it used. `connector-app` `DumJpaProvenanceHistoryStore`
+  (`dum_provenance_run`) persists the series per source; `DumConnectorMonitoringApi` exposes
+  `provenance/{source}` and `provenance/{source}/last-seen`. Proven by
+  `DumStructuredProvenancePluginTest`. Pairs with Turing **Block R** (citation / grounding).

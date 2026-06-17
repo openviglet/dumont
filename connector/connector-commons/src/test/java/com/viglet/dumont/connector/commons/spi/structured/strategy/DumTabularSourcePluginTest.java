@@ -14,6 +14,7 @@
 package com.viglet.dumont.connector.commons.spi.structured.strategy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePlugin;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourceProvider;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenance;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.commons.se.field.TurSEFieldType;
 import com.viglet.turing.commons.sn.field.TurSNFieldName;
@@ -75,7 +77,10 @@ class DumTabularSourcePluginTest {
         assertEquals("Algoritmos", cc101.getAttributes().get("title"));
         assertEquals("Computação", cc101.getAttributes().get("area"));
         assertEquals("https://uni.edu/curso/CC101", cc101.getAttributes().get("url"));
-        assertEquals(4, cc101.getSpecs().size());
+        // 4 declared schema fields + the reserved D16 provenance spec carried with the document.
+        assertEquals(5, cc101.getSpecs().size());
+        assertTrue(cc101.getSpecs().stream()
+                .anyMatch(spec -> DumProvenance.FIELD.equals(spec.getName())));
 
         // MAT201's "Área" cell is empty -> grounded away, absent rather than "".
         TurSNJobItem mat201 = itemById(context, "MAT201");

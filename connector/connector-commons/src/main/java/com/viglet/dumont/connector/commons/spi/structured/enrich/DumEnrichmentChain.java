@@ -21,6 +21,7 @@ import java.util.Map;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumFieldProvenance;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -117,9 +118,13 @@ public final class DumEnrichmentChain {
         try {
             DumStructuredRecord.Builder builder =
                     DumStructuredRecord.builder(record.id(), record.schema());
-            // Source values first; a non-blank contribution then overrides, a blank one is dropped.
-            record.values().forEach(builder::set);
-            contributions.forEach(builder::set);
+            // Source values first, each keeping its origin (D16); a non-blank contribution then
+            // overrides — and re-tags the field's provenance to this enricher — while a blank one is
+            // dropped (the source value and its provenance survive).
+            DumFieldProvenance enriched = DumFieldProvenance.enrichment(enricher.name());
+            record.values().forEach((field, value) ->
+                    builder.set(field, value, record.provenance().get(field)));
+            contributions.forEach((field, value) -> builder.set(field, value, enriched));
             return builder.build();
         } catch (RuntimeException e) {
             log.warn("Enricher '{}' produced an invalid contribution for record '{}' "

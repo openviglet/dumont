@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.viglet.dumont.connector.commons.ground.DumGrounding;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumFieldProvenance;
 import com.viglet.turing.commons.se.field.TurSEFieldType;
 
 /**
@@ -43,6 +44,13 @@ import com.viglet.turing.commons.se.field.TurSEFieldType;
  * {@link #missingMandatoryFields()} and the indexing pipeline skips the record rather than
  * fabricating data.
  *
+ * <p>
+ * <strong>Provenance (roadmap D16).</strong> A field may be set with an optional
+ * {@link DumFieldProvenance} recording where its value came from (strategy, selector/path,
+ * confidence). Provenance follows the grounding contract: it is kept only for fields that actually
+ * carry a value — {@link #provenance()} is always a subset of {@link #values()} — so an absent field
+ * has neither a value nor a provenance.
+ *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
@@ -51,11 +59,14 @@ public final class DumStructuredRecord {
     private final String id;
     private final DumStructuredSchema schema;
     private final Map<String, Object> values;
+    private final Map<String, DumFieldProvenance> provenance;
 
-    private DumStructuredRecord(String id, DumStructuredSchema schema, Map<String, Object> values) {
+    private DumStructuredRecord(String id, DumStructuredSchema schema, Map<String, Object> values,
+            Map<String, DumFieldProvenance> provenance) {
         this.id = id;
         this.schema = schema;
         this.values = Collections.unmodifiableMap(values);
+        this.provenance = Collections.unmodifiableMap(provenance);
     }
 
     public static Builder builder(String id, DumStructuredSchema schema) {
@@ -75,6 +86,14 @@ public final class DumStructuredRecord {
         return values;
     }
 
+    /**
+     * Per-field provenance (roadmap D16), a subset of {@link #values()} — only fields set with an
+     * origin carry one. Empty when the source attaches no provenance.
+     */
+    public Map<String, DumFieldProvenance> provenance() {
+        return provenance;
+    }
+
     public boolean has(String field) {
         return values.containsKey(field);
     }
@@ -90,6 +109,7 @@ public final class DumStructuredRecord {
         private final String id;
         private final DumStructuredSchema schema;
         private final Map<String, Object> values = new LinkedHashMap<>();
+        private final Map<String, DumFieldProvenance> provenance = new LinkedHashMap<>();
 
         private Builder(String id, DumStructuredSchema schema) {
             if (id == null || id.isBlank()) {
@@ -113,11 +133,26 @@ public final class DumStructuredRecord {
          *         given for a single-valued field
          */
         public Builder set(String fieldName, Object value) {
+            return set(fieldName, value, null);
+        }
+
+        /**
+         * Set a field value with its {@link DumFieldProvenance provenance} (roadmap D16). The value
+         * obeys the same grounding contract as {@link #set(String, Object)}; the provenance is kept
+         * only when the value survives grounding — a dropped value carries no provenance, and a
+         * {@code null} provenance clears any previously recorded one for the field.
+         */
+        public Builder set(String fieldName, Object value, DumFieldProvenance fieldProvenance) {
             DumStructuredField field = schema.field(fieldName).orElseThrow(
                     () -> new IllegalArgumentException("Field not declared in schema: " + fieldName));
             Object grounded = ground(field, value);
             if (grounded != null) {
                 values.put(fieldName, grounded);
+                if (fieldProvenance != null) {
+                    provenance.put(fieldName, fieldProvenance);
+                } else {
+                    provenance.remove(fieldName);
+                }
             }
             return this;
         }
@@ -195,7 +230,7 @@ public final class DumStructuredRecord {
         }
 
         public DumStructuredRecord build() {
-            return new DumStructuredRecord(id, schema, values);
+            return new DumStructuredRecord(id, schema, values, provenance);
         }
     }
 }

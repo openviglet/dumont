@@ -76,6 +76,17 @@ public record DumColumnRule(String field, int columnIndex, String selector, Stri
         return new DumColumnRule(field, -1, selector, attribute, false);
     }
 
+    /**
+     * A human-readable locator for this column, used as the provenance selector (roadmap D16): the
+     * CSS selector when set, otherwise the positional {@code col[index]}.
+     */
+    public String locator() {
+        if (selector != null && !selector.isBlank()) {
+            return selector;
+        }
+        return "col[" + columnIndex + "]";
+    }
+
     /** Resolve this rule against a table row into the value(s) to set on the record. */
     Object resolve(Element row, Elements cells) {
         if (selector != null && !selector.isBlank()) {

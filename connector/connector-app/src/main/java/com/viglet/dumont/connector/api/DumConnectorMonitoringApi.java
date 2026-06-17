@@ -34,6 +34,10 @@ import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageDr
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageMonitor;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageSnapshot;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceHistoryStore;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceLastSeen;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceMonitor;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceSnapshot;
 import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.domain.DumConnectorMonitoring;
 import com.viglet.dumont.connector.domain.DumConnectorMonitoringPage;
@@ -54,17 +58,20 @@ public class DumConnectorMonitoringApi {
         private final DumConnectorPluginRegistry pluginRegistry;
         private final DumCoverageHistoryStore coverageHistoryStore;
         private final DumCoverageHealthService coverageHealthService;
+        private final DumProvenanceHistoryStore provenanceHistoryStore;
         private final int driftThreshold;
 
         public DumConnectorMonitoringApi(DumConnectorIndexingService indexingService,
                         DumConnectorPluginRegistry pluginRegistry,
                         DumCoverageHistoryStore coverageHistoryStore,
                         DumCoverageHealthService coverageHealthService,
+                        DumProvenanceHistoryStore provenanceHistoryStore,
                         @Value("${dumont.coverage.driftThreshold:25}") int driftThreshold) {
                 this.indexingService = indexingService;
                 this.pluginRegistry = pluginRegistry;
                 this.coverageHistoryStore = coverageHistoryStore;
                 this.coverageHealthService = coverageHealthService;
+                this.provenanceHistoryStore = provenanceHistoryStore;
                 this.driftThreshold = driftThreshold;
         }
 
@@ -161,6 +168,27 @@ public class DumConnectorMonitoringApi {
                         @PathVariable String source,
                         @RequestParam(defaultValue = "false") boolean regenerate) {
                 return ResponseEntity.ok(coverageHealthService.summarize(source, driftThreshold, regenerate));
+        }
+
+        /** Per-source field-provenance history, newest run first (roadmap D16). */
+        @GetMapping("provenance/{source}")
+        public ResponseEntity<List<DumProvenanceSnapshot>> provenanceHistory(
+                        @PathVariable String source) {
+                return ResponseEntity.ok(provenanceHistoryStore.history(source));
+        }
+
+        /**
+         * Per-field last-seen provenance for a source (roadmap D16): for each field ever declared, the
+         * origin it was last extracted from and how many runs ago — so a field a source stopped
+         * declaring is visible as last-seen at an earlier run rather than disappearing silently.
+         */
+        @GetMapping("provenance/{source}/last-seen")
+        public ResponseEntity<DumProvenanceLastSeen> provenanceLastSeen(@PathVariable String source) {
+                List<DumProvenanceSnapshot> history = provenanceHistoryStore.history(source);
+                if (history.isEmpty()) {
+                        return ResponseEntity.ok(DumProvenanceLastSeen.none(source));
+                }
+                return ResponseEntity.ok(DumProvenanceMonitor.lastSeen(history));
         }
 
         private ResponseEntity<DumConnectorMonitoring> generateMonitoringResponse(

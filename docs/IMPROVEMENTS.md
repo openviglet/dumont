@@ -25,7 +25,6 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
 - [II. Connector convergence — one ingestion contract (Track G, D20–D23)](#ii-connector-convergence--one-ingestion-contract-track-g-d20d23)
 - [III. AEM extraction model redesign (Track H, D24–D27)](#iii-aem-extraction-model-redesign-track-h-d24d27)
-- [V. Field-level provenance (D16)](#v-field-level-provenance-d16)
 - [VI. Index-time embeddings (D17)](#vi-index-time-embeddings-d17)
 - [VII. Cross-source entity resolution & dedup (D18)](#vii-cross-source-entity-resolution--dedup-d18)
 - [VIII. Reusable recipe & taxonomy library (D19)](#viii-reusable-recipe--taxonomy-library-d19)
@@ -58,10 +57,10 @@ platform the product name claims: it doesn't just move documents, it makes them
 semantically richer and de-duplicated on the way through.
 
 The ordering is deliberate. Tracks A–C are prerequisites; D13/D14 (AI-assisted inference +
-dry-run preview) opened the adoption layer and D15 (field-coverage & drift monitoring) made
+dry-run preview) opened the adoption layer, D15 (field-coverage & drift monitoring) made
 partial degradation visible and the sidecar→native parity gate (D11) measurable rather than
-manual — all shipped. D16 (field-level provenance) is the highest-leverage *next* step on the
-trust track. Track F follows the RAG maturity on the Turing side.
+manual, and D16 (field-level provenance) made every published field traceable — all shipped,
+completing the trust track. Track F (semantics) follows the RAG maturity on the Turing side.
 
 ## II. Connector convergence — one ingestion contract (Track G, D20–D23)
 
@@ -148,27 +147,6 @@ the reference migration.
 **Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: the AEM Achilles'-heel god-class becomes a
 composition of tested component extractors + typed per-type schemas + named enrichers, observable
 (coverage/drift/provenance) and reusable across institutions via versioned recipes.
-
-## V. Field-level provenance (D16)
-
-**Problem.** The grounding contract guarantees an *absent* field is omitted — good. But
-for a *present* field there is no record of **where it came from**. When Dumont feeds a
-RAG answer in Turing, the consumer cannot cite the source of a specific attribute, nor
-audit why a field disappeared.
-
-**Design.** For each published attribute, record: source, strategy, selector/path,
-`last-seen` run, optional confidence. Carry a **compact** provenance into the
-`TurSNJobItem` (compact because it travels with every document — a per-field map of
-small tokens, not full lineage). This elevates the contract from "omit absent" to "every
-present field is traceable to a source".
-
-Pairs with Turing **Block R** which holds the citation/grounding consumer side.
-
-**Touch points.** Extraction record model (Track A typed record); `TurSNJobItem`
-emission; the enrichment merge in D18 consumes provenance.
-
-**Done.** A published document carries per-field provenance; a field dropped because the
-source stopped declaring it is visible as "last-seen: run N".
 
 ## VI. Index-time embeddings (D17)
 
