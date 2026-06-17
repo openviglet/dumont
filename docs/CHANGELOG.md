@@ -264,6 +264,8 @@
   drives every enabled environment under one session, `toJobItem` stamps each item's environment,
   per-record delta checksum and resolved locale (+ the `site` attribute), and the tracking-driven
   deindex sweep in `finishIndexing` removes stale/unpublished content as before; coverage/preview/
-  provenance are captured once from the primary environment. (Dependency-graph reindex is not yet routed
-  through the structured path — to be re-homed in Track H.) Proven by `DumAemStructuredSourceTest`,
+  provenance are captured once from the primary environment. Proven by `DumAemStructuredSourceTest`,
   `DumAemStructuredSourceProviderTest`, `DumAemPluginTest`. ↳ Builds on D20. Bridges to Track H.
+  Parity follow-ups split out of this conversion: **D28** (dependency-graph reindex — structured
+  `publish` currently emits no dependency set), **D29** (single-item deindex in structured
+  `indexById`), **D30** (extraction parity harness), **D31** (parallel extraction, perf).

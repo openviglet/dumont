@@ -155,6 +155,41 @@ This track has no remaining pending tasks.
       migration path for *structured* sites currently crawled by WC → D02 strategies. Done: a WC
       source reports per-field coverage across crawls and raises drift when a mapping breaks.\
       ↳ **Depends on:** D15. Complements D09.
+- [ ] **D28** · **AEM dependency-graph reindex (structured path)** — restore the incremental reindex
+      triggered by a shared component, dropped when D21 moved AEM onto the structured loop (which
+      publishes with an empty dependency set). Reuse the XF/CF harvest today in
+      `DumAemJobService.extractDependencies` + `filterSelfReferences` (paths under
+      `/content/experience-fragments/` and `/content/dam/`, gated by `dumont.dependencies.enabled`),
+      lift it to a reusable seam, and emit the real `Set<String>` from `DumAemPlugin`'s structured
+      `publish` (instead of `Set.of()`) so it persists via `DumConnectorDependency`. Done: editing an
+      XF/CF reindexes every page that embeds it through the structured path, at parity with the legacy
+      flow.\
+      ↳ **Depends on:** D21. Natural harvest point in D24 (component traversal), but not blocking.
+- [ ] **D29** · **Structured `indexById` deindex parity** — the legacy AEM standalone path deindexed a
+      targeted id that is missing (404) or a publish item no longer delivered; D21's structured
+      `indexById` silently skips it (extract returns empty → no deindex), so a removed/unpublished
+      single page lingers in the index until the next full `indexAll`. Restore the standalone deindex
+      (author + publish) for a missing/undelivered targeted id. Done: `POST index/{name}` /
+      `reindex/{name}` on a now-removed or unpublished id removes it from the index, matching the
+      legacy standalone behaviour.\
+      ↳ **Depends on:** D21.
+- [ ] **D30** · **AEM extraction parity harness** — the D21 "replace the loop" rests on parity that is
+      only structurally reviewed (no live AEM in CI). Add a fixture/mock-HTTP test that drives one
+      `infinity.json` (page, content-fragment, static-file) through both the structured `extract(id)`
+      and the legacy `DumAemJobService` extraction and asserts identical published shape: attributes,
+      document id, `environment`, delta `checksum`, resolved locale (incl. the `configureObjectDataPath`
+      CF/static-file behaviour D21 deliberately mirrored). Done: a golden-fixture test locks structured
+      extraction == legacy output and fails on any divergence.\
+      ↳ **Depends on:** D21.
+- [ ] **D31** · **Parallel extraction for HTTP-heavy structured sources** *(perf)* — the legacy AEM
+      navigator parallelised tree traversal (`dumont.reactive.indexing`); the shared structured loop
+      (`DumStructuredSourcePlugin`) extracts ids sequentially, and since AEM `extract(id)` is one
+      infinity.json fetch per item, a large site indexes markedly slower. Add bounded-concurrency
+      extraction to the structured loop (framework-level, reused by every adapter; one HTTP fetch per
+      id makes AEM the first beneficiary), preserving ordering-independent grounding/coverage capture.
+      Done: a large AEM source indexes through the structured loop within the legacy reactive path's
+      wall-clock envelope.\
+      ↳ **Depends on:** D21.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
