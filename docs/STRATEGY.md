@@ -108,7 +108,8 @@ connector" lives:
    → ROADMAP Track E (D15–D16).
 
 And the **differentiator** that earns the product's name — *Data Exchange Platform*, not
-*pipe*: a semantics layer over the enrichment hook — **index-time embeddings**,
+*pipe*: a semantics layer over the enrichment hook — **embedding-quality for structured
+content** (shaping what Turing's index-time embedder sees, not re-embedding in Dumont),
 **cross-source entity resolution/dedup**, and a **reusable recipe & taxonomy library** so
 one SIGAA recipe serves all the federals instead of being copied per source.
 → ROADMAP Track F (D17–D19).

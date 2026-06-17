@@ -25,7 +25,7 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
 - [II. Connector convergence — one ingestion contract (Track G, D20–D23)](#ii-connector-convergence--one-ingestion-contract-track-g-d20d23)
 - [III. AEM extraction model redesign (Track H, D24–D27)](#iii-aem-extraction-model-redesign-track-h-d24d27)
-- [VI. Index-time embeddings (D17)](#vi-index-time-embeddings-d17)
+- [VI. Embedding-quality for structured content (D17)](#vi-embedding-quality-for-structured-content-d17)
 - [VII. Cross-source entity resolution & dedup (D18)](#vii-cross-source-entity-resolution--dedup-d18)
 - [VIII. Reusable recipe & taxonomy library (D19)](#viii-reusable-recipe--taxonomy-library-d19)
 - [IX. Cross-cutting decisions & restrictions](#ix-cross-cutting-decisions--restrictions)
@@ -148,22 +148,45 @@ the reference migration.
 composition of tested component extractors + typed per-type schemas + named enrichers, observable
 (coverage/drift/provenance) and reusable across institutions via versioned recipes.
 
-## VI. Index-time embeddings (D17)
+## VI. Embedding-quality for structured content (D17)
 
-**Problem.** Hybrid/semantic RAG on the Turing side needs embeddings. Generating them in
-a separate pass over the indexed corpus is a second full traversal and a consistency
-problem (corpus changes between the index pass and the embed pass).
+**What this is NOT (the original framing was wrong).** The original D17 — "generate
+embeddings in Dumont as an enrichment step so Turing needs no separate reprocessing pass"
+— rests on a premise that does not hold. Turing **already** embeds at index time on the
+exact path Dumont uses: `DumTuringIndexingPlugin.index()` → `POST /api/sn/import` →
+`TurSNImportAPI.sendToGenAi()` → `TurSNGenAi.addDocuments()`, which generates the vectors
+synchronously in the same call (when the target SN site has RAG enabled). There is no
+second traversal and no consistency window to close, and `/api/sn/import` does not accept a
+pre-computed vector anyway. Generating vectors in Dumont would duplicate work Turing does
+well and violate the cross-cutting rule "reuse Turing's LLM surface; do not re-wire models
+in Dumont."
 
-**Design.** Generate embeddings as an **enrichment step at index time** — Dumont already
-holds the full text in hand at that moment. Behind config + cache, exactly like the D04
-LLM enrichment path (respect the same `llmCache*` discipline Turing's `TurLlmCacheService`
-uses). The document and its vector ship together, consistent by construction.
+**The real problem.** Turing's `partitionFields` decides the embedding input by a
+**hardcoded field-name heuristic**: `title` → header, `abstract` + `text` → body, short
+simple-typed custom fields → header (and facet metadata), and anything else — long
+non-standard fields, complex/nested types — is pushed to the body only if simple-typed or
+**dropped entirely**. Structured sources (D11/D16) often carry their meaningful content
+under custom field names or non-simple shapes, so that content never reaches the embedding
+and the document embeds poorly or is flagged "no indexable text."
 
-**Touch points.** D04 enrichment stage; indexing plugins (`DumTuringIndexingPlugin` first);
-Turing hybrid ranking consumer.
+**Design.** Make structured content embed *well*, on the Turing-owned embedding path:
+1. **Recipe-level field mapping** (Dumont side, D04/D19): the recipe maps a source's
+   semantic content into the fields the partitioner recognizes — primary identity → `title`,
+   long-form content → `text`/`abstract`, categorical fields → short simple values. No new
+   model wiring; this shapes the `TurSNJobItem.attributes` Dumont already sends.
+2. **RAG-enabled visibility** (Dumont side): surface whether the target SN site has RAG
+   enabled/bound, so a misconfigured site is caught rather than silently keyword-only.
+3. **Documented partition contract**: write down the header/body/metadata rules so recipes
+   target them deliberately instead of guessing.
 
-**Done.** A source emits embedding vectors alongside its documents; Turing hybrid ranking
-consumes them. Pairs with `turing/2026.1/docs/RAG_HYBRID_CONFIG.md`.
+**Touch points.** Recipe/mapping in the enrichment stage (D04); provenance (D16) to know
+which extracted field is the body vs. a facet; Dumont source page for RAG-enabled status;
+Turing `TurSNGenAi.partitionFields` as the contract being targeted (read, not rewritten).
+
+**Done.** A structured source with non-standard field names indexes such that its
+meaningful content reaches the embedding body (verified via Turing's RAG chunk debug log /
+retrieval), and the RAG-enabled state of the target site is visible in Dumont. Pairs with
+`turing/2026.1/docs/RAG_HYBRID_CONFIG.md`.
 
 ## VII. Cross-source entity resolution & dedup (D18)
 
