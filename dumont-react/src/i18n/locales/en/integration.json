@@ -14,6 +14,7 @@
       "dbSources": "Database Sources",
       "wcSources": "Web Crawler Sources",
       "assetsSources": "Assets Sources",
+      "catalogSources": "Catalog Sources",
       "edsSources": "EDS Sources",
       "sourceInference": "AI Source Inference",
       "indexingRules": "Indexing Rules",
@@ -161,6 +162,20 @@
       "reindexingStarted": "Reindexing started for {{name}}",
       "reindexingFailed": "Failed to start reindexing for {{name}}",
       "reindexAll": "Reindex all",
+      "indexAll": "Index all",
+      "alreadyRunning": "A process is already running for {{name}}. Please wait for it to finish."
+    },
+    "catalogSources": {
+      "title": "Catalog Sources",
+      "description": "Catalog bridge sources — re-index already-normalized catalog records from an external engine.",
+      "feature": "Catalog Source",
+      "blankTitle": "You don't seem to have any catalog sources.",
+      "blankDescription": "Create a new catalog source to re-index normalized catalog records served over HTTP.",
+      "newSource": "New Catalog Source",
+      "deleted": "The {{name}} Catalog Source was deleted",
+      "notDeleted": "The {{name}} Catalog Source was not deleted",
+      "indexingStarted": "Indexing started for {{name}}",
+      "indexingFailed": "Failed to start indexing for {{name}}",
       "indexAll": "Index all",
       "alreadyRunning": "A process is already running for {{name}}. Please wait for it to finish."
     },

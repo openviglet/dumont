@@ -1007,6 +1007,28 @@
       "attributeMappings": "Attribute Mappings",
       "attributeMappingsDesc": "Map crawled content to search engine fields. Use a Java class name or literal text."
     },
+    "catalogSource": {
+      "general": "General",
+      "generalDesc": "Basic information and target site settings for the catalog source.",
+      "namePlaceholder": "e.g., UFMG Catalog",
+      "nameDesc": "A unique name for this catalog source (typically one per institution).",
+      "descriptionPlaceholder": "Describe this institution's catalog...",
+      "descriptionDesc": "Optional description for this catalog source.",
+      "site": "Semantic Navigation Site",
+      "siteRequired": "Site is required.",
+      "siteDesc": "The Turing Semantic Navigation site to publish records to.",
+      "locale": "Locale",
+      "localeDesc": "The locale of the published records (e.g., pt_BR).",
+      "connection": "Connection",
+      "connectionDesc": "Where the already-normalized catalog JSON is served, and optional authentication.",
+      "catalogUrl": "Catalog URL",
+      "catalogUrlRequired": "Catalog URL is required.",
+      "catalogUrlDesc": "URL serving this institution's normalized catalog JSON (a records array, or a {courses:[…]} envelope).",
+      "authHeaderName": "Auth Header Name",
+      "authHeaderNameDesc": "Optional request header sent when fetching the catalog (e.g., Authorization).",
+      "authHeaderValue": "Auth Header Value",
+      "authHeaderValueDesc": "The value for the auth header (e.g., a bearer token or API key)."
+    },
     "dbSource": {
       "general": "General",
       "generalDesc": "Basic information and target site settings for the database source.",

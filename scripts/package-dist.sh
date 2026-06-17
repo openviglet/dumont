@@ -42,6 +42,7 @@ mkdir -p "$STAGE/connector/libs/aem"
 mkdir -p "$STAGE/connector/libs/db"
 mkdir -p "$STAGE/connector/libs/webcrawler"
 mkdir -p "$STAGE/connector/libs/assets"
+mkdir -p "$STAGE/connector/libs/catalog"
 mkdir -p "$STAGE/connector/export"
 mkdir -p "$STAGE/bin"
 
@@ -68,6 +69,10 @@ cp "assets/assets-plugin/target/assets-plugin.jar"        "$STAGE/connector/libs
 cp "assets/assets-plugin-sample/target/assets-plugin-sample.jar" "$STAGE/connector/libs/assets/"
 cp "assets/assets-plugin-sample/scripts/sample/export/sample-assets.json" "$STAGE/connector/export/"
 
+# Catalog Bridge Plugin
+cp "catalog/catalog-plugin/target/catalog-plugin.jar"     "$STAGE/connector/libs/catalog/"
+cp "catalog/catalog-plugin/scripts/sample/export/cursarei.json" "$STAGE/connector/export/"
+
 # Scripts
 cp "$SCRIPT_DIR/bin/dumont-aem.sh"          "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-aem.bat"         "$STAGE/bin/"
@@ -75,6 +80,8 @@ cp "$SCRIPT_DIR/bin/dumont-webcrawler.sh"   "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-webcrawler.bat"  "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-db.sh"           "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-db.bat"          "$STAGE/bin/"
+cp "$SCRIPT_DIR/bin/dumont-catalog.sh"      "$STAGE/bin/"
+cp "$SCRIPT_DIR/bin/dumont-catalog.bat"     "$STAGE/bin/"
 chmod +x "$STAGE/bin/"*.sh 2>/dev/null || true
 
 # Config and docs

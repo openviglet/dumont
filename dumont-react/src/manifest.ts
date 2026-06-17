@@ -1,6 +1,7 @@
 import {
   IconActivityHeartbeat,
   IconAdjustmentsSearch,
+  IconBuildingBank,
   IconChartBar,
   IconCloudComputing,
   IconDatabase,
@@ -42,6 +43,7 @@ const ICON_COMPONENTS: Record<string, Icon> = {
   IconActivityHeartbeat,
   IconGitCommit,
   IconDatabase,
+  IconBuildingBank,
   IconGlobe,
   IconFolder,
   IconCloudComputing,
@@ -73,6 +75,7 @@ const manifest: DumontManifest = {
     { titleKey: "integration.nav.dbSources", url: "/db-source", icon: "IconDatabase", order: 10, provider: "JDBC-DATABASE" },
     { titleKey: "integration.nav.wcSources", url: "/wc-source", icon: "IconGlobe", order: 10, provider: "WEB-CRAWLER" },
     { titleKey: "integration.nav.assetsSources", url: "/assets-source", icon: "IconFolder", order: 10, provider: "ASSETS" },
+    { titleKey: "integration.nav.catalogSources", url: "/catalog-source", icon: "IconBuildingBank", order: 10, provider: "CATALOG-BRIDGE" },
     { titleKey: "integration.nav.edsSources", url: "/eds-source", icon: "IconCloudComputing", order: 10, provider: "EDS" },
     { titleKey: "integration.nav.sourceInference", url: "/source-inference", icon: "IconWand", order: 15 },
     { titleKey: "integration.nav.indexingRules", url: "/indexing-rule", icon: "IconTools", order: 20 },

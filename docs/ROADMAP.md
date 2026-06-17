@@ -63,14 +63,11 @@ This track has no remaining pending tasks.
 > fallback/parity discipline. This is the bridge (sidecar) → native path from
 > [STRATEGY.md](STRATEGY.md).
 
-- [ ] **D10** · **Catalog bridge (sidecar) connector** — a `DumConnectorPlugin` that
-      ingests **already-normalized** catalog records produced by cursarei's existing
-      Python engine (one source per institution) and publishes `TurSNJobItem`s to the
-      Turing SN site, applying the grounding contract. Lets the user-facing Turing wins
-      (search/RAG, cursarei `V01–V04`) go live without first porting extraction to the
-      JVM. Done: the full catalog indexes into Turing through Dumont; document count and
-      a URL sample match the Python output for the same sources.\
-      ↳ **Depends on:** D01, D03. Pairs with cursarei **V05.1** and Turing **T381**.
+> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D10** Catalog bridge (sidecar) connector
+> (`catalog-plugin` over the structured SPI — ingests already-normalized catalog JSON per
+> institution over HTTP, grounding-safe, mandatory `title`/`url`; the bridge that takes the Turing
+> search/RAG wins live while the Python engine stays the anti-WAF fallback).
+
 - [ ] **D11** · **Leg-by-leg native migration** — move institutions from the sidecar
       (D10) to **native declarative strategies** (D02), one leva at a time, starting
       with the SIGAA federals (one shared TabularListing recipe → highest leverage).

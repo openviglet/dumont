@@ -1,11 +1,13 @@
 import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
 
-import { IconActivityHeartbeat, IconAdjustmentsSearch, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools, IconWand } from "@tabler/icons-react";
+import { IconActivityHeartbeat, IconAdjustmentsSearch, IconBuildingBank, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools, IconWand } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Page } from "./components/page";
 import IntegrationInstanceAssetsSourceListPage from "./pages/integration.instance.assets.source.list.page";
 import IntegrationInstanceAssetsSourcePage from "./pages/integration.instance.assets.source.page";
+import IntegrationInstanceCatalogSourceListPage from "./pages/integration.instance.catalog.source.list.page";
+import IntegrationInstanceCatalogSourcePage from "./pages/integration.instance.catalog.source.page";
 import IntegrationInstanceDbSourceListPage from "./pages/integration.instance.db.source.list.page";
 import IntegrationInstanceDbSourcePage from "./pages/integration.instance.db.source.page";
 import IntegrationInstanceCoveragePage from "./pages/integration.instance.coverage.page";
@@ -63,6 +65,12 @@ export default function DumontRoutes() {
         <Route index element={<IntegrationInstanceAssetsSourceListPage />} />
         <Route path=":sourceId" element={<IntegrationInstanceAssetsSourcePage />} />
         <Route path=":sourceId/:tab" element={<IntegrationInstanceAssetsSourcePage />} />
+      </Route>
+      {/* Catalog Bridge Sources (D10) */}
+      <Route path="catalog-source" element={<Page turIcon={IconBuildingBank} title={t("integration.nav.catalogSources")} urlBase="catalog-source" />}>
+        <Route index element={<IntegrationInstanceCatalogSourceListPage />} />
+        <Route path=":sourceId" element={<IntegrationInstanceCatalogSourcePage />} />
+        <Route path=":sourceId/:tab" element={<IntegrationInstanceCatalogSourcePage />} />
       </Route>
       {/* EDS Sources (Adobe Edge Delivery Services / aem.live) */}
       <Route path="eds-source" element={<Page turIcon={IconCloudComputing} title={t("integration.nav.edsSources")} urlBase="eds-source" />}>

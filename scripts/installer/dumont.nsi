@@ -126,6 +126,10 @@ LangString DESC_SecAssets      ${LANG_ENGLISH} "Assets plugin for indexing local
 LangString DESC_SecAssets      ${LANG_PORTUGUESE} "Plugin de assets para indexação de arquivos e documentos locais."
 LangString DESC_SecAssetsSample ${LANG_ENGLISH} "Documents sample: plugin JAR and export configuration."
 LangString DESC_SecAssetsSample ${LANG_PORTUGUESE} "Exemplo documentos: JAR do plugin e configuração de exportação."
+LangString DESC_SecCatalog     ${LANG_ENGLISH} "Catalog bridge plugin: re-indexes already-normalized catalog records from an external engine."
+LangString DESC_SecCatalog     ${LANG_PORTUGUESE} "Plugin catalog bridge: reindexa registros de catálogo já normalizados de um motor externo."
+LangString DESC_SecCatalogSample ${LANG_ENGLISH} "Catalog bridge sample: source export configuration."
+LangString DESC_SecCatalogSample ${LANG_PORTUGUESE} "Exemplo catalog bridge: configuração de exportação de fonte."
 
 ; --------------------------------------------------------------------------
 ; Java Page - Auto-detect and allow user to browse
@@ -611,6 +615,31 @@ SectionGroup "Connectors" SecConnectors
         File "${STAGE}\connector\export\sample-assets.json"
     SectionEnd
 
+    ; ------------------------------------------------------------------
+    ; Catalog Bridge Plugin
+    ; ------------------------------------------------------------------
+    Section "Catalog Bridge" SecCatalog
+        SetOutPath "$INSTDIR\connector\libs\catalog"
+        File "${STAGE}\connector\libs\catalog\catalog-plugin.jar"
+
+        SetOutPath "$INSTDIR\bin"
+        File "${STAGE}\bin\dumont-catalog.sh"
+        File "${STAGE}\bin\dumont-catalog.bat"
+
+        ; Start Menu shortcut
+        CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont Catalog Bridge.lnk" \
+            "$INSTDIR\bin\dumont-catalog.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
+    SectionEnd
+
+    ; ------------------------------------------------------------------
+    ; Catalog Bridge Sample
+    ; ------------------------------------------------------------------
+    Section /o "Catalog Bridge Sample" SecCatalogSample
+        CreateDirectory "$LOCALAPPDATA\Viglet\Dumont\catalog\export"
+        SetOutPath "$LOCALAPPDATA\Viglet\Dumont\catalog\export"
+        File "${STAGE}\connector\export\cursarei.json"
+    SectionEnd
+
 SectionGroupEnd
 
 ; --------------------------------------------------------------------------
@@ -627,6 +656,8 @@ SectionGroupEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDBSample}      $(DESC_SecDBSample)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecAssets}        $(DESC_SecAssets)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecAssetsSample}  $(DESC_SecAssetsSample)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecCatalog}       $(DESC_SecCatalog)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecCatalogSample} $(DESC_SecCatalogSample)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ; --------------------------------------------------------------------------
@@ -671,6 +702,16 @@ Function .onSelChange
     ${IfNot} ${SectionIsSelected} ${SecAssets}
     ${AndIf} ${SectionIsSelected} ${SecAssetsSample}
         !insertmacro UnselectSection ${SecAssetsSample}
+    ${EndIf}
+
+    ; Catalog Sample requires Catalog
+    ${If} ${SectionIsSelected} ${SecCatalogSample}
+    ${AndIfNot} ${SectionIsSelected} ${SecCatalog}
+        !insertmacro SelectSection ${SecCatalog}
+    ${EndIf}
+    ${IfNot} ${SectionIsSelected} ${SecCatalog}
+    ${AndIf} ${SectionIsSelected} ${SecCatalogSample}
+        !insertmacro UnselectSection ${SecCatalogSample}
     ${EndIf}
 FunctionEnd
 

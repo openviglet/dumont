@@ -1007,6 +1007,28 @@
       "attributeMappings": "Mapeamento de Atributos",
       "attributeMappingsDesc": "Mapeie o conteúdo rastreado para campos do mecanismo de busca. Use um nome de classe Java ou texto literal."
     },
+    "catalogSource": {
+      "general": "Geral",
+      "generalDesc": "Informações básicas e configurações do site de destino para a fonte de catálogo.",
+      "namePlaceholder": "ex: Catálogo UFMG",
+      "nameDesc": "Um nome único para esta fonte de catálogo (geralmente uma por instituição).",
+      "descriptionPlaceholder": "Descreva o catálogo desta instituição...",
+      "descriptionDesc": "Descrição opcional para esta fonte de catálogo.",
+      "site": "Site de Navegação Semântica",
+      "siteRequired": "O site é obrigatório.",
+      "siteDesc": "O site de Navegação Semântica do Turing onde os registros serão publicados.",
+      "locale": "Locale",
+      "localeDesc": "O locale dos registros publicados (ex: pt_BR).",
+      "connection": "Conexão",
+      "connectionDesc": "Onde o JSON de catálogo já normalizado é servido, e autenticação opcional.",
+      "catalogUrl": "URL do Catálogo",
+      "catalogUrlRequired": "A URL do catálogo é obrigatória.",
+      "catalogUrlDesc": "URL que serve o JSON normalizado desta instituição (um array de registros, ou um envelope {courses:[…]}).",
+      "authHeaderName": "Nome do Header de Autenticação",
+      "authHeaderNameDesc": "Header opcional enviado ao buscar o catálogo (ex: Authorization).",
+      "authHeaderValue": "Valor do Header de Autenticação",
+      "authHeaderValueDesc": "O valor do header de autenticação (ex: um bearer token ou API key)."
+    },
     "dbSource": {
       "general": "Geral",
       "generalDesc": "Informações básicas e configurações do site de destino para a fonte de banco de dados.",

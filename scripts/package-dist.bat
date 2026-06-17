@@ -55,6 +55,7 @@ mkdir "%STAGE%\connector\libs\aem"
 mkdir "%STAGE%\connector\libs\db"
 mkdir "%STAGE%\connector\libs\webcrawler"
 mkdir "%STAGE%\connector\libs\assets"
+mkdir "%STAGE%\connector\libs\catalog"
 mkdir "%STAGE%\connector\export"
 mkdir "%STAGE%\bin"
 
@@ -81,6 +82,10 @@ copy "assets\assets-plugin\target\assets-plugin.jar"        "%STAGE%\connector\l
 copy "assets\assets-plugin-sample\target\assets-plugin-sample.jar" "%STAGE%\connector\libs\assets\" >nul
 copy "assets\assets-plugin-sample\scripts\sample\export\sample-assets.json" "%STAGE%\connector\export\" >nul
 
+rem Catalog Bridge Plugin
+copy "catalog\catalog-plugin\target\catalog-plugin.jar"     "%STAGE%\connector\libs\catalog\" >nul
+copy "catalog\catalog-plugin\scripts\sample\export\cursarei.json" "%STAGE%\connector\export\" >nul
+
 rem Scripts
 copy "%SCRIPT_DIR%bin\dumont-aem.sh"         "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-aem.bat"        "%STAGE%\bin\" >nul
@@ -88,6 +93,8 @@ copy "%SCRIPT_DIR%bin\dumont-webcrawler.sh"  "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-webcrawler.bat" "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-db.sh"          "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-db.bat"         "%STAGE%\bin\" >nul
+copy "%SCRIPT_DIR%bin\dumont-catalog.sh"     "%STAGE%\bin\" >nul
+copy "%SCRIPT_DIR%bin\dumont-catalog.bat"    "%STAGE%\bin\" >nul
 
 rem Config and docs
 copy "%SCRIPT_DIR%config\dumont-connector.properties" "%STAGE%\connector\" >nul

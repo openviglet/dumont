@@ -111,6 +111,25 @@
   longer a total failure. Proven by `DumWCPluginProcessIncrementalTest`, `DumWCSitemapTest`. Builds on
   D06; pairs with D07.
 
+## Track C — cursarei reference connector
+
+- **D10** — Catalog bridge (sidecar) connector: new `catalog/catalog-plugin` module
+  (`…connector.plugin.catalog`) — the first production consumer of the structured-source SPI.
+  `DumCatalogPlugin` extends `DumStructuredSourcePlugin`; `DumCatalogStructuredSource` fetches one
+  institution's already-normalized catalog JSON (a bare array or the `{courses:[…]}` envelope) over
+  HTTP via the `DumCatalogFetcher` seam (`DumCatalogHttpFetcher` default), indexes records by the
+  engine-assigned id, and maps each `Course` (camelCase keys, `DumCatalogSchema`) onto the schema —
+  so the schema-bound builder enforces grounding (absent/blank field → omitted, never `""`) and
+  `title`/`url` are mandatory (a record missing either is skipped). `DumCatalogSource` (JPA) + REST
+  CRUD (`/api/v2/catalog/source`, `indexAll`, export/import) + first-run `./export` provisioning
+  mirror the db/wc connectors; the plugin ships as a shaded `catalog-plugin.jar` (bundling org.json)
+  loaded via `-Dloader.path`, with `bin/dumont-catalog.*` launchers and package-dist/installer
+  wiring. The engine keeps its anti-WAF collection (Python stays the fallback); Dumont gets the
+  search/RAG wins live without porting extraction to the JVM. Per-institution sources migrate to
+  native declarative strategies one wave at a time (D11), gated on parity. Proven by
+  `DumCatalogStructuredSourceTest` (mapping + grounding + envelope) and `DumCatalogPluginTest`
+  (end-to-end discover→extract→ground→publish, mandatory-skip). Pairs with cursarei V05.1.
+
 ## Track D — Adoption & authoring
 
 - **D13** — AI-assisted source inference: `connector-commons`

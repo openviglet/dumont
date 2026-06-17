@@ -1,0 +1,9 @@
+[
+  {
+    "name": "cursarei-sample",
+    "description": "Sample catalog-bridge source — points at a normalized catalog JSON served by the external engine (one source per institution).",
+    "catalogUrl": "http://localhost:8000/output/sample.json",
+    "locale": "pt_BR",
+    "turSNSites": ["cursarei"]
+  }
+]
