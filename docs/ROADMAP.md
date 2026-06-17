@@ -191,12 +191,12 @@ This track has no remaining pending tasks.
 > layer, it does not rip out the connector). The component shapes recur across institutions, so
 > the endgame ties into the D19 recipe library for multi-tenant reuse.
 
-- [ ] **D27** · **Versioned AEM recipes** — promote component extractors + content-type schemas to
-      first-class **versioned, parameterized artifacts** (the D19 recipe library), so the same
-      "course-offer" recipe applies across institutions (Insper, cursarei federals) with only
-      per-source parameters. Done: two institutions index a shared content type via the same
-      versioned recipe + per-source params; bumping the recipe re-applies to both.\
-      ↳ **Depends on:** D24, D25, D19.
+> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D24** AEM component-extractor SPI · **D25**
+> Schema-per-content-type + template routing · **D26** Derivations → enrichment chain · **D27**
+> Versioned AEM recipes (component extractors + content-type schemas as versioned, parameterized
+> artifacts shared across institutions).
+
+This track has no remaining pending tasks.
 
 ---
 

@@ -358,3 +358,18 @@
   latter including a full-chain reference proving the five derivations come only from named enrichers
   (provenance `enrichment:<name>`). The Insper plugin (separate repo) composes these into its chain.
   ↳ Builds on D25, D04.
+- **D27** — Versioned AEM recipes: D25's per-content-type model (schema + component-extractor
+  composition) is promoted to a first-class, versioned, parameterized artifact applied **by reference**
+  instead of copied into a per-source god-class — the AEM-side counterpart of D19, the endgame of Track
+  H ("one `course-offer` recipe → many institutions"). New `aem-commons` `…aem.commons.recipe` (declared
+  without depending on connector-commons, the same boundary as `DumAemContentTypeField`): `DumAemRecipe`
+  captures the shared shape (content-type name + field schema + an extractor-composition *factory*),
+  `materialize(params)` binds it to one institution's `DumAemRecipeParameters` (template names + a tiny
+  param bag — component resource-type prefix, …) producing a ready `DumAemContentType`; `DumAemRecipeRef`
+  (`name@version`, bare = latest) + `DumAemRecipeLibrary` store recipes by name+version (latest = highest).
+  A recipe-driven extension stays a thin `DumAemExtModelJsonBase`, delegating `contentTypes()` /
+  `templateNameAliases()` to a `DumAemRecipeContentTypes` binding that materializes from the library's
+  current state on every call — so registering a higher version re-applies to every institution tracking
+  it by latest on the next extraction, while a pinned ref stays frozen. Proven by `DumAemRecipeLibraryTest`
+  (two institutions index a shared content type via one recipe; a recipe bump re-applies a new field/
+  extractor to both; pinned ref unaffected; unregistered binding skipped). ↳ Builds on D24, D25, D19.

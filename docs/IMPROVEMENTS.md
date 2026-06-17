@@ -23,7 +23,6 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 ## Table of contents
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
-- [III. AEM extraction model redesign (Track H, D27)](#iii-aem-extraction-model-redesign-track-h-d27)
 - [IX. Cross-cutting decisions & restrictions](#ix-cross-cutting-decisions--restrictions)
 
 ---
@@ -57,48 +56,6 @@ dry-run preview) opened the adoption layer, D15 (field-coverage & drift monitori
 partial degradation visible and the sidecar→native parity gate (D11) measurable rather than
 manual, and D16 (field-level provenance) made every published field traceable — all shipped,
 completing the trust track. Track F (semantics) follows the RAG maturity on the Turing side.
-
-## III. AEM extraction model redesign (Track H, D27)
-
-**Problem.** The AEM connector ships *two* extraction paradigms: a declarative property→field
-mapping (`DumAemPluginModel` → `targetAttr` ← `sourceAttr`) and a code-based content extractor
-(`DumAemExtContentInterface` / `DumAemExtModelJsonBase`). Every serious deployment **abandons the
-declarative one** and pours all logic into a single monolithic content-extractor — the Insper
-portal's `DumAemExtInsperModelJson` is the canonical case: ~480 lines fusing template routing,
-component-tree traversal, business derivation (`inscricaoAberta`, `dateSort`, `preco`,
-`dateOfClassesText`, `alphabet`) and normalization (timezone, `html2Text`, PT months). When every
-real source rejects the parameterized layer for a god-class, the parameterization is modelling the
-wrong thing. That class is the indexing **Achilles' heel**: untestable in parts, un-reusable across
-institutions, schema-less, and able to break **silently**.
-
-**Root cause.** The unit of mapping is wrong. AEM content is a **tree of typed components grouped
-by content type** (a news article, an event, a course/offer, an institutional page), not a bag of
-JCR properties. A property→field table cannot express "flatten all contests across all banners,
-filter by open enrolment, take the earliest future start date" — so it always degrades to code. And
-`templateNameAliases()` collapsing 8 templates into 4 types is the domain quietly telling us the
-real unit is the **content type**, not the source.
-
-**Design.** Realign the *mapping* layer to the domain (crawl/auth/delta/navigator stay untouched),
-on top of the contract D21 establishes and the content-type model D25 shipped (a template routes to
-a content type with its own `DumStructuredSchema` + extractor composition; coverage/drift read per
-type):
-- **Versioned recipes (D27).** Component extractors + content-type schemas become versioned,
-  parameterized artifacts (D19), so one "course-offer" recipe applies across institutions.
-
-**Why incremental.** D21 (wrap as-is) delivers the contract + coverage at ~zero risk and *measures*
-the pain first; each Track H task then peels one layer, deliverable on its own. The risk to avoid is
-building a bespoke AEM-mapping framework before the structured SPI + D04 prove insufficient — which
-is why D24 (shipped) refactored the existing extension into a composed component-extractor SPI rather
-than inventing a new engine, and the remaining tasks build on that seam.
-
-**Touch points.** `aem-commons` ext SPI (`DumAemExtModelJsonBase`, `DumAemModelJsonQuery`,
-`DumAemAttrMap`); the D21 AEM `DumStructuredSource` adapter; `DumStructuredSchema` per content type;
-the D04 `DumEnrichmentChain`; the D19 recipe library; sample extension `DumAemExtInsperModelJson` as
-the reference migration.
-
-**Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: the AEM Achilles'-heel god-class becomes a
-composition of tested component extractors + typed per-type schemas + named enrichers, observable
-(coverage/drift/provenance) and reusable across institutions via versioned recipes.
 
 ## IX. Cross-cutting decisions & restrictions
 
