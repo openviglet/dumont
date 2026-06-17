@@ -81,6 +81,11 @@ public final class DumEnrichmentChain {
         return enrichers.isEmpty();
     }
 
+    /** The enrichers in this chain, in order — immutable. Lets a caller compose chains. */
+    public List<DumEnricher> enrichers() {
+        return enrichers;
+    }
+
     /**
      * Run every applicable enricher in order, returning the enriched record. The input record is
      * never mutated; a new record is returned only when an enricher actually contributes. When the

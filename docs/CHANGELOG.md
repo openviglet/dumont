@@ -198,3 +198,18 @@
   source carried by a new `DumFieldProvenance.source` (D16), emitted in the `dum_provenance` token
   so the merged document stays auditable. Proven by `DumCrossSourceResolutionPluginTest` +
   `DumRecordMergeTest`. ↳ Builds on D04, D16.
+- **D19** — Reusable recipe & taxonomy library: `connector-commons`
+  `…spi.structured.recipe` — versions shared, parameterized extraction recipes and canonical
+  taxonomy maps as first-class artifacts, applied **by reference** instead of copied per source.
+  `DumRecipeRef` (`name@version`, bare name = latest), `DumTabularRecipe` (the SIGAA `TabularListing`
+  shape — schema + row/column rules + taxonomy applications — captured once, built into a strategy per
+  source via `strategy(fetcher, listingUrls)`), `DumTaxonomy` (versioned canonical map) applied through
+  the library-backed `DumTaxonomyEnricher` (resolves its taxonomy from the library at apply time, so a
+  taxonomy bump re-applies live, grounding-safe — unmapped label omitted). `DumRecipeLibrary` stores
+  both keyed by name+version (latest = highest); `DumRecipeSourceProvider` binds each source to a
+  recipe ref + tiny `DumRecipeParameters` (listing URLs, sites, locale) and materializes the
+  `DumStructuredSource` on demand, so a recipe bump re-applies to every bound source on the next run
+  while a pinned ref (`sigaa@1`) stays frozen. `DumEnrichmentChain.enrichers()` accessor lets the
+  provider compose per-recipe chains. Proven by `DumRecipeLibraryPluginTest` (two institutions index
+  via one recipe; recipe + taxonomy bumps re-apply to both; pinned ref unaffected). ↳ Builds on D02, D04.
+  Accelerates D11; ties into D27.

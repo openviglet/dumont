@@ -25,7 +25,6 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
 - [II. Connector convergence — one ingestion contract (Track G, D20–D23)](#ii-connector-convergence--one-ingestion-contract-track-g-d20d23)
 - [III. AEM extraction model redesign (Track H, D24–D27)](#iii-aem-extraction-model-redesign-track-h-d24d27)
-- [VIII. Reusable recipe & taxonomy library (D19)](#viii-reusable-recipe--taxonomy-library-d19)
 - [IX. Cross-cutting decisions & restrictions](#ix-cross-cutting-decisions--restrictions)
 
 ---
@@ -145,23 +144,6 @@ the reference migration.
 **Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: the AEM Achilles'-heel god-class becomes a
 composition of tested component extractors + typed per-type schemas + named enrichers, observable
 (coverage/drift/provenance) and reusable across institutions via versioned recipes.
-
-## VIII. Reusable recipe & taxonomy library (D19)
-
-**Problem.** D11 calls for "one shared `TabularListing` recipe → the SIGAA federals". If
-that recipe is copied per source, the leverage evaporates: 50 institutions become 50
-near-identical configs that drift apart and must be fixed one by one.
-
-**Design.** Make recipes and canonical taxonomy maps **first-class versioned artifacts**,
-applied by reference with per-source parameters. A source references `recipe: sigaa@3`
-plus its parameters; bumping the recipe re-applies to every source that uses it. This is
-what makes the leg-by-leg native migration (D11) scale instead of multiply.
-
-**Touch points.** Strategy config model (D02); a recipe registry/store; taxonomy
-normalization in the enrichment stage (D04).
-
-**Done.** Two institutions index via the same versioned recipe with only per-source
-parameters; bumping the recipe re-applies to both.
 
 ## IX. Cross-cutting decisions & restrictions
 

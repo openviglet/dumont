@@ -119,13 +119,14 @@ This track has no remaining pending tasks.
 > normalization. All grounding-safe: enrichment may normalize / classify / derive, **never**
 > fabricate a sourced attribute.
 
-- [ ] **D19** · **Reusable recipe & taxonomy library** — version shared, parameterized recipes
-      (the "one SIGAA `TabularListing` recipe → all federals" leverage D11 already calls for)
-      and canonical taxonomy maps as **first-class versioned artifacts**, applied by reference
-      instead of copied per source. Updating a recipe re-applies to every source that uses it.
-      Done: two institutions index via the same versioned recipe with only per-source
-      parameters; bumping the recipe re-applies to both. Directly accelerates D11.\
-      ↳ **Depends on:** D02, D04.
+> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D17** Embedding-quality for structured content
+> (field-role projection onto Turing's canonical embedding keys + RAG-status visibility) · **D18**
+> Cross-source entity resolution & dedup (canonical-id merge, grounding-safe) · **D19** Reusable
+> recipe & taxonomy library (versioned `TabularListing` recipes + canonical taxonomy maps applied by
+> reference; a recipe/taxonomy bump re-applies to every bound source). D19 accelerates D11 and ties
+> into D27.
+
+This track has no remaining pending tasks.
 
 ## Track G — Connector convergence (loose-map connectors → structured SPI)
 
