@@ -191,13 +191,6 @@ This track has no remaining pending tasks.
 > layer, it does not rip out the connector). The component shapes recur across institutions, so
 > the endgame ties into the D19 recipe library for multi-tenant reuse.
 
-- [ ] **D25** · **Schema-per-content-type + template routing** — replace "one source = one schema"
-      with a content-type model: each template (via the alias map, e.g. `noticias` / `evento` /
-      `educacao-executiva` / `institucional`) routes to a **content type with its own
-      `DumStructuredSchema`**, and `extract(id)` selects the schema + extractor composition by the
-      resolved type. Done: an AEM source declares multiple content-type schemas; a page indexes
-      against the schema of its resolved type, and D15 coverage/drift is reported per content type.\
-      ↳ **Depends on:** D24.
 - [ ] **D26** · **Derivations → enrichment chain** — move the business derivations currently fused
       into extraction (`inscricaoAberta`, `dateSort`, `preco` aggregation, `dateOfClassesText`
       formatting, `alphabet`) into D04 enrichers, and the cross-cutting normalizations (timezone,

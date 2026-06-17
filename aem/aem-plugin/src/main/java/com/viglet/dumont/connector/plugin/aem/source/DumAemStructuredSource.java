@@ -20,23 +20,27 @@ import static com.viglet.dumont.connector.aem.commons.DumAemConstants.AEM;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
+import com.viglet.dumont.commons.cache.DumCustomClassCache;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemContentType;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemContentTypeField;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemExtModelJsonBase;
+import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredField;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
@@ -103,6 +107,8 @@ public class DumAemStructuredSource implements DumStructuredSource {
 
     private DumAemSession session;
     private DumStructuredSchema schema;
+    // Per-content-type schemas (D25), keyed by resolved content type; empty for an untyped source.
+    private Map<String, DumStructuredSchema> schemasByType;
     // Per-record carriers (parity): the delta checksum and resolved locale legacy stamps per job
     // item. Populated during extract(id) and read back by the plugin in toJobItem.
     private final Map<String, String> checksums = new ConcurrentHashMap<>();
@@ -161,26 +167,79 @@ public class DumAemStructuredSource implements DumStructuredSource {
         return Optional.ofNullable(locales.get(recordId));
     }
 
+    /**
+     * The source-level schema: the union of the source's {@link DumAemAttributeSpecification}s and
+     * every declared content type's fields (roadmap <strong>D25</strong>). Per-record grounding binds
+     * to the resolved <em>content type's</em> schema; this union is the superset published as attribute
+     * specs and used for the D14 baseline / aggregate D15 coverage, so an untyped source is unchanged.
+     */
     @Override
     public synchronized DumStructuredSchema schema() {
-        if (schema == null) {
-            DumStructuredSchema.Builder builder = DumStructuredSchema.builder();
-            Set<String> seen = new HashSet<>();
-            for (DumAemAttributeSpecification spec : source.getAttributeSpecifications()) {
-                if (StringUtils.isBlank(spec.getName()) || !seen.add(spec.getName())) {
-                    continue;
-                }
-                builder.field(DumStructuredField.builder(spec.getName())
-                        .type(spec.getType() != null ? spec.getType() : TurSEFieldType.STRING)
-                        .multiValued(spec.isMultiValued())
-                        .facet(spec.isFacet())
-                        .mandatory(spec.isMandatory())
-                        .description(spec.getDescription())
-                        .build());
-            }
-            schema = builder.build();
-        }
+        ensureSchemas();
         return schema;
+    }
+
+    /** Build the union schema and the per-content-type schemas once, lazily. */
+    private synchronized void ensureSchemas() {
+        if (schema != null) {
+            return;
+        }
+        Map<String, DumStructuredField> union = new LinkedHashMap<>();
+        for (DumAemAttributeSpecification spec : source.getAttributeSpecifications()) {
+            if (StringUtils.isBlank(spec.getName()) || union.containsKey(spec.getName())) {
+                continue;
+            }
+            union.put(spec.getName(), DumStructuredField.builder(spec.getName())
+                    .type(spec.getType() != null ? spec.getType() : TurSEFieldType.STRING)
+                    .multiValued(spec.isMultiValued())
+                    .facet(spec.isFacet())
+                    .mandatory(spec.isMandatory())
+                    .description(spec.getDescription())
+                    .build());
+        }
+        Map<String, DumStructuredSchema> byType = new LinkedHashMap<>();
+        for (DumAemContentType<?> contentType : declaredContentTypes()) {
+            DumStructuredSchema.Builder typeSchema = DumStructuredSchema.builder();
+            for (DumAemContentTypeField field : contentType.fields()) {
+                DumStructuredField structuredField = toField(field);
+                typeSchema.field(structuredField);
+                union.putIfAbsent(structuredField.name(), structuredField);
+            }
+            byType.put(contentType.name(), typeSchema.build());
+        }
+        schemasByType = byType;
+        DumStructuredSchema.Builder unionBuilder = DumStructuredSchema.builder();
+        union.values().forEach(unionBuilder::field);
+        schema = unionBuilder.build();
+    }
+
+    private static DumStructuredField toField(DumAemContentTypeField field) {
+        return DumStructuredField.builder(field.name())
+                .type(field.type())
+                .multiValued(field.multiValued())
+                .facet(field.facet())
+                .mandatory(field.mandatory())
+                .description(field.description())
+                .build();
+    }
+
+    /**
+     * The content types the source's content extractor declares (roadmap <strong>D25</strong>),
+     * resolved through the custom-class cache from the content mapping's class name. Empty when the
+     * extension declares none or is not a {@link DumAemExtModelJsonBase} — the untyped case.
+     */
+    private List<? extends DumAemContentType<?>> declaredContentTypes() {
+        String className = Optional.ofNullable(session())
+                .map(DumAemSession::getModel)
+                .map(DumAemModel::getClassName)
+                .orElse(null);
+        if (StringUtils.isBlank(className)) {
+            return List.of();
+        }
+        return DumCustomClassCache.getCustomClassMap(className)
+                .filter(DumAemExtModelJsonBase.class::isInstance)
+                .map(extension -> ((DumAemExtModelJsonBase<?>) extension).declaredContentTypes())
+                .orElseGet(List::of);
     }
 
     @Override
@@ -224,8 +283,16 @@ public class DumAemStructuredSource implements DumStructuredSource {
             aemObject = publishObject(contentId, generic, config);
         }
         DumAemAttrMap attributes = aemService.getTargetAttrValueMap(aemSession, aemObject);
+        // Content type the extension resolved for this page (D25): surfaced under the reserved attr,
+        // stripped here so it never publishes, and used to pick the record's per-type schema.
+        ensureSchemas();
+        String contentType = firstValue(attributes.remove(DumAemExtModelJsonBase.CONTENT_TYPE_ATTR))
+                .orElse(null);
+        DumStructuredSchema recordSchema = contentType != null
+                ? schemasByType.getOrDefault(contentType, schema)
+                : schema;
         String recordId = firstValue(attributes.get(ID_ATTRIBUTE)).orElse(contentId);
-        DumStructuredRecord record = toRecord(recordId, attributes);
+        DumStructuredRecord record = toRecord(recordId, recordSchema, contentType, attributes);
         checksums.put(recordId, String.valueOf(contentDefinitionService
                 .getDeltaDate(aemObject, config, aemSession.getContentMapping()).getTime()));
         locales.put(recordId, DumAemCommonsUtils.getLocaleFromAemObject(config, aemObject));
@@ -263,10 +330,16 @@ public class DumAemStructuredSource implements DumStructuredSource {
         return contentType != null && !aemService.isNotValidType(session().getModel(), generic, contentType);
     }
 
-    /** Project the extracted attribute map onto the declared schema, dropping unknown/blank fields. */
-    private DumStructuredRecord toRecord(String recordId, DumAemAttrMap attributes) {
-        DumStructuredRecord.Builder record = DumStructuredRecord.builder(recordId, schema());
-        for (DumStructuredField field : schema().fields()) {
+    /**
+     * Project the extracted attribute map onto the record's schema (the resolved content type's
+     * schema when typed, the source union otherwise), dropping unknown/blank fields, and tag the
+     * record with its content type (roadmap <strong>D25</strong>) so the plugin can bucket coverage.
+     */
+    private DumStructuredRecord toRecord(String recordId, DumStructuredSchema recordSchema,
+            String contentType, DumAemAttrMap attributes) {
+        DumStructuredRecord.Builder record = DumStructuredRecord.builder(recordId, recordSchema)
+                .contentType(contentType);
+        for (DumStructuredField field : recordSchema.fields()) {
             TurMultiValue values = attributes.get(field.name());
             if (values == null || values.isEmpty()) {
                 continue;

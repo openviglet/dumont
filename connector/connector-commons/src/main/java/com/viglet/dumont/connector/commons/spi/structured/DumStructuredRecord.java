@@ -58,13 +58,15 @@ public final class DumStructuredRecord {
 
     private final String id;
     private final DumStructuredSchema schema;
+    private final String contentType;
     private final Map<String, Object> values;
     private final Map<String, DumFieldProvenance> provenance;
 
-    private DumStructuredRecord(String id, DumStructuredSchema schema, Map<String, Object> values,
-            Map<String, DumFieldProvenance> provenance) {
+    private DumStructuredRecord(String id, DumStructuredSchema schema, String contentType,
+            Map<String, Object> values, Map<String, DumFieldProvenance> provenance) {
         this.id = id;
         this.schema = schema;
+        this.contentType = contentType;
         this.values = Collections.unmodifiableMap(values);
         this.provenance = Collections.unmodifiableMap(provenance);
     }
@@ -79,6 +81,16 @@ public final class DumStructuredRecord {
 
     public DumStructuredSchema schema() {
         return schema;
+    }
+
+    /**
+     * The content type this record was extracted as (roadmap <strong>D25</strong>), or {@code null}
+     * when the source is untyped. A typed source routes each id to a content type — resolved from a
+     * template/alias — that owns its {@link #schema()} and extractor composition; the type tag lets
+     * the indexing loop report field coverage/drift (D15) per content type.
+     */
+    public String contentType() {
+        return contentType;
     }
 
     /** The grounded field values — only fields the source actually supplied are present. */
@@ -108,6 +120,7 @@ public final class DumStructuredRecord {
     public static final class Builder {
         private final String id;
         private final DumStructuredSchema schema;
+        private String contentType;
         private final Map<String, Object> values = new LinkedHashMap<>();
         private final Map<String, DumFieldProvenance> provenance = new LinkedHashMap<>();
 
@@ -120,6 +133,16 @@ public final class DumStructuredRecord {
             }
             this.id = id;
             this.schema = schema;
+        }
+
+        /**
+         * Tag the record with the content type it was extracted as (roadmap <strong>D25</strong>).
+         * Optional — an untyped source leaves it {@code null}. The tag does not affect grounding; it
+         * only lets the indexing loop bucket coverage/drift per content type.
+         */
+        public Builder contentType(String contentType) {
+            this.contentType = contentType;
+            return this;
         }
 
         /**
@@ -230,7 +253,7 @@ public final class DumStructuredRecord {
         }
 
         public DumStructuredRecord build() {
-            return new DumStructuredRecord(id, schema, values, provenance);
+            return new DumStructuredRecord(id, schema, contentType, values, provenance);
         }
     }
 }

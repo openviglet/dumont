@@ -36,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredField;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
@@ -102,6 +103,30 @@ class DumAemStructuredSourceTest {
                 List.copyOf(adapter(source, DumAemEnv.AUTHOR).getSiteNames()));
         assertEquals(List.of("publishSite"),
                 List.copyOf(adapter(source, DumAemEnv.PUBLISHING).getSiteNames()));
+    }
+
+    @Test
+    @DisplayName("schema() unions the attribute specs with the extension's content-type fields (D25)")
+    void schemaUnionsContentTypeFields() {
+        DumAemAttributeSpecification id = DumAemAttributeSpecification.builder()
+                .name("id").type(TurSEFieldType.STRING).build();
+        DumAemSource source = source(id);
+        DumAemModel model = DumAemModel.builder()
+                .className(DumAemContentTypeTestExtension.class.getName()).build();
+        lenient().when(sessionService.getDumAemSession(source, false)).thenReturn(session);
+        lenient().when(session.getModel()).thenReturn(model);
+
+        DumStructuredSchema schema = adapter(source, DumAemEnv.AUTHOR).schema();
+
+        // The union is the source spec + every declared content type's fields, de-duplicated.
+        assertTrue(schema.hasField("id"));
+        assertTrue(schema.hasField("articleTitle"));
+        assertTrue(schema.hasField("articleBody"));
+        assertTrue(schema.hasField("eventDate"));
+        // 'articleTitle' is shared by both content types but unioned once.
+        assertEquals(4, schema.fields().size());
+        // A content type declared it mandatory, so the union carries that.
+        assertEquals(List.of("articleTitle"), schema.mandatoryFieldNames());
     }
 
     @Test

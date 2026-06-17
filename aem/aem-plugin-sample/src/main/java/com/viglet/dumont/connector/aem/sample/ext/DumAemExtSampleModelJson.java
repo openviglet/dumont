@@ -17,19 +17,25 @@
 package com.viglet.dumont.connector.aem.sample.ext;
 
 import java.util.List;
+import java.util.Map;
 
 import org.pf4j.Extension;
 
+import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemComponentExtractor;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemContentType;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemContentTypeField;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtModelJsonBase;
 import com.viglet.dumont.connector.aem.sample.beans.DumAemSampleModel;
+import com.viglet.turing.commons.se.field.TurSEFieldType;
 
 /**
- * Sample model.json content extractor, composed from single-concern
- * {@link DumAemComponentExtractor}s instead of one monolithic method. Each
- * registered extractor (page attributes, paragraphs, texts, images, content
- * fragments) is independently unit-testable; this class only declares the model
- * class and the composition order.
+ * Sample model.json content extractor. It declares <em>content types</em> (roadmap
+ * <strong>D25</strong>): each AEM template — collapsed through {@link #templateNameAliases() the
+ * alias map} — routes to a content type that owns its schema and its
+ * {@link DumAemComponentExtractor} composition, and {@code extract(id)} runs only that type's
+ * composition and binds the record to that type's schema. The flat {@link #componentExtractors()}
+ * stays as the fallback for a page whose template maps to no declared type.
  */
 @Extension
 public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampleModel> {
@@ -46,9 +52,61 @@ public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampl
     public static final String CONTENT_FRAGMENT_MODELS = "contentFragmentModels";
     public static final String CONTENT_FRAGMENT_ELEMENTS = "contentFragmentElements";
 
+    /** Canonical content types (the values templates resolve to). */
+    public static final String TYPE_ARTICLE = "article";
+    public static final String TYPE_EVENT = "event";
+
     @Override
     protected Class<DumAemSampleModel> getModelClass() {
         return DumAemSampleModel.class;
+    }
+
+    @Override
+    protected Map<String, String> templateNameAliases() {
+        return Map.of(
+                "news", TYPE_ARTICLE,
+                "blog", TYPE_ARTICLE,
+                "article", TYPE_ARTICLE,
+                "event", TYPE_EVENT);
+    }
+
+    @Override
+    protected String templateName(DumAemSampleModel model, DumAemObject aemObject) {
+        return model.getTemplateName();
+    }
+
+    @Override
+    protected List<DumAemContentType<DumAemSampleModel>> contentTypes() {
+        return List.of(
+                DumAemContentType.<DumAemSampleModel>builder(TYPE_ARTICLE)
+                        .fields(
+                                DumAemContentTypeField.text(PAGE_TITLE).asMandatory(),
+                                DumAemContentTypeField.text(PAGE_DESCRIPTION),
+                                DumAemContentTypeField.string(PAGE_LANGUAGE),
+                                DumAemContentTypeField.string(PAGE_TEMPLATE),
+                                DumAemContentTypeField.string(FRAGMENT_PATH),
+                                DumAemContentTypeField.of(PAGE_LAST_MODIFIED, TurSEFieldType.DATE),
+                                DumAemContentTypeField.text(PARAGRAPHS).asMultiValued(),
+                                DumAemContentTypeField.text(TEXTS).asMultiValued())
+                        .extractors(
+                                new DumAemSamplePageExtractor(),
+                                new DumAemSampleParagraphExtractor(),
+                                new DumAemSampleTextExtractor())
+                        .build(),
+                DumAemContentType.<DumAemSampleModel>builder(TYPE_EVENT)
+                        .fields(
+                                DumAemContentTypeField.text(PAGE_TITLE).asMandatory(),
+                                DumAemContentTypeField.text(PAGE_DESCRIPTION),
+                                DumAemContentTypeField.string(PAGE_TEMPLATE),
+                                DumAemContentTypeField.string(IMAGES).asMultiValued(),
+                                DumAemContentTypeField.text(CONTENT_FRAGMENT_TITLES).asMultiValued(),
+                                DumAemContentTypeField.string(CONTENT_FRAGMENT_MODELS).asMultiValued(),
+                                DumAemContentTypeField.text(CONTENT_FRAGMENT_ELEMENTS).asMultiValued())
+                        .extractors(
+                                new DumAemSamplePageExtractor(),
+                                new DumAemSampleImageExtractor(),
+                                new DumAemSampleContentFragmentExtractor())
+                        .build());
     }
 
     @Override

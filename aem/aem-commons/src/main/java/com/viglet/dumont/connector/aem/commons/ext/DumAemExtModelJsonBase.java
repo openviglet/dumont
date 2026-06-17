@@ -83,6 +83,13 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
     /**
+     * Reserved attribute under which {@link #consume} surfaces the resolved content type
+     * (roadmap <strong>D25</strong>) to the structured-source adapter. The adapter reads it to pick
+     * the record's per-type schema and bucket coverage, then strips it — it is never published.
+     */
+    public static final String CONTENT_TYPE_ATTR = "dum:contentType";
+
+    /**
      * Returns the class used to deserialize the root model.json response.
      */
     protected abstract Class<T> getModelClass();
@@ -102,11 +109,54 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
     }
 
     /**
+     * Returns the content types this extension declares (roadmap <strong>D25</strong>).
+     * <p>
+     * Override this to replace "one source = one schema" with a content-type model: each entry binds
+     * a canonical content type (the value a template resolves to via {@link #templateNameAliases()})
+     * to its own {@link DumAemContentType#fields() schema} and its own
+     * {@link DumAemContentType#extractors() extractor composition}. When non-empty,
+     * {@link #extractAttributes} routes each page to the single composition of its
+     * {@link #resolveContentType(Object, DumAemObject) resolved type}, falling back to the flat
+     * {@link #componentExtractors()} when the type is unknown. Empty by default (no routing).
+     *
+     * @return the declared content types (never null)
+     */
+    protected List<DumAemContentType<T>> contentTypes() {
+        return List.of();
+    }
+
+    /** The declared content types, for the structured-source adapter to build per-type schemas. */
+    public final List<DumAemContentType<T>> declaredContentTypes() {
+        return contentTypes();
+    }
+
+    /**
+     * Returns the raw AEM template name of this page, used to route it to a content type
+     * (roadmap <strong>D25</strong>). Override when {@link #contentTypes()} is declared — the value
+     * lives in a model-specific field. Returns {@code null} by default (no routing).
+     */
+    protected String templateName(T model, DumAemObject aemObject) {
+        return null;
+    }
+
+    /**
+     * Resolves this page's canonical content type: the {@link #templateName(Object, DumAemObject) raw
+     * template} collapsed through {@link #templateNameAliases() the alias map}. Returns {@code null}
+     * when no template is available, so the caller falls back to the flat composition.
+     */
+    public final String resolveContentType(T model, DumAemObject aemObject) {
+        String template = templateName(model, aemObject);
+        return StringUtils.isBlank(template) ? null : resolveTemplateName(template);
+    }
+
+    /**
      * Extracts attributes from the parsed model and populates the target attribute map.
      * <p>
-     * The default implementation composes every extractor returned by
-     * {@link #componentExtractors()}, in order. Override this directly only for
-     * legacy monolithic extraction; prefer registering component extractors.
+     * The default implementation routes by content type when {@link #contentTypes()} is declared —
+     * running only the {@link DumAemContentType#extractors() composition} of the page's
+     * {@link #resolveContentType(Object, DumAemObject) resolved type} — and otherwise composes every
+     * extractor returned by {@link #componentExtractors()}, in order. Override this directly only for
+     * legacy monolithic extraction; prefer registering component extractors / content types.
      *
      * @param model      the deserialized root model object
      * @param query      a query helper for finding AEM components by type via JsonPath;
@@ -116,9 +166,26 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
      */
     protected void extractAttributes(T model, DumAemModelJsonQuery query,
             DumAemObject aemObject, DumAemAttrMap attrValues) {
-        for (DumAemComponentExtractor<T> extractor : componentExtractors()) {
+        for (DumAemComponentExtractor<T> extractor : resolveExtractors(model, aemObject)) {
             extractor.contribute(model, query, aemObject, attrValues);
         }
+    }
+
+    /**
+     * The extractor composition to run for this page: the resolved content type's composition when
+     * content types are declared and the type is known, otherwise the flat {@link #componentExtractors()}.
+     */
+    private List<DumAemComponentExtractor<T>> resolveExtractors(T model, DumAemObject aemObject) {
+        List<DumAemContentType<T>> contentTypes = contentTypes();
+        if (!contentTypes.isEmpty()) {
+            String resolved = resolveContentType(model, aemObject);
+            for (DumAemContentType<T> contentType : contentTypes) {
+                if (contentType.name().equals(resolved)) {
+                    return contentType.extractors();
+                }
+            }
+        }
+        return componentExtractors();
     }
 
     /**
@@ -175,6 +242,21 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
         return configuration.getUrl() + aemObject.getPath() + MODEL_JSON_EXTENSION;
     }
 
+    /**
+     * When content types are declared (roadmap <strong>D25</strong>), surface the resolved type under
+     * the reserved {@link #CONTENT_TYPE_ATTR} so the structured-source adapter can pick the record's
+     * per-type schema and bucket coverage. A no-op for untyped extensions.
+     */
+    private void surfaceContentType(T model, DumAemObject aemObject, DumAemAttrMap attrValues) {
+        if (contentTypes().isEmpty()) {
+            return;
+        }
+        String resolved = resolveContentType(model, aemObject);
+        if (StringUtils.isNotBlank(resolved)) {
+            attrValues.set(CONTENT_TYPE_ATTR, resolved);
+        }
+    }
+
     @Override
     public final DumAemAttrMap consume(DumAemObject aemObject,
             DumAemConfiguration configuration) {
@@ -190,6 +272,7 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
                         DumAemModelJsonQuery query = new DumAemModelJsonQuery(json);
                         DumAemAttrMap attrValues = new DumAemAttrMap();
                         extractAttributes(model, query, aemObject, attrValues);
+                        surfaceContentType(model, aemObject, attrValues);
                         return attrValues;
                     })
                     .orElseGet(DumAemAttrMap::new);

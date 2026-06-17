@@ -28,6 +28,7 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumContentTypeCoverageRecorder;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageMonitor;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumInMemoryCoverageHistoryStore;
@@ -212,8 +213,11 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // run can answer "when was each field last seen" — no extra pass over the source.
             DumProvenanceSnapshot.Builder provenance =
                     DumProvenanceSnapshot.builder(structuredSource.schema());
-            structuredSource.discover().forEach(
-                    contentId -> indexOne(structuredSource, contentId, session, snapshot, provenance));
+            // Per content-type coverage/provenance (D25): a typed source buckets each record by its
+            // resolved content type so drift reads per type, additively to the source-level series.
+            DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
+            structuredSource.discover().forEach(contentId -> indexOne(structuredSource, contentId,
+                    session, snapshot, provenance, byType));
             dumConnectorContext.finishIndexing(session, false);
             DumPreviewSnapshot baseline = snapshot.build();
             previewSnapshotStore.save(source, baseline);
@@ -222,6 +226,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             coverageHistoryStore.record(source, baseline.documents().size(),
                     DumCoverageMonitor.coverage(structuredSource.schema(), baseline));
             provenanceHistoryStore.record(source, provenance.documentCount(), provenance.fields());
+            byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
         }, () -> log.error("Structured source '{}' not found", source));
     }
 
@@ -229,7 +234,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     public void indexById(String source, List<String> contentId) {
         provider().resolve(source).ifPresentOrElse(structuredSource -> {
             DumConnectorSession session = newSession(structuredSource);
-            contentId.forEach(id -> indexOne(structuredSource, id, session, null, null));
+            contentId.forEach(id -> indexOne(structuredSource, id, session, null, null, null));
             dumConnectorContext.finishIndexing(session, true);
         }, () -> log.error("Structured source '{}' not found", source));
     }
@@ -262,17 +267,18 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     }
 
     private void indexOne(DumStructuredSource source, String contentId, DumConnectorSession session,
-            DumPreviewSnapshot.Builder snapshot, DumProvenanceSnapshot.Builder provenance) {
+            DumPreviewSnapshot.Builder snapshot, DumProvenanceSnapshot.Builder provenance,
+            DumContentTypeCoverageRecorder byType) {
         source.extract(contentId).ifPresentOrElse(
                 record -> publish(source, enrichmentChain.apply(source, record), session, snapshot,
-                        provenance),
+                        provenance, byType),
                 () -> log.warn("No record extracted for id '{}' in source '{}'", contentId,
                         source.getSourceName()));
     }
 
     private void publish(DumStructuredSource source, DumStructuredRecord record,
             DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
-            DumProvenanceSnapshot.Builder provenance) {
+            DumProvenanceSnapshot.Builder provenance, DumContentTypeCoverageRecorder byType) {
         List<String> missing = record.missingMandatoryFields();
         if (!missing.isEmpty()) {
             log.warn("Skipping record '{}' in source '{}' — missing mandatory field(s): {}",
@@ -286,6 +292,9 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         }
         if (provenance != null) {
             provenance.add(record.values(), record.provenance());
+        }
+        if (byType != null) {
+            byType.add(record);
         }
     }
 

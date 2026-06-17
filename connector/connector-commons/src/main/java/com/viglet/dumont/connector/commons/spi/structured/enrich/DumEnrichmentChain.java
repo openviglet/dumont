@@ -122,7 +122,8 @@ public final class DumEnrichmentChain {
             Map<String, Object> contributions) {
         try {
             DumStructuredRecord.Builder builder =
-                    DumStructuredRecord.builder(record.id(), record.schema());
+                    DumStructuredRecord.builder(record.id(), record.schema())
+                            .contentType(record.contentType());
             // Source values first, each keeping its origin (D16); a non-blank contribution then
             // overrides — and re-tags the field's provenance to this enricher — while a blank one is
             // dropped (the source value and its provenance survive).

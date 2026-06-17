@@ -330,3 +330,17 @@
   sharing a `DumAemSampleItems` tree-walk/HTML-strip helper, at output parity with the god-class. Each
   extractor is now independently unit-tested in isolation (`DumAemSample*ExtractorTest`); the base
   composition is proven by `DumAemComponentExtractorCompositionTest`. ↳ Builds on D21.
+- **D25** — Schema-per-content-type + template routing: replaces "one source = one schema" with a
+  content-type model. `aem-commons` gains `DumAemContentType` (name + fields + extractor composition)
+  and `DumAemContentTypeField`; `DumAemExtModelJsonBase` gains `contentTypes()` + `templateName(...)`,
+  resolves a page's type via the existing alias map (`resolveContentType`), routes `extractAttributes`
+  to only that type's composition (flat `componentExtractors()` fallback), and surfaces the resolved
+  type under reserved `dum:contentType`. The AEM adapter `DumAemStructuredSource` builds a per-type
+  `DumStructuredSchema` (source schema = union of attribute specs + every type's fields), binds each
+  record to its resolved type's schema, and tags it (`DumStructuredRecord.contentType`). D15
+  coverage/drift is now reported per type: `DumContentTypeCoverageRecorder` (connector-commons) buckets
+  records by type and appends per-type history under `source::type`, additively to the source-level
+  series (`DumAemPlugin`/`DumStructuredSourcePlugin` indexAll; enrichment preserves the tag). Reference
+  `DumAemExtSampleModelJson` migrated to `article`/`event` content types. Tests:
+  `DumAemContentTypeRoutingTest`, `DumContentTypeCoverageRecorderTest`, `DumAemStructuredSourceTest`
+  (union schema). ↳ Builds on D24.

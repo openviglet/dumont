@@ -40,6 +40,7 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePlugin;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourceProvider;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumContentTypeCoverageRecorder;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageMonitor;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshot;
@@ -132,15 +133,16 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         DumStructuredSchema schema = primary.schema();
         DumPreviewSnapshot.Builder snapshot = DumPreviewSnapshot.builder(schema);
         DumProvenanceSnapshot.Builder provenance = DumProvenanceSnapshot.builder(schema);
+        // Per content-type coverage/provenance (D25): bucket each record by its resolved content type
+        // so drift reads per type, additively to the source-level series. Captured once, primary env.
+        DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
         List<String> contentIds = primary.discover();
         for (DumAemEnv environment : environments) {
             DumAemStructuredSource structuredSource = environment == primaryEnv ? primary
                     : provider.adapter(aemSource, environment);
             boolean capture = environment == primaryEnv;
-            contentIds.forEach(id -> structuredSource.extract(id)
-                    .ifPresent(extracted -> publish(structuredSource,
-                            enrichmentChain.apply(structuredSource, extracted), session,
-                            capture ? snapshot : null, capture ? provenance : null)));
+            indexEnvironment(structuredSource, contentIds, session, capture ? snapshot : null,
+                    capture ? provenance : null, capture ? byType : null);
         }
         dumConnectorContext.finishIndexing(session, false);
         DumPreviewSnapshot baseline = snapshot.build();
@@ -148,6 +150,17 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         coverageHistoryStore.record(source, baseline.documents().size(),
                 DumCoverageMonitor.coverage(schema, baseline));
         provenanceHistoryStore.record(source, provenance.documentCount(), provenance.fields());
+        byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
+    }
+
+    /** Extract and publish every content id for one environment, capturing only when asked. */
+    private void indexEnvironment(DumAemStructuredSource structuredSource, List<String> contentIds,
+            DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
+            DumProvenanceSnapshot.Builder provenance, DumContentTypeCoverageRecorder byType) {
+        contentIds.forEach(id -> structuredSource.extract(id)
+                .ifPresent(extracted -> publish(structuredSource,
+                        enrichmentChain.apply(structuredSource, extracted), session, snapshot,
+                        provenance, byType)));
     }
 
     /** Index specific content ids across every enabled environment (no deindex sweep). */
@@ -159,7 +172,8 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
                 DumAemStructuredSource structuredSource = provider.adapter(aemSource, environment);
                 contentId.forEach(id -> structuredSource.extract(id)
                         .ifPresent(extracted -> publish(structuredSource,
-                                enrichmentChain.apply(structuredSource, extracted), session, null, null)));
+                                enrichmentChain.apply(structuredSource, extracted), session, null, null,
+                                null)));
             }
             dumConnectorContext.finishIndexing(session, true);
         }, () -> log.error("AEM source '{}' not found", source));
@@ -167,7 +181,7 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
 
     private void publish(DumAemStructuredSource source, DumStructuredRecord structuredRecord,
             DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
-            DumProvenanceSnapshot.Builder provenance) {
+            DumProvenanceSnapshot.Builder provenance, DumContentTypeCoverageRecorder byType) {
         List<String> missing = structuredRecord.missingMandatoryFields();
         if (!missing.isEmpty()) {
             log.warn("Skipping record '{}' in AEM source '{}' — missing mandatory field(s): {}",
@@ -181,6 +195,9 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         }
         if (provenance != null) {
             provenance.add(structuredRecord.values(), structuredRecord.provenance());
+        }
+        if (byType != null) {
+            byType.add(structuredRecord);
         }
     }
 
