@@ -139,16 +139,6 @@ This track has no remaining pending tasks.
 > stays the generic link-spider the framework sits *above*; structured sites it serves
 > migrate to D02 strategies, and it gets only lightweight coverage telemetry.
 
-- [ ] **D20** · **Structured-source adapter seam + DB pilot** — define the thin adapter that
-      presents an existing connector's per-item mapping as a `DumStructuredSource`, running it
-      through `DumStructuredSourcePlugin` so grounding / preview / coverage come for free. Prove
-      it on the **DB connector** (the most naturally tabular): a declared column→field schema
-      (`TurSEFieldType` + multiValued / facet / mandatory), an id-list query for `discover()`,
-      and a single-row `extract(id)` (`… WHERE <pk> = ?`) — replacing today's all-rows batch loop
-      (which leaves `discoverContentIds`/`indexById` unimplemented). Done: a DB source indexes
-      through the structured plugin at parity with the legacy path, and its coverage history (D15)
-      + dry-run preview (D14) work.\
-      ↳ **Depends on:** D01, D03, D14, D15.
 - [ ] **D21** · **AEM structured adapter** — reuse AEM's existing field-spec
       (`DumAemAttributeSpecification` already carries name / type / multiValued / facet / mandatory,
       a 1:1 map to `DumStructuredField`) to expose an AEM source as a `DumStructuredSource`:

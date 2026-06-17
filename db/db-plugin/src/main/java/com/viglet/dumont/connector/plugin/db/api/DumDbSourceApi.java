@@ -77,6 +77,7 @@ public class DumDbSourceApi {
         source.setMaxContentMegaByteSize(5);
         source.setEncoding("UTF-8");
         source.setMultiValuedSeparator(",");
+        source.setPrimaryKeyColumn("id");
         return source;
     }
 
@@ -119,6 +120,12 @@ public class DumDbSourceApi {
             existing.setEncoding(dumDbSource.getEncoding());
             existing.setShowOutput(dumDbSource.isShowOutput());
             existing.setDeindexBeforeImporting(dumDbSource.isDeindexBeforeImporting());
+            existing.setPrimaryKeyColumn(dumDbSource.getPrimaryKeyColumn());
+
+            existing.getFields().clear();
+            if (dumDbSource.getFields() != null) {
+                existing.getFields().addAll(dumDbSource.getFields());
+            }
 
             existing.getTurSNSites().clear();
             if (dumDbSource.getTurSNSites() != null) {

@@ -232,3 +232,22 @@
   provider compose per-recipe chains. Proven by `DumRecipeLibraryPluginTest` (two institutions index
   via one recipe; recipe + taxonomy bumps re-apply to both; pinned ref unaffected). ↳ Builds on D02, D04.
   Accelerates D11; ties into D27.
+
+## Track G — Connector convergence (loose-map connectors → structured SPI)
+
+- **D20** — Structured-source adapter seam + DB pilot: the DB connector now indexes through the
+  structured SPI instead of its all-rows batch loop. `db-plugin` `…plugin.db.source` —
+  `DumDbStructuredSource` (`discover()` = id-list `SELECT <pk> FROM (<query>) sub`; `extract(id)` =
+  single-row `… WHERE <pk> = ?`, reusing the user's query verbatim as a derived table so indexed rows
+  match the legacy path), `DumDbSourceProvider`, and `DumDbRowMapper` (the per-row column/file/custom-
+  class mapping, factored out of `DumDbPluginProcess`). `DumDbField` (`@Embeddable`) + `DumDbSource`
+  `primaryKeyColumn` / `fields` declare a column→field schema (`TurSEFieldType` + multiValued / facet /
+  mandatory / embeddingRole); a source with no declared fields falls back to a STRING schema derived
+  from the query's result-set metadata (legacy parity, every column indexed). Column labels match
+  fields case-insensitively (H2/Oracle upper vs Postgres lower). `DumDbPlugin` now extends
+  `DumStructuredSourcePlugin` wired to the persistent coverage/preview/provenance stores, so D14 dry-run
+  preview and D15 coverage/drift work for a DB source for free; `toJobItem` re-stamps the document
+  `type` + `source_apps` (legacy parity). `DumDbPluginProcess` is reduced to the `@Async` `/{id}/indexAll`
+  dispatcher; CRUD + export/import carry the new fields. Proven by `DumDbStructuredSourceTest`
+  (H2 end-to-end: discover/extract, grounding + mandatory-skip, multi-valued split, coverage history,
+  dry-run preview, derived-schema fallback). ↳ Builds on D01, D03, D14, D15.

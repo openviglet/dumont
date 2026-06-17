@@ -75,11 +75,11 @@ AEM/CMS connectors under the same SPI" is the target end-state, not a prohibitio
 connector **under** the SPI through a thin adapter that *reuses its existing extraction*, so we
 add the trust/adoption surface without touching crawl logic, auth, delta, or politeness.
 
-**Design.**
-- A shared adapter seam wraps a connector's per-item mapping as a `DumStructuredSource`: schema
-  from the connector's declared field config, `discover()` from its id enumeration, `extract(id)`
-  from its single-item fetch. It then runs through the generic plugin — grounding, preview and
-  coverage are inherited, not re-implemented (**D20**, piloted on DB — the cleanest tabular fit).
+**Design.** The shared adapter pattern — wrap a connector's per-item mapping as a
+`DumStructuredSource` (schema from its declared field config, `discover()` from its id enumeration,
+`extract(id)` from its single-item fetch) so grounding/preview/coverage are inherited, not
+re-implemented — shipped with the **DB pilot (D20)**; see [CHANGELOG.md](CHANGELOG.md). The
+remaining connectors follow it:
 - **AEM (D21)** is ~closest: `DumAemAttributeSpecification` already *is* schema-as-code (1:1 with
   `DumStructuredField`) and `discoverContentIds()` already exists; the only real work is detaching
   field extraction (`DumAemAttrProcess`) from the author/publish job-item pipeline.
@@ -90,9 +90,9 @@ add the trust/adoption surface without touching crawl logic, auth, delta, or pol
   It gets only a lightweight coverage signal off its declared `DumWCAttributeMapping` names, plus a
   documented migration path for structured sites still on WC.
 
-**Touch points.** New adapter in `connector-commons` `spi.structured`; per-connector
-`DumStructuredSource` facades in `db`/`aem`/`assets` plugins; `discoverContentIds`/`indexById`
-implemented for DB and Assets (today `UnsupportedOperationException`); WC coverage seam reusing D15.
+**Touch points.** Per-connector `DumStructuredSource` facades in `aem`/`assets` plugins (DB shipped
+in D20); `discoverContentIds`/`indexById` implemented for Assets (today `UnsupportedOperationException`);
+WC coverage seam reusing D15.
 
 **Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: AEM/DB/Assets sources index through the
 structured plugin at parity with their legacy paths and gain coverage/drift + preview; WC reports

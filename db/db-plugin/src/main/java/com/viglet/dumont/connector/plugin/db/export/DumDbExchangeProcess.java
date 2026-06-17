@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -111,6 +112,8 @@ public class DumDbExchangeProcess {
                                         .encoding(source.getEncoding())
                                         .showOutput(source.isShowOutput())
                                         .deindexBeforeImporting(source.isDeindexBeforeImporting())
+                                        .primaryKeyColumn(source.getPrimaryKeyColumn())
+                                        .fields(new ArrayList<>(source.getFields()))
                                         .turSNSites(new HashSet<>(source.getTurSNSites()))
                                         .build())
                                 .toList()));
@@ -218,6 +221,10 @@ public class DumDbExchangeProcess {
                 .encoding(sourceExchange.getEncoding())
                 .showOutput(sourceExchange.isShowOutput())
                 .deindexBeforeImporting(sourceExchange.isDeindexBeforeImporting())
+                .primaryKeyColumn(sourceExchange.getPrimaryKeyColumn())
+                .fields(sourceExchange.getFields() != null
+                        ? new ArrayList<>(sourceExchange.getFields())
+                        : new ArrayList<>())
                 .turSNSites(sourceExchange.getTurSNSites() != null
                         ? new HashSet<>(sourceExchange.getTurSNSites())
                         : new HashSet<>())

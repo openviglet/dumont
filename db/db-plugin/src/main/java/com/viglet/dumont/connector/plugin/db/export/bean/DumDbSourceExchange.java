@@ -19,8 +19,12 @@ package com.viglet.dumont.connector.plugin.db.export.bean;
 
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+
+import com.viglet.dumont.connector.plugin.db.persistence.model.DumDbField;
 
 @Builder(toBuilder = true)
 @AllArgsConstructor
@@ -52,6 +56,10 @@ public class DumDbSourceExchange {
     private String encoding;
     private boolean showOutput;
     private boolean deindexBeforeImporting;
+    private String primaryKeyColumn;
+
+    @Builder.Default
+    private List<DumDbField> fields = new ArrayList<>();
 
     @Builder.Default
     private Collection<String> turSNSites = new HashSet<>();

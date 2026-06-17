@@ -19,8 +19,10 @@ package com.viglet.dumont.connector.plugin.db.persistence.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import com.viglet.dumont.spring.jpa.DumUuid;
 
@@ -31,6 +33,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -123,6 +126,24 @@ public class DumDbSource implements Serializable {
 
     @Column
     private boolean deindexBeforeImporting;
+
+    /**
+     * The query column (the {@code AS} alias) that identifies a row — used by the structured-source
+     * SPI to enumerate ids ({@code SELECT <pk> FROM (<query>) sub}) and to fetch a single row
+     * ({@code … WHERE <pk> = ?}). Defaults to {@code id} when unset.
+     */
+    @Column
+    private String primaryKeyColumn;
+
+    /**
+     * Declared column&rarr;field schema (roadmap <strong>D20</strong>). When empty, the schema is
+     * derived from the query's result-set metadata so legacy sources keep indexing at parity.
+     */
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "db_source_field", joinColumns = @JoinColumn(name = "source_id"))
+    @OrderColumn(name = "field_order")
+    private List<DumDbField> fields = new ArrayList<>();
 
     @Builder.Default
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
