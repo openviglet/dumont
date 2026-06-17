@@ -30,6 +30,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,13 +38,20 @@ import java.util.Optional;
  * Abstract base class for AEM model.json content extractors.
  * <p>
  * Implements the Template Method pattern, handling the boilerplate of fetching,
- * parsing, and error handling for model.json requests. Subclasses only need to
- * implement two methods:
+ * parsing, and error handling for model.json requests. Subclasses declare the
+ * root model bean class via {@link #getModelClass()} and then choose <b>one</b>
+ * of two extraction styles:
  * <ul>
- *   <li>{@link #getModelClass()} - the root model bean class</li>
- *   <li>{@link #extractAttributes(Object, DumAemModelJsonQuery, DumAemObject, DumAemAttrMap)}
- *       - the business logic for attribute extraction</li>
+ *   <li><b>Composed (preferred)</b> — register a list of small, independently
+ *       unit-tested {@link DumAemComponentExtractor}s via
+ *       {@link #componentExtractors()}; the base composes them per page.</li>
+ *   <li><b>Monolithic (legacy)</b> — override
+ *       {@link #extractAttributes(Object, DumAemModelJsonQuery, DumAemObject, DumAemAttrMap)}
+ *       directly with inlined extraction logic.</li>
  * </ul>
+ * The default {@code extractAttributes} runs every registered component
+ * extractor in order, so a subclass that overrides only
+ * {@link #componentExtractors()} needs no other code.
  * <p>
  * Example:
  * <pre>{@code
@@ -80,7 +88,25 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
     protected abstract Class<T> getModelClass();
 
     /**
+     * Returns the ordered list of component extractors composed for each page.
+     * <p>
+     * Override this to express extraction as a registry of small, single-concern
+     * {@link DumAemComponentExtractor}s (banner, course, teacher, event, news,
+     * content fragment…) rather than one monolithic method. Each extractor is
+     * independently unit-testable. Empty by default.
+     *
+     * @return the component extractors to run, in order (never null)
+     */
+    protected List<DumAemComponentExtractor<T>> componentExtractors() {
+        return List.of();
+    }
+
+    /**
      * Extracts attributes from the parsed model and populates the target attribute map.
+     * <p>
+     * The default implementation composes every extractor returned by
+     * {@link #componentExtractors()}, in order. Override this directly only for
+     * legacy monolithic extraction; prefer registering component extractors.
      *
      * @param model      the deserialized root model object
      * @param query      a query helper for finding AEM components by type via JsonPath;
@@ -88,8 +114,12 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
      * @param aemObject  the AEM content object being indexed
      * @param attrValues the attribute map to populate with extracted values
      */
-    protected abstract void extractAttributes(T model, DumAemModelJsonQuery query,
-            DumAemObject aemObject, DumAemAttrMap attrValues);
+    protected void extractAttributes(T model, DumAemModelJsonQuery query,
+            DumAemObject aemObject, DumAemAttrMap attrValues) {
+        for (DumAemComponentExtractor<T> extractor : componentExtractors()) {
+            extractor.contribute(model, query, aemObject, attrValues);
+        }
+    }
 
     /**
      * Returns a map of template name aliases for normalization.

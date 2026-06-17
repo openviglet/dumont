@@ -95,6 +95,17 @@ trust stack stands on the contract:
 - **D16 — field-level provenance.** Citing/auditing where a field came from presupposes the
   field is a first-class, declared thing.
 
+> **The web-crawler nuance (D23).** The web crawler stays loose by design (§5), but it is not
+> *schema-less* in practice: a source's declared `DumWCAttributeMapping` names are an **implicit**
+> field set — the fields it tries to pull from every page. D23 treats those names as the thing to
+> measure and records a per-page field-presence signal into the **same D15 history**, so a WC
+> source *does* report per-field coverage across crawls and a mapping that silently stops matching
+> surfaces as a coverage drop (drift). It is a lightweight approximation, not a contract: there is
+> no type, no mandatory check, no grounding guarantee — only "of the pages indexed this run, what %
+> carried a value for each declared mapping". A field that was *never* mapped is still invisible
+> (you cannot miss what you never declared). For a source that needs the real guarantees, the
+> answer is to migrate it off the crawler (§9), not to enrich the signal.
+
 > **Rule of thumb that decides it:** *"if a field stops arriving tomorrow, do I need to
 > know?"* If yes → structured. If "whatever" → loose is fine.
 
@@ -201,6 +212,46 @@ The roadmap tells this story end to end:
 structured, observable contract at the boundary, with a generic ingestor beneath it for what
 doesn't fit a contract.** Dumont is converging on that point, and Track G is the step that
 unifies the legacy connectors under it.
+
+---
+
+## 9. Migrating a *structured* site off the web crawler → D02 strategies
+
+The web crawler is the right tool for a **link-following breadth crawl** of a heterogeneous
+site. But teams sometimes point it at a site that is *actually* structured — a paginated listing
+of detail pages with a recurring shape (a course catalog, a news index, a product grid) — and
+reconstruct that shape page-by-page with `DumWCAttributeMapping` custom-class extractors. That
+works, but it forfeits everything in §3: no real schema, no grounding guarantee, no mandatory
+check, no dry-run preview, no provenance — and only the lightweight D23 coverage approximation.
+
+The **D23 coverage signal is the trigger to migrate, not the destination.** When a WC source's
+coverage page shows a field that matters sitting below ~100% or drifting between runs, that is
+the site telling you it has a structure worth declaring. The path:
+
+1. **Confirm the shape.** A recurring listing → detail-page pattern, or a sitemap/tabular index,
+   is the tell. If the site is genuinely chaotic (no enumerable item set), it belongs on the
+   crawler — stop here.
+2. **Pick the D02 strategy** that matches the shape:
+   - `DumSitemapStrategy` — a sitemap (or sitemap-index) enumerates the items; pattern → level.
+   - `DumHtmlListingStrategy` — anchors under a selector on a listing page are the detail URLs.
+   - `DumTabularListingStrategy` — a table whose rows *are* the records (discover + extract in one).
+3. **Declare the schema once** (`DumStructuredSchema` — `name / type / multiValued / facet /
+   mandatory` per field, `title`/`url` typically mandatory). The custom-class extractors you wrote
+   for the crawler become `DumFieldRule` selectors on the strategy.
+4. **Onboard via the adoption tools** rather than hand-coding: **D13** (AI-assisted inference)
+   drafts a strategy + field manifest from a sample URL, and **D14** (dry-run preview) shows
+   per-field coverage and the schema/document diff *before* you index anything.
+5. **Index through the structured loop** (`DumStructuredSourcePlugin`). The site now gets the full
+   trust stack — grounding (D03), coverage/drift over a *real* schema (D15), provenance (D16),
+   enrichment (D04) — for free, and the same coverage page now reports against a declared contract
+   instead of an implicit one. If the source recurs across institutions, promote the strategy to a
+   versioned **D19** recipe so the shape is declared once and applied by reference.
+6. **Retire the WC source** once the structured source reaches parity (the **D11** parity gate is
+   the template: record count within tolerance + canonical-URL coverage vs. the crawl it replaces).
+
+> **In one line:** the crawler discovers that a site is structured (D23 coverage); D13/D14 make
+> declaring its contract cheap; D02 + the structured loop give it the guarantees the crawler never
+> could.
 
 ---
 

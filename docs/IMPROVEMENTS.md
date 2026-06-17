@@ -23,8 +23,7 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 ## Table of contents
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
-- [II. Connector convergence — one ingestion contract (Track G, D20–D23)](#ii-connector-convergence--one-ingestion-contract-track-g-d20d23)
-- [III. AEM extraction model redesign (Track H, D24–D27)](#iii-aem-extraction-model-redesign-track-h-d24d27)
+- [III. AEM extraction model redesign (Track H, D25–D27)](#iii-aem-extraction-model-redesign-track-h-d25d27)
 - [IX. Cross-cutting decisions & restrictions](#ix-cross-cutting-decisions--restrictions)
 
 ---
@@ -59,41 +58,7 @@ partial degradation visible and the sidecar→native parity gate (D11) measurabl
 manual, and D16 (field-level provenance) made every published field traceable — all shipped,
 completing the trust track. Track F (semantics) follows the RAG maturity on the Turing side.
 
-## II. Connector convergence — one ingestion contract (Track G, D20–D23)
-
-**Problem.** Every benefit Tracks A/D/E/F deliver — grounding-by-construction (D03), dry-run
-preview (D14), field-coverage & drift (D15), enrichment (D04), provenance (D16) — is wired into
-the **structured SPI** (`DumStructuredSourcePlugin`: `schema()` + `discover()` + `extract(id)`).
-The original connectors (AEM, DB, Assets, WC) predate it and each hand-roll their own
-"discover → extract → publish" loop emitting a **loose `Map<String,Object>`** with `specs = null`.
-Consequence: a DB or AEM source cannot get coverage/drift or a preview, because nothing declares
-*which fields it should have* — coverage % is undefined without a schema. The connectors and the
-framework are two parallel worlds.
-
-**Why an adapter, not a rewrite.** The non-goal "the structured-source framework sits beside the
-AEM/CMS connectors under the same SPI" is the target end-state, not a prohibition: bring each
-connector **under** the SPI through a thin adapter that *reuses its existing extraction*, so we
-add the trust/adoption surface without touching crawl logic, auth, delta, or politeness.
-
-**Design.** The shared adapter pattern — wrap a connector's per-item mapping as a
-`DumStructuredSource` (schema from its declared field config, `discover()` from its id enumeration,
-`extract(id)` from its single-item fetch) so grounding/preview/coverage are inherited, not
-re-implemented — shipped with the **DB pilot (D20)**; see [CHANGELOG.md](CHANGELOG.md). The
-remaining connectors follow it (AEM shipped as **D21**, Assets as **D22**; see
-[CHANGELOG.md](CHANGELOG.md)):
-- **WC (D23)** is deliberately *not* converted — a generic link-spider has no enumerable typed
-  record set; the framework was built to sit *above* it (D02 strategies are the structured path).
-  It gets only a lightweight coverage signal off its declared `DumWCAttributeMapping` names, plus a
-  documented migration path for structured sites still on WC.
-
-**Touch points.** Per-connector `DumStructuredSource` facades (DB shipped in D20, AEM in D21,
-Assets in D22); WC coverage seam reusing D15.
-
-**Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: AEM/DB/Assets sources index through the
-structured plugin at parity with their legacy paths and gain coverage/drift + preview; WC reports
-per-field coverage without a contract it cannot honor.
-
-## III. AEM extraction model redesign (Track H, D24–D27)
+## III. AEM extraction model redesign (Track H, D25–D27)
 
 **Problem.** The AEM connector ships *two* extraction paradigms: a declarative property→field
 mapping (`DumAemPluginModel` → `targetAttr` ← `sourceAttr`) and a code-based content extractor
@@ -115,9 +80,6 @@ real unit is the **content type**, not the source.
 
 **Design.** Realign the *mapping* layer to the domain (crawl/auth/delta/navigator stay untouched),
 on top of the contract D21 establishes:
-- **Component-extractor SPI (D24).** Externalize the god-class into a registry of small,
-  per-component extractors — the fluent `DumAemModelJsonQuery` API is *already* component-oriented,
-  so this is mostly "stop inlining". Each extractor is independently unit-testable.
 - **Schema-per-content-type + routing (D25).** A template routes to a content type with its own
   `DumStructuredSchema`; `extract(id)` picks schema + extractor composition by resolved type.
   Coverage/drift then reads per type.
@@ -129,7 +91,8 @@ on top of the contract D21 establishes:
 **Why incremental.** D21 (wrap as-is) delivers the contract + coverage at ~zero risk and *measures*
 the pain first; each Track H task then peels one layer, deliverable on its own. The risk to avoid is
 building a bespoke AEM-mapping framework before the structured SPI + D04 prove insufficient — which
-is why D24 starts by refactoring the existing extension, not inventing a new engine.
+is why D24 (shipped) refactored the existing extension into a composed component-extractor SPI rather
+than inventing a new engine, and the remaining tasks build on that seam.
 
 **Touch points.** `aem-commons` ext SPI (`DumAemExtModelJsonBase`, `DumAemModelJsonQuery`,
 `DumAemAttrMap`); the D21 AEM `DumStructuredSource` adapter; `DumStructuredSchema` per content type;

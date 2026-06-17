@@ -302,3 +302,31 @@
   `filesystem(...)` provenance factory. Proven by `DumAssetsStructuredSourceTest` (temp-dir end-to-end:
   discover/extract + `.DS_Store` skip, grounding, type/source_apps stamp, Tika content, coverage history,
   dry-run preview). ↳ Builds on D20.
+- **D23** — Web-crawler coverage adapter (no conversion): the WC connector stays the generic breadth
+  link-spider — no typed `discover()`/`extract(id)`, no structured-source pretence. `wc-plugin`
+  `DumWCCoverageAccumulator` treats the source's declared `DumWCAttributeMapping` names as an implicit
+  field set and accumulates a thread-safe per-page field-presence signal over the D08 worker pool;
+  `DumWCPluginProcess` records it (the extracted attribute keys per indexed page) and on `finished()`
+  appends one `DumFieldCoverage` snapshot to the shared D15 `DumCoverageHistoryStore` keyed by the
+  source id — skipped when the source declares no mappings or the run indexed nothing (so an
+  all-304/failed run raises no spurious 0%-coverage drift). A WC source therefore reports per-field
+  coverage across crawls on the existing `coverage/{source}` + `coverage/{source}/drift` endpoints and
+  the generic coverage page, and a mapping that silently stops matching surfaces as a coverage drop —
+  all without a contract a link-following crawl cannot honor. Migration path for *structured* sites
+  still on WC → D02 strategies documented in
+  [STRUCTURED_VS_TRADITIONAL.md](STRUCTURED_VS_TRADITIONAL.md) §9. Proven by
+  `DumWCCoverageAccumulatorTest` + `DumWCPluginProcessCoverageTest`. ↳ Builds on D15. Complements D09.
+
+## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
+
+- **D24** — AEM component-extractor SPI: the monolithic model.json content extractor is replaced by a
+  registry of small, single-concern extractors composed per page. `aem-commons`
+  `…aem.commons.ext.DumAemComponentExtractor` (functional SPI: `contribute(model, query, aemObject,
+  attrValues)`); `DumAemExtModelJsonBase` gains an overridable `componentExtractors()` and a default
+  `extractAttributes` that composes them in order (legacy monolithic override still supported, so the
+  change is backward-compatible). The reference monolith `DumAemExtSampleModelJson` is migrated to five
+  registered extractors — `DumAemSamplePageExtractor`, `DumAemSampleParagraphExtractor`,
+  `DumAemSampleTextExtractor`, `DumAemSampleImageExtractor`, `DumAemSampleContentFragmentExtractor` —
+  sharing a `DumAemSampleItems` tree-walk/HTML-strip helper, at output parity with the god-class. Each
+  extractor is now independently unit-tested in isolation (`DumAemSample*ExtractorTest`); the base
+  composition is proven by `DumAemComponentExtractorCompositionTest`. ↳ Builds on D21.

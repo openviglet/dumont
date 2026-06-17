@@ -132,18 +132,15 @@ This track has no remaining pending tasks.
 > enumeration + `extract(id)` over its single-item fetch) so they inherit that whole surface
 > **without a rewrite**. This *realizes* the existing non-goal ("the framework sits beside
 > the AEM/CMS connectors under the same SPI") — it adapts, never replaces. The web crawler
-> stays the generic link-spider the framework sits *above*; structured sites it serves
-> migrate to D02 strategies, and it gets only lightweight coverage telemetry.
+> stays the generic link-spider the framework sits *above* and is deliberately not converted
+> (its lightweight coverage signal shipped as D23); structured sites it serves migrate to D02
+> strategies.
 
-- [ ] **D23** · **Web-crawler coverage adapter (no conversion)** — the WC connector stays the
-      generic breadth link-spider (Track A objective + non-goals); a typed `discover()`/`extract(id)`
-      contract a link-following crawl cannot satisfy is **not** the goal. Instead, treat the source's
-      declared `DumWCAttributeMapping` names as an implicit field set and emit a per-page
-      field-presence signal, so a WC source still gets D15 coverage/drift telemetry (and surfaces a
-      mapping that silently stops matching) without pretending to be a structured source. Document the
-      migration path for *structured* sites currently crawled by WC → D02 strategies. Done: a WC
-      source reports per-field coverage across crawls and raises drift when a mapping breaks.\
-      ↳ **Depends on:** D15. Complements D09.
+> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D23** Web-crawler coverage adapter (no
+> conversion — the WC connector's declared `DumWCAttributeMapping` names treated as an implicit
+> field set + per-page field-presence signal into the D15 history, plus a documented WC → D02
+> migration path).
+
 - [ ] **D28** · **AEM dependency-graph reindex (structured path)** — restore the incremental reindex
       triggered by a shared component, dropped when D21 moved AEM onto the structured loop (which
       publishes with an empty dependency set). Reuse the XF/CF harvest today in
@@ -194,14 +191,6 @@ This track has no remaining pending tasks.
 > layer, it does not rip out the connector). The component shapes recur across institutions, so
 > the endgame ties into the D19 recipe library for multi-tenant reuse.
 
-- [ ] **D24** · **AEM component-extractor SPI** — externalize the monolithic content-extractor into
-      a registry of small, per-component extractors (`(typed component) → field contributions`),
-      composed per page. Reuses the existing fluent `DumAemModelJsonQuery` component API (already
-      component-oriented) — each extractor (banner, course-box/offer, teacher, event-details, news,
-      generic-banner, instructors…) becomes its own independently unit-tested unit. Done: the Insper
-      extension is expressed as N registered component extractors composed by the adapter, at parity
-      with the god-class — no behaviour change, but each component testable in isolation.\
-      ↳ **Depends on:** D21.
 - [ ] **D25** · **Schema-per-content-type + template routing** — replace "one source = one schema"
       with a content-type model: each template (via the alias map, e.g. `noticias` / `evento` /
       `educacao-executiva` / `institucional`) routes to a **content type with its own

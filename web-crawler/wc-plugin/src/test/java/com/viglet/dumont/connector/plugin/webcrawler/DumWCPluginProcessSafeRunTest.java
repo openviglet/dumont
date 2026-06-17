@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumInMemoryCoverageHistoryStore;
 import com.viglet.dumont.connector.plugin.webcrawler.fetch.DumWCFetcherRegistry;
 import com.viglet.dumont.connector.plugin.webcrawler.state.DumWCCrawlStateService;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCAllowUrl;
@@ -119,7 +120,7 @@ class DumWCPluginProcessSafeRunTest {
 
         return new DumWCPluginProcess(2000, "https://www.google.com", 30_000L, 3, 0, 0L, 0L, 1,
                 allowRepo, notAllowRepo, extRepo, attrRepo, startRepo, registry, crawlStateService,
-                context);
+                context, new DumInMemoryCoverageHistoryStore());
     }
 
     /** A no-op-named {@link DumWCFetcher} delegating its single fetch to {@code behavior}. */

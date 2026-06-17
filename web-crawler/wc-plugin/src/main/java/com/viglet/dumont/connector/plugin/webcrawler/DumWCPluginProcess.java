@@ -39,6 +39,7 @@ import com.viglet.dumont.commons.cache.DumCustomClassCache;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
 import com.viglet.dumont.connector.plugin.webcrawler.fetch.DumWCFetcherRegistry;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCAttributeMapping;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCCrawlState;
@@ -98,6 +99,10 @@ public class DumWCPluginProcess {
     private final DumWCHostRateLimiter hostRateLimiter = new DumWCHostRateLimiter();
     // D09: per-source crawl outcome — drives the safe-run guard and the failure report. Reset per run.
     private DumWCCrawlReport report = new DumWCCrawlReport();
+    // D23: per-crawl field-presence signal over the source's declared mappings (its implicit field
+    // set), recorded to the D15 coverage history so a WC source gets coverage/drift telemetry without
+    // becoming a structured source. Reset per run.
+    private DumWCCoverageAccumulator coverage = new DumWCCoverageAccumulator(List.of());
     private String website;
     private Collection<String> snSites;
     private final int timeout;
@@ -122,6 +127,9 @@ public class DumWCPluginProcess {
     private final DumWCFetcherRegistry dumWCFetcherRegistry;
     private final DumWCCrawlStateService dumWCCrawlStateService;
     private final DumConnectorContext dumConnectorContext;
+    // D23: D15 coverage history, shared across connectors and keyed by source — autowired with the
+    // persistent JPA-backed bean in production, the same store the structured sources record into.
+    private final DumCoverageHistoryStore dumCoverageHistoryStore;
     // D12: per-(source,url) conditional-fetch state loaded once per crawl; read-only during the run.
     private Map<String, DumWCCrawlState> priorStates = new HashMap<>();
     // D12: <lastmod> observed in the sitemap for a queued URL, carried to the index step so it can be
@@ -144,7 +152,8 @@ public class DumWCPluginProcess {
             DumWCStartingPointRepository dumWCStartingPointsRepository,
             DumWCFetcherRegistry dumWCFetcherRegistry,
             DumWCCrawlStateService dumWCCrawlStateService,
-            DumConnectorContext dumConnectorContext) {
+            DumConnectorContext dumConnectorContext,
+            DumCoverageHistoryStore dumCoverageHistoryStore) {
         this.timeout = timeout;
         this.referrer = referrer;
         this.maxCrawlDelayMs = maxCrawlDelayMs;
@@ -161,6 +170,7 @@ public class DumWCPluginProcess {
         this.dumWCFetcherRegistry = dumWCFetcherRegistry;
         this.dumWCCrawlStateService = dumWCCrawlStateService;
         this.dumConnectorContext = dumConnectorContext;
+        this.dumCoverageHistoryStore = dumCoverageHistoryStore;
     }
 
     public void start(DumWCSource dumWCSource) {
@@ -169,6 +179,10 @@ public class DumWCPluginProcess {
         // the sitemap pre-fetch skip below. Empty on a first crawl (everything is fetched).
         this.priorStates = dumWCCrawlStateService.loadByUrl(dumWCSource);
         this.sitemapLastmodByUrl.clear();
+        // D23: seed the implicit field set from the declared mappings up front, so a mapping that
+        // matches zero pages this run still reports 0% coverage (the broken-mapping signal) rather
+        // than dropping out of the report.
+        this.coverage = new DumWCCoverageAccumulator(declaredFieldNames(dumWCSource));
         DumConnectorSession dumConnectorSession = getSource(dumWCSource);
         dumWCFileExtensionRepository.findByDumWCSource(dumWCSource)
                 .ifPresent(source -> source.forEach(dumWCFileExtension -> this.notAllowExtensions
@@ -240,6 +254,23 @@ public class DumWCPluginProcess {
             log.info("Crawl of source '{}' report: {}", source.getSource(), report.summary());
         }
         dumConnectorContext.finishIndexing(source, totalFailure);
+        recordCoverage(source);
+    }
+
+    /**
+     * Append this crawl's per-field coverage to the source's D15 history (roadmap D23), keyed by the
+     * same source id the deindex/tracking uses, so the existing {@code coverage/{source}} and
+     * {@code coverage/{source}/drift} endpoints serve a WC source for free — and a mapping that
+     * silently stopped matching shows up as a coverage drop. Skipped when the source declares no
+     * mappings (nothing to measure) or the run extracted no page (an all-304 or fully-failed run would
+     * otherwise record a spurious 0%-coverage drop and raise false drift).
+     */
+    private void recordCoverage(DumConnectorSession source) {
+        if (coverage.isEmpty() || coverage.documentCount() == 0) {
+            return;
+        }
+        dumCoverageHistoryStore.record(source.getSource(), coverage.documentCount(),
+                coverage.toFieldCoverage());
     }
 
     /** The outcome of the most recent {@link #start(DumWCSource)} (roadmap D09) — for inspection. */
@@ -624,12 +655,22 @@ public class DumWCPluginProcess {
 
     private void addTurSNJobItem(DumWCSource dumWCSource, Document document, String url,
             String checksum, DumConnectorSession source) {
+        Map<String, Object> attributes = getJobItemAttributes(dumWCSource, document, url);
+        // D23: the attribute keys are exactly the declared fields that produced a (non-blank) value on
+        // this page — its field-presence signal for the coverage history.
+        coverage.recordPage(attributes.keySet());
         DumJobItemWithSession dumJobItemWithSession = new DumJobItemWithSession(
                 new TurSNJobItem(TurSNJobAction.CREATE, new ArrayList<>(snSites),
-                        getLocale(dumWCSource, document, url),
-                        getJobItemAttributes(dumWCSource, document, url), null, checksum),
+                        getLocale(dumWCSource, document, url), attributes, null, checksum),
                 source, Collections.emptySet(), false);
         dumConnectorContext.addJobItem(dumJobItemWithSession);
+    }
+
+    /** The names of the source's declared attribute mappings — its implicit field set (roadmap D23). */
+    private List<String> declaredFieldNames(DumWCSource dumWCSource) {
+        return dumWCAttributeMappingRepository.findByDumWCSource(dumWCSource)
+                .map(mappings -> mappings.stream().map(DumWCAttributeMapping::getName).toList())
+                .orElseGet(List::of);
     }
 
     public static String getCRC32Checksum(byte[] bytes) {

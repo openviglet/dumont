@@ -31,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumInMemoryCoverageHistoryStore;
 import com.viglet.dumont.connector.plugin.webcrawler.fetch.DumWCFetcherRegistry;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCAllowUrl;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.DumWCCrawlState;
@@ -236,7 +237,7 @@ class DumWCPluginProcessIncrementalTest {
 
         return new DumWCPluginProcess(2000, "https://www.google.com", 30_000L, 3, 0, 0L, 0L, 1,
                 allowRepo, notAllowRepo, extRepo, attrRepo, startRepo, registry, stateService,
-                context);
+                context, new DumInMemoryCoverageHistoryStore());
     }
 
     /** A no-op-named {@link DumWCFetcher} delegating each fetch to {@code behavior}. */
