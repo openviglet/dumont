@@ -185,3 +185,16 @@
   `UNREACHABLE`, never a false green); `dumont-react` `RagStatusBadge` flags non-RAG sites in the
   source form. (c) `docs/EMBEDDING_PARTITION_CONTRACT.md` documents the contract. Proven by
   `DumEmbeddingProjectionTest` + `DumConnectorGenAiStatusApiTest`. ↳ Builds on D04, D16.
+- **D18** — Cross-source entity resolution & dedup: `connector-commons`
+  `…spi.structured.resolve` — `DumCanonicalKey` (derives a stable canonical id from grounded
+  natural-key fields, normalized; empty → record indexes unmerged, never on a guessed identity),
+  `DumRecordMerge` (grounding-safe merge: first contributor wins and is never overwritten, a later
+  source fills only gaps the canonical schema declares, every merged-in field re-tagged with the
+  source that supplied it), `DumEntityResolver` (accumulates a crawl's records and collapses those
+  sharing a canonical id into one `Entity` published under its primary source). Opt-in via a
+  `DumCanonicalKey` constructor on `DumStructuredSourcePlugin`: `crawl()` switches to
+  resolve-then-publish, so the same entity from two sources indexes as one document and the
+  mandatory-field check runs on the *merged* record (a second source can satisfy it). Per-field
+  source carried by a new `DumFieldProvenance.source` (D16), emitted in the `dum_provenance` token
+  so the merged document stays auditable. Proven by `DumCrossSourceResolutionPluginTest` +
+  `DumRecordMergeTest`. ↳ Builds on D04, D16.

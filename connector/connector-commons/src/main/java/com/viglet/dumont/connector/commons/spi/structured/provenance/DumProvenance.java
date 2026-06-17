@@ -57,11 +57,18 @@ public final class DumProvenance {
                 .toList();
     }
 
-    /** One compact token {@code field|source|strategy|selector|confidence} (trailing blanks trimmed). */
+    /**
+     * One compact token {@code field|source|strategy|selector|confidence} (trailing blanks trimmed).
+     * When the field's provenance carries its own {@link DumFieldProvenance#source() source} (a
+     * cross-source merge, D18), that source wins over the document-level {@code source} so the token
+     * cites the source that actually supplied the field.
+     */
     public static String token(String field, String source, DumFieldProvenance provenance) {
+        String fieldSource = provenance != null && provenance.source() != null ? provenance.source()
+                : source;
         String[] parts = {
                 nullToEmpty(field),
-                nullToEmpty(source),
+                nullToEmpty(fieldSource),
                 provenance == null ? "" : nullToEmpty(provenance.strategy()),
                 provenance == null ? "" : nullToEmpty(provenance.selector()),
                 provenance == null || provenance.confidence() == null ? ""

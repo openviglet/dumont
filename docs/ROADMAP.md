@@ -119,14 +119,6 @@ This track has no remaining pending tasks.
 > normalization. All grounding-safe: enrichment may normalize / classify / derive, **never**
 > fabricate a sourced attribute.
 
-- [ ] **D18** · **Cross-source entity resolution & dedup** — collapse the same real-world
-      entity arriving from multiple sources/URLs (the same course across institution mirrors,
-      one item under canonical + tracking URLs) to a **canonical id**, with a grounding-safe
-      merge rule (prefer the source that declares a field; never invent). High leverage on the
-      cursarei workload where the same program appears across catalogs. Done: a fixture with
-      the same entity from two sources indexes as one canonical document with merged,
-      provenance-tagged fields.\
-      ↳ **Depends on:** D04, D16.
 - [ ] **D19** · **Reusable recipe & taxonomy library** — version shared, parameterized recipes
       (the "one SIGAA `TabularListing` recipe → all federals" leverage D11 already calls for)
       and canonical taxonomy maps as **first-class versioned artifacts**, applied by reference

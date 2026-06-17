@@ -18,6 +18,7 @@ package com.viglet.dumont.connector.commons.spi.structured;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -31,6 +32,8 @@ import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHi
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageMonitor;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumInMemoryCoverageHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnrichmentChain;
+import com.viglet.dumont.connector.commons.spi.structured.resolve.DumCanonicalKey;
+import com.viglet.dumont.connector.commons.spi.structured.resolve.DumEntityResolver;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumInMemoryProvenanceHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenance;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceHistoryStore;
@@ -73,6 +76,15 @@ import lombok.extern.slf4j.Slf4j;
  * {@code ""}. The declared {@link DumStructuredSchema#toAttributeSpecs() schema} travels with every
  * document.
  *
+ * <p>
+ * <strong>Cross-source resolution (roadmap D18).</strong> When a {@link DumCanonicalKey} is
+ * configured, {@link #crawl()} switches from per-source streaming publish to a resolve-then-publish
+ * pass: every source's records are accumulated in a {@link DumEntityResolver} and those that share a
+ * canonical id are folded — grounding-safe — into one canonical document, published once under its
+ * primary source. Because the merge can complete a mandatory field from a second source, the
+ * mandatory-field check runs on the <em>merged</em> record. Without a canonical key the per-source
+ * behaviour is unchanged.
+ *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
@@ -84,6 +96,8 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     protected final DumPreviewSnapshotStore previewSnapshotStore;
     protected final DumCoverageHistoryStore coverageHistoryStore;
     protected final DumProvenanceHistoryStore provenanceHistoryStore;
+    /** Cross-source canonical key (D18); {@code null} disables resolution (per-source publish). */
+    protected final DumCanonicalKey canonicalKey;
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext) {
         this(dumConnectorContext, DumEnrichmentChain.empty(), new DumInMemoryPreviewSnapshotStore(),
@@ -113,6 +127,14 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore,
             DumCoverageHistoryStore coverageHistoryStore,
             DumProvenanceHistoryStore provenanceHistoryStore) {
+        this(dumConnectorContext, enrichmentChain, previewSnapshotStore, coverageHistoryStore,
+                provenanceHistoryStore, null);
+    }
+
+    protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
+            DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore,
+            DumCoverageHistoryStore coverageHistoryStore,
+            DumProvenanceHistoryStore provenanceHistoryStore, DumCanonicalKey canonicalKey) {
         this.dumConnectorContext = dumConnectorContext;
         this.enrichmentChain = enrichmentChain != null ? enrichmentChain : DumEnrichmentChain.empty();
         this.previewSnapshotStore = previewSnapshotStore != null ? previewSnapshotStore
@@ -121,6 +143,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 : new DumInMemoryCoverageHistoryStore();
         this.provenanceHistoryStore = provenanceHistoryStore != null ? provenanceHistoryStore
                 : new DumInMemoryProvenanceHistoryStore();
+        this.canonicalKey = canonicalKey;
     }
 
     /** The provider that resolves this plugin's configured structured sources. */
@@ -138,7 +161,43 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
 
     @Override
     public void crawl() {
-        provider().sourceNames().forEach(this::indexAll);
+        if (canonicalKey == null) {
+            provider().sourceNames().forEach(this::indexAll);
+        } else {
+            resolveAndIndex();
+        }
+    }
+
+    /**
+     * Cross-source entity resolution (roadmap <strong>D18</strong>): accumulate every source's
+     * (extracted, enriched) records in a {@link DumEntityResolver}, then publish each resolved entity
+     * once. Records sharing a {@link #canonicalKey canonical id} are folded — grounding-safe — into a
+     * single canonical document under its primary source's session; the mandatory-field check runs on
+     * the merged record, so a field a second source supplied can satisfy it. A record with no
+     * canonical id is published on its own, unmerged.
+     */
+    private void resolveAndIndex() {
+        DumEntityResolver resolver = new DumEntityResolver(canonicalKey);
+        provider().sourceNames().forEach(sourceName -> provider().resolve(sourceName)
+                .ifPresent(source -> source.discover().forEach(contentId -> source.extract(contentId)
+                        .map(record -> enrichmentChain.apply(source, record))
+                        .ifPresent(record -> resolver.add(source, record)))));
+        Map<String, DumConnectorSession> sessions = new LinkedHashMap<>();
+        for (DumEntityResolver.Entity entity : resolver.entities()) {
+            DumStructuredRecord record = entity.record();
+            List<String> missing = record.missingMandatoryFields();
+            if (!missing.isEmpty()) {
+                log.warn("Skipping canonical entity '{}' — missing mandatory field(s) after merge: {}",
+                        record.id(), missing);
+                continue;
+            }
+            DumStructuredSource primary = entity.source();
+            DumConnectorSession session =
+                    sessions.computeIfAbsent(primary.getSourceName(), name -> newSession(primary));
+            dumConnectorContext.addJobItem(new DumJobItemWithSession(
+                    toJobItem(primary, record), session, Set.of(), false));
+        }
+        sessions.values().forEach(session -> dumConnectorContext.finishIndexing(session, false));
     }
 
     @Override

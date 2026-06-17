@@ -25,7 +25,6 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
 - [II. Connector convergence — one ingestion contract (Track G, D20–D23)](#ii-connector-convergence--one-ingestion-contract-track-g-d20d23)
 - [III. AEM extraction model redesign (Track H, D24–D27)](#iii-aem-extraction-model-redesign-track-h-d24d27)
-- [VII. Cross-source entity resolution & dedup (D18)](#vii-cross-source-entity-resolution--dedup-d18)
 - [VIII. Reusable recipe & taxonomy library (D19)](#viii-reusable-recipe--taxonomy-library-d19)
 - [IX. Cross-cutting decisions & restrictions](#ix-cross-cutting-decisions--restrictions)
 
@@ -146,24 +145,6 @@ the reference migration.
 **Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: the AEM Achilles'-heel god-class becomes a
 composition of tested component extractors + typed per-type schemas + named enrichers, observable
 (coverage/drift/provenance) and reusable across institutions via versioned recipes.
-
-## VII. Cross-source entity resolution & dedup (D18)
-
-**Problem.** The same real-world entity arrives more than once: the same course across
-institution mirror sites, or one item under both a canonical URL and tracking-parameter
-variants. Indexed naïvely, it becomes duplicate documents that pollute facets and split
-RAG relevance.
-
-**Design.** Collapse duplicates to a **canonical id** with a **grounding-safe merge**:
-when two records disagree on a field, prefer the source that *declares* it; never
-synthesize a merged value. Provenance (D16) drives the merge and records which source won
-each field, so the result stays auditable.
-
-**Touch points.** Enrichment stage (D04); provenance model (D16); canonical-id assignment
-before publish.
-
-**Done.** A fixture with the same entity from two sources indexes as one canonical
-document with merged, provenance-tagged fields.
 
 ## VIII. Reusable recipe & taxonomy library (D19)
 
