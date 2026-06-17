@@ -17,13 +17,17 @@ import type {
     TurIntegrationCoverageDrift,
     TurIntegrationCoverageSnapshot,
     TurIntegrationFieldDrift,
+    TurIntegrationFieldLastSeen,
+    TurIntegrationProvenanceLastSeen,
 } from "@/models/integration/integration-coverage.model";
 import { TurIntegrationCoverageService } from "@/services/integration/integration-coverage.service";
 import {
     IconActivityHeartbeat,
     IconAlertTriangle,
     IconCircleCheck,
+    IconClockExclamation,
     IconLoader2,
+    IconRoute,
     IconSparkles,
     IconTrendingDown,
 } from "@tabler/icons-react";
@@ -52,6 +56,7 @@ export default function IntegrationInstanceCoveragePage() {
     const [source, setSource] = useState<string>("");
     const [history, setHistory] = useState<TurIntegrationCoverageSnapshot[] | null>(null);
     const [drift, setDrift] = useState<TurIntegrationCoverageDrift | null>(null);
+    const [provenance, setProvenance] = useState<TurIntegrationProvenanceLastSeen | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -69,15 +74,18 @@ export default function IntegrationInstanceCoveragePage() {
         if (!service || !source) return;
         setIsLoading(true);
         try {
-            const [hist, drf] = await Promise.all([
+            const [hist, drf, prov] = await Promise.all([
                 service.getHistory(source),
                 service.getDrift(source),
+                service.getProvenanceLastSeen(source),
             ]);
             setHistory(hist);
             setDrift(drf);
+            setProvenance(prov);
         } catch {
             setHistory([]);
             setDrift(null);
+            setProvenance(null);
         } finally {
             setIsLoading(false);
         }
@@ -88,6 +96,12 @@ export default function IntegrationInstanceCoveragePage() {
     }, [loadCoverage]);
 
     const latest = history?.[0];
+
+    const lastSeenByField = useMemo(() => {
+        const map = new Map<string, TurIntegrationFieldLastSeen>();
+        provenance?.fields.forEach((f) => map.set(f.field, f));
+        return map;
+    }, [provenance]);
 
     return (
         <>
@@ -180,13 +194,15 @@ export default function IntegrationInstanceCoveragePage() {
                                         <TableRow>
                                             <TableHead>{t("integration.coverage.field")}</TableHead>
                                             <TableHead>{t("integration.coverage.type")}</TableHead>
-                                            <TableHead className="w-1/3">{t("integration.coverage.coverageCol")}</TableHead>
+                                            <TableHead className="w-1/4">{t("integration.coverage.coverageCol")}</TableHead>
                                             <TableHead>{t("integration.coverage.change")}</TableHead>
+                                            <TableHead>{t("integration.coverage.origin")}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {latest.fields.map((field) => {
                                             const change = deltaForField(drift ?? undefined, field.field);
+                                            const origin = lastSeenByField.get(field.field);
                                             return (
                                                 <TableRow key={field.field}>
                                                     <TableCell className="py-3">
@@ -216,6 +232,30 @@ export default function IntegrationInstanceCoveragePage() {
                                                             <span className={`font-mono text-xs font-semibold ${change.drift ? "text-red-600" : change.delta > 0 ? "text-emerald-600" : "text-amber-600"}`}>
                                                                 {change.delta > 0 ? "+" : ""}{change.delta}%
                                                             </span>
+                                                        ) : (
+                                                            <span className="text-xs text-muted-foreground">—</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="py-3">
+                                                        {origin && origin.strategy ? (
+                                                            <div className="flex flex-col gap-1">
+                                                                <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                                                                    <IconRoute className="h-3 w-3 shrink-0" />
+                                                                    {origin.strategy}
+                                                                    {origin.selector && (
+                                                                        <span className="text-muted-foreground/70">· {origin.selector}</span>
+                                                                    )}
+                                                                </span>
+                                                                {origin.presentInLatest === false && origin.lastSeenRunsAgo > 0 && (
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="w-fit flex items-center gap-1 bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] px-1.5 py-0"
+                                                                    >
+                                                                        <IconClockExclamation className="h-3 w-3" />
+                                                                        {t("integration.coverage.lastSeenAgo", { count: origin.lastSeenRunsAgo })}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
                                                         ) : (
                                                             <span className="text-xs text-muted-foreground">—</span>
                                                         )}

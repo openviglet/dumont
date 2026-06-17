@@ -32,3 +32,21 @@ export interface TurIntegrationCoverageDrift {
     currentRunAt: number;
     fields: TurIntegrationFieldDrift[];
 }
+
+/** Field-level provenance & last-seen (roadmap D16). */
+
+export interface TurIntegrationFieldLastSeen {
+    field: string;
+    strategy: string | null;
+    selector: string | null;
+    confidence: number | null;
+    presentInLatest: boolean;
+    /** 0 when present in the latest run, N>0 when last seen N runs ago, -1 when never seen. */
+    lastSeenRunsAgo: number;
+    lastSeenAt: number;
+}
+
+export interface TurIntegrationProvenanceLastSeen {
+    source: string;
+    fields: TurIntegrationFieldLastSeen[];
+}

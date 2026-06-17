@@ -1,10 +1,11 @@
 import type {
     TurIntegrationCoverageDrift,
     TurIntegrationCoverageSnapshot,
+    TurIntegrationProvenanceLastSeen,
 } from "@/models/integration/integration-coverage.model";
 import axios, { type AxiosInstance } from "axios";
 
-/** Reads per-source field-coverage history and drift (roadmap D15). */
+/** Reads per-source field-coverage history and drift (roadmap D15) + provenance last-seen (D16). */
 export class TurIntegrationCoverageService {
     private readonly axiosInstance: AxiosInstance;
     private readonly endpointPrefix: string;
@@ -24,6 +25,14 @@ export class TurIntegrationCoverageService {
     async getDrift(source: string): Promise<TurIntegrationCoverageDrift> {
         const { data } = await this.axiosInstance.get<TurIntegrationCoverageDrift>(
             `${this.endpointPrefix}/coverage/${encodeURIComponent(source)}/drift`
+        );
+        return data;
+    }
+
+    /** Per-field last-seen provenance: origin of each field + when it was last seen (roadmap D16). */
+    async getProvenanceLastSeen(source: string): Promise<TurIntegrationProvenanceLastSeen> {
+        const { data } = await this.axiosInstance.get<TurIntegrationProvenanceLastSeen>(
+            `${this.endpointPrefix}/provenance/${encodeURIComponent(source)}/last-seen`
         );
         return data;
     }
