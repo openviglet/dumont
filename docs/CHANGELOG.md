@@ -251,3 +251,19 @@
   dispatcher; CRUD + export/import carry the new fields. Proven by `DumDbStructuredSourceTest`
   (H2 end-to-end: discover/extract, grounding + mandatory-skip, multi-valued split, coverage history,
   dry-run preview, derived-schema fallback). ↳ Builds on D01, D03, D14, D15.
+- **D21** — AEM structured adapter: the AEM connector now indexes through the structured SPI, wrapping
+  its existing extraction as-is. `aem-plugin` `…plugin.aem.source` — `DumAemStructuredSource` (bound to
+  one `DumAemEnv`: `schema()` wraps the source's `DumAemAttributeSpecification`s 1:1 with
+  `DumStructuredField`; `discover()` delegates to `AemNodeNavigator` path / QueryBuilder enumeration;
+  `extract(id)` reuses `DumAemService.getTargetAttrValueMap` — the `DumAemAttrProcess` + monolithic
+  content-extractor — decoupled from the author/publish job pipeline; the document id is the source's
+  own `id` attribute, falling back to the path) and `DumAemStructuredSourceProvider` (resolves each
+  source's enabled environment(s), author primary). `DumAemPlugin` now extends `DumStructuredSourcePlugin`
+  wired to the persistent coverage/preview/provenance stores, so D14 dry-run preview and D15
+  coverage/drift work for an AEM source for free. **Author/publish + delta stay intact**: `indexAll`
+  drives every enabled environment under one session, `toJobItem` stamps each item's environment,
+  per-record delta checksum and resolved locale (+ the `site` attribute), and the tracking-driven
+  deindex sweep in `finishIndexing` removes stale/unpublished content as before; coverage/preview/
+  provenance are captured once from the primary environment. (Dependency-graph reindex is not yet routed
+  through the structured path — to be re-homed in Track H.) Proven by `DumAemStructuredSourceTest`,
+  `DumAemStructuredSourceProviderTest`, `DumAemPluginTest`. ↳ Builds on D20. Bridges to Track H.

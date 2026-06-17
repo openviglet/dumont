@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2016-2024 the original author or authors.
+ * Copyright (C) 2016-2026 the original author or authors.
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the
@@ -16,12 +16,15 @@
 
 package com.viglet.dumont.connector.plugin.aem.impl;
 
+import static com.viglet.dumont.connector.aem.commons.DumAemConstants.SITE;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
@@ -29,139 +32,211 @@ import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
-import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
-import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
-import com.viglet.dumont.connector.plugin.aem.api.DumAemPathList;
-import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
-import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;
+import com.viglet.dumont.connector.commons.DumConnectorContext;
+import com.viglet.dumont.connector.commons.DumConnectorSession;
+import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
+import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
+import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
+import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePlugin;
+import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourceProvider;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
+import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageMonitor;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshot;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshotStore;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceHistoryStore;
+import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceSnapshot;
+import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemObjectService;
-import com.viglet.dumont.connector.plugin.aem.service.DumAemService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSessionService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSourceService;
+import com.viglet.dumont.connector.plugin.aem.source.DumAemStructuredSource;
+import com.viglet.dumont.connector.plugin.aem.source.DumAemStructuredSourceProvider;
+import com.viglet.turing.client.sn.job.TurSNJobItem;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * AEM connector — adapted to the structured-source SPI (roadmap <strong>D21</strong>).
+ *
+ * <p>
+ * The AEM source indexes through the generic structured loop: a {@link DumAemStructuredSourceProvider}
+ * resolves each source's environment(s) as {@link DumAemStructuredSource}s (schema from the attribute
+ * specs, {@code discover()} over the path/QueryBuilder enumeration, {@code extract(id)} reusing the
+ * connector's existing field extraction), and the shared loop grounds, previews (D14) and tracks
+ * field coverage/drift (D15) and provenance (D16) for free — wired to the same persistent stores the
+ * monitoring API reads.
+ *
+ * <p>
+ * <strong>Author/publish + delta stay intact.</strong> Each adapter extracts <em>one</em>
+ * environment; {@link #indexAll(String)} drives every enabled environment of a source under a single
+ * indexing session, stamping each job item with its environment, the per-record delta checksum and
+ * the resolved locale ({@link #toJobItem}). The tracking-driven deindex sweep in
+ * {@code finishIndexing} removes stale/unpublished content as before. Coverage/preview/provenance are
+ * captured once, from the primary environment.
+ *
+ * @author Alexandre Oliveira
+ * @since 2026.3.1
+ */
 @Slf4j
 @Component("aem")
-public class DumAemPlugin implements DumConnectorPlugin {
-    private final DumAemPluginProcess dumAemPluginProcess;
-    private final DumAemSourceService dumAemSourceService;
-    private final DumAemService dumAemService;
-    private final DumAemSessionService dumAemSessionService;
-    private final DumAemObjectService dumAemObjectService;
-    private final AemNodeNavigator aemNodeNavigator;
-    private final boolean queryBuilderEnabled;
+public class DumAemPlugin extends DumStructuredSourcePlugin {
 
-    public DumAemPlugin(DumAemPluginProcess dumAemPluginProcess,
-            DumAemSourceService dumAemSourceService,
-            DumAemService dumAemService,
-            DumAemSessionService dumAemSessionService,
-            DumAemObjectService dumAemObjectService,
-            AemNodeNavigator aemNodeNavigator,
-            @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled) {
-        this.dumAemPluginProcess = dumAemPluginProcess;
-        this.dumAemSourceService = dumAemSourceService;
-        this.dumAemService = dumAemService;
-        this.dumAemSessionService = dumAemSessionService;
-        this.dumAemObjectService = dumAemObjectService;
-        this.aemNodeNavigator = aemNodeNavigator;
-        this.queryBuilderEnabled = queryBuilderEnabled;
+    private final DumAemStructuredSourceProvider provider;
+    private final DumAemSourceService sourceService;
+    private final DumAemSessionService sessionService;
+    private final DumAemObjectService objectService;
+
+    public DumAemPlugin(DumConnectorContext dumConnectorContext,
+            DumAemStructuredSourceProvider provider, DumAemSourceService sourceService,
+            DumAemSessionService sessionService, DumAemObjectService objectService,
+            DumPreviewSnapshotStore previewSnapshotStore,
+            DumCoverageHistoryStore coverageHistoryStore,
+            DumProvenanceHistoryStore provenanceHistoryStore) {
+        super(dumConnectorContext, null, previewSnapshotStore, coverageHistoryStore,
+                provenanceHistoryStore);
+        this.provider = provider;
+        this.sourceService = sourceService;
+        this.sessionService = sessionService;
+        this.objectService = objectService;
     }
 
     @Override
-    public void crawl() {
-        dumAemSourceService.getAllSources().forEach(dumAemPluginProcess::indexAll);
+    protected DumStructuredSourceProvider provider() {
+        return provider;
     }
 
+    /**
+     * Index every enabled environment of a source under one session (so the deindex sweep in
+     * {@code finishIndexing} sees both), capturing coverage/preview/provenance once from the primary
+     * environment. Asynchronous so the connector API returns immediately, as the legacy flow did.
+     */
+    @Async
     @Override
     public void indexAll(String source) {
-        dumAemPluginProcess.indexAllByNameAsync(source);
+        sourceService.getDumAemSourceByName(source).ifPresentOrElse(
+                aemSource -> indexAllEnvironments(source, aemSource),
+                () -> log.error("AEM source '{}' not found", source));
     }
 
+    private void indexAllEnvironments(String source, DumAemSource aemSource) {
+        List<DumAemEnv> environments = provider.enabledEnvironments(aemSource);
+        if (environments.isEmpty()) {
+            log.warn("AEM source '{}' has no enabled environment (author/publish) — nothing to index",
+                    source);
+            return;
+        }
+        DumConnectorSession session = newSession(aemSource);
+        DumAemEnv primaryEnv = environments.getFirst();
+        DumAemStructuredSource primary = provider.adapter(aemSource, primaryEnv);
+        DumStructuredSchema schema = primary.schema();
+        DumPreviewSnapshot.Builder snapshot = DumPreviewSnapshot.builder(schema);
+        DumProvenanceSnapshot.Builder provenance = DumProvenanceSnapshot.builder(schema);
+        List<String> contentIds = primary.discover();
+        for (DumAemEnv environment : environments) {
+            DumAemStructuredSource structuredSource = environment == primaryEnv ? primary
+                    : provider.adapter(aemSource, environment);
+            boolean capture = environment == primaryEnv;
+            contentIds.forEach(id -> structuredSource.extract(id)
+                    .ifPresent(extracted -> publish(structuredSource,
+                            enrichmentChain.apply(structuredSource, extracted), session,
+                            capture ? snapshot : null, capture ? provenance : null)));
+        }
+        dumConnectorContext.finishIndexing(session, false);
+        DumPreviewSnapshot baseline = snapshot.build();
+        previewSnapshotStore.save(source, baseline);
+        coverageHistoryStore.record(source, baseline.documents().size(),
+                DumCoverageMonitor.coverage(schema, baseline));
+        provenanceHistoryStore.record(source, provenance.documentCount(), provenance.fields());
+    }
+
+    /** Index specific content ids across every enabled environment (no deindex sweep). */
+    @Override
     public void indexById(String source, List<String> contentId) {
-        DumAemPathList dumAemPathList = DumAemPathList.builder()
-                .paths(contentId)
-                .event(DumAemEvent.INDEXING)
-                .recursive(false)
-                .build();
-        dumAemPluginProcess.sentToIndexStandalone(source, dumAemPathList);
+        sourceService.getDumAemSourceByName(source).ifPresentOrElse(aemSource -> {
+            DumConnectorSession session = newSession(aemSource);
+            for (DumAemEnv environment : provider.enabledEnvironments(aemSource)) {
+                DumAemStructuredSource structuredSource = provider.adapter(aemSource, environment);
+                contentId.forEach(id -> structuredSource.extract(id)
+                        .ifPresent(extracted -> publish(structuredSource,
+                                enrichmentChain.apply(structuredSource, extracted), session, null, null)));
+            }
+            dumConnectorContext.finishIndexing(session, true);
+        }, () -> log.error("AEM source '{}' not found", source));
     }
 
-    @Override
-    public String getProviderName() {
-        return dumAemService.getProviderName();
+    private void publish(DumAemStructuredSource source, DumStructuredRecord structuredRecord,
+            DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
+            DumProvenanceSnapshot.Builder provenance) {
+        List<String> missing = structuredRecord.missingMandatoryFields();
+        if (!missing.isEmpty()) {
+            log.warn("Skipping record '{}' in AEM source '{}' — missing mandatory field(s): {}",
+                    structuredRecord.id(), source.getSourceName(), missing);
+            return;
+        }
+        dumConnectorContext.addJobItem(new DumJobItemWithSession(toJobItem(source, structuredRecord),
+                session, Set.of(), false));
+        if (snapshot != null) {
+            snapshot.add(structuredRecord.id(), structuredRecord.values());
+        }
+        if (provenance != null) {
+            provenance.add(structuredRecord.values(), structuredRecord.provenance());
+        }
     }
 
+    /**
+     * Stamp the AEM-specific document fields the legacy job pipeline produced: the environment, the
+     * per-record delta checksum and resolved locale, and the {@code site} attribute. Sites/locale
+     * default come from the bound environment via {@link #toJobItem(DumStructuredSource,
+     * DumStructuredRecord) super}; the per-record locale overrides it for multi-locale sources.
+     */
     @Override
-    public boolean ownsSource(String source) {
-        return dumAemSourceService.getDumAemSourceByName(source).isPresent();
+    protected TurSNJobItem toJobItem(DumStructuredSource source, DumStructuredRecord structuredRecord) {
+        TurSNJobItem item = super.toJobItem(source, structuredRecord);
+        if (source instanceof DumAemStructuredSource aemSource) {
+            item.setEnvironment(aemSource.getEnvironment().toString());
+            aemSource.checksum(structuredRecord.id()).ifPresent(item::setChecksum);
+            aemSource.locale(structuredRecord.id()).ifPresent(item::setLocale);
+            aemSource.contentSiteName()
+                    .ifPresent(site -> item.getAttributes().putIfAbsent(SITE, site));
+        }
+        return item;
     }
 
     @Override
     public Locale resolveLocale(String source, String objectId) {
-        return dumAemSourceService.getDumAemSourceByName(source)
-                .map(dumAemSource -> {
-                    DumAemSession session = dumAemSessionService.getDumAemSession(dumAemSource, false);
-                    return DumAemCommonsUtils.getLocaleByPath(session.getConfiguration(), objectId);
-                })
+        return sourceService.getDumAemSourceByName(source)
+                .map(aemSource -> DumAemCommonsUtils.getLocaleByPath(
+                        sessionService.getDumAemSession(aemSource, false).getConfiguration(), objectId))
                 .orElse(null);
     }
 
     @Override
     public List<EnvironmentInfo> resolveEnvironments(String source, String objectId) {
-        return dumAemSourceService.getDumAemSourceByName(source)
-                .map(dumAemSource -> {
-                    DumAemSession session = dumAemSessionService.getDumAemSession(dumAemSource, false);
-                    DumAemConfiguration config = session.getConfiguration();
-                    List<EnvironmentInfo> environments = new ArrayList<>();
-
-                    return DumAemCommonsUtils.getInfinityJson(objectId, config, false)
-                            .map(infinityJson -> {
-                                if (config.isAuthor()) {
-                                    environments.add(new EnvironmentInfo(
-                                            DumAemEnv.AUTHOR.toString(),
-                                            List.of(config.getAuthorSNSite())));
-                                }
-                                if (config.isPublish()) {
-                                    DumAemObjectGeneric aemObject = dumAemObjectService
-                                            .getDumAemObjectGeneric(objectId, infinityJson, DumAemEvent.INDEXING);
-                                    if (aemObject.isDelivered()) {
-                                        environments.add(new EnvironmentInfo(
-                                                DumAemEnv.PUBLISHING.toString(),
-                                                List.of(config.getPublishSNSite())));
-                                    }
-                                }
-                                return environments;
-                            })
-                            .orElse(Collections.emptyList());
-                })
-                .orElse(Collections.emptyList());
+        return sourceService.getDumAemSourceByName(source).map(aemSource -> {
+            DumAemConfiguration config = sessionService.getDumAemSession(aemSource, false)
+                    .getConfiguration();
+            return DumAemCommonsUtils.getInfinityJson(objectId, config, false).map(infinityJson -> {
+                List<EnvironmentInfo> environments = new ArrayList<>();
+                if (config.isAuthor()) {
+                    environments.add(new EnvironmentInfo(DumAemEnv.AUTHOR.toString(),
+                            List.of(config.getAuthorSNSite())));
+                }
+                if (config.isPublish()) {
+                    DumAemObjectGeneric aemObject = objectService.getDumAemObjectGeneric(objectId,
+                            infinityJson, DumAemEvent.INDEXING);
+                    if (aemObject.isDelivered()) {
+                        environments.add(new EnvironmentInfo(DumAemEnv.PUBLISHING.toString(),
+                                List.of(config.getPublishSNSite())));
+                    }
+                }
+                return environments;
+            }).orElse(Collections.emptyList());
+        }).orElse(Collections.emptyList());
     }
 
-    @Override
-    public List<String> discoverContentIds(String source) {
-        return dumAemSourceService.getDumAemSourceByName(source)
-                .map(dumAemSource -> {
-                    DumAemSession session = dumAemSessionService.getDumAemSession(dumAemSource, false);
-
-                    if (queryBuilderEnabled) {
-                        return aemNodeNavigator.collectAccessiblePathsViaQueryBuilder(session);
-                    }
-
-                    DumAemConfiguration config = session.getConfiguration();
-                    String rootPath = config.getRootPath();
-
-                    return DumAemCommonsUtils.getInfinityJson(rootPath, config, false)
-                            .map(infinityJson -> aemNodeNavigator.collectAccessiblePaths(
-                                    session, rootPath, infinityJson))
-                            .orElseGet(() -> {
-                                log.warn("Root path '{}' not accessible for source '{}'", rootPath, source);
-                                return Collections.<String>emptyList();
-                            });
-                })
-                .orElseGet(() -> {
-                    log.error("Source '{}' not found", source);
-                    return Collections.emptyList();
-                });
+    private DumConnectorSession newSession(DumAemSource aemSource) {
+        return new DumConnectorSession(aemSource.getName(), getProviderName(),
+                aemSource.getDefaultLocale() != null ? aemSource.getDefaultLocale() : Locale.US);
     }
 }

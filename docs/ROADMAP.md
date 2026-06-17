@@ -139,18 +139,6 @@ This track has no remaining pending tasks.
 > stays the generic link-spider the framework sits *above*; structured sites it serves
 > migrate to D02 strategies, and it gets only lightweight coverage telemetry.
 
-- [ ] **D21** · **AEM structured adapter** — reuse AEM's existing field-spec
-      (`DumAemAttributeSpecification` already carries name / type / multiValued / facet / mandatory,
-      a 1:1 map to `DumStructuredField`) to expose an AEM source as a `DumStructuredSource`:
-      `schema()` wraps the attribute specs, `discover()` delegates to the existing path /
-      QueryBuilder enumeration, `extract(id)` reuses `DumAemAttrProcess` field extraction decoupled
-      from the author/publish job-item pipeline. Author/publish + delta semantics stay intact (the
-      adapter extracts one environment; the loop drives environments). It wraps today's extraction
-      — including a monolithic content-extractor (`DumAemExtModelJsonBase` subclass) — **as-is**, to
-      gain the contract + coverage immediately; **Track H** then redesigns that extraction. Done: an
-      AEM source's coverage/drift + preview work and indexing stays at parity with the legacy
-      author/publish flow.\
-      ↳ **Depends on:** D20. Bridges to Track H.
 - [ ] **D22** · **Assets structured adapter** — declare the Assets fixed field set as schema-as-code
       (`id`, `url`, `title`, `date`, `type` + optional `fileSize` / `fileExtension` / `image`, and
       an optional Tika `content` field), with `discover()` = directory walk returning ids and

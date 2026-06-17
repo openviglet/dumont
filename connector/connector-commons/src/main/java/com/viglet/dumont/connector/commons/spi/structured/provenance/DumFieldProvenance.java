@@ -70,6 +70,14 @@ public record DumFieldProvenance(String strategy, String selector, Double confid
         return new DumFieldProvenance("tabular", locator, null, null);
     }
 
+    /**
+     * An AEM extraction origin (roadmap D21); {@code locator} names the target attribute the value
+     * was extracted into from the content node's JCR properties / component tree.
+     */
+    public static DumFieldProvenance aem(String locator) {
+        return new DumFieldProvenance("aem", locator, null, null);
+    }
+
     /** A value an enricher derived (roadmap D04); {@code name} identifies the enricher. */
     public static DumFieldProvenance enrichment(String name) {
         String suffix = (name == null || name.isBlank()) ? "" : ":" + name.trim();

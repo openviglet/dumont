@@ -79,10 +79,7 @@ add the trust/adoption surface without touching crawl logic, auth, delta, or pol
 `DumStructuredSource` (schema from its declared field config, `discover()` from its id enumeration,
 `extract(id)` from its single-item fetch) so grounding/preview/coverage are inherited, not
 re-implemented — shipped with the **DB pilot (D20)**; see [CHANGELOG.md](CHANGELOG.md). The
-remaining connectors follow it:
-- **AEM (D21)** is ~closest: `DumAemAttributeSpecification` already *is* schema-as-code (1:1 with
-  `DumStructuredField`) and `discoverContentIds()` already exists; the only real work is detaching
-  field extraction (`DumAemAttrProcess`) from the author/publish job-item pipeline.
+remaining connectors follow it (AEM shipped as **D21**; see [CHANGELOG.md](CHANGELOG.md)):
 - **Assets (D22)** has a stable fixed field set to declare; `discover()` is the directory walk and
   `extract(id)` resolves one file.
 - **WC (D23)** is deliberately *not* converted — a generic link-spider has no enumerable typed
@@ -90,9 +87,9 @@ remaining connectors follow it:
   It gets only a lightweight coverage signal off its declared `DumWCAttributeMapping` names, plus a
   documented migration path for structured sites still on WC.
 
-**Touch points.** Per-connector `DumStructuredSource` facades in `aem`/`assets` plugins (DB shipped
-in D20); `discoverContentIds`/`indexById` implemented for Assets (today `UnsupportedOperationException`);
-WC coverage seam reusing D15.
+**Touch points.** Per-connector `DumStructuredSource` facades in the `assets` plugin (DB shipped in
+D20, AEM in D21); `discoverContentIds`/`indexById` implemented for Assets (today
+`UnsupportedOperationException`); WC coverage seam reusing D15.
 
 **Done.** Per task in [ROADMAP.md](ROADMAP.md). Net: AEM/DB/Assets sources index through the
 structured plugin at parity with their legacy paths and gain coverage/drift + preview; WC reports
