@@ -39,7 +39,7 @@ class DumAemStructuredSourceProviderTest {
 
     @BeforeEach
     void setUp() {
-        provider = new DumAemStructuredSourceProvider(null, null, null, null, null, null, false);
+        provider = new DumAemStructuredSourceProvider(null, null, null, null, null, null, null, false);
     }
 
     @Test

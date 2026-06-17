@@ -373,3 +373,14 @@
   it by latest on the next extraction, while a pinned ref stays frozen. Proven by `DumAemRecipeLibraryTest`
   (two institutions index a shared content type via one recipe; a recipe bump re-applies a new field/
   extractor to both; pinned ref unaffected; unregistered binding skipped). ↳ Builds on D24, D25, D19.
+- **D28** — AEM dependency-graph reindex (structured path): editing a shared XF/CF again reindexes every
+  page that embeds it through the structured loop, dropped when D21 moved AEM onto it (published with an
+  empty dependency set). The XF/CF harvest (`getDependencies` over infinity.json + model.json, restricted
+  to `/content/experience-fragments/` and `/content/dam/` roots, dropping renditions/extensions, JCR
+  sub-trees and self-refs) is lifted out of `DumAemJobService` into a shared `DumAemDependencyService`
+  seam (gated by `dumont.dependencies.enabled` + the per-source `dependencyClass`). `DumAemStructuredSource`
+  harvests the set per record during `extract(id)` (from the author payload, parity with the legacy
+  `prepareIndexObject`) and exposes it via `dependencies(id)`; `DumAemPlugin#publish` emits it on the
+  `DumJobItemWithSession` (replacing `Set.of()`), so it persists via `DumConnectorDependency` and resolves
+  through `getObjectIdByDependency`. Proven by `DumAemDependencyServiceTest` (gating + filtering parity).
+  ↳ Builds on D21.

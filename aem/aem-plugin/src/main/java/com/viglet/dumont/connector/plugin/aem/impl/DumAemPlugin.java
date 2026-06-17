@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -188,8 +187,10 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
                     structuredRecord.id(), source.getSourceName(), missing);
             return;
         }
+        // Emit the harvested XF/CF dependency graph (roadmap D28) so editing a shared component
+        // reindexes every embedding page — at parity with the legacy job flow.
         dumConnectorContext.addJobItem(new DumJobItemWithSession(toJobItem(source, structuredRecord),
-                session, Set.of(), false));
+                session, source.dependencies(structuredRecord.id()), false));
         if (snapshot != null) {
             snapshot.add(structuredRecord.id(), structuredRecord.values());
         }

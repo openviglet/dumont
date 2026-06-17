@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +53,7 @@ import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemAttributeSpecification;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemContentDefinitionService;
+import com.viglet.dumont.connector.plugin.aem.service.DumAemDependencyService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemObjectService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSessionService;
@@ -103,6 +105,7 @@ public class DumAemStructuredSource implements DumStructuredSource {
     private final DumAemService aemService;
     private final AemNodeNavigator navigator;
     private final DumAemContentDefinitionService contentDefinitionService;
+    private final DumAemDependencyService dependencyService;
     private final boolean queryBuilderEnabled;
 
     private DumAemSession session;
@@ -113,11 +116,15 @@ public class DumAemStructuredSource implements DumStructuredSource {
     // item. Populated during extract(id) and read back by the plugin in toJobItem.
     private final Map<String, String> checksums = new ConcurrentHashMap<>();
     private final Map<String, Locale> locales = new ConcurrentHashMap<>();
+    // Per-record XF/CF dependency set (roadmap D28): harvested during extract(id) and read back by
+    // the plugin so the structured publish persists the real dependency graph (not Set.of()).
+    private final Map<String, Set<String>> dependencies = new ConcurrentHashMap<>();
 
     public DumAemStructuredSource(DumAemSource source, DumAemEnv environment,
             DumAemSessionService sessionService, DumAemObjectService objectService,
             DumAemService aemService, AemNodeNavigator navigator,
-            DumAemContentDefinitionService contentDefinitionService, boolean queryBuilderEnabled) {
+            DumAemContentDefinitionService contentDefinitionService,
+            DumAemDependencyService dependencyService, boolean queryBuilderEnabled) {
         this.source = source;
         this.environment = environment;
         this.sessionService = sessionService;
@@ -125,6 +132,7 @@ public class DumAemStructuredSource implements DumStructuredSource {
         this.aemService = aemService;
         this.navigator = navigator;
         this.contentDefinitionService = contentDefinitionService;
+        this.dependencyService = dependencyService;
         this.queryBuilderEnabled = queryBuilderEnabled;
     }
 
@@ -165,6 +173,15 @@ public class DumAemStructuredSource implements DumStructuredSource {
     /** The per-record resolved locale captured during {@link #extract(String)} (parity with legacy). */
     public Optional<Locale> locale(String recordId) {
         return Optional.ofNullable(locales.get(recordId));
+    }
+
+    /**
+     * The per-record XF/CF dependencies harvested during {@link #extract(String)} (roadmap
+     * <strong>D28</strong>). Empty when none were collected or dependency indexing is disabled; the
+     * owning plugin persists this set so editing a shared component reindexes every embedding page.
+     */
+    public Set<String> dependencies(String recordId) {
+        return dependencies.getOrDefault(recordId, Set.of());
     }
 
     /**
@@ -296,6 +313,10 @@ public class DumAemStructuredSource implements DumStructuredSource {
         checksums.put(recordId, String.valueOf(contentDefinitionService
                 .getDeltaDate(aemObject, config, aemSession.getContentMapping()).getTime()));
         locales.put(recordId, DumAemCommonsUtils.getLocaleFromAemObject(config, aemObject));
+        // Harvest the XF/CF dependency graph from the author payload (parity with the legacy
+        // DumAemJobService.prepareIndexObject path) so the plugin can persist it on publish (D28).
+        dependencies.put(recordId, dependencyService.collectDependencies(generic, config,
+                aemSession.getContentMapping()));
         return Optional.of(record);
     }
 

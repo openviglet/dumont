@@ -65,7 +65,8 @@ class DumAemStructuredSourceTest {
     }
 
     private DumAemStructuredSource adapter(DumAemSource source, DumAemEnv env) {
-        return new DumAemStructuredSource(source, env, sessionService, null, null, null, null, false);
+        return new DumAemStructuredSource(source, env, sessionService, null, null, null, null, null,
+                false);
     }
 
     @Test

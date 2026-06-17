@@ -141,16 +141,6 @@ This track has no remaining pending tasks.
 > field set + per-page field-presence signal into the D15 history, plus a documented WC → D02
 > migration path).
 
-- [ ] **D28** · **AEM dependency-graph reindex (structured path)** — restore the incremental reindex
-      triggered by a shared component, dropped when D21 moved AEM onto the structured loop (which
-      publishes with an empty dependency set). Reuse the XF/CF harvest today in
-      `DumAemJobService.extractDependencies` + `filterSelfReferences` (paths under
-      `/content/experience-fragments/` and `/content/dam/`, gated by `dumont.dependencies.enabled`),
-      lift it to a reusable seam, and emit the real `Set<String>` from `DumAemPlugin`'s structured
-      `publish` (instead of `Set.of()`) so it persists via `DumConnectorDependency`. Done: editing an
-      XF/CF reindexes every page that embeds it through the structured path, at parity with the legacy
-      flow.\
-      ↳ **Depends on:** D21. Natural harvest point in D24 (component traversal), but not blocking.
 - [ ] **D29** · **Structured `indexById` deindex parity** — the legacy AEM standalone path deindexed a
       targeted id that is missing (404) or a publish item no longer delivered; D21's structured
       `indexById` silently skips it (extract returns empty → no deindex), so a removed/unpublished

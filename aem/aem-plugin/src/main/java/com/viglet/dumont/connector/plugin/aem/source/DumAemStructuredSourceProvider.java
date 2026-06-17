@@ -33,6 +33,7 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePro
 import com.viglet.dumont.connector.plugin.aem.navigator.AemNodeNavigator;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemContentDefinitionService;
+import com.viglet.dumont.connector.plugin.aem.service.DumAemDependencyService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemObjectService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemService;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemSessionService;
@@ -62,12 +63,14 @@ public class DumAemStructuredSourceProvider implements DumStructuredSourceProvid
     private final DumAemService aemService;
     private final AemNodeNavigator navigator;
     private final DumAemContentDefinitionService contentDefinitionService;
+    private final DumAemDependencyService dependencyService;
     private final boolean queryBuilderEnabled;
 
     public DumAemStructuredSourceProvider(DumAemSourceService sourceService,
             DumAemSessionService sessionService, DumAemObjectService objectService,
             DumAemService aemService, AemNodeNavigator navigator,
             DumAemContentDefinitionService contentDefinitionService,
+            DumAemDependencyService dependencyService,
             @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled) {
         this.sourceService = sourceService;
         this.sessionService = sessionService;
@@ -75,6 +78,7 @@ public class DumAemStructuredSourceProvider implements DumStructuredSourceProvid
         this.aemService = aemService;
         this.navigator = navigator;
         this.contentDefinitionService = contentDefinitionService;
+        this.dependencyService = dependencyService;
         this.queryBuilderEnabled = queryBuilderEnabled;
     }
 
@@ -110,6 +114,7 @@ public class DumAemStructuredSourceProvider implements DumStructuredSourceProvid
     /** A structured source bound to one source + environment. */
     public DumAemStructuredSource adapter(DumAemSource source, DumAemEnv environment) {
         return new DumAemStructuredSource(source, environment, sessionService, objectService,
-                aemService, navigator, contentDefinitionService, queryBuilderEnabled);
+                aemService, navigator, contentDefinitionService, dependencyService,
+                queryBuilderEnabled);
     }
 }
