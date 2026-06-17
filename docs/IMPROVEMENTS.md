@@ -23,7 +23,7 @@ originate from the **cursarei → Viglet** migration and pair with Turing **Bloc
 ## Table of contents
 
 - [I. The second bet — adoption & trust on top of ingestion](#i-the-second-bet--adoption--trust-on-top-of-ingestion)
-- [III. AEM extraction model redesign (Track H, D26–D27)](#iii-aem-extraction-model-redesign-track-h-d26d27)
+- [III. AEM extraction model redesign (Track H, D27)](#iii-aem-extraction-model-redesign-track-h-d27)
 - [IX. Cross-cutting decisions & restrictions](#ix-cross-cutting-decisions--restrictions)
 
 ---
@@ -58,7 +58,7 @@ partial degradation visible and the sidecar→native parity gate (D11) measurabl
 manual, and D16 (field-level provenance) made every published field traceable — all shipped,
 completing the trust track. Track F (semantics) follows the RAG maturity on the Turing side.
 
-## III. AEM extraction model redesign (Track H, D26–D27)
+## III. AEM extraction model redesign (Track H, D27)
 
 **Problem.** The AEM connector ships *two* extraction paradigms: a declarative property→field
 mapping (`DumAemPluginModel` → `targetAttr` ← `sourceAttr`) and a code-based content extractor
@@ -82,8 +82,6 @@ real unit is the **content type**, not the source.
 on top of the contract D21 establishes and the content-type model D25 shipped (a template routes to
 a content type with its own `DumStructuredSchema` + extractor composition; coverage/drift read per
 type):
-- **Derivations → enrichers (D26).** The derived fields move to the D04 enrichment chain; the
-  cross-cutting normalizers become shared. Extraction emits only *sourced* fields.
 - **Versioned recipes (D27).** Component extractors + content-type schemas become versioned,
   parameterized artifacts (D19), so one "course-offer" recipe applies across institutions.
 

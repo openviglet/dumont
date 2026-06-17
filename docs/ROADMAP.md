@@ -191,13 +191,6 @@ This track has no remaining pending tasks.
 > layer, it does not rip out the connector). The component shapes recur across institutions, so
 > the endgame ties into the D19 recipe library for multi-tenant reuse.
 
-- [ ] **D26** · **Derivations → enrichment chain** — move the business derivations currently fused
-      into extraction (`inscricaoAberta`, `dateSort`, `preco` aggregation, `dateOfClassesText`
-      formatting, `alphabet`) into D04 enrichers, and the cross-cutting normalizations (timezone,
-      `html2Text`, PT month names) into shared normalizers. Grounding-safe by construction; each rule
-      individually testable and reusable across sources. Done: `extract(id)` emits only *sourced*
-      fields; every derived field is produced by a named enricher in the chain.\
-      ↳ **Depends on:** D25, D04.
 - [ ] **D27** · **Versioned AEM recipes** — promote component extractors + content-type schemas to
       first-class **versioned, parameterized artifacts** (the D19 recipe library), so the same
       "course-offer" recipe applies across institutions (Insper, cursarei federals) with only

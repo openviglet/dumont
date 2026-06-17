@@ -71,6 +71,18 @@ public final class DumNormalizationEnricher implements DumEnricher {
                 value -> Optional.ofNullable(table.get(value)));
     }
 
+    /**
+     * A free-function enricher: each source value runs through {@code mapping}, which returns
+     * {@link Optional#empty()} for any value it cannot ground. The shape behind the shared
+     * normalizers — e.g. {@code transform("alphabet", "title", "alphabet", DumTextNormalizers::firstLetter)}
+     * or {@code transform("html2Text", "bodyHtml", "body", DumTextNormalizers::htmlToText)} — so a
+     * derived/normalized field becomes a named enricher with no bespoke class.
+     */
+    public static DumNormalizationEnricher transform(String name, String sourceField,
+            String targetField, Function<String, Optional<String>> mapping) {
+        return new DumNormalizationEnricher(name, sourceField, targetField, mapping);
+    }
+
     @Override
     public String name() {
         return name;

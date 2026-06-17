@@ -344,3 +344,17 @@
   `DumAemExtSampleModelJson` migrated to `article`/`event` content types. Tests:
   `DumAemContentTypeRoutingTest`, `DumContentTypeCoverageRecorderTest`, `DumAemStructuredSourceTest`
   (union schema). ↳ Builds on D24.
+- **D26** — Derivations → enrichment chain: the business derivations the AEM god-class fused into
+  extraction become reusable, named D04 enrichers, so `extract(id)` emits only *sourced* fields and
+  every derived field is produced by a named enricher. connector-commons `…structured.enrich` gains
+  `DumDistinctValuesEnricher` (`preco` aggregation), `DumBooleanAnyEnricher` (`inscricaoAberta`),
+  `DumEarliestDateEnricher` (`dateSort`, future-boundary from an injected clock), `DumDateRangeTextEnricher`
+  (`dateOfClassesText`), plus `DumNormalizationEnricher.transform(...)` for `alphabet` via the shared
+  normalizers. The cross-cutting normalizations move to a stateless `…structured.normalize` package:
+  `DumTextNormalizers` (accent-folded first letter, HTML→text over the connector's single Jsoup impl)
+  and `DumDateNormalizers` (PT month abbreviations, zone-aware start-of-day, date-range label) — pure
+  `Optional`-returning functions, so an un-normalizable input grounds away. Each rule is individually
+  unit-tested (`DumTextNormalizersTest`, `DumDateNormalizersTest`, `DumDerivationEnrichersTest`), the
+  latter including a full-chain reference proving the five derivations come only from named enrichers
+  (provenance `enrichment:<name>`). The Insper plugin (separate repo) composes these into its chain.
+  ↳ Builds on D25, D04.
