@@ -119,21 +119,6 @@ This track has no remaining pending tasks.
 > normalization. All grounding-safe: enrichment may normalize / classify / derive, **never**
 > fabricate a sourced attribute.
 
-- [ ] **D17** · **Embedding-quality for structured content** — Turing *already* embeds at index
-      time on the path Dumont uses (`POST /api/sn/import` → `TurSNGenAi.addDocuments`, when the
-      target SN site has RAG enabled), so generating vectors in Dumont buys nothing. The real gap
-      is that Turing's partitioner (`partitionFields`) is hardcoded by field name — `title`→header,
-      `abstract`+`text`→body, short simple fields→header/facets, **complex/long non-standard fields
-      dropped from the embedding body**. So a structured source whose meaningful content lives in
-      custom-named or non-simple fields embeds poorly or not at all. This task makes structured
-      content embed *well*: (a) a recipe-level mapping so a source's semantic content lands in the
-      fields the partitioner recognizes; (b) surface in Dumont whether the target SN site has RAG
-      enabled/bound (so a misconfigured site is caught, not silently keyword-only); (c) document
-      the header/body/metadata partition contract so recipes target it deliberately. Done: a
-      structured source with non-standard field names indexes such that its meaningful content
-      reaches the embedding body (verified via Turing's RAG chunk debug log / retrieval), and the
-      RAG-enabled state of the target site is visible in Dumont.\
-      ↳ **Depends on:** D04, D16. Pairs with Turing **Block R** / `RAG_HYBRID_CONFIG.md`.
 - [ ] **D18** · **Cross-source entity resolution & dedup** — collapse the same real-world
       entity arriving from multiple sources/URLs (the same course across institution mirrors,
       one item under canonical + tracking URLs) to a **canonical id**, with a grounding-safe

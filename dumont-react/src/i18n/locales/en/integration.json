@@ -334,6 +334,23 @@
       "failedConnect": "Failed to connect to the summary service. Please try again.",
       "regenerate": "Regenerate"
     },
+    "ragStatus": {
+      "checking": "Checking RAG…",
+      "enabled": "RAG enabled",
+      "disabled": "RAG disabled",
+      "reason": {
+        "NONE": "RAG is fully wired — documents indexed to this site are embedded for semantic/hybrid search.",
+        "NO_GENAI": "This site has no GenAI configuration. Documents will be keyword-only, never embedded.",
+        "NO_AGENT": "The GenAI configuration has no AI agent linked. Documents will be keyword-only.",
+        "AGENT_DISABLED": "The site's AI agent is disabled. Documents will be keyword-only.",
+        "RAG_DISABLED": "RAG is turned off on the site's AI agent. Documents will be keyword-only.",
+        "MISSING_LLM": "The AI agent has no LLM configured. Documents will be keyword-only.",
+        "MISSING_EMBEDDING": "The AI agent has no embedding model configured — documents cannot be embedded.",
+        "MISSING_STORE": "The AI agent has no vector store configured — embeddings have nowhere to go.",
+        "UNREACHABLE": "Could not reach Turing to check RAG status.",
+        "UNKNOWN": "RAG status is unknown for this site."
+      }
+    },
     "coverage": {
       "title": "Field Coverage & Drift",
       "description": "Per-field coverage across runs and drift alerts when a field's coverage drops sharply — the signal of a layout or selector break.",

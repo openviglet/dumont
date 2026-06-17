@@ -28,18 +28,21 @@ import com.viglet.turing.commons.se.field.TurSEFieldType;
  * strings around. The declaration maps directly to a Turing {@link TurSNJobAttributeSpec}, so the
  * schema is published alongside the document and the indexing side knows the field shape up front.
  *
- * @param name        the field name as it appears in the indexed document (required)
- * @param type        the search-engine field type (defaults to {@link TurSEFieldType#STRING})
- * @param multiValued whether the field may hold more than one value
- * @param facet       whether the field is exposed as a facet
- * @param mandatory   whether a record without this field is invalid (skipped, never fabricated)
- * @param description an optional human-readable description
+ * @param name          the field name as it appears in the indexed document (required)
+ * @param type          the search-engine field type (defaults to {@link TurSEFieldType#STRING})
+ * @param multiValued   whether the field may hold more than one value
+ * @param facet         whether the field is exposed as a facet
+ * @param mandatory     whether a record without this field is invalid (skipped, never fabricated)
+ * @param description   an optional human-readable description
+ * @param embeddingRole the field's role in Turing's index-time embedding (defaults to
+ *                      {@link DumEmbeddingRole#NONE}); a non-{@code NONE} role projects the field's
+ *                      value onto the canonical key Turing's RAG partitioner reads
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
 public record DumStructuredField(String name, TurSEFieldType type, boolean multiValued,
-        boolean facet, boolean mandatory, String description) {
+        boolean facet, boolean mandatory, String description, DumEmbeddingRole embeddingRole) {
 
     public DumStructuredField {
         if (name == null || name.isBlank()) {
@@ -47,6 +50,9 @@ public record DumStructuredField(String name, TurSEFieldType type, boolean multi
         }
         if (type == null) {
             type = TurSEFieldType.STRING;
+        }
+        if (embeddingRole == null) {
+            embeddingRole = DumEmbeddingRole.NONE;
         }
     }
 
@@ -63,6 +69,24 @@ public record DumStructuredField(String name, TurSEFieldType type, boolean multi
     /** A multi-valued, faceted {@link TurSEFieldType#STRING} field. */
     public static DumStructuredField facet(String name) {
         return builder(name).type(TurSEFieldType.STRING).multiValued(true).facet(true).build();
+    }
+
+    /**
+     * A {@link TurSEFieldType#TEXT} field that is the document's primary heading — projected onto
+     * Turing's {@code title} so the embedding chunk header carries the document identity.
+     */
+    public static DumStructuredField title(String name) {
+        return builder(name).type(TurSEFieldType.TEXT)
+                .embeddingRole(DumEmbeddingRole.TITLE).build();
+    }
+
+    /**
+     * A {@link TurSEFieldType#TEXT} field holding long-form content — projected onto Turing's
+     * {@code text} so it reaches the embedded body even under a non-standard field name.
+     */
+    public static DumStructuredField body(String name) {
+        return builder(name).type(TurSEFieldType.TEXT)
+                .embeddingRole(DumEmbeddingRole.BODY).build();
     }
 
     public static Builder builder(String name) {
@@ -88,6 +112,7 @@ public record DumStructuredField(String name, TurSEFieldType type, boolean multi
         private boolean facet;
         private boolean mandatory;
         private String description;
+        private DumEmbeddingRole embeddingRole = DumEmbeddingRole.NONE;
 
         private Builder(String name) {
             this.name = name;
@@ -118,8 +143,14 @@ public record DumStructuredField(String name, TurSEFieldType type, boolean multi
             return this;
         }
 
+        public Builder embeddingRole(DumEmbeddingRole embeddingRole) {
+            this.embeddingRole = embeddingRole;
+            return this;
+        }
+
         public DumStructuredField build() {
-            return new DumStructuredField(name, type, multiValued, facet, mandatory, description);
+            return new DumStructuredField(name, type, multiValued, facet, mandatory, description,
+                    embeddingRole);
         }
     }
 }

@@ -23,6 +23,7 @@ layer (it crawls/ingests content from external sources and publishes it into
 | [CHANGELOG.md](CHANGELOG.md) | Shipped ledger — one line per shipped `D##` task (what + where + commit) | See what already shipped |
 | [IMPROVEMENTS.md](IMPROVEMENTS.md) | Design rationale per active `D##` task | Implement the "how" |
 | [STRUCTURED_VS_TRADITIONAL.md](STRUCTURED_VS_TRADITIONAL.md) | Conceptual reference: the two ways to model a source, when to use each, market direction | Understand the structured-source bet in depth |
+| [EMBEDDING_PARTITION_CONTRACT.md](EMBEDDING_PARTITION_CONTRACT.md) | Reference: how structured content reaches Turing's index-time embedding, and the `DumEmbeddingRole` field-projection contract (D17) | Declare a schema whose content must embed well |
 
 ## Workflow
 

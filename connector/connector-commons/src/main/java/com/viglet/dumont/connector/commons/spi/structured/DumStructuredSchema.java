@@ -99,6 +99,16 @@ public final class DumStructuredSchema {
             return field(DumStructuredField.facet(name));
         }
 
+        /** A {@code TEXT} field projected onto Turing's {@code title} for the embedding header. */
+        public Builder title(String name) {
+            return field(DumStructuredField.title(name));
+        }
+
+        /** A {@code TEXT} field projected onto Turing's {@code text} for the embedded body. */
+        public Builder body(String name) {
+            return field(DumStructuredField.body(name));
+        }
+
         public DumStructuredSchema build() {
             if (fields.isEmpty()) {
                 throw new IllegalStateException("A structured schema must declare at least one field");

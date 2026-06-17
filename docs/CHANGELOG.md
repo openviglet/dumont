@@ -170,3 +170,18 @@
   (`dum_provenance_run`) persists the series per source; `DumConnectorMonitoringApi` exposes
   `provenance/{source}` and `provenance/{source}/last-seen`. Proven by
   `DumStructuredProvenancePluginTest`. Pairs with Turing **Block R** (citation / grounding).
+
+## Track F — Enrichment & semantics
+
+- **D17** — Embedding-quality for structured content (not re-embedding in Dumont): Turing already
+  embeds at index time on the path Dumont uses (`POST /api/sn/import` → `TurSNGenAi.addDocuments`,
+  when the site has RAG enabled), but its `partitionFields` only reads the canonical keys
+  `title`/`abstract`/`text` — so content under custom field names embeds poorly. (a) `connector-commons`
+  `DumEmbeddingRole` (NONE/TITLE/SUMMARY/BODY) on `DumStructuredField` + `DumStructuredSchema.title()`/
+  `body()`; `DumStructuredSourcePlugin.toJobItem` **projects** a role-bearing field's value onto the
+  canonical key (grounding-safe — present-only, `putIfAbsent` so the source wins, original field kept,
+  no spec needed as the targets are core SN fields). (b) `connector-app` `DumConnectorGenAiStatusApi`
+  (`GET /api/v2/connector/genai-status/{site}`) proxies Turing's `chat/enabled` (degrades to
+  `UNREACHABLE`, never a false green); `dumont-react` `RagStatusBadge` flags non-RAG sites in the
+  source form. (c) `docs/EMBEDDING_PARTITION_CONTRACT.md` documents the contract. Proven by
+  `DumEmbeddingProjectionTest` + `DumConnectorGenAiStatusApiTest`. ↳ Builds on D04, D16.

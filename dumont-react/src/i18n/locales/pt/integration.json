@@ -334,6 +334,23 @@
       "failedConnect": "Falha ao conectar ao serviço de resumo. Tente novamente.",
       "regenerate": "Regenerar"
     },
+    "ragStatus": {
+      "checking": "Verificando RAG…",
+      "enabled": "RAG ativo",
+      "disabled": "RAG inativo",
+      "reason": {
+        "NONE": "RAG totalmente configurado — documentos indexados neste site são vetorizados para busca semântica/híbrida.",
+        "NO_GENAI": "Este site não tem configuração de GenAI. Os documentos ficarão apenas em busca por palavra-chave, sem embedding.",
+        "NO_AGENT": "A configuração de GenAI não tem agente de IA vinculado. Os documentos ficarão apenas em busca por palavra-chave.",
+        "AGENT_DISABLED": "O agente de IA do site está desativado. Os documentos ficarão apenas em busca por palavra-chave.",
+        "RAG_DISABLED": "O RAG está desligado no agente de IA do site. Os documentos ficarão apenas em busca por palavra-chave.",
+        "MISSING_LLM": "O agente de IA não tem LLM configurado. Os documentos ficarão apenas em busca por palavra-chave.",
+        "MISSING_EMBEDDING": "O agente de IA não tem modelo de embedding configurado — os documentos não podem ser vetorizados.",
+        "MISSING_STORE": "O agente de IA não tem vector store configurado — os embeddings não têm onde ser gravados.",
+        "UNREACHABLE": "Não foi possível contatar o Turing para verificar o status do RAG.",
+        "UNKNOWN": "O status do RAG é desconhecido para este site."
+      }
+    },
     "coverage": {
       "title": "Cobertura de Campos & Desvio",
       "description": "Cobertura por campo entre execuções e alertas de desvio quando a cobertura de um campo cai bruscamente — o sinal de uma quebra de layout ou seletor.",

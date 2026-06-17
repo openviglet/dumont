@@ -26,6 +26,7 @@ import {
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { RagStatusBadge } from "../rag-status-badge";
 import { DialogDelete } from "../dialog.delete";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientButton } from "../ui/gradient-button";
@@ -375,6 +376,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                           <FormControl>
                             <Input {...field} placeholder="author-site" type="text" />
                           </FormControl>
+                          <RagStatusBadge integrationId={integrationId} siteName={field.value} />
                           <FormDescription>{t("forms.integrationSource.authorSnSite")}</FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -438,6 +440,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                           <FormControl>
                             <Input {...field} placeholder="publish-site" type="text" />
                           </FormControl>
+                          <RagStatusBadge integrationId={integrationId} siteName={field.value} />
                           <FormDescription>{t("forms.integrationSource.publishSnSite")}</FormDescription>
                           <FormMessage />
                         </FormItem>

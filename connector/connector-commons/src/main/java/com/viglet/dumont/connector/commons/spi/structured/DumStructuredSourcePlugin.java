@@ -240,6 +240,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     protected TurSNJobItem toJobItem(DumStructuredSource source, DumStructuredRecord record) {
         Map<String, Object> attributes = new HashMap<>(record.values());
         attributes.putIfAbsent(TurSNFieldName.ID, record.id());
+        projectEmbeddingFields(source.schema(), attributes);
         List<TurSNJobAttributeSpec> specs = new ArrayList<>(source.schema().toAttributeSpecs());
         DumProvenance.contribute(source.getSourceName(), record, attributes, specs);
         return new TurSNJobItem(TurSNJobAction.CREATE,
@@ -247,6 +248,39 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 source.getLocale(),
                 attributes,
                 specs);
+    }
+
+    /**
+     * Roadmap <strong>D17</strong>: project fields that declare an {@link DumEmbeddingRole} onto the
+     * canonical Turing keys ({@code title}/{@code abstract}/{@code text}) that the RAG partitioner
+     * reads, so a source whose semantic content lives under custom field names still embeds well at
+     * Turing's index time. The canonical keys are core SN fields, so no extra attribute spec is
+     * needed — only the value is projected.
+     *
+     * <p>
+     * Grounding-safe by construction: only a present value is copied ({@code record.values()} has
+     * already dropped blanks); an explicitly-supplied canonical key always wins ({@code putIfAbsent});
+     * and when the schema declares the canonical field itself the mapping is 1:1, so projection is
+     * skipped. The source field is kept as-is for display/facets — nothing is renamed or fabricated.
+     * If two fields claim the same role, the first declared wins. The contract is documented in
+     * {@code docs/EMBEDDING_PARTITION_CONTRACT.md}.
+     */
+    private static void projectEmbeddingFields(DumStructuredSchema schema,
+            Map<String, Object> attributes) {
+        for (DumStructuredField field : schema.fields()) {
+            DumEmbeddingRole role = field.embeddingRole();
+            if (!role.projects()) {
+                continue;
+            }
+            String target = role.targetAttribute().orElseThrow();
+            if (schema.hasField(target)) {
+                continue;
+            }
+            Object value = attributes.get(field.name());
+            if (value != null) {
+                attributes.putIfAbsent(target, value);
+            }
+        }
     }
 
     private DumConnectorSession newSession(DumStructuredSource source) {
