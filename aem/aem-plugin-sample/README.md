@@ -1,245 +1,180 @@
 # Dumont AEM Plugin Sample
 
-This is a sample implementation of the Dumont AEM Connector Plugin that demonstrates how to create custom extensions for Adobe Experience Manager (AEM) content indexing and search integration with Viglet Dumont.
+A working, end-to-end example of a Dumont AEM connector plugin built on the
+**structured-source architecture**. It shows how a plugin author declares a typed,
+per-content-type schema and a set of composable extractors for Adobe Experience Manager
+(AEM), packaged as a [PF4J](https://pf4j.org) plugin and indexed into Viglet Dumont.
 
-## Overview
+## How it fits the structured-source architecture
 
-The AEM Plugin Sample provides a working example of how to:
-- Extend AEM content indexing capabilities
-- Implement custom content processors for AEM fragments
-- Configure delta indexing for incremental content updates
-- Set up AEM-to-Dumont integration with the WKND sample site
+Dumont indexes a *structured source* with one generic loop — **discover → extract → ground →
+publish** — implemented once by the framework (`DumStructuredSourcePlugin`). For AEM that loop
+is driven by the framework's `DumAemStructuredSource` adapter: it discovers content paths,
+fetches each `infinity.json`, and turns it into a schema-bound `DumStructuredRecord` that the
+loop grounds (mandatory-field check, no fabricated values) and publishes to Turing.
 
-## What This Sample Includes
+A plugin author **does not** re-implement that loop. Instead this sample supplies only the
+AEM-specific pieces the adapter calls into:
 
-### Core Components
+- **The schema** — declared as typed fields, grouped into **content types**.
+- **The extraction logic** — small **component extractors** that read AEM `model.json` and
+  contribute attribute values, composed per content type.
+- **Per-source hooks** — delta date (incremental indexing) and dependency selection.
 
-- **Custom Extensions**: Sample implementations of AEM extension interfaces
-  - `DumAemExtSampleDeltaDate`: Handles delta date processing for incremental indexing
-  - `DumAemExtSampleModelJson`: Processes AEM content fragments and model JSON data
+Because the schema is declared as code, every published document carries its field spec, and
+the framework enforces grounding for free.
 
-- **Configuration**: Pre-configured setup for the WKND sample site
-  - Source configuration with AEM author/publish endpoints
-  - Attribute mappings for content indexing
-  - Locale-specific path configurations
+## What this sample includes
 
-- **Scripts**: Automated build and deployment scripts
-  - Build automation with Maven and Ant
-  - Runtime configuration for different environments
-  - Ready-to-run connector setup
+### Content types & schema (`DumAemExtSampleModelJson`)
 
-### Sample Data Model
+`DumAemExtSampleModelJson` extends `DumAemExtModelJsonBase<DumAemSampleModel>` and is the
+entry point for `model.json` extraction. It declares two **content types** — each owning its
+own schema (typed `DumAemContentTypeField`s) and its own extractor composition:
 
-The sample includes a `DumAemSampleModel` bean that demonstrates how to handle AEM content fragments with custom properties like `fragmentPath`.
+| Content type | Mandatory | Notable fields | Extractors |
+|--------------|-----------|----------------|------------|
+| `article`    | `pageTitle` | description, language, template, paragraphs, texts | Page, Paragraph, Text |
+| `event`      | `pageTitle` | description, template, images, content-fragment titles/models/elements | Page, Image, ContentFragment |
+
+AEM templates are routed to a content type through the alias map in `templateNameAliases()`
+(`news`/`blog`/`article` → `article`, `event` → `event`). `extract(id)` runs only the matched
+type's extractor composition and binds the record to that type's schema. A page whose template
+maps to no declared type falls back to the flat `componentExtractors()` list.
+
+### Component extractors (`DumAemComponentExtractor`)
+
+Each extractor handles a single concern and contributes to the shared `DumAemAttrMap`. They
+all walk the same nested `:items` tree via the `DumAemSampleItems` helper (recursion +
+HTML-stripping), so each stays a small single-responsibility unit:
+
+- `DumAemSamplePageExtractor` — page-level fields (title, description, language, template,
+  last-modified) from the model root.
+- `DumAemSampleParagraphExtractor` — HTML-stripped paragraphs from every item.
+- `DumAemSampleTextExtractor` — HTML-stripped `text` from every item.
+- `DumAemSampleImageExtractor` — non-blank image `src` values.
+- `DumAemSampleContentFragmentExtractor` — titles, models, and element values from
+  `contentfragment` items.
+
+### Per-source hooks
+
+- `DumAemExtSampleDeltaDate` (`DumAemExtDeltaDateInterface`) — supplies the delta date used for
+  incremental (delta) indexing; here, the AEM last-modified timestamp.
+- `DumAemExtSampleDependency` (`DumAemExtDependencyInterface`) — a business rule deciding whether
+  a page's `/content` dependencies are collected and reverse-indexed; here, FAQ pages opt out.
+- `DumAemExtSampleContentTitle` (`DumAemExtAttributeInterface`) — a per-attribute extractor
+  wired by `className` in the source config, illustrating the attribute-level extension point.
+
+### Data model (`DumAemSampleModel`)
+
+A Jackson-mapped bean for AEM `model.json`: page-level properties plus the nested
+`:items` / `:elements` tree the component extractors traverse.
+
+### Configuration & scripts
+
+A pre-configured WKND source (`scripts/wknd/export/wknd.json`) and build/run scripts
+(`compile-and-run.cmd`, `run.cmd`, Ant `build.xml`) that package the plugin and launch the
+connector.
 
 ## Prerequisites
 
-Before deploying this sample, ensure you have:
-
 1. **Java 21+** ☕
 2. **Maven 3.6+** 📦
-3. **Apache Ant** (for build scripts) 🐜
+3. **Apache Ant** (for the build scripts) 🐜
 4. **Adobe Experience Manager 6.5+** running locally or remotely
 5. **Viglet Dumont** server running and accessible
 6. **AEM WKND Sample Site** (recommended for testing)
 
-## Quick Start
+## Quick start
 
-### 1. Clone and Build
+### 1. Build and run
 
 ```bash
-# Navigate to the sample directory
-cd dumont-aem/aem-plugin-sample
+# From the sample directory
+cd aem/aem-plugin-sample
 
-# Build the sample using the provided script
+# Clean, compile, package, copy JARs to dist/, and launch the connector
 compile-and-run.cmd
 ```
 
-This will:
-- Clean and compile the Maven project
-- Package the sample plugin
-- Copy required JARs to the distribution directory
-- Launch the connector
-
-### 2. Manual Build Process
-
-If you prefer to build manually:
+### 2. Manual build
 
 ```bash
 # Build the sample plugin
 ./mvnw clean install package
 
-# Build using Ant (creates dist/wknd directory)
+# Assemble the distribution (creates dist/wknd)
 ant wknd
 
-# Navigate to the distribution directory
-cd dist/wknd
-
 # Run the connector
+cd dist/wknd
 run.cmd
 ```
 
 ## Configuration
 
-### Environment Configuration
+### AEM source configuration
 
-Edit `scripts/wknd/env.cmd` to configure your environment:
+The sample ships a pre-configured WKND source in `scripts/wknd/export/wknd.json`. Key fields:
 
-```batch
-set TURING_URL=http://localhost:2700
-set TURING_API_KEY=your_api_key_here
-```
-
-### AEM Source Configuration
-
-The sample includes a pre-configured WKND source in `scripts/wknd/export/wknd.json`:
-
-```json
-{
-  "sources": [
-    {
-      "name": "WKND",
-      "endpoint": "http://localhost:4502",
-      "username": "admin",
-      "password": "admin",
-      "rootPath": "/content/wknd",
-      "contentType": "cq:Page",
-      "authorSNSite": "wknd-author",
-      "publishSNSite": "wknd-publish"
-    }
-  ]
-}
-```
-
-### Key Configuration Parameters
-
-| Parameter | Description | Default Value |
-|-----------|-------------|---------------|
+| Field | Purpose | Sample value |
+|-------|---------|--------------|
 | `endpoint` | AEM instance URL | `http://localhost:4502` |
-| `username` | AEM admin username | `admin` |
-| `password` | AEM admin password | `admin` |
-| `rootPath` | Content root path to index | `/content/wknd` |
-| `authorURLPrefix` | Author instance URL prefix | `http://localhost:4502` |
-| `publishURLPrefix` | Publish instance URL prefix | `https://wknd.site` |
+| `username` / `password` | AEM credentials | `admin` / `admin` |
+| `rootPath` | Content root to discover | `/content/wknd` |
+| `contentType` | JCR type to index | `cq:Page` |
+| `authorSNSite` / `publishSNSite` | Target Turing SN sites | `wknd-author` / `wknd-publish` |
+| `deltaClass` | Delta-date extension | `…sample.ext.DumAemExtSampleDeltaDate` |
+| `dependencyClass` | Dependency-selection extension | `…sample.ext.DumAemExtSampleDependency` |
+| `models[].className` | `model.json` extractor (content types) | `…sample.ext.DumAemExtSampleModelJson` |
 
-## Deployment
+The `attributes` block declares the source-level field specs (id, title, tags, type, dates,
+site, url, …). The framework builds the published schema as the **union** of these specs and
+the fields declared by the content types, so both contribute to the schema that travels with
+every document.
 
-### Option 1: Using Build Scripts
+## Creating your own plugin
 
-1. **Configure environment variables** in `scripts/wknd/env.cmd`
-2. **Run the automated build and deployment**:
-   ```cmd
-   compile-and-run.cmd
-   ```
+Use this sample as the template:
 
-### Option 2: Manual Deployment
-
-1. **Build the project**:
-   ```bash
-   ./mvnw clean install package
-   ```
-
-2. **Create distribution directory**:
-   ```bash
-   mkdir -p dist/wknd/libs
-   ```
-
-3. **Copy required files**:
-   ```bash
-   # Copy sample plugin
-   cp target/aem-plugin-sample.jar dist/wknd/libs/
-   
-   # Copy AEM plugin
-   cp ../aem-plugin/target/aem-plugin.jar dist/wknd/libs/
-   
-   # Copy connector application
-   cp ../../dumont-connector/connector-app/target/dumont-connector.jar dist/wknd/
-   
-   # Copy scripts
-   cp -r scripts/wknd/* dist/wknd/
-   ```
-
-4. **Run the connector**:
-   ```bash
-   cd dist/wknd
-   java -Dloader.path=libs \
-        -Ddumont.url=http://localhost:2700 \
-        -Ddumont.apiKey=your_api_key \
-        -Dspring.h2.console.enabled=true \
-        -jar dumont-connector.jar
-   ```
-
-## Usage
-
-### Starting the Connector
-
-Once deployed, start the connector with:
-
-```cmd
-cd dist/wknd
-run.cmd
-```
-
-The connector will:
-1. Load the sample plugin extensions
-2. Connect to your AEM instance
-3. Connect to Dumont server
-4. Start indexing content from the configured root path
-
-### Custom Extensions
-
-To create your own extensions:
-
-1. **Implement the required interfaces**:
-   - `DumAemExtContentInterface` for content processing
-   - `DumAemExtDeltaDateInterface` for delta indexing
-
-2. **Add your extension classes to the configuration**:
-   ```json
-   {
-     "deltaClass": "com.your.package.YourDeltaExtension",
-     "attributes": [
-       {
-         "className": "com.your.package.YourContentExtension"
-       }
-     ]
-   }
-   ```
+1. **Model your `model.json`** as a Jackson bean (cf. `DumAemSampleModel`).
+2. **Declare content types** by extending `DumAemExtModelJsonBase<YourModel>`: list each
+   `DumAemContentType` with its `DumAemContentTypeField`s and its extractor composition, and
+   map your AEM templates to those types in `templateNameAliases()`.
+3. **Write component extractors** implementing `DumAemComponentExtractor<YourModel>`, one per
+   concern, each contributing to the `DumAemAttrMap`.
+4. **(Optional) add per-source hooks** — `DumAemExtDeltaDateInterface` for delta indexing,
+   `DumAemExtDependencyInterface` for dependency selection, `DumAemExtAttributeInterface` for
+   attribute-level extraction.
+5. **Package as a PF4J plugin** — the `Plugin-Class` manifest entry points at your `Plugin`
+   subclass (cf. `DumAemSamplePlugin`); `@Extension`-annotated classes are auto-registered.
+6. **Reference your classes** from the source config (`deltaClass`, `dependencyClass`,
+   `models[].className`, attribute `className`).
 
 ## Troubleshooting
 
-### Common Issues
+**Connection refused to AEM** — verify AEM is running at the configured `endpoint` and the
+credentials are correct.
 
-**Q: Connection refused to AEM**
-A: Verify AEM is running and accessible at the configured endpoint. Check username/password.
+**Dumont API key invalid** — ensure the API key is correct and the Dumont server is running.
 
-**Q: Dumont API key invalid**
-A: Ensure your API key is correct in `env.cmd` and that Dumont server is running.
+**No content indexed** — check that `rootPath` exists in AEM and contains pages of the
+configured `contentType`.
 
-**Q: No content being indexed**
-A: Check that the `rootPath` exists in AEM and contains the specified `contentType`.
+**A record is skipped** — the framework grounds every record: a record missing a content
+type's **mandatory** field (e.g. `pageTitle`) is logged and skipped rather than published with
+a fabricated value.
 
-**Q: Build fails**
-A: Ensure Java 21+ is installed and `JAVA_HOME` is set correctly.
+**Build fails** — ensure Java 21+ is installed and `JAVA_HOME` is set.
 
-### Debugging
+Enable debug logging with:
 
-Enable debug logging by adding to your run command:
 ```bash
 -Dlogging.level.com.viglet.dumont=DEBUG
 ```
 
-### Support
+## Support
 
 - 📋 [GitHub Discussions](https://github.com/openviglet/dumont/discussions)
 - 🐛 [Report Issues](https://github.com/openviglet/dumont/issues)
 - 📖 [Main Documentation](../../README.adoc)
-
-## Next Steps
-
-1. **Explore the code**: Review the extension implementations in `src/main/java`
-2. **Customize configuration**: Modify `wknd.json` for your specific AEM setup
-3. **Create custom extensions**: Implement your own content processors
-4. **Test with real content**: Replace WKND with your actual AEM content structure
-
-This sample provides a foundation for building production-ready AEM-to-Dumont integrations. Customize the extensions and configuration to match your specific content models and indexing requirements.
