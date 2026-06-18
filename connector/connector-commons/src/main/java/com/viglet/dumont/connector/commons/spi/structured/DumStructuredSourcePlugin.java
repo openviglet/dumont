@@ -150,6 +150,17 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     /** The provider that resolves this plugin's configured structured sources. */
     protected abstract DumStructuredSourceProvider provider();
 
+    /**
+     * Degree of bounded-concurrency extraction used by {@link #indexAll(String)} (roadmap
+     * <strong>D31</strong>). The default {@code 1} extracts sequentially — every adapter is unchanged.
+     * An HTTP-heavy adapter (AEM, where {@code extract(id)} is one {@code infinity.json} fetch)
+     * overrides this so extraction runs on a bounded pool; the publish + coverage/provenance capture
+     * stays serial, so the speed-up is grounding/coverage-neutral. See {@link DumBoundedExtraction}.
+     */
+    protected int extractionConcurrency() {
+        return 1;
+    }
+
     @Override
     public String getProviderName() {
         return provider().getProviderName();
@@ -216,8 +227,14 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // Per content-type coverage/provenance (D25): a typed source buckets each record by its
             // resolved content type so drift reads per type, additively to the source-level series.
             DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
-            structuredSource.discover().forEach(contentId -> indexOne(structuredSource, contentId,
-                    session, snapshot, provenance, byType));
+            // Bounded-concurrency extraction (roadmap D31): extract(id) may run on a small pool while
+            // the consumer below — publish + snapshot/coverage/provenance capture — stays serial on
+            // this thread, so capture remains single-threaded and order-independent. Default
+            // extractionConcurrency() == 1 keeps every adapter sequential.
+            DumBoundedExtraction.extractEach(structuredSource, structuredSource.discover(),
+                    extractionConcurrency(),
+                    record -> publish(structuredSource, enrichmentChain.apply(structuredSource, record),
+                            session, snapshot, provenance, byType));
             dumConnectorContext.finishIndexing(session, false);
             DumPreviewSnapshot baseline = snapshot.build();
             previewSnapshotStore.save(source, baseline);

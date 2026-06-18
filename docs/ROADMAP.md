@@ -103,7 +103,18 @@ This track has no remaining pending tasks.
 > `dum_provenance` attribute; per-source last-seen history so a dropped field stays auditable).
 > Complements D09.
 
-This track has no remaining pending tasks.
+- [ ] **D33** · **Safe finish on a partial / interrupted structured run** *(trust)* — `indexAll` on the
+      structured loop runs the tracking-driven deindex sweep via `finishIndexing(session, false)` even
+      when extraction aborted partway (pool/JVM shutdown → `DumBoundedExtraction` breaks on interrupt; or
+      an exception escapes the per-environment loop), so every id not yet extracted is treated as
+      *removed* and deindexed — a transient interruption can wipe valid documents. Generalize D09's
+      zero-yield safe-run to the structured path: when a run did not complete its discovered id set
+      (interrupted / aborted), finish *standalone* so the destructive sweep is skipped and the prior
+      index survives. Touch points: `DumBoundedExtraction` (surface "completed all vs interrupted"),
+      `DumStructuredSourcePlugin#indexAll`, `DumAemPlugin#indexAllEnvironments`. Done: an interrupted
+      `indexAll` keeps the previously indexed documents (no spurious deindex); a clean run still
+      deindexes stale content as today.\
+      ↳ **Depends on:** D31. Complements D09.
 
 ## Track F — Enrichment & semantics (the differentiator)
 
@@ -141,15 +152,18 @@ This track has no remaining pending tasks.
 > field set + per-page field-presence signal into the D15 history, plus a documented WC → D02
 > migration path).
 
-- [ ] **D31** · **Parallel extraction for HTTP-heavy structured sources** *(perf)* — the legacy AEM
-      navigator parallelised tree traversal (`dumont.reactive.indexing`); the shared structured loop
-      (`DumStructuredSourcePlugin`) extracts ids sequentially, and since AEM `extract(id)` is one
-      infinity.json fetch per item, a large site indexes markedly slower. Add bounded-concurrency
-      extraction to the structured loop (framework-level, reused by every adapter; one HTTP fetch per
-      id makes AEM the first beneficiary), preserving ordering-independent grounding/coverage capture.
-      Done: a large AEM source indexes through the structured loop within the legacy reactive path's
-      wall-clock envelope.\
-      ↳ **Depends on:** D21.
+- [ ] **D34** · **Per-extract timeout + failure-wave guard for the structured loop** *(resilience)* —
+      `DumBoundedExtraction` blocks on `completion.take()` with no bound, so one hung `extract(id)` (a
+      stalled `infinity.json` fetch past the HTTP client's own timeout) can stall a whole run; and a
+      transient *wave* of extraction failures (a network blip dropping many ids) is silently swallowed,
+      then deindexed by the non-standalone finish — D09 only guards the *zero*-yield case, not a partial
+      collapse. Add a bounded per-extract timeout (cancel + count as failed; configurable, off by
+      default) and a safe-run guard that finishes *standalone* when the failed-extraction ratio over a
+      run exceeds a threshold, so a partial outage keeps the prior index instead of mass-deindexing.
+      Touch points: `DumBoundedExtraction` + a small per-run extraction report carried back to the
+      plugin. Done: a hung extraction is bounded and the run completes; a high-failure run preserves the
+      previously indexed data and logs the ratio.\
+      ↳ **Depends on:** D31. Complements D09, D33.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
@@ -170,7 +184,20 @@ This track has no remaining pending tasks.
 > Versioned AEM recipes (component extractors + content-type schemas as versioned, parameterized
 > artifacts shared across institutions).
 
-This track has no remaining pending tasks.
+- [ ] **D32** · **AEM extractor concurrency contract + statelessness gate** *(safety)* — D31 extracts
+      ids in parallel, and the content extractor is a **cached singleton** (`DumCustomClassCache`)
+      reused across threads — so a `DumAemComponentExtractor` / `DumAemExtModelJsonBase` impl holding
+      mutable instance state during `contribute` / `extractAttributes` would corrupt output under
+      `dumont.reactive.indexing=true`. The exposure equals the legacy reactive navigator's (same
+      singleton, same `getTargetAttrValueMap` called concurrently), but it is currently undocumented and
+      untested. Document the *stateless-during-extraction* contract on the `DumAemComponentExtractor`
+      SPI, and add a concurrency parity test that drives the reference extractors (D24/D25) and the
+      Insper god-class (`DumAemExtInsperModelJson`) through parallel vs sequential extraction over the
+      same fixtures, asserting identical job items. Touch points: `aem-commons`
+      `DumAemComponentExtractor` javadoc + a new `DumAemExtractorConcurrencyTest`. Done: the contract is
+      stated and a deliberately stateful extractor is caught by a failing test, while the shipped
+      extractors pass.\
+      ↳ **Depends on:** D31, D24.
 
 ---
 

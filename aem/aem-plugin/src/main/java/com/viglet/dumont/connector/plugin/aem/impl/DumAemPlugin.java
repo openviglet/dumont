@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +40,7 @@ import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.DumBoundedExtraction;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
@@ -91,24 +93,39 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
     private final DumAemSourceService sourceService;
     private final DumAemSessionService sessionService;
     private final DumAemObjectService objectService;
+    /**
+     * Degree of bounded-concurrency extraction (roadmap D31). Reuses the legacy reactive navigator's
+     * controls so the structured loop matches that path's wall-clock envelope: parallel extraction is
+     * enabled by {@code dumont.reactive.indexing} at {@code dumont.reactive.parallelism} threads, and
+     * stays {@code 1} (sequential) by default.
+     */
+    private final int extractionConcurrency;
 
     public DumAemPlugin(DumConnectorContext dumConnectorContext,
             DumAemStructuredSourceProvider provider, DumAemSourceService sourceService,
             DumAemSessionService sessionService, DumAemObjectService objectService,
             DumPreviewSnapshotStore previewSnapshotStore,
             DumCoverageHistoryStore coverageHistoryStore,
-            DumProvenanceHistoryStore provenanceHistoryStore) {
+            DumProvenanceHistoryStore provenanceHistoryStore,
+            @Value("${dumont.reactive.indexing:false}") boolean reactiveEnabled,
+            @Value("${dumont.reactive.parallelism:10}") int reactiveParallelism) {
         super(dumConnectorContext, null, previewSnapshotStore, coverageHistoryStore,
                 provenanceHistoryStore);
         this.provider = provider;
         this.sourceService = sourceService;
         this.sessionService = sessionService;
         this.objectService = objectService;
+        this.extractionConcurrency = reactiveEnabled ? Math.max(1, reactiveParallelism) : 1;
     }
 
     @Override
     protected DumStructuredSourceProvider provider() {
         return provider;
+    }
+
+    @Override
+    protected int extractionConcurrency() {
+        return extractionConcurrency;
     }
 
     /**
@@ -157,14 +174,20 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
     }
 
-    /** Extract and publish every content id for one environment, capturing only when asked. */
+    /**
+     * Extract and publish every content id for one environment, capturing only when asked.
+     * Extraction runs with bounded concurrency (roadmap <strong>D31</strong>) — each AEM
+     * {@code extract(id)} is one {@code infinity.json} fetch, so a large source overlaps those
+     * fetches instead of serialising them; the publish + capture callback stays serial on this
+     * thread, so coverage/provenance capture remains single-threaded and order-independent.
+     */
     private void indexEnvironment(DumAemStructuredSource structuredSource, List<String> contentIds,
             DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
             DumProvenanceSnapshot.Builder provenance, DumContentTypeCoverageRecorder byType) {
-        contentIds.forEach(id -> structuredSource.extract(id)
-                .ifPresent(extracted -> publish(structuredSource,
+        DumBoundedExtraction.extractEach(structuredSource, contentIds, extractionConcurrency(),
+                extracted -> publish(structuredSource,
                         enrichmentChain.apply(structuredSource, extracted), session, snapshot,
-                        provenance, byType)));
+                        provenance, byType));
     }
 
     /**

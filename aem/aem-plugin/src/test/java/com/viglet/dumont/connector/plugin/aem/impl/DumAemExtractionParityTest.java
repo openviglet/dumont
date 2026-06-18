@@ -135,7 +135,8 @@ class DumAemExtractionParityTest {
         sessionService = mock(DumAemSessionService.class);
         // Only DumAemPlugin#toJobItem is exercised; the provider / source services are unused there.
         plugin = new DumAemPlugin(connectorContext, mock(DumAemStructuredSourceProvider.class),
-                mock(DumAemSourceService.class), sessionService, objectService, null, null, null);
+                mock(DumAemSourceService.class), sessionService, objectService, null, null, null,
+                false, 1);
     }
 
     @Test

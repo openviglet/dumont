@@ -341,6 +341,22 @@
   object actually extracted, for author and publish alike, at parity by construction. Proven by the
   harness (a field living only under `data/master`/`metadata` is extracted identically on both paths; an
   unmapped sub-tree property never leaks). Fails on any future divergence. ↳ Builds on D21.
+- **D31** — Parallel extraction for HTTP-heavy structured sources (perf): the shared structured loop
+  extracted ids one at a time, so a large AEM source — where each `extract(id)` is a single
+  `infinity.json` fetch — indexed markedly slower than the legacy reactive navigator that parallelised
+  its tree traversal. `connector-commons` `…spi.structured.DumBoundedExtraction` restores that
+  parallelism at the framework level: `extract(id)` runs on a bounded daemon pool (at most N in flight,
+  so memory stays bounded) while the consumer — publish + snapshot/coverage/provenance capture — is
+  invoked **serially on the calling thread**, so capture stays single-threaded and order-independent
+  (every capture is keyed by record id, never position); a failed/empty extraction is logged and
+  dropped, never fabricated. `DumStructuredSourcePlugin` gains an `extractionConcurrency()` hook
+  (default `1` = sequential, every adapter unchanged) and drives `indexAll` through the extractor;
+  `DumAemPlugin` overrides it from the legacy reactive controls (`dumont.reactive.indexing` gate +
+  `dumont.reactive.parallelism` degree) and runs each environment's extraction through it, so the
+  structured path matches the legacy reactive path's wall-clock envelope. AEM's per-id state
+  (`checksums`/`locales`/`dependencies`) is already `ConcurrentHashMap` + `schema()`/`session()`
+  synchronized, so parallel `extract` is safe. Proven by `DumBoundedExtractionTest` (parallel overlap,
+  serial order-independent consume, dropped empty/failing ids). ↳ Builds on D21.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
