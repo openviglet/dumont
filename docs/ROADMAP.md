@@ -182,22 +182,11 @@ This track has no remaining pending tasks.
 > **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D24** AEM component-extractor SPI · **D25**
 > Schema-per-content-type + template routing · **D26** Derivations → enrichment chain · **D27**
 > Versioned AEM recipes (component extractors + content-type schemas as versioned, parameterized
-> artifacts shared across institutions).
+> artifacts shared across institutions) · **D32** AEM extractor concurrency contract +
+> statelessness gate (stateless-during-extraction contract documented on the
+> `DumAemComponentExtractor` SPI + a parallel-vs-sequential parity test).
 
-- [ ] **D32** · **AEM extractor concurrency contract + statelessness gate** *(safety)* — D31 extracts
-      ids in parallel, and the content extractor is a **cached singleton** (`DumCustomClassCache`)
-      reused across threads — so a `DumAemComponentExtractor` / `DumAemExtModelJsonBase` impl holding
-      mutable instance state during `contribute` / `extractAttributes` would corrupt output under
-      `dumont.reactive.indexing=true`. The exposure equals the legacy reactive navigator's (same
-      singleton, same `getTargetAttrValueMap` called concurrently), but it is currently undocumented and
-      untested. Document the *stateless-during-extraction* contract on the `DumAemComponentExtractor`
-      SPI, and add a concurrency parity test that drives the reference extractors (D24/D25) and the
-      Insper god-class (`DumAemExtInsperModelJson`) through parallel vs sequential extraction over the
-      same fixtures, asserting identical job items. Touch points: `aem-commons`
-      `DumAemComponentExtractor` javadoc + a new `DumAemExtractorConcurrencyTest`. Done: the contract is
-      stated and a deliberately stateful extractor is caught by a failing test, while the shipped
-      extractors pass.\
-      ↳ **Depends on:** D31, D24.
+This track has no remaining pending tasks.
 
 ---
 

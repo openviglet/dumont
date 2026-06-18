@@ -52,6 +52,27 @@ import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
  * }
  * }</pre>
  *
+ * <h2>Concurrency contract — stateless during extraction</h2>
+ * The owning {@link DumAemExtModelJsonBase} is resolved once and <strong>cached as a
+ * singleton</strong> (see {@code com.viglet.dumont.commons.cache.DumCustomClassCache}), then
+ * reused across every page of a run. Under {@code dumont.reactive.indexing=true} ids are
+ * extracted in parallel (see {@code DumBoundedExtraction}), so that <em>one</em> extractor
+ * instance — and every component extractor it composes — has {@link #contribute} invoked
+ * <strong>concurrently from many threads</strong>, each with its own {@code model},
+ * {@code aemObject} and {@code attrValues}.
+ * <p>
+ * An implementation MUST therefore be <strong>stateless during extraction</strong>: derive
+ * everything from the four {@code contribute} arguments plus local variables, and write only to
+ * the {@code attrValues} it is handed. Never stash per-page data — the current model, a partial
+ * result, a "last seen" value — in a mutable instance field between calls; a second thread will
+ * overwrite it and corrupt the output of both. Immutable fields set at construction
+ * (configuration, the model class, sub-extractor lists) are safe; <em>per-invocation</em> mutable
+ * instance state is the violation. The same contract binds a monolithic
+ * {@link DumAemExtModelJsonBase#extractAttributes} override (e.g. a single content-extractor
+ * fusing the whole tree). {@code DumAemExtractorConcurrencyTest} enforces it by asserting that
+ * parallel extraction over a shared instance yields the identical attribute maps as sequential
+ * extraction; a deliberately stateful extractor diverges and is caught.
+ *
  * @param <T> the root model bean type for the model.json response
  */
 @FunctionalInterface

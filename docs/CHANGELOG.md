@@ -425,3 +425,12 @@
   `DumJobItemWithSession` (replacing `Set.of()`), so it persists via `DumConnectorDependency` and resolves
   through `getObjectIdByDependency`. Proven by `DumAemDependencyServiceTest` (gating + filtering parity).
   ↳ Builds on D21.
+- **D32** — AEM extractor concurrency contract + statelessness gate: D31 extracts ids in parallel while
+  the content extractor is a cached singleton (`DumCustomClassCache`) reused across threads, so a
+  `DumAemComponentExtractor` / monolithic `extractAttributes` holding per-page mutable instance state would
+  corrupt output under `dumont.reactive.indexing=true`. The *stateless-during-extraction* contract is now
+  documented on the `DumAemComponentExtractor` SPI (mirrored on `DumAemExtModelJsonBase`), and
+  `DumAemExtractorConcurrencyTest` (aem-commons) enforces it: it drives the D24 composed SPI, the D25
+  content-type-routed model, and a monolithic (Insper-shaped) extractor through sequential-vs-parallel
+  extraction over one shared instance, asserting identical attribute maps — and proves the harness catches a
+  deliberately stateful extractor (it diverges under parallel extraction). ↳ Builds on D31, D24.

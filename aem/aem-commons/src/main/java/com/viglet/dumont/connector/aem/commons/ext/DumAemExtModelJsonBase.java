@@ -53,6 +53,12 @@ import java.util.Optional;
  * extractor in order, so a subclass that overrides only
  * {@link #componentExtractors()} needs no other code.
  * <p>
+ * <strong>Concurrency:</strong> the resolved subclass is a cached singleton reused across
+ * threads (parallel extraction under {@code dumont.reactive.indexing=true}), so both the
+ * composed {@link DumAemComponentExtractor}s <em>and</em> any monolithic
+ * {@link #extractAttributes} override MUST be stateless during extraction — see the
+ * stateless-during-extraction contract on {@link DumAemComponentExtractor}.
+ * <p>
  * Example:
  * <pre>{@code
  * public class MyModelJsonExtractor extends DumAemExtModelJsonBase<MyModel> {
