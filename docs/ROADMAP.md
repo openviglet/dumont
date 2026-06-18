@@ -141,14 +141,6 @@ This track has no remaining pending tasks.
 > field set + per-page field-presence signal into the D15 history, plus a documented WC → D02
 > migration path).
 
-- [ ] **D30** · **AEM extraction parity harness** — the D21 "replace the loop" rests on parity that is
-      only structurally reviewed (no live AEM in CI). Add a fixture/mock-HTTP test that drives one
-      `infinity.json` (page, content-fragment, static-file) through both the structured `extract(id)`
-      and the legacy `DumAemJobService` extraction and asserts identical published shape: attributes,
-      document id, `environment`, delta `checksum`, resolved locale (incl. the `configureObjectDataPath`
-      CF/static-file behaviour D21 deliberately mirrored). Done: a golden-fixture test locks structured
-      extraction == legacy output and fails on any divergence.\
-      ↳ **Depends on:** D21.
 - [ ] **D31** · **Parallel extraction for HTTP-heavy structured sources** *(perf)* — the legacy AEM
       navigator parallelised tree traversal (`dumont.reactive.indexing`); the shared structured loop
       (`DumStructuredSourcePlugin`) extracts ids sequentially, and since AEM `extract(id)` is one
