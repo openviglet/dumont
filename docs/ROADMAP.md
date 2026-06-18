@@ -103,19 +103,6 @@ This track has no remaining pending tasks.
 > `dum_provenance` attribute; per-source last-seen history so a dropped field stays auditable).
 > Complements D09.
 
-- [ ] **D33** · **Safe finish on a partial / interrupted structured run** *(trust)* — `indexAll` on the
-      structured loop runs the tracking-driven deindex sweep via `finishIndexing(session, false)` even
-      when extraction aborted partway (pool/JVM shutdown → `DumBoundedExtraction` breaks on interrupt; or
-      an exception escapes the per-environment loop), so every id not yet extracted is treated as
-      *removed* and deindexed — a transient interruption can wipe valid documents. Generalize D09's
-      zero-yield safe-run to the structured path: when a run did not complete its discovered id set
-      (interrupted / aborted), finish *standalone* so the destructive sweep is skipped and the prior
-      index survives. Touch points: `DumBoundedExtraction` (surface "completed all vs interrupted"),
-      `DumStructuredSourcePlugin#indexAll`, `DumAemPlugin#indexAllEnvironments`. Done: an interrupted
-      `indexAll` keeps the previously indexed documents (no spurious deindex); a clean run still
-      deindexes stale content as today.\
-      ↳ **Depends on:** D31. Complements D09.
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that

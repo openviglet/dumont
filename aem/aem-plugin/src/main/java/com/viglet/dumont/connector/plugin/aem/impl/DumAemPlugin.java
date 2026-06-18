@@ -41,6 +41,7 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.spi.structured.DumBoundedExtraction;
+import com.viglet.dumont.connector.commons.spi.structured.DumExtractionOutcome;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
@@ -158,12 +159,30 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         // so drift reads per type, additively to the source-level series. Captured once, primary env.
         DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
         List<String> contentIds = primary.discover();
-        for (DumAemEnv environment : environments) {
-            DumAemStructuredSource structuredSource = environment == primaryEnv ? primary
-                    : provider.adapter(aemSource, environment);
-            boolean capture = environment == primaryEnv;
-            indexEnvironment(structuredSource, contentIds, session, capture ? snapshot : null,
-                    capture ? provenance : null, capture ? byType : null);
+        DumExtractionOutcome outcome = DumExtractionOutcome.completed(contentIds.size());
+        try {
+            for (DumAemEnv environment : environments) {
+                DumAemStructuredSource structuredSource = environment == primaryEnv ? primary
+                        : provider.adapter(aemSource, environment);
+                boolean capture = environment == primaryEnv;
+                outcome = indexEnvironment(structuredSource, contentIds, session,
+                        capture ? snapshot : null, capture ? provenance : null, capture ? byType : null);
+                if (!outcome.completed()) {
+                    // An environment's extraction was interrupted; stop and finish standalone (D33)
+                    // so the partial run does not deindex the rest of the catalog.
+                    break;
+                }
+            }
+        } catch (RuntimeException e) {
+            // An exception escaped the per-environment loop — finish standalone (D33) so the
+            // destructive deindex sweep is skipped and the prior index survives.
+            finishPartialRunStandalone(session, source, "aborted by an exception", e);
+            return;
+        }
+        if (!outcome.completed()) {
+            finishPartialRunStandalone(session, source, "interrupted after %d of %d ids"
+                    .formatted(outcome.processed(), outcome.discovered()), null);
+            return;
         }
         dumConnectorContext.finishIndexing(session, false);
         DumPreviewSnapshot baseline = snapshot.build();
@@ -181,10 +200,10 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
      * fetches instead of serialising them; the publish + capture callback stays serial on this
      * thread, so coverage/provenance capture remains single-threaded and order-independent.
      */
-    private void indexEnvironment(DumAemStructuredSource structuredSource, List<String> contentIds,
-            DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
+    private DumExtractionOutcome indexEnvironment(DumAemStructuredSource structuredSource,
+            List<String> contentIds, DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
             DumProvenanceSnapshot.Builder provenance, DumContentTypeCoverageRecorder byType) {
-        DumBoundedExtraction.extractEach(structuredSource, contentIds, extractionConcurrency(),
+        return DumBoundedExtraction.extractEach(structuredSource, contentIds, extractionConcurrency(),
                 extracted -> publish(structuredSource,
                         enrichmentChain.apply(structuredSource, extracted), session, snapshot,
                         provenance, byType));

@@ -231,10 +231,26 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // the consumer below — publish + snapshot/coverage/provenance capture — stays serial on
             // this thread, so capture remains single-threaded and order-independent. Default
             // extractionConcurrency() == 1 keeps every adapter sequential.
-            DumBoundedExtraction.extractEach(structuredSource, structuredSource.discover(),
-                    extractionConcurrency(),
-                    record -> publish(structuredSource, enrichmentChain.apply(structuredSource, record),
-                            session, snapshot, provenance, byType));
+            DumExtractionOutcome outcome;
+            try {
+                outcome = DumBoundedExtraction.extractEach(structuredSource, structuredSource.discover(),
+                        extractionConcurrency(),
+                        record -> publish(structuredSource,
+                                enrichmentChain.apply(structuredSource, record), session, snapshot,
+                                provenance, byType));
+            } catch (RuntimeException e) {
+                // An exception escaped the extraction loop — finish standalone (D33) so the
+                // destructive deindex sweep is skipped and the prior index survives.
+                finishPartialRunStandalone(session, source, "aborted by an exception", e);
+                return;
+            }
+            if (!outcome.completed()) {
+                // The run was interrupted before visiting every discovered id; finishing
+                // non-standalone would treat the rest of the catalog as removed (D33).
+                finishPartialRunStandalone(session, source, "interrupted after %d of %d ids"
+                        .formatted(outcome.processed(), outcome.discovered()), null);
+                return;
+            }
             dumConnectorContext.finishIndexing(session, false);
             DumPreviewSnapshot baseline = snapshot.build();
             previewSnapshotStore.save(source, baseline);
@@ -245,6 +261,29 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             provenanceHistoryStore.record(source, provenance.documentCount(), provenance.fields());
             byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
         }, () -> log.error("Structured source '{}' not found", source));
+    }
+
+    /**
+     * Finish a partial / interrupted {@code indexAll} run safely (roadmap <strong>D33</strong>):
+     * close the session <em>standalone</em> so {@link DumConnectorContext#finishIndexing} skips the
+     * tracking-driven deindex sweep, and the previously indexed documents survive instead of every
+     * not-yet-extracted id being treated as removed and wiped. Generalises D09's zero-yield safe-run
+     * to the partial / aborted structured path. The run-end baseline/coverage/provenance capture is
+     * deliberately not performed by the caller — a partial run must never overwrite the last full
+     * index's baseline.
+     *
+     * @param cause the exception that aborted the run, or {@code null} for a clean interrupt
+     */
+    protected void finishPartialRunStandalone(DumConnectorSession session, String source,
+            String reason, RuntimeException cause) {
+        dumConnectorContext.finishIndexing(session, true);
+        if (cause != null) {
+            log.error("Structured indexAll for source '{}' did not complete ({}) — finished standalone, "
+                    + "previously indexed documents preserved (no deindex)", source, reason, cause);
+        } else {
+            log.warn("Structured indexAll for source '{}' did not complete ({}) — finished standalone, "
+                    + "previously indexed documents preserved (no deindex)", source, reason);
+        }
     }
 
     @Override

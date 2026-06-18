@@ -116,9 +116,78 @@ class DumBoundedExtractionTest {
     @Test
     void emptyIdListIsANoOp() {
         SlowSource source = new SlowSource(List.of(), 0);
-        DumBoundedExtraction.extractEach(source, source.discover(), 4, record -> {
-            throw new AssertionError("consumer must not run for an empty id list");
-        });
+        DumExtractionOutcome outcome =
+                DumBoundedExtraction.extractEach(source, source.discover(), 4, record -> {
+                    throw new AssertionError("consumer must not run for an empty id list");
+                });
+        assertTrue(outcome.completed(), "an empty run is complete, not interrupted");
+        assertEquals(0, outcome.discovered());
+    }
+
+    @Test
+    void completeRunReportsCompleted() {
+        SlowSource source = new SlowSource(ids(5), 0);
+
+        DumExtractionOutcome sequential =
+                DumBoundedExtraction.extractEach(source, source.discover(), 1, record -> {
+                });
+        DumExtractionOutcome parallel =
+                DumBoundedExtraction.extractEach(source, source.discover(), 4, record -> {
+                });
+
+        assertTrue(sequential.completed(), "a sequential run that visits every id is complete");
+        assertEquals(5, sequential.processed());
+        assertTrue(parallel.completed(), "a parallel run that visits every id is complete");
+        assertEquals(5, parallel.processed());
+    }
+
+    @Test
+    @Timeout(10)
+    void interruptedSequentialRunReportsInterrupted() {
+        // The calling thread is interrupted partway; the sequential loop must bail and report the
+        // partial run (roadmap D33) so the caller can skip the destructive deindex sweep.
+        SlowSource source = new SlowSource(ids(6), 0);
+        List<String> consumed = new ArrayList<>();
+
+        DumExtractionOutcome outcome =
+                DumBoundedExtraction.extractEach(source, source.discover(), 1, record -> {
+                    consumed.add(record.id());
+                    if (consumed.size() == 2) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+
+        try {
+            assertFalse(outcome.completed(), "an interrupted run is not complete");
+            assertTrue(outcome.interrupted());
+            assertEquals(2, outcome.processed(), "stopped right after the interrupt was observed");
+            assertEquals(6, outcome.discovered());
+        } finally {
+            Thread.interrupted(); // clear the flag so it cannot leak into another test
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    void interruptedParallelRunReportsInterrupted() {
+        SlowSource source = new SlowSource(ids(12), 0);
+        List<String> consumed = new ArrayList<>();
+
+        DumExtractionOutcome outcome =
+                DumBoundedExtraction.extractEach(source, source.discover(), 4, record -> {
+                    consumed.add(record.id());
+                    if (consumed.size() == 1) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
+
+        try {
+            assertFalse(outcome.completed(), "an interrupted parallel run is not complete");
+            assertTrue(outcome.interrupted());
+            assertTrue(outcome.processed() < 12, "the run stopped before visiting every id");
+        } finally {
+            Thread.interrupted(); // clear the flag so it cannot leak into another test
+        }
     }
 
     private static List<String> ids(int n) {

@@ -58,6 +58,13 @@ import lombok.extern.slf4j.Slf4j;
  * extractions are in flight at once, so memory stays bounded however far extraction races ahead of the
  * consumer. An extraction that throws or yields no record is logged and dropped, never fabricated.
  *
+ * <p>
+ * <strong>Partial-run safety (roadmap D33).</strong> {@code extractEach} returns a
+ * {@link DumExtractionOutcome} telling the caller whether the run got through its whole discovered id
+ * set or was cut short by an interrupt (pool/JVM shutdown). The structured loop uses this to skip the
+ * destructive deindex sweep on an interrupted run, so a transient interruption cannot wipe a still-
+ * valid index.
+ *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
@@ -76,21 +83,42 @@ public final class DumBoundedExtraction {
      * @param concurrency the maximum number of concurrent {@code extract(id)} calls; {@code <= 1}
      *                    runs sequentially on the calling thread (the unchanged default)
      * @param consumer    invoked serially, on the calling thread, once per extracted record
+     * @return whether the run got through its whole discovered id set or was interrupted partway
+     *         (roadmap <strong>D33</strong>) — the caller uses this to decide whether the
+     *         tracking-driven deindex sweep is safe to run
      */
-    public static void extractEach(DumStructuredSource source, List<String> contentIds,
+    public static DumExtractionOutcome extractEach(DumStructuredSource source, List<String> contentIds,
             int concurrency, Consumer<DumStructuredRecord> consumer) {
         if (contentIds == null || contentIds.isEmpty()) {
-            return;
+            return DumExtractionOutcome.completed(0);
         }
         if (concurrency <= 1 || contentIds.size() == 1) {
-            contentIds.forEach(id -> extractOne(source, id).ifPresent(consumer));
-            return;
+            return runSequential(source, contentIds, consumer);
         }
-        runParallel(source, contentIds, Math.min(concurrency, contentIds.size()), consumer);
+        return runParallel(source, contentIds, Math.min(concurrency, contentIds.size()), consumer);
     }
 
-    private static void runParallel(DumStructuredSource source, List<String> contentIds, int threads,
-            Consumer<DumStructuredRecord> consumer) {
+    private static DumExtractionOutcome runSequential(DumStructuredSource source,
+            List<String> contentIds, Consumer<DumStructuredRecord> consumer) {
+        int total = contentIds.size();
+        int processed = 0;
+        for (String id : contentIds) {
+            // Bail out if the calling thread has been interrupted (pool/JVM shutdown) so a partial
+            // run is reported as such instead of silently driving the destructive deindex sweep.
+            if (Thread.currentThread().isInterrupted()) {
+                return DumExtractionOutcome.interrupted(total, processed);
+            }
+            extractOne(source, id).ifPresent(consumer);
+            processed++;
+        }
+        return DumExtractionOutcome.completed(total);
+    }
+
+    private static DumExtractionOutcome runParallel(DumStructuredSource source,
+            List<String> contentIds, int threads, Consumer<DumStructuredRecord> consumer) {
+        int total = contentIds.size();
+        int processed = 0;
+        boolean interrupted = false;
         ExecutorService pool = Executors.newFixedThreadPool(threads, daemonFactory());
         try {
             ExecutorCompletionService<Optional<DumStructuredRecord>> completion =
@@ -109,10 +137,12 @@ public final class DumBoundedExtraction {
                     done = completion.take();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                    interrupted = true;
                     break;
                 }
                 inFlight--;
                 consume(done, source, consumer);
+                processed++;
                 if (ids.hasNext()) {
                     submit(completion, source, ids.next());
                     inFlight++;
@@ -121,6 +151,8 @@ public final class DumBoundedExtraction {
         } finally {
             pool.shutdownNow();
         }
+        return interrupted ? DumExtractionOutcome.interrupted(total, processed)
+                : DumExtractionOutcome.completed(total);
     }
 
     private static void submit(ExecutorCompletionService<Optional<DumStructuredRecord>> completion,

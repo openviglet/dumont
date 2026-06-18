@@ -207,6 +207,17 @@
   (`dum_provenance_run`) persists the series per source; `DumConnectorMonitoringApi` exposes
   `provenance/{source}` and `provenance/{source}/last-seen`. Proven by
   `DumStructuredProvenancePluginTest`. Pairs with Turing **Block R** (citation / grounding).
+- **D33** — Safe finish on a partial / interrupted structured run: `DumBoundedExtraction.extractEach`
+  now returns a `DumExtractionOutcome` (discovered / processed / interrupted) — the sequential loop
+  bails on `Thread.isInterrupted()` and the parallel loop reports the break on `completion.take()`
+  interrupt. `DumStructuredSourcePlugin#indexAll` and `DumAemPlugin#indexAllEnvironments` finish the
+  session *standalone* (`finishIndexing(session, true)`, via the shared
+  `finishPartialRunStandalone`) — skipping the tracking-driven deindex sweep and the baseline/coverage
+  capture — when a run is interrupted partway or an exception escapes the per-environment loop, so a
+  transient interruption (pool/JVM shutdown) can no longer treat not-yet-extracted ids as removed and
+  wipe a still-valid index; a clean run deindexes stale content as before. Generalises D09's
+  zero-yield safe-run to the structured path. Proven by `DumBoundedExtractionTest`,
+  `DumStructuredSourcePluginTest`. ↳ Builds on D31. Complements D09.
 
 ## Track F — Enrichment & semantics
 
