@@ -18,7 +18,8 @@ package com.viglet.dumont.connector.commons.spi.structured;
 
 /**
  * Outcome of one {@link DumBoundedExtraction#extractEach extractEach} pass (roadmap
- * <strong>D33</strong>): did the run get through its whole discovered id set, or was it cut short?
+ * <strong>D33</strong>): did the run get through its whole discovered id set, or was it cut short —
+ * and how many of the ids it visited <em>failed</em> to extract (roadmap <strong>D34</strong>)?
  *
  * <p>
  * The signal lets {@code indexAll} on the structured loop distinguish a <em>complete</em> run (every
@@ -29,24 +30,43 @@ package com.viglet.dumont.connector.commons.spi.structured;
  * plugin finishes such a run <em>standalone</em> instead, generalising D09's zero-yield safe-run to
  * the partial / aborted structured path.
  *
+ * <p>
+ * <strong>Failure-wave guard (roadmap D34).</strong> {@code failed} counts ids whose
+ * {@code extract(id)} threw or was cancelled by the per-extract timeout — a transient <em>wave</em>
+ * of such failures (a network blip dropping many ids) would, on an otherwise-complete run, deindex
+ * everything it could not re-fetch. The plugin reads {@link #failureRatio()} to finish a high-failure
+ * run standalone too, so a partial outage preserves the prior index instead of mass-deindexing.
+ * Empty extractions (a legitimate "no record here") are <em>not</em> failures and do not count.
+ *
  * @param discovered  the number of ids the run set out to extract
  * @param processed   the number of ids it actually got through before finishing or being cut short
+ * @param failed      the number of visited ids whose extraction threw or timed out (D34)
  * @param interrupted {@code true} when the extraction loop broke on an interrupt before visiting
  *                    every discovered id
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
-public record DumExtractionOutcome(int discovered, int processed, boolean interrupted) {
+public record DumExtractionOutcome(int discovered, int processed, int failed, boolean interrupted) {
 
-    /** A run that visited every discovered id. */
+    /** A run that visited every discovered id, none of which failed. */
     public static DumExtractionOutcome completed(int discovered) {
-        return new DumExtractionOutcome(discovered, discovered, false);
+        return new DumExtractionOutcome(discovered, discovered, 0, false);
+    }
+
+    /** A run that visited every discovered id, {@code failed} of which threw or timed out (D34). */
+    public static DumExtractionOutcome completed(int discovered, int failed) {
+        return new DumExtractionOutcome(discovered, discovered, failed, false);
     }
 
     /** A run cut short by an interrupt after {@code processed} of {@code discovered} ids. */
     public static DumExtractionOutcome interrupted(int discovered, int processed) {
-        return new DumExtractionOutcome(discovered, processed, true);
+        return new DumExtractionOutcome(discovered, processed, 0, true);
+    }
+
+    /** A run cut short after {@code processed} ids, {@code failed} of which threw or timed out. */
+    public static DumExtractionOutcome interrupted(int discovered, int processed, int failed) {
+        return new DumExtractionOutcome(discovered, processed, failed, true);
     }
 
     /**
@@ -55,5 +75,14 @@ public record DumExtractionOutcome(int discovered, int processed, boolean interr
      */
     public boolean completed() {
         return !interrupted;
+    }
+
+    /**
+     * Fraction of visited ids whose extraction failed (roadmap <strong>D34</strong>): {@code failed /
+     * processed}, or {@code 0.0} when nothing was processed. The plugin compares this against its
+     * configured threshold to decide whether a wave of failures should finish the run standalone.
+     */
+    public double failureRatio() {
+        return processed == 0 ? 0.0 : (double) failed / processed;
     }
 }

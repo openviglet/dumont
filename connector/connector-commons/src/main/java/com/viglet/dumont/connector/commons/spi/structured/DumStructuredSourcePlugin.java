@@ -161,6 +161,46 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         return 1;
     }
 
+    /**
+     * Per-extract wall-clock bound in milliseconds used by {@link #indexAll(String)} (roadmap
+     * <strong>D34</strong>). The default {@code 0} disables it — no extraction is ever cancelled for
+     * time, exactly as before. An HTTP-heavy adapter (AEM) overrides this so a single hung
+     * {@code infinity.json} fetch past the HTTP client's own timeout cannot stall the whole run: the
+     * overrun is cancelled and counted as a failed extraction. See {@link DumBoundedExtraction}.
+     */
+    protected long extractionTimeoutMs() {
+        return 0L;
+    }
+
+    /**
+     * Failure-wave threshold (roadmap <strong>D34</strong>): when the fraction of <em>failed</em>
+     * extractions over an otherwise-complete run reaches this ratio, the run finishes
+     * <em>standalone</em> (no deindex) so a transient outage that dropped many ids keeps the prior
+     * index instead of mass-deindexing what it could not re-fetch. The default {@code 0.5} guards
+     * only a genuine collapse; {@code <= 0} disables the guard. Generalises D09 / D33 from the
+     * zero-yield and interrupted cases to a partial collapse.
+     */
+    protected double failureRatioThreshold() {
+        return 0.5;
+    }
+
+    /**
+     * Whether {@code outcome} represents a failure wave (roadmap <strong>D34</strong>) that should
+     * finish the run standalone: the guard is enabled ({@link #failureRatioThreshold()} {@code > 0}),
+     * at least one extraction failed, and the failure ratio met the threshold.
+     */
+    protected boolean isFailureWave(DumExtractionOutcome outcome) {
+        double threshold = failureRatioThreshold();
+        return threshold > 0 && outcome.failed() > 0 && outcome.failureRatio() >= threshold;
+    }
+
+    /** Human-readable reason for a failure-wave standalone finish (roadmap <strong>D34</strong>). */
+    protected String failureWaveReason(DumExtractionOutcome outcome) {
+        return "failure wave — %d of %d extractions failed (%.0f%% ≥ threshold %.0f%%)".formatted(
+                outcome.failed(), outcome.processed(), outcome.failureRatio() * 100,
+                failureRatioThreshold() * 100);
+    }
+
     @Override
     public String getProviderName() {
         return provider().getProviderName();
@@ -234,7 +274,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             DumExtractionOutcome outcome;
             try {
                 outcome = DumBoundedExtraction.extractEach(structuredSource, structuredSource.discover(),
-                        extractionConcurrency(),
+                        extractionConcurrency(), extractionTimeoutMs(),
                         record -> publish(structuredSource,
                                 enrichmentChain.apply(structuredSource, record), session, snapshot,
                                 provenance, byType));
@@ -249,6 +289,12 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 // non-standalone would treat the rest of the catalog as removed (D33).
                 finishPartialRunStandalone(session, source, "interrupted after %d of %d ids"
                         .formatted(outcome.processed(), outcome.discovered()), null);
+                return;
+            }
+            if (isFailureWave(outcome)) {
+                // A wave of extraction failures (e.g. a network blip) would otherwise deindex every id
+                // it could not re-fetch; finish standalone so the prior index survives (D34).
+                finishPartialRunStandalone(session, source, failureWaveReason(outcome), null);
                 return;
             }
             dumConnectorContext.finishIndexing(session, false);

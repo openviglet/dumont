@@ -218,6 +218,20 @@
   wipe a still-valid index; a clean run deindexes stale content as before. Generalises D09's
   zero-yield safe-run to the structured path. Proven by `DumBoundedExtractionTest`,
   `DumStructuredSourcePluginTest`. ↳ Builds on D31. Complements D09.
+- **D34** — Per-extract timeout + failure-wave guard for the structured loop (resilience):
+  `DumBoundedExtraction.extractEach` gains an optional per-extract wall-clock bound — an
+  `extract(id)` that hangs past the HTTP client's own timeout is cancelled and counted as failed
+  (so one stalled `infinity.json` fetch can no longer stall the run on the unbounded
+  `completion.take()`); when a timeout is set the run uses the pool even at concurrency 1. The
+  returned `DumExtractionOutcome` now carries a `failed` count + `failureRatio()`; `extract`
+  outcomes are classed present / empty (legitimate, not counted) / failed (threw or timed out).
+  `DumStructuredSourcePlugin` (and `DumAemPlugin#indexAllEnvironments`) finish *standalone* via the
+  shared `finishPartialRunStandalone` when the failure ratio of an otherwise-complete run meets
+  `failureRatioThreshold()` (default 0.5; ≤ 0 disables), so a transient outage that dropped many
+  ids preserves the prior index instead of mass-deindexing. AEM wires both from
+  `dumont.reactive.extractTimeoutMs` (default 0) and `dumont.reactive.failureRatioThreshold`
+  (default 0.5). Proven by `DumBoundedExtractionTest`, `DumStructuredSourcePluginTest`.
+  ↳ Builds on D31. Complements D09, D33.
 
 ## Track F — Enrichment & semantics
 

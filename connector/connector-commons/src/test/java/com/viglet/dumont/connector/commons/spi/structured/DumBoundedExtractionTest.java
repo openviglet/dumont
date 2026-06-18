@@ -114,6 +114,78 @@ class DumBoundedExtractionTest {
     }
 
     @Test
+    @Timeout(10)
+    void perExtractTimeoutCancelsHungExtractionAndCountsItFailed() {
+        // id3 hangs far past the timeout; the rest are instant. The hung extraction must be cancelled
+        // and counted as failed, the run must still complete, and every other id must be consumed.
+        SlowSource source = new SlowSource(ids(6), 0);
+        source.hangFor("id3");
+        List<String> consumed = new ArrayList<>();
+
+        DumExtractionOutcome outcome = DumBoundedExtraction.extractEach(source, source.discover(), 4,
+                200L, record -> consumed.add(record.id()));
+
+        assertTrue(outcome.completed(), "a run with a cancelled extraction still completes");
+        assertEquals(6, outcome.processed(), "the hung id is processed (as a failure), not skipped");
+        assertEquals(1, outcome.failed(), "exactly the hung extraction is counted as failed");
+        assertEquals(5, consumed.size(), "every non-hung id reaches the consumer");
+        assertFalse(consumed.contains("id3"), "the hung id yields no record");
+    }
+
+    @Test
+    @Timeout(10)
+    void timeoutBoundsAHungExtractionEvenAtConcurrencyOne() {
+        // With a timeout configured the run uses the pool even at concurrency 1, so a single hung
+        // extraction cannot stall the whole run.
+        SlowSource source = new SlowSource(ids(3), 0);
+        source.hangFor("id1");
+        List<String> consumed = new ArrayList<>();
+
+        DumExtractionOutcome outcome = DumBoundedExtraction.extractEach(source, source.discover(), 1,
+                200L, record -> consumed.add(record.id()));
+
+        assertTrue(outcome.completed());
+        assertEquals(1, outcome.failed(), "the hung id is the only failure");
+        assertEquals(List.of("id0", "id2"), consumed.stream().sorted().toList(),
+                "the two fast ids are consumed, the hung one dropped");
+    }
+
+    @Test
+    @Timeout(10)
+    void failureWaveRatioIsReported() {
+        // A wave of throwing extractions is counted so the plugin can finish such a run standalone.
+        SlowSource source = new SlowSource(ids(4), 0);
+        source.failFor("id0");
+        source.failFor("id1");
+        source.failFor("id2");
+        List<String> consumed = new ArrayList<>();
+
+        DumExtractionOutcome outcome = DumBoundedExtraction.extractEach(source, source.discover(), 2,
+                record -> consumed.add(record.id()));
+
+        assertTrue(outcome.completed());
+        assertEquals(3, outcome.failed(), "all three throwing extractions are counted as failed");
+        assertEquals(0.75, outcome.failureRatio(), 1e-9, "failed / processed");
+        assertEquals(1, consumed.size(), "only the one good id is published");
+    }
+
+    @Test
+    void sequentialRunCountsFailuresButNotEmpties() {
+        // Empties are a legitimate "no record here" and must not be held against the run (D34).
+        SlowSource source = new SlowSource(ids(5), 0);
+        source.failFor("id1");
+        source.emptyFor("id2");
+
+        DumExtractionOutcome outcome =
+                DumBoundedExtraction.extractEach(source, source.discover(), 1, record -> {
+                });
+
+        assertEquals(1, outcome.failed(), "only the throwing id is a failure, the empty one is not");
+        assertEquals(5, outcome.processed());
+        assertEquals(0.2, outcome.failureRatio(), 1e-9);
+    }
+
+    @Test
     void emptyIdListIsANoOp() {
         SlowSource source = new SlowSource(List.of(), 0);
         DumExtractionOutcome outcome =
@@ -203,6 +275,7 @@ class DumBoundedExtractionTest {
         private final AtomicInteger observed = new AtomicInteger();
         private final List<String> emptyIds = new ArrayList<>();
         private final List<String> failIds = new ArrayList<>();
+        private final List<String> hangIds = new ArrayList<>();
 
         SlowSource(List<String> ids, long sleepMs) {
             this.ids = ids;
@@ -215,6 +288,11 @@ class DumBoundedExtractionTest {
 
         void failFor(String id) {
             failIds.add(id);
+        }
+
+        /** Make {@code extract(id)} block (interruptibly) far past any per-extract timeout. */
+        void hangFor(String id) {
+            hangIds.add(id);
         }
 
         int maxConcurrent() {
@@ -261,7 +339,9 @@ class DumBoundedExtractionTest {
             int now = concurrent.incrementAndGet();
             maxConcurrent.accumulateAndGet(now, Math::max);
             try {
-                if (sleepMs > 0) {
+                if (hangIds.contains(contentId)) {
+                    Thread.sleep(10_000); // far past any test timeout; cancelled via interrupt
+                } else if (sleepMs > 0) {
                     Thread.sleep(sleepMs);
                 }
                 if (failIds.contains(contentId)) {

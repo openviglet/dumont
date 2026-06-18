@@ -101,6 +101,18 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
      * stays {@code 1} (sequential) by default.
      */
     private final int extractionConcurrency;
+    /**
+     * Per-extract timeout (roadmap D34): a single {@code infinity.json} fetch that hangs past the HTTP
+     * client's own timeout is cancelled and counted as failed, so one stalled id cannot stall the run.
+     * {@code 0} (the default) disables it.
+     */
+    private final long extractionTimeoutMs;
+    /**
+     * Failure-wave threshold (roadmap D34): when this fraction of an otherwise-complete run's
+     * extractions fail (e.g. a network blip dropping many fetches), the run finishes standalone so the
+     * prior index survives instead of mass-deindexing the un-fetchable ids.
+     */
+    private final double failureRatioThreshold;
 
     public DumAemPlugin(DumConnectorContext dumConnectorContext,
             DumAemStructuredSourceProvider provider, DumAemSourceService sourceService,
@@ -109,7 +121,9 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
             DumCoverageHistoryStore coverageHistoryStore,
             DumProvenanceHistoryStore provenanceHistoryStore,
             @Value("${dumont.reactive.indexing:false}") boolean reactiveEnabled,
-            @Value("${dumont.reactive.parallelism:10}") int reactiveParallelism) {
+            @Value("${dumont.reactive.parallelism:10}") int reactiveParallelism,
+            @Value("${dumont.reactive.extractTimeoutMs:0}") long extractTimeoutMs,
+            @Value("${dumont.reactive.failureRatioThreshold:0.5}") double failureRatioThreshold) {
         super(dumConnectorContext, null, previewSnapshotStore, coverageHistoryStore,
                 provenanceHistoryStore);
         this.provider = provider;
@@ -117,6 +131,8 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         this.sessionService = sessionService;
         this.objectService = objectService;
         this.extractionConcurrency = reactiveEnabled ? Math.max(1, reactiveParallelism) : 1;
+        this.extractionTimeoutMs = Math.max(0L, extractTimeoutMs);
+        this.failureRatioThreshold = failureRatioThreshold;
     }
 
     @Override
@@ -127,6 +143,16 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
     @Override
     protected int extractionConcurrency() {
         return extractionConcurrency;
+    }
+
+    @Override
+    protected long extractionTimeoutMs() {
+        return extractionTimeoutMs;
+    }
+
+    @Override
+    protected double failureRatioThreshold() {
+        return failureRatioThreshold;
     }
 
     /**
@@ -172,6 +198,12 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
                     // so the partial run does not deindex the rest of the catalog.
                     break;
                 }
+                if (isFailureWave(outcome)) {
+                    // A wave of failed fetches in this environment (e.g. a network blip) — finish
+                    // standalone so the prior index survives instead of mass-deindexing (D34).
+                    finishPartialRunStandalone(session, source, failureWaveReason(outcome), null);
+                    return;
+                }
             }
         } catch (RuntimeException e) {
             // An exception escaped the per-environment loop — finish standalone (D33) so the
@@ -204,6 +236,7 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
             List<String> contentIds, DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
             DumProvenanceSnapshot.Builder provenance, DumContentTypeCoverageRecorder byType) {
         return DumBoundedExtraction.extractEach(structuredSource, contentIds, extractionConcurrency(),
+                extractionTimeoutMs(),
                 extracted -> publish(structuredSource,
                         enrichmentChain.apply(structuredSource, extracted), session, snapshot,
                         provenance, byType));

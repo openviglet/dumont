@@ -119,6 +119,21 @@ class DumStructuredSourcePluginTest {
     }
 
     @Test
+    void failureWaveIndexAllFinishesStandaloneSoPriorIndexSurvives() {
+        // Roadmap D34: a wave of extraction failures (here 3 of 4 ids throw) over an otherwise-complete
+        // run must finish *standalone* so the prior index survives instead of mass-deindexing what the
+        // transient outage made un-fetchable. The default failure-ratio threshold (0.5) is exceeded.
+        DumStructuredSourcePlugin failingPlugin =
+                new SampleCatalogPlugin(context, new FailingCatalogProvider());
+
+        failingPlugin.indexAll("failing");
+
+        assertTrue(context.standalone, "a failure-wave run finishes standalone (no destructive deindex)");
+        assertEquals(1, context.finishedSessions.size(), "the session is still finished");
+        assertEquals(1, context.items.size(), "the one good record is still published");
+    }
+
+    @Test
     void indexByIdPublishesStandaloneSession() {
         plugin.indexById(SOURCE, List.of("c1"));
 
@@ -343,6 +358,74 @@ class DumStructuredSourcePluginTest {
             return Optional.of(DumStructuredRecord.builder(contentId, schema)
                     .set("title", "Boom " + contentId)
                     .build());
+        }
+    }
+
+    /** A source most of whose extractions throw, modelling a transient failure wave (roadmap D34). */
+    private static final class FailingCatalog implements DumStructuredSource {
+        private final DumStructuredSchema schema = DumStructuredSchema.builder()
+                .field(DumStructuredField.builder("title").type(TurSEFieldType.TEXT)
+                        .mandatory(true).build())
+                .build();
+
+        @Override
+        public String getSourceName() {
+            return "failing";
+        }
+
+        @Override
+        public String getProviderName() {
+            return "STRUCTURED-SAMPLE";
+        }
+
+        @Override
+        public Collection<String> getSiteNames() {
+            return List.of("Sample");
+        }
+
+        @Override
+        public DumStructuredSchema schema() {
+            return schema;
+        }
+
+        @Override
+        public Locale getLocale() {
+            return Locale.US;
+        }
+
+        @Override
+        public List<String> discover() {
+            return List.of("c1", "c2", "c3", "c4");
+        }
+
+        @Override
+        public Optional<DumStructuredRecord> extract(String contentId) {
+            // c1 succeeds; c2/c3/c4 throw -> extractOne counts them as failed (ratio 0.75 > 0.5).
+            if (!"c1".equals(contentId)) {
+                throw new IllegalStateException("transient fetch failure for " + contentId);
+            }
+            return Optional.of(DumStructuredRecord.builder(contentId, schema)
+                    .set("title", "Title " + contentId)
+                    .build());
+        }
+    }
+
+    private static final class FailingCatalogProvider implements DumStructuredSourceProvider {
+        private final FailingCatalog catalog = new FailingCatalog();
+
+        @Override
+        public String getProviderName() {
+            return "STRUCTURED-SAMPLE";
+        }
+
+        @Override
+        public Collection<String> sourceNames() {
+            return List.of("failing");
+        }
+
+        @Override
+        public Optional<DumStructuredSource> resolve(String sourceName) {
+            return "failing".equals(sourceName) ? Optional.of(catalog) : Optional.empty();
         }
     }
 

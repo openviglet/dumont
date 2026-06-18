@@ -82,7 +82,7 @@ class DumAemPluginTest {
     void setUp() {
         dumAemPlugin = new DumAemPlugin(dumConnectorContext, provider, dumAemSourceService,
                 dumAemSessionService, dumAemObjectService, previewSnapshotStore, coverageHistoryStore,
-                provenanceHistoryStore, false, 1);
+                provenanceHistoryStore, false, 1, 0L, 0.5);
     }
 
     @Test

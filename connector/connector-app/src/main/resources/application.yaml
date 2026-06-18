@@ -36,6 +36,10 @@ dumont:
   dependencies.enabled: false
   reactive.indexing: false
   reactive.parallelism: 10
+  # D34: per-extract wall-clock bound (ms); 0 disables it (no extraction is cancelled for time).
+  reactive.extractTimeoutMs: 0
+  # D34: finish standalone (no deindex) when this fraction of a run's extractions fail; 0 disables.
+  reactive.failureRatioThreshold: 0.5
   dns:
     cache:
       ttl: 60

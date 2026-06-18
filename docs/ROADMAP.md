@@ -139,18 +139,7 @@ This track has no remaining pending tasks.
 > field set + per-page field-presence signal into the D15 history, plus a documented WC → D02
 > migration path).
 
-- [ ] **D34** · **Per-extract timeout + failure-wave guard for the structured loop** *(resilience)* —
-      `DumBoundedExtraction` blocks on `completion.take()` with no bound, so one hung `extract(id)` (a
-      stalled `infinity.json` fetch past the HTTP client's own timeout) can stall a whole run; and a
-      transient *wave* of extraction failures (a network blip dropping many ids) is silently swallowed,
-      then deindexed by the non-standalone finish — D09 only guards the *zero*-yield case, not a partial
-      collapse. Add a bounded per-extract timeout (cancel + count as failed; configurable, off by
-      default) and a safe-run guard that finishes *standalone* when the failed-extraction ratio over a
-      run exceeds a threshold, so a partial outage keeps the prior index instead of mass-deindexing.
-      Touch points: `DumBoundedExtraction` + a small per-run extraction report carried back to the
-      plugin. Done: a hung extraction is bounded and the run completes; a high-failure run preserves the
-      previously indexed data and logs the ratio.\
-      ↳ **Depends on:** D31. Complements D09, D33.
+This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
