@@ -325,17 +325,22 @@
   standalone behaviour. The explicit delete flows through the processing chain regardless of the
   `standalone=true` flag that suppresses the tracking-driven sweep, so `POST index/{name}` / `reindex/{name}`
   on a removed/unpublished id removes it. Proven by `DumAemPluginTest`. ↳ Builds on D21.
-- **D30** — AEM extraction parity harness: a golden-fixture test locking the D21 conversion's parity with
-  the legacy job pipeline (no live AEM in CI). `aem-plugin` `DumAemExtractionParityTest` drives one
-  `infinity.json` per content kind — `cq:Page`, Content Fragment, static file — through both the
-  structured `DumAemStructuredSource.extract(id)` + `DumAemPlugin.toJobItem` path and the legacy
-  `DumAemJobService.prepareIndexObject` extraction (real `DumAemService`/`DumAemAttrProcess`/delta/locale
-  collaborators; `getInfinityJson` the only stubbed static), then asserts the published `TurSNJobItem` has
-  identical shape: content attributes, document id, `environment`, delta `checksum`, resolved locale. The
-  CF/static fixtures carry a `data/master` | `metadata` sub-tree so the legacy `configureObjectDataPath`
-  routing is exercised and the test locks that a nested-only property never leaks differently between the
-  paths; the structured-only `dum_provenance` token (D16) is excluded from the content comparison. Fails on
-  any future divergence between the two extraction paths. ↳ Builds on D21.
+- **D30** — AEM extraction parity harness + data-path fix: a golden-fixture test locking the D21
+  conversion's parity with the legacy job pipeline (no live AEM in CI), and the bug it surfaced.
+  `aem-plugin` `DumAemExtractionParityTest` drives one `infinity.json` per content kind — `cq:Page`,
+  Content Fragment, static file — through both the structured `DumAemStructuredSource.extract(id)` +
+  `DumAemPlugin.toJobItem` path and the legacy `DumAemJobService.prepareIndexObject` extraction (real
+  `DumAemService`/`DumAemAttrProcess`/delta/locale collaborators; `getInfinityJson` the only stubbed
+  static), asserting the published `TurSNJobItem` has identical shape: content attributes, document id,
+  `environment`, delta `checksum`, resolved locale (the structured-only `dum_provenance` token, D16, is
+  excluded from the content comparison). **Fix:** `configureObjectDataPath` (CF → `data/master`, static
+  file → `metadata`) was applied to the *generic* object in `prepareIndexObject`, then discarded when
+  `indexObject` re-wrapped it in a fresh `DumAemObject` — so CF/static attributes under those sub-trees
+  were never extracted (legacy *and* structured). It now lives on `DumAemService` and runs inside
+  `getTargetAttrValueMap` — the single field-extraction boundary both paths share — so it applies to the
+  object actually extracted, for author and publish alike, at parity by construction. Proven by the
+  harness (a field living only under `data/master`/`metadata` is extracted identically on both paths; an
+  unmapped sub-tree property never leaks). Fails on any future divergence. ↳ Builds on D21.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 

@@ -1,8 +1,6 @@
 package com.viglet.dumont.connector.plugin.aem.service;
 
 import static com.viglet.dumont.commons.indexing.DumIndexingStatus.DEINDEXED;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.DATA_MASTER;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.METADATA;
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.SITE;
 import static com.viglet.dumont.connector.aem.commons.bean.DumAemEnv.PUBLISHING;
 import static com.viglet.dumont.connector.commons.logging.DumConnectorLoggingUtils.setSuccessStatus;
@@ -333,7 +331,6 @@ public class DumAemJobService {
                 if (!isObjectEligibleForIndexing(dumAemSession, aemObjectGeneric)) {
                         return;
                 }
-                configureObjectDataPath(dumAemSession, aemObjectGeneric);
                 extractDependencies(dumAemSession, aemObjectGeneric);
                 indexObject(dumAemSession, aemObjectGeneric);
 
@@ -378,14 +375,4 @@ public class DumAemJobService {
                 return true;
         }
 
-        private void configureObjectDataPath(DumAemSession dumAemSession,
-                        DumAemObjectGeneric aemObject) {
-                String contentType = dumAemSession.getConfiguration().getContentType();
-                if (dumAemService.isContentFragment(dumAemSession.getModel(), contentType,
-                                aemObject)) {
-                        aemObject.setDataPath(DATA_MASTER);
-                } else if (dumAemService.isStaticFile(dumAemSession.getModel(), contentType)) {
-                        aemObject.setDataPath(METADATA);
-                }
-        }
 }

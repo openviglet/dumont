@@ -141,21 +141,25 @@ class DumAemExtractionParityTest {
     @Test
     @DisplayName("cq:Page extracts to an identical job item on both paths")
     void pageParity() {
-        assertParity("/content/portal/en/home", pageJson(), "cq:Page", null, false);
+        assertParity("/content/portal/en/home", pageJson(), "cq:Page", null);
     }
 
     @Test
     @DisplayName("Content Fragment (configureObjectDataPath → data/master) extracts identically")
     void contentFragmentParity() {
+        // 'detail' lives only under jcr:content/data/master — extracted only because the data path
+        // is resolved onto the extracted object (the bug fix); identical on both paths.
         assertParity("/content/portal/fragments/intro", contentFragmentJson(), "dam:Asset",
-                "contentFragment", true);
+                "contentFragment");
     }
 
     @Test
     @DisplayName("Static file (configureObjectDataPath → metadata) extracts identically")
     void staticFileParity() {
+        // 'detail' lives only under jcr:content/metadata — extracted only because the data path is
+        // resolved onto the extracted object (the bug fix); identical on both paths.
         assertParity("/content/portal/files/brochure.pdf", staticFileJson(), "dam:Asset",
-                "static-file", false);
+                "static-file");
     }
 
     /**
@@ -165,7 +169,7 @@ class DumAemExtractionParityTest {
      * resolves {@code data/master}.
      */
     private void assertParity(String path, JSONObject infinityJson, String contentType,
-            String subType, boolean contentFragment) {
+            String subType) {
         DumAemConfiguration config = config(contentType, subType);
         DumAemModel model = model(contentType, subType);
         DumAemSession session = session(config, model);
@@ -182,6 +186,16 @@ class DumAemExtractionParityTest {
             TurSNJobItem structuredItem = structuredJobItem(source, session, path);
 
             assertSameShape(legacyItem, structuredItem);
+
+            // A field whose value lives only in the content type's data sub-tree (data/master for a
+            // CF, metadata for a static file) is extracted only because configureObjectDataPath
+            // resolves that sub-tree onto the extracted object — the bug this fixes. A cq:Page has no
+            // such sub-tree, so the field is absent.
+            Object expectedDetail = "dam:Asset".equals(contentType)
+                    ? ("contentFragment".equals(subType) ? "cf-detail" : "sf-detail")
+                    : null;
+            assertEquals(expectedDetail, structuredItem.getAttributes().get("detail"),
+                    "data-path-sourced field extracted on the structured path");
         }
     }
 
@@ -271,7 +285,8 @@ class DumAemExtractionParityTest {
                 .targetAttrs(List.of(
                         target("id", "id"),
                         target("title", "jcr:title"),
-                        target("tags", "tags")))
+                        target("tags", "tags"),
+                        target("detail", "detail")))
                 .build();
     }
 
@@ -294,7 +309,8 @@ class DumAemExtractionParityTest {
                 .attributeSpecs(List.of(
                         spec("id", TurSEFieldType.STRING, false),
                         spec("title", TurSEFieldType.TEXT, false),
-                        spec("tags", TurSEFieldType.STRING, true)))
+                        spec("tags", TurSEFieldType.STRING, true),
+                        spec("detail", TurSEFieldType.TEXT, false)))
                 .build();
     }
 
@@ -309,7 +325,8 @@ class DumAemExtractionParityTest {
                 .attributeSpecifications(Set.of(
                         attrSpec("id", TurSEFieldType.STRING, false, false),
                         attrSpec("title", TurSEFieldType.TEXT, true, false),
-                        attrSpec("tags", TurSEFieldType.STRING, false, true)))
+                        attrSpec("tags", TurSEFieldType.STRING, false, true),
+                        attrSpec("detail", TurSEFieldType.TEXT, false, false)))
                 .build();
     }
 
@@ -344,8 +361,10 @@ class DumAemExtractionParityTest {
     private JSONObject contentFragmentJson() {
         JSONObject content = contentNode();
         content.put("contentFragment", true);
-        // A data/master block to exercise the configureObjectDataPath CF routing on the legacy side.
+        // CF attributes live under jcr:content/data/master — 'detail' is readable only once the data
+        // path is resolved onto the extracted object; 'nestedOnly' is unmapped and must never leak.
         JSONObject master = new JSONObject();
+        master.put("detail", "cf-detail");
         master.put("nestedOnly", "should-not-leak");
         JSONObject data = new JSONObject();
         data.put("master", master);
@@ -358,8 +377,10 @@ class DumAemExtractionParityTest {
 
     private JSONObject staticFileJson() {
         JSONObject content = contentNode();
-        // A metadata block to exercise the configureObjectDataPath static-file routing on the legacy side.
+        // Static-file attributes live under jcr:content/metadata — 'detail' is readable only once the
+        // data path is resolved onto the extracted object; 'nestedOnly' is unmapped and must never leak.
         JSONObject metadata = new JSONObject();
+        metadata.put("detail", "sf-detail");
         metadata.put("nestedOnly", "should-not-leak");
         content.put("metadata", metadata);
         JSONObject node = new JSONObject();
