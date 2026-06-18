@@ -141,14 +141,6 @@ This track has no remaining pending tasks.
 > field set + per-page field-presence signal into the D15 history, plus a documented WC → D02
 > migration path).
 
-- [ ] **D29** · **Structured `indexById` deindex parity** — the legacy AEM standalone path deindexed a
-      targeted id that is missing (404) or a publish item no longer delivered; D21's structured
-      `indexById` silently skips it (extract returns empty → no deindex), so a removed/unpublished
-      single page lingers in the index until the next full `indexAll`. Restore the standalone deindex
-      (author + publish) for a missing/undelivered targeted id. Done: `POST index/{name}` /
-      `reindex/{name}` on a now-removed or unpublished id removes it from the index, matching the
-      legacy standalone behaviour.\
-      ↳ **Depends on:** D21.
 - [ ] **D30** · **AEM extraction parity harness** — the D21 "replace the loop" rests on parity that is
       only structurally reviewed (no live AEM in CI). Add a fixture/mock-HTTP test that drives one
       `infinity.json` (page, content-fragment, static-file) through both the structured `extract(id)`

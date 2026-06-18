@@ -284,9 +284,8 @@
   deindex sweep in `finishIndexing` removes stale/unpublished content as before; coverage/preview/
   provenance are captured once from the primary environment. Proven by `DumAemStructuredSourceTest`,
   `DumAemStructuredSourceProviderTest`, `DumAemPluginTest`. ↳ Builds on D20. Bridges to Track H.
-  Parity follow-ups split out of this conversion: **D28** (dependency-graph reindex — structured
-  `publish` currently emits no dependency set), **D29** (single-item deindex in structured
-  `indexById`), **D30** (extraction parity harness), **D31** (parallel extraction, perf).
+  Parity follow-ups split out of this conversion: **D28** (dependency-graph reindex), **D29** (single-item
+  deindex in structured `indexById`), **D30** (extraction parity harness), **D31** (parallel extraction, perf).
 - **D22** — Assets structured adapter: the filesystem Assets connector now indexes through the
   structured SPI instead of its bespoke directory-walk + loose attribute map. `assets-plugin`
   `…plugin.assets.source` — `DumAssetsStructuredSource` (the fixed field set declared as schema-as-code:
@@ -316,6 +315,16 @@
   still on WC → D02 strategies documented in
   [STRUCTURED_VS_TRADITIONAL.md](STRUCTURED_VS_TRADITIONAL.md) §9. Proven by
   `DumWCCoverageAccumulatorTest` + `DumWCPluginProcessCoverageTest`. ↳ Builds on D15. Complements D09.
+- **D29** — Structured `indexById` deindex parity: a targeted single id whose `extract(id)` yields no
+  record (a now-removed page — author 404 / ineligible — or a publish item no longer delivered) is again
+  removed from the index instead of silently lingering until the next full `indexAll`. `aem-plugin`
+  `DumAemPlugin.indexById` now drives each enabled environment with `ifPresentOrElse`, queuing an explicit
+  `DELETE` `TurSNJobItem` (env-stamped, `id`/`source_apps` attrs, source sites + locale) through
+  `addJobItem` on the empty branch — so a missing page deindexes from both author and publish while an
+  undelivered publish item (author still present) deindexes from publish only, matching the legacy
+  standalone behaviour. The explicit delete flows through the processing chain regardless of the
+  `standalone=true` flag that suppresses the tracking-driven sweep, so `POST index/{name}` / `reindex/{name}`
+  on a removed/unpublished id removes it. Proven by `DumAemPluginTest`. ↳ Builds on D21.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 

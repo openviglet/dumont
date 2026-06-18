@@ -17,11 +17,16 @@
 package com.viglet.dumont.connector.plugin.aem.impl;
 
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.SITE;
+import static com.viglet.turing.client.sn.TurSNConstants.ID_ATTR;
+import static com.viglet.turing.client.sn.TurSNConstants.SOURCE_APPS_ATTR;
+import static com.viglet.turing.client.sn.job.TurSNJobAction.DELETE;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -162,20 +167,54 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
                         provenance, byType)));
     }
 
-    /** Index specific content ids across every enabled environment (no deindex sweep). */
+    /**
+     * Index specific content ids across every enabled environment (no tracking-driven deindex
+     * sweep). A targeted id whose extraction yields no record is deindexed in place (roadmap
+     * <strong>D29</strong>) rather than silently skipped.
+     */
     @Override
     public void indexById(String source, List<String> contentId) {
         sourceService.getDumAemSourceByName(source).ifPresentOrElse(aemSource -> {
             DumConnectorSession session = newSession(aemSource);
             for (DumAemEnv environment : provider.enabledEnvironments(aemSource)) {
                 DumAemStructuredSource structuredSource = provider.adapter(aemSource, environment);
-                contentId.forEach(id -> structuredSource.extract(id)
-                        .ifPresent(extracted -> publish(structuredSource,
+                contentId.forEach(id -> structuredSource.extract(id).ifPresentOrElse(
+                        extracted -> publish(structuredSource,
                                 enrichmentChain.apply(structuredSource, extracted), session, null, null,
-                                null)));
+                                null),
+                        () -> deIndexMissing(structuredSource, id, session)));
             }
             dumConnectorContext.finishIndexing(session, true);
         }, () -> log.error("AEM source '{}' not found", source));
+    }
+
+    /**
+     * Restore the legacy standalone deindex (roadmap <strong>D29</strong>): a targeted id whose
+     * extraction yields no record — a now-removed page (author {@code 404} / ineligible) or a publish
+     * item no longer delivered — is removed from this environment's index rather than left as a stale
+     * document until the next full {@link #indexAll(String)}. Because the caller drives every enabled
+     * environment, a missing page deindexes from <em>both</em> author and publish, while an undelivered
+     * publish item (author still present) deindexes from publish only — matching the legacy standalone
+     * behaviour. The explicit DELETE flows through the processing chain regardless of the standalone
+     * flag that suppresses the tracking-driven sweep.
+     */
+    private void deIndexMissing(DumAemStructuredSource structuredSource, String contentId,
+            DumConnectorSession session) {
+        List<String> sites = new ArrayList<>(structuredSource.getSiteNames());
+        if (sites.isEmpty()) {
+            return;
+        }
+        TurSNJobItem deIndexJobItem = new TurSNJobItem(DELETE, sites, structuredSource.getLocale(),
+                Map.of(ID_ATTR, contentId, SOURCE_APPS_ATTR, getProviderName()));
+        deIndexJobItem.setEnvironment(structuredSource.getEnvironment().toString());
+        if (dumConnectorContext.addJobItem(
+                new DumJobItemWithSession(deIndexJobItem, session, Set.of(), true))) {
+            log.info("Standalone deIndex queued for missing id '{}' in AEM source '{}' env {}",
+                    contentId, structuredSource.getSourceName(), structuredSource.getEnvironment());
+        } else {
+            log.error("Failed to queue standalone deIndex for id '{}' in AEM source '{}' env {}",
+                    contentId, structuredSource.getSourceName(), structuredSource.getEnvironment());
+        }
     }
 
     private void publish(DumAemStructuredSource source, DumStructuredRecord structuredRecord,
