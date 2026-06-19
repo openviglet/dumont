@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
@@ -48,7 +49,7 @@ class DumDerivationEnrichersTest {
     private static final java.util.function.Supplier<Instant> CLOCK =
             () -> Instant.parse("2024-06-01T12:00:00Z");
     private static final Date FAR_FUTURE =
-            Date.from(LocalDate.of(2100, 1, 1).atStartOfDay(SAO_PAULO).toInstant());
+            Date.from(LocalDate.of(2100, Month.JANUARY, 1).atStartOfDay(SAO_PAULO).toInstant());
 
     private final DumStructuredSchema schema = DumStructuredSchema.builder()
             .field(DumStructuredField.text("title"))

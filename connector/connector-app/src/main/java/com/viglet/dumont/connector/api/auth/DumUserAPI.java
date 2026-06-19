@@ -120,7 +120,11 @@ public class DumUserAPI {
     }
 
     private String currentUsername() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new IllegalStateException("No authenticated user in the security context");
+        }
+        return authentication.getName();
     }
 
     private boolean isAdmin() {
@@ -313,7 +317,7 @@ public class DumUserAPI {
     public record RegisterRequest(String username, String password, String firstName, String lastName, String email) {}
 
     @PostMapping("/register")
-    public ResponseEntity<?> dumUserRegister(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Object> dumUserRegister(@RequestBody RegisterRequest request) {
         if (configProperties.getAuthentication() == null
                 || !configProperties.getAuthentication().isNewUser()) {
             return ResponseEntity.status(403).body(Map.of(KEY_ERROR,"Self-registration is disabled"));

@@ -49,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DumAemApi {
     private final DumAemPluginProcess dumAemPluginProcess;
     private final Set<String> currentContentIdSet = new HashSet<>();
-    private LocalDateTime currentStandAloneUpdate = LocalDateTime.now();
+    private LocalDateTime currentStandAloneUpdate = LocalDateTime.now(ZoneId.systemDefault());
 
     public DumAemApi(DumAemPluginProcess dumAemPluginProcess) {
         this.dumAemPluginProcess = dumAemPluginProcess;

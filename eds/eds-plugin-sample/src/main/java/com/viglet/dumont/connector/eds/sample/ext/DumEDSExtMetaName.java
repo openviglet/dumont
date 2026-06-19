@@ -59,7 +59,7 @@ public class DumEDSExtMetaName implements DumEDSExtInterface {
             return Optional.empty();
         }
         String content = meta.attr("content");
-        if (content == null || content.isBlank()) {
+        if (content.isBlank()) {
             return Optional.empty();
         }
         return Optional.of(toMultiValue(content));

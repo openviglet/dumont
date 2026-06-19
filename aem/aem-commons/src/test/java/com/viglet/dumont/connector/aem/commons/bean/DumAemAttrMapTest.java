@@ -75,7 +75,7 @@ class DumAemAttrMapTest {
         @Test
         @DisplayName("Should add date value")
         void shouldAddDateValue() {
-            Date date = new Date();
+            Date date = new Date(1_700_000_000_000L);
             valueMap.set("date", date);
 
             assertTrue(valueMap.containsKey("date"));

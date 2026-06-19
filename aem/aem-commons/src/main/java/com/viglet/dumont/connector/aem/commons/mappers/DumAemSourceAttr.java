@@ -1,5 +1,7 @@
 package com.viglet.dumont.connector.aem.commons.mappers;
 
+import java.io.Serializable;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +12,7 @@ import lombok.experimental.Tolerate;
 @Setter
 @Builder
 @ToString
-public class DumAemSourceAttr {
+public class DumAemSourceAttr implements Serializable {
     private String name;
     private String className;
     private boolean uniqueValues;

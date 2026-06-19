@@ -74,8 +74,14 @@ public final class DumCoverageMonitor {
             int dropThreshold) {
         int threshold = dropThreshold <= 0 ? DEFAULT_DROP_THRESHOLD : dropThreshold;
         if (previous == null || current == null) {
-            String source = current != null ? current.source()
-                    : previous != null ? previous.source() : null;
+            String source;
+            if (current != null) {
+                source = current.source();
+            } else if (previous != null) {
+                source = previous.source();
+            } else {
+                source = null;
+            }
             return DumCoverageDrift.none(source, threshold);
         }
         Set<String> names = new LinkedHashSet<>();
