@@ -84,17 +84,7 @@ public class DumEDSPathPatternMatcher {
                 break;
             }
             if (isNamedGroup(patternSeg)) {
-                String name = patternSeg.substring(1, patternSeg.length() - 1);
-                FacetSpec spec = byName.getOrDefault(name, new FacetSpec(name, Set.of()));
-                if (pathIndex >= pathSegments.size()) {
-                    continue;
-                }
-                String candidate = pathSegments.get(pathIndex);
-                if (!spec.accepts(candidate)) {
-                    continue;
-                }
-                result.put(name, candidate);
-                pathIndex++;
+                pathIndex = matchNamedGroup(patternSeg, pathSegments, pathIndex, byName, result);
             } else if (pathIndex < pathSegments.size()
                     && Objects.equals(patternSeg, pathSegments.get(pathIndex))) {
                 pathIndex++;
@@ -104,6 +94,26 @@ public class DumEDSPathPatternMatcher {
             }
         }
         return result;
+    }
+
+    /**
+     * Binds one {@code {name}} segment to the current path segment when the facet spec accepts it,
+     * recording it in {@code result}. Returns the advanced path index on a match, or the unchanged
+     * index when the path is exhausted or the value is rejected (the segment is skipped).
+     */
+    private static int matchNamedGroup(String patternSeg, List<String> pathSegments, int pathIndex,
+            Map<String, FacetSpec> byName, Map<String, String> result) {
+        String name = patternSeg.substring(1, patternSeg.length() - 1);
+        FacetSpec spec = byName.getOrDefault(name, new FacetSpec(name, Set.of()));
+        if (pathIndex >= pathSegments.size()) {
+            return pathIndex;
+        }
+        String candidate = pathSegments.get(pathIndex);
+        if (!spec.accepts(candidate)) {
+            return pathIndex;
+        }
+        result.put(name, candidate);
+        return pathIndex + 1;
     }
 
     static boolean isNamedGroup(String segment) {
