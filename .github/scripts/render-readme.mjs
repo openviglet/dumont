@@ -10,7 +10,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
-import { dirname, basename, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { marked } from "marked";
 
 const [, , inputPath, outputPath, slug, zipArg] = process.argv;
@@ -369,9 +369,9 @@ console.log(`Rendered: ${inputPath} → ${outputPath}`);
 
 function escapeHtml(str) {
   return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
