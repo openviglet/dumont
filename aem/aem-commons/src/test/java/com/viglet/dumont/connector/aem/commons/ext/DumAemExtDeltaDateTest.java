@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 import org.json.JSONObject;
@@ -60,8 +61,7 @@ class DumAemExtDeltaDateTest {
             JSONObject jcrNode = new JSONObject();
             jcrNode.put("jcr:primaryType", "cq:Page");
 
-            Calendar lastModified = Calendar.getInstance();
-            lastModified.set(2024, Calendar.MARCH, 20, 14, 0, 0);
+            Calendar lastModified = new GregorianCalendar(2024, Calendar.MARCH, 20, 14, 0, 0);
             String lastModifiedStr = aemJsonDateFormat.format(lastModified.getTime());
 
             JSONObject jcrContent = new JSONObject();
@@ -81,8 +81,7 @@ class DumAemExtDeltaDateTest {
             JSONObject jcrNode = new JSONObject();
             jcrNode.put("jcr:primaryType", "cq:Page");
 
-            Calendar created = Calendar.getInstance();
-            created.set(2024, Calendar.JANUARY, 15, 10, 30, 0);
+            Calendar created = new GregorianCalendar(2024, Calendar.JANUARY, 15, 10, 30, 0);
             String createdStr = aemJsonDateFormat.format(created.getTime());
             jcrNode.put("jcr:created", createdStr);
 

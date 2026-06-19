@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 import org.json.JSONObject;
@@ -67,8 +68,7 @@ class DumAemExtPublicationDateTest {
             JSONObject jcrNode = new JSONObject();
             jcrNode.put("jcr:primaryType", "cq:Page");
 
-            Calendar lastReplicated = Calendar.getInstance();
-            lastReplicated.set(2024, Calendar.FEBRUARY, 25, 12, 0, 0);
+            Calendar lastReplicated = new GregorianCalendar(2024, Calendar.FEBRUARY, 25, 12, 0, 0);
             String lastReplicatedStr = aemJsonDateFormat.format(lastReplicated.getTime());
 
             JSONObject jcrContent = new JSONObject();

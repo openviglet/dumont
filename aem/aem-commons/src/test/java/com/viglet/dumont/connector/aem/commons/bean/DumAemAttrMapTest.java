@@ -211,7 +211,7 @@ class DumAemAttrMapTest {
         @Test
         @DisplayName("Should add date collection")
         void shouldAddDateCollection() {
-            List<Date> dates = Arrays.asList(new Date(), new Date());
+            List<Date> dates = Arrays.asList(new Date(1_700_000_000_000L), new Date(1_700_000_001_000L));
             valueMap.setAllDates("dates", dates);
 
             assertTrue(valueMap.containsKey("dates"));
