@@ -119,6 +119,15 @@ public class DumEDSSheetParser {
     }
 
     private List<String> parseColumns(JSONArray columns, List<Map<String, String>> rows) {
+        List<String> result = explicitColumns(columns);
+        if (result.isEmpty()) {
+            result = columnsFromRows(rows);
+        }
+        return List.copyOf(result);
+    }
+
+    /** Column names declared in the sheet's {@code columns} array (blanks skipped). */
+    private static List<String> explicitColumns(JSONArray columns) {
         List<String> result = new ArrayList<>();
         if (columns != null) {
             for (int i = 0; i < columns.length(); i++) {
@@ -128,16 +137,20 @@ public class DumEDSSheetParser {
                 }
             }
         }
-        if (result.isEmpty()) {
-            for (Map<String, String> row : rows) {
-                for (String key : row.keySet()) {
-                    if (!result.contains(key)) {
-                        result.add(key);
-                    }
+        return result;
+    }
+
+    /** Fallback column order derived from the row keys, first-seen order, de-duplicated. */
+    private static List<String> columnsFromRows(List<Map<String, String>> rows) {
+        List<String> result = new ArrayList<>();
+        for (Map<String, String> row : rows) {
+            for (String key : row.keySet()) {
+                if (!result.contains(key)) {
+                    result.add(key);
                 }
             }
         }
-        return List.copyOf(result);
+        return result;
     }
 
     public static class UnsupportedSheetTypeException extends RuntimeException {
