@@ -218,17 +218,21 @@ public class DumConnectorSummaryApi {
             if (rows.isEmpty()) return;
             sb.append("### ").append(label).append(" (").append(rows.size()).append(")\n");
             for (Object row : rows) {
-                if (row instanceof Object[] cols) {
-                    sb.append("- ").append(cols[0]);
-                    if (cols.length > 1 && cols[1] != null) sb.append(" — ").append(cols[1]);
-                    if (cols.length > 2 && cols[2] != null) sb.append(" (").append(cols[2]).append(")");
-                    sb.append("\n");
-                } else {
-                    sb.append("- ").append(row).append("\n");
-                }
+                appendSourceRow(sb, row);
             }
         } catch (Exception ignored) {
             // Table may not exist if plugin is not loaded
+        }
+    }
+
+    private static void appendSourceRow(StringBuilder sb, Object row) {
+        if (row instanceof Object[] cols) {
+            sb.append("- ").append(cols[0]);
+            if (cols.length > 1 && cols[1] != null) sb.append(" — ").append(cols[1]);
+            if (cols.length > 2 && cols[2] != null) sb.append(" (").append(cols[2]).append(")");
+            sb.append("\n");
+        } else {
+            sb.append("- ").append(row).append("\n");
         }
     }
 
