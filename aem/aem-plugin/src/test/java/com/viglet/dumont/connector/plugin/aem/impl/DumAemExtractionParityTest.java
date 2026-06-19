@@ -184,7 +184,7 @@ class DumAemExtractionParityTest {
                     .thenReturn(Optional.of(infinityJson));
 
             TurSNJobItem legacyItem = legacyJobItem(session, path, infinityJson);
-            TurSNJobItem structuredItem = structuredJobItem(source, session, path);
+            TurSNJobItem structuredItem = structuredJobItem(source, path);
 
             assertSameShape(legacyItem, structuredItem);
 
@@ -213,7 +213,7 @@ class DumAemExtractionParityTest {
     }
 
     /** The structured path: {@code extract(id)} → {@code DumAemPlugin#toJobItem}. */
-    private TurSNJobItem structuredJobItem(DumAemSource source, DumAemSession session, String path) {
+    private TurSNJobItem structuredJobItem(DumAemSource source, String path) {
         DumAemStructuredSource structuredSource = new DumAemStructuredSource(source, DumAemEnv.AUTHOR,
                 sessionService, objectService, aemService, null, contentDefinitionService,
                 dependencyService, false);

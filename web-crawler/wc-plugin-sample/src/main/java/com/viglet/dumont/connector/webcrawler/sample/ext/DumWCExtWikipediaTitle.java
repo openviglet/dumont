@@ -24,7 +24,7 @@ public class DumWCExtWikipediaTitle implements DumWCExtInterface {
     @Override
     public Optional<TurMultiValue> consume(DumWCContext context) {
         String title = context.getDocument().title();
-        if (title != null && title.endsWith(WIKIPEDIA_SUFFIX)) {
+        if (title.endsWith(WIKIPEDIA_SUFFIX)) {
             title = title.substring(0, title.length() - WIKIPEDIA_SUFFIX.length());
         }
         return Optional.ofNullable(title)
