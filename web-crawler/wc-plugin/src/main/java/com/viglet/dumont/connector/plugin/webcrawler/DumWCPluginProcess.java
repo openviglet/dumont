@@ -269,7 +269,7 @@ public class DumWCPluginProcess {
         if (coverage.isEmpty() || coverage.documentCount() == 0) {
             return;
         }
-        dumCoverageHistoryStore.record(source.getSource(), coverage.documentCount(),
+        dumCoverageHistoryStore.recordSnapshot(source.getSource(), coverage.documentCount(),
                 coverage.toFieldCoverage());
     }
 

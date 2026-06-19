@@ -114,7 +114,7 @@ public final class DumParityGate {
     private static Set<String> urls(DumStructuredSource source, List<String> ids, String urlField) {
         Set<String> set = new LinkedHashSet<>();
         for (String id : ids) {
-            source.extract(id).ifPresent(record -> addUrl(set, record.values().get(urlField)));
+            source.extract(id).ifPresent(rec -> addUrl(set, rec.values().get(urlField)));
         }
         return set;
     }

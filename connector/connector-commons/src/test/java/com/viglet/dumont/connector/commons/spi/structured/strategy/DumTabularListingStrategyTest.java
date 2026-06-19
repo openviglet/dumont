@@ -70,13 +70,13 @@ class DumTabularListingStrategyTest {
 
     @Test
     void extractsColumnsByIndexAndSelector() {
-        DumStructuredRecord record = strategy().extract("CC101").orElseThrow();
+        DumStructuredRecord rec = strategy().extract("CC101").orElseThrow();
 
-        assertEquals("CC101", record.id());
-        assertEquals("CC101", record.values().get("code"));
-        assertEquals("Algoritmos", record.values().get("title"));
-        assertEquals("https://uni.edu/curso/CC101", record.values().get("url"));
-        assertEquals("Computação", record.values().get("area"));
+        assertEquals("CC101", rec.id());
+        assertEquals("CC101", rec.values().get("code"));
+        assertEquals("Algoritmos", rec.values().get("title"));
+        assertEquals("https://uni.edu/curso/CC101", rec.values().get("url"));
+        assertEquals("Computação", rec.values().get("area"));
     }
 
     @Test

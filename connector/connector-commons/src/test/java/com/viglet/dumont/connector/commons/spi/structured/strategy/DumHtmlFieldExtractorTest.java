@@ -65,14 +65,14 @@ class DumHtmlFieldExtractorTest {
         Optional<DumStructuredRecord> result = extractor.extract(DETAIL);
 
         assertTrue(result.isPresent());
-        DumStructuredRecord record = result.get();
-        assertEquals(DETAIL, record.id());
-        assertEquals("Algoritmos", record.values().get("title"));
-        assertEquals("Sorting and complexity", record.values().get("description"));
-        assertEquals(List.of("Computer Science", "Mathematics"), record.values().get("area"));
-        assertEquals(DETAIL, record.values().get("url"));
+        DumStructuredRecord rec = result.get();
+        assertEquals(DETAIL, rec.id());
+        assertEquals("Algoritmos", rec.values().get("title"));
+        assertEquals("Sorting and complexity", rec.values().get("description"));
+        assertEquals(List.of("Computer Science", "Mathematics"), rec.values().get("area"));
+        assertEquals(DETAIL, rec.values().get("url"));
         // No <h2.missing> on the page -> the optional field is omitted, not "".
-        assertFalse(record.has("subtitle"));
-        assertTrue(record.missingMandatoryFields().isEmpty());
+        assertFalse(rec.has("subtitle"));
+        assertTrue(rec.missingMandatoryFields().isEmpty());
     }
 }

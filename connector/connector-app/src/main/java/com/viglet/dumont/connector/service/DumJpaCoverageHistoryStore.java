@@ -53,7 +53,7 @@ public class DumJpaCoverageHistoryStore implements DumCoverageHistoryStore {
 
     @Override
     @Transactional
-    public DumCoverageSnapshot record(String source, int documentCount,
+    public DumCoverageSnapshot recordSnapshot(String source, int documentCount,
             List<DumFieldCoverage> fields) {
         Date capturedAt = new Date();
         DumCoverageRunModel run = DumCoverageRunModel.builder()

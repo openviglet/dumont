@@ -66,9 +66,9 @@ public final class DumDateRangeTextEnricher implements DumEnricher {
     }
 
     @Override
-    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record) {
-        List<Date> starts = dates(record, startField);
-        List<Date> ends = dates(record, endField);
+    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
+        List<Date> starts = dates(rec, startField);
+        List<Date> ends = dates(rec, endField);
         int pairs = Math.min(starts.size(), ends.size());
         if (pairs == 0) {
             return Map.of();
@@ -82,11 +82,11 @@ public final class DumDateRangeTextEnricher implements DumEnricher {
         return labels.isEmpty() ? Map.of() : Map.of(targetField, labels);
     }
 
-    private static List<Date> dates(DumStructuredRecord record, String field) {
-        if (!record.has(field)) {
+    private static List<Date> dates(DumStructuredRecord rec, String field) {
+        if (!rec.has(field)) {
             return List.of();
         }
-        return asValues(record.values().get(field)).stream()
+        return asValues(rec.values().get(field)).stream()
                 .filter(Date.class::isInstance)
                 .map(Date.class::cast)
                 .toList();

@@ -42,7 +42,7 @@ public final class DumInMemoryProvenanceHistoryStore implements DumProvenanceHis
             new ConcurrentHashMap<>();
 
     @Override
-    public DumProvenanceSnapshot record(String source, int documentCount,
+    public DumProvenanceSnapshot recordSnapshot(String source, int documentCount,
             List<DumFieldProvenanceEntry> fields) {
         DumProvenanceSnapshot snapshot = new DumProvenanceSnapshot(source, System.currentTimeMillis(),
                 documentCount, fields);

@@ -52,12 +52,12 @@ public final class DumRecordMerge {
      * document, tagging every field's provenance with {@code source}. The schema and values are
      * unchanged; only the id and the provenance source are rewritten.
      */
-    public static DumStructuredRecord rekey(DumStructuredRecord record, String canonicalId,
+    public static DumStructuredRecord rekey(DumStructuredRecord rec, String canonicalId,
             String source) {
         DumStructuredRecord.Builder builder =
-                DumStructuredRecord.builder(canonicalId, record.schema());
-        record.values().forEach((field, value) ->
-                builder.set(field, value, stamp(record.provenance().get(field), source)));
+                DumStructuredRecord.builder(canonicalId, rec.schema());
+        rec.values().forEach((field, value) ->
+                builder.set(field, value, stamp(rec.provenance().get(field), source)));
         return builder.build();
     }
 

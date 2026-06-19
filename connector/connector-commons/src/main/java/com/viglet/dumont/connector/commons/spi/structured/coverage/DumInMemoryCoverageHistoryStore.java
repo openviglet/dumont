@@ -41,7 +41,7 @@ public final class DumInMemoryCoverageHistoryStore implements DumCoverageHistory
     private final ConcurrentMap<String, Deque<DumCoverageSnapshot>> history = new ConcurrentHashMap<>();
 
     @Override
-    public DumCoverageSnapshot record(String source, int documentCount,
+    public DumCoverageSnapshot recordSnapshot(String source, int documentCount,
             List<DumFieldCoverage> fields) {
         DumCoverageSnapshot snapshot = new DumCoverageSnapshot(source, System.currentTimeMillis(),
                 documentCount, fields);

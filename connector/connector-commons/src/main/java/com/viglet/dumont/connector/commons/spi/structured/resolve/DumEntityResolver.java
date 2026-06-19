@@ -50,7 +50,7 @@ public final class DumEntityResolver {
      * A resolved entity ready to publish: the merged canonical {@code record} and the {@code source}
      * under whose sites/locale it is indexed (the first source that contributed it).
      */
-    public record Entity(DumStructuredSource source, DumStructuredRecord record) {
+    public record Entity(DumStructuredSource source, DumStructuredRecord rec) {
     }
 
     private final DumCanonicalKey canonicalKey;
@@ -65,20 +65,20 @@ public final class DumEntityResolver {
     }
 
     /** Feed one extracted record; merges it into its canonical document or passes it through. */
-    public void add(DumStructuredSource source, DumStructuredRecord record) {
-        Optional<String> canonicalId = canonicalKey.canonicalId(source, record);
+    public void add(DumStructuredSource source, DumStructuredRecord rec) {
+        Optional<String> canonicalId = canonicalKey.canonicalId(source, rec);
         if (canonicalId.isEmpty()) {
-            passthrough.add(new Entity(source, record));
+            passthrough.add(new Entity(source, rec));
             return;
         }
         String id = canonicalId.get();
         Entity existing = merged.get(id);
         if (existing == null) {
             merged.put(id, new Entity(source,
-                    DumRecordMerge.rekey(record, id, source.getSourceName())));
+                    DumRecordMerge.rekey(rec, id, source.getSourceName())));
         } else {
             merged.put(id, new Entity(existing.source(),
-                    DumRecordMerge.merge(existing.record(), record, source.getSourceName())));
+                    DumRecordMerge.merge(existing.rec(), rec, source.getSourceName())));
         }
     }
 

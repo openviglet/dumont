@@ -57,7 +57,7 @@ public final class DumTaxonomyEnricher implements DumEnricher {
     }
 
     @Override
-    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record) {
+    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
         DumTaxonomy taxonomy = library.taxonomy(application.taxonomy()).orElse(null);
         if (taxonomy == null) {
             // The recipe references a taxonomy the library does not (yet) hold — contribute nothing
@@ -66,6 +66,6 @@ public final class DumTaxonomyEnricher implements DumEnricher {
         }
         return DumNormalizationEnricher
                 .lookup(name(), application.sourceField(), application.targetField(), taxonomy.table())
-                .enrich(source, record);
+                .enrich(source, rec);
     }
 }

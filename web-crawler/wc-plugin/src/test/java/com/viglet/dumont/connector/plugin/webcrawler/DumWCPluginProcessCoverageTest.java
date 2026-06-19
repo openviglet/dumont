@@ -80,7 +80,7 @@ class DumWCPluginProcessCoverageTest {
         process.start(source());
 
         ArgumentCaptor<List<DumFieldCoverage>> fields = ArgumentCaptor.captor();
-        verify(store).record(eq("s1"), eq(1), fields.capture());
+        verify(store).recordSnapshot(eq("s1"), eq(1), fields.capture());
         Map<String, DumFieldCoverage> coverage = byField(fields.getValue());
         assertEquals(1, coverage.get("category").present());
         assertEquals(1, coverage.get("category").total());
@@ -101,7 +101,7 @@ class DumWCPluginProcessCoverageTest {
 
         process.start(source());
 
-        verify(store, never()).record(anyString(), anyInt(), anyList());
+        verify(store, never()).recordSnapshot(anyString(), anyInt(), anyList());
     }
 
     @Test
@@ -117,7 +117,7 @@ class DumWCPluginProcessCoverageTest {
 
         process.start(source());
 
-        verify(store, never()).record(anyString(), anyInt(), anyList());
+        verify(store, never()).recordSnapshot(anyString(), anyInt(), anyList());
     }
 
     private static DumWCPluginProcess newProcess(DumConnectorContext context, DumWCFetcher fetcher,

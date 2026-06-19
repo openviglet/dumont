@@ -100,7 +100,7 @@ public final class DumTabularListingStrategy {
             }
             for (Element row : document.select(rowSelector)) {
                 rowNumber++;
-                parseRow(row, rowNumber).ifPresent(record -> built.put(record.id(), record));
+                parseRow(row, rowNumber).ifPresent(rec -> built.put(rec.id(), rec));
             }
         }
         recordsById = built;
@@ -112,12 +112,12 @@ public final class DumTabularListingStrategy {
         Map<String, Object> values = new LinkedHashMap<>();
         columnRules.forEach(rule -> values.put(rule.field(), rule.resolve(row, cells)));
         String id = resolveId(values, rowNumber);
-        DumStructuredRecord.Builder record = DumStructuredRecord.builder(id, schema);
+        DumStructuredRecord.Builder rec = DumStructuredRecord.builder(id, schema);
         // D16: tag each cell value with the column locator it was read from, so the published
         // document can cite where the field came from.
-        columnRules.forEach(rule -> record.set(rule.field(), values.get(rule.field()),
+        columnRules.forEach(rule -> rec.set(rule.field(), values.get(rule.field()),
                 DumFieldProvenance.tabular(rule.locator())));
-        DumStructuredRecord built = record.build();
+        DumStructuredRecord built = rec.build();
         // Header rows / separators map to nothing — skip them rather than emit an id-only document.
         return built.values().isEmpty() ? Optional.empty() : Optional.of(built);
     }

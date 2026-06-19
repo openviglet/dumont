@@ -89,12 +89,12 @@ public final class DumNormalizationEnricher implements DumEnricher {
     }
 
     @Override
-    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record) {
-        if (!record.has(sourceField)) {
+    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
+        if (!rec.has(sourceField)) {
             return Map.of();
         }
         List<Object> derived = new ArrayList<>();
-        for (Object raw : asValues(record.values().get(sourceField))) {
+        for (Object raw : asValues(rec.values().get(sourceField))) {
             mapping.apply(String.valueOf(raw))
                     .filter(mapped -> !mapped.isBlank())
                     .ifPresent(derived::add);

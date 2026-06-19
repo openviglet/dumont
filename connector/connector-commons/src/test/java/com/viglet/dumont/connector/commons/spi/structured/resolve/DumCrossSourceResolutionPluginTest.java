@@ -185,11 +185,11 @@ class DumCrossSourceResolutionPluginTest {
             if (fixture == null) {
                 return Optional.empty();
             }
-            DumStructuredRecord.Builder record = DumStructuredRecord.builder(contentId, SCHEMA);
-            record.set("code", fixture.code(), DumFieldProvenance.css(".code"));
-            record.set("title", fixture.title(), DumFieldProvenance.css("h1"));
-            record.set("workload", fixture.workload(), DumFieldProvenance.css(".workload"));
-            return Optional.of(record.build());
+            DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, SCHEMA);
+            rec.set("code", fixture.code(), DumFieldProvenance.css(".code"));
+            rec.set("title", fixture.title(), DumFieldProvenance.css("h1"));
+            rec.set("workload", fixture.workload(), DumFieldProvenance.css(".workload"));
+            return Optional.of(rec.build());
         }
     }
 

@@ -35,7 +35,7 @@ class DumClassificationEnricherTest {
             .facet("area")
             .build();
 
-    private DumStructuredRecord record(String description) {
+    private DumStructuredRecord rec(String description) {
         DumStructuredRecord.Builder builder = DumStructuredRecord.builder("r", schema);
         if (description != null) {
             builder.set("description", description);
@@ -59,7 +59,7 @@ class DumClassificationEnricherTest {
             return Optional.of("X");
         }).enabled(false).build();
 
-        assertTrue(enricher.enrich(null, record("anything")).isEmpty());
+        assertTrue(enricher.enrich(null, rec("anything")).isEmpty());
         assertEquals(0, calls.get());
     }
 
@@ -68,13 +68,13 @@ class DumClassificationEnricherTest {
         DumClassificationEnricher enricher =
                 base(input -> Optional.of("Exact Sciences")).build();
         assertEquals(Map.of("area", "Exact Sciences"),
-                enricher.enrich(null, record("intro calculus")));
+                enricher.enrich(null, rec("intro calculus")));
     }
 
     @Test
     void emptyClassificationOmitsTheField() {
         DumClassificationEnricher enricher = base(input -> Optional.empty()).build();
-        assertTrue(enricher.enrich(null, record("ambiguous")).isEmpty(),
+        assertTrue(enricher.enrich(null, rec("ambiguous")).isEmpty(),
                 "no confident label -> field omitted, never fabricated");
     }
 
@@ -83,7 +83,7 @@ class DumClassificationEnricherTest {
         DumClassificationEnricher enricher = base(input -> {
             throw new RuntimeException("LLM down");
         }).build();
-        assertTrue(enricher.enrich(null, record("x")).isEmpty(),
+        assertTrue(enricher.enrich(null, rec("x")).isEmpty(),
                 "a failed call omits the field rather than failing the record");
     }
 
@@ -112,7 +112,7 @@ class DumClassificationEnricherTest {
             calls.incrementAndGet();
             return Optional.of("X");
         }).build();
-        assertTrue(enricher.enrich(null, record(null)).isEmpty());
+        assertTrue(enricher.enrich(null, rec(null)).isEmpty());
         assertEquals(0, calls.get());
     }
 
@@ -128,8 +128,8 @@ class DumClassificationEnricherTest {
                 .targetField("area").inputField("description").classifier(classifier).cache(cache)
                 .build();
 
-        enricher.enrich(null, record("intro calculus"));
-        Map<String, Object> second = enricher.enrich(null, record("intro calculus"));
+        enricher.enrich(null, rec("intro calculus"));
+        Map<String, Object> second = enricher.enrich(null, rec("intro calculus"));
 
         assertEquals(Map.of("area", "Exact Sciences"), second);
         assertEquals(1, calls.get(), "the cache spares the second identical call");

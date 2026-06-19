@@ -71,11 +71,11 @@ public final class DumEarliestDateEnricher implements DumEnricher {
     }
 
     @Override
-    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record) {
+    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
         Instant today = DumDateNormalizers.startOfDay(clock.get(), zone);
         Date earliest = sourceFields.stream()
-                .filter(record::has)
-                .flatMap(field -> asValues(record.values().get(field)).stream())
+                .filter(rec::has)
+                .flatMap(field -> asValues(rec.values().get(field)).stream())
                 .filter(Date.class::isInstance)
                 .map(Date.class::cast)
                 .filter(date -> !date.toInstant().isBefore(today))

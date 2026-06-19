@@ -53,7 +53,7 @@ public class DumJpaProvenanceHistoryStore implements DumProvenanceHistoryStore {
 
     @Override
     @Transactional
-    public DumProvenanceSnapshot record(String source, int documentCount,
+    public DumProvenanceSnapshot recordSnapshot(String source, int documentCount,
             List<DumFieldProvenanceEntry> fields) {
         Date capturedAt = new Date();
         DumProvenanceRunModel run = DumProvenanceRunModel.builder()

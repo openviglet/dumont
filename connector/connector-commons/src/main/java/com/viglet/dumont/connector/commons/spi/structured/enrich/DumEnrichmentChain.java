@@ -91,8 +91,8 @@ public final class DumEnrichmentChain {
      * never mutated; a new record is returned only when an enricher actually contributes. When the
      * chain is empty the input is returned as-is.
      */
-    public DumStructuredRecord apply(DumStructuredSource source, DumStructuredRecord record) {
-        DumStructuredRecord current = record;
+    public DumStructuredRecord apply(DumStructuredSource source, DumStructuredRecord rec) {
+        DumStructuredRecord current = rec;
         for (DumEnricher enricher : enrichers) {
             current = applyOne(enricher, source, current);
         }
@@ -100,43 +100,43 @@ public final class DumEnrichmentChain {
     }
 
     private DumStructuredRecord applyOne(DumEnricher enricher, DumStructuredSource source,
-            DumStructuredRecord record) {
+            DumStructuredRecord rec) {
         if (!enricher.appliesTo(source)) {
-            return record;
+            return rec;
         }
         Map<String, Object> contributions;
         try {
-            contributions = enricher.enrich(source, record);
+            contributions = enricher.enrich(source, rec);
         } catch (RuntimeException e) {
             log.warn("Enricher '{}' failed on record '{}' in source '{}' — record left unchanged",
-                    enricher.name(), record.id(), source.getSourceName(), e);
-            return record;
+                    enricher.name(), rec.id(), source.getSourceName(), e);
+            return rec;
         }
         if (contributions == null || contributions.isEmpty()) {
-            return record;
+            return rec;
         }
-        return merge(enricher, record, contributions);
+        return merge(enricher, rec, contributions);
     }
 
-    private DumStructuredRecord merge(DumEnricher enricher, DumStructuredRecord record,
+    private DumStructuredRecord merge(DumEnricher enricher, DumStructuredRecord rec,
             Map<String, Object> contributions) {
         try {
             DumStructuredRecord.Builder builder =
-                    DumStructuredRecord.builder(record.id(), record.schema())
-                            .contentType(record.contentType());
+                    DumStructuredRecord.builder(rec.id(), rec.schema())
+                            .contentType(rec.contentType());
             // Source values first, each keeping its origin (D16); a non-blank contribution then
             // overrides — and re-tags the field's provenance to this enricher — while a blank one is
             // dropped (the source value and its provenance survive).
             DumFieldProvenance enriched = DumFieldProvenance.enrichment(enricher.name());
-            record.values().forEach((field, value) ->
-                    builder.set(field, value, record.provenance().get(field)));
+            rec.values().forEach((field, value) ->
+                    builder.set(field, value, rec.provenance().get(field)));
             contributions.forEach((field, value) -> builder.set(field, value, enriched));
             return builder.build();
         } catch (RuntimeException e) {
             log.warn("Enricher '{}' produced an invalid contribution for record '{}' "
                     + "(undeclared field or type mismatch) — record left unchanged: {}",
-                    enricher.name(), record.id(), e.getMessage());
-            return record;
+                    enricher.name(), rec.id(), e.getMessage());
+            return rec;
         }
     }
 }

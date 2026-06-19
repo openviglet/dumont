@@ -155,7 +155,7 @@ public final class DumBoundedExtraction {
                 failed++;
             }
             if (extraction.present()) {
-                consumer.accept(extraction.record());
+                consumer.accept(extraction.rec());
             }
             processed++;
         }
@@ -211,7 +211,7 @@ public final class DumBoundedExtraction {
                     failed++;
                 }
                 if (extraction.present()) {
-                    consumer.accept(extraction.record());
+                    consumer.accept(extraction.rec());
                 }
                 processed++;
                 if (ids.hasNext()) {
@@ -301,13 +301,13 @@ public final class DumBoundedExtraction {
 
     private static Extraction extractOne(DumStructuredSource source, String contentId) {
         try {
-            Optional<DumStructuredRecord> record = source.extract(contentId);
-            if (record.isEmpty()) {
+            Optional<DumStructuredRecord> rec = source.extract(contentId);
+            if (rec.isEmpty()) {
                 log.warn("No record extracted for id '{}' in source '{}'", contentId,
                         source.getSourceName());
                 return Extraction.empty();
             }
-            return Extraction.of(record.get());
+            return Extraction.of(rec.get());
         } catch (RuntimeException e) {
             log.warn("Extraction failed for id '{}' in source '{}': {}", contentId,
                     source.getSourceName(), e.toString());
@@ -320,9 +320,9 @@ public final class DumBoundedExtraction {
      * extraction threw or was cancelled by the per-extract timeout). Only failures count toward the
      * failure-wave ratio (D34); empties are dropped but not held against the run.
      */
-    private record Extraction(DumStructuredRecord record, boolean failed) {
-        static Extraction of(DumStructuredRecord record) {
-            return new Extraction(record, false);
+    private record Extraction(DumStructuredRecord rec, boolean failed) {
+        static Extraction of(DumStructuredRecord rec) {
+            return new Extraction(rec, false);
         }
 
         static Extraction empty() {
@@ -334,7 +334,7 @@ public final class DumBoundedExtraction {
         }
 
         boolean present() {
-            return record != null;
+            return rec != null;
         }
     }
 

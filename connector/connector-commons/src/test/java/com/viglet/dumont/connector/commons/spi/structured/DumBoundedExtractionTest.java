@@ -49,7 +49,7 @@ class DumBoundedExtractionTest {
         List<String> consumed = new ArrayList<>();
 
         DumBoundedExtraction.extractEach(source, source.discover(), 1,
-                record -> consumed.add(record.id()));
+                rec -> consumed.add(rec.id()));
 
         assertEquals(List.of("id0", "id1", "id2", "id3", "id4"), consumed,
                 "sequential extraction preserves discovery order");
@@ -65,7 +65,7 @@ class DumBoundedExtractionTest {
 
         long start = System.nanoTime();
         DumBoundedExtraction.extractEach(source, source.discover(), 6,
-                record -> consumed.add(record.id()));
+                rec -> consumed.add(rec.id()));
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
 
         assertEquals(12, consumed.size(), "every record reaches the consumer");
@@ -86,10 +86,10 @@ class DumBoundedExtractionTest {
         AtomicInteger maxInConsumer = new AtomicInteger();
         List<String> consumed = new ArrayList<>();
 
-        DumBoundedExtraction.extractEach(source, source.discover(), 8, record -> {
+        DumBoundedExtraction.extractEach(source, source.discover(), 8, rec -> {
             int now = inConsumer.incrementAndGet();
             maxInConsumer.accumulateAndGet(now, Math::max);
-            consumed.add(record.id());
+            consumed.add(rec.id());
             inConsumer.decrementAndGet();
         });
 
@@ -106,7 +106,7 @@ class DumBoundedExtractionTest {
         List<String> consumed = new ArrayList<>();
 
         DumBoundedExtraction.extractEach(source, source.discover(), 4,
-                record -> consumed.add(record.id()));
+                rec -> consumed.add(rec.id()));
 
         assertEquals(4, consumed.size(), "the empty and the failing id are both dropped");
         assertFalse(consumed.contains("id2"));
@@ -123,7 +123,7 @@ class DumBoundedExtractionTest {
         List<String> consumed = new ArrayList<>();
 
         DumExtractionOutcome outcome = DumBoundedExtraction.extractEach(source, source.discover(), 4,
-                200L, record -> consumed.add(record.id()));
+                200L, rec -> consumed.add(rec.id()));
 
         assertTrue(outcome.completed(), "a run with a cancelled extraction still completes");
         assertEquals(6, outcome.processed(), "the hung id is processed (as a failure), not skipped");
@@ -142,7 +142,7 @@ class DumBoundedExtractionTest {
         List<String> consumed = new ArrayList<>();
 
         DumExtractionOutcome outcome = DumBoundedExtraction.extractEach(source, source.discover(), 1,
-                200L, record -> consumed.add(record.id()));
+                200L, rec -> consumed.add(rec.id()));
 
         assertTrue(outcome.completed());
         assertEquals(1, outcome.failed(), "the hung id is the only failure");
@@ -161,7 +161,7 @@ class DumBoundedExtractionTest {
         List<String> consumed = new ArrayList<>();
 
         DumExtractionOutcome outcome = DumBoundedExtraction.extractEach(source, source.discover(), 2,
-                record -> consumed.add(record.id()));
+                rec -> consumed.add(rec.id()));
 
         assertTrue(outcome.completed());
         assertEquals(3, outcome.failed(), "all three throwing extractions are counted as failed");
@@ -177,7 +177,7 @@ class DumBoundedExtractionTest {
         source.emptyFor("id2");
 
         DumExtractionOutcome outcome =
-                DumBoundedExtraction.extractEach(source, source.discover(), 1, record -> {
+                DumBoundedExtraction.extractEach(source, source.discover(), 1, rec -> {
                 });
 
         assertEquals(1, outcome.failed(), "only the throwing id is a failure, the empty one is not");
@@ -189,7 +189,7 @@ class DumBoundedExtractionTest {
     void emptyIdListIsANoOp() {
         SlowSource source = new SlowSource(List.of(), 0);
         DumExtractionOutcome outcome =
-                DumBoundedExtraction.extractEach(source, source.discover(), 4, record -> {
+                DumBoundedExtraction.extractEach(source, source.discover(), 4, rec -> {
                     throw new AssertionError("consumer must not run for an empty id list");
                 });
         assertTrue(outcome.completed(), "an empty run is complete, not interrupted");
@@ -201,10 +201,10 @@ class DumBoundedExtractionTest {
         SlowSource source = new SlowSource(ids(5), 0);
 
         DumExtractionOutcome sequential =
-                DumBoundedExtraction.extractEach(source, source.discover(), 1, record -> {
+                DumBoundedExtraction.extractEach(source, source.discover(), 1, rec -> {
                 });
         DumExtractionOutcome parallel =
-                DumBoundedExtraction.extractEach(source, source.discover(), 4, record -> {
+                DumBoundedExtraction.extractEach(source, source.discover(), 4, rec -> {
                 });
 
         assertTrue(sequential.completed(), "a sequential run that visits every id is complete");
@@ -222,8 +222,8 @@ class DumBoundedExtractionTest {
         List<String> consumed = new ArrayList<>();
 
         DumExtractionOutcome outcome =
-                DumBoundedExtraction.extractEach(source, source.discover(), 1, record -> {
-                    consumed.add(record.id());
+                DumBoundedExtraction.extractEach(source, source.discover(), 1, rec -> {
+                    consumed.add(rec.id());
                     if (consumed.size() == 2) {
                         Thread.currentThread().interrupt();
                     }
@@ -246,8 +246,8 @@ class DumBoundedExtractionTest {
         List<String> consumed = new ArrayList<>();
 
         DumExtractionOutcome outcome =
-                DumBoundedExtraction.extractEach(source, source.discover(), 4, record -> {
-                    consumed.add(record.id());
+                DumBoundedExtraction.extractEach(source, source.discover(), 4, rec -> {
+                    consumed.add(rec.id());
                     if (consumed.size() == 1) {
                         Thread.currentThread().interrupt();
                     }

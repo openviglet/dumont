@@ -84,11 +84,11 @@ class DumStructuredProvenancePluginTest {
 
     @Test
     void recordCarriesProvenanceOnlyForPresentFields() {
-        DumStructuredRecord record = plugin.catalog.extract("c1").orElseThrow();
-        assertEquals(record.values().keySet(), record.provenance().keySet(),
+        DumStructuredRecord rec = plugin.catalog.extract("c1").orElseThrow();
+        assertEquals(rec.values().keySet(), rec.provenance().keySet(),
                 "provenance is a faithful subset of the grounded values");
-        assertEquals("h1.title", record.provenance().get("title").selector());
-        assertEquals("css", record.provenance().get("title").strategy());
+        assertEquals("h1.title", rec.provenance().get("title").selector());
+        assertEquals("css", rec.provenance().get("title").strategy());
     }
 
     @Test
@@ -173,12 +173,12 @@ class DumStructuredProvenancePluginTest {
             if (title == null) {
                 return Optional.empty();
             }
-            DumStructuredRecord.Builder record = DumStructuredRecord.builder(contentId, schema)
+            DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, schema)
                     .set("title", title, DumFieldProvenance.css("h1.title"));
             if (workloadExtractable) {
-                record.set("workload", "60h", DumFieldProvenance.css(".workload"));
+                rec.set("workload", "60h", DumFieldProvenance.css(".workload"));
             }
-            return Optional.of(record.build());
+            return Optional.of(rec.build());
         }
     }
 

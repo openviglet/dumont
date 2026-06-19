@@ -177,7 +177,7 @@ public class DumDbStructuredSource implements DumStructuredSource {
         // (H2/Oracle fold to upper, PostgreSQL to lower), but the declared field name is authoritative.
         Map<String, Object> byLowerKey = new HashMap<>();
         attributes.forEach((key, value) -> byLowerKey.put(key.toLowerCase(Locale.ROOT), value));
-        DumStructuredRecord.Builder record = DumStructuredRecord.builder(documentId(contentId), schema());
+        DumStructuredRecord.Builder rec = DumStructuredRecord.builder(documentId(contentId), schema());
         for (DumStructuredField field : schema().fields()) {
             // The primary key is the document identity, not a content field.
             if (field.name().equalsIgnoreCase(pk)) {
@@ -191,13 +191,13 @@ public class DumDbStructuredSource implements DumStructuredSource {
                     ? splitMultiValued(text)
                     : value;
             try {
-                record.set(field.name(), grounded, DumFieldProvenance.tabular(field.name()));
+                rec.set(field.name(), grounded, DumFieldProvenance.tabular(field.name()));
             } catch (IllegalArgumentException e) {
                 log.warn("DB source '{}' id '{}' field '{}' skipped: {}", source.getName(), contentId,
                         field.name(), e.getMessage());
             }
         }
-        return record.build();
+        return rec.build();
     }
 
     /** Build the declared schema from the source's column&rarr;field declarations. */

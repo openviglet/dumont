@@ -51,8 +51,8 @@ public final class DumProvenance {
      * The provenance tokens for a record's fields, in record order — one per field that carries an
      * origin. Empty when the record has no provenance, so no reserved attribute is emitted.
      */
-    public static List<String> tokens(String source, DumStructuredRecord record) {
-        return record.provenance().entrySet().stream()
+    public static List<String> tokens(String source, DumStructuredRecord rec) {
+        return rec.provenance().entrySet().stream()
                 .map(entry -> token(entry.getKey(), source, entry.getValue()))
                 .toList();
     }
@@ -101,9 +101,9 @@ public final class DumProvenance {
      * Add the compact provenance attribute + spec to a record's would-be document, when the record
      * carries any provenance. A no-op (the maps are returned unchanged) otherwise.
      */
-    public static void contribute(String source, DumStructuredRecord record,
+    public static void contribute(String source, DumStructuredRecord rec,
             Map<String, Object> attributes, List<TurSNJobAttributeSpec> specs) {
-        List<String> tokens = tokens(source, record);
+        List<String> tokens = tokens(source, rec);
         if (tokens.isEmpty()) {
             return;
         }

@@ -44,7 +44,7 @@ public interface DumCanonicalKey {
      * The canonical id for {@code record}, or {@link Optional#empty()} when the record carries no
      * value for the key (it then indexes under its own id, unmerged).
      */
-    Optional<String> canonicalId(DumStructuredSource source, DumStructuredRecord record);
+    Optional<String> canonicalId(DumStructuredSource source, DumStructuredRecord rec);
 
     /**
      * A canonical key built from one or more declared natural-key fields (e.g. a course code, or
@@ -58,10 +58,10 @@ public interface DumCanonicalKey {
         if (keyFields.isEmpty()) {
             throw new IllegalArgumentException("A field canonical key needs at least one field");
         }
-        return (source, record) -> {
+        return (source, rec) -> {
             StringBuilder id = new StringBuilder();
             for (String field : keyFields) {
-                String part = normalize(record.values().get(field));
+                String part = normalize(rec.values().get(field));
                 if (part == null) {
                     return Optional.empty();
                 }

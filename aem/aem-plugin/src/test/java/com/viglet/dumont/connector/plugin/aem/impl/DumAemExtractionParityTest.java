@@ -217,9 +217,9 @@ class DumAemExtractionParityTest {
         DumAemStructuredSource structuredSource = new DumAemStructuredSource(source, DumAemEnv.AUTHOR,
                 sessionService, objectService, aemService, null, contentDefinitionService,
                 dependencyService, false);
-        Optional<DumStructuredRecord> record = structuredSource.extract(path);
-        assertTrue(record.isPresent(), "structured extract(id) yielded no record for " + path);
-        return plugin.toJobItem(structuredSource, record.get());
+        Optional<DumStructuredRecord> rec = structuredSource.extract(path);
+        assertTrue(rec.isPresent(), "structured extract(id) yielded no record for " + path);
+        return plugin.toJobItem(structuredSource, rec.get());
     }
 
     /**

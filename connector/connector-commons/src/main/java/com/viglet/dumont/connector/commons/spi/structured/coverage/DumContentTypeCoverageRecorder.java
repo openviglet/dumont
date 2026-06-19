@@ -59,17 +59,17 @@ public final class DumContentTypeCoverageRecorder {
      * Fold one published record into its content type's bucket. A record with no content type tag is
      * a no-op (the source-level capture still covers it).
      */
-    public void add(DumStructuredRecord record) {
-        String type = record.contentType();
+    public void add(DumStructuredRecord rec) {
+        String type = rec.contentType();
         if (type == null || type.isBlank()) {
             return;
         }
-        DumStructuredSchema schema = record.schema();
+        DumStructuredSchema schema = rec.schema();
         schemas.putIfAbsent(type, schema);
         snapshots.computeIfAbsent(type, t -> DumPreviewSnapshot.builder(schema))
-                .add(record.id(), record.values());
+                .add(rec.id(), rec.values());
         provenances.computeIfAbsent(type, t -> DumProvenanceSnapshot.builder(schema))
-                .add(record.values(), record.provenance());
+                .add(rec.values(), rec.provenance());
     }
 
     /** Whether any typed record was bucketed (an untyped run flushes nothing). */
@@ -87,10 +87,10 @@ public final class DumContentTypeCoverageRecorder {
             String key = key(source, type);
             DumStructuredSchema schema = schemas.get(type);
             DumPreviewSnapshot snapshot = snapshotBuilder.build();
-            coverageHistoryStore.record(key, snapshot.documents().size(),
+            coverageHistoryStore.recordSnapshot(key, snapshot.documents().size(),
                     DumCoverageMonitor.coverage(schema, snapshot));
             DumProvenanceSnapshot.Builder provenance = provenances.get(type);
-            provenanceHistoryStore.record(key, provenance.documentCount(), provenance.fields());
+            provenanceHistoryStore.recordSnapshot(key, provenance.documentCount(), provenance.fields());
         });
     }
 

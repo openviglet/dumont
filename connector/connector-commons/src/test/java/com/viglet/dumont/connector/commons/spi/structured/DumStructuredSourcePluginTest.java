@@ -163,11 +163,11 @@ class DumStructuredSourcePluginTest {
                 () -> DumStructuredRecord.builder("x", schema).set("credits", "not-a-number"));
 
         // Blank values are grounded away; the field stays absent.
-        DumStructuredRecord record = DumStructuredRecord.builder("x", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("x", schema)
                 .set("title", "  ")
                 .build();
-        assertFalse(record.has("title"));
-        assertEquals(List.of("title"), record.missingMandatoryFields());
+        assertFalse(rec.has("title"));
+        assertEquals(List.of("title"), rec.missingMandatoryFields());
     }
 
     private TurSNJobItem itemById(String id) {
@@ -303,14 +303,14 @@ class DumStructuredSourcePluginTest {
 
         @Override
         public Optional<DumStructuredRecord> extract(String contentId) {
-            DumStructuredRecord record = DumStructuredRecord.builder(contentId, schema)
+            DumStructuredRecord rec = DumStructuredRecord.builder(contentId, schema)
                     .set("title", "Title " + contentId)
                     .build();
             if ("c1".equals(contentId)) {
                 // Simulate a pool/JVM shutdown landing on the extraction thread mid-run.
                 Thread.currentThread().interrupt();
             }
-            return Optional.of(record);
+            return Optional.of(rec);
         }
     }
 

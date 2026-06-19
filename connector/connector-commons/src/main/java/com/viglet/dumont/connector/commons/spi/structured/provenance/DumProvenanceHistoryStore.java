@@ -38,7 +38,7 @@ public interface DumProvenanceHistoryStore {
      * Append one run's per-field provenance to the source's history and return the stored snapshot
      * (the implementation stamps {@code capturedAt}).
      */
-    DumProvenanceSnapshot record(String source, int documentCount,
+    DumProvenanceSnapshot recordSnapshot(String source, int documentCount,
             List<DumFieldProvenanceEntry> fields);
 
     /** The source's provenance history, newest run first (possibly empty, never null). */

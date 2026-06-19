@@ -143,12 +143,12 @@ class DumStructuredCoveragePluginTest {
             if (title == null) {
                 return Optional.empty();
             }
-            DumStructuredRecord.Builder record = DumStructuredRecord.builder(contentId, schema)
+            DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, schema)
                     .set("title", title);
             if (workloadExtractable) {
-                record.set("workload", "60h");
+                rec.set("workload", "60h");
             }
-            return Optional.of(record.build());
+            return Optional.of(rec.build());
         }
     }
 

@@ -39,7 +39,7 @@ public interface DumCoverageHistoryStore {
      * Append one run's coverage to the source's history and return the stored snapshot (the
      * implementation stamps {@code capturedAt}).
      */
-    DumCoverageSnapshot record(String source, int documentCount, List<DumFieldCoverage> fields);
+    DumCoverageSnapshot recordSnapshot(String source, int documentCount, List<DumFieldCoverage> fields);
 
     /** The source's coverage history, newest run first (possibly empty, never null). */
     List<DumCoverageSnapshot> history(String source);

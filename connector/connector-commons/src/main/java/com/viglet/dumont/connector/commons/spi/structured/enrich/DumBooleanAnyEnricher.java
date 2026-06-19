@@ -59,13 +59,13 @@ public final class DumBooleanAnyEnricher implements DumEnricher {
     }
 
     @Override
-    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record) {
+    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
         boolean anyPresent = false;
         for (String field : sourceFields) {
-            if (!record.has(field)) {
+            if (!rec.has(field)) {
                 continue;
             }
-            for (Object value : asValues(record.values().get(field))) {
+            for (Object value : asValues(rec.values().get(field))) {
                 anyPresent = true;
                 if (isTrue(value)) {
                     return Map.of(targetField, Boolean.TRUE);

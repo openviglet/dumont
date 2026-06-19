@@ -219,9 +219,9 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         dumConnectorContext.finishIndexing(session, false);
         DumPreviewSnapshot baseline = snapshot.build();
         previewSnapshotStore.save(source, baseline);
-        coverageHistoryStore.record(source, baseline.documents().size(),
+        coverageHistoryStore.recordSnapshot(source, baseline.documents().size(),
                 DumCoverageMonitor.coverage(schema, baseline));
-        provenanceHistoryStore.record(source, provenance.documentCount(), provenance.fields());
+        provenanceHistoryStore.recordSnapshot(source, provenance.documentCount(), provenance.fields());
         byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
     }
 

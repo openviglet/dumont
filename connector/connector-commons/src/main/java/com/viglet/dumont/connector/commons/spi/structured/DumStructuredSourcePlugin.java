@@ -232,22 +232,22 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         DumEntityResolver resolver = new DumEntityResolver(canonicalKey);
         provider().sourceNames().forEach(sourceName -> provider().resolve(sourceName)
                 .ifPresent(source -> source.discover().forEach(contentId -> source.extract(contentId)
-                        .map(record -> enrichmentChain.apply(source, record))
-                        .ifPresent(record -> resolver.add(source, record)))));
+                        .map(rec -> enrichmentChain.apply(source, rec))
+                        .ifPresent(rec -> resolver.add(source, rec)))));
         Map<String, DumConnectorSession> sessions = new LinkedHashMap<>();
         for (DumEntityResolver.Entity entity : resolver.entities()) {
-            DumStructuredRecord record = entity.record();
-            List<String> missing = record.missingMandatoryFields();
+            DumStructuredRecord rec = entity.rec();
+            List<String> missing = rec.missingMandatoryFields();
             if (!missing.isEmpty()) {
                 log.warn("Skipping canonical entity '{}' — missing mandatory field(s) after merge: {}",
-                        record.id(), missing);
+                        rec.id(), missing);
                 continue;
             }
             DumStructuredSource primary = entity.source();
             DumConnectorSession session =
                     sessions.computeIfAbsent(primary.getSourceName(), name -> newSession(primary));
             dumConnectorContext.addJobItem(new DumJobItemWithSession(
-                    toJobItem(primary, record), session, Set.of(), false));
+                    toJobItem(primary, rec), session, Set.of(), false));
         }
         sessions.values().forEach(session -> dumConnectorContext.finishIndexing(session, false));
     }
@@ -275,8 +275,8 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             try {
                 outcome = DumBoundedExtraction.extractEach(structuredSource, structuredSource.discover(),
                         extractionConcurrency(), extractionTimeoutMs(),
-                        record -> publish(structuredSource,
-                                enrichmentChain.apply(structuredSource, record), session, snapshot,
+                        rec -> publish(structuredSource,
+                                enrichmentChain.apply(structuredSource, rec), session, snapshot,
                                 provenance, byType));
             } catch (RuntimeException e) {
                 // An exception escaped the extraction loop — finish standalone (D33) so the
@@ -372,31 +372,31 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             DumPreviewSnapshot.Builder snapshot, DumProvenanceSnapshot.Builder provenance,
             DumContentTypeCoverageRecorder byType) {
         source.extract(contentId).ifPresentOrElse(
-                record -> publish(source, enrichmentChain.apply(source, record), session, snapshot,
+                rec -> publish(source, enrichmentChain.apply(source, rec), session, snapshot,
                         provenance, byType),
                 () -> log.warn("No record extracted for id '{}' in source '{}'", contentId,
                         source.getSourceName()));
     }
 
-    private void publish(DumStructuredSource source, DumStructuredRecord record,
+    private void publish(DumStructuredSource source, DumStructuredRecord rec,
             DumConnectorSession session, DumPreviewSnapshot.Builder snapshot,
             DumProvenanceSnapshot.Builder provenance, DumContentTypeCoverageRecorder byType) {
-        List<String> missing = record.missingMandatoryFields();
+        List<String> missing = rec.missingMandatoryFields();
         if (!missing.isEmpty()) {
             log.warn("Skipping record '{}' in source '{}' — missing mandatory field(s): {}",
-                    record.id(), source.getSourceName(), missing);
+                    rec.id(), source.getSourceName(), missing);
             return;
         }
         dumConnectorContext.addJobItem(new DumJobItemWithSession(
-                toJobItem(source, record), session, Set.of(), false));
+                toJobItem(source, rec), session, Set.of(), false));
         if (snapshot != null) {
-            snapshot.add(record.id(), record.values());
+            snapshot.add(rec.id(), rec.values());
         }
         if (provenance != null) {
-            provenance.add(record.values(), record.provenance());
+            provenance.add(rec.values(), rec.provenance());
         }
         if (byType != null) {
-            byType.add(record);
+            byType.add(rec);
         }
     }
 
@@ -407,12 +407,12 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
      * so the search/RAG side can cite and audit where each attribute came from. Subclasses may
      * override to add provider-specific attributes (e.g. {@code source_apps}).
      */
-    protected TurSNJobItem toJobItem(DumStructuredSource source, DumStructuredRecord record) {
-        Map<String, Object> attributes = new HashMap<>(record.values());
-        attributes.putIfAbsent(TurSNFieldName.ID, record.id());
+    protected TurSNJobItem toJobItem(DumStructuredSource source, DumStructuredRecord rec) {
+        Map<String, Object> attributes = new HashMap<>(rec.values());
+        attributes.putIfAbsent(TurSNFieldName.ID, rec.id());
         projectEmbeddingFields(source.schema(), attributes);
         List<TurSNJobAttributeSpec> specs = new ArrayList<>(source.schema().toAttributeSpecs());
-        DumProvenance.contribute(source.getSourceName(), record, attributes, specs);
+        DumProvenance.contribute(source.getSourceName(), rec, attributes, specs);
         return new TurSNJobItem(TurSNJobAction.CREATE,
                 new ArrayList<>(source.getSiteNames()),
                 source.getLocale(),

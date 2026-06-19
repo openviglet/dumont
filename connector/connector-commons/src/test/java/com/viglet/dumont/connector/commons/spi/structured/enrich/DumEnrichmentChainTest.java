@@ -53,9 +53,9 @@ class DumEnrichmentChainTest {
 
     @Test
     void emptyChainReturnsTheSameInstance() {
-        DumStructuredRecord record = baseRecord();
+        DumStructuredRecord rec = baseRecord();
         assertTrue(DumEnrichmentChain.empty().isEmpty());
-        assertSame(record, DumEnrichmentChain.empty().apply(source, record));
+        assertSame(rec, DumEnrichmentChain.empty().apply(source, rec));
     }
 
     @Test
@@ -113,8 +113,8 @@ class DumEnrichmentChainTest {
             }
 
             @Override
-            public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record) {
-                return fn.apply(record);
+            public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
+                return fn.apply(rec);
             }
         };
     }

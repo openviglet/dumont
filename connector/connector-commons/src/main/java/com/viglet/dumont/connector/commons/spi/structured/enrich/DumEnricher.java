@@ -59,7 +59,7 @@ public interface DumEnricher {
      * thrown exception is caught by the chain and the record is left unchanged, so enrichment is
      * never a single point of failure for a run.
      */
-    Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record);
+    Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec);
 
     /** Whether this enricher runs for the given source. Defaults to all sources. */
     default boolean appliesTo(DumStructuredSource source) {

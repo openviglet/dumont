@@ -41,8 +41,8 @@ class DumNormalizationEnricherTest {
         DumNormalizationEnricher enricher = DumNormalizationEnricher.lookup(
                 "region", "uf", "region", Map.of("SP", "Sudeste"));
 
-        DumStructuredRecord record = DumStructuredRecord.builder("r", schema).set("uf", "SP").build();
-        assertEquals(Map.of("region", "Sudeste"), enricher.enrich(null, record));
+        DumStructuredRecord rec = DumStructuredRecord.builder("r", schema).set("uf", "SP").build();
+        assertEquals(Map.of("region", "Sudeste"), enricher.enrich(null, rec));
     }
 
     @Test
@@ -51,11 +51,11 @@ class DumNormalizationEnricherTest {
                 "areas", "rawAreas", "areas",
                 Map.of("cs", "Computer Science", "math", "Mathematics"));
 
-        DumStructuredRecord record = DumStructuredRecord.builder("r", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("r", schema)
                 .set("rawAreas", List.of("cs", "unknown", "math"))
                 .build();
 
-        Object areas = enricher.enrich(null, record).get("areas");
+        Object areas = enricher.enrich(null, rec).get("areas");
         assertEquals(List.of("Computer Science", "Mathematics"), areas,
                 "unmapped values are omitted, never replaced with a placeholder");
     }
@@ -64,8 +64,8 @@ class DumNormalizationEnricherTest {
     void absentSourceFieldContributesNothing() {
         DumNormalizationEnricher enricher = DumNormalizationEnricher.lookup(
                 "region", "uf", "region", Map.of("SP", "Sudeste"));
-        DumStructuredRecord record = DumStructuredRecord.builder("r", schema).set("uf", "XX").build();
-        assertTrue(enricher.enrich(null, record).isEmpty(), "no mapping -> no contribution");
+        DumStructuredRecord rec = DumStructuredRecord.builder("r", schema).set("uf", "XX").build();
+        assertTrue(enricher.enrich(null, rec).isEmpty(), "no mapping -> no contribution");
 
         DumStructuredRecord noUf = DumStructuredRecord.builder("r", schema).set("region", "x").build();
         assertTrue(enricher.enrich(null, noUf).isEmpty(), "absent source field -> no contribution");

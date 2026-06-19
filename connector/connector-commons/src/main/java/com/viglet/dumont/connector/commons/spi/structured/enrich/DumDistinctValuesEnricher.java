@@ -61,11 +61,11 @@ public final class DumDistinctValuesEnricher implements DumEnricher {
     }
 
     @Override
-    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record) {
+    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
         Set<Object> distinct = new LinkedHashSet<>();
         for (String field : sourceFields) {
-            if (record.has(field)) {
-                distinct.addAll(asValues(record.values().get(field)));
+            if (rec.has(field)) {
+                distinct.addAll(asValues(rec.values().get(field)));
             }
         }
         return distinct.isEmpty() ? Map.of() : Map.of(targetField, List.copyOf(distinct));

@@ -69,13 +69,13 @@ public final class DumHtmlFieldExtractor {
 
     /** Extract a record from an already-parsed detail document, using {@code id} as the content id. */
     public DumStructuredRecord extract(String id, Element scope) {
-        DumStructuredRecord.Builder record = DumStructuredRecord.builder(id, schema);
+        DumStructuredRecord.Builder rec = DumStructuredRecord.builder(id, schema);
         for (DumFieldRule rule : rules) {
             // D16: tag each value with the CSS selector it was read from, so the published document
             // can cite where the field came from.
-            record.set(rule.field(), rule.resolve(scope), DumFieldProvenance.css(rule.selector()));
+            rec.set(rule.field(), rule.resolve(scope), DumFieldProvenance.css(rule.selector()));
         }
-        return record.build();
+        return rec.build();
     }
 
     private Document fetchHtml(String url) {

@@ -70,13 +70,13 @@ class DumDerivationEnrichersTest {
 
     @Test
     void distinctValuesAggregatesAndDedupsPreservingOrder() {
-        DumStructuredRecord record = DumStructuredRecord.builder("r1", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("r1", schema)
                 .set("precoContest", List.of(100.0, 200.0))
                 .set("precoOffer", List.of(200.0, 300.0))
                 .build();
         DumDistinctValuesEnricher preco = new DumDistinctValuesEnricher("preco", "preco",
                 List.of("precoContest", "precoOffer"));
-        assertEquals(List.of(100.0, 200.0, 300.0), preco.enrich(source, record).get("preco"));
+        assertEquals(List.of(100.0, 200.0, 300.0), preco.enrich(source, rec).get("preco"));
     }
 
     @Test
@@ -88,80 +88,80 @@ class DumDerivationEnrichersTest {
 
     @Test
     void booleanAnyIsTrueWhenAnySourceFlagIsTrue() {
-        DumStructuredRecord record = DumStructuredRecord.builder("r1", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("r1", schema)
                 .set("openContest", List.of(false))
                 .set("openOffer", List.of(true))
                 .build();
         DumBooleanAnyEnricher open = new DumBooleanAnyEnricher("inscricaoAberta", "inscricaoAberta",
                 List.of("openContest", "openOffer"), Boolean.FALSE);
-        assertEquals(Boolean.TRUE, open.enrich(source, record).get("inscricaoAberta"));
+        assertEquals(Boolean.TRUE, open.enrich(source, rec).get("inscricaoAberta"));
     }
 
     @Test
     void booleanAnyIsFalseWhenAllPresentFlagsAreFalse() {
-        DumStructuredRecord record = DumStructuredRecord.builder("r1", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("r1", schema)
                 .set("openContest", List.of(false, false))
                 .build();
         DumBooleanAnyEnricher open = new DumBooleanAnyEnricher("inscricaoAberta", "inscricaoAberta",
                 List.of("openContest", "openOffer"), Boolean.FALSE);
-        assertEquals(Boolean.FALSE, open.enrich(source, record).get("inscricaoAberta"));
+        assertEquals(Boolean.FALSE, open.enrich(source, rec).get("inscricaoAberta"));
     }
 
     @Test
     void booleanAnyUsesDefaultWhenNoSourceFlagPresent() {
-        DumStructuredRecord record = DumStructuredRecord.builder("r1", schema).set("title", "x").build();
+        DumStructuredRecord rec = DumStructuredRecord.builder("r1", schema).set("title", "x").build();
         DumBooleanAnyEnricher withDefault = new DumBooleanAnyEnricher("inscricaoAberta",
                 "inscricaoAberta", List.of("openContest"), Boolean.FALSE);
-        assertEquals(Boolean.FALSE, withDefault.enrich(source, record).get("inscricaoAberta"));
+        assertEquals(Boolean.FALSE, withDefault.enrich(source, rec).get("inscricaoAberta"));
 
         DumBooleanAnyEnricher strict = new DumBooleanAnyEnricher("inscricaoAberta", "inscricaoAberta",
                 List.of("openContest"), null);
-        assertTrue(strict.enrich(source, record).isEmpty(),
+        assertTrue(strict.enrich(source, rec).isEmpty(),
                 "a null default leaves the flag absent (strict grounding)");
     }
 
     @Test
     void earliestDatePicksTheSoonestNonPastDateAcrossSources() {
-        DumStructuredRecord record = DumStructuredRecord.builder("r1", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("r1", schema)
                 .set("startOfClasses",
                         List.of(dateAt(2024, 1, 15), dateAt(2024, 9, 1), dateAt(2024, 12, 1)))
                 .build();
         DumEarliestDateEnricher dateSort = new DumEarliestDateEnricher("dateSort", "dateSort",
                 List.of("startOfClasses"), CLOCK, SAO_PAULO, FAR_FUTURE);
-        assertEquals(dateAt(2024, 9, 1), dateSort.enrich(source, record).get("dateSort"),
+        assertEquals(dateAt(2024, 9, 1), dateSort.enrich(source, rec).get("dateSort"),
                 "the 2024-01-15 date is in the past and is excluded");
     }
 
     @Test
     void earliestDateFallsBackToSentinelWhenNoFutureDate() {
-        DumStructuredRecord record = DumStructuredRecord.builder("r1", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("r1", schema)
                 .set("startOfClasses", List.of(dateAt(2020, 1, 1)))
                 .build();
         DumEarliestDateEnricher dateSort = new DumEarliestDateEnricher("dateSort", "dateSort",
                 List.of("startOfClasses"), CLOCK, SAO_PAULO, FAR_FUTURE);
-        assertEquals(FAR_FUTURE, dateSort.enrich(source, record).get("dateSort"));
+        assertEquals(FAR_FUTURE, dateSort.enrich(source, rec).get("dateSort"));
     }
 
     @Test
     void dateRangeTextPairsByIndexSortsChronologicallyAndFormatsInPt() {
-        DumStructuredRecord record = DumStructuredRecord.builder("r1", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("r1", schema)
                 .set("startOfClasses", List.of(dateAt(2024, 9, 1), dateAt(2024, 1, 15)))
                 .set("endOfClasses", List.of(dateAt(2024, 12, 1), dateAt(2024, 2, 20)))
                 .build();
         DumDateRangeTextEnricher text = new DumDateRangeTextEnricher("dateOfClassesText",
                 "dateOfClassesText", "startOfClasses", "endOfClasses", SAO_PAULO);
         assertEquals(List.of("15 Jan - 20 Fev 2024", "01 Set - 01 Dez 2024"),
-                text.enrich(source, record).get("dateOfClassesText"));
+                text.enrich(source, rec).get("dateOfClassesText"));
     }
 
     @Test
     void dateRangeTextContributesNothingWithoutCompletePairs() {
-        DumStructuredRecord record = DumStructuredRecord.builder("r1", schema)
+        DumStructuredRecord rec = DumStructuredRecord.builder("r1", schema)
                 .set("startOfClasses", List.of(dateAt(2024, 9, 1)))
                 .build();
         DumDateRangeTextEnricher text = new DumDateRangeTextEnricher("dateOfClassesText",
                 "dateOfClassesText", "startOfClasses", "endOfClasses", SAO_PAULO);
-        assertTrue(text.enrich(source, record).isEmpty());
+        assertTrue(text.enrich(source, rec).isEmpty());
     }
 
     /**

@@ -83,7 +83,7 @@ public final class DumStructuredPreviewer {
 
         List<DumStructuredRecord> records = allIds.stream()
                 .limit(effectiveN)
-                .map(id -> source.extract(id).map(record -> enrich.apply(source, record)).orElse(null))
+                .map(id -> source.extract(id).map(rec -> enrich.apply(source, rec)).orElse(null))
                 .filter(Objects::nonNull)
                 .toList();
 
@@ -92,15 +92,15 @@ public final class DumStructuredPreviewer {
         List<SampleRecord> samples = new ArrayList<>();
         List<SkippedRecord> skipped = new ArrayList<>();
         Map<String, DumPreviewDoc> currentDocs = new LinkedHashMap<>();
-        for (DumStructuredRecord record : records) {
-            List<String> missing = record.missingMandatoryFields();
+        for (DumStructuredRecord rec : records) {
+            List<String> missing = rec.missingMandatoryFields();
             boolean wouldIndex = missing.isEmpty();
-            samples.add(new SampleRecord(record.id(), new LinkedHashMap<>(record.values()),
+            samples.add(new SampleRecord(rec.id(), new LinkedHashMap<>(rec.values()),
                     wouldIndex, missing));
             if (wouldIndex) {
-                currentDocs.put(record.id(), DumPreviewDoc.of(record.values()));
+                currentDocs.put(rec.id(), DumPreviewDoc.of(rec.values()));
             } else {
-                skipped.add(new SkippedRecord(record.id(), missing));
+                skipped.add(new SkippedRecord(rec.id(), missing));
             }
         }
 
@@ -115,7 +115,7 @@ public final class DumStructuredPreviewer {
             List<DumStructuredRecord> records) {
         int total = records.size();
         return schema.fields().stream().map(field -> {
-            int present = (int) records.stream().filter(record -> record.has(field.name())).count();
+            int present = (int) records.stream().filter(rec -> rec.has(field.name())).count();
             int percent = total == 0 ? 0 : Math.round(present * 100f / total);
             return new Coverage(field.name(), field.type().name(), field.mandatory(), present, total,
                     percent);

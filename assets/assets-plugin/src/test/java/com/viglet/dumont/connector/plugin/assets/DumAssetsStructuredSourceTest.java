@@ -138,10 +138,10 @@ class DumAssetsStructuredSourceTest {
     void extractResolvesASingleFileIntoATypedRecord() {
         var structuredSource = provider(source()).resolve(SOURCE).orElseThrow();
 
-        var record = structuredSource.extract(textFile.toFile().getAbsolutePath()).orElseThrow();
-        assertThat(record.values()).containsEntry(TurSNFieldName.TITLE, "doc.txt");
-        assertThat(record.values()).containsEntry("fileExtension", "txt");
-        assertThat(record.values().get(TurSNFieldName.URL).toString()).endsWith("doc.txt");
+        var rec = structuredSource.extract(textFile.toFile().getAbsolutePath()).orElseThrow();
+        assertThat(rec.values()).containsEntry(TurSNFieldName.TITLE, "doc.txt");
+        assertThat(rec.values()).containsEntry("fileExtension", "txt");
+        assertThat(rec.values().get(TurSNFieldName.URL).toString()).endsWith("doc.txt");
 
         assertThat(structuredSource.extract(tempDir.resolve("missing.txt").toString())).isEmpty();
     }

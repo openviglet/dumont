@@ -39,12 +39,12 @@ class DumRecordMergeTest {
 
     @Test
     void rekeyRewritesIdAndStampsSourceOnEveryField() {
-        DumStructuredRecord record = DumStructuredRecord.builder("a-1", SCHEMA)
+        DumStructuredRecord rec = DumStructuredRecord.builder("a-1", SCHEMA)
                 .set("code", "CS101", DumFieldProvenance.css(".code"))
                 .set("title", "Algorithms", DumFieldProvenance.css("h1"))
                 .build();
 
-        DumStructuredRecord rekeyed = DumRecordMerge.rekey(record, "cs101", "catalog-a");
+        DumStructuredRecord rekeyed = DumRecordMerge.rekey(rec, "cs101", "catalog-a");
 
         assertEquals("cs101", rekeyed.id());
         assertEquals("catalog-a", rekeyed.provenance().get("code").source());
@@ -93,18 +93,18 @@ class DumRecordMergeTest {
     @Test
     void canonicalKeyNormalizesAndJoinsFields() {
         DumCanonicalKey key = DumCanonicalKey.field("code");
-        DumStructuredRecord record = DumStructuredRecord.builder("a-1", SCHEMA)
+        DumStructuredRecord rec = DumStructuredRecord.builder("a-1", SCHEMA)
                 .set("code", "  CS 101 ", DumFieldProvenance.css(".code")).build();
 
-        assertEquals("cs 101", key.canonicalId(null, record).orElseThrow());
+        assertEquals("cs 101", key.canonicalId(null, rec).orElseThrow());
     }
 
     @Test
     void canonicalKeyIsEmptyWhenAKeyFieldIsAbsent() {
         DumCanonicalKey key = DumCanonicalKey.field("code");
-        DumStructuredRecord record = DumStructuredRecord.builder("a-1", SCHEMA)
+        DumStructuredRecord rec = DumStructuredRecord.builder("a-1", SCHEMA)
                 .set("title", "Algorithms", DumFieldProvenance.css("h1")).build();
 
-        assertTrue(key.canonicalId(null, record).isEmpty());
+        assertTrue(key.canonicalId(null, rec).isEmpty());
     }
 }

@@ -81,14 +81,14 @@ public final class DumClassificationEnricher implements DumEnricher {
     }
 
     @Override
-    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord record) {
+    public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
         if (!enabled) {
             return Map.of();
         }
-        if (!overwriteSourced && record.has(targetField)) {
+        if (!overwriteSourced && rec.has(targetField)) {
             return Map.of();
         }
-        String input = inputBuilder.apply(record);
+        String input = inputBuilder.apply(rec);
         if (input == null || input.isBlank()) {
             return Map.of();
         }
@@ -141,8 +141,8 @@ public final class DumClassificationEnricher implements DumEnricher {
 
         /** Reads a single field as the classifier input — the common case. */
         public Builder inputField(String field) {
-            this.inputBuilder = record -> {
-                Object value = record.values().get(field);
+            this.inputBuilder = rec -> {
+                Object value = rec.values().get(field);
                 return value == null ? null : String.valueOf(value);
             };
             return this;

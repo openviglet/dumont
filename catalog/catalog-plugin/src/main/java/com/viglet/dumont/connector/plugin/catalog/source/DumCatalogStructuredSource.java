@@ -112,14 +112,14 @@ public class DumCatalogStructuredSource implements DumStructuredSource {
         if (json == null) {
             return Optional.empty();
         }
-        DumStructuredRecord.Builder record = DumStructuredRecord.builder(contentId, schema);
+        DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, schema);
         for (String field : DumCatalogSchema.FIELDS) {
             Object value = value(json, field);
             if (value != null) {
-                record.set(field, value);
+                rec.set(field, value);
             }
         }
-        return Optional.of(record.build());
+        return Optional.of(rec.build());
     }
 
     /** Fetch + parse the catalog once, indexing records by their engine-assigned id. */

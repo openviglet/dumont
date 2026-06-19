@@ -205,27 +205,27 @@ public class DumAssetsStructuredSource implements DumStructuredSource {
         String fileURL = applyPrefix(file.getAbsolutePath());
         String documentId = source.isTypeInId() ? getContentType() + fileURL : fileURL;
 
-        DumStructuredRecord.Builder record = DumStructuredRecord.builder(documentId, schema());
-        record.set(TurSNFieldName.TITLE, file.getName(), DumFieldProvenance.filesystem("name"));
-        record.set(TurSNFieldName.URL, fileURL, DumFieldProvenance.filesystem("path"));
-        record.set(DATE_FIELD, formatDate(file.lastModified()),
+        DumStructuredRecord.Builder rec = DumStructuredRecord.builder(documentId, schema());
+        rec.set(TurSNFieldName.TITLE, file.getName(), DumFieldProvenance.filesystem("name"));
+        rec.set(TurSNFieldName.URL, fileURL, DumFieldProvenance.filesystem("path"));
+        rec.set(DATE_FIELD, formatDate(file.lastModified()),
                 DumFieldProvenance.filesystem("lastModified"));
         if (IMAGE_EXTENSIONS.contains(ext)) {
-            record.set(TurSNFieldName.IMAGE, fileURL, DumFieldProvenance.filesystem("path"));
+            rec.set(TurSNFieldName.IMAGE, fileURL, DumFieldProvenance.filesystem("path"));
         }
         if (StringUtils.isNotBlank(source.getFileSizeField())) {
-            record.set(source.getFileSizeField(), file.length(),
+            rec.set(source.getFileSizeField(), file.length(),
                     DumFieldProvenance.filesystem("size"));
         }
         if (StringUtils.isNotBlank(source.getFileExtensionField())) {
-            record.set(source.getFileExtensionField(), ext,
+            rec.set(source.getFileExtensionField(), ext,
                     DumFieldProvenance.filesystem("extension"));
         }
         if (StringUtils.isNotBlank(source.getContentField())) {
-            extractContent(file).ifPresent(content -> record.set(source.getContentField(), content,
+            extractContent(file).ifPresent(content -> rec.set(source.getContentField(), content,
                     DumFieldProvenance.filesystem("tika:content")));
         }
-        return Optional.of(record.build());
+        return Optional.of(rec.build());
     }
 
     /** Tika-extract the file body for the optional {@code content} field; grounding drops a blank. */

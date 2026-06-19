@@ -309,7 +309,7 @@ public class DumAemStructuredSource implements DumStructuredSource {
                 ? schemasByType.getOrDefault(contentType, schema)
                 : schema;
         String recordId = firstValue(attributes.get(ID_ATTRIBUTE)).orElse(contentId);
-        DumStructuredRecord record = toRecord(recordId, recordSchema, contentType, attributes);
+        DumStructuredRecord rec = toRecord(recordId, recordSchema, contentType, attributes);
         checksums.put(recordId, String.valueOf(contentDefinitionService
                 .getDeltaDate(aemObject, config, aemSession.getContentMapping()).getTime()));
         locales.put(recordId, DumAemCommonsUtils.getLocaleFromAemObject(config, aemObject));
@@ -317,7 +317,7 @@ public class DumAemStructuredSource implements DumStructuredSource {
         // DumAemJobService.prepareIndexObject path) so the plugin can persist it on publish (D28).
         dependencies.put(recordId, dependencyService.collectDependencies(generic, config,
                 aemSession.getContentMapping()));
-        return Optional.of(record);
+        return Optional.of(rec);
     }
 
     /**
@@ -358,7 +358,7 @@ public class DumAemStructuredSource implements DumStructuredSource {
      */
     private DumStructuredRecord toRecord(String recordId, DumStructuredSchema recordSchema,
             String contentType, DumAemAttrMap attributes) {
-        DumStructuredRecord.Builder record = DumStructuredRecord.builder(recordId, recordSchema)
+        DumStructuredRecord.Builder rec = DumStructuredRecord.builder(recordId, recordSchema)
                 .contentType(contentType);
         for (DumStructuredField field : recordSchema.fields()) {
             TurMultiValue values = attributes.get(field.name());
@@ -366,13 +366,13 @@ public class DumAemStructuredSource implements DumStructuredSource {
                 continue;
             }
             try {
-                record.set(field.name(), new ArrayList<>(values), DumFieldProvenance.aem(field.name()));
+                rec.set(field.name(), new ArrayList<>(values), DumFieldProvenance.aem(field.name()));
             } catch (IllegalArgumentException e) {
                 log.warn("AEM source '{}' id '{}' field '{}' skipped: {}", source.getName(), recordId,
                         field.name(), e.getMessage());
             }
         }
-        return record.build();
+        return rec.build();
     }
 
     private static Optional<String> firstValue(TurMultiValue values) {
