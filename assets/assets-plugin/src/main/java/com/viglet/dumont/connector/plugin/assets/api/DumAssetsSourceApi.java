@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = "*") @RestController
+@RestController
 @RequestMapping("/api/v2/assets/source")
 @Tag(name = "Assets Source", description = "Assets Source")
 public class DumAssetsSourceApi {

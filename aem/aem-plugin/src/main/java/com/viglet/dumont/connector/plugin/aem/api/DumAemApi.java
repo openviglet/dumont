@@ -29,7 +29,6 @@ import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,7 +41,6 @@ import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
-@CrossOrigin(origins = "*")
 @Slf4j
 @RestController
 @RequestMapping("/api/v2/aem")

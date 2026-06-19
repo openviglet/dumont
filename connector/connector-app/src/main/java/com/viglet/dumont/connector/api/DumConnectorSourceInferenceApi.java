@@ -23,7 +23,6 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,7 +65,6 @@ import lombok.extern.slf4j.Slf4j;
  * @author Alexandre Oliveira
  * @since 2026.3.2
  */
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/connector/source/infer")
 @Tag(name = "Source Inference", description = "AI-assisted source shape + field-manifest inference")

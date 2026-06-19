@@ -20,7 +20,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +36,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Alexandre Oliveira
  * @since 2026.2
  */
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/discovery")
 @Tag(name = "Discovery API", description = "Runtime feature flags for the frontend")

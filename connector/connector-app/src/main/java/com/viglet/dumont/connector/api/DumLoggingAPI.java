@@ -19,7 +19,6 @@ import java.util.Map;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,7 +45,6 @@ import tools.jackson.databind.ObjectMapper;
  * {@code none} or the backing store is disabled.
  */
 @Slf4j
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/connector/logging")
 @Tag(name = "Logging API", description = "Connector indexing log history")

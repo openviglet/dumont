@@ -18,7 +18,6 @@ package com.viglet.dumont.connector.api;
 
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +32,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Alexandre Oliveira
  * @since 2026.2
  */
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/ping")
 @Tag(name = "Ping API", description = "Backend liveness probe")

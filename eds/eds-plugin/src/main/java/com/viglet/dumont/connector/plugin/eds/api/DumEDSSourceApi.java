@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,7 +45,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/eds/source")
 @Tag(name = "EDS Source", description = "Adobe Edge Delivery Services Source")

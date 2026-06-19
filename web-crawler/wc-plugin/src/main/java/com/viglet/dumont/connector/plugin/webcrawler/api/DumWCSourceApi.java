@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/wc/source")
 @Tag(name = "Web Crawler Source", description = "Web Crawler Source")

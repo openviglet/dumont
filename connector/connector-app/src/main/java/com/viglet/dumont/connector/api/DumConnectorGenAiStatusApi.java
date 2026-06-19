@@ -16,7 +16,6 @@
 
 package com.viglet.dumont.connector.api;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
  * {@code GET /api/sn/{siteName}/chat/enabled} (no Turing change, same {@code Key} auth as every
  * other outbound call). See {@code docs/EMBEDDING_PARTITION_CONTRACT.md}.
  */
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/connector/genai-status")
 @Tag(name = "GenAI Status", description = "Whether a Turing SN site has RAG enabled")

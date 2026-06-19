@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +47,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * <p>Designed to be cheap (single per-source SELECT) so a Kubernetes liveness
  * probe or Dumont admin dashboard can poll it freely.
  */
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v2/eds/health")
 @Tag(name = "EDS Health", description = "Adobe Edge Delivery Services connector health")
