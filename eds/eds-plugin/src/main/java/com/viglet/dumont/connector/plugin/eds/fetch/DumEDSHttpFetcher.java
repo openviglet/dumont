@@ -28,6 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.plugin.eds.discovery.DumEDSIndexClient;
@@ -88,6 +89,7 @@ public class DumEDSHttpFetcher {
 
     private final HttpClient httpClient;
 
+    @Autowired
     public DumEDSHttpFetcher() {
         this(HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)

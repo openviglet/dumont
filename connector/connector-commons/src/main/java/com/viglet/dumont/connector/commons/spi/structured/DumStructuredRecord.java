@@ -208,10 +208,10 @@ public final class DumStructuredRecord {
                 }
                 return validateType(field, kept.getFirst());
             }
-            List<Object> values = new ArrayList<>();
+            List<Object> validatedValues = new ArrayList<>();
             collection.stream().filter(v -> !isBlank(v))
-                    .forEach(v -> values.add(validateType(field, v)));
-            return values.isEmpty() ? null : values;
+                    .forEach(v -> validatedValues.add(validateType(field, v)));
+            return validatedValues.isEmpty() ? null : validatedValues;
         }
 
         private Object validateType(DumStructuredField field, Object value) {

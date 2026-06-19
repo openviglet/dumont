@@ -142,6 +142,7 @@ public class DumConnectorSystemInfoApi {
                 indexing.put("elasticsearchIndex", propertyEntry(elasticsearchIndex, "dumont.indexing.elasticsearch.index"));
                 indexing.put("elasticsearchUsername", propertyEntry(elasticsearchUsername, "dumont.indexing.elasticsearch.username"));
             }
+            default -> { /* unknown provider — only the provider name is reported above */ }
         }
         info.put("indexing", indexing);
 
