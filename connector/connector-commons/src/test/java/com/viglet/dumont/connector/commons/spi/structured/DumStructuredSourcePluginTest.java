@@ -157,10 +157,11 @@ class DumStructuredSourcePluginTest {
                 .field(DumStructuredField.builder("credits").type(TurSEFieldType.INT).build())
                 .build();
 
+        DumStructuredRecord.Builder ghostBuilder = DumStructuredRecord.builder("x", schema);
+        assertThrows(IllegalArgumentException.class, () -> ghostBuilder.set("ghost", "v"));
+        DumStructuredRecord.Builder creditsBuilder = DumStructuredRecord.builder("x", schema);
         assertThrows(IllegalArgumentException.class,
-                () -> DumStructuredRecord.builder("x", schema).set("ghost", "v"));
-        assertThrows(IllegalArgumentException.class,
-                () -> DumStructuredRecord.builder("x", schema).set("credits", "not-a-number"));
+                () -> creditsBuilder.set("credits", "not-a-number"));
 
         // Blank values are grounded away; the field stays absent.
         DumStructuredRecord rec = DumStructuredRecord.builder("x", schema)

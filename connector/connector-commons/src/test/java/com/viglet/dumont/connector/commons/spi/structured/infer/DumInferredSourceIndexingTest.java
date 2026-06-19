@@ -108,9 +108,12 @@ class DumInferredSourceIndexingTest {
 
     @Test
     void unknownDraftIsNotMaterializable() {
+        DumSourceDraft draft = DumSourceDraft.unknown("nope");
+        DumHtmlFetcher fetcher = DumHtmlFetcher.ofPages(PAGES);
+        List<String> sites = List.of("S");
         assertThrows(UnsupportedOperationException.class,
-                () -> DumSourceDraftMaterializer.materialize(DumSourceDraft.unknown("nope"),
-                        DumHtmlFetcher.ofPages(PAGES), LISTING, SOURCE, "P", List.of("S"), Locale.US));
+                () -> DumSourceDraftMaterializer.materialize(draft, fetcher, LISTING, SOURCE, "P",
+                        sites, Locale.US));
     }
 
     private static TurSNJobItem itemById(CapturingContext context, String id) {
