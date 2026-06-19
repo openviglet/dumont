@@ -54,6 +54,7 @@ import reactor.core.publisher.Mono;
 public class AemNodeNavigator {
 
     private static final int DEFAULT_PARALLELISM = 4;
+    private static final String PATH_FORMAT = "%s/%s";
 
     private final DumAemObjectService objectService;
     private final DumAemJobService jobService;
@@ -146,7 +147,7 @@ public class AemNodeNavigator {
 
         aemObject.getJcrNode().toMap().forEach((nodeName, nodeValue) -> {
             if (isIndexableNode(config, nodeName)) {
-                String childPath = "%s/%s".formatted(aemObject.getPath(), nodeName);
+                String childPath = PATH_FORMAT.formatted(aemObject.getPath(), nodeName);
 
                 if (shouldProcessNode(session, childPath)) {
                     processChildNode(session, childPath);
@@ -164,7 +165,7 @@ public class AemNodeNavigator {
 
         return Flux.fromIterable(aemObject.getJcrNode().toMap().entrySet())
                 .filter(entry -> isIndexableNode(config, entry.getKey()))
-                .map(entry -> "%s/%s".formatted(aemObject.getPath(), entry.getKey()))
+                .map(entry -> PATH_FORMAT.formatted(aemObject.getPath(), entry.getKey()))
                 .filter(childPath -> shouldProcessNode(session, childPath))
                 .flatMap(childPath -> processChildNodeReactive(session, childPath), reactiveParallelism)
                 .then();
@@ -283,7 +284,7 @@ public class AemNodeNavigator {
 
         aemObject.getJcrNode().toMap().forEach((nodeName, nodeValue) -> {
             if (isIndexableNode(config, nodeName)) {
-                String childPath = "%s/%s".formatted(aemObject.getPath(), nodeName);
+                String childPath = PATH_FORMAT.formatted(aemObject.getPath(), nodeName);
 
                 if (shouldProcessNode(session, childPath)) {
                     DumAemCommonsUtils.getInfinityJson(childPath, config, false)

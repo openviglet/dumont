@@ -66,8 +66,8 @@ public class DumAemExtSampleModelJson extends DumAemExtModelJsonBase<DumAemSampl
         return Map.of(
                 "news", TYPE_ARTICLE,
                 "blog", TYPE_ARTICLE,
-                "article", TYPE_ARTICLE,
-                "event", TYPE_EVENT);
+                TYPE_ARTICLE, TYPE_ARTICLE,
+                TYPE_EVENT, TYPE_EVENT);
     }
 
     @Override

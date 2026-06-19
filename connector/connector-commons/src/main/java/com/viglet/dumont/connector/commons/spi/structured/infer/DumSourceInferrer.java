@@ -56,6 +56,7 @@ public final class DumSourceInferrer {
 
     /** Cap on the markup excerpt handed to the model — enough to classify, bounded for cost. */
     private static final int MAX_SAMPLE_CHARS = 12_000;
+    private static final String COLUMN_INDEX = "columnIndex";
 
     static final String SYSTEM_PROMPT = """
             You are a data-integration analyst classifying the STRUCTURE of a web source so it can be \
@@ -191,8 +192,8 @@ public final class DumSourceInferrer {
             // Grounding: a field with no name is dropped, never published as a placeholder.
             return Optional.empty();
         }
-        Integer columnIndex = field.has("columnIndex") && !field.isNull("columnIndex")
-                ? field.optInt("columnIndex")
+        Integer columnIndex = field.has(COLUMN_INDEX) && !field.isNull(COLUMN_INDEX)
+                ? field.optInt(COLUMN_INDEX)
                 : null;
         return Optional.of(new DumInferredField(
                 name.trim(),

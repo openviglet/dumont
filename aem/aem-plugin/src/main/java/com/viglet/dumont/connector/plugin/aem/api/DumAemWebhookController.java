@@ -67,6 +67,7 @@ public class DumAemWebhookController {
     private static final String DATA_FIELD = "data";
     private static final String TYPE_FIELD = "type";
     private static final String RECIPIENT_CLIENT_ID_FIELD = "recipient_client_id";
+    private static final String KEY_STATUS = "status";
 
     private final DumAemPluginProcess dumAemPluginProcess;
     private final String adobeIoClientId;
@@ -107,7 +108,7 @@ public class DumAemWebhookController {
         if (!isAuthorized(payload)) {
             log.warn("AEM Webhook rejected | source={} | reason=recipient_client_id mismatch", source);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("status", "unauthorized"));
+                    .body(Map.of(KEY_STATUS,"unauthorized"));
         }
 
         String eventType = asString(payload.get(TYPE_FIELD));
@@ -119,11 +120,11 @@ public class DumAemWebhookController {
         DumAemEvent event = mapEvent(eventType);
         if (event == null) {
             log.debug("AEM Webhook ignored | source={} | unsupported type={}", source, eventType);
-            return ResponseEntity.ok(Map.of("status", "ignored"));
+            return ResponseEntity.ok(Map.of(KEY_STATUS,"ignored"));
         }
         if (!StringUtils.hasText(resourcePath)) {
             log.warn("AEM Webhook missing data.resource_path | source={} | type={}", source, eventType);
-            return ResponseEntity.badRequest().body(Map.of("status", "missing-resource-path"));
+            return ResponseEntity.badRequest().body(Map.of(KEY_STATUS,"missing-resource-path"));
         }
 
         DumAemPathList pathList = DumAemPathList.builder()
@@ -134,7 +135,7 @@ public class DumAemWebhookController {
                 .build();
 
         dumAemPluginProcess.sentToIndexStandaloneAsync(source, pathList);
-        return ResponseEntity.accepted().body(Map.of("status", "accepted"));
+        return ResponseEntity.accepted().body(Map.of(KEY_STATUS,"accepted"));
     }
 
     /**

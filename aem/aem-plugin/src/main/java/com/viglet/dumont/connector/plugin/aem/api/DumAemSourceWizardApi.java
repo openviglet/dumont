@@ -40,6 +40,10 @@ public class DumAemSourceWizardApi {
     /** JCR content paths are always '/'-delimited (not the OS file separator). */
     private static final String JCR_PATH_SEPARATOR = "/";
 
+    private static final String RESP_SUCCESS = "success";
+    private static final String RESP_MESSAGE = "message";
+    private static final String RESP_CHILDREN = "children";
+
     private final DumAemExtractorScannerService extractorScanner;
 
     public DumAemSourceWizardApi(DumAemExtractorScannerService extractorScanner) {
@@ -72,20 +76,20 @@ public class DumAemSourceWizardApi {
                     log.info("AEM test-connection {} returned HTTP {}", testUrl, statusCode);
                     if (statusCode == 200) {
                         return ResponseEntity.ok(Map.of(
-                                "success", true,
-                                "message", "Connection successful"));
+                                RESP_SUCCESS, true,
+                                RESP_MESSAGE, "Connection successful"));
                     }
                     return ResponseEntity.ok(Map.of(
-                            "success", false,
-                            "message", "AEM returned HTTP %d. Check your credentials and endpoint."
+                            RESP_SUCCESS, false,
+                            RESP_MESSAGE, "AEM returned HTTP %d. Check your credentials and endpoint."
                                     .formatted(statusCode)));
                 });
             }
         } catch (Exception e) {
             log.error("AEM connection test failed: {}", e.getMessage(), e);
             return ResponseEntity.ok(Map.of(
-                    "success", false,
-                    "message", "Connection failed: " + e.getMessage()));
+                    RESP_SUCCESS, false,
+                    RESP_MESSAGE, "Connection failed: " + e.getMessage()));
         }
     }
 
@@ -123,17 +127,17 @@ public class DumAemSourceWizardApi {
                     }
                 }
                 return ResponseEntity.ok(Map.of(
-                        "success", true,
-                        "children", children));
+                        RESP_SUCCESS, true,
+                        RESP_CHILDREN, children));
             }
             return ResponseEntity.ok(Map.of(
-                    "success", false,
-                    "children", Collections.emptyList()));
+                    RESP_SUCCESS, false,
+                    RESP_CHILDREN, Collections.emptyList()));
         } catch (Exception e) {
             log.error("AEM browse failed: {}", e.getMessage(), e);
             return ResponseEntity.ok(Map.of(
-                    "success", false,
-                    "children", Collections.emptyList()));
+                    RESP_SUCCESS, false,
+                    RESP_CHILDREN, Collections.emptyList()));
         }
     }
 }

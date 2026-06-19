@@ -49,6 +49,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class DumCatalogParityService {
 
+    private static final String SOURCE_NOT_FOUND = "Catalog source id not found: ";
+
     private final DumCatalogSourceRepository sourceRepository;
     private final DumCatalogSourceProvider sourceProvider;
 
@@ -68,7 +70,7 @@ public class DumCatalogParityService {
      */
     public DumParityReport parity(String id, DumParityCriteria criteria) {
         DumCatalogSource source = sourceRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Catalog source id not found: " + id));
+                () -> new IllegalArgumentException(SOURCE_NOT_FOUND + id));
         return parity(source, criteria);
     }
 
@@ -78,7 +80,7 @@ public class DumCatalogParityService {
      */
     public DumParityReport migrateToNative(String id, DumParityCriteria criteria) {
         DumCatalogSource source = sourceRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Catalog source id not found: " + id));
+                () -> new IllegalArgumentException(SOURCE_NOT_FOUND + id));
         DumParityReport report = parity(source, criteria);
         if (report.passed()) {
             source.setMigrationState(DumCatalogMigrationState.NATIVE);
@@ -96,7 +98,7 @@ public class DumCatalogParityService {
     /** Reverse a source to the sidecar leg. Always allowed (D09 safe fallback). */
     public DumCatalogSource rollbackToSidecar(String id) {
         DumCatalogSource source = sourceRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Catalog source id not found: " + id));
+                () -> new IllegalArgumentException(SOURCE_NOT_FOUND + id));
         source.setMigrationState(DumCatalogMigrationState.SIDECAR);
         return sourceRepository.save(source);
     }
