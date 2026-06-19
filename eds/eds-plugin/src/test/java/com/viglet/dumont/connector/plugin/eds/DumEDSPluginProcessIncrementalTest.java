@@ -106,7 +106,7 @@ class DumEDSPluginProcessIncrementalTest {
             priorA.setPath(PAGE_A);
             priorA.setLastModified(LAST_MOD_VALUE);
             priorA.setChecksum("prior-checksum");
-            priorA.setLastSeenAt(Instant.now().minusSeconds(3600));
+            priorA.setLastSeenAt(Instant.parse("2026-01-01T00:00:00Z").minusSeconds(3600));
             state.seed(priorA);
 
             DumEDSPluginProcess process = newProcess(context, state);
@@ -340,9 +340,9 @@ class DumEDSPluginProcessIncrementalTest {
             });
             state.setLastModified(lastModified);
             state.setChecksum(checksum);
-            state.setLastSeenAt(Instant.now());
+            state.setLastSeenAt(Instant.parse("2026-01-01T00:00:00Z"));
             if (indexed) {
-                state.setLastIndexedAt(Instant.now());
+                state.setLastIndexedAt(Instant.parse("2026-01-01T00:00:00Z"));
             }
             return state;
         }
@@ -350,7 +350,7 @@ class DumEDSPluginProcessIncrementalTest {
         @Override
         public DumEDSCrawlState touch(DumEDSCrawlState prior) {
             touched.add(prior.getPath());
-            prior.setLastSeenAt(Instant.now());
+            prior.setLastSeenAt(Instant.parse("2026-01-01T00:00:00Z"));
             return prior;
         }
 

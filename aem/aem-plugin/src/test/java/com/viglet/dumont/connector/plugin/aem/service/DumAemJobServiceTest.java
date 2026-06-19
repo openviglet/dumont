@@ -156,7 +156,7 @@ class DumAemJobServiceTest {
             attributes.put("title", "Test Title");
 
             when(dumAemContentDefinitionService.getDeltaDate(any(), any(), any()))
-                    .thenReturn(new Date());
+                    .thenReturn(new Date(1_700_000_000_000L));
 
             // When
             TurSNJobItem result = service.getTurSNJobItem(session, aemObject, locale, attributes,
@@ -204,7 +204,7 @@ class DumAemJobServiceTest {
             when(dumAemService.getTargetAttrValueMap(any(), any()))
                     .thenReturn(new DumAemAttrMap());
             when(dumAemContentDefinitionService.getDeltaDate(any(), any(), any()))
-                    .thenReturn(new Date());
+                    .thenReturn(new Date(1_700_000_000_000L));
             when(dumConnectorContext.addJobItem(any())).thenReturn(true);
 
             // When
@@ -224,7 +224,7 @@ class DumAemJobServiceTest {
             lenient().when(dumAemService.getTargetAttrValueMap(any(), any()))
                     .thenReturn(new DumAemAttrMap());
             lenient().when(dumAemContentDefinitionService.getDeltaDate(any(), any(), any()))
-                    .thenReturn(new Date());
+                    .thenReturn(new Date(1_700_000_000_000L));
             lenient().when(dumConnectorContext.addJobItem(any())).thenReturn(true);
 
             // When

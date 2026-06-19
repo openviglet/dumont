@@ -36,7 +36,7 @@ class DumConnectorIndexingTest {
 
     @BeforeEach
     void setUp() {
-        testDate = new Date();
+        testDate = new Date(1_700_000_000_000L);
         testSites = Arrays.asList("site1", "site2");
         indexing = DumConnectorIndexing.builder()
                 .id(1)
