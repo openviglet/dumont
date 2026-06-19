@@ -27,6 +27,7 @@ hs_err_pid*
 .metals
 .bloop
 .sonar_lock
+/scripts/sonar/.sonar-token
 /.idea
 
 .flattened-pom.xml

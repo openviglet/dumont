@@ -63,6 +63,22 @@ cd dumont-react && npm run dev
 ```
 > **Windows PowerShell**: quote `-D` flags, e.g. `"-DskipTests"`
 
+### Code Quality (SonarQube)
+Dumont **reuses the SonarQube Docker stack that lives in the Turing repo** — there is
+no separate stack here. Local analysis runs against `http://localhost:9100` under the
+project key `viglet_dumont` (distinct from Turing's `viglet_turing`).
+
+- **Premise**: the SonarQube instance is assumed to be **already up**. If not, start it
+  once from the Turing repo: `docker compose -f containers/sonarqube/docker-compose.yaml up -d`.
+- `scripts/sonar/sonar-scan.sh` — bootstraps an analysis token (cached in
+  `scripts/sonar/.sonar-token`, git-ignored) and runs `mvn compile sonar:sonar` from the
+  reactor root (all backend modules, frontend build skipped). Env: `SONAR_URL`,
+  `SONAR_ADMIN_PASSWORD` (default `TuringSonar@2026`), `SONAR_GOAL` (`verify` for coverage).
+- `scripts/sonar/sonar-issues.sh` — lists open issues via the Web API (rule breakdown by
+  default; `SONAR_RULE=<rule>` or `SONAR_LIST=1` for detail).
+- Root `pom.xml` carries `sonar.projectKey=viglet_dumont` and CPD exclusions for
+  `**/persistence/{dto,model}/**`. See `scripts/sonar/README.md`.
+
 ### Backend Conventions
 - **Spring Boot 4.0.5** with **Java 21**
 - Persistence: JPA/Hibernate with H2 (default), PostgreSQL optional
