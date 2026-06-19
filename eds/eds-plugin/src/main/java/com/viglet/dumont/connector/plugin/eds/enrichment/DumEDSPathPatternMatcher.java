@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -95,7 +96,7 @@ public class DumEDSPathPatternMatcher {
                 result.put(name, candidate);
                 pathIndex++;
             } else if (pathIndex < pathSegments.size()
-                    && patternSeg.equals(pathSegments.get(pathIndex))) {
+                    && Objects.equals(patternSeg, pathSegments.get(pathIndex))) {
                 pathIndex++;
             } else {
                 // literal mismatch — pattern does not apply to this path

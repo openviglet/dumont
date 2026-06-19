@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
@@ -54,7 +55,7 @@ class DumDateNormalizersTest {
     void startOfDayIsLocalMidnightRegardlessOfReferenceInstant() {
         // 2024-03-10 02:00 UTC is still 2024-03-09 23:00 in São Paulo (UTC-3) -> day is the 9th.
         Instant reference = Instant.parse("2024-03-10T02:00:00Z");
-        Instant expected = LocalDate.of(2024, 3, 9).atStartOfDay(SAO_PAULO).toInstant();
+        Instant expected = LocalDate.of(2024, Month.MARCH, 9).atStartOfDay(SAO_PAULO).toInstant();
         assertEquals(expected, DumDateNormalizers.startOfDay(reference, SAO_PAULO));
     }
 

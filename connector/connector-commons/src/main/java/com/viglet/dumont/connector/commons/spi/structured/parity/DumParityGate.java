@@ -71,15 +71,23 @@ public final class DumParityGate {
         int baselineCount = baselineIds.size();
         int candidateCount = candidateIds.size();
         int countDelta = Math.abs(baselineCount - candidateCount);
-        double countDeltaRatio = baselineCount == 0 ? (candidateCount == 0 ? 0.0 : 1.0)
-                : (double) countDelta / baselineCount;
+        double countDeltaRatio;
+        if (baselineCount == 0) {
+            countDeltaRatio = candidateCount == 0 ? 0.0 : 1.0;
+        } else {
+            countDeltaRatio = (double) countDelta / baselineCount;
+        }
         boolean countWithinTolerance = countDeltaRatio <= gate.countTolerance() + EPSILON;
 
         Set<String> baselineUrls = urls(baseline, baselineIds, gate.urlField());
         Set<String> candidateUrls = urls(candidate, candidateIds, gate.urlField());
         int matched = (int) baselineUrls.stream().filter(candidateUrls::contains).count();
-        double coverage = baselineUrls.isEmpty() ? (candidateUrls.isEmpty() ? 1.0 : 0.0)
-                : (double) matched / baselineUrls.size();
+        double coverage;
+        if (baselineUrls.isEmpty()) {
+            coverage = candidateUrls.isEmpty() ? 1.0 : 0.0;
+        } else {
+            coverage = (double) matched / baselineUrls.size();
+        }
         boolean coverageMet = coverage >= gate.minUrlCoverage() - EPSILON;
 
         List<String> missing = baselineUrls.stream().filter(url -> !candidateUrls.contains(url))
