@@ -47,7 +47,7 @@ import com.viglet.dumont.connector.aem.commons.ext.DumAemContentTypeField;
  * {@link #materialize(DumAemRecipeParameters)} binds the recipe to one institution's parameters,
  * producing a ready {@link DumAemContentType}. It is called fresh per resolution, so a recipe bump
  * (registering a higher version in the {@link DumAemRecipeLibrary}) re-applies to every institution
- * tracking the recipe by {@link DumAemRecipeRef#LATEST latest} on the next materialization.
+ * tracking the recipe by {@link DumAemRecipeRef#LATEST_VERSION latest} on the next materialization.
  *
  * @param <T> the root model bean type for the model.json response
  *

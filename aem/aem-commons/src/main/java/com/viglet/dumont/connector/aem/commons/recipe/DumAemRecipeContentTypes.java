@@ -53,7 +53,7 @@ import com.viglet.dumont.connector.aem.commons.ext.DumAemExtModelJsonBase;
  * <p>
  * Both methods resolve the recipes from the library <em>fresh on every call</em>, so registering a
  * higher recipe version (a bump) re-applies to every institution that bound the recipe by
- * {@link DumAemRecipeRef#LATEST latest} on the next extraction — without touching any extension. A
+ * {@link DumAemRecipeRef#LATEST_VERSION latest} on the next extraction — without touching any extension. A
  * binding whose ref does not resolve (an unregistered/pinned-away recipe) is skipped, so a single
  * missing recipe never breaks the others.
  *

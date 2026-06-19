@@ -38,7 +38,7 @@
  * {@link com.viglet.dumont.connector.aem.commons.recipe.DumAemRecipeContentTypes} binding. Because the
  * binding materializes from the library's current state on every call, registering a higher recipe
  * version re-applies to every institution tracking it by
- * {@link com.viglet.dumont.connector.aem.commons.recipe.DumAemRecipeRef#LATEST latest} on the next
+ * {@link com.viglet.dumont.connector.aem.commons.recipe.DumAemRecipeRef#LATEST_VERSION latest} on the next
  * extraction, while a pinned ref ({@code course-offer@1}) stays frozen.
  *
  * <p>

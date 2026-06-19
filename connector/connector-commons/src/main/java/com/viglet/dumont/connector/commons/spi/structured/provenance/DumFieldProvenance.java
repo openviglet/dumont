@@ -49,7 +49,7 @@ package com.viglet.dumont.connector.commons.spi.structured.provenance;
 public record DumFieldProvenance(String strategy, String selector, Double confidence, String source) {
 
     /** The strategy name used for values an enricher derived. */
-    public static final String ENRICHMENT = "enrichment";
+    public static final String ENRICHMENT_STRATEGY = "enrichment";
 
     public DumFieldProvenance {
         if (strategy == null || strategy.isBlank()) {
@@ -90,7 +90,7 @@ public record DumFieldProvenance(String strategy, String selector, Double confid
     /** A value an enricher derived (roadmap D04); {@code name} identifies the enricher. */
     public static DumFieldProvenance enrichment(String name) {
         String suffix = (name == null || name.isBlank()) ? "" : ":" + name.trim();
-        return new DumFieldProvenance(ENRICHMENT + suffix, null, null, null);
+        return new DumFieldProvenance(ENRICHMENT_STRATEGY + suffix, null, null, null);
     }
 
     /** This provenance with a confidence attached (the value/selector/source are unchanged). */

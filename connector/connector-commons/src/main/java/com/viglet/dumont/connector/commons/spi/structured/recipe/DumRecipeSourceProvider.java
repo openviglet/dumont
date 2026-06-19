@@ -39,7 +39,7 @@ import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetche
  * <p>
  * Because {@link #resolve(String)} materializes the source on demand from the library's current
  * state, bumping a recipe (registering a new version under a name a binding tracks via
- * {@link DumRecipeRef#LATEST}) re-applies to every source bound to it on the next run — no per-source
+ * {@link DumRecipeRef#LATEST_VERSION}) re-applies to every source bound to it on the next run — no per-source
  * edit. {@link #enrichmentChain()} aggregates the taxonomy enrichers of every bound recipe into one
  * library-backed chain to hand to the {@code DumStructuredSourcePlugin}; taxonomy bumps then re-apply
  * live (the enrichers resolve their taxonomy at apply time).

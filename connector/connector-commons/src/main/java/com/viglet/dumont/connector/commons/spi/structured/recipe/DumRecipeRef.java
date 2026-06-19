@@ -23,12 +23,12 @@ package com.viglet.dumont.connector.commons.spi.structured.recipe;
  * <p>
  * A source binds to a recipe <em>by reference</em> ({@code sigaa@3}), never by copy, which is what
  * lets a single recipe bump re-apply to every source that uses it. A ref with no explicit version
- * ({@code sigaa}, {@link #LATEST}) resolves to the highest registered version, so pinning is opt-in:
- * pin ({@code sigaa@3}) to freeze a source on a known-good recipe, or track {@link #LATEST} to ride
+ * ({@code sigaa}, {@link #LATEST_VERSION}) resolves to the highest registered version, so pinning is opt-in:
+ * pin ({@code sigaa@3}) to freeze a source on a known-good recipe, or track {@link #LATEST_VERSION} to ride
  * every bump.
  *
  * @param name    the artifact name (required)
- * @param version the pinned version, or {@link #LATEST} to resolve the newest registered version
+ * @param version the pinned version, or {@link #LATEST_VERSION} to resolve the newest registered version
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -36,7 +36,7 @@ package com.viglet.dumont.connector.commons.spi.structured.recipe;
 public record DumRecipeRef(String name, int version) {
 
     /** Sentinel version meaning "resolve the highest registered version". */
-    public static final int LATEST = 0;
+    public static final int LATEST_VERSION = 0;
 
     public DumRecipeRef {
         if (name == null || name.isBlank()) {
@@ -54,7 +54,7 @@ public record DumRecipeRef(String name, int version) {
 
     /** A ref that tracks the newest registered version of {@code name}. */
     public static DumRecipeRef latest(String name) {
-        return new DumRecipeRef(name, LATEST);
+        return new DumRecipeRef(name, LATEST_VERSION);
     }
 
     /**
@@ -79,7 +79,7 @@ public record DumRecipeRef(String name, int version) {
     }
 
     public boolean isLatest() {
-        return version == LATEST;
+        return version == LATEST_VERSION;
     }
 
     @Override

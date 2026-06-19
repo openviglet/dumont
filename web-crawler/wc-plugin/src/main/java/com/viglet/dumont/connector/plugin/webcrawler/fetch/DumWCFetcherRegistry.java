@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  * Resolves the {@link DumWCFetcher} a source should crawl with (roadmap D07). Every {@code
  * DumWCFetcher} bean on the classpath is registered by its {@link DumWCFetcher#name() name}; a source
  * selects one through its {@code fetcher} config, falling back to the {@code dumont.wc.fetcher}
- * default (itself defaulting to {@link DumWCJsoupFetcher#NAME jsoup}). An unknown name resolves to the
+ * default (itself defaulting to {@link DumWCJsoupFetcher#FETCHER_NAME jsoup}). An unknown name resolves to the
  * default rather than failing the crawl.
  *
  * @author Alexandre Oliveira
@@ -37,9 +37,9 @@ public class DumWCFetcherRegistry {
         fetchers.forEach(fetcher -> byName.put(key(fetcher.name()), fetcher));
         DumWCFetcher resolved = byName.get(key(defaultName));
         if (resolved == null) {
-            resolved = byName.get(DumWCJsoupFetcher.NAME);
+            resolved = byName.get(DumWCJsoupFetcher.FETCHER_NAME);
             log.warn("Configured default fetcher '{}' not found; using '{}'", defaultName,
-                    DumWCJsoupFetcher.NAME);
+                    DumWCJsoupFetcher.FETCHER_NAME);
         }
         this.defaultFetcher = resolved;
         log.info("Web crawler fetchers registered: {} (default: {})", byName.keySet(),

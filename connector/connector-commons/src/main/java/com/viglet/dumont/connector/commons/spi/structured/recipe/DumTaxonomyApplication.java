@@ -27,7 +27,7 @@ package com.viglet.dumont.connector.commons.spi.structured.recipe;
  * (see {@link DumTaxonomyEnricher}). That indirection is what lets a taxonomy bump re-apply to every
  * source whose recipe declares this application, without rebuilding the enrichment chain.
  *
- * @param taxonomy    the taxonomy to apply, by reference (pinned or {@link DumRecipeRef#LATEST})
+ * @param taxonomy    the taxonomy to apply, by reference (pinned or {@link DumRecipeRef#LATEST_VERSION})
  * @param sourceField the field whose raw value is normalized
  * @param targetField the field the canonical value is written to (may equal {@code sourceField})
  *

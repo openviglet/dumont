@@ -21,7 +21,7 @@ import com.viglet.dumont.connector.webcrawler.commons.fetch.DumWCFetcher;
 @DisplayName("DumWCFetcherRegistry (D07)")
 class DumWCFetcherRegistryTest {
 
-    private final DumWCFetcher jsoup = named(DumWCJsoupFetcher.NAME);
+    private final DumWCFetcher jsoup = named(DumWCJsoupFetcher.FETCHER_NAME);
     private final DumWCFetcher headless = named("headless");
 
     @Test

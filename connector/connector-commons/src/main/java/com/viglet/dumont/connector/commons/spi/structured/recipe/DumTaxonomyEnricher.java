@@ -31,7 +31,7 @@ import com.viglet.dumont.connector.commons.spi.structured.enrich.DumNormalizatio
  * It is the runtime side of a recipe's {@link DumTaxonomyApplication}: rather than capturing the
  * taxonomy table when the enrichment chain is built, it looks the taxonomy up in the library on
  * every record. A taxonomy bump (a new version registered for the same name, or the
- * {@link DumRecipeRef#LATEST} target advancing) therefore re-applies immediately to every source
+ * {@link DumRecipeRef#LATEST_VERSION} target advancing) therefore re-applies immediately to every source
  * whose chain holds this enricher — the chain itself never has to be rebuilt.
  *
  * <p>

@@ -36,7 +36,7 @@ import com.viglet.dumont.connector.aem.commons.ext.DumAemContentType;
  * into a ready {@link DumAemContentType} for one institution — the recipe's shared schema plus that
  * institution's per-source parameters. Re-resolving after a bump yields the new version, which is why
  * registering a higher version re-applies to every institution tracking the recipe by
- * {@link DumAemRecipeRef#LATEST latest}.
+ * {@link DumAemRecipeRef#LATEST_VERSION latest}.
  *
  * <p>
  * The store is thread-safe; registering a new version is a single put, so a bump is atomic from a

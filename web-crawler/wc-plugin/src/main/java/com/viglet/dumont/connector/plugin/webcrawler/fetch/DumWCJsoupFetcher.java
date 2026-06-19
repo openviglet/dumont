@@ -35,7 +35,7 @@ import com.viglet.dumont.connector.webcrawler.commons.fetch.DumWCFetcher;
 @Component
 public class DumWCJsoupFetcher implements DumWCFetcher {
 
-    public static final String NAME = "jsoup";
+    public static final String FETCHER_NAME = "jsoup";
     private static final String AUTHORIZATION = "Authorization";
     private static final String IF_NONE_MATCH = "If-None-Match";
     private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
@@ -44,7 +44,7 @@ public class DumWCJsoupFetcher implements DumWCFetcher {
 
     @Override
     public String name() {
-        return NAME;
+        return FETCHER_NAME;
     }
 
     @Override

@@ -25,12 +25,12 @@ package com.viglet.dumont.connector.aem.commons.recipe;
  * {@code aem-commons} can version recipes without depending on the connector commons (the same reason
  * {@code DumAemContentTypeField} mirrors {@code DumStructuredField}). An extension binds to a recipe
  * <em>by reference</em> ({@code course-offer@3}), never by copy, which is what lets a single recipe
- * bump re-apply to every institution that uses it. A bare {@code course-offer} ({@link #LATEST})
+ * bump re-apply to every institution that uses it. A bare {@code course-offer} ({@link #LATEST_VERSION})
  * resolves to the highest registered version, so pinning is opt-in: pin to freeze an institution on a
- * known-good recipe, or track {@link #LATEST} to ride every bump.
+ * known-good recipe, or track {@link #LATEST_VERSION} to ride every bump.
  *
  * @param name    the recipe name (required)
- * @param version the pinned version, or {@link #LATEST} to resolve the newest registered version
+ * @param version the pinned version, or {@link #LATEST_VERSION} to resolve the newest registered version
  *
  * @author Alexandre Oliveira
  * @since 2026.3.5
@@ -38,7 +38,7 @@ package com.viglet.dumont.connector.aem.commons.recipe;
 public record DumAemRecipeRef(String name, int version) {
 
     /** Sentinel version meaning "resolve the highest registered version". */
-    public static final int LATEST = 0;
+    public static final int LATEST_VERSION = 0;
 
     public DumAemRecipeRef {
         if (name == null || name.isBlank()) {
@@ -56,7 +56,7 @@ public record DumAemRecipeRef(String name, int version) {
 
     /** A ref that tracks the newest registered version of {@code name}. */
     public static DumAemRecipeRef latest(String name) {
-        return new DumAemRecipeRef(name, LATEST);
+        return new DumAemRecipeRef(name, LATEST_VERSION);
     }
 
     /**
@@ -81,7 +81,7 @@ public record DumAemRecipeRef(String name, int version) {
     }
 
     public boolean isLatest() {
-        return version == LATEST;
+        return version == LATEST_VERSION;
     }
 
     @Override
