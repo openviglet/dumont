@@ -60,9 +60,9 @@ class DumEDSSheetParserTest {
         Map<String, String> contaDigital = page.rows().stream()
                 .filter(r -> "/pt-br/pf/conta-digital".equals(r.get("path")))
                 .findFirst().orElseThrow();
-        assertThat(contaDigital).containsOnlyKeys("path");
-        assertThat(contaDigital).doesNotContainKey("title");
-        assertThat(contaDigital).doesNotContainKey("description");
+        assertThat(contaDigital).containsOnlyKeys("path")
+                .doesNotContainKey("title")
+                .doesNotContainKey("description");
     }
 
     @Test
@@ -74,9 +74,9 @@ class DumEDSSheetParserTest {
         Map<String, String> imprensa = page.rows().stream()
                 .filter(r -> "/pt-br/sala-de-imprensa".equals(r.get("path")))
                 .findFirst().orElseThrow();
-        assertThat(imprensa).containsKey("title");
-        assertThat(imprensa).doesNotContainKey("date");
-        assertThat(imprensa).doesNotContainKey("description");
+        assertThat(imprensa).containsKey("title")
+                .doesNotContainKey("date")
+                .doesNotContainKey("description");
     }
 
     @Test
@@ -109,7 +109,7 @@ class DumEDSSheetParserTest {
         DumEDSSheetPage page = parser.parse(minimal);
 
         assertThat(page.total()).isEqualTo(2);
-        assertThat(page.offset()).isEqualTo(0);
+        assertThat(page.offset()).isZero();
         assertThat(page.limit()).isEqualTo(2);
         assertThat(page.sheetType()).isEqualTo(DumEDSSheetPage.TYPE_SHEET);
         assertThat(page.columns()).containsExactly("path");

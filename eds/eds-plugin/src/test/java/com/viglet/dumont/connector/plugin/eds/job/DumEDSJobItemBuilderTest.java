@@ -61,17 +61,18 @@ class DumEDSJobItemBuilderTest {
         assertThat(item.getLocale()).isEqualTo(Locale.forLanguageTag(TAG_PT_BR));
 
         Map<String, Object> attrs = item.getAttributes();
-        assertThat(attrs).containsEntry("id", "https://example.invalid/pt-br/pf/cartao-de-credito");
-        assertThat(attrs).containsEntry("url", "https://example.invalid/pt-br/pf/cartao-de-credito");
-        assertThat(attrs).containsEntry("path", "/pt-br/pf/cartao-de-credito");
-        assertThat(attrs).containsEntry(FIELD_TITLE, "Cartão");
-        assertThat(attrs).containsEntry(FIELD_DESCRIPTION, "Cartão de crédito sem anuidade");
-        assertThat(attrs).containsEntry("body", "Body content here");
-        assertThat(attrs).containsEntry("lastModified", LAST_MOD_GMT);
-        assertThat(attrs).containsEntry("locale", "pt-br");
-        assertThat(attrs).containsEntry("audience", "pf");
-        assertThat(attrs).containsEntry("section", "cartao-de-credito");
-        assertThat(attrs).containsEntry("source_apps", "EDS");
+        assertThat(attrs)
+                .containsEntry("id", "https://example.invalid/pt-br/pf/cartao-de-credito")
+                .containsEntry("url", "https://example.invalid/pt-br/pf/cartao-de-credito")
+                .containsEntry("path", "/pt-br/pf/cartao-de-credito")
+                .containsEntry(FIELD_TITLE, "Cartão")
+                .containsEntry(FIELD_DESCRIPTION, "Cartão de crédito sem anuidade")
+                .containsEntry("body", "Body content here")
+                .containsEntry("lastModified", LAST_MOD_GMT)
+                .containsEntry("locale", "pt-br")
+                .containsEntry("audience", "pf")
+                .containsEntry("section", "cartao-de-credito")
+                .containsEntry("source_apps", "EDS");
     }
 
     @Test
@@ -114,8 +115,9 @@ class DumEDSJobItemBuilderTest {
                 null, null, null);
 
         String originalChecksum = builder.build(source, original).getChecksum();
-        assertThat(originalChecksum).isNotEqualTo(builder.build(source, titleChanged).getChecksum());
-        assertThat(originalChecksum).isNotEqualTo(builder.build(source, bodyChanged).getChecksum());
+        assertThat(originalChecksum)
+                .isNotEqualTo(builder.build(source, titleChanged).getChecksum())
+                .isNotEqualTo(builder.build(source, bodyChanged).getChecksum());
     }
 
     @Test
@@ -169,8 +171,7 @@ class DumEDSJobItemBuilderTest {
 
         Map<String, Object> attrs = builder.build(source, page).getAttributes();
 
-        assertThat(attrs).doesNotContainKey("body");
-        assertThat(attrs).doesNotContainKey("lastModified");
+        assertThat(attrs).doesNotContainKey("body").doesNotContainKey("lastModified");
     }
 
     private static DumEDSSource testSource() {

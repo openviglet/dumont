@@ -87,7 +87,7 @@ class DumEDSHealthApiTest {
 
         DumEDSHealthApi.Health health = api.health();
         assertThat(health.status()).isEqualTo(DumEDSHealthApi.STATUS_UP);
-        assertThat(health.sourceCount()).isEqualTo(0);
+        assertThat(health.sourceCount()).isZero();
         assertThat(health.sources()).isEmpty();
     }
 
@@ -101,7 +101,7 @@ class DumEDSHealthApiTest {
                 .health();
 
         assertThat(health.sources()).singleElement().satisfies(s -> {
-            assertThat(s.pagesIndexed()).isEqualTo(0);
+            assertThat(s.pagesIndexed()).isZero();
             assertThat(s.lastSeenAt()).isNull();
             assertThat(s.lastIndexedAt()).isNull();
         });

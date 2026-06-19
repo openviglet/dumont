@@ -233,6 +233,6 @@ class DumDbStructuredSourceTest {
         // No mandatory fields when derived → all three rows publish, every column indexed as text.
         assertThat(context.published).extracting(TurSNJobItem::getId).containsExactly("1", "2", "3");
         // Derived field names are the DB's own column labels (legacy parity), case as the DB returns.
-        assertThat(context.published.getFirst().getAttributes().values()).contains("Algorithms");
+        assertThat(context.published.getFirst().getAttributes()).containsValue("Algorithms");
     }
 }

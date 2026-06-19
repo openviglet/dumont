@@ -99,10 +99,10 @@ class DumCatalogStructuredSourceTest {
                 .containsEntry(DumCatalogSchema.STATE, List.of("MG"))
                 .containsEntry(DumCatalogSchema.HIGHLIGHT, true)
                 .containsEntry(DumCatalogSchema.CAPACITY, 120);
-        assertThat(rec.values().get(DumCatalogSchema.FACULTY))
-                .isEqualTo(List.of("Prof. A", "Prof. B"));
-        assertThat(rec.values().get(DumCatalogSchema.AUDIENCE_SUMMARY))
-                .isEqualTo(List.of("Para gestores", "Para empreendedores"));
+        assertThat(rec.values())
+                .containsEntry(DumCatalogSchema.FACULTY, List.of("Prof. A", "Prof. B"))
+                .containsEntry(DumCatalogSchema.AUDIENCE_SUMMARY,
+                        List.of("Para gestores", "Para empreendedores"));
     }
 
     @Test

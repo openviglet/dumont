@@ -70,8 +70,8 @@ class DumEDSIndexClientLiveTest {
 
         // WKND has grown to ~250 paths and continues to expand; floor at 100,
         // sanity ceiling at 2000.
-        assertThat(rows).hasSizeBetween(100, 2000);
-        assertThat(rows).allMatch(row -> row.get("path") != null);
+        assertThat(rows).hasSizeBetween(100, 2000)
+                .allMatch(row -> row.get("path") != null);
 
         List<String> paths = rows.stream().map(r -> r.get("path")).toList();
         assertThat(paths).contains(

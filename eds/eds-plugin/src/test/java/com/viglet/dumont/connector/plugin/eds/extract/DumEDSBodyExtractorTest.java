@@ -44,10 +44,10 @@ class DumEDSBodyExtractorTest {
 
         String body = extractor.extract(doc, "main", List.of());
 
-        assertThat(body).contains("Conta PF");
-        assertThat(body).contains("Sua conta digital sem tarifas.");
-        assertThat(body).doesNotContain("window.foo");
-        assertThat(body).doesNotContain("color:red");
+        assertThat(body).contains("Conta PF")
+                .contains("Sua conta digital sem tarifas.")
+                .doesNotContain("window.foo")
+                .doesNotContain("color:red");
     }
 
     @Test
@@ -64,8 +64,7 @@ class DumEDSBodyExtractorTest {
 
         String body = extractor.extract(doc, "main", List.of(".cta", "aside"));
 
-        assertThat(body).doesNotContain("Baixe o App");
-        assertThat(body).contains("Use o PIX integrado");
+        assertThat(body).doesNotContain("Baixe o App").contains("Use o PIX integrado");
     }
 
     @Test
@@ -90,8 +89,7 @@ class DumEDSBodyExtractorTest {
 
         String body = extractor.extract(doc, "main", List.of());
 
-        assertThat(body).doesNotContain("   ");
-        assertThat(body).doesNotContain("\n\n\n");
+        assertThat(body).doesNotContain("   ").doesNotContain("\n\n\n");
     }
 
     @Test
@@ -115,8 +113,8 @@ class DumEDSBodyExtractorTest {
         String body = extractor.extract(doc, "main",
                 List.of("nav", "footer", "aside", "header", "[role=navigation]"));
 
-        assertThat(body).contains("Welcome to the site");
-        assertThat(body).contains("Digital account, pix, investments and credit card");
-        assertThat(body).doesNotContain("Baixe o App");
+        assertThat(body).contains("Welcome to the site")
+                .contains("Digital account, pix, investments and credit card")
+                .doesNotContain("Baixe o App");
     }
 }

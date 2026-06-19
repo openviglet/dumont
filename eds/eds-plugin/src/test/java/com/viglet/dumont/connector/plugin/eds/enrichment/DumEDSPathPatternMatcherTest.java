@@ -75,9 +75,9 @@ class DumEDSPathPatternMatcherTest {
         assertThat(result)
                 .containsEntry("locale", "pt-br")
                 .containsEntry("audience", "pf")
-                .containsEntry("section", "cartao-de-credito");
-        // anything past "section" is swallowed by **; no extra keys
-        assertThat(result).hasSize(3);
+                .containsEntry("section", "cartao-de-credito")
+                // anything past "section" is swallowed by **; no extra keys
+                .hasSize(3);
     }
 
     @Test
