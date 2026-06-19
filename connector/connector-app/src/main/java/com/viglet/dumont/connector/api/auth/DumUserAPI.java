@@ -195,6 +195,28 @@ public class DumUserAPI {
         String email = firstNonNull(user, EMAIL);
         String picture = firstNonNull(user, "picture", "avatar_url");
 
+        OAuth2Name name = resolveOAuth2Name(user);
+        DumUser dumUser = upsertOAuth2User(username, name, email, picture, realm);
+        boolean isAdmin = !configProperties.isPermissions() || isAdminViaGroups(dumUser);
+
+        DumCurrentUser currentUser = new DumCurrentUser();
+        currentUser.setUsername(username);
+        currentUser.setFirstName(name.firstName());
+        currentUser.setLastName(name.lastName());
+        currentUser.setEmail(email);
+        currentUser.setAdmin(isAdmin);
+        currentUser.setAvatarUrl(dumUser.getAvatarUrl());
+        currentUser.setHasAvatar(dumUser.getAvatarUrl() != null);
+        currentUser.setRealm(dumUser.getRealm());
+        currentUser.setPrivileges(resolvePrivileges(dumUser));
+        return currentUser;
+    }
+
+    private record OAuth2Name(String firstName, String lastName) {
+    }
+
+    /** Resolves first/last name from the OAuth2 claims, falling back to splitting {@code name}. */
+    private OAuth2Name resolveOAuth2Name(OAuth2User user) {
         String firstName = user.getAttribute(GIVEN_NAME);
         String lastName = user.getAttribute(FAMILY_NAME);
         if (firstName == null && lastName == null) {
@@ -205,54 +227,48 @@ public class DumUserAPI {
                 lastName = space > 0 ? fullName.substring(space + 1) : null;
             }
         }
+        return new OAuth2Name(firstName, lastName);
+    }
 
+    /** Creates the OAuth2 user on first login, or refreshes its profile fields on return. */
+    private DumUser upsertOAuth2User(String username, OAuth2Name name, String email, String picture,
+            String realm) {
         DumUser dumUser = dumUserRepository.findByUsername(username);
         if (dumUser == null) {
             dumUser = DumUser.builder()
                     .username(username)
-                    .firstName(firstName)
-                    .lastName(lastName)
+                    .firstName(name.firstName())
+                    .lastName(name.lastName())
                     .email(email)
                     .avatarUrl(picture)
                     .realm(realm)
                     .enabled(1)
                     .build();
-            dumUserRepository.save(dumUser);
         } else {
-            dumUser.setFirstName(firstName);
-            dumUser.setLastName(lastName);
+            dumUser.setFirstName(name.firstName());
+            dumUser.setLastName(name.lastName());
             dumUser.setEmail(email);
             dumUser.setRealm(realm);
             if (picture != null && dumUser.getAvatarUrl() == null) {
                 dumUser.setAvatarUrl(picture);
             }
-            dumUserRepository.save(dumUser);
         }
+        dumUserRepository.save(dumUser);
+        return dumUser;
+    }
 
-        boolean isAdmin = !configProperties.isPermissions();
-        if (!isAdmin) {
-            var groups = dumGroupRepository.findByDumUsersContaining(dumUser);
-            if (groups != null) {
-                for (DumGroup group : groups) {
-                    if (ADMINISTRATOR.equals(group.getName())) {
-                        isAdmin = true;
-                        break;
-                    }
-                }
+    /** True when any of the user's groups is the {@code Administrator} group. */
+    private boolean isAdminViaGroups(DumUser dumUser) {
+        var groups = dumGroupRepository.findByDumUsersContaining(dumUser);
+        if (groups == null) {
+            return false;
+        }
+        for (DumGroup group : groups) {
+            if (ADMINISTRATOR.equals(group.getName())) {
+                return true;
             }
         }
-
-        DumCurrentUser currentUser = new DumCurrentUser();
-        currentUser.setUsername(username);
-        currentUser.setFirstName(firstName);
-        currentUser.setLastName(lastName);
-        currentUser.setEmail(email);
-        currentUser.setAdmin(isAdmin);
-        currentUser.setAvatarUrl(dumUser.getAvatarUrl());
-        currentUser.setHasAvatar(dumUser.getAvatarUrl() != null);
-        currentUser.setRealm(dumUser.getRealm());
-        currentUser.setPrivileges(resolvePrivileges(dumUser));
-        return currentUser;
+        return false;
     }
 
     @GetMapping("/{username}")
