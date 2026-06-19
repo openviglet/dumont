@@ -302,9 +302,9 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             previewSnapshotStore.save(source, baseline);
             // Per-field coverage of this run, appended to the source's history so a later run can be
             // checked for drift (D15) — derived from the same fingerprint, no extra pass over the source.
-            coverageHistoryStore.record(source, baseline.documents().size(),
+            coverageHistoryStore.recordSnapshot(source, baseline.documents().size(),
                     DumCoverageMonitor.coverage(structuredSource.schema(), baseline));
-            provenanceHistoryStore.record(source, provenance.documentCount(), provenance.fields());
+            provenanceHistoryStore.recordSnapshot(source, provenance.documentCount(), provenance.fields());
             byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
         }, () -> log.error("Structured source '{}' not found", source));
     }
