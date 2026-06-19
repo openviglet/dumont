@@ -41,8 +41,7 @@ record DumWCRobotsTxt(List<String> sitemaps, long crawlDelayMs) {
         String agent = userAgent == null ? "" : userAgent.toLowerCase();
         List<String> sitemaps = new ArrayList<>();
         Set<String> currentAgents = new LinkedHashSet<>();
-        long wildcardDelayMs = -1L;
-        long matchedDelayMs = -1L;
+        Delays delays = new Delays(-1L, -1L);
         boolean lastWasDirective = false;
         for (String rawLine : content.split("\\R")) {
             String line = stripComment(rawLine).trim();
@@ -65,23 +64,37 @@ record DumWCRobotsTxt(List<String> sitemaps, long crawlDelayMs) {
                 }
                 case SITEMAP -> sitemaps.add(value); // non-group: does not affect grouping
                 case CRAWL_DELAY -> {
-                    long ms = parseDelayMs(value);
-                    if (ms >= 0) {
-                        for (String groupAgent : currentAgents) {
-                            if (WILDCARD.equals(groupAgent)) {
-                                wildcardDelayMs = Math.max(wildcardDelayMs, ms);
-                            } else if (agent.contains(groupAgent)) {
-                                matchedDelayMs = Math.max(matchedDelayMs, ms);
-                            }
-                        }
-                    }
+                    delays = applyCrawlDelay(delays, value, currentAgents, agent);
                     lastWasDirective = true;
                 }
                 default -> lastWasDirective = true; // allow / disallow / unknown
             }
         }
-        long crawlDelayMs = matchedDelayMs >= 0 ? matchedDelayMs : wildcardDelayMs;
+        long crawlDelayMs = delays.matched() >= 0 ? delays.matched() : delays.wildcard();
         return new DumWCRobotsTxt(List.copyOf(sitemaps), crawlDelayMs);
+    }
+
+    /** Accumulated crawl-delay (ms) for the wildcard group and the requesting agent's group. */
+    private record Delays(long wildcard, long matched) {
+    }
+
+    /** Folds one {@code Crawl-delay} directive into the running per-group maxima. */
+    private static Delays applyCrawlDelay(Delays delays, String value, Set<String> currentAgents,
+            String agent) {
+        long ms = parseDelayMs(value);
+        if (ms < 0) {
+            return delays;
+        }
+        long wildcard = delays.wildcard();
+        long matched = delays.matched();
+        for (String groupAgent : currentAgents) {
+            if (WILDCARD.equals(groupAgent)) {
+                wildcard = Math.max(wildcard, ms);
+            } else if (agent.contains(groupAgent)) {
+                matched = Math.max(matched, ms);
+            }
+        }
+        return new Delays(wildcard, matched);
     }
 
     private static String stripComment(String line) {
