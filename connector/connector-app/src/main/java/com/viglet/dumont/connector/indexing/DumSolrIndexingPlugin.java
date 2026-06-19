@@ -50,14 +50,12 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "dumont.indexing.provider", havingValue = "solr")
 public class DumSolrIndexingPlugin implements DumIndexingPlugin {
 
-    private final String solrUrl;
     private final String solrCollection;
     private final SolrClient solrClient;
 
     public DumSolrIndexingPlugin(
             @Value("${dumont.indexing.solr.url}") String solrUrl,
             @Value("${dumont.indexing.solr.collection}") String solrCollection) {
-        this.solrUrl = solrUrl;
         this.solrCollection = solrCollection;
         this.solrClient = new HttpJdkSolrClient.Builder(solrUrl).build();
         log.info("Initialized Solr indexing plugin with URL: {} and collection: {}", solrUrl, solrCollection);

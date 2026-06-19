@@ -37,6 +37,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DumAemSourceWizardApi {
 
+    /** JCR content paths are always '/'-delimited (not the OS file separator). */
+    private static final String JCR_PATH_SEPARATOR = "/";
+
     private final DumAemExtractorScannerService extractorScanner;
 
     public DumAemSourceWizardApi(DumAemExtractorScannerService extractorScanner) {
@@ -109,9 +112,9 @@ public class DumAemSourceWizardApi {
                     if (value instanceof JSONObject child) {
                         String primaryType = child.optString("jcr:primaryType", "");
                         if (!primaryType.isEmpty()) {
-                            String childPath = request.getPath().endsWith("/")
+                            String childPath = request.getPath().endsWith(JCR_PATH_SEPARATOR)
                                     ? request.getPath() + key
-                                    : request.getPath() + "/" + key;
+                                    : request.getPath() + JCR_PATH_SEPARATOR + key;
                             children.add(Map.of(
                                     "name", key,
                                     "path", childPath,

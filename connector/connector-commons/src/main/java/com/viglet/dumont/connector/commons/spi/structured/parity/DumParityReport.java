@@ -42,14 +42,4 @@ public record DumParityReport(String source, int baselineCount, int candidateCou
         extraUrls = extraUrls == null ? List.of() : List.copyOf(extraUrls);
         reasons = reasons == null ? List.of() : List.copyOf(reasons);
     }
-
-    /** URLs the baseline produced that the candidate did not (a bounded sample). */
-    public List<String> missingUrls() {
-        return missingUrls;
-    }
-
-    /** URLs the candidate produced that the baseline did not (a bounded sample). */
-    public List<String> extraUrls() {
-        return extraUrls;
-    }
 }

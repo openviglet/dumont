@@ -82,7 +82,7 @@ public class DumAemContentMappingService {
                 return dumAemAttributeSpecificationRepository.findByDumAemSource(dumAemSource)
                                 .map(attributeSpecifications -> attributeSpecifications.stream()
                                                 .map(this::mapToTurSNAttributeSpec)
-                                                .collect(Collectors.toList()))
+                                                .toList())
                                 .orElse(new ArrayList<>());
         }
 

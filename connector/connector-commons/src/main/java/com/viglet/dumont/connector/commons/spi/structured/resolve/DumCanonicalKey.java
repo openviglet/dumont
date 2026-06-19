@@ -65,7 +65,7 @@ public interface DumCanonicalKey {
                 if (part == null) {
                     return Optional.empty();
                 }
-                if (id.length() > 0) {
+                if (!id.isEmpty()) {
                     id.append('|');
                 }
                 id.append(part);

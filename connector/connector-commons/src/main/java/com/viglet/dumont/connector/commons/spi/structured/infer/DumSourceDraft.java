@@ -55,7 +55,7 @@ public record DumSourceDraft(DumSourceShape shape, double confidence,
         if (shape == null) {
             shape = DumSourceShape.UNKNOWN;
         }
-        confidence = Math.max(0.0, Math.min(1.0, confidence));
+        confidence = Math.clamp(confidence, 0.0, 1.0);
         strategyConfig = strategyConfig == null ? Map.of()
                 : Map.copyOf(strategyConfig);
         fields = fields == null ? List.of()

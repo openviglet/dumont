@@ -4,6 +4,8 @@
 package com.viglet.dumont.connector.webcrawler.commons.fetch;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A transport-agnostic fetch result (roadmap D07). The body is kept as raw bytes so the caller can
@@ -39,5 +41,37 @@ public record DumWCFetchResponse(int statusCode, String contentType, byte[] body
     /** True when the server answered {@code 304 Not Modified} (roadmap D12): the resource is unchanged. */
     public boolean notModified() {
         return statusCode == 304;
+    }
+
+    /** Content-aware equality: the {@code body} array is compared by value, not identity. */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DumWCFetchResponse other = (DumWCFetchResponse) o;
+        return statusCode == other.statusCode
+                && Objects.equals(contentType, other.contentType)
+                && Arrays.equals(body, other.body)
+                && Objects.equals(url, other.url)
+                && Objects.equals(etag, other.etag)
+                && Objects.equals(lastModified, other.lastModified);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * Objects.hash(statusCode, contentType, url, etag, lastModified)
+                + Arrays.hashCode(body);
+    }
+
+    /** Body is rendered as its length (raw bytes would flood logs and may be binary). */
+    @Override
+    public String toString() {
+        return "DumWCFetchResponse[statusCode=" + statusCode + ", contentType=" + contentType
+                + ", body=" + (body == null ? "null" : body.length + " bytes") + ", url=" + url
+                + ", etag=" + etag + ", lastModified=" + lastModified + "]";
     }
 }

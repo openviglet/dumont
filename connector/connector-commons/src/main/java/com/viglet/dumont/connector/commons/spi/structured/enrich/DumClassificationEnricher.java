@@ -100,8 +100,7 @@ public final class DumClassificationEnricher implements DumEnricher {
 
     private Optional<String> safeClassify(String input) {
         try {
-            Optional<String> result = classifier.classify(input);
-            return result == null ? Optional.empty() : result;
+            return classifier.classify(input);
         } catch (RuntimeException e) {
             log.warn("Classifier '{}' failed — field '{}' will be omitted for this record: {}",
                     name, targetField, e.getMessage());

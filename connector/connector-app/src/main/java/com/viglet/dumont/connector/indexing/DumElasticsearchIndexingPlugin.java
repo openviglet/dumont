@@ -55,10 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "dumont.indexing.provider", havingValue = "elasticsearch")
 public class DumElasticsearchIndexingPlugin implements DumIndexingPlugin {
 
-    private final String elasticsearchUrl;
     private final String elasticsearchIndex;
-    private final String elasticsearchUsername;
-    private final String elasticsearchPassword;
     private final ElasticsearchClient client;
     private final RestClient restClient;
 
@@ -67,10 +64,7 @@ public class DumElasticsearchIndexingPlugin implements DumIndexingPlugin {
             @Value("${dumont.indexing.elasticsearch.index}") String elasticsearchIndex,
             @Value("${dumont.indexing.elasticsearch.username:#{null}}") String elasticsearchUsername,
             @Value("${dumont.indexing.elasticsearch.password:#{null}}") String elasticsearchPassword) {
-        this.elasticsearchUrl = elasticsearchUrl;
         this.elasticsearchIndex = elasticsearchIndex;
-        this.elasticsearchUsername = elasticsearchUsername;
-        this.elasticsearchPassword = elasticsearchPassword;
 
         // Create the client and store both client and restClient for proper cleanup
         HttpHost httpHost = HttpHost.create(elasticsearchUrl);

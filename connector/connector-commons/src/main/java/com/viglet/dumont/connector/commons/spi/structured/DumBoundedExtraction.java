@@ -135,7 +135,7 @@ public final class DumBoundedExtraction {
         if (!timed && (concurrency <= 1 || contentIds.size() == 1)) {
             return runSequential(source, contentIds, consumer);
         }
-        int threads = Math.min(Math.max(concurrency, 1), contentIds.size());
+        int threads = Math.clamp(concurrency, 1, contentIds.size());
         return runParallel(source, contentIds, threads, perExtractTimeoutMs, consumer);
     }
 

@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -83,7 +84,7 @@ public final class DumStructuredPreviewer {
         List<DumStructuredRecord> records = allIds.stream()
                 .limit(effectiveN)
                 .map(id -> source.extract(id).map(record -> enrich.apply(source, record)).orElse(null))
-                .filter(record -> record != null)
+                .filter(Objects::nonNull)
                 .toList();
 
         List<Coverage> coverage = coverage(schema, records);
