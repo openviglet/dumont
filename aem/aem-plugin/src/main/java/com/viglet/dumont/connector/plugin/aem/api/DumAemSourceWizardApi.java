@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -110,19 +111,7 @@ public class DumAemSourceWizardApi {
                 JSONObject json = response.get();
                 List<Map<String, String>> children = new ArrayList<>();
                 for (String key : json.keySet()) {
-                    Object value = json.get(key);
-                    if (value instanceof JSONObject child) {
-                        String primaryType = child.optString("jcr:primaryType", "");
-                        if (!primaryType.isEmpty()) {
-                            String childPath = request.getPath().endsWith(JCR_PATH_SEPARATOR)
-                                    ? request.getPath() + key
-                                    : request.getPath() + JCR_PATH_SEPARATOR + key;
-                            children.add(Map.of(
-                                    "name", key,
-                                    "path", childPath,
-                                    "primaryType", primaryType));
-                        }
-                    }
+                    toChildNode(request.getPath(), key, json.get(key)).ifPresent(children::add);
                 }
                 return ResponseEntity.ok(Map.of(
                         RESP_SUCCESS, true,
@@ -137,5 +126,19 @@ public class DumAemSourceWizardApi {
                     RESP_SUCCESS, false,
                     RESP_CHILDREN, Collections.emptyList()));
         }
+    }
+
+    /** Maps one JCR child node to its {name, path, primaryType} entry, when it is a typed node. */
+    private Optional<Map<String, String>> toChildNode(String basePath, String key, Object value) {
+        if (!(value instanceof JSONObject child)) {
+            return Optional.empty();
+        }
+        String primaryType = child.optString("jcr:primaryType", "");
+        if (primaryType.isEmpty()) {
+            return Optional.empty();
+        }
+        String childPath = basePath.endsWith(JCR_PATH_SEPARATOR) ? basePath + key
+                : basePath + JCR_PATH_SEPARATOR + key;
+        return Optional.of(Map.of("name", key, "path", childPath, "primaryType", primaryType));
     }
 }
