@@ -46,7 +46,7 @@ class DumFileAttributesTest {
 
     @Test
     void testBuilderPattern() {
-        Date testDate = new Date();
+        Date testDate = new Date(1_700_000_000_000L);
         DumFileSize testSize = new DumFileSize();
         Map<String, String> testMetadata = new HashMap<>();
         testMetadata.put("author", "Test Author");
@@ -72,7 +72,7 @@ class DumFileAttributesTest {
 
     @Test
     void testAllArgsConstructor() {
-        Date testDate = new Date();
+        Date testDate = new Date(1_700_000_000_000L);
         DumFileSize testSize = new DumFileSize();
         Map<String, String> testMetadata = new HashMap<>();
         testMetadata.put("type", "document");
