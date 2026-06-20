@@ -38,6 +38,7 @@ import com.viglet.dumont.connector.batch.JobItemBatchProcessor;
 import com.viglet.dumont.connector.chain.JobProcessingChain;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
@@ -125,6 +126,21 @@ class DumConnectorContextImplTest {
         verify(batchProcessor, times(2)).flush(session);
         verify(indexingService).completeIndexingStats("wknd", "turing");
         verify(indexingService).finishProcessing("wknd");
+    }
+
+    @Test
+    void finishIndexingNonStandaloneCreatesDeleteJobsForDeindexedItems() {
+        DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
+        DumConnectorIndexingModel stale = org.mockito.Mockito.mock(DumConnectorIndexingModel.class);
+        when(stale.getObjectId()).thenReturn("/content/gone");
+        when(stale.getSites()).thenReturn(List.of("Sample"));
+        when(stale.getLocale()).thenReturn(Locale.US);
+        when(indexingService.getShouldBeDeIndexedList(session)).thenReturn(List.of(stale));
+
+        context.finishIndexing(session, false);
+
+        verify(batchProcessor).addDeferred(any(TurSNJobItem.class));
+        verify(indexingService).deleteContentsToBeDeIndexed(session);
     }
 
     @Test
