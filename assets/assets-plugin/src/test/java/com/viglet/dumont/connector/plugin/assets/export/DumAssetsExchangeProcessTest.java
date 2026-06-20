@@ -24,8 +24,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,6 +43,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.assets.export.bean.DumAssetsExchange;
 import com.viglet.dumont.connector.plugin.assets.export.bean.DumAssetsSourceExchange;
 import com.viglet.dumont.connector.plugin.assets.persistence.model.DumAssetsSource;
@@ -123,6 +128,81 @@ class DumAssetsExchangeProcessTest {
             assertThat(out.size()).isPositive();
         } finally {
             System.setProperty("user.dir", previousUserDir);
+        }
+    }
+
+    @Test
+    void importFromMultipartFileImportsFlatZip(@TempDir Path tempDir) throws Exception {
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        process.importFromMultipartFile(new InMemoryMultipartFile(buildZip(tempDir, false)));
+
+        verify(repository).save(any(DumAssetsSource.class));
+    }
+
+    @Test
+    void importFromMultipartFileImportsFolderWrappedZip(@TempDir Path tempDir) throws Exception {
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        process.importFromMultipartFile(new InMemoryMultipartFile(buildZip(tempDir, true)));
+
+        verify(repository).save(any(DumAssetsSource.class));
+    }
+
+    /** Builds a ZIP holding export.json, either at the root or nested one folder deep. */
+    private static byte[] buildZip(Path tempDir, boolean wrapped) throws Exception {
+        DumAssetsSourceExchange entry = fullExchange().toBuilder().id(null).build();
+        String json =
+                JsonMapper.builder().build().writeValueAsString(new DumAssetsExchange(List.of(entry)));
+        File contentRoot = new File(tempDir.toFile(), "zip-" + (wrapped ? "w" : "f"));
+        File jsonDir = wrapped ? new File(contentRoot, "inner") : contentRoot;
+        Files.createDirectories(jsonDir.toPath());
+        Files.writeString(new File(jsonDir, "export.json").toPath(), json);
+        File zipFile = new File(tempDir.toFile(), "assets-" + (wrapped ? "w" : "f") + ".zip");
+        DumCommonsUtils.addFilesToZip(contentRoot, zipFile);
+        return Files.readAllBytes(zipFile.toPath());
+    }
+
+    /** Minimal {@link MultipartFile} over an in-memory byte[] — avoids a spring-test dependency. */
+    private record InMemoryMultipartFile(byte[] bytes) implements MultipartFile {
+        @Override
+        public String getName() {
+            return "file";
+        }
+
+        @Override
+        public String getOriginalFilename() {
+            return "assets.zip";
+        }
+
+        @Override
+        public String getContentType() {
+            return "application/zip";
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return bytes.length == 0;
+        }
+
+        @Override
+        public long getSize() {
+            return bytes.length;
+        }
+
+        @Override
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        @Override
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(bytes);
+        }
+
+        @Override
+        public void transferTo(File dest) throws java.io.IOException {
+            Files.write(dest.toPath(), bytes);
         }
     }
 
