@@ -11,15 +11,19 @@ package com.viglet.dumont.connector.api.plugin;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pf4j.PluginDescriptor;
@@ -150,5 +154,71 @@ class DumPluginManagementServiceTest {
                 new MockMultipartFile("file", null, "application/java-archive", new byte[] {1});
         assertThatThrownBy(() -> service.upload(file))
                 .isInstanceOf(ResponseStatusException.class);
+    }
+
+    @TempDir
+    Path pluginsDir;
+
+    private DumPluginManagementService tempDirService() {
+        return new DumPluginManagementService(pluginManager, failedRegistry, events,
+                pluginsDir.toString());
+    }
+
+    private static MockMultipartFile jar(String name) {
+        return new MockMultipartFile("file", name, "application/java-archive",
+                new byte[] {0x50, 0x4b, 0x03, 0x04});
+    }
+
+    @Test
+    void uploadLoadsStartsAndReturnsInfo() {
+        DumPluginManagementService svc = tempDirService();
+        PluginWrapper pw = loadedPlugin("my-plugin");
+        when(pluginManager.getPlugins()).thenReturn(List.of());
+        when(pluginManager.loadPlugin(any(Path.class))).thenReturn("my-plugin");
+        when(pluginManager.startPlugin("my-plugin")).thenReturn(PluginState.STARTED);
+        when(pluginManager.getPlugin("my-plugin")).thenReturn(pw);
+
+        DumPluginInfo info = svc.upload(jar("my-plugin.jar"));
+
+        assertThat(info.id()).isEqualTo("my-plugin");
+        verify(failedRegistry).remove("my-plugin.jar");
+        verify(events).publishEvent(any(PluginsChangedEvent.class));
+    }
+
+    @Test
+    void uploadRegistersFailureWhenLoadThrows() {
+        DumPluginManagementService svc = tempDirService();
+        when(pluginManager.getPlugins()).thenReturn(List.of());
+        when(pluginManager.loadPlugin(any(Path.class)))
+                .thenThrow(new RuntimeException("bad jar"));
+        MockMultipartFile file = jar("broken.jar");
+
+        assertThatThrownBy(() -> svc.upload(file))
+                .isInstanceOf(ResponseStatusException.class);
+        verify(failedRegistry).register(any(Path.class), anyString());
+    }
+
+    @Test
+    void uploadFailsWhenNoPluginIdResolved() {
+        DumPluginManagementService svc = tempDirService();
+        when(pluginManager.getPlugins()).thenReturn(List.of());
+        when(pluginManager.loadPlugin(any(Path.class))).thenReturn(null);
+        MockMultipartFile file = jar("noid.jar");
+
+        assertThatThrownBy(() -> svc.upload(file))
+                .isInstanceOf(ResponseStatusException.class);
+        verify(failedRegistry).register(any(Path.class), anyString());
+    }
+
+    @Test
+    void deleteFailedRemovesRegisteredEntry() {
+        DumPluginManagementService svc = tempDirService();
+        when(failedRegistry.get("bad.jar")).thenReturn(new DumFailedPluginRegistry.FailedPlugin(
+                "bad.jar", null, null, null, "boom", null));
+
+        svc.deleteFailed("bad.jar");
+
+        verify(failedRegistry).remove("bad.jar");
+        verify(events).publishEvent(any(PluginsChangedEvent.class));
     }
 }
