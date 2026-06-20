@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
+import com.viglet.dumont.connector.plugin.aem.api.dto.DumAemSourceRequest;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemPluginModel;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
@@ -108,7 +109,8 @@ public class DumAemSourceApi {
     @Operation(summary = "Update a AEM Source")
     @PutMapping("/{id}")
     public ResponseEntity<DumAemSource> dumAemSourceUpdate(@PathVariable String id,
-            @RequestBody DumAemSource dumAemSource) {
+            @RequestBody DumAemSourceRequest request) {
+        DumAemSource dumAemSource = toEntity(request);
         if (dumAemSource.getId() != null && !id.equals(dumAemSource.getId())) {
             return ResponseEntity.badRequest().build();
         }
@@ -148,6 +150,34 @@ public class DumAemSourceApi {
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    private static DumAemSource toEntity(DumAemSourceRequest request) {
+        DumAemSource entity = DumAemSource.builder()
+                .id(request.getId())
+                .name(request.getName())
+                .endpoint(request.getEndpoint())
+                .username(request.getUsername())
+                .password(request.getPassword())
+                .rootPath(request.getRootPath())
+                .contentType(request.getContentType())
+                .subType(request.getSubType())
+                .oncePattern(request.getOncePattern())
+                .defaultLocale(request.getDefaultLocale())
+                .localeClass(request.getLocaleClass())
+                .deltaClass(request.getDeltaClass())
+                .dependencyClass(request.getDependencyClass())
+                .author(request.isAuthor())
+                .publish(request.isPublish())
+                .authorSNSite(request.getAuthorSNSite())
+                .publishSNSite(request.getPublishSNSite())
+                .authorURLPrefix(request.getAuthorURLPrefix())
+                .publishURLPrefix(request.getPublishURLPrefix())
+                .build();
+        entity.setLocalePaths(request.getLocalePaths());
+        entity.setAttributeSpecifications(request.getAttributeSpecifications());
+        entity.setModels(request.getModels());
+        return entity;
+    }
+
     private static void wireModelHierarchy(DumAemPluginModel model, DumAemSource source) {
         model.setDumAemSource(source);
         if (model.getTargetAttrs() == null) {
@@ -174,7 +204,8 @@ public class DumAemSourceApi {
 
     @Operation(summary = "Create a AEM Source")
     @PostMapping
-    public DumAemSource dumAemSourceAdd(@RequestBody DumAemSource dumAemSource) {
+    public DumAemSource dumAemSourceAdd(@RequestBody DumAemSourceRequest request) {
+        DumAemSource dumAemSource = toEntity(request);
         dumAemSource.getLocalePaths().forEach(localePath -> localePath.setDumAemSource(dumAemSource));
         dumAemSource.getAttributeSpecifications().forEach(spec -> spec.setDumAemSource(dumAemSource));
         dumAemSource.getModels().forEach(model -> wireModelHierarchy(model, dumAemSource));

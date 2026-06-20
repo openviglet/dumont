@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.viglet.dumont.connector.plugin.webcrawler.DumWCPluginProcess;
+import com.viglet.dumont.connector.plugin.webcrawler.api.dto.DumWCSourceRequest;
 import com.viglet.dumont.connector.plugin.webcrawler.export.DumWCExchangeProcess;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.model.*;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.*;
@@ -91,43 +92,46 @@ public class DumWCSourceApi {
     @Transactional
     @PutMapping("/{id}")
     @Operation(summary = "Update a WC Source")
-    public ResponseEntity<DumWCSource> update(@PathVariable String id, @RequestBody DumWCSource wcSource) {
+    public ResponseEntity<DumWCSource> update(@PathVariable String id, @RequestBody DumWCSourceRequest wcSource) {
         if (wcSource.getId() != null && !id.equals(wcSource.getId())) {
             return ResponseEntity.badRequest().build();
         }
         return dumWCSourceRepository.findById(id).map(existing -> {
-            existing.setTitle(wcSource.getTitle());
-            existing.setDescription(wcSource.getDescription());
-            existing.setUrl(wcSource.getUrl());
-            existing.setLocale(wcSource.getLocale());
-            existing.setLocaleClass(wcSource.getLocaleClass());
-            existing.setUsername(wcSource.getUsername());
-            existing.setPassword(wcSource.getPassword());
-            existing.setEnableSitemap(wcSource.getEnableSitemap());
-            existing.setCrawlDelay(wcSource.getCrawlDelay());
-            existing.setFetcher(wcSource.getFetcher());
-            existing.setUserAgentStrategy(wcSource.getUserAgentStrategy());
-            existing.setWorkers(wcSource.getWorkers());
-            existing.setTurSNSites(wcSource.getTurSNSites());
-            existing.setStartingPoints(wcSource.getStartingPoints());
-            existing.setAllowUrls(wcSource.getAllowUrls());
-            existing.setNotAllowUrls(wcSource.getNotAllowUrls());
-            existing.setNotAllowExtensions(wcSource.getNotAllowExtensions());
-            existing.setAttributeMappings(wcSource.getAttributeMappings());
-
-            if (wcSource.getStartingPoints() != null)
-                wcSource.getStartingPoints().forEach(sp -> sp.setDumWCSource(existing));
-            if (wcSource.getAllowUrls() != null)
-                wcSource.getAllowUrls().forEach(au -> au.setDumWCSource(existing));
-            if (wcSource.getNotAllowUrls() != null)
-                wcSource.getNotAllowUrls().forEach(nu -> nu.setDumWCSource(existing));
-            if (wcSource.getNotAllowExtensions() != null)
-                wcSource.getNotAllowExtensions().forEach(fe -> fe.setDumWCSource(existing));
-            if (wcSource.getAttributeMappings() != null)
-                wcSource.getAttributeMappings().forEach(am -> am.setDumWCSource(existing));
-
+            applyToEntity(existing, wcSource);
             return ResponseEntity.ok(dumWCSourceRepository.save(existing));
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private static void applyToEntity(DumWCSource existing, DumWCSourceRequest wcSource) {
+        existing.setTitle(wcSource.getTitle());
+        existing.setDescription(wcSource.getDescription());
+        existing.setUrl(wcSource.getUrl());
+        existing.setLocale(wcSource.getLocale());
+        existing.setLocaleClass(wcSource.getLocaleClass());
+        existing.setUsername(wcSource.getUsername());
+        existing.setPassword(wcSource.getPassword());
+        existing.setEnableSitemap(wcSource.getEnableSitemap());
+        existing.setCrawlDelay(wcSource.getCrawlDelay());
+        existing.setFetcher(wcSource.getFetcher());
+        existing.setUserAgentStrategy(wcSource.getUserAgentStrategy());
+        existing.setWorkers(wcSource.getWorkers());
+        existing.setTurSNSites(wcSource.getTurSNSites());
+        existing.setStartingPoints(wcSource.getStartingPoints());
+        existing.setAllowUrls(wcSource.getAllowUrls());
+        existing.setNotAllowUrls(wcSource.getNotAllowUrls());
+        existing.setNotAllowExtensions(wcSource.getNotAllowExtensions());
+        existing.setAttributeMappings(wcSource.getAttributeMappings());
+
+        if (existing.getStartingPoints() != null)
+            existing.getStartingPoints().forEach(sp -> sp.setDumWCSource(existing));
+        if (existing.getAllowUrls() != null)
+            existing.getAllowUrls().forEach(au -> au.setDumWCSource(existing));
+        if (existing.getNotAllowUrls() != null)
+            existing.getNotAllowUrls().forEach(nu -> nu.setDumWCSource(existing));
+        if (existing.getNotAllowExtensions() != null)
+            existing.getNotAllowExtensions().forEach(fe -> fe.setDumWCSource(existing));
+        if (existing.getAttributeMappings() != null)
+            existing.getAttributeMappings().forEach(am -> am.setDumWCSource(existing));
     }
 
     @Transactional
@@ -142,18 +146,10 @@ public class DumWCSourceApi {
 
     @PostMapping
     @Operation(summary = "Create a WC Source")
-    public DumWCSource create(@RequestBody DumWCSource wcSource) {
-        if (wcSource.getStartingPoints() != null)
-            wcSource.getStartingPoints().forEach(sp -> sp.setDumWCSource(wcSource));
-        if (wcSource.getAllowUrls() != null)
-            wcSource.getAllowUrls().forEach(au -> au.setDumWCSource(wcSource));
-        if (wcSource.getNotAllowUrls() != null)
-            wcSource.getNotAllowUrls().forEach(nu -> nu.setDumWCSource(wcSource));
-        if (wcSource.getNotAllowExtensions() != null)
-            wcSource.getNotAllowExtensions().forEach(fe -> fe.setDumWCSource(wcSource));
-        if (wcSource.getAttributeMappings() != null)
-            wcSource.getAttributeMappings().forEach(am -> am.setDumWCSource(wcSource));
-        return dumWCSourceRepository.save(wcSource);
+    public DumWCSource create(@RequestBody DumWCSourceRequest wcSource) {
+        DumWCSource entity = DumWCSource.builder().build();
+        applyToEntity(entity, wcSource);
+        return dumWCSourceRepository.save(entity);
     }
 
     @GetMapping("/{id}/crawl")

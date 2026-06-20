@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.viglet.dumont.connector.plugin.eds.DumEDSPluginProcess;
+import com.viglet.dumont.connector.plugin.eds.api.dto.DumEDSSourceRequest;
 import com.viglet.dumont.connector.plugin.eds.export.DumEDSExchangeProcess;
 import com.viglet.dumont.connector.plugin.eds.persistence.model.DumEDSSource;
 import com.viglet.dumont.connector.plugin.eds.persistence.repository.DumEDSExcludePatternRepository;
@@ -121,47 +122,51 @@ public class DumEDSSourceApi {
     @PutMapping("/{id}")
     @Operation(summary = "Update an EDS Source")
     public ResponseEntity<DumEDSSource> update(@PathVariable String id,
-            @RequestBody DumEDSSource edsSource) {
+            @RequestBody DumEDSSourceRequest edsSource) {
         if (edsSource.getId() != null && !id.equals(edsSource.getId())) {
             return ResponseEntity.badRequest().build();
         }
         return dumEDSSourceRepository.findById(id).map(existing -> {
-            existing.setTitle(edsSource.getTitle());
-            existing.setDescription(edsSource.getDescription());
-            existing.setBaseUrl(edsSource.getBaseUrl());
-            existing.setLocale(edsSource.getLocale());
-            existing.setLocaleClass(edsSource.getLocaleClass());
-            existing.setSitemapFallback(edsSource.getSitemapFallback());
-            existing.setBodySelector(edsSource.getBodySelector());
-            existing.setUserAgent(edsSource.getUserAgent());
-            existing.setFetchTimeoutMs(edsSource.getFetchTimeoutMs());
-            existing.setRequestsPerSecond(edsSource.getRequestsPerSecond());
-            existing.setMaxConcurrent(edsSource.getMaxConcurrent());
-            existing.setTurSNSites(edsSource.getTurSNSites());
-            existing.setFacetPathPattern(edsSource.getFacetPathPattern());
-            existing.setIndexes(edsSource.getIndexes());
-            existing.setExcludePatterns(edsSource.getExcludePatterns());
-            existing.setRemoveSelectors(edsSource.getRemoveSelectors());
-            existing.setFacets(edsSource.getFacets());
-            existing.setFieldMappings(edsSource.getFieldMappings());
-
-            if (edsSource.getIndexes() != null) {
-                edsSource.getIndexes().forEach(idx -> idx.setDumEDSSource(existing));
-            }
-            if (edsSource.getExcludePatterns() != null) {
-                edsSource.getExcludePatterns().forEach(p -> p.setDumEDSSource(existing));
-            }
-            if (edsSource.getRemoveSelectors() != null) {
-                edsSource.getRemoveSelectors().forEach(s -> s.setDumEDSSource(existing));
-            }
-            if (edsSource.getFacets() != null) {
-                edsSource.getFacets().forEach(f -> f.setDumEDSSource(existing));
-            }
-            if (edsSource.getFieldMappings() != null) {
-                edsSource.getFieldMappings().forEach(m -> m.setDumEDSSource(existing));
-            }
+            applyToEntity(existing, edsSource);
             return ResponseEntity.ok(dumEDSSourceRepository.save(existing));
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private static void applyToEntity(DumEDSSource existing, DumEDSSourceRequest edsSource) {
+        existing.setTitle(edsSource.getTitle());
+        existing.setDescription(edsSource.getDescription());
+        existing.setBaseUrl(edsSource.getBaseUrl());
+        existing.setLocale(edsSource.getLocale());
+        existing.setLocaleClass(edsSource.getLocaleClass());
+        existing.setSitemapFallback(edsSource.getSitemapFallback());
+        existing.setBodySelector(edsSource.getBodySelector());
+        existing.setUserAgent(edsSource.getUserAgent());
+        existing.setFetchTimeoutMs(edsSource.getFetchTimeoutMs());
+        existing.setRequestsPerSecond(edsSource.getRequestsPerSecond());
+        existing.setMaxConcurrent(edsSource.getMaxConcurrent());
+        existing.setTurSNSites(edsSource.getTurSNSites());
+        existing.setFacetPathPattern(edsSource.getFacetPathPattern());
+        existing.setIndexes(edsSource.getIndexes());
+        existing.setExcludePatterns(edsSource.getExcludePatterns());
+        existing.setRemoveSelectors(edsSource.getRemoveSelectors());
+        existing.setFacets(edsSource.getFacets());
+        existing.setFieldMappings(edsSource.getFieldMappings());
+
+        if (existing.getIndexes() != null) {
+            existing.getIndexes().forEach(idx -> idx.setDumEDSSource(existing));
+        }
+        if (existing.getExcludePatterns() != null) {
+            existing.getExcludePatterns().forEach(p -> p.setDumEDSSource(existing));
+        }
+        if (existing.getRemoveSelectors() != null) {
+            existing.getRemoveSelectors().forEach(s -> s.setDumEDSSource(existing));
+        }
+        if (existing.getFacets() != null) {
+            existing.getFacets().forEach(f -> f.setDumEDSSource(existing));
+        }
+        if (existing.getFieldMappings() != null) {
+            existing.getFieldMappings().forEach(m -> m.setDumEDSSource(existing));
+        }
     }
 
     @Transactional
@@ -176,23 +181,10 @@ public class DumEDSSourceApi {
 
     @PostMapping
     @Operation(summary = "Create an EDS Source")
-    public DumEDSSource create(@RequestBody DumEDSSource edsSource) {
-        if (edsSource.getIndexes() != null) {
-            edsSource.getIndexes().forEach(idx -> idx.setDumEDSSource(edsSource));
-        }
-        if (edsSource.getExcludePatterns() != null) {
-            edsSource.getExcludePatterns().forEach(p -> p.setDumEDSSource(edsSource));
-        }
-        if (edsSource.getRemoveSelectors() != null) {
-            edsSource.getRemoveSelectors().forEach(s -> s.setDumEDSSource(edsSource));
-        }
-        if (edsSource.getFacets() != null) {
-            edsSource.getFacets().forEach(f -> f.setDumEDSSource(edsSource));
-        }
-        if (edsSource.getFieldMappings() != null) {
-            edsSource.getFieldMappings().forEach(m -> m.setDumEDSSource(edsSource));
-        }
-        return dumEDSSourceRepository.save(edsSource);
+    public DumEDSSource create(@RequestBody DumEDSSourceRequest edsSource) {
+        DumEDSSource entity = DumEDSSource.builder().build();
+        applyToEntity(entity, edsSource);
+        return dumEDSSourceRepository.save(entity);
     }
 
     @GetMapping("/{id}/index")

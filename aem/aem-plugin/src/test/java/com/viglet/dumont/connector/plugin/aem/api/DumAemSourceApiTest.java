@@ -47,6 +47,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
+import com.viglet.dumont.connector.plugin.aem.api.dto.DumAemSourceRequest;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSourceLocalePath;
@@ -221,7 +222,7 @@ class DumAemSourceApiTest {
             when(dumAemSourceRepository.save(any())).thenReturn(existingSource);
 
             // When
-            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, updatedSource);
+            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, toRequest(updatedSource));
 
             // Then
             assertNotNull(result.getBody());
@@ -237,7 +238,7 @@ class DumAemSourceApiTest {
             when(dumAemSourceRepository.findById(sourceId)).thenReturn(Optional.empty());
 
             // When
-            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, updatedSource);
+            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, toRequest(updatedSource));
 
             // Then
             assertNull(result.getBody());
@@ -255,7 +256,7 @@ class DumAemSourceApiTest {
             when(dumAemSourceRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             // When
-            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, updatedSource);
+            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate(sourceId, toRequest(updatedSource));
 
             // Then
             assertNotNull(result.getBody());
@@ -307,15 +308,15 @@ class DumAemSourceApiTest {
         @DisplayName("Should add new source")
         void shouldAddNewSource() {
             // Given
-            DumAemSource source = createDumAemSource("new-source");
-            when(dumAemSourceRepository.save(source)).thenReturn(source);
+            DumAemSourceRequest request = toRequest(createDumAemSource("new-source"));
+            when(dumAemSourceRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
             // When
-            DumAemSource result = api.dumAemSourceAdd(source);
+            DumAemSource result = api.dumAemSourceAdd(request);
 
             // Then
             assertNotNull(result);
-            verify(dumAemSourceRepository, times(1)).save(source);
+            verify(dumAemSourceRepository, times(1)).save(any());
         }
     }
 
@@ -344,6 +345,33 @@ class DumAemSourceApiTest {
         return List.of(
                 createDumAemSource("source-1"),
                 createDumAemSource("source-2"));
+    }
+
+    private static DumAemSourceRequest toRequest(DumAemSource source) {
+        DumAemSourceRequest request = new DumAemSourceRequest();
+        request.setId(source.getId());
+        request.setName(source.getName());
+        request.setEndpoint(source.getEndpoint());
+        request.setUsername(source.getUsername());
+        request.setPassword(source.getPassword());
+        request.setRootPath(source.getRootPath());
+        request.setContentType(source.getContentType());
+        request.setSubType(source.getSubType());
+        request.setOncePattern(source.getOncePattern());
+        request.setDefaultLocale(source.getDefaultLocale());
+        request.setLocaleClass(source.getLocaleClass());
+        request.setDeltaClass(source.getDeltaClass());
+        request.setDependencyClass(source.getDependencyClass());
+        request.setAuthor(source.isAuthor());
+        request.setPublish(source.isPublish());
+        request.setAuthorSNSite(source.getAuthorSNSite());
+        request.setPublishSNSite(source.getPublishSNSite());
+        request.setAuthorURLPrefix(source.getAuthorURLPrefix());
+        request.setPublishURLPrefix(source.getPublishURLPrefix());
+        request.setLocalePaths(source.getLocalePaths());
+        request.setAttributeSpecifications(source.getAttributeSpecifications());
+        request.setModels(source.getModels());
+        return request;
     }
 
     private DumAemSource createDumAemSource(String id) {
