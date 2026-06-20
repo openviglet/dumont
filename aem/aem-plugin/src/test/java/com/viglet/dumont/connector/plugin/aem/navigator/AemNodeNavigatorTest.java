@@ -17,6 +17,7 @@
 
 package com.viglet.dumont.connector.plugin.aem.navigator;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.json.JSONObject;
@@ -44,6 +46,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemQueryBuilderUtils;
 
 import reactor.core.publisher.Mono;
 
@@ -260,6 +263,91 @@ class AemNodeNavigatorTest {
                         .thenReturn(true);
 
                 assertDoesNotThrow(() -> reactiveNavigator.navigateAndIndex(session, path, infinityJson));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("processNode + collectAccessiblePaths Tests")
+    class ProcessAndCollectTests {
+
+        @Test
+        @DisplayName("processNode(path) indexes when type matches content type")
+        void processNodeByPathIndexesWhenTypeMatches() {
+            DumAemSession session = createMockSession(false);
+            DumAemObjectGeneric aemObject = createMockAemObject("/content/test", "cq:Page");
+            when(objectService.getDumAemObjectGeneric(anyString(), any(JSONObject.class), any()))
+                    .thenReturn(aemObject);
+
+            try (MockedStatic<DumAemCommonsUtils> mockedUtils = mockStatic(DumAemCommonsUtils.class)) {
+                mockedUtils.when(() -> DumAemCommonsUtils.isTypeEqualContentType(any(), any()))
+                        .thenReturn(true);
+
+                aemNodeNavigator.processNode(session, "/content/test", new JSONObject());
+
+                verify(jobService).prepareIndexObject(session, aemObject);
+            }
+        }
+
+        @Test
+        @DisplayName("collectAccessiblePaths gathers root + matching descendants")
+        void collectAccessiblePathsGathersMatchingDescendants() {
+            DumAemSession session = createMockSession(true);
+            DumAemObjectGeneric parent =
+                    createMockAemObjectWithChildren("/content/test", "cq:Page");
+            DumAemObjectGeneric child =
+                    createMockAemObject("/content/test/childNode", "cq:Page");
+            when(objectService.getDumAemObjectGeneric(eq("/content/test"), any(JSONObject.class),
+                    any())).thenReturn(parent);
+            when(objectService.getDumAemObjectGeneric(eq("/content/test/childNode"),
+                    any(JSONObject.class), any())).thenReturn(child);
+
+            try (MockedStatic<DumAemCommonsUtils> mockedUtils = mockStatic(DumAemCommonsUtils.class)) {
+                mockedUtils.when(() -> DumAemCommonsUtils.getInfinityJson(anyString(), any(),
+                        anyBoolean())).thenReturn(Optional.of(new JSONObject()));
+                mockedUtils.when(() -> DumAemCommonsUtils.checkIfFileHasNotImageExtension(anyString()))
+                        .thenReturn(true);
+                mockedUtils.when(() -> DumAemCommonsUtils.isTypeEqualContentType(any(), any()))
+                        .thenReturn(true);
+                mockedUtils.when(() -> DumAemCommonsUtils.isNotOnceConfig(anyString(), any()))
+                        .thenReturn(true);
+
+                List<String> paths = aemNodeNavigator.collectAccessiblePaths(session,
+                        "/content/test", new JSONObject());
+
+                assertThat(paths).containsExactly("/content/test", "/content/test/childNode");
+            }
+        }
+
+        @Test
+        @DisplayName("collectAccessiblePaths returns only root when not recursive")
+        void collectAccessiblePathsRootOnlyWhenNotRecursive() {
+            DumAemSession session = createMockSession(false);
+            DumAemObjectGeneric root = createMockAemObject("/content/test", "cq:Page");
+            when(objectService.getDumAemObjectGeneric(anyString(), any(JSONObject.class), any()))
+                    .thenReturn(root);
+
+            try (MockedStatic<DumAemCommonsUtils> mockedUtils = mockStatic(DumAemCommonsUtils.class)) {
+                mockedUtils.when(() -> DumAemCommonsUtils.isTypeEqualContentType(any(), any()))
+                        .thenReturn(true);
+
+                assertThat(aemNodeNavigator.collectAccessiblePaths(session, "/content/test",
+                        new JSONObject())).containsExactly("/content/test");
+            }
+        }
+
+        @Test
+        @DisplayName("collectAccessiblePathsViaQueryBuilder delegates to QueryBuilder utils")
+        void collectAccessiblePathsViaQueryBuilderDelegates() {
+            DumAemSession session = createMockSession(false);
+
+            try (MockedStatic<DumAemQueryBuilderUtils> mocked =
+                    mockStatic(DumAemQueryBuilderUtils.class)) {
+                mocked.when(() -> DumAemQueryBuilderUtils.queryAllPaths(any()))
+                        .thenReturn(List.of("/a", "/b"));
+
+                assertThat(aemNodeNavigator.collectAccessiblePathsViaQueryBuilder(session))
+                        .containsExactly("/a", "/b");
             }
         }
     }
