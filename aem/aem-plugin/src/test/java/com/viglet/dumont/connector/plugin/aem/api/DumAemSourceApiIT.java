@@ -51,6 +51,8 @@ import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSourceLoca
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemTargetAttribute;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourceRepository;
 
+import tools.jackson.databind.json.JsonMapper;
+
 @DataJpaTest
 @EntityScan(basePackages = "com.viglet.dumont.connector.plugin.aem.persistence.model")
 @EnableJpaRepositories(basePackages = "com.viglet.dumont.connector.plugin.aem.persistence.repository")
@@ -226,10 +228,15 @@ class DumAemSourceApiIT {
             DumAemSource saved = api.dumAemSourceAdd(toRequest(newWkndSource()));
 
             DumAemSource fetched = api.dumAemSourceGet(saved.getId());
-            // simulate UI round-trip: read, mutate an unrelated field, send back
-            fetched.setName("WKND Renamed");
+            // Simulate a real UI round-trip: serialize the read model and deserialize it back into a
+            // detached request (fresh objects, not the managed entities), mutate an unrelated field,
+            // then send it. This is what the browser does and avoids reusing the managed collection.
+            JsonMapper mapper = JsonMapper.builder().build();
+            DumAemSourceRequest request =
+                    mapper.readValue(mapper.writeValueAsString(fetched), DumAemSourceRequest.class);
+            request.setName("WKND Renamed");
 
-            ResponseEntity<DumAemSource> response = api.dumAemSourceUpdate(saved.getId(), toRequest(fetched));
+            ResponseEntity<DumAemSource> response = api.dumAemSourceUpdate(saved.getId(), request);
             assertEquals(HttpStatus.OK, response.getStatusCode());
 
             DumAemSource fromDb = sourceRepository.findById(saved.getId()).orElseThrow();
