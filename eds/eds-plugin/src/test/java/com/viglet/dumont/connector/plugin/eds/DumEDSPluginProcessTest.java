@@ -18,18 +18,25 @@ package com.viglet.dumont.connector.plugin.eds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import org.jsoup.Jsoup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.viglet.dumont.connector.eds.commons.domain.DumEDSFetchedPage;
 
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.eds.commons.domain.DumEDSDiscoveredPage;
@@ -153,6 +160,65 @@ class DumEDSPluginProcessTest {
         List<DumEDSDiscoveredPage> kept = process.discoverAndFilter(source);
 
         assertThat(kept).isEmpty();
+    }
+
+    @Test
+    void startFetchesChangedPagesAndEnqueuesJobItems() {
+        DumEDSSource source = sourceWith(List.of("/query-index.json"), List.of());
+        source.setLocale(Locale.US);  // short-circuits per-page locale resolution
+        source.setBodySelector("main");
+        when(indexClient.fetchAllRows(any(), any(), any())).thenReturn(List.of(
+                Map.of(FIELD_PATH, PATH_PF, "lastModified", "2024-01-01")));
+        when(sitemapClient.fetchPaths(any(), any(), any())).thenReturn(Set.of());
+        when(crawlStateService.loadByPath(source)).thenReturn(Map.of());
+        when(crawlStateService.isUnchanged(any(), any())).thenReturn(false);
+        when(httpFetcher.fetch(any(), any(), any())).thenReturn(new DumEDSHttpFetcher.FetchResult(
+                Jsoup.parse("<html><head><title>PF</title></head><body><main>Hello PF</main></body></html>",
+                        BASE_URL),
+                Optional.of("2024-01-01")));
+        when(connectorContext.addJobItem(any())).thenReturn(true);
+
+        List<DumEDSFetchedPage> fetched = process.start(source);
+
+        assertThat(fetched).singleElement()
+                .satisfies(page -> assertThat(page.path()).isEqualTo(PATH_PF));
+        verify(connectorContext, atLeastOnce()).addJobItem(any());
+        verify(crawlStateService).upsert(eq(source), eq(PATH_PF), any(), any(), eq(true));
+        verify(connectorContext).finishIndexing(any(), eq(false));
+    }
+
+    @Test
+    void startWithNoDiscoveryReturnsEmptyAndFinishes() {
+        DumEDSSource source = sourceWith(List.of(), List.of());
+        when(crawlStateService.loadByPath(source)).thenReturn(Map.of());
+
+        assertThat(process.start(source)).isEmpty();
+
+        verify(connectorContext).finishIndexing(any(), eq(false));
+    }
+
+    @Test
+    void reindexClearsCrawlStateBeforeRunning() {
+        DumEDSSource source = sourceWith(List.of(), List.of());
+        when(crawlStateService.deleteAll(source)).thenReturn(3);
+        when(crawlStateService.loadByPath(source)).thenReturn(Map.of());
+
+        assertThat(process.reindex(source)).isEmpty();
+
+        verify(crawlStateService).deleteAll(source);
+    }
+
+    @Test
+    void dryScanReportsDiscoveredPathsWithoutFetching() {
+        DumEDSSource source = sourceWith(List.of("/query-index.json"), List.of());
+        when(indexClient.fetchAllRows(any(), any(), any())).thenReturn(List.of(
+                Map.of(FIELD_PATH, PATH_PF), Map.of(FIELD_PATH, "/pt-br/pj")));
+        when(sitemapClient.fetchPaths(any(), any(), any())).thenReturn(Set.of());
+
+        DumEDSPluginProcess.DryScanResult result = process.dryScan(source);
+
+        assertThat(result.discovered()).isEqualTo(2);
+        assertThat(result.paths()).containsExactly(PATH_PF, "/pt-br/pj");
     }
 
     private static DumEDSSource sourceWith(List<String> indexPaths, List<String> excludePatterns) {
