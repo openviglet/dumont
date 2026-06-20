@@ -1,8 +1,8 @@
 package com.viglet.dumont.connector.service;
 
 import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -46,7 +46,7 @@ public class DumConnectorIndexingService {
         private final Map<String, PendingStats> pendingStatsMap = new ConcurrentHashMap<>();
         private final Set<String> processingSources = ConcurrentHashMap.newKeySet();
 
-        public record PendingStats(Date startTime, OperationType operationType) {}
+        public record PendingStats(Instant startTime, OperationType operationType) {}
 
         public DumConnectorIndexingService(
                         DumConnectorIndexingRepository dumConnectorIndexingRepository,
@@ -72,7 +72,7 @@ public class DumConnectorIndexingService {
         public void trackIndexingStart(String source, String provider,
                         OperationType operationType) {
                 String key = source + "|" + provider;
-                pendingStatsMap.put(key, new PendingStats(new Date(), operationType));
+                pendingStatsMap.put(key, new PendingStats(Instant.now(), operationType));
         }
 
         public void completeIndexingStats(String source, String provider) {
@@ -83,10 +83,10 @@ public class DumConnectorIndexingService {
                                         key, pendingStatsMap.keySet());
                         return;
                 }
-                Date endTime = new Date();
+                Instant endTime = Instant.now();
                 long documentCount = countBySourceAndProviderSince(source, provider,
                                 pending.startTime());
-                long durationMs = endTime.getTime() - pending.startTime().getTime();
+                long durationMs = endTime.toEpochMilli() - pending.startTime().toEpochMilli();
                 double documentsPerMinute = durationMs > 0
                                 ? (documentCount * 60_000.0) / durationMs
                                 : 0;
@@ -304,7 +304,7 @@ public class DumConnectorIndexingService {
                                 .setChecksum(turSNJobItemWithSession.turSNJobItem().getChecksum())
                                 .setTransactionId(turSNJobItemWithSession.session()
                                                 .getTransactionId())
-                                .setModificationDate(new Date()).setStatus(status)
+                                .setModificationDate(Instant.now()).setStatus(status)
                                 .setStandalone(turSNJobItemWithSession.standalone());
                 dumConnectorIndexing.setSites(turSNJobItemWithSession.turSNJobItem().getSiteNames());
                 dumConnectorIndexing.setDependencies(getDependencies(turSNJobItemWithSession,
@@ -321,8 +321,8 @@ public class DumConnectorIndexingService {
                                 .source(dumConnectorSession.getSource())
                                 .transactionId(dumConnectorSession.getTransactionId())
                                 .locale(turSNJobItem.getLocale())
-                                .checksum(turSNJobItem.getChecksum()).created(new Date())
-                                .modificationDate(new Date()).sites(turSNJobItem.getSiteNames())
+                                .checksum(turSNJobItem.getChecksum()).created(Instant.now())
+                                .modificationDate(Instant.now()).sites(turSNJobItem.getSiteNames())
                                 .environment(turSNJobItem.getEnvironment()).status(status)
                                 .standalone(turSNJobItemWithSession.standalone())
                                 .provider(dumConnectorSession.getProviderName()).build();
@@ -425,8 +425,8 @@ public class DumConnectorIndexingService {
                                 .environment(environment)
                                 .sites(sites)
                                 .status(DumIndexingStatus.NOT_PROCESSED)
-                                .created(new Date())
-                                .modificationDate(new Date())
+                                .created(Instant.now())
+                                .modificationDate(Instant.now())
                                 .build();
                 return dumConnectorIndexingRepository.save(model);
         }
@@ -447,7 +447,7 @@ public class DumConnectorIndexingService {
                 dumConnectorIndexingRepository.deleteAll(records);
         }
 
-        public long countBySourceAndProviderSince(String source, String provider, Date since) {
+        public long countBySourceAndProviderSince(String source, String provider, Instant since) {
                 return dumConnectorIndexingRepository
                                 .countBySourceAndProviderAndModificationDateGreaterThanEqual(
                                                 source, provider, since);

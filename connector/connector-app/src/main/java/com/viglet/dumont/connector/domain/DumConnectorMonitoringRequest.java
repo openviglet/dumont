@@ -1,6 +1,6 @@
 package com.viglet.dumont.connector.domain;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
@@ -28,6 +28,6 @@ public class DumConnectorMonitoringRequest {
     private String environment;
     private String locale;
     private String site;
-    private Date dateFrom;
-    private Date dateTo;
+    private Instant dateFrom;
+    private Instant dateTo;
 }

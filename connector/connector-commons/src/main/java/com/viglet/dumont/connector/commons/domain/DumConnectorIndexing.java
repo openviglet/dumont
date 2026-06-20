@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
@@ -21,8 +21,8 @@ public class DumConnectorIndexing {
     private String transactionId;
     private String checksum;
     private Locale locale;
-    private Date created;
-    private Date modificationDate;
+    private Instant created;
+    private Instant modificationDate;
     private DumIndexingStatus status;
     private List<String> sites;
 }

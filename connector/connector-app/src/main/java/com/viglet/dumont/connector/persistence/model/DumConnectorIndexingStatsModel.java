@@ -18,8 +18,8 @@ package com.viglet.dumont.connector.persistence.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -76,9 +76,9 @@ public class DumConnectorIndexingStatsModel implements Serializable {
     @Column
     private OperationType operationType;
     @Column
-    private Date startTime;
+    private Instant startTime;
     @Column
-    private Date endTime;
+    private Instant endTime;
     @Column
     private long documentCount;
     @Column

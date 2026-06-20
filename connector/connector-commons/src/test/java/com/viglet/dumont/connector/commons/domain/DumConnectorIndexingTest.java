@@ -18,8 +18,8 @@ package com.viglet.dumont.connector.commons.domain;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,12 +31,12 @@ import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 class DumConnectorIndexingTest {
 
     private DumConnectorIndexing indexing;
-    private Date testDate;
+    private Instant testDate;
     private List<String> testSites;
 
     @BeforeEach
     void setUp() {
-        testDate = new Date(1_700_000_000_000L);
+        testDate = Instant.ofEpochMilli(1_700_000_000_000L);
         testSites = Arrays.asList("site1", "site2");
         indexing = DumConnectorIndexing.builder()
                 .id(1)

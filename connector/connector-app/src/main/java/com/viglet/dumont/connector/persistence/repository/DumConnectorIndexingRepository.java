@@ -16,8 +16,8 @@
 
 package com.viglet.dumont.connector.persistence.repository;
 
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -148,7 +148,7 @@ public interface DumConnectorIndexingRepository
         List<String> findAllSites(@Param("provider") String provider);
 
         long countBySourceAndProviderAndModificationDateGreaterThanEqual(String source,
-                        String provider, Date modificationDate);
+                        String provider, Instant modificationDate);
 
         long countByProvider(String provider);
 
