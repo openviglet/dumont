@@ -257,6 +257,97 @@ class DumAemJobServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("Standalone deIndex + prepareIndexObject Tests")
+    class StandaloneAndPrepareTests {
+
+        @Test
+        @DisplayName("Standalone deIndex with no items sends author + publish deletes")
+        void standaloneDeIndexSendsAuthorAndPublishJobs() {
+            DumAemConfiguration config = mock(DumAemConfiguration.class);
+            lenient().when(config.isAuthor()).thenReturn(true);
+            lenient().when(config.isPublish()).thenReturn(true);
+            lenient().when(config.getAuthorSNSite()).thenReturn("author-site");
+            lenient().when(config.getPublishSNSite()).thenReturn("publish-site");
+            lenient().when(config.getDefaultLocale()).thenReturn(Locale.US);
+            DumAemSession session = DumAemSession.builder().configuration(config)
+                    .event(DumAemEvent.INDEXING).standalone(true).providerName("AEM")
+                    .contentMapping(DumAemContentMapping.builder().build())
+                    .attributeSpecs(Collections.emptyList()).build();
+            when(dumConnectorContext.getIndexingItem(anyString(), any(), anyString()))
+                    .thenReturn(Collections.emptyList());
+            when(dumConnectorContext.addJobItem(any())).thenReturn(true);
+
+            service.createDeIndexJobAndSendToConnectorQueue(session, "/content/test");
+
+            verify(dumConnectorContext, times(2)).addJobItem(any());
+        }
+
+        @Test
+        @DisplayName("deIndex with indexing items sends one delete per item")
+        void deIndexWithItemsSendsDeletePerItem() {
+            DumAemSession session = createMockSession();
+            DumConnectorIndexing indexing = mock(DumConnectorIndexing.class);
+            lenient().when(indexing.getSites()).thenReturn(List.of("site"));
+            lenient().when(indexing.getLocale()).thenReturn(Locale.US);
+            lenient().when(indexing.getObjectId()).thenReturn("/content/test");
+            lenient().when(indexing.getEnvironment()).thenReturn(DumAemEnv.AUTHOR.toString());
+            when(dumConnectorContext.getIndexingItem(anyString(), any(), anyString()))
+                    .thenReturn(List.of(indexing));
+            when(dumConnectorContext.addJobItem(any())).thenReturn(true);
+
+            service.createDeIndexJobAndSendToConnectorQueue(session, "/content/test");
+
+            verify(dumConnectorContext, times(1)).addJobItem(any());
+        }
+
+        @Test
+        @DisplayName("prepareIndexObject skips an object outside the root path")
+        void prepareIndexObjectSkipsOutsideRootPath() {
+            DumAemConfiguration config = mock(DumAemConfiguration.class);
+            lenient().when(config.getRootPath()).thenReturn("/content/other");
+            DumAemSession session = DumAemSession.builder().configuration(config)
+                    .event(DumAemEvent.INDEXING).standalone(true).providerName("AEM").build();
+
+            service.prepareIndexObject(session, createMockAemObjectGeneric());
+
+            verify(dumAemDependencyService, times(0)).collectDependencies(any(), any(), any());
+            verify(dumConnectorContext, times(0)).addJobItem(any());
+        }
+
+        @Test
+        @DisplayName("prepareIndexObject skips when content type is null")
+        void prepareIndexObjectSkipsWhenContentTypeNull() {
+            DumAemConfiguration config = mock(DumAemConfiguration.class);
+            lenient().when(config.getRootPath()).thenReturn(null);
+            lenient().when(config.getContentType()).thenReturn(null);
+            DumAemSession session = DumAemSession.builder().configuration(config)
+                    .event(DumAemEvent.INDEXING).standalone(true).providerName("AEM").build();
+
+            service.prepareIndexObject(session, createMockAemObjectGeneric());
+
+            verify(dumConnectorContext, times(0)).addJobItem(any());
+        }
+
+        @Test
+        @DisplayName("indexingPublish forces a deIndex when not delivered in standalone mode")
+        void indexingPublishForcesDeIndexWhenNotDelivered() {
+            DumAemConfiguration config = mock(DumAemConfiguration.class);
+            lenient().when(config.isPublish()).thenReturn(true);
+            lenient().when(config.getPublishSNSite()).thenReturn("publish-site");
+            lenient().when(config.getLocalePaths()).thenReturn(Collections.emptySet());
+            lenient().when(config.getDefaultLocale()).thenReturn(Locale.US);
+            DumAemSession session = DumAemSession.builder().configuration(config)
+                    .event(DumAemEvent.INDEXING).standalone(true).providerName("AEM").build();
+            when(dumConnectorContext.addJobItem(any())).thenReturn(true);
+
+            // createMockAemObjectGeneric() has no replication metadata -> not delivered.
+            service.indexingPublish(session, createMockAemObjectGeneric());
+
+            verify(dumConnectorContext, times(1)).addJobItem(any());
+        }
+    }
+
     private DumAemSession createMockSession() {
         DumAemConfiguration config = mock(DumAemConfiguration.class);
         lenient().when(config.isAuthor()).thenReturn(false);
