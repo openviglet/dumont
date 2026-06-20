@@ -18,8 +18,8 @@ package com.viglet.dumont.connector.persistence.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -92,9 +92,9 @@ public class DumConnectorIndexingModel implements Serializable {
     @Column
     private Locale locale;
     @Column
-    private Date created;
+    private Instant created;
     @Column
-    private Date modificationDate;
+    private Instant modificationDate;
     @Column
     private boolean standalone;
     @Enumerated(EnumType.STRING)

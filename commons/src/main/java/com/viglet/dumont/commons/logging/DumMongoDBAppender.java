@@ -2,12 +2,10 @@ package com.viglet.dumont.commons.logging;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
+import java.time.Instant;
 
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ch.qos.logback.classic.pattern.Abbreviator;
 import ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator;
@@ -31,7 +29,6 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
     // muito mais eficiente.
     private static final JsonMapper JSON_MAPPER = JsonMapper.builder()
             .addModule(new JodaModule())
-            .withConfigOverride(Date.class, cfg -> cfg.setFormat(JsonFormat.Value.forShape(JsonFormat.Shape.NUMBER)))
             .build();
 
     @Override
@@ -43,7 +40,7 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
                 .level(event.getLevel().toString())
                 .logger(abbreviatePackage(event.getLoggerName()))
                 .message(event.getFormattedMessage())
-                .date(new Date(event.getTimeStamp()))
+                .date(Instant.ofEpochMilli(event.getTimeStamp()))
                 .stackTrace(getStackTrace(event))
                 .build();
         try {

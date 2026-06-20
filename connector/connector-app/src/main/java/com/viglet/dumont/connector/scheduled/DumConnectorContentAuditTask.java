@@ -16,8 +16,8 @@
 
 package com.viglet.dumont.connector.scheduled;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -89,7 +89,7 @@ public class DumConnectorContentAuditTask {
     private void auditSource(DumConnectorPlugin plugin, String source, String provider) {
         log.info("Auditing source '{}' (queryBuilder={}, parallelism={})",
                 source, queryBuilderEnabled, parallelism);
-        Date startTime = new Date();
+        Instant startTime = Instant.now();
         try {
             List<String> discoveredIds = plugin.discoverContentIds(source);
 
@@ -106,8 +106,8 @@ public class DumConnectorContentAuditTask {
                         allEnvironments, allSites, firstLocale);
             }
 
-            Date endTime = new Date();
-            long durationMs = endTime.getTime() - startTime.getTime();
+            Instant endTime = Instant.now();
+            long durationMs = endTime.toEpochMilli() - startTime.toEpochMilli();
             double docsPerMinute = durationMs > 0
                     ? (discoveredIds.size() * 60_000.0) / durationMs
                     : 0;

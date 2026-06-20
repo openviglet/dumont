@@ -1,7 +1,7 @@
 package com.viglet.dumont.commons.logging;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -20,5 +20,5 @@ public class DumLoggingGeneral implements Serializable {
     private String message;
     private String stackTrace;
     @JsonSerialize(using = IsoDateSerializer.class)
-    private Date date;
+    private Instant date;
 }

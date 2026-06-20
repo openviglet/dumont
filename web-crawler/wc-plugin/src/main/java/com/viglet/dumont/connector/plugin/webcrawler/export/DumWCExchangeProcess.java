@@ -4,10 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -137,7 +138,7 @@ public class DumWCExchangeProcess {
 
                 DumCommonsUtils.addFilesToZip(exportDir, zipFile);
 
-                String strDate = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
+                String strDate = LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss"));
                 String zipFileName = "WC_" + strDate + ".zip";
 
                 response.addHeader("Content-disposition", "attachment;filename=" + zipFileName);

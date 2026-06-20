@@ -19,8 +19,7 @@
 package com.viglet.dumont.connector.plugin.aem.api;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DumAemApi {
     private final DumAemPluginProcess dumAemPluginProcess;
     private final Set<String> currentContentIdSet = new HashSet<>();
-    private LocalDateTime currentStandAloneUpdate = LocalDateTime.now(ZoneId.systemDefault());
+    private Instant currentStandAloneUpdate = Instant.now();
 
     public DumAemApi(DumAemPluginProcess dumAemPluginProcess) {
         this.dumAemPluginProcess = dumAemPluginProcess;
@@ -72,11 +71,11 @@ public class DumAemApi {
     private void updateCurrentRequests(String name, List<String> paths) {
         currentContentIdSet.clear();
         paths.forEach(path -> currentContentIdSet.add(getSourceWithContentId(name, path)));
-        currentStandAloneUpdate = LocalDateTime.now(ZoneId.systemDefault());
+        currentStandAloneUpdate = Instant.now();
     }
 
     private boolean hasNonRepeatedRequest(String name, List<String> paths) {
-        Duration duration = Duration.between(currentStandAloneUpdate, LocalDateTime.now(ZoneId.systemDefault()));
+        Duration duration = Duration.between(currentStandAloneUpdate, Instant.now());
         if (duration.getSeconds() > 30L)
             return true;
         List<String> filteredPaths = new ArrayList<>(paths);

@@ -1,7 +1,7 @@
 package com.viglet.dumont.commons.logging;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,6 +31,6 @@ public class DumLoggingIndexing implements Serializable {
     private DumLoggingStatus resultStatus;
     private String details;
     @JsonSerialize(using = IsoDateSerializer.class)
-    private Date date;
+    private Instant date;
 
 }

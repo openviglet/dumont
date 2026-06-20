@@ -1,30 +1,30 @@
 package com.viglet.dumont.commons.logging;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ser.std.StdSerializer;
 
-public class IsoDateSerializer extends StdSerializer<Date> {
+public class IsoDateSerializer extends StdSerializer<Instant> {
     // No v3, o construtor padrão chamando super() é fortemente recomendado
     public IsoDateSerializer() {
-        super(Date.class);
+        super(Instant.class);
     }
 
     @Override
-    public void serialize(Date date, JsonGenerator jsonGenerator, SerializationContext provider)
+    public void serialize(Instant instant, JsonGenerator jsonGenerator, SerializationContext provider)
             throws JacksonException {
-        if (date == null) {
+        if (instant == null) {
             jsonGenerator.writeNull();
             return;
         }
 
-        ZonedDateTime zdt = date.toInstant().atZone(ZoneId.systemDefault());
+        ZonedDateTime zdt = instant.atZone(ZoneId.systemDefault());
         String isoOffsetString = zdt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
         jsonGenerator.writeRawValue("ISODate(\"" + isoOffsetString + "\")");
