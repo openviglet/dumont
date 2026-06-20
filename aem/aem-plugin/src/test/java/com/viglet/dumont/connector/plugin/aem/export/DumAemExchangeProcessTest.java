@@ -26,9 +26,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -45,6 +48,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemAttribExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemModelExchange;
@@ -300,6 +306,109 @@ class DumAemExchangeProcessTest {
                 .name("Test Source")
                 .endpoint("http://localhost:4502")
                 .build();
+    }
+
+    @Nested
+    @DisplayName("importFromMultipartFile Tests")
+    class ImportFromMultipartFileTests {
+
+        @Test
+        @DisplayName("Should import from a ZIP with export.json at the root")
+        void shouldImportFromFlatZip() throws IOException {
+            byte[] zip = buildZip(false);
+            stubSaves();
+
+            exchangeProcess.importFromMultipartFile(new InMemoryMultipartFile(zip));
+
+            verify(dumAemSourceRepository, times(1)).save(any());
+        }
+
+        @Test
+        @DisplayName("Should import from a ZIP wrapping export.json in a single folder")
+        void shouldImportFromWrappedZip() throws IOException {
+            byte[] zip = buildZip(true);
+            stubSaves();
+
+            exchangeProcess.importFromMultipartFile(new InMemoryMultipartFile(zip));
+
+            verify(dumAemSourceRepository, times(1)).save(any());
+        }
+
+        private void stubSaves() {
+            when(dumAemSourceRepository.findById(any())).thenReturn(Optional.empty());
+            when(dumAemSourceRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        }
+
+        /** Builds a ZIP holding export.json, either at the root or nested one folder deep. */
+        private byte[] buildZip(boolean wrapped) throws IOException {
+            File contentRoot = new File(tempDir, "zip-" + (wrapped ? "wrapped" : "flat"));
+            File jsonDir = wrapped ? new File(contentRoot, "inner") : contentRoot;
+            Files.createDirectories(jsonDir.toPath());
+            Files.writeString(new File(jsonDir, "export.json").toPath(), exportJson());
+            File zipFile = new File(tempDir, "aem-" + (wrapped ? "wrapped" : "flat") + ".zip");
+            DumCommonsUtils.addFilesToZip(contentRoot, zipFile);
+            return Files.readAllBytes(zipFile.toPath());
+        }
+    }
+
+    private static String exportJson() {
+        return """
+                {
+                    "sources": [
+                        {
+                            "id": "source-1",
+                            "name": "Test Source",
+                            "endpoint": "http://localhost:4502",
+                            "attributes": [],
+                            "models": [],
+                            "localePaths": []
+                        }
+                    ]
+                }
+                """;
+    }
+
+    /** Minimal {@link MultipartFile} over an in-memory byte[] — avoids a spring-test dependency. */
+    private record InMemoryMultipartFile(byte[] bytes) implements MultipartFile {
+        @Override
+        public String getName() {
+            return "file";
+        }
+
+        @Override
+        public String getOriginalFilename() {
+            return "aem.zip";
+        }
+
+        @Override
+        public String getContentType() {
+            return "application/zip";
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return bytes.length == 0;
+        }
+
+        @Override
+        public long getSize() {
+            return bytes.length;
+        }
+
+        @Override
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        @Override
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(bytes);
+        }
+
+        @Override
+        public void transferTo(File dest) throws IOException {
+            Files.write(dest.toPath(), bytes);
+        }
     }
 
     private File createExportFile() throws IOException {
