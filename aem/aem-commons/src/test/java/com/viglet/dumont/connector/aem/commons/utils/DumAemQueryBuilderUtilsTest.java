@@ -115,7 +115,7 @@ class DumAemQueryBuilderUtilsTest {
     }
 
     @Test
-    void queryAllPathsReturnsEmptyWhenQueryThrows() throws Exception {
+    void queryAllPathsReturnsEmptyWhenQueryThrows() {
         try (MockedStatic<DumAemCommonsUtils> mocked = mockStatic(DumAemCommonsUtils.class)) {
             mocked.when(() -> DumAemCommonsUtils.getResponseBody(anyString(), any(), eq(false)))
                     .thenThrow(new java.io.IOException("boom"));
