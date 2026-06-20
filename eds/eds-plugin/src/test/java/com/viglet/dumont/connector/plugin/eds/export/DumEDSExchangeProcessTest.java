@@ -17,17 +17,28 @@ package com.viglet.dumont.connector.plugin.eds.export;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import com.viglet.dumont.commons.utils.DumCommonsUtils;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -217,6 +228,84 @@ class DumEDSExchangeProcessTest {
         } catch (Exception expected) {
             // Pass — jackson surfaces a FileNotFoundException wrapped as JacksonException.
             assertThat(expected).isNotNull();
+        }
+    }
+
+    @Test
+    void exportObjectStreamsNonEmptyZip() throws Exception {
+        when(sourceRepository.findAll()).thenReturn(List.of(fullSource()));
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        StreamingResponseBody body = process.exportObject(response);
+
+        assertThat(body).isNotNull();
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+        verify(response).setContentType("application/octet-stream");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        body.writeTo(out);
+        assertThat(out.toByteArray()).isNotEmpty();
+    }
+
+    @Test
+    void importFromMultipartFileImportsSourceFromZip(@TempDir Path tempDir) throws Exception {
+        // Build a ZIP whose root holds a single export.json (the non-wrapped layout).
+        DumEDSExchange exchange = DumEDSExchange.builder()
+                .sources(List.of(process.toExchange(fullSource()).toBuilder().id(null).build()))
+                .build();
+        Path contentDir = tempDir.resolve("content");
+        Files.createDirectories(contentDir);
+        Files.writeString(contentDir.resolve("export.json"), DumEDSExchangeProcess.toJson(exchange),
+                StandardCharsets.UTF_8);
+        File zipFile = tempDir.resolve("eds.zip").toFile();
+        DumCommonsUtils.addFilesToZip(contentDir.toFile(), zipFile);
+        byte[] zipBytes = Files.readAllBytes(zipFile.toPath());
+
+        process.importFromMultipartFile(new InMemoryMultipartFile(zipBytes));
+
+        verify(sourceRepository).save(any(DumEDSSource.class));
+    }
+
+    /** Minimal {@link MultipartFile} over an in-memory byte[] — avoids a spring-test dependency. */
+    private record InMemoryMultipartFile(byte[] bytes) implements MultipartFile {
+        @Override
+        public String getName() {
+            return "file";
+        }
+
+        @Override
+        public String getOriginalFilename() {
+            return "eds.zip";
+        }
+
+        @Override
+        public String getContentType() {
+            return "application/zip";
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return bytes.length == 0;
+        }
+
+        @Override
+        public long getSize() {
+            return bytes.length;
+        }
+
+        @Override
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        @Override
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(bytes);
+        }
+
+        @Override
+        public void transferTo(File dest) throws java.io.IOException {
+            Files.write(dest.toPath(), bytes);
         }
     }
 }
