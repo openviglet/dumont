@@ -18,8 +18,8 @@ package com.viglet.dumont.connector.persistence.model;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.hibernate.annotations.TenantId;
@@ -72,7 +72,7 @@ public class DumProvenanceRunModel implements Serializable {
     @Column
     private String source;
     @Column
-    private Date capturedAt;
+    private Instant capturedAt;
     @Column
     private int documentCount;
     @Builder.Default

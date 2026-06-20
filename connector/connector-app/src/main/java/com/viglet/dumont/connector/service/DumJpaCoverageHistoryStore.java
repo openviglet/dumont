@@ -16,7 +16,7 @@
 
 package com.viglet.dumont.connector.service;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.domain.Limit;
@@ -55,7 +55,7 @@ public class DumJpaCoverageHistoryStore implements DumCoverageHistoryStore {
     @Transactional
     public DumCoverageSnapshot recordSnapshot(String source, int documentCount,
             List<DumFieldCoverage> fields) {
-        Date capturedAt = new Date();
+        Instant capturedAt = Instant.now();
         DumCoverageRunModel run = DumCoverageRunModel.builder()
                 .source(source)
                 .capturedAt(capturedAt)
@@ -91,7 +91,7 @@ public class DumJpaCoverageHistoryStore implements DumCoverageHistoryStore {
                 .map(field -> new DumFieldCoverage(field.getFieldName(), field.getFieldType(),
                         field.isMandatory(), field.getPresent(), field.getTotal(), field.getPercent()))
                 .toList();
-        long capturedAt = run.getCapturedAt() == null ? 0L : run.getCapturedAt().getTime();
+        long capturedAt = run.getCapturedAt() == null ? 0L : run.getCapturedAt().toEpochMilli();
         return new DumCoverageSnapshot(run.getSource(), capturedAt, run.getDocumentCount(), fields);
     }
 }

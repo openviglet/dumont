@@ -16,7 +16,7 @@
 
 package com.viglet.dumont.connector.service;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.domain.Limit;
@@ -55,7 +55,7 @@ public class DumJpaProvenanceHistoryStore implements DumProvenanceHistoryStore {
     @Transactional
     public DumProvenanceSnapshot recordSnapshot(String source, int documentCount,
             List<DumFieldProvenanceEntry> fields) {
-        Date capturedAt = new Date();
+        Instant capturedAt = Instant.now();
         DumProvenanceRunModel run = DumProvenanceRunModel.builder()
                 .source(source)
                 .capturedAt(capturedAt)
@@ -92,7 +92,7 @@ public class DumJpaProvenanceHistoryStore implements DumProvenanceHistoryStore {
                         field.getSelector(), field.getConfidence(), field.getPresent(),
                         field.getTotal()))
                 .toList();
-        long capturedAt = run.getCapturedAt() == null ? 0L : run.getCapturedAt().getTime();
+        long capturedAt = run.getCapturedAt() == null ? 0L : run.getCapturedAt().toEpochMilli();
         return new DumProvenanceSnapshot(run.getSource(), capturedAt, run.getDocumentCount(), fields);
     }
 }
