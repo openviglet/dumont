@@ -42,8 +42,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.context.DumAemLocalePathContext;
+import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 
@@ -574,6 +578,61 @@ class DumAemCommonsUtilsTest {
                     .build();
 
             Locale result = DumAemCommonsUtils.getLocaleByPath(config, "/content/mysite/unknown/home");
+
+            assertEquals(Locale.ENGLISH, result);
+        }
+    }
+
+    @Nested
+    @DisplayName("Misc helper Tests")
+    class MiscHelperTests {
+
+        @Test
+        @DisplayName("runCustomClassFromContentType returns an empty map when no class is configured")
+        void runCustomClassReturnsEmptyMapWhenNoClass() {
+            DumAemModel model = DumAemModel.builder().type("cq:Page").className("").build();
+            JSONObject jcrNode = new JSONObject();
+            jcrNode.put("jcr:primaryType", "cq:Page");
+            DumAemObject aemObject = new DumAemObject("/content/test", jcrNode, DumAemEnv.AUTHOR);
+
+            DumAemAttrMap result =
+                    DumAemCommonsUtils.runCustomClassFromContentType(model, aemObject, configuration);
+
+            assertTrue(result.isEmpty());
+        }
+
+        @Test
+        @DisplayName("getJsonNodeToComponent skips jcr:/sling: nested nodes")
+        void getJsonNodeToComponentSkipsReservedNamespaces() {
+            JSONObject jcrContent = new JSONObject();
+            jcrContent.put("text", "Hidden");
+            JSONObject slingNode = new JSONObject();
+            slingNode.put("text", "AlsoHidden");
+            JSONObject component = new JSONObject();
+            component.put("text", " Shown");
+            JSONObject json = new JSONObject();
+            json.put("text", "Top");
+            json.put("jcr:content", jcrContent);
+            json.put("sling:members", slingNode);
+            json.put("component", component);
+
+            String result = DumAemCommonsUtils.getJsonNodeToComponent(json);
+
+            assertTrue(result.contains("Top"));
+            assertTrue(result.contains("Shown"));
+            assertFalse(result.contains("Hidden"));
+        }
+
+        @Test
+        @DisplayName("getLocaleFromContext resolves via the bound object path")
+        void getLocaleFromContextResolvesDefault() {
+            JSONObject jcrNode = new JSONObject();
+            jcrNode.put("jcr:primaryType", "cq:Page");
+            DumAemObject aemObject = new DumAemObject("/content/mysite/home", jcrNode,
+                    DumAemEnv.AUTHOR);
+            DumAemContext context = new DumAemContext(aemObject);
+
+            Locale result = DumAemCommonsUtils.getLocaleFromContext(configuration, context);
 
             assertEquals(Locale.ENGLISH, result);
         }

@@ -117,6 +117,14 @@ class DumAemCommonsUtilsHttpTest {
     }
 
     @Test
+    void getResponseBodyTypedReturnsEmptyForInvalidJson() throws IOException {
+        Optional<Bean> bean = DumAemCommonsUtils.getResponseBody(baseUrl + "/content/notjson.json",
+                config(), Bean.class, false);
+
+        assertThat(bean).isEmpty();
+    }
+
+    @Test
     void getInfinityJsonReturnsObject() {
         Optional<JSONObject> json =
                 DumAemCommonsUtils.getInfinityJson("/content/wknd", config(), false);
