@@ -18,7 +18,9 @@
 package com.viglet.dumont.connector.plugin.aem;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -37,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEvent;
 import com.viglet.dumont.connector.plugin.aem.api.DumAemPathList;
+import com.viglet.dumont.connector.plugin.aem.api.DumAemAttributeIndex;
 import com.viglet.dumont.connector.plugin.aem.command.IndexingCommand;
 import com.viglet.dumont.connector.plugin.aem.command.IndexingCommandFactory;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
@@ -225,6 +228,69 @@ class DumAemPluginProcessTest {
             dumAemPluginProcess.sentToIndexStandalone(sourceName, pathList);
 
             verify(commandFactory, never()).createIndexPathsCommand(any(), any());
+        }
+
+        @Test
+        @DisplayName("Should ignore an empty path list")
+        void shouldIgnoreEmptyPathList() {
+            DumAemPathList pathList = DumAemPathList.builder()
+                    .paths(List.of()).event(DumAemEvent.INDEXING).recursive(false).build();
+
+            dumAemPluginProcess.sentToIndexStandalone("src", pathList);
+
+            verify(sourceService, never()).getDumAemSourceByName(any());
+        }
+
+        @Test
+        @DisplayName("Should resolve URLs to IDs before indexing")
+        void shouldConvertUrlsToIds() {
+            String sourceName = "test-source";
+            DumAemPathList pathList = DumAemPathList.builder()
+                    .attribute(DumAemAttributeIndex.URL)
+                    .paths(List.of("http://aem/content/a.html"))
+                    .event(DumAemEvent.INDEXING).recursive(false).build();
+            when(sourceService.resolveIdFromUrl(sourceName, "http://aem/content/a.html"))
+                    .thenReturn("/content/a");
+            when(sourceService.getDumAemSourceByName(sourceName))
+                    .thenReturn(Optional.of(dumAemSource));
+            when(sessionService.getDumAemSession(any(DumAemSource.class), any(DumAemPathList.class),
+                    any(Boolean.class))).thenReturn(dumAemSession);
+            when(commandFactory.createIndexPathsCommand(any(), any())).thenReturn(indexingCommand);
+
+            dumAemPluginProcess.sentToIndexStandalone(sourceName, pathList);
+
+            verify(executor).executeStandalone(any(), any());
+        }
+
+        @Test
+        @DisplayName("Should not index when no IDs resolve from URLs")
+        void shouldNotIndexWhenNoIdsResolved() {
+            String sourceName = "test-source";
+            DumAemPathList pathList = DumAemPathList.builder()
+                    .attribute(DumAemAttributeIndex.URL)
+                    .paths(List.of("http://aem/content/missing.html"))
+                    .event(DumAemEvent.INDEXING).recursive(false).build();
+            when(sourceService.resolveIdFromUrl(sourceName, "http://aem/content/missing.html"))
+                    .thenReturn(null);
+
+            dumAemPluginProcess.sentToIndexStandalone(sourceName, pathList);
+
+            verify(sourceService, never()).getDumAemSourceByName(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Executor delegation Tests")
+    class ExecutorDelegationTests {
+
+        @Test
+        @DisplayName("isSourceRunning and getRunningSourcesCount delegate to the executor")
+        void delegatesToExecutor() {
+            when(executor.isRunning("src")).thenReturn(true);
+            when(executor.getRunningCount()).thenReturn(3);
+
+            assertTrue(dumAemPluginProcess.isSourceRunning("src"));
+            assertEquals(3, dumAemPluginProcess.getRunningSourcesCount());
         }
     }
 }
