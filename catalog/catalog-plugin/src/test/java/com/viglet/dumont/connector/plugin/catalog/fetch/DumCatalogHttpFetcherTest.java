@@ -85,20 +85,23 @@ class DumCatalogHttpFetcherTest {
 
     @Test
     void fetchThrowsWhenUrlBlank() {
-        assertThatThrownBy(() -> fetcher.fetch(source("  ")))
+        DumCatalogSource source = source("  ");
+        assertThatThrownBy(() -> fetcher.fetch(source))
                 .isInstanceOf(DumCatalogFetchException.class).hasMessageContaining("no catalogUrl");
     }
 
     @Test
     void fetchThrowsOnNonSuccessStatus() {
         statusToReturn = 500;
-        assertThatThrownBy(() -> fetcher.fetch(source(baseUrl + "/catalog")))
+        DumCatalogSource source = source(baseUrl + "/catalog");
+        assertThatThrownBy(() -> fetcher.fetch(source))
                 .isInstanceOf(DumCatalogFetchException.class).hasMessageContaining("HTTP 500");
     }
 
     @Test
     void fetchThrowsOnTransportError() {
-        assertThatThrownBy(() -> fetcher.fetch(source("http://localhost:1/catalog")))
+        DumCatalogSource source = source("http://localhost:1/catalog");
+        assertThatThrownBy(() -> fetcher.fetch(source))
                 .isInstanceOf(DumCatalogFetchException.class).hasMessageContaining("failed");
     }
 }

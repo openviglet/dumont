@@ -151,7 +151,7 @@ class DumWCExchangeProcessTest {
     void exportObjectWritesZipAndStreamsBytes(@TempDir Path tempDir) throws Exception {
         String previousUserDir = System.getProperty("user.dir");
         System.setProperty("user.dir", tempDir.toAbsolutePath().toString());
-        try {
+        try (AutoCloseable restore = () -> System.setProperty("user.dir", previousUserDir)) {
             DumWCSource source = DumWCSource.builder()
                     .id("s1").title("Wiki").url("https://wiki.invalid")
                     .turSNSites(new HashSet<>(List.of("Wiki"))).build();
@@ -167,8 +167,6 @@ class DumWCExchangeProcessTest {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             body.writeTo(out);
             assertThat(out.size()).isPositive();
-        } finally {
-            System.setProperty("user.dir", previousUserDir);
         }
     }
 

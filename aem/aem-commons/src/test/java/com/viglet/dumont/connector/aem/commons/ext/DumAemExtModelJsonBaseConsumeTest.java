@@ -25,6 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,7 +93,7 @@ class DumAemExtModelJsonBaseConsumeTest {
             DumAemAttrMap attrs =
                     ext.consume(aemObject(DumAemEnv.AUTHOR), config("http://author", null));
 
-            assertThat(attrs.containsKey("title")).isTrue();
+            assertThat(attrs).containsKey("title");
         }
     }
 
@@ -134,14 +135,14 @@ class DumAemExtModelJsonBaseConsumeTest {
 
     @Test
     void lastModifiedDateFallsBackToCreatedDate() {
-        Calendar created = Calendar.getInstance();
+        Calendar created = new GregorianCalendar(2024, Calendar.JANUARY, 1, 10, 0, 0);
         DumAemObject withCreatedOnly = mock(DumAemObject.class);
         lenient().when(withCreatedOnly.getLastModified()).thenReturn(null);
         lenient().when(withCreatedOnly.getCreatedDate()).thenReturn(created);
 
         assertThat(ext.exposeLastModified(withCreatedOnly)).isEqualTo(created.getTime());
 
-        Calendar modified = Calendar.getInstance();
+        Calendar modified = new GregorianCalendar(2024, Calendar.FEBRUARY, 2, 12, 0, 0);
         DumAemObject withModified = mock(DumAemObject.class);
         lenient().when(withModified.getLastModified()).thenReturn(modified);
 

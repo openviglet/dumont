@@ -16,6 +16,7 @@
 package com.viglet.dumont.connector.indexing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -105,14 +106,14 @@ class DumElasticsearchIndexingPluginTest {
         when(client.bulk(any(BulkRequest.class))).thenThrow(new IOException("network down"));
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("id", "c1");
+        var items = itemsWith(attributes);
 
-        assertThatThrownBy(() -> plugin.index(itemsWith(attributes)))
-                .isInstanceOf(TurRuntimeException.class);
+        assertThatThrownBy(() -> plugin.index(items)).isInstanceOf(TurRuntimeException.class);
     }
 
     @Test
     void destroyClosesRestClient() {
         // restClient is a real (unconnected) client; closing it must not throw
-        plugin.destroy();
+        assertThatCode(() -> plugin.destroy()).doesNotThrowAnyException();
     }
 }

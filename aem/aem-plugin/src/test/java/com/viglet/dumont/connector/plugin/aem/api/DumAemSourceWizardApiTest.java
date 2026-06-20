@@ -40,7 +40,6 @@ import org.springframework.http.ResponseEntity;
 import com.sun.net.httpserver.HttpServer;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemExtractorScannerService;
-import com.viglet.dumont.connector.plugin.aem.service.DumAemExtractorScannerService.ExtractorClass;
 
 class DumAemSourceWizardApiTest {
 

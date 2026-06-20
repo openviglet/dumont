@@ -45,8 +45,8 @@ class DumAemExtractorScannerServiceTest {
     @Test
     void listReturnsClasspathExtractorsForKnownCategory() {
         List<ExtractorClass> attributes = service.list("attribute", null);
-        // The classpath scan must not fail; every returned entry is well-formed.
-        assertThat(attributes).allSatisfy(e -> {
+        // The classpath scan must not fail and must surface well-formed attribute extractors.
+        assertThat(attributes).isNotEmpty().allSatisfy(e -> {
             assertThat(e.fqcn()).isNotBlank();
             assertThat(e.category()).isEqualTo("attribute");
         });

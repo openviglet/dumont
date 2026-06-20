@@ -45,12 +45,13 @@ class DumLoggingApiMongoIT {
             MongoCollection<Document> collection =
                     client.getDatabase(DB).getCollection(COLLECTION);
             collection.drop();
+            Date fixedDate = new Date(1_700_000_000_000L);
             collection.insertOne(new Document("contentId", "c1").append("status", "INDEXED")
                     .append("resultStatus", "SUCCESS").append("url", "http://site/a")
-                    .append("date", new Date()));
+                    .append("date", fixedDate));
             collection.insertOne(new Document("contentId", "c2").append("status", "DEINDEXED")
                     .append("resultStatus", "ERROR").append("url", "http://site/b")
-                    .append("date", new Date()));
+                    .append("date", fixedDate));
         }
         api = new DumLoggingAPI("mongodb", true, MONGO.getConnectionString(), DB, COLLECTION,
                 false, "redis://localhost:6379/0", "dumontLog:indexing");
@@ -65,30 +66,30 @@ class DumLoggingApiMongoIT {
     void returnsAllDocuments() {
         Map<String, Object> result = api.indexingLogging(0, 100, null, null, null, null, null, null,
                 "desc");
-        assertThat(result.get("totalElements")).isEqualTo(2L);
+        assertThat(result).containsEntry("totalElements", 2L);
         assertThat((List<?>) result.get("content")).hasSize(2);
     }
 
     @Test
     void filtersByStatusAndContentId() {
-        assertThat(api.indexingLogging(0, 100, null, null, "INDEXED", null, null, null, "asc")
-                .get("totalElements")).isEqualTo(1L);
-        assertThat(api.indexingLogging(0, 100, null, null, null, "c2", null, null, "desc")
-                .get("totalElements")).isEqualTo(1L);
+        assertThat(api.indexingLogging(0, 100, null, null, "INDEXED", null, null, null, "asc"))
+                .containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, "c2", null, null, "desc"))
+                .containsEntry("totalElements", 1L);
     }
 
     @Test
     void filtersByResultStatusAndUrlRegex() {
-        assertThat(api.indexingLogging(0, 100, null, null, null, null, "ERROR", null, "desc")
-                .get("totalElements")).isEqualTo(1L);
-        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, "site/a", "desc")
-                .get("totalElements")).isEqualTo(1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, "ERROR", null, "desc"))
+                .containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, "site/a", "desc"))
+                .containsEntry("totalElements", 1L);
     }
 
     @Test
     void appliesDateRangeFilter() {
         Map<String, Object> result = api.indexingLogging(0, 100, "2000-01-01", "2100-01-01", null,
                 null, null, null, "desc");
-        assertThat(result.get("totalElements")).isEqualTo(2L);
+        assertThat(result).containsEntry("totalElements", 2L);
     }
 }

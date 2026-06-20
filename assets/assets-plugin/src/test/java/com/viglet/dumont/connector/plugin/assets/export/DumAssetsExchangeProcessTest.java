@@ -113,7 +113,7 @@ class DumAssetsExchangeProcessTest {
     void exportObjectWritesZipAndStreamsBytes(@TempDir Path tempDir) throws Exception {
         String previousUserDir = System.getProperty("user.dir");
         System.setProperty("user.dir", tempDir.toAbsolutePath().toString());
-        try {
+        try (AutoCloseable restore = () -> System.setProperty("user.dir", previousUserDir)) {
             when(repository.findAll()).thenReturn(List.of(sourceEntity()));
             HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -126,8 +126,6 @@ class DumAssetsExchangeProcessTest {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             body.writeTo(out);
             assertThat(out.size()).isPositive();
-        } finally {
-            System.setProperty("user.dir", previousUserDir);
         }
     }
 

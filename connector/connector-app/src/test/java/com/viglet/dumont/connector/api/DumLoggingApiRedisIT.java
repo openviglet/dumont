@@ -58,7 +58,7 @@ class DumLoggingApiRedisIT {
     void returnsAllEntries() {
         Map<String, Object> result = api.indexingLogging(0, 100, null, null, null, null, null, null,
                 "desc");
-        assertThat(result.get("totalElements")).isEqualTo(2L);
+        assertThat(result).containsEntry("totalElements", 2L);
         assertThat((List<?>) result.get("content")).hasSize(2);
     }
 
@@ -66,7 +66,7 @@ class DumLoggingApiRedisIT {
     void filtersByContentIdAndSortsAscending() {
         Map<String, Object> result = api.indexingLogging(0, 100, null, null, null, "c1", null, null,
                 "asc");
-        assertThat(result.get("totalElements")).isEqualTo(1L);
+        assertThat(result).containsEntry("totalElements", 1L);
     }
 
     @Test
@@ -74,6 +74,6 @@ class DumLoggingApiRedisIT {
         Map<String, Object> page0 = api.indexingLogging(0, 1, null, null, null, null, null, null,
                 "desc");
         assertThat((List<?>) page0.get("content")).hasSize(1);
-        assertThat(page0.get("totalElements")).isEqualTo(2L);
+        assertThat(page0).containsEntry("totalElements", 2L);
     }
 }

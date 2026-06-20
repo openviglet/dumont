@@ -102,9 +102,9 @@ class DumSolrIndexingPluginTest {
         when(solrClient.add(eq("dumont"),
                 org.mockito.ArgumentMatchers.<List<SolrInputDocument>>any()))
                 .thenThrow(new SolrServerException("boom"));
+        var items = itemsWith(attributes);
 
-        assertThatThrownBy(() -> plugin.index(itemsWith(attributes)))
-                .isInstanceOf(TurRuntimeException.class);
+        assertThatThrownBy(() -> plugin.index(items)).isInstanceOf(TurRuntimeException.class);
     }
 
     @Test

@@ -41,8 +41,8 @@ class DumConnectorSystemInfoApiTest {
     void turingProviderReportsTuringEndpoints() {
         Map<String, Object> info = apiWithProvider("turing").getSystemInfo();
 
-        assertThat(info).containsEntry("appName", "Viglet Dumont DEP").containsEntry("status", "UP");
-        assertThat(info).containsKeys("javaVersion", "osName", "memory", "disk", "indexing");
+        assertThat(info).containsEntry("appName", "Viglet Dumont DEP").containsEntry("status", "UP")
+                .containsKeys("javaVersion", "osName", "memory", "disk", "indexing");
         @SuppressWarnings("unchecked")
         Map<String, Object> indexing = (Map<String, Object>) info.get("indexing");
         assertThat(indexing).containsKey("turingUrl").containsKey("turingSolrEndpoint");

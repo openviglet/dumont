@@ -38,7 +38,6 @@ import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemContext;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
-import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.utils.DumAemAttrUtils;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;

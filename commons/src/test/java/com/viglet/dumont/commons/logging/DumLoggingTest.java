@@ -16,6 +16,7 @@
 package com.viglet.dumont.commons.logging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.time.Instant;
 import java.util.List;
@@ -83,8 +84,9 @@ class DumLoggingTest {
 
     @Test
     void indexingLogSetStatusDoesNotThrow() {
-        DumLoggingIndexingLog.setStatus(DumLoggingIndexing.builder()
-                .status(DumIndexingStatus.INDEXED).source("s").build());
+        DumLoggingIndexing entry = DumLoggingIndexing.builder()
+                .status(DumIndexingStatus.INDEXED).source("s").build();
+        assertThatCode(() -> DumLoggingIndexingLog.setStatus(entry)).doesNotThrowAnyException();
     }
 
     @Test

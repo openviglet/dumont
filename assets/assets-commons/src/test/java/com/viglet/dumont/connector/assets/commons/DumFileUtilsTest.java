@@ -98,7 +98,8 @@ class DumFileUtilsTest {
 
     @Test
     void urlContentToTextBlocksLoopbackHost() throws Exception {
-        DumFileAttributes attrs = DumFileUtils.urlContentToText(new URL("http://127.0.0.1/secret"));
+        DumFileAttributes attrs =
+                DumFileUtils.urlContentToText(java.net.URI.create("http://127.0.0.1/secret").toURL());
 
         assertThat(attrs.getContent()).isNull();
     }

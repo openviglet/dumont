@@ -18,7 +18,6 @@ package com.viglet.dumont.connector.plugin.db.export;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -127,7 +126,7 @@ class DumDbExchangeProcessTest {
     void exportObjectWritesZipAndStreamsBytes(@TempDir Path tempDir) throws Exception {
         String previousUserDir = System.getProperty("user.dir");
         System.setProperty("user.dir", tempDir.toAbsolutePath().toString());
-        try {
+        try (AutoCloseable restore = () -> System.setProperty("user.dir", previousUserDir)) {
             when(dumDbSourceRepository.findAll()).thenReturn(List.of(fullSourceExchangeSource()));
             HttpServletResponse response = org.mockito.Mockito.mock(HttpServletResponse.class);
 
@@ -142,8 +141,6 @@ class DumDbExchangeProcessTest {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             body.writeTo(out);
             assertThat(out.size()).isPositive();
-        } finally {
-            System.setProperty("user.dir", previousUserDir);
         }
     }
 
