@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.apache.commons.io.FileUtils;
@@ -68,7 +70,7 @@ public class DumAssetsExchangeProcess {
 
             File zipFile = new File(tmpDir, folderName + ".zip");
             DumCommonsUtils.addFilesToZip(exportDir, zipFile);
-            String zipFileName = "Assets_" + new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date()) + ".zip";
+            String zipFileName = "Assets_" + LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")) + ".zip";
             response.addHeader("Content-disposition", "attachment;filename=" + zipFileName);
             response.setContentType("application/octet-stream");
             response.setStatus(HttpServletResponse.SC_OK);

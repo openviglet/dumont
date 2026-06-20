@@ -19,10 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,7 +124,7 @@ public class DumEDSExchangeProcess {
                     .concat(File.separator + folderName + ".zip"));
             DumCommonsUtils.addFilesToZip(exportDir, zipFile);
 
-            String stamp = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
+            String stamp = LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss"));
             response.addHeader("Content-disposition",
                     "attachment;filename=EDS_" + stamp + ".zip");
             response.setContentType("application/octet-stream");
