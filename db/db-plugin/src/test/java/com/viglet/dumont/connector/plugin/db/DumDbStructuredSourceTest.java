@@ -48,6 +48,7 @@ import com.viglet.dumont.connector.plugin.db.persistence.model.DumDbField;
 import com.viglet.dumont.connector.plugin.db.persistence.model.DumDbSource;
 import com.viglet.dumont.connector.plugin.db.persistence.repository.DumDbSourceRepository;
 import com.viglet.dumont.connector.plugin.db.source.DumDbRowMapper;
+import com.viglet.dumont.connector.plugin.db.source.DumDbStructuredSource;
 import com.viglet.dumont.connector.plugin.db.source.DumDbSourceProvider;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.commons.se.field.TurSEFieldType;
@@ -234,5 +235,17 @@ class DumDbStructuredSourceTest {
         assertThat(context.published).extracting(TurSNJobItem::getId).containsExactly("1", "2", "3");
         // Derived field names are the DB's own column labels (legacy parity), case as the DB returns.
         assertThat(context.published.getFirst().getAttributes()).containsValue("Algorithms");
+    }
+
+    @Test
+    void discoverAndExtractReturnEmptyOnSqlError() {
+        // A valid H2 connection but a query against a missing table: executeQuery throws
+        // SQLException, which both discover() and extract() swallow into an empty result.
+        DumDbSource broken = source().toBuilder()
+                .query("SELECT id FROM table_that_does_not_exist").build();
+        DumDbStructuredSource src = new DumDbStructuredSource(broken, new DumDbRowMapper());
+
+        assertThat(src.discover()).isEmpty();
+        assertThat(src.extract("1")).isEmpty();
     }
 }
