@@ -17,6 +17,7 @@
 
 package com.viglet.dumont.connector.plugin.aem.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -43,8 +44,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.viglet.dumont.connector.aem.commons.DumAemObject;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemContentMapping;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
+import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
+import com.viglet.dumont.connector.aem.commons.mappers.DumAemTargetAttr;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 import com.viglet.turing.commons.se.field.TurSEFieldType;
@@ -282,6 +286,88 @@ class DumAemContentDefinitionServiceTest {
 
             // Then
             assertFalse(result.isPresent());
+        }
+    }
+
+    @Nested
+    @DisplayName("Dependency + definition-merge Tests")
+    class DependencyAndMergeTests {
+
+        @Test
+        @DisplayName("getDependencyClassName returns value or null")
+        void getDependencyClassNameReturnsValueOrNull() {
+            assertNull(service.getDependencyClassName(null));
+            DumAemContentMapping mapping = DumAemContentMapping.builder()
+                    .dependencyClassName("com.example.Dep").build();
+            assertEquals("com.example.Dep", service.getDependencyClassName(mapping));
+        }
+
+        @Test
+        @DisplayName("shouldIndexDependencies defaults to true when no resolvable class")
+        void shouldIndexDependenciesDefaultsTrue() {
+            DumAemObjectGeneric aemObject = createMockAemObject();
+            DumAemConfiguration config = createMockConfiguration();
+
+            // No dependency class configured -> default true.
+            assertTrue(service.shouldIndexDependencies(aemObject, config, null));
+            // Configured but unresolvable class -> still default true.
+            DumAemContentMapping mapping = DumAemContentMapping.builder()
+                    .dependencyClassName("com.example.NotOnClasspath").build();
+            assertTrue(service.shouldIndexDependencies(aemObject, config, mapping));
+        }
+
+        @Test
+        @DisplayName("getModel merges target-attr definitions into the model")
+        void getModelMergesTargetAttrDefinitions() {
+            DumAemSource source = createDumAemSource();
+            DumAemConfiguration config = createMockConfigurationWithContentType("cq:Page");
+
+            // Model already defines "title" (with a source attr) and "extra".
+            DumAemTargetAttr titleAttr = DumAemTargetAttr.builder()
+                    .name("title")
+                    .sourceAttrs(new ArrayList<>(List.of(
+                            DumAemSourceAttr.builder().name("jcr:title").build())))
+                    .build();
+            DumAemTargetAttr extraAttr = DumAemTargetAttr.builder().name("extra").build();
+            DumAemModel model = DumAemModel.builder()
+                    .type("cq:Page")
+                    .targetAttrs(new ArrayList<>(List.of(titleAttr, extraAttr)))
+                    .build();
+
+            // Definitions: "title" (matches, has className -> sets it on source attr),
+            // "newfacet" (no match, mandatory + className -> new source attrs),
+            // "optional" (no match, not mandatory -> skipped).
+            List<TurSNAttributeSpec> definitions = List.of(
+                    TurSNAttributeSpec.builder().name("title").className("com.x.TitleClass")
+                            .mandatory(true).type(TurSEFieldType.STRING).build(),
+                    TurSNAttributeSpec.builder().name("newfacet").className("com.x.FacetClass")
+                            .mandatory(true).facet(true).multiValued(true)
+                            .type(TurSEFieldType.STRING).build(),
+                    TurSNAttributeSpec.builder().name("optional").mandatory(false)
+                            .type(TurSEFieldType.STRING).build());
+
+            DumAemContentMapping mapping = DumAemContentMapping.builder()
+                    .models(List.of(model))
+                    .targetAttrDefinitions(definitions)
+                    .build();
+            when(dumAemContentMappingService.getDumAemContentMapping(source)).thenReturn(mapping);
+
+            Optional<DumAemModel> result = service.getModel(config, source);
+
+            assertTrue(result.isPresent());
+            List<DumAemTargetAttr> attrs = result.get().getTargetAttrs();
+            assertThat(attrs).extracting(DumAemTargetAttr::getName)
+                    .contains("title", "newfacet", "extra")
+                    .doesNotContain("optional");
+            // "title" definition pushed its className onto the existing source attr.
+            DumAemTargetAttr mergedTitle = attrs.stream()
+                    .filter(a -> "title".equals(a.getName())).findFirst().orElseThrow();
+            assertThat(mergedTitle.getSourceAttrs())
+                    .anySatisfy(sa -> assertEquals("com.x.TitleClass", sa.getClassName()));
+            // "newfacet" got a fresh source attr carrying the className.
+            DumAemTargetAttr newFacet = attrs.stream()
+                    .filter(a -> "newfacet".equals(a.getName())).findFirst().orElseThrow();
+            assertEquals("com.x.FacetClass", newFacet.getClassName());
         }
     }
 
