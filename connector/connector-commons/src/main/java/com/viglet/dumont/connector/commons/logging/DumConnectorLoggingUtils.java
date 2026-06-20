@@ -1,6 +1,6 @@
 package com.viglet.dumont.connector.commons.logging;
 
-import java.util.Date;
+import java.time.Instant;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 import com.viglet.dumont.commons.indexing.DumLoggingStatus;
@@ -29,7 +29,7 @@ public class DumConnectorLoggingUtils {
                 .environment(turSNJobItem.getEnvironment()).locale(turSNJobItem.getLocale())
                 .status(status).resultStatus(DumLoggingStatus.SUCCESS)
                 .transactionId(session.getTransactionId()).checksum(turSNJobItem.getChecksum())
-                .source(session.getSource()).date(new Date()).sites(turSNJobItem.getSiteNames())
+                .source(session.getSource()).date(Instant.now()).sites(turSNJobItem.getSiteNames())
                 .details(details).build());
     }
 
@@ -43,7 +43,7 @@ public class DumConnectorLoggingUtils {
                 .url(turSNJobItem.getStringAttribute(URL))
                 .environment(turSNJobItem.getEnvironment()).locale(turSNJobItem.getLocale())
                 .status(status).resultStatus(DumLoggingStatus.SUCCESS)
-                .checksum(turSNJobItem.getChecksum()).date(new Date())
+                .checksum(turSNJobItem.getChecksum()).date(Instant.now())
                 .sites(turSNJobItem.getSiteNames()).build());
     }
 

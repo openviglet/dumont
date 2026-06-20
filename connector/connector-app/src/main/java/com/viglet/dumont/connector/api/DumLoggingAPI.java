@@ -11,7 +11,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -213,13 +212,13 @@ public class DumLoggingAPI {
 
     private void addDateRangeFilter(List<Bson> filters, String dateFrom, String dateTo) {
         if (dateFrom != null && !dateFrom.isBlank()) {
-            Date from = parseDate(dateFrom, false);
+            Instant from = parseDate(dateFrom, false);
             if (from != null) {
                 filters.add(Filters.gte(DATE, from));
             }
         }
         if (dateTo != null && !dateTo.isBlank()) {
-            Date to = parseDate(dateTo, true);
+            Instant to = parseDate(dateTo, true);
             if (to != null) {
                 filters.add(Filters.lte(DATE, to));
             }
@@ -238,13 +237,12 @@ public class DumLoggingAPI {
         }
     }
 
-    private Date parseDate(String dateStr, boolean endOfDay) {
+    private Instant parseDate(String dateStr, boolean endOfDay) {
         try {
             LocalDate localDate = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
-            Instant instant = endOfDay
+            return endOfDay
                     ? localDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
                     : localDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
-            return Date.from(instant);
         } catch (Exception e) {
             log.warn("Invalid date format: {}", dateStr);
             return null;

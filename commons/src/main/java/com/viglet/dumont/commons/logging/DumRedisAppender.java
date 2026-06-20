@@ -9,7 +9,7 @@ package com.viglet.dumont.commons.logging;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
+import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -65,7 +65,7 @@ public class DumRedisAppender extends DumRedisAppenderBase {
                 .level(event.getLevel().toString())
                 .logger(abbreviatePackage(event.getLoggerName()))
                 .message(event.getFormattedMessage())
-                .date(new Date(event.getTimeStamp()))
+                .date(Instant.ofEpochMilli(event.getTimeStamp()))
                 .stackTrace(getStackTrace(event))
                 .clusterNode(cachedHostName)
                 .build();
