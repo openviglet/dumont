@@ -18,14 +18,26 @@
 package com.viglet.dumont.connector.aem.commons.context;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+
+import com.viglet.dumont.connector.aem.commons.config.IAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 
 @DisplayName("DumAemConfiguration Tests")
 class DumAemConfigurationTest {
@@ -319,6 +331,70 @@ class DumAemConfigurationTest {
         @DisplayName("Should get publish SN site")
         void shouldGetPublishSNSite() {
             assertEquals("pubSN", config.getPublishSNSite());
+        }
+    }
+
+    @Nested
+    @DisplayName("IAemConfiguration constructor Tests")
+    class IAemConfigurationConstructorTests {
+
+        private IAemConfiguration iaem() {
+            IAemConfiguration iaem = mock(IAemConfiguration.class);
+            lenient().when(iaem.getCmsGroup()).thenReturn("grp");
+            lenient().when(iaem.getCmsContentType()).thenReturn("cq:Page");
+            lenient().when(iaem.getDefaultLocale()).thenReturn(Locale.US);
+            lenient().when(iaem.getCmsRootPath()).thenReturn("/content/wknd");
+            lenient().when(iaem.getCmsHost()).thenReturn("http://aem.invalid:4502");
+            lenient().when(iaem.getAuthorURLPrefix()).thenReturn("http://author");
+            lenient().when(iaem.getPublishURLPrefix()).thenReturn("http://publish");
+            lenient().when(iaem.getCmsSubType()).thenReturn("article");
+            lenient().when(iaem.getOncePatternPath()).thenReturn("/once.*");
+            lenient().when(iaem.getProviderName()).thenReturn("AEM");
+            lenient().when(iaem.getCmsPassword()).thenReturn("pw");
+            lenient().when(iaem.getCmsUsername()).thenReturn("admin");
+            lenient().when(iaem.getLocales()).thenReturn(new HashSet<>());
+            lenient().when(iaem.isAuthor()).thenReturn(true);
+            lenient().when(iaem.isPublish()).thenReturn(true);
+            lenient().when(iaem.getAuthorSNSite()).thenReturn("author-site");
+            lenient().when(iaem.getPublishSNSite()).thenReturn("publish-site");
+            return iaem;
+        }
+
+        @Test
+        @DisplayName("Maps every field and leaves siteName unset when the root is unreachable")
+        void mapsFieldsWithoutSiteName() {
+            try (MockedStatic<DumAemCommonsUtils> mocked = mockStatic(DumAemCommonsUtils.class)) {
+                mocked.when(() -> DumAemCommonsUtils.getInfinityJson(any(), any(), eq(false)))
+                        .thenReturn(Optional.empty());
+
+                DumAemConfiguration config = new DumAemConfiguration(iaem());
+
+                assertEquals("grp", config.getId());
+                assertEquals("cq:Page", config.getContentType());
+                assertEquals("/content/wknd", config.getRootPath());
+                assertEquals("http://aem.invalid:4502", config.getUrl());
+                assertEquals("admin", config.getUsername());
+                assertTrue(config.isAuthor());
+                assertTrue(config.isPublish());
+                assertEquals("author-site", config.getAuthorSNSite());
+                assertNull(config.getSiteName());
+            }
+        }
+
+        @Test
+        @DisplayName("Resolves siteName from the root infinity.json when available")
+        void resolvesSiteName() {
+            try (MockedStatic<DumAemCommonsUtils> mocked = mockStatic(DumAemCommonsUtils.class)) {
+                JSONObject infinity = new JSONObject();
+                mocked.when(() -> DumAemCommonsUtils.getInfinityJson(any(), any(), eq(false)))
+                        .thenReturn(Optional.of(infinity));
+                mocked.when(() -> DumAemCommonsUtils.getSiteName(any(DumAemConfiguration.class),
+                        any(JSONObject.class))).thenReturn(Optional.of("WKND"));
+
+                DumAemConfiguration config = new DumAemConfiguration(iaem());
+
+                assertEquals("WKND", config.getSiteName());
+            }
         }
     }
 }
