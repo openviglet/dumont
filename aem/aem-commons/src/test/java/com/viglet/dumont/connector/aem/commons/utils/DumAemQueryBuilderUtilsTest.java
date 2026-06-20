@@ -92,4 +92,35 @@ class DumAemQueryBuilderUtilsTest {
             assertThat(DumAemQueryBuilderUtils.queryAllPaths(config())).isEmpty();
         }
     }
+
+    @Test
+    void discoverPathsStreamsEveryPageWhenTotalExceedsPageSize() {
+        // total=600 forces a second page (slim page size is 500): offset 0 then 500.
+        String page1 = "{\"total\":600,\"hits\":[{\"jcr:path\":\"/content/wknd/a\"},\"/content/wknd/s\"]}";
+        String page2 = "{\"total\":600,\"hits\":[{\"path\":\"/content/wknd/b\"}]}";
+        List<String> collected = new java.util.ArrayList<>();
+
+        try (MockedStatic<DumAemCommonsUtils> mocked = mockStatic(DumAemCommonsUtils.class)) {
+            mocked.when(() -> DumAemCommonsUtils.getResponseBody(anyString(), any(), eq(false)))
+                    .thenReturn(Optional.of(page1)).thenReturn(Optional.of(page2));
+            mocked.when(() -> DumAemCommonsUtils.isResponseBodyJSONObject(anyString()))
+                    .thenReturn(true);
+
+            long total = DumAemQueryBuilderUtils.discoverPaths(config(), collected::addAll);
+
+            assertThat(total).isEqualTo(3);
+            assertThat(collected).containsExactly("/content/wknd/a", "/content/wknd/s",
+                    "/content/wknd/b");
+        }
+    }
+
+    @Test
+    void queryAllPathsReturnsEmptyWhenQueryThrows() throws Exception {
+        try (MockedStatic<DumAemCommonsUtils> mocked = mockStatic(DumAemCommonsUtils.class)) {
+            mocked.when(() -> DumAemCommonsUtils.getResponseBody(anyString(), any(), eq(false)))
+                    .thenThrow(new java.io.IOException("boom"));
+
+            assertThat(DumAemQueryBuilderUtils.queryAllPaths(config())).isEmpty();
+        }
+    }
 }
