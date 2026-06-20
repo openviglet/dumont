@@ -13,6 +13,7 @@ hs_err_pid*
 /bin/
 /target/
 /store/
+store/
 /.gradle/
 /logs/
 /build/
