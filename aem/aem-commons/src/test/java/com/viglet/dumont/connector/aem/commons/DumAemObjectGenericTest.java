@@ -20,6 +20,7 @@ package com.viglet.dumont.connector.aem.commons;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.json.JSONObject;
@@ -266,6 +267,85 @@ class DumAemObjectGenericTest {
             DumAemObjectGeneric object = new DumAemObjectGeneric(TEST_PATH, jcrNode);
 
             assertEquals("/conf/mysite/settings/dam/cfm/models/article", object.getModel());
+        }
+    }
+
+    @Nested
+    @DisplayName("Replication, date-branch and basic-property Tests")
+    class ReplicationAndDateTests {
+
+        private static final String AEM_DATE = "Mon Jan 01 2024 10:30:00 GMT+0000";
+
+        private JSONObject node(JSONObject jcrContent) {
+            JSONObject jcrNode = new JSONObject();
+            jcrNode.put("jcr:primaryType", TEST_TYPE);
+            jcrNode.put("jcr:content", jcrContent);
+            return jcrNode;
+        }
+
+        @Test
+        @DisplayName("delivered is true only when both replication actions are Activate")
+        void deliveredTrueWhenBothActionsActivated() {
+            JSONObject jcrContent = new JSONObject();
+            jcrContent.put("cq:lastReplicationAction", "Activate");
+            jcrContent.put("cq:lastReplicationAction_publish", "Activate");
+
+            assertTrue(new DumAemObjectGeneric(TEST_PATH, node(jcrContent)).isDelivered());
+        }
+
+        @Test
+        @DisplayName("delivered is false when only the author action is Activate")
+        void deliveredFalseWhenOnlyAuthorActivated() {
+            JSONObject jcrContent = new JSONObject();
+            jcrContent.put("cq:lastReplicationAction", "Activate");
+
+            assertFalse(new DumAemObjectGeneric(TEST_PATH, node(jcrContent)).isDelivered());
+        }
+
+        @Test
+        @DisplayName("lastModified resolves from jcr:lastModified, else cq:lastModified")
+        void lastModifiedFromEitherKey() {
+            JSONObject jcr = new JSONObject();
+            jcr.put("jcr:lastModified", AEM_DATE);
+            assertNotNull(new DumAemObjectGeneric(TEST_PATH, node(jcr)).getLastModified());
+
+            JSONObject cq = new JSONObject();
+            cq.put("cq:lastModified", AEM_DATE);
+            assertNotNull(new DumAemObjectGeneric(TEST_PATH, node(cq)).getLastModified());
+        }
+
+        @Test
+        @DisplayName("publicationDate resolves from cq:lastReplicated_publish, else cq:lastReplicated")
+        void publicationDateFromEitherKey() {
+            JSONObject publish = new JSONObject();
+            publish.put("cq:lastReplicated_publish", AEM_DATE);
+            assertNotNull(new DumAemObjectGeneric(TEST_PATH, node(publish)).getPublicationDate());
+
+            JSONObject replicated = new JSONObject();
+            replicated.put("cq:lastReplicated", AEM_DATE);
+            assertNotNull(new DumAemObjectGeneric(TEST_PATH, node(replicated)).getPublicationDate());
+        }
+
+        @Test
+        @DisplayName("a malformed date is logged and yields a null lastModified")
+        void malformedDateYieldsNull() {
+            JSONObject jcrContent = new JSONObject();
+            jcrContent.put("jcr:lastModified", "not-a-valid-date");
+
+            assertNull(new DumAemObjectGeneric(TEST_PATH, node(jcrContent)).getLastModified());
+        }
+
+        @Test
+        @DisplayName("title and template are extracted from jcr:content")
+        void titleAndTemplateExtracted() {
+            JSONObject jcrContent = new JSONObject();
+            jcrContent.put("jcr:title", TEST_TITLE);
+            jcrContent.put("cq:template", TEST_TEMPLATE);
+
+            DumAemObjectGeneric object = new DumAemObjectGeneric(TEST_PATH, node(jcrContent));
+
+            assertEquals(TEST_TITLE, object.getTitle());
+            assertEquals(TEST_TEMPLATE, object.getTemplate());
         }
     }
 
