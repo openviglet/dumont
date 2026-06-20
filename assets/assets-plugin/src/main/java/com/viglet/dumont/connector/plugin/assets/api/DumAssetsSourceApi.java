@@ -1,5 +1,6 @@
 package com.viglet.dumont.connector.plugin.assets.api;
 
+import java.util.HashSet;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.viglet.dumont.connector.plugin.assets.DumAssetsPluginProcess;
+import com.viglet.dumont.connector.plugin.assets.api.dto.DumAssetsSourceRequest;
 import com.viglet.dumont.connector.plugin.assets.export.DumAssetsExchangeProcess;
 import com.viglet.dumont.connector.plugin.assets.persistence.model.DumAssetsSource;
 import com.viglet.dumont.connector.plugin.assets.persistence.repository.DumAssetsSourceRepository;
@@ -48,21 +50,26 @@ public class DumAssetsSourceApi {
     }
 
     @Transactional @PutMapping("/{id}") @Operation(summary = "Update an Assets Source")
-    public ResponseEntity<DumAssetsSource> update(@PathVariable String id, @RequestBody DumAssetsSource source) {
+    public ResponseEntity<DumAssetsSource> update(@PathVariable String id, @RequestBody DumAssetsSourceRequest source) {
         if (source.getId() != null && !id.equals(source.getId())) return ResponseEntity.badRequest().build();
         return repository.findById(id).map(e -> {
-            e.setName(source.getName()); e.setDescription(source.getDescription());
-            e.setSourceDir(source.getSourceDir()); e.setPrefixFromReplace(source.getPrefixFromReplace());
-            e.setPrefixToReplace(source.getPrefixToReplace()); e.setSite(source.getSite());
-            e.setLocale(source.getLocale()); e.setContentType(source.getContentType());
-            e.setChunk(source.getChunk()); e.setTypeInId(source.isTypeInId());
-            e.setFileSizeField(source.getFileSizeField()); e.setFileExtensionField(source.getFileExtensionField());
-            e.setContentField(source.getContentField());
-            e.setEncoding(source.getEncoding()); e.setShowOutput(source.isShowOutput());
-            e.getTurSNSites().clear();
-            if (source.getTurSNSites() != null) e.getTurSNSites().addAll(source.getTurSNSites());
+            applyToEntity(e, source);
             return ResponseEntity.ok(repository.save(e));
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private static void applyToEntity(DumAssetsSource e, DumAssetsSourceRequest source) {
+        e.setName(source.getName()); e.setDescription(source.getDescription());
+        e.setSourceDir(source.getSourceDir()); e.setPrefixFromReplace(source.getPrefixFromReplace());
+        e.setPrefixToReplace(source.getPrefixToReplace()); e.setSite(source.getSite());
+        e.setLocale(source.getLocale()); e.setContentType(source.getContentType());
+        e.setChunk(source.getChunk()); e.setTypeInId(source.isTypeInId());
+        e.setFileSizeField(source.getFileSizeField()); e.setFileExtensionField(source.getFileExtensionField());
+        e.setContentField(source.getContentField());
+        e.setEncoding(source.getEncoding()); e.setShowOutput(source.isShowOutput());
+        if (e.getTurSNSites() == null) e.setTurSNSites(new HashSet<>());
+        e.getTurSNSites().clear();
+        if (source.getTurSNSites() != null) e.getTurSNSites().addAll(source.getTurSNSites());
     }
 
     @Transactional @DeleteMapping("/{id}") @Operation(summary = "Delete an Assets Source")
@@ -71,7 +78,11 @@ public class DumAssetsSourceApi {
     }
 
     @PostMapping @Operation(summary = "Create an Assets Source")
-    public DumAssetsSource create(@RequestBody DumAssetsSource source) { return repository.save(source); }
+    public DumAssetsSource create(@RequestBody DumAssetsSourceRequest source) {
+        DumAssetsSource entity = new DumAssetsSource();
+        applyToEntity(entity, source);
+        return repository.save(entity);
+    }
 
     @GetMapping("/{id}/indexAll") @Operation(summary = "Index all files from an Assets Source")
     public ResponseEntity<Object> indexAll(@PathVariable String id) {

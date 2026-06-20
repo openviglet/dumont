@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.plugin.catalog.api;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.http.MediaType;
@@ -36,6 +37,7 @@ import com.viglet.dumont.connector.commons.spi.structured.parity.DumParityCriter
 import com.viglet.dumont.connector.commons.spi.structured.parity.DumParityReport;
 import com.viglet.dumont.connector.plugin.catalog.DumCatalogIndexer;
 import com.viglet.dumont.connector.plugin.catalog.export.DumCatalogExchangeProcess;
+import com.viglet.dumont.connector.plugin.catalog.api.dto.DumCatalogSourceRequest;
 import com.viglet.dumont.connector.plugin.catalog.migration.DumCatalogParityService;
 import com.viglet.dumont.connector.plugin.catalog.persistence.model.DumCatalogSource;
 import com.viglet.dumont.connector.plugin.catalog.persistence.repository.DumCatalogSourceRepository;
@@ -86,28 +88,35 @@ public class DumCatalogSourceApi {
     @PutMapping("/{id}")
     @Operation(summary = "Update a Catalog Source")
     public ResponseEntity<DumCatalogSource> catalogSourceUpdate(@PathVariable String id,
-            @RequestBody DumCatalogSource catalogSource) {
+            @RequestBody DumCatalogSourceRequest catalogSource) {
         if (catalogSource.getId() != null && !id.equals(catalogSource.getId())) {
             return ResponseEntity.badRequest().build();
         }
         return sourceRepository.findById(id).map(existing -> {
-            existing.setName(catalogSource.getName());
-            existing.setDescription(catalogSource.getDescription());
-            existing.setCatalogUrl(catalogSource.getCatalogUrl());
-            existing.setAuthHeaderName(catalogSource.getAuthHeaderName());
-            existing.setAuthHeaderValue(catalogSource.getAuthHeaderValue());
-            existing.setLocale(catalogSource.getLocale());
-            // Native-migration binding (D11) is configurable here; the state flip itself is gated
-            // by the parity endpoints, never set directly through a plain update.
-            existing.setLeva(catalogSource.getLeva());
-            existing.setNativeRecipe(catalogSource.getNativeRecipe());
-            existing.setNativeListingUrl(catalogSource.getNativeListingUrl());
-            existing.getTurSNSites().clear();
-            if (catalogSource.getTurSNSites() != null) {
-                existing.getTurSNSites().addAll(catalogSource.getTurSNSites());
-            }
+            applyToEntity(existing, catalogSource);
             return ResponseEntity.ok(sourceRepository.save(existing));
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private static void applyToEntity(DumCatalogSource existing, DumCatalogSourceRequest catalogSource) {
+        existing.setName(catalogSource.getName());
+        existing.setDescription(catalogSource.getDescription());
+        existing.setCatalogUrl(catalogSource.getCatalogUrl());
+        existing.setAuthHeaderName(catalogSource.getAuthHeaderName());
+        existing.setAuthHeaderValue(catalogSource.getAuthHeaderValue());
+        existing.setLocale(catalogSource.getLocale());
+        // Native-migration binding (D11) is configurable here; the state flip itself is gated
+        // by the parity endpoints, never set directly through a plain update.
+        existing.setLeva(catalogSource.getLeva());
+        existing.setNativeRecipe(catalogSource.getNativeRecipe());
+        existing.setNativeListingUrl(catalogSource.getNativeListingUrl());
+        if (existing.getTurSNSites() == null) {
+            existing.setTurSNSites(new HashSet<>());
+        }
+        existing.getTurSNSites().clear();
+        if (catalogSource.getTurSNSites() != null) {
+            existing.getTurSNSites().addAll(catalogSource.getTurSNSites());
+        }
     }
 
     @Transactional
@@ -122,8 +131,10 @@ public class DumCatalogSourceApi {
 
     @PostMapping
     @Operation(summary = "Create a Catalog Source")
-    public DumCatalogSource catalogSourceAdd(@RequestBody DumCatalogSource catalogSource) {
-        return sourceRepository.save(catalogSource);
+    public DumCatalogSource catalogSourceAdd(@RequestBody DumCatalogSourceRequest catalogSource) {
+        DumCatalogSource entity = new DumCatalogSource();
+        applyToEntity(entity, catalogSource);
+        return sourceRepository.save(entity);
     }
 
     @GetMapping("/{id}/indexAll")

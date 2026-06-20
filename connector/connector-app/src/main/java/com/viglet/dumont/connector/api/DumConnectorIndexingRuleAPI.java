@@ -22,6 +22,7 @@
 package com.viglet.dumont.connector.api;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.viglet.dumont.connector.api.dto.DumConnectorIndexingRuleRequest;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingRuleModel;
 import com.viglet.dumont.connector.service.DumConnectorIndexingRuleService;
 
@@ -78,8 +80,19 @@ public class DumConnectorIndexingRuleAPI {
     @Operation(summary = "Update a Connector Indexing Rules")
     @PutMapping("/{id}")
     public DumConnectorIndexingRuleModel dumConnectorIndexingRuleUpdate(@PathVariable String id,
-            @RequestBody DumConnectorIndexingRuleModel indexingRule) {
-        return indexingRuleService.update(id, indexingRule);
+            @RequestBody DumConnectorIndexingRuleRequest indexingRule) {
+        return indexingRuleService.update(id, toModel(indexingRule));
+    }
+
+    private static DumConnectorIndexingRuleModel toModel(DumConnectorIndexingRuleRequest dto) {
+        return DumConnectorIndexingRuleModel.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .source(dto.getSource())
+                .ruleType(dto.getRuleType())
+                .attribute(dto.getAttribute())
+                .values(dto.getValues() != null ? new ArrayList<>(dto.getValues()) : new ArrayList<>())
+                .build();
     }
 
     @Transactional
@@ -93,9 +106,10 @@ public class DumConnectorIndexingRuleAPI {
     @Operation(summary = "Create a Connector Ranking Expression")
     @PostMapping
     public DumConnectorIndexingRuleModel dumConnectorIndexingRuleAdd(
-            @RequestBody DumConnectorIndexingRuleModel dumConnectorIndexingRule) {
-        dumConnectorIndexingRule.setLastModifiedDate(Instant.now());
-        return indexingRuleService.save(dumConnectorIndexingRule);
+            @RequestBody DumConnectorIndexingRuleRequest dumConnectorIndexingRule) {
+        DumConnectorIndexingRuleModel model = toModel(dumConnectorIndexingRule);
+        model.setLastModifiedDate(Instant.now());
+        return indexingRuleService.save(model);
     }
 
     @Operation(summary = "Connector Ranking Expression Structure")

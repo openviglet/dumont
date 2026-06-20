@@ -17,6 +17,8 @@
 
 package com.viglet.dumont.connector.plugin.db.api;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.viglet.dumont.connector.plugin.db.DumDbPluginProcess;
+import com.viglet.dumont.connector.plugin.db.api.dto.DumDbSourceRequest;
 import com.viglet.dumont.connector.plugin.db.export.DumDbExchangeProcess;
 import com.viglet.dumont.connector.plugin.db.persistence.model.DumDbSource;
 import com.viglet.dumont.connector.plugin.db.persistence.repository.DumDbSourceRepository;
@@ -89,50 +92,59 @@ public class DumDbSourceApi {
     @PutMapping("/{id}")
     @Operation(summary = "Update a DB Source")
     public ResponseEntity<DumDbSource> dumDbSourceUpdate(@PathVariable String id,
-            @RequestBody DumDbSource dumDbSource) {
+            @RequestBody DumDbSourceRequest dumDbSource) {
         if (dumDbSource.getId() != null && !id.equals(dumDbSource.getId())) {
             return ResponseEntity.badRequest().build();
         }
 
         return dumDbSourceRepository.findById(id).map(existing -> {
-            existing.setName(dumDbSource.getName());
-            existing.setDescription(dumDbSource.getDescription());
-            existing.setDriver(dumDbSource.getDriver());
-            existing.setUrl(dumDbSource.getUrl());
-            existing.setDbUsername(dumDbSource.getDbUsername());
-            existing.setDbPassword(dumDbSource.getDbPassword());
-            existing.setQuery(dumDbSource.getQuery());
-            existing.setSite(dumDbSource.getSite());
-            existing.setLocale(dumDbSource.getLocale());
-            existing.setContentType(dumDbSource.getContentType());
-            existing.setChunk(dumDbSource.getChunk());
-            existing.setTypeInId(dumDbSource.isTypeInId());
-            existing.setMultiValuedSeparator(dumDbSource.getMultiValuedSeparator());
-            existing.setMultiValuedFields(dumDbSource.getMultiValuedFields());
-            existing.setRemoveHtmlTagsFields(dumDbSource.getRemoveHtmlTagsFields());
-            existing.setFilePathField(dumDbSource.getFilePathField());
-            existing.setFileContentField(dumDbSource.getFileContentField());
-            existing.setFileSizeField(dumDbSource.getFileSizeField());
-            existing.setCustomClassName(dumDbSource.getCustomClassName());
-            existing.setMaxContentMegaByteSize(dumDbSource.getMaxContentMegaByteSize());
-            existing.setEncoding(dumDbSource.getEncoding());
-            existing.setShowOutput(dumDbSource.isShowOutput());
-            existing.setDeindexBeforeImporting(dumDbSource.isDeindexBeforeImporting());
-            existing.setPrimaryKeyColumn(dumDbSource.getPrimaryKeyColumn());
-
-            existing.getFields().clear();
-            if (dumDbSource.getFields() != null) {
-                existing.getFields().addAll(dumDbSource.getFields());
-            }
-
-            existing.getTurSNSites().clear();
-            if (dumDbSource.getTurSNSites() != null) {
-                existing.getTurSNSites().addAll(dumDbSource.getTurSNSites());
-            }
-
+            applyToEntity(existing, dumDbSource);
             DumDbSource saved = dumDbSourceRepository.save(existing);
             return ResponseEntity.ok(saved);
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private static void applyToEntity(DumDbSource existing, DumDbSourceRequest dumDbSource) {
+        existing.setName(dumDbSource.getName());
+        existing.setDescription(dumDbSource.getDescription());
+        existing.setDriver(dumDbSource.getDriver());
+        existing.setUrl(dumDbSource.getUrl());
+        existing.setDbUsername(dumDbSource.getDbUsername());
+        existing.setDbPassword(dumDbSource.getDbPassword());
+        existing.setQuery(dumDbSource.getQuery());
+        existing.setSite(dumDbSource.getSite());
+        existing.setLocale(dumDbSource.getLocale());
+        existing.setContentType(dumDbSource.getContentType());
+        existing.setChunk(dumDbSource.getChunk());
+        existing.setTypeInId(dumDbSource.isTypeInId());
+        existing.setMultiValuedSeparator(dumDbSource.getMultiValuedSeparator());
+        existing.setMultiValuedFields(dumDbSource.getMultiValuedFields());
+        existing.setRemoveHtmlTagsFields(dumDbSource.getRemoveHtmlTagsFields());
+        existing.setFilePathField(dumDbSource.getFilePathField());
+        existing.setFileContentField(dumDbSource.getFileContentField());
+        existing.setFileSizeField(dumDbSource.getFileSizeField());
+        existing.setCustomClassName(dumDbSource.getCustomClassName());
+        existing.setMaxContentMegaByteSize(dumDbSource.getMaxContentMegaByteSize());
+        existing.setEncoding(dumDbSource.getEncoding());
+        existing.setShowOutput(dumDbSource.isShowOutput());
+        existing.setDeindexBeforeImporting(dumDbSource.isDeindexBeforeImporting());
+        existing.setPrimaryKeyColumn(dumDbSource.getPrimaryKeyColumn());
+
+        if (existing.getFields() == null) {
+            existing.setFields(new ArrayList<>());
+        }
+        existing.getFields().clear();
+        if (dumDbSource.getFields() != null) {
+            existing.getFields().addAll(dumDbSource.getFields());
+        }
+
+        if (existing.getTurSNSites() == null) {
+            existing.setTurSNSites(new HashSet<>());
+        }
+        existing.getTurSNSites().clear();
+        if (dumDbSource.getTurSNSites() != null) {
+            existing.getTurSNSites().addAll(dumDbSource.getTurSNSites());
+        }
     }
 
     @Transactional
@@ -147,8 +159,10 @@ public class DumDbSourceApi {
 
     @PostMapping
     @Operation(summary = "Create a DB Source")
-    public DumDbSource dumDbSourceAdd(@RequestBody DumDbSource dumDbSource) {
-        return dumDbSourceRepository.save(dumDbSource);
+    public DumDbSource dumDbSourceAdd(@RequestBody DumDbSourceRequest dumDbSource) {
+        DumDbSource entity = new DumDbSource();
+        applyToEntity(entity, dumDbSource);
+        return dumDbSourceRepository.save(entity);
     }
 
     @GetMapping("/{id}/indexAll")
