@@ -49,6 +49,8 @@ import org.springframework.http.ResponseEntity;
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import com.viglet.dumont.connector.plugin.aem.api.dto.DumAemSourceRequest;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
+import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemAttributeSpecification;
+import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemPluginModel;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSourceLocalePath;
 import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemAttributeSpecificationRepository;
@@ -205,6 +207,26 @@ class DumAemSourceApiTest {
             // Then
             assertNotNull(result);
         }
+
+        @Test
+        @DisplayName("Should populate attribute specifications and models")
+        void shouldPopulateSpecsAndModels() {
+            String sourceId = "source-1";
+            DumAemSource source = createDumAemSource(sourceId);
+            when(dumAemSourceRepository.findById(sourceId)).thenReturn(Optional.of(source));
+            when(dumAemSourceLocalePathRepository.findByDumAemSource(source))
+                    .thenReturn(Optional.empty());
+            when(dumAemAttributeSpecificationRepository.findByDumAemSource(source))
+                    .thenReturn(Optional.of(List.of(
+                            DumAemAttributeSpecification.builder().name("title").build())));
+            when(dumAemPluginModelRepository.findByDumAemSource(source))
+                    .thenReturn(List.of(DumAemPluginModel.builder().type("cq:Page").build()));
+
+            DumAemSource result = api.dumAemSourceGet(sourceId);
+
+            assertEquals(1, result.getAttributeSpecifications().size());
+            assertEquals(1, result.getModels().size());
+        }
     }
 
     @Nested
@@ -227,6 +249,17 @@ class DumAemSourceApiTest {
             // Then
             assertNotNull(result.getBody());
             verify(dumAemSourceRepository, times(1)).save(any());
+        }
+
+        @Test
+        @DisplayName("Should reject update when the body id mismatches the path id")
+        void shouldRejectUpdateWhenIdMismatches() {
+            DumAemSourceRequest request = toRequest(createDumAemSource("other-id"));
+
+            ResponseEntity<DumAemSource> result = api.dumAemSourceUpdate("source-1", request);
+
+            assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+            verify(dumAemSourceRepository, times(0)).save(any());
         }
 
         @Test
