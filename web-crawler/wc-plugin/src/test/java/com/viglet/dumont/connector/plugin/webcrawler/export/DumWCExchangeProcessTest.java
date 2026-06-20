@@ -25,7 +25,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +45,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.webcrawler.export.bean.DumWCAttribExchange;
 import com.viglet.dumont.connector.plugin.webcrawler.export.bean.DumWCExchange;
 import com.viglet.dumont.connector.plugin.webcrawler.export.bean.DumWCSourceExchange;
@@ -163,6 +169,85 @@ class DumWCExchangeProcessTest {
             assertThat(out.size()).isPositive();
         } finally {
             System.setProperty("user.dir", previousUserDir);
+        }
+    }
+
+    @Test
+    void importFromMultipartFileImportsFlatZip(@TempDir Path tempDir) throws Exception {
+        when(dumWCSourceRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        process.importFromMultipartFile(new InMemoryMultipartFile(buildZip(tempDir, false)));
+
+        verify(dumWCSourceRepository).save(any(DumWCSource.class));
+    }
+
+    @Test
+    void importFromMultipartFileImportsFolderWrappedZip(@TempDir Path tempDir) throws Exception {
+        when(dumWCSourceRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        process.importFromMultipartFile(new InMemoryMultipartFile(buildZip(tempDir, true)));
+
+        verify(dumWCSourceRepository).save(any(DumWCSource.class));
+    }
+
+    /** Builds a ZIP holding export.json, either at the root or nested one folder deep. */
+    private static byte[] buildZip(Path tempDir, boolean wrapped) throws Exception {
+        DumWCSourceExchange entry = DumWCSourceExchange.builder()
+                .title("Wiki").url("https://wiki.invalid")
+                .turSNSites(new HashSet<>()).startingPoints(new HashSet<>())
+                .allowUrls(new HashSet<>()).notAllowUrls(new HashSet<>())
+                .notAllowExtensions(new HashSet<>()).attributes(new HashSet<>()).build();
+        String json =
+                JsonMapper.builder().build().writeValueAsString(new DumWCExchange(List.of(entry)));
+        File contentRoot = new File(tempDir.toFile(), "zip-" + (wrapped ? "w" : "f"));
+        File jsonDir = wrapped ? new File(contentRoot, "inner") : contentRoot;
+        Files.createDirectories(jsonDir.toPath());
+        Files.writeString(new File(jsonDir, "export.json").toPath(), json);
+        File zipFile = new File(tempDir.toFile(), "wc-" + (wrapped ? "w" : "f") + ".zip");
+        DumCommonsUtils.addFilesToZip(contentRoot, zipFile);
+        return Files.readAllBytes(zipFile.toPath());
+    }
+
+    /** Minimal {@link MultipartFile} over an in-memory byte[] — avoids a spring-test dependency. */
+    private record InMemoryMultipartFile(byte[] bytes) implements MultipartFile {
+        @Override
+        public String getName() {
+            return "file";
+        }
+
+        @Override
+        public String getOriginalFilename() {
+            return "wc.zip";
+        }
+
+        @Override
+        public String getContentType() {
+            return "application/zip";
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return bytes.length == 0;
+        }
+
+        @Override
+        public long getSize() {
+            return bytes.length;
+        }
+
+        @Override
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        @Override
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(bytes);
+        }
+
+        @Override
+        public void transferTo(File dest) throws java.io.IOException {
+            Files.write(dest.toPath(), bytes);
         }
     }
 }
