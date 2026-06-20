@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin.EnvironmentInfo;
+import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 
@@ -115,5 +116,39 @@ class DumConnectorContentAuditTaskTest {
 
         verify(plugin).discoverContentIds("wknd");
         verify(indexingService).saveStats(any());
+    }
+
+    @Test
+    void auditRemovesStaleRecordsNotInActiveEnvironments() {
+        when(pluginRegistry.resolveBySource("wknd")).thenReturn(plugin);
+        when(plugin.discoverContentIds("wknd")).thenReturn(List.of("o1"));
+        when(plugin.resolveLocale(eq("wknd"), any())).thenReturn(Locale.US);
+        when(plugin.resolveEnvironments("wknd", "o1"))
+                .thenReturn(List.of(new EnvironmentInfo("prod", List.of("site1"))));
+        DumConnectorIndexingModel stale = org.mockito.Mockito.mock(DumConnectorIndexingModel.class);
+        when(stale.getEnvironment()).thenReturn("retired");  // absent from the active prod env
+        when(indexingService.findUnprocessedByObjectIdAndSourceAndProvider(any(), any(), any()))
+                .thenReturn(List.of(stale));
+        when(indexingService.existsByObjectIdAndSourceAndEnvironmentAndProvider(
+                "o1", "wknd", "prod", "turing")).thenReturn(true);
+
+        task.auditSourceAsync("wknd");
+
+        verify(indexingService).deleteAll(List.of(stale));
+    }
+
+    @Test
+    void auditRemovesAllStaleWhenNoEnvironments() {
+        when(pluginRegistry.resolveBySource("wknd")).thenReturn(plugin);
+        when(plugin.discoverContentIds("wknd")).thenReturn(List.of("gone"));
+        when(plugin.resolveLocale(eq("wknd"), any())).thenReturn(Locale.US);
+        when(plugin.resolveEnvironments("wknd", "gone")).thenReturn(List.of());
+        DumConnectorIndexingModel stale = org.mockito.Mockito.mock(DumConnectorIndexingModel.class);
+        when(indexingService.findUnprocessedByObjectIdAndSourceAndProvider("gone", "wknd", "turing"))
+                .thenReturn(List.of(stale));
+
+        task.auditSourceAsync("wknd");
+
+        verify(indexingService).deleteAll(List.of(stale));
     }
 }
