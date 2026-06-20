@@ -18,10 +18,15 @@
 package com.viglet.dumont.connector.plugin.aem.impl;
 
 import static com.viglet.turing.client.sn.TurSNConstants.ID_ATTR;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,16 +36,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
+import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
+import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin.EnvironmentInfo;
+import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
@@ -167,6 +179,71 @@ class DumAemPluginTest {
         verify(dumConnectorContext, never()).addJobItem(any(DumJobItemWithSession.class));
         verify(dumConnectorContext).finishIndexing(any(DumConnectorSession.class), org.mockito
                 .ArgumentMatchers.eq(true));
+    }
+
+    @Test
+    @DisplayName("resolveLocale should resolve via locale-by-path")
+    void resolveLocaleResolvesByPath() {
+        DumAemSource source = DumAemSource.builder().name("src").build();
+        DumAemConfiguration config = mock(DumAemConfiguration.class);
+        DumAemSession session = mock(DumAemSession.class);
+        when(dumAemSourceService.getDumAemSourceByName("src")).thenReturn(Optional.of(source));
+        when(dumAemSessionService.getDumAemSession(source, false)).thenReturn(session);
+        when(session.getConfiguration()).thenReturn(config);
+
+        try (MockedStatic<DumAemCommonsUtils> mocked = mockStatic(DumAemCommonsUtils.class)) {
+            mocked.when(() -> DumAemCommonsUtils.getLocaleByPath(config, "/content/p1"))
+                    .thenReturn(Locale.US);
+
+            assertThat(dumAemPlugin.resolveLocale("src", "/content/p1")).isEqualTo(Locale.US);
+        }
+    }
+
+    @Test
+    @DisplayName("resolveLocale should be null when the source is unknown")
+    void resolveLocaleNullWhenSourceMissing() {
+        when(dumAemSourceService.getDumAemSourceByName("missing")).thenReturn(Optional.empty());
+
+        assertThat(dumAemPlugin.resolveLocale("missing", "/content/p1")).isNull();
+    }
+
+    @Test
+    @DisplayName("resolveEnvironments should list author + publish when the page is delivered")
+    void resolveEnvironmentsListsAuthorAndPublish() {
+        DumAemSource source = DumAemSource.builder().name("src").build();
+        DumAemConfiguration config = mock(DumAemConfiguration.class);
+        DumAemSession session = mock(DumAemSession.class);
+        when(dumAemSourceService.getDumAemSourceByName("src")).thenReturn(Optional.of(source));
+        when(dumAemSessionService.getDumAemSession(source, false)).thenReturn(session);
+        when(session.getConfiguration()).thenReturn(config);
+        when(config.isAuthor()).thenReturn(true);
+        when(config.getAuthorSNSite()).thenReturn("author-site");
+        when(config.isPublish()).thenReturn(true);
+        when(config.getPublishSNSite()).thenReturn("publish-site");
+
+        DumAemObjectGeneric aemObject = mock(DumAemObjectGeneric.class);
+        when(aemObject.isDelivered()).thenReturn(true);
+        when(dumAemObjectService.getDumAemObjectGeneric(eq("/content/p1"), any(), any()))
+                .thenReturn(aemObject);
+
+        try (MockedStatic<DumAemCommonsUtils> mocked = mockStatic(DumAemCommonsUtils.class)) {
+            mocked.when(() -> DumAemCommonsUtils.getInfinityJson(eq("/content/p1"), eq(config),
+                    eq(false))).thenReturn(Optional.of(new JSONObject()));
+
+            List<EnvironmentInfo> environments =
+                    dumAemPlugin.resolveEnvironments("src", "/content/p1");
+
+            assertThat(environments).extracting(EnvironmentInfo::environment)
+                    .containsExactly(DumAemEnv.AUTHOR.toString(), DumAemEnv.PUBLISHING.toString());
+        }
+    }
+
+    @Test
+    @DisplayName("resolveEnvironments should be empty when the source is unknown")
+    void resolveEnvironmentsEmptyWhenSourceMissing() {
+        when(dumAemSourceService.getDumAemSourceByName("missing")).thenReturn(Optional.empty());
+
+        assertThat(dumAemPlugin.resolveEnvironments("missing", "/content/p1")).isEmpty();
     }
 
     /** An adapter bound to {@code environment} whose extraction yields no record (404/undelivered). */
