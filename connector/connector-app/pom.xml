@@ -17,6 +17,8 @@
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <!-- Docker Engine API version for Testcontainers-backed *IT tests (see failsafe config). -->
+        <dumont.it.dockerApiVersion>1.43</dumont.it.dockerApiVersion>
     </properties>
 
     <dependencies>
@@ -284,6 +286,21 @@
                          repackaged fat jar (whose app classes live under BOOT-INF and
                          are not loadable on a flat test classpath). -->
                     <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                    <!-- Testcontainers/docker-java env, forced into the forked test JVM so it is
+                         honoured regardless of the developer's shell. DOCKER_API_VERSION pins a
+                         version within the daemon's supported range: docker-java's default (1.32)
+                         is below the API floor of recent Docker Engines (min 1.40), which reject
+                         it with HTTP 400. Override via -Ddumont.it.dockerApiVersion / DOCKER_HOST
+                         on hosts that need it; Ryuk is disabled to avoid Windows named-pipe flakiness. -->
+                    <environmentVariables>
+                        <DOCKER_API_VERSION>${dumont.it.dockerApiVersion}</DOCKER_API_VERSION>
+                        <TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+                    </environmentVariables>
+                    <!-- docker-java reads the API version from the 'api.version' system property
+                         (the DOCKER_API_VERSION env var alone is not honoured), so set both. -->
+                    <systemPropertyVariables>
+                        <api.version>${dumont.it.dockerApiVersion}</api.version>
+                    </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>
