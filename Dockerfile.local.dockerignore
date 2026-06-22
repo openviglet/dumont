@@ -1,0 +1,53 @@
+# Per-Dockerfile ignore for Dockerfile.local (BuildKit uses <dockerfile>.dockerignore
+# in preference to .dockerignore). The runtime-only image needs ONLY the six
+# host-built jars, so exclude everything else and keep the build context tiny.
+# (Re-including a nested file requires un-ignoring each parent directory.)
+*
+
+!connector/
+connector/*
+!connector/connector-app/
+connector/connector-app/*
+!connector/connector-app/target/
+connector/connector-app/target/*
+!connector/connector-app/target/dumont-connector.jar
+
+!aem/
+aem/*
+!aem/aem-plugin/
+aem/aem-plugin/*
+!aem/aem-plugin/target/
+aem/aem-plugin/target/*
+!aem/aem-plugin/target/aem-plugin.jar
+
+!eds/
+eds/*
+!eds/eds-plugin/
+eds/eds-plugin/*
+!eds/eds-plugin/target/
+eds/eds-plugin/target/*
+!eds/eds-plugin/target/eds-plugin.jar
+
+!db/
+db/*
+!db/db-plugin/
+db/db-plugin/*
+!db/db-plugin/target/
+db/db-plugin/target/*
+!db/db-plugin/target/db-plugin.jar
+
+!web-crawler/
+web-crawler/*
+!web-crawler/wc-plugin/
+web-crawler/wc-plugin/*
+!web-crawler/wc-plugin/target/
+web-crawler/wc-plugin/target/*
+!web-crawler/wc-plugin/target/web-crawler-plugin.jar
+
+!assets/
+assets/*
+!assets/assets-plugin/
+assets/assets-plugin/*
+!assets/assets-plugin/target/
+assets/assets-plugin/target/*
+!assets/assets-plugin/target/assets-plugin.jar
