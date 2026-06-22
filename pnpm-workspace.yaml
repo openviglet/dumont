@@ -4,3 +4,15 @@ packages:
   - "assets/assets-plugin-sample/turing-export/app"
   - "db/db-plugin-sample/turing-export/app"
   - "web-crawler/wc-plugin-sample/turing-export/app"
+
+# Moved out of package.json's "pnpm" field — pnpm 11 reads build approvals here.
+onlyBuiltDependencies:
+  - esbuild
+  - "@swc/core"
+  - "@tailwindcss/oxide"
+
+# Non-interactive builds (Maven frontend plugin, CI) have no TTY. When pnpm needs
+# to recreate node_modules (e.g. it was created by a different package manager or
+# pnpm version), proceed without prompting instead of aborting with
+# ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY.
+confirmModulesPurge: false
