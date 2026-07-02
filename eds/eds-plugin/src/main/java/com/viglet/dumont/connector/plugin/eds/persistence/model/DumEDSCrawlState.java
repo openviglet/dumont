@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.viglet.dumont.spring.jpa.DumUuid;
+import com.viglet.core.jpa.VigletAssignableUuidGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,7 +69,7 @@ public class DumEDSCrawlState implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @DumUuid
+    @VigletAssignableUuidGenerator
     @Column(name = "id", nullable = false)
     private String id;
 

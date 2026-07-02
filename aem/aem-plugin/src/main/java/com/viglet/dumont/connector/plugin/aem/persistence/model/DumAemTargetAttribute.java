@@ -27,7 +27,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.viglet.dumont.spring.jpa.DumUuid;
+import com.viglet.core.jpa.VigletAssignableUuidGenerator;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -62,7 +62,7 @@ public class DumAemTargetAttribute implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @DumUuid
+    @VigletAssignableUuidGenerator
     @Column(name = "id", nullable = false)
     private String id;
 

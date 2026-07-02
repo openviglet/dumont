@@ -25,7 +25,7 @@ import java.util.Locale;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.viglet.dumont.spring.jpa.DumUuid;
+import com.viglet.core.jpa.VigletAssignableUuidGenerator;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -60,7 +60,7 @@ public class DumEDSSource implements Serializable {
     public static final String SN_SITE = "sn_site";
 
     @Id
-    @DumUuid
+    @VigletAssignableUuidGenerator
     @Column(name = "id", nullable = false)
     private String id;
 

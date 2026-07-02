@@ -47,6 +47,10 @@
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.viglet.core</groupId>
+            <artifactId>viglet-core-jpa</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

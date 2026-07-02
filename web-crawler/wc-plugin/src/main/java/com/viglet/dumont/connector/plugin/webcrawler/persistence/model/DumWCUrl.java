@@ -1,6 +1,6 @@
 package com.viglet.dumont.connector.plugin.webcrawler.persistence.model;
 
-import com.viglet.dumont.spring.jpa.DumUuid;
+import com.viglet.core.jpa.VigletAssignableUuidGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -26,7 +26,7 @@ public class DumWCUrl implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @DumUuid
+    @VigletAssignableUuidGenerator
     @Column(name = "id", nullable = false)
     protected String id;
     protected String url;

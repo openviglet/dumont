@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.viglet.dumont.spring.jpa.DumUuid;
+import com.viglet.core.jpa.VigletAssignableUuidGenerator;
 import com.viglet.turing.client.sn.job.TurSNAttributeSpec;
 import com.viglet.turing.commons.se.field.TurSEFieldType;
 
@@ -43,7 +43,7 @@ public class DumAemAttributeSpecification extends TurSNAttributeSpec {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @DumUuid
+    @VigletAssignableUuidGenerator
     @Column(name = "id", nullable = false)
     private String id;
 
