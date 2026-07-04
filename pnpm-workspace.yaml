@@ -16,3 +16,6 @@ onlyBuiltDependencies:
 # pnpm version), proceed without prompting instead of aborting with
 # ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY.
 confirmModulesPurge: false
+
+minimumReleaseAgeExclude:
+  - '@viglet/viglet-design-system@2026.3.2'
