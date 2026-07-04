@@ -1,4 +1,25 @@
 const consolePath: string = import.meta.env.VITE_CONSOLE_CONTEXT_PATH;
+
+/**
+ * Base path for an integration-instance surface.
+ *
+ * Dumont is mounted by the host (Turing) as a Module Federation remote under
+ * `<hostPrefix>/integration/instance/:id/*`, and that host prefix differs
+ * between the legacy console (`/admin`) and the new Bento shell (`/bento`).
+ * Every internal link Dumont builds is `${ROUTES.INTEGRATION_INSTANCE}/${id}/…`,
+ * so hard-coding the console path made those links jump OUT of the Bento shell
+ * back to `/admin/...`. Deriving the prefix from the live URL keeps Dumont's
+ * navigation inside whichever shell is hosting it. Falls back to the build-time
+ * console path for standalone mode / before the first navigation.
+ */
+function integrationInstanceBase(): string {
+  if (typeof window !== "undefined") {
+    const match = /^(.*?)\/integration\/instance(?:\/|$)/.exec(window.location.pathname);
+    if (match) return `${match[1]}/integration/instance`;
+  }
+  return `${consolePath}/integration/instance`;
+}
+
 export const ROUTES = {
   ROOT: "/",
   LOGIN: "/login",
@@ -17,7 +38,8 @@ export const ROUTES = {
   LLM_ROOT: `${consolePath}/llm`,
   LLM_INSTANCE: `${consolePath}/llm/instance`,
   INTEGRATION_ROOT: `${consolePath}/integration`,
-  INTEGRATION_INSTANCE: `${consolePath}/integration/instance`,
+  // Host-aware (console `/admin` vs Bento `/bento`) — see integrationInstanceBase().
+  get INTEGRATION_INSTANCE() { return integrationInstanceBase(); },
   LOGGING_ROOT: `${consolePath}/logging`,
   LOGGING_INSTANCE: `${consolePath}/logging/instance`,
   DASHBOARD: `${consolePath}/dashboard`,
