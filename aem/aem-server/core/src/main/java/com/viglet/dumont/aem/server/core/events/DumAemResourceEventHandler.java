@@ -5,6 +5,7 @@ import com.viglet.dumont.aem.server.core.events.utils.DumAemEventUtils;
 import com.viglet.dumont.aem.server.core.services.DumAemIndexerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.sling.api.SlingConstants;
+import org.apache.sling.event.jobs.JobManager;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -29,6 +30,9 @@ public class DumAemResourceEventHandler implements EventHandler {
     @Reference
     private DumAemIndexerService dumAemIndexerService;
 
+    @Reference
+    private JobManager jobManager;
+
     @Override
     public void handleEvent(Event event) {
         String path = (String) event.getProperty(SlingConstants.PROPERTY_PATH);
@@ -51,7 +55,7 @@ public class DumAemResourceEventHandler implements EventHandler {
         }
 
         log.info("Dumont: Resource event for asset: {}", assetPath);
-        DumAemEventUtils.index(dumAemIndexerService.getConfig(), assetPath, DumAemEvent.INDEXING);
+        DumAemEventUtils.enqueue(jobManager, dumAemIndexerService.getConfig(), assetPath, DumAemEvent.INDEXING);
     }
 
     private boolean isAssetEvent(String resourceType) {

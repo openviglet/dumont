@@ -7,6 +7,7 @@ import com.viglet.dumont.aem.server.core.events.utils.DumAemEventUtils;
 import com.viglet.dumont.aem.server.core.services.DumAemIndexerService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IteratorUtils;
+import org.apache.sling.event.jobs.JobManager;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -26,6 +27,9 @@ public class DumAemPageEventHandler implements EventHandler {
     @Reference
     private DumAemIndexerService dumAemIndexerService;
 
+    @Reference
+    private JobManager jobManager;
+
     @Override
     public void handleEvent(Event event) {
         PageEvent pageEvent = PageEvent.fromEvent(event);
@@ -43,6 +47,6 @@ public class DumAemPageEventHandler implements EventHandler {
         if (paths.isEmpty()) {
             return;
         }
-        DumAemEventUtils.index(dumAemIndexerService.getConfig(), paths, DumAemEvent.INDEXING);
+        DumAemEventUtils.enqueue(jobManager, dumAemIndexerService.getConfig(), paths, DumAemEvent.INDEXING);
     }
 }

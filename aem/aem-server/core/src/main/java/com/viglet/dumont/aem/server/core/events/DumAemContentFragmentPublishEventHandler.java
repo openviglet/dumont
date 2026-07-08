@@ -8,6 +8,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.apache.sling.event.jobs.JobManager;
 
 import com.viglet.dumont.aem.server.core.events.beans.DumAemEvent;
 import com.viglet.dumont.aem.server.core.events.utils.DumAemEventUtils;
@@ -32,6 +33,9 @@ public class DumAemContentFragmentPublishEventHandler implements EventHandler {
 
     @Reference
     private DumAemIndexerService dumAemIndexerService;
+
+    @Reference
+    private JobManager jobManager;
 
     @Override
     public void handleEvent(Event event) {
@@ -79,9 +83,9 @@ public class DumAemContentFragmentPublishEventHandler implements EventHandler {
 
     private void indexContentFragments(List<String> paths, DumAemEvent event) {
         try {
-            DumAemEventUtils.index(dumAemIndexerService.getConfig(), paths, event);
+            DumAemEventUtils.enqueue(jobManager, dumAemIndexerService.getConfig(), paths, event);
         } catch (Exception e) {
-            log.error("Error indexing Content Fragments {}: {}", paths, e.getMessage(), e);
+            log.error("Error enqueuing index job for Content Fragments {}: {}", paths, e.getMessage(), e);
         }
     }
 }

@@ -39,7 +39,6 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePro
 import com.viglet.dumont.connector.commons.spi.structured.infer.DumSourceDraft;
 import com.viglet.dumont.connector.commons.spi.structured.infer.DumSourceDraftMaterializer;
 import com.viglet.dumont.connector.commons.spi.structured.infer.DumSourceInferrer;
-import com.viglet.dumont.connector.commons.spi.structured.preview.DumInMemoryPreviewSnapshotStore;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshotStore;
 import com.viglet.dumont.connector.commons.spi.structured.preview.DumStructuredPreview;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetcher;
@@ -78,7 +77,8 @@ public class DumConnectorSourceInferenceApi {
     private final DumHtmlFetcher fetcher;
     // App-wide baseline store (the controller is a singleton): an index run captures a snapshot a
     // later preview of the same source diffs against. Survives the connector's lifetime, not restarts.
-    private final DumPreviewSnapshotStore previewSnapshotStore = new DumInMemoryPreviewSnapshotStore();
+    // Injected so every structured plugin shares the one bean (see DumStructuredStoreConfiguration).
+    private final DumPreviewSnapshotStore previewSnapshotStore;
     // Persisted coverage history (D15): an index run appends its per-field coverage so drift across
     // runs is queryable through the monitoring API.
     private final DumCoverageHistoryStore coverageHistoryStore;
@@ -87,9 +87,11 @@ public class DumConnectorSourceInferenceApi {
     private final DumProvenanceHistoryStore provenanceHistoryStore;
 
     public DumConnectorSourceInferenceApi(RestClient restClient, DumTuringCsrfService csrfService,
-            DumConnectorContext connectorContext, DumCoverageHistoryStore coverageHistoryStore,
+            DumConnectorContext connectorContext, DumPreviewSnapshotStore previewSnapshotStore,
+            DumCoverageHistoryStore coverageHistoryStore,
             DumProvenanceHistoryStore provenanceHistoryStore) {
         this.connectorContext = connectorContext;
+        this.previewSnapshotStore = previewSnapshotStore;
         this.coverageHistoryStore = coverageHistoryStore;
         this.provenanceHistoryStore = provenanceHistoryStore;
         this.fetcher = new DumJsoupFetcher();

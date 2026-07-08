@@ -8,6 +8,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.apache.sling.event.jobs.JobManager;
 
 import com.day.cq.replication.ReplicationAction;
 import com.day.cq.replication.ReplicationActionType;
@@ -27,6 +28,9 @@ public class DumAemContentFragmentReplicationEventHandler implements EventHandle
 
     @Reference
     private DumAemIndexerService dumAemIndexerService;
+
+    @Reference
+    private JobManager jobManager;
 
     @Override
     public void handleEvent(Event event) {
@@ -64,9 +68,9 @@ public class DumAemContentFragmentReplicationEventHandler implements EventHandle
 
     private void indexContentFragments(List<String> paths, DumAemEvent event) {
         try {
-            DumAemEventUtils.index(dumAemIndexerService.getConfig(), paths, event);
+            DumAemEventUtils.enqueue(jobManager, dumAemIndexerService.getConfig(), paths, event);
         } catch (Exception e) {
-            log.error("Error indexing Content Fragments {}: {}", paths, e.getMessage(), e);
+            log.error("Error enqueuing index job for Content Fragments {}: {}", paths, e.getMessage(), e);
         }
     }
 }

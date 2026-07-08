@@ -26,6 +26,7 @@ import com.viglet.dumont.connector.api.DumConnectorSourceInferenceApi.InferIndex
 import com.viglet.dumont.connector.api.DumConnectorSourceInferenceApi.InferRequest;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageHistoryStore;
+import com.viglet.dumont.connector.commons.spi.structured.preview.DumPreviewSnapshotStore;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceHistoryStore;
 import com.viglet.dumont.connector.config.DumTuringCsrfService;
 
@@ -34,7 +35,8 @@ class DumConnectorSourceInferenceApiTest {
     private DumConnectorSourceInferenceApi api() {
         return new DumConnectorSourceInferenceApi(mock(RestClient.class),
                 mock(DumTuringCsrfService.class), mock(DumConnectorContext.class),
-                mock(DumCoverageHistoryStore.class), mock(DumProvenanceHistoryStore.class));
+                mock(DumPreviewSnapshotStore.class), mock(DumCoverageHistoryStore.class),
+                mock(DumProvenanceHistoryStore.class));
     }
 
     @Test
