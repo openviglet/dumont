@@ -31,4 +31,20 @@ public class DumAuthConfigProperties {
     private boolean keycloak = false;
     private String keycloakAdminId;
     private DumAuthenticationProperty authentication = new DumAuthenticationProperty();
+    /**
+     * Client Silos isolation (Viglet Cloud C051). When set (e.g. {@code vilt}),
+     * this instance is a dedicated per-client silo and only admits logins/tokens
+     * whose {@code viglet_client} claim equals this value; any other client (or no
+     * claim) is rejected. Blank/unset (default) = shared instance, no restriction.
+     * Env: {@code DUMONT_REQUIRED_VIGLET_CLIENT}.
+     */
+    private String requiredVigletClient;
+    /**
+     * Client Silos (Viglet Cloud). Comma-separated usernames/e-mails granted full
+     * admin (the {@code Administrator} group) on this instance, seeded on startup
+     * like {@link #keycloakAdminId}. Lets a dedicated silo give its client's
+     * operators total autonomy. Matches the login username (the e-mail when
+     * {@code registrationEmailAsUsername} is on). Env: {@code DUMONT_ADMIN_EMAILS}.
+     */
+    private String adminEmails;
 }

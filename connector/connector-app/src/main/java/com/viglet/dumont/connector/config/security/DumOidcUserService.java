@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
+import com.viglet.dumont.connector.properties.DumAuthConfigProperties;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,14 +35,22 @@ public class DumOidcUserService extends OidcUserService {
     private static final String EMAIL = "email";
 
     private final DumAuthorityResolver dumAuthorityResolver;
+    private final DumAuthConfigProperties dumAuthConfigProperties;
 
-    public DumOidcUserService(DumAuthorityResolver dumAuthorityResolver) {
+    public DumOidcUserService(DumAuthorityResolver dumAuthorityResolver,
+            DumAuthConfigProperties dumAuthConfigProperties) {
         this.dumAuthorityResolver = dumAuthorityResolver;
+        this.dumAuthConfigProperties = dumAuthConfigProperties;
     }
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         OidcUser oidcUser = super.loadUser(userRequest);
+
+        // Client Silos isolation (C051): reject a login whose viglet_client claim
+        // doesn't match this instance's dedicated client (no-op if unrestricted).
+        DumClientClaimGate.enforce(dumAuthConfigProperties.getRequiredVigletClient(),
+                oidcUser.getClaims().get(DumClientClaimGate.VIGLET_CLIENT_CLAIM));
 
         String username = oidcUser.getAttribute(PREFERRED_USERNAME);
         if (username == null) {
