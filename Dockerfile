@@ -4,7 +4,11 @@
 # already here. See .dockerignore for what is kept out of the context (target/,
 # node_modules, ...); .git is kept so the git-commit-id plugin can stamp the
 # build version.
-FROM eclipse-temurin:25-jdk AS build
+#
+# Java 21 (NOT 25): embedded Artemis 2.43.0 (via Netty) crashes on Java 25 with
+# "Cannot clean arbitrary ByteBuffer instances" (CleanerJava25) while loading its
+# NIO journal, which takes down the broker and every JMS listener.
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /src
 ARG CACHE_BUST=none
 COPY . .
@@ -19,7 +23,7 @@ RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw clean package -DskipTests \
     -pl '!aem/aem-plugin-sample,!assets/assets-plugin-sample,!db/db-plugin-sample,!web-crawler/wc-plugin-sample' 2>&1
 
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:21-jre
 ARG CACHE_BUST=none
 LABEL org.opencontainers.image.revision=$CACHE_BUST
 RUN groupadd -r java && useradd -r -g java -u 1001 java
