@@ -42,7 +42,7 @@
         <viglet-core.version>2026.3.10</viglet-core.version>
         <tika.version>3.3.1</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <mongodb.version>5.8.0</mongodb.version>
+        <mongodb.version>5.9.0</mongodb.version>
         <pf4j.version>3.15.0</pf4j.version>
         <sonar.organization>viglet</sonar.organization>
         <sonar.projectKey>viglet_dumont</sonar.projectKey>
