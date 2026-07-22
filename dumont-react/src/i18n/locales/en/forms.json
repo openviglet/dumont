@@ -839,6 +839,8 @@
       "deltaClass": "Delta Class",
       "dependencyClass": "Dependency Class",
       "dependencyClassDesc": "Optional custom class that decides, per content, whether its /content dependencies (from infinity.json and model.json) should be extracted and indexed. Must implement DumAemExtDependencyInterface.",
+      "indexConditionClass": "Index Condition Class",
+      "indexConditionClassDesc": "Optional custom class that decides, per content, whether the content should be indexed at all (e.g. skip pages by their cq:template). Return false to skip. Must implement DumAemExtIndexConditionInterface.",
       "localePaths": "Locale Paths",
       "localePathsDesc": "Define specific paths for different locales.",
       "specifications": "Specifications",

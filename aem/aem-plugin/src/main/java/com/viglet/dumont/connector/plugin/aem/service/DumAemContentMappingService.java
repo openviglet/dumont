@@ -35,6 +35,7 @@ public class DumAemContentMappingService {
                 return DumAemContentMapping.builder()
                                 .deltaClassName(dumAemSource.getDeltaClass())
                                 .dependencyClassName(dumAemSource.getDependencyClass())
+                                .indexConditionClassName(dumAemSource.getIndexConditionClass())
                                 .models(getDumAemModels(dumAemSource))
                                 .targetAttrDefinitions(
                                                 collectTurSNAttributeSpecifications(dumAemSource))

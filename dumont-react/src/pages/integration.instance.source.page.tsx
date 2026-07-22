@@ -21,7 +21,7 @@ export default function IntegrationInstanceSourcePage() {
   const [integrationAemSource, setIntegrationAemSource] = useState<TurIntegrationAemSource>({
     id: "", name: "", endpoint: "", username: "", password: "",
     rootPath: "", contentType: "", subType: "", oncePattern: "",
-    defaultLocale: "", localeClass: "", deltaClass: "", dependencyClass: "",
+    defaultLocale: "", localeClass: "", deltaClass: "", dependencyClass: "", indexConditionClass: "",
     author: false, publish: false,
     authorSNSite: "", publishSNSite: "",
     authorURLPrefix: "", publishURLPrefix: "",

@@ -360,8 +360,17 @@ public class DumAemJobService {
                                         dumAemSession.getProviderName());
                         return false;
                 }
-                return !dumAemService.isNotValidType(dumAemSession.getModel(), aemObject,
-                                contentType);
+                if (dumAemService.isNotValidType(dumAemSession.getModel(), aemObject,
+                                contentType)) {
+                        return false;
+                }
+                if (!dumAemContentDefinitionService.shouldIndex(aemObject, config,
+                                dumAemSession.getContentMapping())) {
+                        log.debug("Custom indexConditionClass opted out of indexing for {}",
+                                        aemObject.getPath());
+                        return false;
+                }
+                return true;
         }
 
         private boolean isWithinRootPath(DumAemObjectGeneric aemObject,

@@ -839,6 +839,8 @@
       "deltaClass": "Classe Delta",
       "dependencyClass": "Classe de Dependência",
       "dependencyClassDesc": "Classe customizada opcional que decide, por conteúdo, se as dependências /content (do infinity.json e model.json) devem ser extraídas e indexadas. Deve implementar DumAemExtDependencyInterface.",
+      "indexConditionClass": "Classe de Condição de Indexação",
+      "indexConditionClassDesc": "Classe customizada opcional que decide, por conteúdo, se ele deve ser indexado (ex.: não indexar páginas por cq:template). Retorne false para pular. Deve implementar DumAemExtIndexConditionInterface.",
       "localePaths": "Caminhos de Idioma",
       "localePathsDesc": "Defina caminhos específicos para diferentes idiomas.",
       "specifications": "Especificações",

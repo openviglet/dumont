@@ -317,6 +317,29 @@ class DumAemContentDefinitionServiceTest {
         }
 
         @Test
+        @DisplayName("getIndexConditionClassName returns value or null")
+        void getIndexConditionClassNameReturnsValueOrNull() {
+            assertNull(service.getIndexConditionClassName(null));
+            DumAemContentMapping mapping = DumAemContentMapping.builder()
+                    .indexConditionClassName("com.example.IndexCond").build();
+            assertEquals("com.example.IndexCond", service.getIndexConditionClassName(mapping));
+        }
+
+        @Test
+        @DisplayName("shouldIndex defaults to true when no resolvable class")
+        void shouldIndexDefaultsTrue() {
+            DumAemObjectGeneric aemObject = createMockAemObject();
+            DumAemConfiguration config = createMockConfiguration();
+
+            // No index condition class configured -> default true.
+            assertTrue(service.shouldIndex(aemObject, config, null));
+            // Configured but unresolvable class -> still default true.
+            DumAemContentMapping mapping = DumAemContentMapping.builder()
+                    .indexConditionClassName("com.example.NotOnClasspath").build();
+            assertTrue(service.shouldIndex(aemObject, config, mapping));
+        }
+
+        @Test
         @DisplayName("getModel merges target-attr definitions into the model")
         void getModelMergesTargetAttrDefinitions() {
             DumAemSource source = createDumAemSource();
