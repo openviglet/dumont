@@ -34,6 +34,7 @@ import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDeltaDate;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDeltaDateInterface;
 import com.viglet.dumont.connector.aem.commons.ext.DumAemExtDependencyInterface;
+import com.viglet.dumont.connector.aem.commons.ext.DumAemExtIndexConditionInterface;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemContentMapping;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemModel;
 import com.viglet.dumont.connector.aem.commons.mappers.DumAemSourceAttr;
@@ -69,6 +70,29 @@ public class DumAemContentDefinitionService {
         public String getDependencyClassName(DumAemContentMapping dumAemContentMapping) {
                 return Optional.ofNullable(dumAemContentMapping)
                                 .map(DumAemContentMapping::getDependencyClassName).orElse(null);
+        }
+
+        public String getIndexConditionClassName(DumAemContentMapping dumAemContentMapping) {
+                return Optional.ofNullable(dumAemContentMapping)
+                                .map(DumAemContentMapping::getIndexConditionClassName).orElse(null);
+        }
+
+        /**
+         * Decides whether the given content should be indexed at all. When
+         * {@code indexConditionClass} is configured on the source, the custom
+         * class is invoked to implement per-content business logic (e.g. skip
+         * pages whose {@code cq:template} matches a value). When no class is
+         * configured (or it cannot be resolved), the default is to index the
+         * content.
+         */
+        public boolean shouldIndex(DumAemObjectGeneric aemObject,
+                        DumAemConfiguration dumAemSourceContext,
+                        DumAemContentMapping dumAemContentMapping) {
+                return Optional.ofNullable(getIndexConditionClassName(dumAemContentMapping))
+                                .flatMap(DumCustomClassCache::getCustomClassMap)
+                                .map(classInstance -> ((DumAemExtIndexConditionInterface) classInstance)
+                                                .consume(aemObject, dumAemSourceContext))
+                                .orElse(true);
         }
 
         /**

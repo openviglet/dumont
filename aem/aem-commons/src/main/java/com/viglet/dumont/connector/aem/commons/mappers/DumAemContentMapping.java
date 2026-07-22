@@ -18,4 +18,5 @@ public class DumAemContentMapping {
     private List<DumAemModel> models;
     private String deltaClassName;
     private String dependencyClassName;
+    private String indexConditionClassName;
 }

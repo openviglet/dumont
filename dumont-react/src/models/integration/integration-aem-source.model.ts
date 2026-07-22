@@ -16,6 +16,7 @@ export type TurIntegrationAemSource = {
   localeClass: string;
   deltaClass: string;
   dependencyClass: string;
+  indexConditionClass: string;
   author: boolean;
   publish: boolean;
   authorSNSite: string;

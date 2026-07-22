@@ -42,6 +42,7 @@ class DumAemSourceExchangeTest {
                     .defaultLocale(Locale.US)
                     .localeClass("com.example.LocaleClass")
                     .deltaClass("com.example.DeltaClass")
+                    .indexConditionClass("com.example.IndexConditionClass")
                     .endpoint("http://localhost:4502")
                     .oncePattern("*.json")
                     .username("admin")
@@ -61,6 +62,7 @@ class DumAemSourceExchangeTest {
             assertEquals(Locale.US, exchange.getDefaultLocale());
             assertEquals("com.example.LocaleClass", exchange.getLocaleClass());
             assertEquals("com.example.DeltaClass", exchange.getDeltaClass());
+            assertEquals("com.example.IndexConditionClass", exchange.getIndexConditionClass());
             assertEquals("http://localhost:4502", exchange.getEndpoint());
             assertEquals("*.json", exchange.getOncePattern());
             assertEquals("admin", exchange.getUsername());

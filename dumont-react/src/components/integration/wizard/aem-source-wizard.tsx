@@ -66,6 +66,7 @@ export function AemSourceWizard({
       defaultLocale: "",
       localeClass: "",
       deltaClass: "",
+      indexConditionClass: "",
       author: false,
       publish: false,
       authorSNSite: "",

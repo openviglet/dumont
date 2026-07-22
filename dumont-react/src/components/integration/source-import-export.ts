@@ -48,6 +48,7 @@ interface ExchangeSource {
   defaultLocale?: string;
   localeClass?: string;
   deltaClass?: string;
+  indexConditionClass?: string;
   endpoint?: string;
   username?: string;
   password?: string;
@@ -165,6 +166,7 @@ function mapExchangeSource(src: ExchangeSource): Partial<TurIntegrationAemSource
     defaultLocale: src.defaultLocale ?? "",
     localeClass: src.localeClass ?? "",
     deltaClass: src.deltaClass ?? "",
+    indexConditionClass: src.indexConditionClass ?? "",
     author: src.author ?? false,
     publish: src.publish ?? false,
     authorSNSite: src.authorSNSite ?? "",
@@ -185,6 +187,7 @@ export function exportSourceToJson(source: TurIntegrationAemSource): string {
     defaultLocale: source.defaultLocale || undefined,
     localeClass: source.localeClass || undefined,
     deltaClass: source.deltaClass || undefined,
+    indexConditionClass: source.indexConditionClass || undefined,
     endpoint: source.endpoint,
     username: source.username,
     password: source.password,

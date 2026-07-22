@@ -168,6 +168,84 @@ class DumAemContentDefinitionServiceTest {
     }
 
     @Nested
+    @DisplayName("getIndexConditionClassName Tests")
+    class GetIndexConditionClassNameTests {
+
+        @Test
+        @DisplayName("Should return index condition class name from content mapping")
+        void shouldReturnIndexConditionClassNameFromContentMapping() {
+            // Given
+            String expectedClassName = "com.example.IndexConditionClass";
+            DumAemContentMapping contentMapping = DumAemContentMapping.builder()
+                    .indexConditionClassName(expectedClassName)
+                    .build();
+
+            // When
+            String result = service.getIndexConditionClassName(contentMapping);
+
+            // Then
+            assertEquals(expectedClassName, result);
+        }
+
+        @Test
+        @DisplayName("Should return null when content mapping is null")
+        void shouldReturnNullWhenContentMappingIsNull() {
+            // When
+            String result = service.getIndexConditionClassName(null);
+
+            // Then
+            assertNull(result);
+        }
+
+        @Test
+        @DisplayName("Should return null when index condition class name is not set")
+        void shouldReturnNullWhenIndexConditionClassNameIsNotSet() {
+            // Given
+            DumAemContentMapping contentMapping = DumAemContentMapping.builder().build();
+
+            // When
+            String result = service.getIndexConditionClassName(contentMapping);
+
+            // Then
+            assertNull(result);
+        }
+    }
+
+    @Nested
+    @DisplayName("shouldIndex Tests")
+    class ShouldIndexTests {
+
+        @Test
+        @DisplayName("Should index by default when no index condition class configured")
+        void shouldIndexByDefaultWhenNoClassConfigured() {
+            // Given
+            DumAemObject aemObject = createMockAemObject();
+            DumAemConfiguration config = createMockConfiguration();
+            DumAemContentMapping contentMapping = DumAemContentMapping.builder().build();
+
+            // When
+            boolean result = service.shouldIndex(aemObject, config, contentMapping);
+
+            // Then
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("Should index by default when content mapping is null")
+        void shouldIndexByDefaultWhenContentMappingIsNull() {
+            // Given
+            DumAemObject aemObject = createMockAemObject();
+            DumAemConfiguration config = createMockConfiguration();
+
+            // When
+            boolean result = service.shouldIndex(aemObject, config, null);
+
+            // Then
+            assertTrue(result);
+        }
+    }
+
+    @Nested
     @DisplayName("getDeltaDate Tests")
     class GetDeltaDateTests {
 
