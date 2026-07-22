@@ -65,6 +65,13 @@ public class DumWebConfiguration {
 
         private static final String LOGIN_PATH = "/api/login";
         private static final String LOGOUT_PATH = "/logout";
+        // OIDC Back-Channel Logout callback (Single Logout). Keycloak POSTs a signed
+        // logout token here when the SSO session ends (e.g. logout from the Console),
+        // and Spring invalidates the matching local session on its own. Server-to-
+        // server, token-authenticated: no browser cookie/CSRF, so it must be CSRF-
+        // exempt and permitAll (the logout token IS the credential). Path is Spring's
+        // default: /logout/connect/back-channel/{registrationId} (registrationId=keycloak).
+        private static final String BACK_CHANNEL_LOGOUT_PATH = "/logout/connect/back-channel/**";
         private static final String SETUP_PATH = "/api/setup";
         public static final String ERROR_PATH = "/error/**";
 
@@ -131,6 +138,7 @@ public class DumWebConfiguration {
                                                 mvc.matcher("/api/v2/assets/**"),
                                                 mvc.matcher(ERROR_PATH),
                                                 mvc.matcher(LOGOUT_PATH),
+                                                mvc.matcher(BACK_CHANNEL_LOGOUT_PATH),
                                                 mvc.matcher(LOGIN_PATH),
                                                 mvc.matcher(SETUP_PATH),
                                                 mvc.matcher("/login/oauth2/**"),
@@ -146,9 +154,19 @@ public class DumWebConfiguration {
                                 http.oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
                                                 .userService(oAuth2UserService)
                                                 .oidcUserService(oidcUserService)));
+                                // Single Logout: accept Keycloak's OIDC Back-Channel Logout so a
+                                // logout at the Console (which ends the shared SSO session) cascades
+                                // here — dumont invalidates its own session without the user having
+                                // to visit /logout. Requires this app's own Keycloak client
+                                // (viglet-dumont / per-silo viglet-dumont-<key>) with a Backchannel
+                                // Logout URL; the shared viglet-cloud client cannot fan out to every app.
+                                http.oidcLogout(oidc -> oidc.backChannel(Customizer.withDefaults()));
                         }
                         http.authorizeHttpRequests(authorize -> authorize.requestMatchers(
                                         mvc.matcher(ERROR_PATH),
+                                        // OIDC Back-Channel Logout callback (Single Logout) —
+                                        // authenticated by Keycloak's signed logout token, not a session.
+                                        mvc.matcher(BACK_CHANNEL_LOGOUT_PATH),
                                         mvc.matcher("/api/v2/ping"),
                                         mvc.matcher("/api/v2/discovery"),
                                         mvc.matcher("/api/v2/connector/status"),

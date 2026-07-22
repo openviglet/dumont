@@ -10,7 +10,10 @@
 package com.viglet.dumont.connector.onstartup.auth;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import com.viglet.dumont.connector.persistence.model.auth.DumGroup;
 import com.viglet.dumont.connector.persistence.model.auth.DumUser;
@@ -54,8 +57,6 @@ public class DumKeycloakAdminOnStartup implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (!configProperties.isKeycloak()) return;
-        String adminId = configProperties.getKeycloakAdminId();
-        if (!StringUtils.hasText(adminId)) return;
 
         DumGroup adminGroup = dumGroupRepository.findByName(ADMINISTRATOR);
         if (adminGroup == null) {
@@ -63,10 +64,29 @@ public class DumKeycloakAdminOnStartup implements ApplicationRunner {
             return;
         }
 
-        DumUser user = dumUserRepository.findByUsername(adminId);
+        // Bootstrap admin + Client Silos admin-emails (deduped, blanks ignored).
+        Set<String> adminIds = new LinkedHashSet<>();
+        if (StringUtils.hasText(configProperties.getKeycloakAdminId())) {
+            adminIds.add(configProperties.getKeycloakAdminId());
+        }
+        if (StringUtils.hasText(configProperties.getAdminEmails())) {
+            Arrays.stream(configProperties.getAdminEmails().split(","))
+                    .map(String::trim)
+                    .filter(StringUtils::hasText)
+                    .forEach(adminIds::add);
+        }
+
+        for (String adminId : adminIds) {
+            ensureAdministrator(adminId, adminGroup);
+        }
+    }
+
+    /** Idempotently ensure {@code username} exists and is in the Administrator group. */
+    private void ensureAdministrator(String username, DumGroup adminGroup) {
+        DumUser user = dumUserRepository.findByUsername(username);
         if (user == null) {
             user = DumUser.builder()
-                    .username(adminId)
+                    .username(username)
                     .firstName("Keycloak")
                     .lastName("Admin")
                     .realm("keycloak")
@@ -74,7 +94,7 @@ public class DumKeycloakAdminOnStartup implements ApplicationRunner {
                     .dumGroups(Collections.singletonList(adminGroup))
                     .build();
             dumUserRepository.save(user);
-            log.info("Created Keycloak admin user '{}' with Administrator group.", adminId);
+            log.info("Created Keycloak admin user '{}' with Administrator group.", username);
         } else {
             var groups = dumGroupRepository.findByDumUsersContaining(user);
             boolean hasAdmin = groups.stream().anyMatch(g -> ADMINISTRATOR.equals(g.getName()));
@@ -83,7 +103,7 @@ public class DumKeycloakAdminOnStartup implements ApplicationRunner {
                 groupList.add(adminGroup);
                 user.setDumGroups(groupList);
                 dumUserRepository.save(user);
-                log.info("Added Administrator group to Keycloak user '{}'.", adminId);
+                log.info("Added Administrator group to Keycloak user '{}'.", username);
             }
         }
     }

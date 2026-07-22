@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import com.viglet.dumont.connector.properties.DumAuthConfigProperties;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,14 +35,22 @@ public class DumOAuth2UserService extends DefaultOAuth2UserService {
     private static final String EMAIL = "email";
 
     private final DumAuthorityResolver dumAuthorityResolver;
+    private final DumAuthConfigProperties dumAuthConfigProperties;
 
-    public DumOAuth2UserService(DumAuthorityResolver dumAuthorityResolver) {
+    public DumOAuth2UserService(DumAuthorityResolver dumAuthorityResolver,
+            DumAuthConfigProperties dumAuthConfigProperties) {
         this.dumAuthorityResolver = dumAuthorityResolver;
+        this.dumAuthConfigProperties = dumAuthConfigProperties;
     }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
+
+        // Client Silos isolation (C051): reject a login whose viglet_client claim
+        // doesn't match this instance's dedicated client (no-op if unrestricted).
+        DumClientClaimGate.enforce(dumAuthConfigProperties.getRequiredVigletClient(),
+                oAuth2User.getAttribute(DumClientClaimGate.VIGLET_CLIENT_CLAIM));
 
         String username = oAuth2User.getAttribute(PREFERRED_USERNAME);
         if (username == null) {
