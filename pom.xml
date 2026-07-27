@@ -40,9 +40,9 @@
         <!-- Shared backend platform — external project (github.com/openviglet/viglet-core),
              published to GitHub Packages and versioned independently. -->
         <viglet-core.version>2026.3.10</viglet-core.version>
-        <tika.version>3.3.1</tika.version>
+        <tika.version>3.3.2</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <mongodb.version>5.9.0</mongodb.version>
+        <mongodb.version>5.9.1</mongodb.version>
         <pf4j.version>3.15.0</pf4j.version>
         <sonar.organization>viglet</sonar.organization>
         <sonar.projectKey>viglet_dumont</sonar.projectKey>
@@ -94,7 +94,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.5.1</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
@@ -376,7 +376,7 @@
             <dependency>
                 <groupId>org.xerial</groupId>
                 <artifactId>sqlite-jdbc</artifactId>
-                <version>3.53.2.0</version>
+                <version>3.53.2.1</version>
             </dependency>
             <dependency>
                 <groupId>org.jsoup</groupId>
@@ -522,12 +522,12 @@
             <dependency>
                 <groupId>co.elastic.clients</groupId>
                 <artifactId>elasticsearch-java</artifactId>
-                <version>9.4.3</version>
+                <version>9.4.4</version>
             </dependency>
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
                 <artifactId>elasticsearch-rest-client</artifactId>
-                <version>9.4.3</version>
+                <version>9.4.4</version>
             </dependency>
             <dependency>
                 <groupId>org.mapstruct</groupId>
