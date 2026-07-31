@@ -1,18 +1,17 @@
 # Dumont's roadkeep configuration — the fourth corpus, after Shio (RK20), roadkeep's own
 # and Turing (RK21).
 #
-# NOT WIRED INTO CI. Under this file `roadkeep lint` reports 43 findings, and unlike Shio's
-# and Turing's, **both classes are roadkeep's defects and not Dumont's**:
+# NOT WIRED INTO CI. Under this file `roadkeep lint` reports 9 findings, all of one class:
 #
-#    34  block.missing   every one of the 34 ledger entries. Dumont files work under
-#                        `## Track A — …`, and roadkeep hardcodes the heading word as
-#                        `Block `. Three of the four adopting corpora spell it otherwise —
-#                        Turing has 22 `## D.1` sub-blocks, cursarei writes `## Fase 0` —
-#                        so the word is a convention, which by L6 is configuration.
-#     9  id.format       `D01`–`D09`. roadkeep refuses zero padding because `D01` and `D1`
+#     9  id.format       `D01`-`D09`. roadkeep refuses zero padding because `D01` and `D1`
 #                        would be two spellings of one id; Dumont pads *consistently*, so
 #                        there is only ever one spelling. Whether a declared width is
 #                        legal is an open question, not a defect either way.
+#
+# It reported 43 when this file was first written. The other 34 were every ledger entry, on
+# `block.missing`, because roadkeep hardcoded the heading word as `Block` against this
+# file's `## Track A` -- adopting Dumont is what found that, and `[headings] word` below is
+# what RK75 shipped for it.
 #
 # The roadmap is the interesting half: it holds **zero** open task lines — all eight tracks
 # read "This track has no remaining pending tasks", and the pending work that existed was
@@ -31,6 +30,11 @@ roadmap = "docs/ROADMAP.md"
 changelog = "docs/CHANGELOG.md"
 improvements = "docs/IMPROVEMENTS.md"
 strategy = "docs/STRATEGY.md"
+
+[headings]
+# Dumont files work under `## Track A`, not `## Block A` (RK75), so the word is
+# declared and the label after it is the format's as everywhere else.
+word = "Track"
 
 [markers]
 open = ["📋", "💭", "⏳", "🛠"]
