@@ -1,0 +1,52 @@
+# Dumont's roadkeep configuration — the fourth corpus, after Shio (RK20), roadkeep's own
+# and Turing (RK21).
+#
+# NOT WIRED INTO CI. Under this file `roadkeep lint` reports 43 findings, and unlike Shio's
+# and Turing's, **both classes are roadkeep's defects and not Dumont's**:
+#
+#    34  block.missing   every one of the 34 ledger entries. Dumont files work under
+#                        `## Track A — …`, and roadkeep hardcodes the heading word as
+#                        `Block `. Three of the four adopting corpora spell it otherwise —
+#                        Turing has 22 `## D.1` sub-blocks, cursarei writes `## Fase 0` —
+#                        so the word is a convention, which by L6 is configuration.
+#     9  id.format       `D01`–`D09`. roadkeep refuses zero padding because `D01` and `D1`
+#                        would be two spellings of one id; Dumont pads *consistently*, so
+#                        there is only ever one spelling. Whether a declared width is
+#                        legal is an open question, not a defect either way.
+#
+# The roadmap is the interesting half: it holds **zero** open task lines — all eight tracks
+# read "This track has no remaining pending tasks", and the pending work that existed was
+# shipped. So nothing has to be migrated, and every line added from here goes through `add`
+# and is refused at insertion. That is the cheapest adoption of the four, and the only one
+# where the format costs nobody a rewrite.
+
+prefix = "D"
+
+# Dumont numbers its rationale by hand, not by task id: the scheme follows the file rather
+# than the file following the scheme.
+ref_scheme = "outline"
+
+[files]
+roadmap = "docs/ROADMAP.md"
+changelog = "docs/CHANGELOG.md"
+improvements = "docs/IMPROVEMENTS.md"
+strategy = "docs/STRATEGY.md"
+
+[markers]
+open = ["📋", "💭", "⏳", "🛠"]
+shipped = "✅"
+retired = "🗑"
+
+[ledger]
+# The two slots Dumont's ledger lines do not have: no marker, because the file itself is
+# the statement that the work shipped (RK43), and no bold symptom, because every entry is
+# `- **D01** — <prose>` (RK48). Declared here, so those 34 entries parse at all.
+marker = false
+symptom = false
+
+[rules.changelog]
+# The two prose rules this file's history cannot obey (RK52): its entries are paragraphs
+# that predate the tool, and none of them ends in a stop. The roadmap keeps both rules,
+# which — the roadmap being empty — means they hold for every line ever added to it.
+one_sentence = false
+terminator = false
