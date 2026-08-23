@@ -46,6 +46,13 @@ open = ["📋", "💭", "⏳", "🛠"]
 shipped = "✅"
 retired = "🗑"
 
+# Acceptance criteria. Declared when Track I opened, and for the reason that track exists:
+# its nine lines are a migration of 39 pages, so "done" cannot mean the line was deleted.
+# Dumont was the only one of the four corpora without this table, which is why the console
+# adoption work arrived with no test to hold it to. Declared at all means governed; both
+# limits stay at their defaults (lead 80, why 320).
+[criteria]
+
 [ledger]
 # The two slots Dumont's ledger lines do not have: no marker, because the file itself is
 # the statement that the work shipped (RK43), and no bold symptom, because every entry is

@@ -178,6 +178,51 @@ This track has no remaining pending tasks.
 - 📋 **D42** (deps: —) **the console has no test suite at all, so no migrated surface can be shown to still render** — Zero test files and no test script, which leaves every line in this track verifiable only by eye. → §XI.8
 - 📋 **D43** (deps: —) **copy-ds.cmd writes into dumont/dumont-react, a path without the version directory, so it cannot resolve** — Every line here is a package change tried against this console before it is published. → §XI.9
 
+## Done when — D35
+
+- **A script prints how much console chrome is left** It classifies all 39 pages and 88
+  components, and the number falls as this track advances.
+
+## Done when — D36
+
+- **Representative surfaces render from the bento subpath** The console imports the
+  subpath and its stylesheet, and those surfaces match what it renders today.
+
+## Done when — D37
+
+- **A bento surface and its console original both serve** Both route trees resolve, and
+  deleting the bento one leaves the console untouched.
+
+## Done when — D38
+
+- **ui/table.tsx declares nothing the package exports** The eight primitives are one
+  re-export, and every list surface still renders.
+
+## Done when — D39
+
+- **One nav declaration drives the console sidebar** The surfaces are data shaped to the
+  package schema, and the sidebar reads it instead of markup.
+
+## Done when — D40
+
+- **No bento chrome string renders in the wrong language** The chrome namespace is
+  translated in every language this console already ships.
+
+## Done when — D41
+
+- **A component re-declared here fails this repository's CI** check-duplicates runs in
+  CI, names the replacing import, and a new duplicate exits non-zero.
+
+## Done when — D42
+
+- **A surface that stops rendering turns a run red** A test script exists, runs in CI,
+  and covers the shell and one list and one form surface.
+
+## Done when — D43
+
+- **copy-ds.cmd reaches the console's own node_modules** The destination carries the
+  version directory, and an absent target fails instead of being created.
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
