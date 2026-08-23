@@ -166,6 +166,18 @@ This track has no remaining pending tasks.
 
 ---
 
+## Track I — The console adopts the shared bento layer
+
+- 📋 **D35** (deps: —) **nothing counts how much console chrome this console still renders, so the migration has no size and no end** — 39 pages and 88 components, and no number says which of them the shared layer could carry. → §XI.1
+- 📋 **D36** (deps: viglet-design-system VDS8) **the console imports no bento component, so a third product installs the design system and looks unrelated** — All 95 import sites take the root and router entries; the bento subpath is installed and untouched. → §XI.2
+- 📋 **D37** (deps: D36) **there is no bento route tree, so a migrated surface has nowhere to render beside the console one** — A parallel shell is what makes each of the 39 pages reversible one at a time. → §XI.3
+- 📋 **D38** (deps: —) **ui/table.tsx re-declares all eight Table primitives, the only real fork among 33 ui files** — The package exports the same eight, and a table that drifts takes every list surface with it. → §XI.4
+- 📋 **D39** (deps: D37) **Dumont has no nav declaration a rail and a palette can share, so each surface would be listed twice** — Navigation lives as markup inside the console sidebar, and the package takes it as data. → §XI.5
+- 📋 **D40** (deps: D37) **bento chrome strings have no Dumont translations, so a shared rail and palette would render English** — This console already ships more than one language, and the chrome the package owns needs them here. → §XI.6
+- 📋 **D41** (deps: viglet-design-system VDS5) **nothing fails when a component is re-declared here instead of imported from the design system** — Nineteen names in eleven files already are, and only a reader has ever noticed. → §XI.7
+- 📋 **D42** (deps: —) **the console has no test suite at all, so no migrated surface can be shown to still render** — Zero test files and no test script, which leaves every line in this track verifiable only by eye. → §XI.8
+- 📋 **D43** (deps: —) **copy-ds.cmd writes into dumont/dumont-react, a path without the version directory, so it cannot resolve** — Every line here is a package change tried against this console before it is published. → §XI.9
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

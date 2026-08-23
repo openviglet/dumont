@@ -459,3 +459,6 @@
   content-type-routed model, and a monolithic (Insper-shaped) extractor through sequential-vs-parallel
   extraction over one shared instance, asserting identical attribute maps — and proves the harness catches a
   deliberately stateful extractor (it diverges under parallel extraction). ↳ Builds on D31, D24.
+
+## Track I — The console adopts the shared bento layer
+
