@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import {
   Form,
   FormControl,
@@ -15,9 +15,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { TurIntegrationCatalogSource } from "@/models/integration/integration-catalog-source.model";
 import { TurIntegrationCatalogSourceService } from "@/services/integration/integration-catalog-source.service";
-import { IconBuildingBank, IconDeviceFloppy, IconPlugConnected, IconSettings, IconX } from "@tabler/icons-react";
+import { IconBuildingBank, IconPlugConnected, IconSettings } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
-import { StickyPageHeader } from "@viglet/viglet-design-system/router";
+import { AdaptiveFormHeader } from "@/components/bento/adaptive-form-header";
 import { useEffect, useMemo } from "react";
 import {
   useForm
@@ -25,8 +25,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
-import { GradientButton } from "../ui/gradient-button";
-import { SectionCard } from "../ui/section-card";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 "use client"
 
 /** The catalog source publishes to a single SN site; the form edits it as one `site` field. */
@@ -94,23 +93,24 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
-        <StickyPageHeader>
-          <StickyPageHeader.Title icon={IconBuildingBank} feature={t("integration.catalogSources.title")} description={t("integration.catalogSources.description")} />
-          <StickyPageHeader.Actions>
+        <AdaptiveFormHeader
+          icon={IconBuildingBank}
+          feature={t("integration.catalogSources.title")}
+          description={t("integration.catalogSources.description")}
+          title={form.watch("name") || ""}
+          urlBase={sourceInstanceRoute}
+          onCancel={() => navigate(sourceInstanceRoute)}
+          dirty={isNew || form.formState.isDirty}
+          titleMissing={!form.watch("name")?.trim()}
+          actions={
+            <>
             {open !== undefined && onDelete && setOpen && (
               <DialogDelete feature={t("integration.catalogSources.title")} name={form.watch("name") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
             )}
             {headerActions}
-            <GradientButton type="submit" size="sm">
-              <IconDeviceFloppy className="size-4" />
-              {t("forms.formActions.saveChanges")}
-            </GradientButton>
-            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(sourceInstanceRoute)}>
-              <IconX className="size-4" />
-              {t("forms.formActions.cancel")}
-            </GradientButton>
-          </StickyPageHeader.Actions>
-        </StickyPageHeader>
+            </>
+          }
+        />
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general">
@@ -239,7 +239,7 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                       <FormItem>
                         <FormLabel>{t("forms.catalogSource.authHeaderValue")}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Bearer ••••••••" type="password" />
+                          <Input {...field} placeholder="Bearer â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password" />
                         </FormControl>
                         <FormDescription>{t("forms.catalogSource.authHeaderValueDesc")}</FormDescription>
                         <FormMessage />

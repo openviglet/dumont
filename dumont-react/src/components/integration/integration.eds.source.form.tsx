@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { ROUTES } from "@/app/routes.const";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,6 @@ import { TurIntegrationEdsSourceService } from "@/services/integration/integrati
 import {
   IconCloudComputing,
   IconCode,
-  IconDeviceFloppy,
   IconEye,
   IconFileDescription,
   IconFilter,
@@ -28,18 +27,16 @@ import {
   IconTrash,
   IconUpload,
   IconWorld,
-  IconX,
 } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
-import { StickyPageHeader } from "@viglet/viglet-design-system/router";
+import { AdaptiveFormHeader } from "@/components/bento/adaptive-form-header";
 import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
 import { SNSiteSelect } from "./sn-site-select";
-import { GradientButton } from "../ui/gradient-button";
-import { SectionCard } from "../ui/section-card";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 
 interface Props {
   value: TurIntegrationEdsSource;
@@ -142,48 +139,26 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
-        <StickyPageHeader>
-          <StickyPageHeader.Title
-            icon={IconCloudComputing}
-            feature={t("integration.edsSources.title")}
-            description={t("integration.edsSources.description")}
-          />
-          <StickyPageHeader.Actions>
-            {/* Dropdown items (3-dot menu) */}
-            {onDryScan && (
-              <StickyPageHeader.Action
-                label={t("integration.edsSources.dryScan")}
-                icon={IconEye}
-                onClick={onDryScan}
-                disabled={indexingDisabled || dryScanning}
-              />
-            )}
-            {onReindex && (
-              <StickyPageHeader.Action
-                label={t("integration.edsSources.reindexAll")}
-                icon={IconRefresh}
-                onClick={onReindex}
-                disabled={indexingDisabled || reindexing}
-              />
-            )}
-            {onIndex && (
-              <StickyPageHeader.Action
-                label={t("integration.edsSources.indexAll")}
-                icon={IconUpload}
-                onClick={onIndex}
-                disabled={indexingDisabled || indexing}
-              />
-            )}
-            {open !== undefined && onDelete && setOpen && (
-              <StickyPageHeader.Action
-                label={t("forms.formActions.delete")}
-                icon={IconTrash}
-                onClick={() => setOpen(true)}
-              />
-            )}
-
-            {/* Dialog rendered without its own trigger — opened by the dropdown item above */}
-            {open !== undefined && onDelete && setOpen && (
+        <AdaptiveFormHeader
+          icon={IconCloudComputing}
+          feature={t("integration.edsSources.title")}
+          description={t("integration.edsSources.description")}
+          title={form.watch("title") || ""}
+          urlBase={sourceInstanceRoute}
+          onCancel={() => navigate(sourceInstanceRoute)}
+          dirty={isNew || form.formState.isDirty}
+          titleMissing={!form.watch("title")?.trim()}
+          menuActions={[
+            ...(onDryScan ? [{ label: t("integration.edsSources.dryScan"), icon: IconEye, onSelect: onDryScan, disabled: indexingDisabled || dryScanning }] : []),
+            ...(onReindex ? [{ label: t("integration.edsSources.reindexAll"), icon: IconRefresh, onSelect: onReindex, disabled: indexingDisabled || reindexing }] : []),
+            ...(onIndex ? [{ label: t("integration.edsSources.indexAll"), icon: IconUpload, onSelect: onIndex, disabled: indexingDisabled || indexing }] : []),
+            ...(open !== undefined && onDelete && setOpen
+              ? [{ label: t("forms.formActions.delete"), icon: IconTrash, onSelect: () => setOpen(true), tone: "destructive" as const }]
+              : []),
+          ]}
+          actions={
+            /* Rendered without its own trigger — the menu item above is what opens it. */
+            open !== undefined && onDelete && setOpen ? (
               <DialogDelete
                 trigger={null}
                 feature={t("integration.edsSources.title")}
@@ -192,24 +167,9 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
                 open={open}
                 setOpen={setOpen}
               />
-            )}
-
-            {/* Visible buttons */}
-            <GradientButton type="submit" size="sm">
-              <IconDeviceFloppy className="size-4" />
-              {t("forms.formActions.saveChanges")}
-            </GradientButton>
-            <GradientButton
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(sourceInstanceRoute)}
-            >
-              <IconX className="size-4" />
-              {t("forms.formActions.cancel")}
-            </GradientButton>
-          </StickyPageHeader.Actions>
-        </StickyPageHeader>
+            ) : undefined
+          }
+        />
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general">
@@ -683,7 +643,7 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
                       placeholder="title"
                       className="w-1/3"
                     />
-                    <span className="text-muted-foreground">→</span>
+                    <span className="text-muted-foreground">â†’</span>
                     <Input
                       {...form.register(`fieldMappings.${index}.targetField`)}
                       placeholder="page_title"

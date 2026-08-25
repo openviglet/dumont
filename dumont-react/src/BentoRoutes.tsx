@@ -3,11 +3,17 @@ import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remot
 import { Route, Routes } from "react-router-dom";
 import BentoAreaPage from "./app/bento/bento.area.page";
 import BentoHomePage from "./app/bento/bento.home.page";
+import IntegrationInstanceAssetsSourceDetailBentoPage from "./pages/bento/integration.instance.assets.source.detail.bento.page";
 import IntegrationInstanceAssetsSourceListBentoPage from "./pages/bento/integration.instance.assets.source.list.bento.page";
+import IntegrationInstanceCatalogSourceDetailBentoPage from "./pages/bento/integration.instance.catalog.source.detail.bento.page";
 import IntegrationInstanceCatalogSourceListBentoPage from "./pages/bento/integration.instance.catalog.source.list.bento.page";
+import IntegrationInstanceDbSourceDetailBentoPage from "./pages/bento/integration.instance.db.source.detail.bento.page";
 import IntegrationInstanceDbSourceListBentoPage from "./pages/bento/integration.instance.db.source.list.bento.page";
+import IntegrationInstanceEdsSourceDetailBentoPage from "./pages/bento/integration.instance.eds.source.detail.bento.page";
 import IntegrationInstanceEdsSourceListBentoPage from "./pages/bento/integration.instance.eds.source.list.bento.page";
+import IntegrationInstanceSourceDetailBentoPage from "./pages/bento/integration.instance.source.detail.bento.page";
 import IntegrationInstanceSourceListBentoPage from "./pages/bento/integration.instance.source.list.bento.page";
+import IntegrationInstanceWcSourceDetailBentoPage from "./pages/bento/integration.instance.wc.source.detail.bento.page";
 import IntegrationInstanceWcSourceListBentoPage from "./pages/bento/integration.instance.wc.source.list.bento.page";
 
 /**
@@ -40,12 +46,36 @@ export default function BentoRoutes() {
        * The source lists. Each console original is untouched and still serves; only the list has
        * moved, so a card still opens its detail page on the other tree until D47.
        */}
-      <Route path="source" element={<IntegrationInstanceSourceListBentoPage />} />
-      <Route path="db-source" element={<IntegrationInstanceDbSourceListBentoPage />} />
-      <Route path="wc-source" element={<IntegrationInstanceWcSourceListBentoPage />} />
-      <Route path="assets-source" element={<IntegrationInstanceAssetsSourceListBentoPage />} />
-      <Route path="catalog-source" element={<IntegrationInstanceCatalogSourceListBentoPage />} />
-      <Route path="eds-source" element={<IntegrationInstanceEdsSourceListBentoPage />} />
+      <Route path="source">
+        <Route index element={<IntegrationInstanceSourceListBentoPage />} />
+        <Route path=":sourceId" element={<IntegrationInstanceSourceDetailBentoPage />} />
+        <Route path=":sourceId/:tab" element={<IntegrationInstanceSourceDetailBentoPage />} />
+      </Route>
+      <Route path="db-source">
+        <Route index element={<IntegrationInstanceDbSourceListBentoPage />} />
+        <Route path=":sourceId" element={<IntegrationInstanceDbSourceDetailBentoPage />} />
+        <Route path=":sourceId/:tab" element={<IntegrationInstanceDbSourceDetailBentoPage />} />
+      </Route>
+      <Route path="wc-source">
+        <Route index element={<IntegrationInstanceWcSourceListBentoPage />} />
+        <Route path=":sourceId" element={<IntegrationInstanceWcSourceDetailBentoPage />} />
+        <Route path=":sourceId/:tab" element={<IntegrationInstanceWcSourceDetailBentoPage />} />
+      </Route>
+      <Route path="assets-source">
+        <Route index element={<IntegrationInstanceAssetsSourceListBentoPage />} />
+        <Route path=":sourceId" element={<IntegrationInstanceAssetsSourceDetailBentoPage />} />
+        <Route path=":sourceId/:tab" element={<IntegrationInstanceAssetsSourceDetailBentoPage />} />
+      </Route>
+      <Route path="catalog-source">
+        <Route index element={<IntegrationInstanceCatalogSourceListBentoPage />} />
+        <Route path=":sourceId" element={<IntegrationInstanceCatalogSourceDetailBentoPage />} />
+        <Route path=":sourceId/:tab" element={<IntegrationInstanceCatalogSourceDetailBentoPage />} />
+      </Route>
+      <Route path="eds-source">
+        <Route index element={<IntegrationInstanceEdsSourceListBentoPage />} />
+        <Route path=":sourceId" element={<IntegrationInstanceEdsSourceDetailBentoPage />} />
+        <Route path=":sourceId/:tab" element={<IntegrationInstanceEdsSourceDetailBentoPage />} />
+      </Route>
     </Routes>
   );
 }

@@ -1,5 +1,5 @@
-/*
- * D42 — the test that holds D35's instrument.
+﻿/*
+ * D42 â€” the test that holds D35's instrument.
  *
  * The census is a script anyone can run, which makes it a number anyone can also stop running.
  * This is what re-runs it: the seven forks are named here one by one, so retiring one is a diff
@@ -7,7 +7,7 @@
  *
  * ## Why a named list and not a ceiling
  *
- * A ceiling — "no more than seven forked components" — lets one migration pay for the next: shim
+ * A ceiling â€” "no more than seven forked components" â€” lets one migration pay for the next: shim
  * `page.tsx`, and the budget quietly funds leaving `grid.list.tsx` forked for ever. The map below
  * names every one, so the diff that removes a fork also removes its line, and the diff that adds
  * a component re-declaring a package export has to write it in.
@@ -16,8 +16,8 @@
  *
  * Not the page-by-page chrome map. Thirty-nine entries would be a wall nobody reads, and the
  * chrome counts below carry the same signal in a form a person can check at a glance. What the
- * page half asserts is the falling number the track is actually about — how many surfaces are on
- * bento — plus the guards that keep the reader honest when that number is zero.
+ * page half asserts is the falling number the track is actually about â€” how many surfaces are on
+ * bento â€” plus the guards that keep the reader honest when that number is zero.
  */
 import { readdirSync } from "node:fs"
 import { dirname, join } from "node:path"
@@ -47,24 +47,30 @@ const FORKED: Record<string, string[]> = {
 /**
  * Surfaces that render bento chrome. Empty until D37 built the route tree, and it grows by exactly
  * one line per migrated surface after that. The count, not the names, is what the track is
- * measured by — but the names are what make each step reviewable.
+ * measured by â€” but the names are what make each step reviewable.
  *
  * The first three are the shell rather than migrated pages: a parallel tree needs a root,
- * somewhere for Home to land, and a hub per section before any surface can move into it. The six
- * below them are the source lists (D46).
+ * somewhere for Home to land, and a hub per section before any surface can move into it. The
+ * twelve below them are the six source lists (D46) and the six detail pages behind them (D47).
  *
- * "Left to move" still counts the six console originals, because they still exist and still render
- * console chrome — that is what makes each migration reversible, not an oversight in the count.
+ * "Left to move" still counts the twelve console originals, because they still exist and still render
+ * console chrome â€” that is what makes each migration reversible, not an oversight in the count.
  */
 const ON_BENTO: string[] = [
   "app/bento/bento.area.page.tsx",
   "app/bento/bento.home.page.tsx",
   "app/bento/bento.root.page.tsx",
+  "pages/bento/integration.instance.assets.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.assets.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.catalog.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.catalog.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.db.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.db.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.eds.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.eds.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.wc.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.list.bento.page.tsx",
 ]
 
@@ -79,7 +85,7 @@ describe("D35: the console census", () => {
 
     expect(forked, [
       "The fork census moved.",
-      "A file in `+ received` declares a name the package exports — either shim it, or if the",
+      "A file in `+ received` declares a name the package exports â€” either shim it, or if the",
       "  variation is genuine, wrap the shared component instead of re-declaring its name.",
       "A file in `- expected` was shimmed: delete its line here in the same diff.",
     ].join("\n")).toEqual(FORKED)
@@ -92,14 +98,14 @@ describe("D35: the console census", () => {
       .map(([name]) => name)
       .sort()
 
-    expect(bento, "A page imports the bento subpath and is not declared migrated — add it to"
+    expect(bento, "A page imports the bento subpath and is not declared migrated â€” add it to"
       + " ON_BENTO. That import is what states a page's era.").toEqual([...ON_BENTO].sort())
   })
 
   it("is not measuring an empty tree", () => {
     // The one wrong answer this reader must never give quietly. A walk that found nothing
     // reports zero forks and zero console pages, which is indistinguishable from a finished
-    // migration — and the census is the only thing that would have said otherwise.
+    // migration â€” and the census is the only thing that would have said otherwise.
     const { totals } = census()
     const onDisk = readdirSync(join(SRC, "pages")).filter((n) => n.endsWith(".page.tsx")).length
 
@@ -113,7 +119,7 @@ describe("D35: the console census", () => {
   it("reads a design system that actually exports things", () => {
     // The failure the fallback reader had on its first run: `dist/index.d.ts` in the published
     // package is eight lines of `export * from`, so a reader that did not follow them found one
-    // name — and one export means every component classifies as Dumont's own.
+    // name â€” and one export means every component classifies as Dumont's own.
     const ds = designSystemExports()
     expect(ds.names.size).toBeGreaterThan(200)
     expect(ds.names.has("Table")).toBe(true)
@@ -159,7 +165,7 @@ describe("D35: era is decided by the bento subpath", () => {
   })
 
   it("leaves a page that only takes an era-neutral adapter on console", () => {
-    // The adapter is the one export written to be used *from* a console page — it renders
+    // The adapter is the one export written to be used *from* a console page â€” it renders
     // console chrome by default. A page that takes it has adopted nothing yet, and counting it
     // as migrated would shrink the debt without moving a surface.
     expect(isBento(importing("AdaptiveSectionCard"))).toBe(false)
@@ -172,10 +178,10 @@ describe("D35: era is decided by the bento subpath", () => {
 
   it("does not read a type-only import as adopting the layer", () => {
     /*
-     * D46 — a type import is erased at compile time and renders nothing, so it says which shape a
+     * D46 â€” a type import is erased at compile time and renders nothing, so it says which shape a
      * module speaks in, not which era it belongs to. `nav.const.ts` takes the package's nav schema
      * that way and is read by the *console* sidebar; counting it as bento made every page that
-     * reaches it — the console shell included — read as migrated.
+     * reaches it â€” the console shell included â€” read as migrated.
      */
     expect(isBento('import type { BentoNavGroup } from "@viglet/viglet-design-system/bento"')).toBe(
       false,
@@ -198,7 +204,7 @@ describe("D46: era follows a page's local imports", () => {
     const { pages } = census()
     const lists = Object.entries(pages).filter(([path]) => path.startsWith("pages/bento/"))
 
-    expect(lists).toHaveLength(6)
+    expect(lists).toHaveLength(12)
     for (const [path, page] of lists) {
       expect(page.era, `${path} should be bento-era through its wrapper`).toBe("bento")
     }

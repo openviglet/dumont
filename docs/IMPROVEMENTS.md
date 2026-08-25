@@ -76,22 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XII Console surfaces move to bento chrome
-
-### XII.3 The detail pages behind those lists (D47)
-
-A migrated list links its tiles at the console detail page, because that page has not
-moved. The reader crosses from the bento shell into the console sidebar mid-task, which
-is the one place the parallel tree is visibly a migration rather than a product.
-
-`BentoEntityShell` and `BentoFormHero` own the identity hero and the save-bar morph, so
-a detail page becomes a form plus its sections. The rule the package states is worth
-keeping: identity lives in the hero, never as a form field, and the save bar is always
-the morph — a hand-rolled sticky bar is two halves that drift.
-
-A detail page moves after its list, so `bentoRoute` and the tile it feeds change
-together.
-
 ## XIII Frontend build and lint gates
 
 ### XIII.1 A lint that has never run (D48)

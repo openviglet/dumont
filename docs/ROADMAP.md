@@ -168,19 +168,12 @@ This track has no remaining pending tasks.
 
 ## Track J — Console surfaces move to bento chrome
 
-- 📋 **D47** (deps: D46 ✅) **a migrated list sends every tile into the console, so a reader leaves the shell mid-task** — Detail pages have not moved, and BentoEntityShell is what a form page becomes. → §XII.3
-
 ## Track K — Frontend build and lint gates
 
 - 📋 **D48** (deps: —) **no eslint config exists, so the lint script fails and four installed plugins have never run** — Both lint scripts exit non-zero on a missing eslint.config.js, which reads as a broken command rather than an absent gate. → §XIII.1
 - 📋 **D49** (deps: —) **type declarations for the federated remotes fail to generate on every build, and the build still passes** — Turing consumes those remotes and gets no types across the boundary, where a mismatch surfaces at runtime. → §XIII.2
 - 📋 **D50** (deps: —) **the build-and-analyse workflow is dispatch-only, so a pull request is never actually built** — It also caches on a lockfile that does not exist and pins Sonar to the previous version's branch. → §XIII.3
 - 📋 **D51** (deps: —) **the census warns on every run about a probe for chrome no page has ever imported** — A standing warning is what teaches a reader to ignore the next one, which will be a real one. → §XIII.4
-
-## Done when — D47
-
-- **A migrated list's tiles stay inside the bento shell** A tile still built from
-  CONSOLE_INTEGRATION_INSTANCE is what says its detail page has not moved.
 
 ## Non-goals (do NOT add as tasks)
 

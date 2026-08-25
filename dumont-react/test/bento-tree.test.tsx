@@ -156,16 +156,39 @@ describe("D37: the bento tree's own root", () => {
     expect(page.queryByText(/nothing in this section/i)).toBeNull()
   })
 
-  it("sends a not-yet-migrated detail page back to the console tree", async () => {
-    // The link the migration is guaranteed to need, and the one most likely to be wrong: the DB
-    // *detail* page has not moved, so a tile must name the console tree explicitly. Deriving the
-    // prefix from the live URL — which is what `ROUTES.INTEGRATION_INSTANCE` does — would resolve
-    // to `/bento/...` from in here and send every tile to a route nothing serves.
+  it("keeps a tile inside the bento shell, now the detail page serves there", async () => {
+    /*
+     * D47's whole criterion. Until the detail pages moved, a tile had to name the console tree
+     * explicitly, and the reader crossed eras mid-task — the one place the parallel tree was
+     * visibly a migration rather than a product.
+     */
     stubConnector()
     renderApp(BENTO_DB)
 
     const tile = (await screen.findByText("Products")).closest("a")
-    expect(tile?.getAttribute("href")).toBe(`${CONSOLE_DB}/1`)
+    expect(tile?.getAttribute("href")).toBe(`${BENTO_DB}/1`)
+  })
+
+  it("serves that detail page, in bento chrome, with the console original intact", async () => {
+    // A tile pointing at a route nothing answers is worse than one that leaves the shell.
+    answerGet({
+      "/db/source/1": { id: "1", name: "Products", description: "Catalogue rows" },
+      "/connector/status": CONNECTOR_STATUS,
+      "/user": USER,
+    })
+    const bento = renderApp(`${BENTO_DB}/1`)
+    expect(await screen.findByDisplayValue("Products")).toBeDefined()
+    expect(bento.container.querySelector(".bento-rail-gutter")).not.toBeNull()
+    bento.unmount()
+
+    answerGet({
+      "/db/source/1": { id: "1", name: "Products", description: "Catalogue rows" },
+      "/connector/status": CONNECTOR_STATUS,
+      "/user": USER,
+    })
+    const console = renderApp(`${CONSOLE_DB}/1`)
+    expect(await screen.findByDisplayValue("Products")).toBeDefined()
+    expect(console.container.querySelector(".bento-rail-gutter")).toBeNull()
   })
 })
 

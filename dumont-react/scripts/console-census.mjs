@@ -84,6 +84,15 @@ const BENTO_CLAUSE = /import\s*(type\s+)?\{([^}]*)\}\s*from\s*["']@viglet\/vigle
  * console-era as a file gets.
  */
 export function isBento(source) {
+  /*
+   * D47 — declaring the chrome is the strongest statement of era there is.
+   *
+   * `SectionCardChromeProvider` is era-neutral *as a component*, because it can declare either
+   * era, and that is why it sits in the list above. The value is what commits: a page rendering
+   * `chrome="bento"` puts everything beneath it in bento chrome, which is exactly how the six
+   * source detail pages migrate without their 500-line forms being forked.
+   */
+  if (/chrome=["']bento["']/.test(source)) return true
   if (!source.includes(BENTO_SUBPATH)) return false
   const clauses = [...source.matchAll(BENTO_CLAUSE)]
   if (!clauses.length) return true
@@ -130,9 +139,28 @@ function isBentoThroughLocals(file, source, seen = new Set()) {
   for (const [, specifier] of source.matchAll(LOCAL_IMPORT)) {
     const target = resolveLocal(file, specifier)
     if (!target || seen.has(target)) continue
-    if (isBentoThroughLocals(target, readFileSync(target, "utf8"), seen)) return true
+    const targetSource = readFileSync(target, "utf8")
+    // An adapter renders whichever era it is placed in, so importing one states nothing.
+    if (isAdapter(targetSource)) continue
+    if (isBentoThroughLocals(target, targetSource, seen)) return true
   }
   return false
+}
+
+/**
+ * Is this module an adapter — one that renders both eras and commits to neither?
+ *
+ * `useSectionChrome` is the whole test, and it is a property rather than a name: a module asking
+ * which chrome it is in has already said it works in both. Dumont's `AdaptiveFormHeader` is one,
+ * and it is why the six source *forms* are shared instead of forked — they are 500 lines of field
+ * logic whose only era-specific part is the header.
+ *
+ * Without this, following imports made every page reaching such a form read as bento, including
+ * the console originals that still render `StickyPageHeader`. The package's own `ERA_NEUTRAL`
+ * list says the same thing about its adapters; this says it about a product's.
+ */
+function isAdapter(source) {
+  return source.includes("useSectionChrome")
 }
 
 /**

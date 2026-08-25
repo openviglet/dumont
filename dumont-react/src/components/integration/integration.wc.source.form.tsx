@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,16 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TurIntegrationWcSource } from "@/models/integration/integration-wc-source.model";
 import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service";
-import { IconDeviceFloppy, IconFileDescription, IconFilter, IconGlobe, IconPlus, IconSettings, IconTrash, IconX } from "@tabler/icons-react";
+import { IconFileDescription, IconFilter, IconGlobe, IconPlus, IconSettings, IconTrash } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
-import { StickyPageHeader } from "@viglet/viglet-design-system/router";
+import { AdaptiveFormHeader } from "@/components/bento/adaptive-form-header";
 import { useEffect, useMemo } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
-import { GradientButton } from "../ui/gradient-button";
-import { SectionCard } from "../ui/section-card";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 "use client"
 
 interface Props {
@@ -78,23 +77,24 @@ export const IntegrationWcSourceForm: React.FC<Props> = ({ value, isNew, integra
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
-        <StickyPageHeader>
-          <StickyPageHeader.Title icon={IconGlobe} feature={t("integration.wcSources.title")} description={t("integration.wcSources.description")} />
-          <StickyPageHeader.Actions>
+        <AdaptiveFormHeader
+          icon={IconGlobe}
+          feature={t("integration.wcSources.title")}
+          description={t("integration.wcSources.description")}
+          title={form.watch("title") || ""}
+          urlBase={sourceInstanceRoute}
+          onCancel={() => navigate(sourceInstanceRoute)}
+          dirty={isNew || form.formState.isDirty}
+          titleMissing={!form.watch("title")?.trim()}
+          actions={
+            <>
             {open !== undefined && onDelete && setOpen && (
               <DialogDelete feature={t("integration.wcSources.title")} name={form.watch("title") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
             )}
             {headerActions}
-            <GradientButton type="submit" size="sm">
-              <IconDeviceFloppy className="size-4" />
-              {t("forms.formActions.saveChanges")}
-            </GradientButton>
-            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(sourceInstanceRoute)}>
-              <IconX className="size-4" />
-              {t("forms.formActions.cancel")}
-            </GradientButton>
-          </StickyPageHeader.Actions>
-        </StickyPageHeader>
+            </>
+          }
+        />
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general"><IconSettings className="size-4" />{t("forms.wcSource.general")}</TabsTrigger>
@@ -130,7 +130,7 @@ export const IntegrationWcSourceForm: React.FC<Props> = ({ value, isNew, integra
                   <FormField control={form.control} name="password"
                     render={({ field }) => (
                       <FormItem><FormLabel>{t("forms.wcSource.password")}</FormLabel>
-                        <FormControl><Input {...field} placeholder="••••••••" type="password" /></FormControl>
+                        <FormControl><Input {...field} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password" /></FormControl>
                         <FormDescription>{t("forms.wcSource.passwordDesc")}</FormDescription><FormMessage /></FormItem>
                     )} />
                 </div>

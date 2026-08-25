@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { LanguageSelect } from "@/components/language-select";
 import {
   Form,
@@ -17,9 +17,9 @@ import type { TurIntegrationAemSource } from "@/models/integration/integration-a
 import type { TurLocale } from "@/models/locale/locale.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurLocaleService } from "@/services/locale/locale.service";
-import { IconBox, IconDeviceFloppy, IconDownload, IconEye, IconFileDescription, IconGitCommit, IconLanguage, IconRefresh, IconSend, IconSettings, IconTrash, IconUpload, IconUser, IconWorld, IconX } from "@tabler/icons-react";
+import { IconBox, IconDownload, IconEye, IconFileDescription, IconGitCommit, IconLanguage, IconRefresh, IconSend, IconSettings, IconTrash, IconUpload, IconUser, IconWorld } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
-import { StickyPageHeader } from "@viglet/viglet-design-system/router";
+import { AdaptiveFormHeader } from "@/components/bento/adaptive-form-header";
 import { useEffect, useMemo, useState } from "react";
 import {
   useForm
@@ -29,9 +29,8 @@ import { useNavigate } from "react-router-dom";
 import { RagStatusBadge } from "../rag-status-badge";
 import { DialogDelete } from "../dialog.delete";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
-import { GradientButton } from "../ui/gradient-button";
 import { GradientSwitch } from "../ui/gradient-switch";
-import { SectionCard } from "../ui/section-card";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 import { AttributeSpecificationList } from "./attribute.specification.list";
 import { DynamicSourceLocales } from "./dynamic.source.locale";
 import { PluginModelList } from "./plugin.model.list";
@@ -139,42 +138,31 @@ export const IntegrationSourceForm: React.FC<Props> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
-        <StickyPageHeader>
-          <StickyPageHeader.Title icon={IconGitCommit} feature={t("integration.sources.title")} description={t("integration.sources.description")} />
-          <StickyPageHeader.Actions>
-            {/* Dropdown items (3-dot menu) */}
-            {onExport && (
-              <StickyPageHeader.Action label={t("forms.importExport.export")} icon={IconDownload} onClick={onExport} />
-            )}
-            {onDryScan && (
-              <StickyPageHeader.Action label={t("integration.sources.dryScan")} icon={IconEye} onClick={onDryScan} disabled={indexingDisabled || dryScanning} />
-            )}
-            {onReindexAll && (
-              <StickyPageHeader.Action label={t("integration.sources.reindexAll")} icon={IconRefresh} onClick={onReindexAll} disabled={indexingDisabled || reindexingAll} />
-            )}
-            {onIndexAll && (
-              <StickyPageHeader.Action label={t("integration.sources.indexAll")} icon={IconUpload} onClick={onIndexAll} disabled={indexingDisabled || indexingAll} />
-            )}
-            {open !== undefined && onDelete && setOpen && (
-              <StickyPageHeader.Action label={t("forms.formActions.delete") /* falls back to "Delete" */} icon={IconTrash} onClick={() => setOpen(true)} />
-            )}
-
-            {/* Dialog rendered without its own trigger — opened by the dropdown item above */}
-            {open !== undefined && onDelete && setOpen && (
+        <AdaptiveFormHeader
+          icon={IconGitCommit}
+          feature={t("integration.sources.title")}
+          description={t("integration.sources.description")}
+          title={form.watch("name") || ""}
+          urlBase={sourceInstanceRoute}
+          onCancel={() => navigate(sourceInstanceRoute)}
+          dirty={isNew || form.formState.isDirty}
+          titleMissing={!form.watch("name")?.trim()}
+          menuActions={[
+            ...(onExport ? [{ label: t("forms.importExport.export"), icon: IconDownload, onSelect: onExport }] : []),
+            ...(onDryScan ? [{ label: t("integration.sources.dryScan"), icon: IconEye, onSelect: onDryScan, disabled: indexingDisabled || dryScanning }] : []),
+            ...(onReindexAll ? [{ label: t("integration.sources.reindexAll"), icon: IconRefresh, onSelect: onReindexAll, disabled: indexingDisabled || reindexingAll }] : []),
+            ...(onIndexAll ? [{ label: t("integration.sources.indexAll"), icon: IconUpload, onSelect: onIndexAll, disabled: indexingDisabled || indexingAll }] : []),
+            ...(open !== undefined && onDelete && setOpen
+              ? [{ label: t("forms.formActions.delete"), icon: IconTrash, onSelect: () => setOpen(true), tone: "destructive" as const }]
+              : []),
+          ]}
+          actions={
+            /* Rendered without its own trigger â€” the menu item above is what opens it. */
+            open !== undefined && onDelete && setOpen ? (
               <DialogDelete trigger={null} feature={t("integration.sources.title")} name={form.watch("name") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
-            )}
-
-            {/* Visible buttons */}
-            <GradientButton type="submit" size="sm">
-              <IconDeviceFloppy className="size-4" />
-              {t("forms.formActions.saveChanges")}
-            </GradientButton>
-            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(sourceInstanceRoute)}>
-              <IconX className="size-4" />
-              {t("forms.formActions.cancel")}
-            </GradientButton>
-          </StickyPageHeader.Actions>
-        </StickyPageHeader>
+            ) : undefined
+          }
+        />
         <Tabs value={tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="general">
@@ -262,7 +250,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                       <FormItem>
                         <FormLabel>{t("forms.integrationSource.password")}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="••••••••" type="password" />
+                          <Input {...field} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password" />
                         </FormControl>
                         <FormDescription>{t("forms.integrationSource.password")}</FormDescription>
                         <FormMessage />

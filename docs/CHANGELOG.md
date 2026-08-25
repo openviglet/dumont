@@ -477,6 +477,7 @@
 
 - **D45** — Each section declares a hub path, one parameterised route renders it as a mosaic, and the rail lists both; home lists sections too, deleting its hand-written copy of what had migrated.
 - **D46** — All six source lists serve in bento through one shared wrapper, every console route untouched; the census now reads era through a page's local imports and no longer counts a type-only import.
+- **D47** — The six detail pages serve on the bento tree through a chrome declaration, so their 500-line forms are shared rather than forked, and a tile now keeps the reader inside the shell.
 
 ## Track K — Frontend build and lint gates
 
