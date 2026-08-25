@@ -31,5 +31,18 @@
   // Postman extension tweak
   "postman.settings.dotenv-detection-notification-visibility": false,
   "java.configuration.updateBuildConfiguration": "automatic",
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.compile.nullAnalysis.mode": "automatic",
+  "window.title": "✈️ Dumont ${separator} ${dirty}${activeEditorShort} ${separator} ${appName}",
+
+  // Status bar in the Dumont logo green so this worktree is easy to spot
+  "workbench.colorCustomizations": {
+    "statusBar.background": "#0f766e",
+    "statusBar.foreground": "#ccfbf1",
+    "statusBar.border": "#115e59",
+    "statusBar.noFolderBackground": "#0f766e",
+    "statusBar.debuggingBackground": "#0f766e",
+    "statusBarItem.hoverBackground": "#115e59",
+    "statusBarItem.remoteBackground": "#115e59",
+    "statusBarItem.remoteForeground": "#ccfbf1"
+  }
 }
