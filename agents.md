@@ -189,6 +189,8 @@ is what lets it move back.
 
 - A route belongs in `BentoRoutes.tsx` only once its page has actually moved — the tree must never
   advertise a surface it does not serve.
+- **All six source surfaces (list + detail) have moved.** Everything else is still console-only.
+  `pnpm run census` prints which page is on which era.
 - Both are exposed over Module Federation (`./DumontRoutes`, `./BentoRoutes`); no turing-react
   change is needed when adding a page to either.
 - **`ROUTES.INTEGRATION_INSTANCE` derives its prefix from the live URL.** From inside the bento
@@ -271,6 +273,37 @@ Bento notes: `BentoUserMenu` reads the **package's** user context, not `@/contex
 `BentoRootPage` wraps its shell in the package's `UserProvider` (a component never sees a context
 it mounts itself). `BentoListPage` takes its layout as a prop rather than fetching one.
 `docs/BENTO-AUTHORING.md` in the design system repo is the contract for writing a bento page.
+
+### Migrating a page (D46, D47)
+
+**A list page** is one `BentoSourceList` call (`pages/bento/bento-source-list.tsx`): a service,
+two field accessors, a translation prefix. Path, icon and tone come from `DUMONT_NAV` by id.
+
+**A detail page is never rewritten.** Its form is ~500 lines of field logic whose only
+era-specific parts are the header and the section cards, so the form is *shared* and those two
+read the chrome. Forking it would leave two copies drifting for the length of the migration.
+
+```tsx
+// The bento page — the console page under a chrome declaration.
+<SectionCardChromeProvider chrome="bento"><IntegrationInstanceDbSourcePage /></SectionCardChromeProvider>
+```
+
+- `AdaptiveFormHeader` (`components/bento/`) → `StickyPageHeader` or `BentoFormHero`. Declarative,
+  not a passthrough: the console header takes Save/Cancel as children, while `BentoFormHero` owns
+  **both halves of the save-bar morph** and must never be handed a second pair. Secondary actions
+  go through `menuActions` (→ `StickyPageHeader.Action` or `BentoActionsMenu`); destructive ones
+  belong there, never in the save bar.
+- `AdaptiveSectionCard as SectionCard` → collapsible card or frosted section. Same markup.
+- Both default to `console`, so a form that knows nothing about this is unchanged.
+- Then set `migrated: true` in `nav.const.ts` — that is what mints the `bentoRoute` the palette
+  and hubs use to stay inside the shell.
+
+**The census reads era transitively**, and three rules keep it honest: a page is bento-era if it
+reaches a bento import through its own local modules; a **type-only** import never counts (it is
+erased and renders nothing); and a module reading `useSectionChrome` is an *adapter* the walk does
+not follow, because it renders whichever era it is placed in. `chrome="bento"` is itself the
+strongest era statement. Adding a bento page means adding it to `ON_BENTO` in
+`test/console-census.test.ts`.
 
 ### Shared Components
 

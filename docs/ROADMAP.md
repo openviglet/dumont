@@ -166,8 +166,6 @@ This track has no remaining pending tasks.
 
 ---
 
-## Track J — Console surfaces move to bento chrome
-
 ## Track K — Frontend build and lint gates
 
 - 📋 **D48** (deps: —) **no eslint config exists, so the lint script fails and four installed plugins have never run** — Both lint scripts exit non-zero on a missing eslint.config.js, which reads as a broken command rather than an absent gate. → §XIII.1
