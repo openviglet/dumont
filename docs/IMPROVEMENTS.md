@@ -78,19 +78,6 @@ These constrain every task above:
 
 ## XII Console surfaces move to bento chrome
 
-### XII.2 The remaining source lists (D46)
-
-Six source lists render the same shape — a header, a grid of cards, a blank slate — and
-one of them has moved. `BentoListPage` collapses that shape into a single call, so each
-of the remaining five is a small, self-contained change rather than a rewrite.
-
-They are the right surfaces to take next because the migrated one proves the pattern:
-the DB list kept its service, its model and its translation keys, and changed only its
-chrome. What is learned here is whether that holds for a list whose items carry status,
-locale or a per-item action, which the DB list does not exercise.
-
-Each moves on its own, in its own commit, with its console route left serving.
-
 ### XII.3 The detail pages behind those lists (D47)
 
 A migrated list links its tiles at the console detail page, because that page has not

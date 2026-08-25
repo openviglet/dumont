@@ -121,8 +121,25 @@ describe("D39: where a surface points depends on whether it has moved", () => {
     // Not an empty string and not the console route copied across: the palette decides whether to
     // navigate inside the shell or link out by whether this is set, so a placeholder value would
     // send a reader to a route the bento tree does not serve.
-    const crawler = dumontNavItems(STANDALONE).find((item) => item.id === "wc-source")!
-    expect(crawler.bentoRoute).toBeUndefined()
+    //
+    // Monitoring, not a source list — all six of those moved in D46, and picking a migrated
+    // surface here would make the assertion pass for the wrong reason.
+    const monitoring = dumontNavItems(STANDALONE).find((item) => item.id === "monitoring")!
+    expect(monitoring.bentoRoute).toBeUndefined()
+  })
+
+  it("gives every migrated surface a bento route the tree actually serves", () => {
+    // The other direction, and the one that rots: `migrated: true` with no route in
+    // `BentoRoutes.tsx` sends the palette and the hubs at a page nothing answers.
+    const migrated = dumontNavItems(STANDALONE).filter((item) => item.bentoRoute)
+    expect(migrated.map((item) => item.id).sort()).toEqual([
+      "assets-source",
+      "catalog-source",
+      "db-source",
+      "eds-source",
+      "source",
+      "wc-source",
+    ])
   })
 
   it("always names the console tree explicitly in the fallback", () => {

@@ -49,16 +49,23 @@ const FORKED: Record<string, string[]> = {
  * one line per migrated surface after that. The count, not the names, is what the track is
  * measured by — but the names are what make each step reviewable.
  *
- * Three of the four below are the shell itself rather than migrated pages: a parallel tree needs a
- * root, somewhere for Home to land, and a hub per section before any surface can move into it.
- * Only the last is one of the 39, which is why "Left to move" still reads 39 — the shell is what
- * makes moving possible, not progress through the list.
+ * The first three are the shell rather than migrated pages: a parallel tree needs a root,
+ * somewhere for Home to land, and a hub per section before any surface can move into it. The six
+ * below them are the source lists (D46).
+ *
+ * "Left to move" still counts the six console originals, because they still exist and still render
+ * console chrome — that is what makes each migration reversible, not an oversight in the count.
  */
 const ON_BENTO: string[] = [
   "app/bento/bento.area.page.tsx",
   "app/bento/bento.home.page.tsx",
   "app/bento/bento.root.page.tsx",
+  "pages/bento/integration.instance.assets.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.catalog.source.list.bento.page.tsx",
   "pages/bento/integration.instance.db.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.eds.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.wc.source.list.bento.page.tsx",
 ]
 
 describe("D35: the console census", () => {
@@ -161,5 +168,46 @@ describe("D35: era is decided by the bento subpath", () => {
 
   it("leaves a page with no bento import at all on console", () => {
     expect(isBento('import { Card } from "@/components/ui/card"')).toBe(false)
+  })
+
+  it("does not read a type-only import as adopting the layer", () => {
+    /*
+     * D46 — a type import is erased at compile time and renders nothing, so it says which shape a
+     * module speaks in, not which era it belongs to. `nav.const.ts` takes the package's nav schema
+     * that way and is read by the *console* sidebar; counting it as bento made every page that
+     * reaches it — the console shell included — read as migrated.
+     */
+    expect(isBento('import type { BentoNavGroup } from "@viglet/viglet-design-system/bento"')).toBe(
+      false,
+    )
+    // A value import alongside an inline type still counts: the page renders that component.
+    expect(isBento(importing("BentoHero, type BentoTone"))).toBe(true)
+  })
+})
+
+describe("D46: era follows a page's local imports", () => {
+  it("counts the six source lists, which reach the layer through a shared wrapper", () => {
+    /*
+     * The six lists render the same shape and share one wrapper rather than repeating it six
+     * times, so none of them imports the bento subpath directly. Judging a page by its own import
+     * line alone counted every one as console-era and made the instrument report the migration
+     * going backwards while it was going forwards.
+     *
+     * A page's era is the chrome it renders, and it renders whatever its own modules render.
+     */
+    const { pages } = census()
+    const lists = Object.entries(pages).filter(([path]) => path.startsWith("pages/bento/"))
+
+    expect(lists).toHaveLength(6)
+    for (const [path, page] of lists) {
+      expect(page.era, `${path} should be bento-era through its wrapper`).toBe("bento")
+    }
+  })
+
+  it("keeps the console shell on console, though it reaches a module that names bento types", () => {
+    // The regression the type-only rule prevents: the console root imports the sidebar, which
+    // imports the nav declaration, which imports the nav *schema* as types.
+    const { pages } = census()
+    expect(pages["app/console/console.root.page.tsx"].era).toBe("console")
   })
 })

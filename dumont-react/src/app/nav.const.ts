@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import {
   IconActivityHeartbeat,
   IconAdjustmentsSearch,
@@ -27,21 +27,21 @@ import type {
 } from "@viglet/viglet-design-system/bento";
 
 /*
- * D39 — Dumont's map of itself, written down once.
+ * D39 â€” Dumont's map of itself, written down once.
  *
  * Three things read what surfaces exist: the console sidebar today, and the bento rail and the
- * `⌘K` palette on the other tree. The package supplies the schema and takes the map as data,
- * deliberately — routes and entity names are product data, and a package holding them would offer
+ * `âŒ˜K` palette on the other tree. The package supplies the schema and takes the map as data,
+ * deliberately â€” routes and entity names are product data, and a package holding them would offer
  * one console's surfaces inside another's.
  *
  * Dumont did have a declaration before this: `manifest.navItems`. But it was shaped for the
- * Module Federation wire — a string icon name, a `url`, an `order` — and nothing else, so a rail
+ * Module Federation wire â€” a string icon name, a `url`, an `order` â€” and nothing else, so a rail
  * or a palette would each have needed a second array with sections, tones and descriptions in it.
  * Three arrays drift the moment a surface is renamed, and the rename is exactly the change nobody
  * remembers to make three times.
  *
  * So the declaration is here, in the package's shape plus the two fields the console needs
- * (`provider`, `order`), and everything else is derived from it — including `manifest.navItems`,
+ * (`provider`, `order`), and everything else is derived from it â€” including `manifest.navItems`,
  * which keeps its wire shape byte for byte so the host is unaffected.
  *
  * Type-only imports from the bento subpath: this module is reachable from `manifest`, which the
@@ -55,7 +55,7 @@ export type DumontNavSectionId = "sources" | "integration";
  * One surface, as every reader of the map sees it.
  *
  * Routes are stored as a `path` under the integration-instance base rather than absolute, because
- * Dumont's are per-instance (`/…/instance/:id/db-source`) and the id is only known at render.
+ * Dumont's are per-instance (`/â€¦/instance/:id/db-source`) and the id is only known at render.
  * Turing's equivalent can hold absolute routes; this one cannot, which is why the derivations
  * below take an `integrationId`.
  */
@@ -125,7 +125,7 @@ export function resolveIcon(name: string): Icon {
 export interface DumontNavSectionDecl extends Omit<BentoNavSection, "areaRoute"> {
   id: DumontNavSectionId;
   /*
-   * The package leaves these three optional — a section may render unlabelled, and one reached
+   * The package leaves these three optional â€” a section may render unlabelled, and one reached
    * only through its items needs no icon. Dumont's always carry all three, because every one of
    * them appears on the rail and as a tile on the home mosaic, and both need something to draw.
    * Requiring them here is what lets the pages read the values instead of asserting them.
@@ -140,7 +140,7 @@ export interface DumontNavSectionDecl extends Omit<BentoNavSection, "areaRoute">
 }
 
 /**
- * The bands the rail lists. The rail renders **sections**, never leaves — that is what keeps it a
+ * The bands the rail lists. The rail renders **sections**, never leaves â€” that is what keeps it a
  * fixed, small height however many surfaces exist, and it is the flat console sidebar's overflow
  * inverted.
  *
@@ -181,12 +181,12 @@ export function sectionAreaRoute(id: DumontNavSectionId, integrationId: string):
  * derived wire shape is identical and the host sees no change.
  */
 export const DUMONT_NAV: DumontNavSurface[] = [
-  { id: "source", titleKey: "integration.nav.sources", descriptionKey: "integration.sources.description", iconName: "IconGitCommit", section: "sources", tone: "blue", path: "/source", order: 10, provider: "AEM" },
+  { id: "source", titleKey: "integration.nav.sources", descriptionKey: "integration.sources.description", iconName: "IconGitCommit", section: "sources", tone: "blue", path: "/source", order: 10, migrated: true, provider: "AEM" },
   { id: "db-source", titleKey: "integration.nav.dbSources", descriptionKey: "integration.dbSources.description", iconName: "IconDatabase", section: "sources", tone: "indigo", path: "/db-source", order: 10, provider: "JDBC-DATABASE", migrated: true },
-  { id: "wc-source", titleKey: "integration.nav.wcSources", descriptionKey: "integration.wcSources.description", iconName: "IconGlobe", section: "sources", tone: "emerald", path: "/wc-source", order: 10, provider: "WEB-CRAWLER" },
-  { id: "assets-source", titleKey: "integration.nav.assetsSources", descriptionKey: "integration.assetsSources.description", iconName: "IconFolder", section: "sources", tone: "amber", path: "/assets-source", order: 10, provider: "ASSETS" },
-  { id: "catalog-source", titleKey: "integration.nav.catalogSources", descriptionKey: "integration.catalogSources.description", iconName: "IconBuildingBank", section: "sources", tone: "violet", path: "/catalog-source", order: 10, provider: "CATALOG-BRIDGE" },
-  { id: "eds-source", titleKey: "integration.nav.edsSources", descriptionKey: "integration.edsSources.description", iconName: "IconCloudComputing", section: "sources", tone: "rose", path: "/eds-source", order: 10, provider: "EDS" },
+  { id: "wc-source", titleKey: "integration.nav.wcSources", descriptionKey: "integration.wcSources.description", iconName: "IconGlobe", section: "sources", tone: "emerald", path: "/wc-source", order: 10, migrated: true, provider: "WEB-CRAWLER" },
+  { id: "assets-source", titleKey: "integration.nav.assetsSources", descriptionKey: "integration.assetsSources.description", iconName: "IconFolder", section: "sources", tone: "amber", path: "/assets-source", order: 10, migrated: true, provider: "ASSETS" },
+  { id: "catalog-source", titleKey: "integration.nav.catalogSources", descriptionKey: "integration.catalogSources.description", iconName: "IconBuildingBank", section: "sources", tone: "violet", path: "/catalog-source", order: 10, migrated: true, provider: "CATALOG-BRIDGE" },
+  { id: "eds-source", titleKey: "integration.nav.edsSources", descriptionKey: "integration.edsSources.description", iconName: "IconCloudComputing", section: "sources", tone: "rose", path: "/eds-source", order: 10, migrated: true, provider: "EDS" },
   { id: "source-inference", titleKey: "integration.nav.sourceInference", descriptionKey: "integration.sourceInference.description", iconName: "IconWand", section: "sources", tone: "violet", path: "/source-inference", order: 15 },
   { id: "indexing-rule", titleKey: "integration.nav.indexingRules", descriptionKey: "integration.indexingRules.description", iconName: "IconTools", section: "integration", tone: "slate", path: "/indexing-rule", order: 20 },
   { id: "indexing-manager", titleKey: "integration.nav.indexingManager", descriptionKey: "integration.indexingManager.description", iconName: "IconAdjustmentsSearch", section: "integration", tone: "indigo", path: "/indexing-manager", order: 30 },
@@ -202,8 +202,8 @@ export const DUMONT_NAV: DumontNavSurface[] = [
 /**
  * One surface in the package's render contract, for the given instance.
  *
- * `fallbackRoute` always names the console tree explicitly — never `ROUTES.INTEGRATION_INSTANCE`,
- * whose prefix is read from the live URL and so resolves to `/bento/…` from inside the bento
+ * `fallbackRoute` always names the console tree explicitly â€” never `ROUTES.INTEGRATION_INSTANCE`,
+ * whose prefix is read from the live URL and so resolves to `/bento/â€¦` from inside the bento
  * shell, which is where the palette renders. `bentoRoute` is set only for a surface that has
  * actually moved, which is how the palette knows to jump inside the shell rather than out of it.
  */
@@ -222,7 +222,7 @@ export function toBentoNavItem(surface: DumontNavSurface, integrationId: string)
   };
 }
 
-/** The flat list the `⌘K` palette renders. */
+/** The flat list the `âŒ˜K` palette renders. */
 export function dumontNavItems(integrationId: string, surfaces: DumontNavSurface[] = DUMONT_NAV): BentoNavItem[] {
   return surfaces.map((surface) => toBentoNavItem(surface, integrationId));
 }
@@ -254,7 +254,7 @@ export function dumontNavGroups(integrationId: string, surfaces: DumontNavSurfac
  * The surfaces a reader may see, given which connector providers are active.
  *
  * Visibility is the product's question, not the package's: an entry appears when the product says
- * it may. Sorted by `order` here so every reader — sidebar, rail, palette — gets one answer.
+ * it may. Sorted by `order` here so every reader â€” sidebar, rail, palette â€” gets one answer.
  */
 export function visibleNavSurfaces(providers: readonly string[]): DumontNavSurface[] {
   return DUMONT_NAV.filter((s) => !s.provider || providers.includes(s.provider)).sort(

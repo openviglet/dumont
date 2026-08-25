@@ -3,7 +3,12 @@ import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remot
 import { Route, Routes } from "react-router-dom";
 import BentoAreaPage from "./app/bento/bento.area.page";
 import BentoHomePage from "./app/bento/bento.home.page";
+import IntegrationInstanceAssetsSourceListBentoPage from "./pages/bento/integration.instance.assets.source.list.bento.page";
+import IntegrationInstanceCatalogSourceListBentoPage from "./pages/bento/integration.instance.catalog.source.list.bento.page";
 import IntegrationInstanceDbSourceListBentoPage from "./pages/bento/integration.instance.db.source.list.bento.page";
+import IntegrationInstanceEdsSourceListBentoPage from "./pages/bento/integration.instance.eds.source.list.bento.page";
+import IntegrationInstanceSourceListBentoPage from "./pages/bento/integration.instance.source.list.bento.page";
+import IntegrationInstanceWcSourceListBentoPage from "./pages/bento/integration.instance.wc.source.list.bento.page";
 
 /**
  * The bento tree — the parallel router beside `DumontRoutes` (D37).
@@ -31,8 +36,16 @@ export default function BentoRoutes() {
        * this tree cannot answer.
        */}
       <Route path="area/:sectionId" element={<BentoAreaPage />} />
-      {/* Migrated in D37 — its console original at `db-source` is untouched. */}
+      {/*
+       * The source lists. Each console original is untouched and still serves; only the list has
+       * moved, so a card still opens its detail page on the other tree until D47.
+       */}
+      <Route path="source" element={<IntegrationInstanceSourceListBentoPage />} />
       <Route path="db-source" element={<IntegrationInstanceDbSourceListBentoPage />} />
+      <Route path="wc-source" element={<IntegrationInstanceWcSourceListBentoPage />} />
+      <Route path="assets-source" element={<IntegrationInstanceAssetsSourceListBentoPage />} />
+      <Route path="catalog-source" element={<IntegrationInstanceCatalogSourceListBentoPage />} />
+      <Route path="eds-source" element={<IntegrationInstanceEdsSourceListBentoPage />} />
     </Routes>
   );
 }

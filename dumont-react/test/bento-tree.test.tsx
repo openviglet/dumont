@@ -32,14 +32,24 @@ const SOURCES = [
   { id: "2", name: "Customers", description: "CRM rows" },
 ]
 
+/**
+ * Every connector plugin active, so a source list is reachable whichever one it belongs to. The
+ * sidebar and the hubs filter on this, and a plugin left out here reads as a missing route.
+ */
+const CONNECTOR_STATUS = {
+  status: "UP",
+  providers: ["AEM", "JDBC-DATABASE", "WEB-CRAWLER", "ASSETS", "CATALOG-BRIDGE", "EDS"],
+}
+const USER = { username: "operator" }
+
 /** Everything the shell and its providers ask for before any page paints. */
 function stubConnector(sources: unknown = SOURCES) {
   answerGet({
     "/db/source": sources,
-    "/connector/status": { status: "UP", providers: ["JDBC-DATABASE"] },
+    "/connector/status": CONNECTOR_STATUS,
     "/connector/system-info": { appVersion: "2026.3.1" },
     "/connector/queue": { size: 0 },
-    "/user": { username: "operator" },
+    "/user": USER,
     "/ping": { status: "UP" },
   })
 }
@@ -157,6 +167,56 @@ describe("D37: the bento tree's own root", () => {
     const tile = (await screen.findByText("Products")).closest("a")
     expect(tile?.getAttribute("href")).toBe(`${CONSOLE_DB}/1`)
   })
+})
+
+/**
+ * The six source lists, with what each service answers and the two fields its cards show.
+ *
+ * Written out rather than derived from the declaration: this is the table that says the routes
+ * were actually wired, and building it from the same source the code builds from would pass
+ * against a tree that serves none of them.
+ */
+const SOURCE_LISTS = [
+  { path: "source", endpoint: "/aem/source", title: "WKND author", second: "https://author.wknd" },
+  { path: "db-source", endpoint: "/db/source", title: "Products", second: "Catalogue rows" },
+  { path: "wc-source", endpoint: "/wc/source", title: "Marketing site", second: "https://www.example.com" },
+  { path: "assets-source", endpoint: "/assets/source", title: "Brochures", second: "/mnt/brochures" },
+  { path: "catalog-source", endpoint: "/catalog/source", title: "Parts catalogue", second: "Normalised rows" },
+  { path: "eds-source", endpoint: "/eds/source", title: "aem.live site", second: "https://main--wknd--aem.hlx.live" },
+] as const
+
+describe("D46: all six source lists render bento, and every console route still serves", () => {
+  for (const list of SOURCE_LISTS) {
+    it(`serves ${list.path} on both trees`, async () => {
+      /*
+       * Both halves in one case, on one fixture. The migration is only reversible while the page
+       * it replaced is still mounted, so asserting the bento route alone would let a "migration"
+       * that quietly deleted the original pass.
+       */
+      const row = {
+        id: "1",
+        name: list.title,
+        title: list.title,
+        description: list.second,
+        endpoint: list.second,
+        url: list.second,
+        sourceDir: list.second,
+        baseUrl: list.second,
+      }
+
+      answerGet({ [list.endpoint]: [row], "/connector/status": CONNECTOR_STATUS, "/user": USER })
+      const bento = renderApp(`${BENTO_HOME}/${list.path}`)
+      expect(await within(await screen.findByRole("main")).findByText(list.title)).toBeDefined()
+      // Reached through the bento shell, not by the console one happening to answer that path.
+      expect(bento.container.querySelector(".bento-rail-gutter")).not.toBeNull()
+      bento.unmount()
+
+      answerGet({ [list.endpoint]: [row], "/connector/status": CONNECTOR_STATUS, "/user": USER })
+      const console = renderApp(`/admin/integration/instance/${STANDALONE}/${list.path}`)
+      expect(await screen.findByText(list.title)).toBeDefined()
+      expect(console.container.querySelector(".bento-rail-gutter")).toBeNull()
+    })
+  }
 })
 
 describe("D37: the bento tree's empty branch", () => {

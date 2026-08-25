@@ -71,22 +71,68 @@ export const ERA_NEUTRAL = [
 ]
 
 const BENTO_SUBPATH = "@viglet/viglet-design-system/bento"
-const BENTO_CLAUSE = /import\s*(?:type\s+)?\{([^}]*)\}\s*from\s*["']@viglet\/viglet-design-system\/bento["']/g
+const BENTO_CLAUSE = /import\s*(type\s+)?\{([^}]*)\}\s*from\s*["']@viglet\/viglet-design-system\/bento["']/g
 
 /**
  * A page is bento-era when it imports the bento subpath as something other than an adapter. A
  * clause-less `import "…/bento…"` counts: it can only be there for a side effect the console era
  * does not have.
+ *
+ * A **type-only** import does not count. `import type { BentoNavGroup }` is erased at compile time
+ * and renders nothing, so it says what shape a module speaks in, not which era it belongs to —
+ * `nav.const.ts` takes the nav schema that way and is read by the console sidebar, which is as
+ * console-era as a file gets.
  */
 export function isBento(source) {
   if (!source.includes(BENTO_SUBPATH)) return false
   const clauses = [...source.matchAll(BENTO_CLAUSE)]
   if (!clauses.length) return true
-  return clauses.some(([, names]) => names
+  return clauses.some(([, typeOnly, names]) => !typeOnly && names
     .split(",")
     .map((name) => name.trim().replace(/^type\s+/, "").split(/\s+as\s+/)[0].trim())
     .filter(Boolean)
     .some((name) => !ERA_NEUTRAL.includes(name)))
+}
+
+/** Local import specifiers — the alias this codebase uses, and the relative spellings. */
+const LOCAL_IMPORT = /from\s*["'](@\/[^"']+|\.\.?\/[^"']+)["']/g
+const RESOLVE_EXTENSIONS = [".tsx", ".ts", "/index.tsx", "/index.ts"]
+
+/** Resolve one local specifier to a file under `src`, or null when it is not a module here. */
+function resolveLocal(fromFile, specifier) {
+  const base = specifier.startsWith("@/")
+    ? join(SRC, specifier.slice(2))
+    : join(dirname(fromFile), specifier)
+  for (const ext of RESOLVE_EXTENSIONS) {
+    const candidate = `${base}${ext}`
+    if (existsSync(candidate)) return candidate
+  }
+  return existsSync(base) ? base : null
+}
+
+/**
+ * Is this page bento-era, counting the chrome it renders **through a local module**?
+ *
+ * `isBento` asks whether a file imports the bento subpath itself, which is the right question of
+ * one file and the wrong one of a page. A page that composes a local bento component renders bento
+ * chrome as surely as one importing `BentoHero` directly, and the six source lists do exactly
+ * that: they share one wrapper rather than repeating its shape six times. Reading only the page's
+ * own imports counted every one of them as console-era, so the instrument said the migration had
+ * gone backwards while it was going forwards.
+ *
+ * Bounded by `seen`, so a cycle terminates, and it only ever follows imports that resolve to a
+ * file under `src` — a page's era is decided by this project's code, never by a dependency's.
+ */
+function isBentoThroughLocals(file, source, seen = new Set()) {
+  if (seen.has(file)) return false
+  seen.add(file)
+  if (isBento(source)) return true
+  for (const [, specifier] of source.matchAll(LOCAL_IMPORT)) {
+    const target = resolveLocal(file, specifier)
+    if (!target || seen.has(target)) continue
+    if (isBentoThroughLocals(target, readFileSync(target, "utf8"), seen)) return true
+  }
+  return false
 }
 
 /**
@@ -319,7 +365,7 @@ export function census() {
   const pages = {}
   for (const file of walk(SRC, (n) => n.endsWith(".page.tsx")).sort(byCodepoint)) {
     const source = readFileSync(file, "utf8")
-    pages[key(file)] = isBento(source)
+    pages[key(file)] = isBentoThroughLocals(file, source)
       ? { era: "bento", chrome: [] }
       : {
           era: "console",
