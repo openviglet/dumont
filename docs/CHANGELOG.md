@@ -470,3 +470,4 @@
 - **D36** — bento.css joins the Tailwind build (bento-glass, bento-grid, the rail gutter reach the bundle) and seven cases mount the rail, the mosaic and the form hero against the affordances D42 pins.
 - **D37** — A bento tree serves under its own prefix and shell with the database source list migrated into it; the console route is untouched, nothing redirects, and six cases mount the real App to hold both.
 - **D39** — One declaration in nav.const holds all 16 surfaces in the package's schema; the sidebar, the rail and a wired command palette derive from it, and manifest's wire shape is derived and pinned unchanged.
+- **D40** — The package's bundles are now the base and Dumont's merge over them, so five namespaces its chrome reads stopped being dropped; a gate asserts every bento string differs between en and pt.

@@ -78,29 +78,6 @@ These constrain every task above:
 
 ## XI The console adopts the shared bento layer
 
-### XI.6 The chrome speaks, and not yet in this console's languages (D40)
-
-The bento chrome the package owns speaks: the save bar says "Unsaved changes" and "Title
-required", the palette names its sections, the rail labels its groups, the empty states
-carry their own copy. Every one of those strings goes through `t()` with a
-`defaultValue`, which is what VDS21 shipped — so a consumer with no translations renders
-English rather than a raw key, and a consumer with translations gets its own languages.
-
-Dumont has an `i18n` directory and a console that already speaks more than English. The
-moment a bento rail or palette renders here, its chrome will be the one part of the page
-that is not translated. English beside Portuguese in the same shell reads as a bug, and
-it is the kind that ships because nobody notices their own default language.
-
-Turing found the flip side of this in T989: two of its suites asserted the raw i18n key
-and started failing the moment the package's component rendered its `defaultValue`
-instead. The behaviour was correct; only the copy had changed. That is worth knowing
-here because it says the strings really do arrive from the package and really can be
-overridden.
-
-Add the bento chrome namespace to this console's translations, in the languages it
-already ships. Do it with the shell rather than after it, so no migrated surface is ever
-the untranslated one.
-
 ### XI.7 A lint, since discipline is not an instrument (D41)
 
 Nineteen names are declared in this console and exported by the design system under the

@@ -1,0 +1,11 @@
+{
+  "bento": {
+    "skipToContent": "Ir para o conteúdo",
+    "mainContent": "Conteúdo principal",
+    "home": {
+      "subtitle": "Telas que já usam a nova interface.",
+      "emptyTitle": "Nada foi migrado ainda",
+      "emptyDescription": "Todas as telas continuam sendo servidas pelo console."
+    }
+  }
+}

@@ -141,7 +141,7 @@ function BentoShell() {
       <BentoNavRail
         groups={navGroups}
         homeRoute={home}
-        homeLabel={t("common.home", { defaultValue: "Home" })}
+        homeLabel={t("home.title")}
       />
 
       <header className="bento-shell-header sticky top-0 z-30 flex shrink-0 items-center justify-between gap-3 border-b border-border/40 bg-background/55 px-4 py-3 backdrop-blur-xl backdrop-saturate-150 md:px-8">

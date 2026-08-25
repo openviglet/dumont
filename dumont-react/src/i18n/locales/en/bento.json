@@ -1,0 +1,11 @@
+{
+  "bento": {
+    "skipToContent": "Skip to content",
+    "mainContent": "Main content",
+    "home": {
+      "subtitle": "Surfaces already running on the new chrome.",
+      "emptyTitle": "Nothing has moved yet",
+      "emptyDescription": "Every surface is still served by the console."
+    }
+  }
+}
