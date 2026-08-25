@@ -45,6 +45,16 @@ export function useDiscovery(): DumDiscoveryAPI | undefined {
       .catch(() => {
         // discovery failed — keep undefined, components fall back to defaults
       });
+    /*
+     * D48 — the cleanup this guard was always missing.
+     *
+     * `alive` was written but never cleared, so the check above was decorative: a component
+     * unmounted while discovery was in flight still set state afterwards. `prefer-const` is what
+     * noticed — "never reassigned" was the report, and the reassignment being absent was the bug.
+     */
+    return () => {
+      alive = false;
+    };
   }, [data]);
 
   return data;

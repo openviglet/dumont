@@ -481,3 +481,4 @@
 
 ## Track K — Frontend build and lint gates
 
+- **D48** — A flat config runs ESLint for the first time: ten real defects fixed, including a missing effect cleanup, and the two structural classes carried as named files rather than a ceiling.

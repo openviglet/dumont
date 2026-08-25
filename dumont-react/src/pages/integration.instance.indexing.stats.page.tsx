@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
 import { Badge } from "@/components/ui/badge";
@@ -65,7 +65,7 @@ export default function IntegrationInstanceIndexingStatsPage() {
     }, [id]);
 
     const [refreshInterval, setRefreshInterval] = useState(5000);
-    const [lastUpdated, setLastUpdated] = useState(Date.now());
+    const [lastUpdated, setLastUpdated] = useState(() => Date.now());
 
     const fetchData = useCallback(async (isSilent = false) => {
         if (!statsService || !id) return;
@@ -77,8 +77,6 @@ export default function IntegrationInstanceIndexingStatsPage() {
             setStats(data);
             setCountBySource(counts);
             setLastUpdated(Date.now());
-            if (!isSilent) {
-            }
         } catch {
             if (!isSilent) setError(t("integration.indexingStats.loadFailed"));
         }

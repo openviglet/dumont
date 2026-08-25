@@ -28,7 +28,6 @@ import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientSwitch } from "../ui/gradient-switch";
-"use client"
 
 interface Props {
   value: TurIntegrationDbSource;

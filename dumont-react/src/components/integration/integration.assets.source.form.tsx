@@ -15,7 +15,6 @@ import { DialogDelete } from "../dialog.delete";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
-"use client"
 
 interface Props {
   value: TurIntegrationAssetsSource;

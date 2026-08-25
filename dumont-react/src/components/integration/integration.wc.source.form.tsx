@@ -22,7 +22,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
-"use client"
 
 interface Props {
   value: TurIntegrationWcSource;

@@ -44,3 +44,10 @@ jobs:
       - name: Check for duplicated design system exports
         working-directory: dumont-react
         run: pnpm run lint:ds
+
+      # D48 — ESLint, which had no config until then and so had never run. Warnings do not fail:
+      # the inherited debt is carried as named files in `eslint.config.js`, and anything not named
+      # there is an error.
+      - name: Lint
+        working-directory: dumont-react
+        run: pnpm run lint

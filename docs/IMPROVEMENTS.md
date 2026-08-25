@@ -78,20 +78,6 @@ These constrain every task above:
 
 ## XIII Frontend build and lint gates
 
-### XIII.1 A lint that has never run (D48)
-
-`dumont-react` declares ESLint 10, typescript-eslint, `eslint-plugin-react-hooks` and
-`eslint-plugin-react-refresh` as devDependencies, and both `pnpm run lint` in the app
-and `pnpm -r run lint` at the root exit non-zero with "ESLint couldn't find an
-eslint.config.js". There is no such file anywhere in the repository.
-
-So four linters are installed, none of them has ever run, and the failure reads like a
-broken command rather than a missing gate — which is why it has survived. The rules
-those plugins carry are the ones that catch a hook called conditionally and a component
-that breaks fast refresh, neither of which a type-check sees.
-
-Write the flat config, fix whatever the first run reports, and let CI run it.
-
 ### XIII.2 Types that never cross the federation boundary (D49)
 
 Every `vite build` prints `[ Module Federation DTS ] Error: Failed to generate type

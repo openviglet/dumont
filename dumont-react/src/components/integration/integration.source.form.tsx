@@ -34,7 +34,6 @@ import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system
 import { AttributeSpecificationList } from "./attribute.specification.list";
 import { DynamicSourceLocales } from "./dynamic.source.locale";
 import { PluginModelList } from "./plugin.model.list";
-"use client"
 
 interface Props {
   value: TurIntegrationAemSource;

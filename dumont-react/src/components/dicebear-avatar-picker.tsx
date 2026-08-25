@@ -1,5 +1,5 @@
-import { IconCheck, IconDice5, IconPalette, IconSearch } from "@tabler/icons-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { IconCheck, IconDice5, IconPalette, IconSearch } from "@tabler/icons-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -84,14 +84,22 @@ export function DiceBearAvatarPicker({
   const [seed, setSeed] = useState(defaultSeed || generateRandomSeed());
   const [previewSeeds, setPreviewSeeds] = useState<string[]>([]);
   const [selectedUrl, setSelectedUrl] = useState("");
-  const imgKeyRef = useRef(0);
+  /*
+   * D48 â€” state, not a ref, because the render reads it.
+   *
+   * This counter forces the twelve preview images to remount on each shuffle, and it was a ref
+   * read straight into a `key`. Reading a ref during render is what `react-hooks/refs` refuses:
+   * a ref is not render state, so React is free to render without seeing the write, and the
+   * shuffle then silently reuses the old images.
+   */
+  const [shuffleCount, setShuffleCount] = useState(0);
 
   const debouncedSeed = useDebounce(seed, 400);
 
   const generatePreviewSeeds = useCallback(() => {
     const seeds = Array.from({ length: 12 }, () => generateRandomSeed());
     setPreviewSeeds(seeds);
-    imgKeyRef.current += 1;
+    setShuffleCount((n) => n + 1);
   }, []);
 
   useEffect(() => {
@@ -243,7 +251,7 @@ export function DiceBearAvatarPicker({
                 const isActive = url === selectedUrl;
                 return (
                   <button
-                    key={`${s}-${imgKeyRef.current}`}
+                    key={`${s}-${shuffleCount}`}
                     type="button"
                     onClick={() => setSelectedUrl(url)}
                     className={cn(

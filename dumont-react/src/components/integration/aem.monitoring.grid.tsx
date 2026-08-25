@@ -1,4 +1,4 @@
-// D44 — see grid.list.tsx: the v8 names live on under v9's `./legacy` subpath, `flexRender`
+﻿// D44 â€” see grid.list.tsx: the v8 names live on under v9's `./legacy` subpath, `flexRender`
 // stays on the root entry.
 import { flexRender } from "@tanstack/react-table";
 import {
@@ -212,7 +212,7 @@ export const AemMonitoringGrid: React.FC<PropsWithChildren<Props>> = ({
         },
     });
 
-    const [lastUpdated, setLastUpdated] = useState(Date.now());
+    const [lastUpdated, setLastUpdated] = useState(() => Date.now());
 
     useEffect(() => {
         setLastUpdated(Date.now());
