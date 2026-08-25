@@ -22,6 +22,7 @@ interface NavGroup {
   readonly items: readonly NavItem[]
 }
 
+// viglet-ds-allow-duplicate NavMain -- renders the console sidebar's own NavGroup shape (D39)
 export function NavMain({
   groups,
 }: {

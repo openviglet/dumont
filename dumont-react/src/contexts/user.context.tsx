@@ -20,6 +20,7 @@ function redirectToLoginIfNeeded() {
   globalThis.location.href = `/login?returnUrl=${encodeURIComponent(returnUrl)}`;
 }
 
+// viglet-ds-allow-duplicate UserProvider -- fetches DumUser from Dumont's auth service and redirects to its login
 export function UserProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [user, setUser] = React.useState<DumUser>({} as DumUser);
 
@@ -45,6 +46,7 @@ export function UserProvider({ children }: Readonly<{ children: React.ReactNode 
   return <UserContext value={value}>{children}</UserContext>;
 }
 
+// viglet-ds-allow-duplicate useCurrentUser -- returns DumUser; the package's own hook backs BentoUserMenu (D37)
 export function useCurrentUser(): UserContextValue {
   const ctx = React.useContext(UserContext);
   if (!ctx) throw new Error("useCurrentUser must be used within UserProvider");

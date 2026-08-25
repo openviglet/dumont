@@ -17,6 +17,7 @@ interface Props {
   confirmLabel?: string;
 }
 
+// viglet-ds-allow-duplicate DialogDelete -- console-era dialog built on this console's own shims
 export const DialogDelete: React.FC<Props> = ({
   feature, name, onDelete, open, setOpen,
   trigger, title, description, confirmLabel,

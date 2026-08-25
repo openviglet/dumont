@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom"
 
 const STANDALONE_ID = "local"
 
+// viglet-ds-allow-duplicate AppFooter -- renders Dumont's own logo, connector version and links
 export function AppFooter() {
   const [version, setVersion] = useState<string>("")
   const { id } = useParams<{ id?: string }>()

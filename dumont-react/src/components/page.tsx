@@ -25,6 +25,7 @@ function isStandalone(): boolean {
   );
 }
 
+// viglet-ds-allow-duplicate Page -- suppresses its own header when mounted as a remote (__DUMONT_STANDALONE__)
 export const Page: React.FC<PageProps> = ({ turIcon: TurIcon, title, urlBase }) => {
   const { id } = useParams() as { id: string };
   const fullUrlBase = `${ROUTES.INTEGRATION_INSTANCE}/${id}/${urlBase}`;

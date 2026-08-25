@@ -1,0 +1,46 @@
+# D41 — fail the build when this console re-declares a component the design
+# system already exports.
+#
+# The lint ships with the package (`viglet-ds-check-duplicates`, VDS5): it reads
+# `exports.json` from the installed version, so it checks against the version
+# this repository actually resolves rather than a list copied into it. Each
+# finding ends in the import line that replaces the copy, because reporting the
+# duplicate is not the useful half — a local copy gets written by someone who
+# did not know the shared one existed.
+#
+# What is deliberate is annotated at the declaration with its reason
+# (`// viglet-ds-allow-duplicate <Name> -- why`), so this gate fails on a *new*
+# duplicate rather than on the eleven the console already carries. The reason is
+# the point: a gate with no way to say "this one is mine" is a gate somebody
+# deletes.
+#
+# Its own trigger rather than a step in `validate.yml`, which is
+# `workflow_dispatch` only and so gates nothing.
+name: design-system
+
+on: [push, pull_request]
+
+jobs:
+  duplicates:
+    name: no local copy of a design system export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.3.1
+          cache: pnpm
+
+      # The lint resolves `@viglet/viglet-design-system/exports.json` through the
+      # consumer's own module graph, so the workspace has to be installed first.
+      # Scripts are skipped: nothing here needs a postinstall, and one of them
+      # (husky) is not present in CI.
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Check for duplicated design system exports
+        working-directory: dumont-react
+        run: pnpm run lint:ds

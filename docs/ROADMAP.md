@@ -168,13 +168,6 @@ This track has no remaining pending tasks.
 
 ## Track I — The console adopts the shared bento layer
 
-- 📋 **D41** (deps: viglet-design-system VDS5) **nothing fails when a component is re-declared here instead of imported from the design system** — Nineteen names in eleven files already are, and only a reader has ever noticed. → §XI.7
-
-## Done when — D41
-
-- **A component re-declared here fails this repository's CI** check-duplicates runs in
-  CI, names the replacing import, and a new duplicate exits non-zero.
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

@@ -11,6 +11,7 @@ import { useEffect, useRef } from "react";
  * - An array of BreadcrumbItem: multiple levels
  * - `undefined`: deferred — items are pushed once the value becomes defined
  */
+// viglet-ds-allow-duplicate useSubPageBreadcrumb -- writes into Dumont's own breadcrumb context
 export function useSubPageBreadcrumb(
   items: string | BreadcrumbItem | BreadcrumbItem[] | undefined,
 ) {

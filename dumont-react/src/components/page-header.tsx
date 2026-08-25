@@ -19,6 +19,7 @@ interface MyComponentProps {
   urlBase?: string;
 }
 
+// viglet-ds-allow-duplicate PageHeader -- bound to Dumont's breadcrumb context, user context and discovery
 export const PageHeader: React.FC<MyComponentProps> = ({ turIcon: TurIcon, title, urlBase }) => {
   const { items } = useBreadcrumb();
   const navigate = useNavigate();

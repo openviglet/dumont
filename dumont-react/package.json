@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
+    "lint:ds": "viglet-ds-check-duplicates src",
     "preview": "vite preview"
   },
   "dependencies": {

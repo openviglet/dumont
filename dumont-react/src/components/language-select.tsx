@@ -17,6 +17,7 @@ interface LanguageSelectProps {
     className?: string;
 }
 
+// viglet-ds-allow-duplicate LanguageSelect -- takes Dumont's TurLocale model and its BadgeLocale
 export function LanguageSelect({
     value,
     onValueChange,

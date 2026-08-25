@@ -10,6 +10,7 @@ interface GridAdapterConfig<T> {
   icon?: FieldExtractor<T>;
 }
 
+// viglet-ds-allow-duplicate useGridAdapter -- adapts to Dumont's own TurGridItem model
 export function useGridAdapter<T>(
   data: T[] | undefined | null,
   config: GridAdapterConfig<T>,

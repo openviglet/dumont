@@ -276,6 +276,7 @@ const GridListComponent: React.FC<Props> = ({ gridItemList, children }) => {
     );
 };
 
+// viglet-ds-allow-duplicate GridList -- console-era grid on Dumont's TurGridItem and the v8 table API (D44)
 export const GridList = Object.assign(GridListComponent, {
     NewButton: GridListNewButton,
     Action: GridListAction,

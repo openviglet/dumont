@@ -75,29 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XI The console adopts the shared bento layer
-
-### XI.7 A lint, since discipline is not an instrument (D41)
-
-Nineteen names are declared in this console and exported by the design system under the
-same names, across eleven files, and nothing anywhere fails because of it. They were
-found by pointing the package's export-manifest lint at this repository, which is the
-first time anyone counted.
-
-Some of them are legitimate. `AppFooter` renders Dumont's own identity, and the user
-context is bound to this product's auth service and model — those share a name and
-nothing else, and the lint has an annotation for exactly that case, where the reason is
-the point. `ui/table.tsx` is not legitimate and has its own line above. The rest are
-console-era chrome that leaves when the console does.
-
-What matters is not this list but the next one. Turing is the proof: an entire design
-language grew inside that product while a design system sat next to it exporting console
-chrome, because nothing ever failed when a component was re-declared instead of
-imported. Dumont is about to put a large shared surface within reach, and the cheapest
-path to one missing prop is a local copy.
-
-Adopt the lint the package ships — `viglet-ds-check-duplicates`, which reads
-`exports.json` from the installed package and ends each finding in the import that
-replaces the copy — and run it in this repository's CI. Annotate what is deliberate with
-its reason, so what fails is a new duplicate.
