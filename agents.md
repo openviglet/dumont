@@ -298,12 +298,33 @@ read the chrome. Forking it would leave two copies drifting for the length of th
 - Then set `migrated: true` in `nav.const.ts` — that is what mints the `bentoRoute` the palette
   and hubs use to stay inside the shell.
 
-**The census reads era transitively**, and three rules keep it honest: a page is bento-era if it
-reaches a bento import through its own local modules; a **type-only** import never counts (it is
-erased and renders nothing); and a module reading `useSectionChrome` is an *adapter* the walk does
-not follow, because it renders whichever era it is placed in. `chrome="bento"` is itself the
-strongest era statement. Adding a bento page means adding it to `ON_BENTO` in
-`test/console-census.test.ts`.
+**The census reads a page through its local imports**, both for era and for the console chrome it
+renders — a page renders most of its chrome through components, and reading the page file alone
+under-counted `Card` by 17 and reported a live `StickySaveBar` as dead (D51). Three rules keep the
+era half honest: a page is bento-era if it reaches a bento import through its own local modules; a
+**type-only** import never counts (it is erased and renders nothing); and a module reading
+`useSectionChrome` is an *adapter* the walk does not follow, because it renders whichever era it
+is placed in. `chrome="bento"` is itself the strongest era statement. Adding a bento page means
+adding it to `ON_BENTO` in `test/console-census.test.ts`.
+
+### Build and lint gates (Track K)
+
+| Command | Gate |
+|---|---|
+| `pnpm run lint` | ESLint. **Debt is carried as named files in `eslint.config.js`, never as a count** — `react-hooks/set-state-in-effect` and `@typescript-eslint/no-explicit-any` are warnings in the listed files and errors everywhere else. A ceiling would let one change pay for another. |
+| `pnpm run lint:ds` | No component re-declares a design system export (D41). |
+| `pnpm run census` | The migration count. Exits non-zero on a broken read; warns on stderr when a chrome probe matches nothing. |
+| `pnpm run compile:build` | `tsc -b`, the Vite build, then `scripts/check-mf-types.mjs`. |
+
+**Federated type declarations (D49).** They emit to `dumont-react/mf-types/`, deliberately outside
+`build.outDir` — the Vite output directory is the connector's `public/` and `emptyOutDir` wipes it
+*after* the generator writes there. The DTS build extends `tsconfig.app.json`, not the root
+`tsconfig.json`, which is a solution file carrying no `jsx`. Do not trust the generator's exit
+code: it has printed `#TYPE-001` and exited 0, and written the wrong layout and exited 0. The
+check inspects the artefact.
+
+CI: `validate.yml` (Maven build every push and PR, Sonar on pushes) and `design-system.yml`
+(duplicates + ESLint, no build — the Maven one already covers it).
 
 ### Shared Components
 

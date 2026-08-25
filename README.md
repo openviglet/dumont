@@ -81,8 +81,13 @@ cd dumont-react
 pnpm install
 pnpm run dev          # Vite dev server
 pnpm test             # Vitest
+pnpm run lint         # ESLint
 pnpm run lint:ds      # fail on a component the design system already exports
+pnpm run census       # which surfaces are on which chrome
 ```
+
+Every push and pull request runs the Maven build (which builds the console) plus ESLint and the
+design system duplicate check.
 
 ## ⚙️ Configuration
 
