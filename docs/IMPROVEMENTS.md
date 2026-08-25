@@ -78,28 +78,6 @@ These constrain every task above:
 
 ## XI The console adopts the shared bento layer
 
-### XI.3 A parallel shell, so a page can move back (D37)
-
-A migration of 39 pages is only safe if it can be done one page at a time and undone the
-same way. That needs somewhere for a migrated surface to live that is not the console
-route tree, because the two eras mount different chrome: the console root provides a
-sidebar shell that the bento components neither expect nor tolerate, and a page cannot
-be half of each.
-
-Shio reached the same conclusion and its SH888 is this task under another name — a
-parallel bento route tree beside the console one, so a surface moves by being added to
-the new tree rather than by being rewritten in place. The old route keeps working until
-the new one is trusted, which is what makes each of the 39 reversible.
-
-Build the tree, mount the bento shell at its root, and put one already-migrated surface
-under it. Two things this is not: it is not a rewrite of the console router, which keeps
-every route it has, and it is not a redirect — both trees serve, and which one a person
-reaches is a decision this task does not make.
-
-The cost of skipping it is the cost Turing paid by not having it: the bento layer grew
-inside the product, page by page, until 118 pages depended on components nothing shared,
-and unwinding that took a block of its own.
-
 ### XI.5 One declaration, read three times (D39)
 
 The bento nav rail and the command palette are both driven by a declaration of what

@@ -53,6 +53,16 @@ export default defineConfig({
         "./register": "./src/i18n/register.ts",
         "./manifest": "./src/manifest.ts",
         "./DumontRoutes": "./src/DumontRoutes.tsx",
+        /*
+         * The bento tree, offered beside the console one (D37). Turing mounts Dumont under its own
+         * prefix, and its bento shell is at `/bento` — so the host already supplies the chrome
+         * there and needs the *routes* that belong to it. Without this entry the parallel tree
+         * would exist only in standalone mode, which is not where anyone uses Dumont.
+         *
+         * Additive and inert until a host imports it: `./DumontRoutes` keeps serving every route
+         * it did, and a host that mounts neither is unaffected.
+         */
+        "./BentoRoutes": "./src/BentoRoutes.tsx",
       },
       shared: {
         react: { singleton: true, requiredVersion: "*" },

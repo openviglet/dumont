@@ -6,6 +6,7 @@ import AdminRolePage from "./app/console/admin-settings/admin.role.page";
 import AdminRolesListPage from "./app/console/admin-settings/admin.roles.list.page";
 import AdminUserPage from "./app/console/admin-settings/admin.user.page";
 import AdminUsersListPage from "./app/console/admin-settings/admin.users.list.page";
+import BentoRootPage from "./app/bento/bento.root.page";
 import ConsoleRootPage from "./app/console/console.root.page";
 import HomePage from "./app/console/home/home.page";
 import UserAccountPage from "./app/console/user/user.account.page";
@@ -18,6 +19,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import { BreadcrumbProvider } from "./contexts/breadcrumb.context";
 import { PluginProvider } from "./contexts/plugin.context";
 import { UserProvider } from "./contexts/user.context";
+import BentoRoutes from "./BentoRoutes";
 import DumontRoutes from "./DumontRoutes";
 
 /**
@@ -63,6 +65,18 @@ function App() {
                 <Route path="integration/instance/:id/*" element={<DumontRoutes />} />
                 {/* Redirect bare console path to home */}
                 <Route index element={<Navigate to="home" replace />} />
+              </Route>
+              {/*
+               * The bento tree, mounted beside the console one (D37).
+               *
+               * Both serve. This is an addition — the console routes above keep every path they
+               * had, and nothing redirects between the two — so a surface migrates by appearing
+               * under here and reverts by disappearing again. The two eras mount different chrome
+               * (a SidebarProvider vs a fixed rail), which is why they need separate roots rather
+               * than a flag inside one.
+               */}
+              <Route path={ROUTES.BENTO} element={<BentoRootPage />}>
+                <Route path="integration/instance/:id/*" element={<BentoRoutes />} />
               </Route>
             </Routes>
           </BreadcrumbProvider>

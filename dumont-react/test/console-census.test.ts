@@ -45,11 +45,20 @@ const FORKED: Record<string, string[]> = {
 }
 
 /**
- * Surfaces that render bento chrome. **Expected to stay empty until D37 builds the route tree**,
- * and to grow by exactly one line per migrated surface after that. The count, not the names, is
- * what the track is measured by — but the names are what make each step reviewable.
+ * Surfaces that render bento chrome. Empty until D37 built the route tree, and it grows by exactly
+ * one line per migrated surface after that. The count, not the names, is what the track is
+ * measured by — but the names are what make each step reviewable.
+ *
+ * Two of the three below are the shell itself rather than migrated pages: a parallel tree needs a
+ * root and somewhere for Home to land before any surface can move into it. Only the third is one
+ * of the 39, which is why "Left to move" still reads 39 — the shell is what makes moving possible,
+ * not progress through the list.
  */
-const ON_BENTO: string[] = []
+const ON_BENTO: string[] = [
+  "app/bento/bento.home.page.tsx",
+  "app/bento/bento.root.page.tsx",
+  "pages/bento/integration.instance.db.source.list.bento.page.tsx",
+]
 
 describe("D35: the console census", () => {
   it("names every forked component, and nothing else", () => {

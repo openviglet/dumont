@@ -1,6 +1,19 @@
 const consolePath: string = import.meta.env.VITE_CONSOLE_CONTEXT_PATH;
 
 /**
+ * Base path for the bento shell — the second era's tree, mounted beside the console one (D37).
+ *
+ * Both trees serve. A surface migrates by being added under this prefix while its console route
+ * keeps working, which is what makes each of the 39 pages reversible one at a time; nothing here
+ * redirects, and which tree a person reaches is not this file's decision.
+ *
+ * Read from the environment for the same reason `VITE_CONSOLE_CONTEXT_PATH` is: the host mounts
+ * Dumont under its own prefix, and `/bento` is Turing's. The fallback keeps standalone working
+ * without a new entry in every `.env`.
+ */
+const bentoPath: string = import.meta.env.VITE_BENTO_CONTEXT_PATH ?? "/bento";
+
+/**
  * Base path for an integration-instance surface.
  *
  * Dumont is mounted by the host (Turing) as a Module Federation remote under
@@ -26,6 +39,9 @@ export const ROUTES = {
   LOGOUT: "/logout",
   CONSOLE: consolePath,
   HOME: `${consolePath}/home`,
+  BENTO: bentoPath,
+  BENTO_HOME: `${bentoPath}/home`,
+  BENTO_INTEGRATION_INSTANCE: `${bentoPath}/integration/instance`,
   SN_SEARCH: `/sn`,
   SN_ROOT: `${consolePath}/sn`,
   SN_INSTANCE: `${consolePath}/sn/instance`,
@@ -40,6 +56,15 @@ export const ROUTES = {
   INTEGRATION_ROOT: `${consolePath}/integration`,
   // Host-aware (console `/admin` vs Bento `/bento`) — see integrationInstanceBase().
   get INTEGRATION_INSTANCE() { return integrationInstanceBase(); },
+  /**
+   * The console-era base, stated rather than derived (D37).
+   *
+   * A bento surface linking to a not-yet-migrated page must name the console tree explicitly:
+   * `INTEGRATION_INSTANCE` reads the *current* path, so from inside `/bento` it resolves to
+   * `/bento/integration/instance` and would point at a bento route that does not exist yet. That
+   * is the one link the migration is guaranteed to need and the one the getter cannot give.
+   */
+  CONSOLE_INTEGRATION_INSTANCE: `${consolePath}/integration/instance`,
   LOGGING_ROOT: `${consolePath}/logging`,
   LOGGING_INSTANCE: `${consolePath}/logging/instance`,
   DASHBOARD: `${consolePath}/dashboard`,
