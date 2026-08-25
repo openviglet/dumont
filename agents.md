@@ -177,15 +177,40 @@ The dumont-react app runs both inside Turing (via Module Federation) and standal
 - Standalone uses a fixed `STANDALONE_ID = "local"` for the integration ID
 - The axios request interceptor strips the integration path segment
 
-### Routing
-- All routes defined in `DumontRoutes.tsx`
-- Route structure: `/{feature}` and `/{feature}/:sourceId` and `/{feature}/:sourceId/:tab`
-- No changes needed in turing-react when adding new dumont pages
+### Routing — two trees, both serving
+Console surfaces are migrating to bento chrome one page at a time, so there are two route trees
+and both answer. A page moves by being added to the second; its console route is untouched, which
+is what lets it move back.
 
-### Sidebar (`app-sidebar.tsx`)
-- Nav items grouped by connector type: `aemSourceItems`, `dbSourceItems`, `wcSourceItems`, `assetsSourceItems`, `commonItems`
-- Visibility controlled by `usePlugin()` provider context
-- Items use `SidebarNavItem` interface: `{ key, titleKey, url, icon }`
+| Tree | Router | Mounted at | Chrome |
+|---|---|---|---|
+| Console | `DumontRoutes.tsx` | `/admin/integration/instance/:id/*` | `ConsoleRootPage` — `SidebarProvider` + collapsible sidebar |
+| Bento | `BentoRoutes.tsx` | `/bento/integration/instance/:id/*` | `BentoRootPage` — fixed nav rail, `⌘K` palette, no provider |
+
+- A route belongs in `BentoRoutes.tsx` only once its page has actually moved — the tree must never
+  advertise a surface it does not serve.
+- Both are exposed over Module Federation (`./DumontRoutes`, `./BentoRoutes`); no turing-react
+  change is needed when adding a page to either.
+- **`ROUTES.INTEGRATION_INSTANCE` derives its prefix from the live URL.** From inside the bento
+  shell it resolves to `/bento/…`, so a link to a not-yet-migrated page must use
+  `ROUTES.CONSOLE_INTEGRATION_INSTANCE` instead, or it points at a route nothing serves.
+
+### Navigation (`src/app/nav.const.ts`)
+One declaration, read by three surfaces — the console sidebar, the bento rail and the `⌘K`
+palette. Written in the design system's `BentoNavItem` schema plus the two fields the console
+needs, so no reader keeps a second list that drifts on a rename.
+
+- `DUMONT_NAV` — every surface: `id`, `titleKey`, `descriptionKey`, `iconName`, `section`, `tone`,
+  `path`, plus `provider` (visibility) and `order` (sidebar).
+- `visibleNavSurfaces(providers)` — the shared filter *and* sort. Every reader calls it, so they
+  cannot disagree. Providers come from `usePlugin()`.
+- `dumontNavItems(id)` / `dumontNavGroups(id)` — the flat and grouped derivations for palette and
+  rail. `migrated: true` is what gives a surface a `bentoRoute`; everything else falls back to the
+  console.
+- `manifest.navItems` is **derived** from `DUMONT_NAV` and keeps its wire shape — the Turing host
+  reads it over `./manifest`, so that shape is a contract.
+- The rail renders only sections carrying an `areaRoute`. Dumont has no hub pages yet, so it shows
+  Home alone; the palette needs no hub and reaches everything today.
 
 ### i18n Structure
 ```
@@ -194,14 +219,58 @@ src/i18n/locales/
 │   ├── common.json      — Common UI strings, systemInfo keys
 │   ├── dialog.json      — Dialog strings
 │   ├── forms.json       — Form validation & submission
+│   ├── bento.json       — Bento chrome this shell owns (skip link, main landmark, migration home)
 │   └── integration.json — Integration/connector-specific (sources, nav, insights, systemInfo)
 └── pt/
     ├── common.json
     ├── dialog.json
     ├── forms.json
+    ├── bento.json
     └── integration.json
 ```
 All keys use dot notation: `integration.sources.indexAll`, `common.apiKeyMismatch`, `systemInfo.overview`
+
+**The package is the base; Dumont merges over it.** `src/i18n/index.ts` initialises i18next with
+`vigDesignSystemTranslations` as the resources and then `addResourceBundle(..., deep, overwrite)`
+for Dumont's own. Do **not** go back to `registerVigTranslations`: it skips any namespace whose
+*top-level* key the app already declares, which silently dropped five of the package's nine
+bundles (`common`, `forms`, `dialog`, `sidebar`, `theme`) in both languages. Nothing failed —
+every string in the layer has a `defaultValue`, so the chrome just rendered English inside a
+Portuguese console.
+
+- Dumont's wording still wins any conflict; the package only fills gaps.
+- `bento.json` carries only this shell's own keys and must be **merged**, never spread into a base
+  bundle — the other ~20 `bento.*` keys belong to the package.
+- `test/bento-i18n.test.ts` is the gate. It asserts the Portuguese **differs** from the English,
+  because a `defaultValue` always resolves and "the key resolves" would prove nothing.
+
+### Design System (`@viglet/viglet-design-system`)
+
+Shared with Turing and Shio. Two entry points matter here:
+
+- **root / `./router`** — console-era chrome. Most of `components/ui/*` are one-line re-export
+  shims over it.
+- **`./bento`** — the newer layer, plus `./bento.css` (imported once in `src/index.css`, after the
+  console stylesheet so a migrated surface gets the bento value of a shared property).
+
+**Never re-declare a component the package exports.** `pnpm run lint:ds`
+(`viglet-ds-check-duplicates`) reads `exports.json` from the installed version and fails the
+build, naming the import that replaces the copy; it runs on push and PR via
+`.github/workflows/design-system.yml`. A deliberate collision is annotated at its declaration with
+the reason:
+
+```ts
+// viglet-ds-allow-duplicate AppFooter -- renders Dumont's own logo, connector version and links
+```
+
+Eleven names are annotated today — all bound to something only Dumont has (its auth service,
+`TurGridItem`, its breadcrumb context, `__DUMONT_STANDALONE__`). The gate exists to catch the
+*next* one.
+
+Bento notes: `BentoUserMenu` reads the **package's** user context, not `@/contexts/user.context` —
+`BentoRootPage` wraps its shell in the package's `UserProvider` (a component never sees a context
+it mounts itself). `BentoListPage` takes its layout as a prop rather than fetching one.
+`docs/BENTO-AUTHORING.md` in the design system repo is the contract for writing a bento page.
 
 ### Shared Components
 

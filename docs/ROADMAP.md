@@ -166,8 +166,6 @@ This track has no remaining pending tasks.
 
 ---
 
-## Track I — The console adopts the shared bento layer
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

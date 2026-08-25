@@ -22,6 +22,10 @@
   - Elasticsearch
   
 - **Plugin Architecture**: Easily extend functionality with custom plugins
+
+- **Web Console**: Configure sources, launch indexing and watch it run, in English or Portuguese.
+  Built from the same component library as Viglet Turing ES and Viglet Shio, and mountable inside
+  Turing as well as standalone.
   
 - **Enterprise Ready**:
   - JMS message queue support
@@ -43,12 +47,14 @@
 | `filesystem` | File system connector |
 | `web-crawler` | Web crawler connector |
 | `wordpress` | WordPress plugin for content indexing |
+| `dumont-react` | Web console (React + Vite), built into the connector's static resources |
 
 ## 🛠️ Prerequisites
 
 - **Java 21+** ☕
 - **Maven 3.6+** 📦
 - **Spring Boot 4.x** 🍃
+- **Node.js 26 + pnpm 11** ⚛️ — only to work on the console; the Maven build invokes them for you
 
 ## 🏗️ Building
 
@@ -62,6 +68,16 @@ cd dumont
 
 # Build specific modules (skip tests)
 ./mvnw clean install -DskipTests
+```
+
+The console is built and bundled by the commands above. To work on it with hot reload:
+
+```bash
+cd dumont-react
+pnpm install
+pnpm run dev          # Vite dev server
+pnpm test             # Vitest
+pnpm run lint:ds      # fail on a component the design system already exports
 ```
 
 ## ⚙️ Configuration
