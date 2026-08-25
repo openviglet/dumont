@@ -60,9 +60,11 @@ class DumKeycloakAdminOnStartupTest {
     }
 
     @Test
-    void doesNothingWhenAdminIdBlank() {
+    void doesNothingWhenNoAdminIdConfigured() {
         when(configProperties.isKeycloak()).thenReturn(true);
+        when(groupRepository.findByName("Administrator")).thenReturn(adminGroup());
         when(configProperties.getKeycloakAdminId()).thenReturn("  ");
+        when(configProperties.getAdminEmails()).thenReturn("  ");
         runner.run(null);
         verify(userRepository, never()).save(any());
     }
@@ -70,7 +72,6 @@ class DumKeycloakAdminOnStartupTest {
     @Test
     void warnsAndStopsWhenNoAdministratorGroup() {
         when(configProperties.isKeycloak()).thenReturn(true);
-        when(configProperties.getKeycloakAdminId()).thenReturn("kc-admin");
         when(groupRepository.findByName("Administrator")).thenReturn(null);
         runner.run(null);
         verify(userRepository, never()).save(any());

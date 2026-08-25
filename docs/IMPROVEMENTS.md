@@ -75,3 +75,105 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XII Console surfaces move to bento chrome
+
+### XII.1 Hubs, so the rail becomes navigation (D45)
+
+Track I put the bento shell and its route tree in place, and left the rail with nothing
+to list. The rail renders only sections that carry an `areaRoute`, because it lists
+section hubs and never leaves — that is what keeps it a fixed, small height however many
+of the 39 surfaces migrate, and it is the flat console sidebar's overflow inverted.
+
+Dumont has no hub pages, so the rail shows Home alone and the tree's only navigation is
+the home mosaic. The `⌘K` palette covers the gap today, but a palette is a keyboard
+affordance and a rail is what a reader sees.
+
+The declaration already carries the two sections and every surface's membership. A hub
+renders one section's surfaces as a mosaic; giving the section an `areaRoute` is what
+makes the rail list it. Nothing else has to change.
+
+### XII.2 The remaining source lists (D46)
+
+Six source lists render the same shape — a header, a grid of cards, a blank slate — and
+one of them has moved. `BentoListPage` collapses that shape into a single call, so each
+of the remaining five is a small, self-contained change rather than a rewrite.
+
+They are the right surfaces to take next because the migrated one proves the pattern:
+the DB list kept its service, its model and its translation keys, and changed only its
+chrome. What is learned here is whether that holds for a list whose items carry status,
+locale or a per-item action, which the DB list does not exercise.
+
+Each moves on its own, in its own commit, with its console route left serving.
+
+### XII.3 The detail pages behind those lists (D47)
+
+A migrated list links its tiles at the console detail page, because that page has not
+moved. The reader crosses from the bento shell into the console sidebar mid-task, which
+is the one place the parallel tree is visibly a migration rather than a product.
+
+`BentoEntityShell` and `BentoFormHero` own the identity hero and the save-bar morph, so
+a detail page becomes a form plus its sections. The rule the package states is worth
+keeping: identity lives in the hero, never as a form field, and the save bar is always
+the morph — a hand-rolled sticky bar is two halves that drift.
+
+A detail page moves after its list, so `bentoRoute` and the tile it feeds change
+together.
+
+## XIII Frontend build and lint gates
+
+### XIII.1 A lint that has never run (D48)
+
+`dumont-react` declares ESLint 10, typescript-eslint, `eslint-plugin-react-hooks` and
+`eslint-plugin-react-refresh` as devDependencies, and both `pnpm run lint` in the app
+and `pnpm -r run lint` at the root exit non-zero with "ESLint couldn't find an
+eslint.config.js". There is no such file anywhere in the repository.
+
+So four linters are installed, none of them has ever run, and the failure reads like a
+broken command rather than a missing gate — which is why it has survived. The rules
+those plugins carry are the ones that catch a hook called conditionally and a component
+that breaks fast refresh, neither of which a type-check sees.
+
+Write the flat config, fix whatever the first run reports, and let CI run it.
+
+### XIII.2 Types that never cross the federation boundary (D49)
+
+Every `vite build` prints `[ Module Federation DTS ] Error: Failed to generate type
+declaration #TYPE-001` and then succeeds. The build exits 0, so nothing fails and nobody
+looks.
+
+What is lost is the type declarations for the exposed remotes — `./DumontRoutes`,
+`./BentoRoutes`, `./manifest`, `./register`. A host consuming them gets no types across
+the federation boundary, which is exactly where a type error is most expensive: the host
+and the remote are built separately, so a prop that stopped matching surfaces at runtime
+in someone else's product.
+
+It predates the bento work — confirmed by stashing those changes and rebuilding. The
+plugin prints the `tsc --project` command it ran, which is where to start.
+
+### XIII.3 A CI workflow nothing triggers (D50)
+
+`validate.yml` runs the Maven build, the frontend build and a SonarCloud analysis, and
+its only trigger is `workflow_dispatch`. It gates nothing: a pull request can carry a
+failing backend build and a failing Sonar quality gate and report all checks green,
+because the workflow that would have caught it was never asked to run. `roadkeep` and
+`design-system` are the only two that fire on a push.
+
+Two smaller things are wrong in the same file. Its node_modules cache key hashes
+`dumont-react/package-lock.json`, a file that does not exist — the workspace is pnpm,
+and the key therefore hashes nothing and never hits. And `-Dsonar.branch.name=2026.2` is
+pinned to the previous version, so analysis lands on the wrong branch.
+
+### XIII.4 A probe that cries wolf (D51)
+
+The census warns on every run that its `StickySaveBar` probe matches no page, and says
+what the two explanations are: every page carrying it migrated, or its import path moved
+and the census has quietly stopped counting it. Neither is true. No page has ever
+imported it, and `components/ui/sticky-save-bar.tsx` is a live shim re-exporting three
+names.
+
+So the probe counts a chrome component this console does not use. It is a warning on
+stderr and the script exits 0, which is the shape of a message people learn to scroll
+past — and the next probe that goes stale for the *real* reason will read identically.
+
+Drop the probe, or the shim it points at if nothing imports that either.

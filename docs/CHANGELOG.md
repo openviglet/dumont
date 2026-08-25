@@ -472,3 +472,8 @@
 - **D39** — One declaration in nav.const holds all 16 surfaces in the package's schema; the sidebar, the rail and a wired command palette derive from it, and manifest's wire shape is derived and pinned unchanged.
 - **D40** — The package's bundles are now the base and Dumont's merge over them, so five namespaces its chrome reads stopped being dropped; a gate asserts every bento string differs between en and pt.
 - **D41** — viglet-ds-check-duplicates runs on push and pull_request; the eleven standing collisions are annotated at their declaration with a reason, and a planted duplicate exits 1 in a test.
+
+## Track J — Console surfaces move to bento chrome
+
+## Track K — Frontend build and lint gates
+
