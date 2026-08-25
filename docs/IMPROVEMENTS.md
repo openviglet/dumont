@@ -78,21 +78,6 @@ These constrain every task above:
 
 ## XIII Frontend build and lint gates
 
-### XIII.2 Types that never cross the federation boundary (D49)
-
-Every `vite build` prints `[ Module Federation DTS ] Error: Failed to generate type
-declaration #TYPE-001` and then succeeds. The build exits 0, so nothing fails and nobody
-looks.
-
-What is lost is the type declarations for the exposed remotes — `./DumontRoutes`,
-`./BentoRoutes`, `./manifest`, `./register`. A host consuming them gets no types across
-the federation boundary, which is exactly where a type error is most expensive: the host
-and the remote are built separately, so a prop that stopped matching surfaces at runtime
-in someone else's product.
-
-It predates the bento work — confirmed by stashing those changes and rebuilding. The
-plugin prints the `tsc --project` command it ran, which is where to start.
-
 ### XIII.3 A CI workflow nothing triggers (D50)
 
 `validate.yml` runs the Maven build, the frontend build and a SonarCloud analysis, and

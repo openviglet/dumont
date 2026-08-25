@@ -51,3 +51,10 @@ jobs:
       - name: Lint
         working-directory: dumont-react
         run: pnpm run lint
+
+      # D49 — build, then assert the remotes actually declared their types. The build alone
+      # cannot say: the DTS generator has exited 0 while printing #TYPE-001, and exited 0 while
+      # silently writing the wrong layout. The artefact is the only honest signal.
+      - name: Build and check federated type declarations
+        working-directory: dumont-react
+        run: pnpm run compile:build

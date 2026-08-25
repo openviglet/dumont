@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "compile:deps": "npm install --no-audit --no-fund",
-    "compile:build": "tsc -b && vite build",
+    "compile:build": "tsc -b && vite build && node scripts/check-mf-types.mjs",
+    "check:mf-types": "node scripts/check-mf-types.mjs",
     "compile": "npm run compile:deps && npm run compile:build",
     "census": "node scripts/console-census.mjs",
     "test": "vitest run",

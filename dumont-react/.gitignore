@@ -1,3 +1,6 @@
 node_modules
 dist
 *.local
+
+# D49 - generated federated type declarations (built artefact, checked by scripts/check-mf-types.mjs)
+mf-types/

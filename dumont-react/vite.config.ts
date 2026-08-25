@@ -1,4 +1,4 @@
-import { federation } from "@module-federation/vite";
+﻿import { federation } from "@module-federation/vite";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { vigletBootLoader } from "@viglet/viglet-design-system/vite";
@@ -55,7 +55,7 @@ export default defineConfig({
         "./DumontRoutes": "./src/DumontRoutes.tsx",
         /*
          * The bento tree, offered beside the console one (D37). Turing mounts Dumont under its own
-         * prefix, and its bento shell is at `/bento` — so the host already supplies the chrome
+         * prefix, and its bento shell is at `/bento` â€” so the host already supplies the chrome
          * there and needs the *routes* that belong to it. Without this entry the parallel tree
          * would exist only in standalone mode, which is not where anyone uses Dumont.
          *
@@ -78,6 +78,50 @@ export default defineConfig({
         "@viglet/viglet-design-system/router": { singleton: true, requiredVersion: "*" },
         "@viglet/viglet-design-system/i18n": { singleton: true, requiredVersion: "*" },
         "@viglet/viglet-design-system/floating-formulas-bg": { singleton: true, requiredVersion: "*" },
+      },
+      /*
+       * D49 â€” the type declarations the host consumes, which had never once been generated.
+       *
+       * Every build printed `#TYPE-001` and then exited 0, so a remote shipped with no types
+       * across the federation boundary â€” the one place a mismatch is most expensive, because the
+       * host and the remote are built separately and a prop that stopped matching surfaces at
+       * runtime in someone else's product.
+       *
+       * The cause was the tsconfig it inherited. The generated DTS config extends this project's
+       * root `tsconfig.json`, which is a *solution* file: `files: []` plus references, carrying no
+       * `jsx`, no `lib` and no `target`. So the declaration build compiled every `.tsx` with JSX
+       * disabled and failed on the first one.
+       */
+      dts: {
+        /*
+         * `outputDir` is honoured by the DTS plugin but missing from the `DtsRemoteOptions` type
+         * this version of `@module-federation/vite` bundles, so the object is widened here rather
+         * than the option dropped. Narrowly scoped: everything else in it is type-checked.
+         */
+        generateTypes: {
+          // The real compiler options live here; the root config only points at projects.
+          tsConfigPath: "./tsconfig.app.json",
+          /*
+           * `import.meta.env` is declared in `vite-env.d.ts`, and the generated config lists its
+           * files explicitly with an empty `include` â€” so an ambient declaration nothing imports
+           * is never part of the program unless it is named.
+           */
+          additionalFilesToCompile: ["src/vite-env.d.ts"],
+          /*
+           * Emit outside the Vite output directory.
+           *
+           * `build.outDir` is the connector's `public/`, and `emptyOutDir: true` wipes it — after
+           * the generator has written into it. So even a *successful* generation left nothing
+           * behind, which is the second half of why no release has ever shipped these.
+           */
+          outputDir: "mf-types",
+          /*
+           * Fail the build when the generator reports an error. Necessary and *not sufficient*:
+           * pointed at the wrong tsconfig it reports nothing, writes the wrong layout and still
+           * exits 0 â€” which is why `scripts/check-mf-types.mjs` checks the artefact instead.
+           */
+          abortOnError: true,
+        } as Record<string, unknown>,
       },
     }),
   ],

@@ -27,6 +27,9 @@ export default tseslint.config(
       "dist/**",
       "node_modules/**",
       "../connector/connector-app/src/main/resources/public/**",
+      // D49 — generated `.d.ts` for the federated remotes. Linting emitted declarations reports
+      // the source's problems a second time, at a location nobody can fix them.
+      "mf-types/**",
     ],
   },
 
