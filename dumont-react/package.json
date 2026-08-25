@@ -8,6 +8,7 @@
     "compile:deps": "npm install --no-audit --no-fund",
     "compile:build": "tsc -b && vite build",
     "compile": "npm run compile:deps && npm run compile:build",
+    "census": "node scripts/console-census.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -78,27 +78,6 @@ These constrain every task above:
 
 ## XI The console adopts the shared bento layer
 
-### XI.1 Count the console before moving it (D35)
-
-Dumont's console is 39 pages built from 88 components, 33 of them under `components/ui`.
-Nobody can say how much of that the shared layer could carry, which means this track has
-no size, no order and no way to know it is finished. Shio met the same problem and its
-answer was an instrument first: a script that reads the source and reports what is still
-console-era, so a migration is a falling number rather than a feeling.
-
-Count it here the same way. For each page, whether it renders console chrome or bento
-chrome; for each component, whether it is a local declaration, a one-line re-export of a
-design-system export, or genuinely this product's. The third category is the interesting
-one and the reason the count cannot be a grep for imports: `AppFooter` and the user
-context are Dumont's own and will never move, while `ui/table.tsx` is a fork of eight
-primitives the package already exports.
-
-The output is a number and a list, printed by a script anyone can run and cheap enough
-to run on every commit. Without it, every later line in this track is judged by whoever
-last looked, and "the console adopts the shared bento layer" stays a sentence in a
-roadmap instead of a claim something checks. Land it first, because the tasks below are
-deletions and a deletion with no baseline is indistinguishable from a regression.
-
 ### XI.2 Render the layer once before trusting it (D36)
 
 Dumont installs the design system and takes 95 imports from it — 81 from the root entry,
@@ -142,29 +121,6 @@ reaches is a decision this task does not make.
 The cost of skipping it is the cost Turing paid by not having it: the bento layer grew
 inside the product, page by page, until 118 pages depended on components nothing shared,
 and unwinding that took a block of its own.
-
-### XI.4 The one fork among thirty-three (D38)
-
-Thirty-three files sit under `components/ui` and thirty-two of them are honest. One is
-not: `table.tsx` declares `Table`, `TableHeader`, `TableBody`, `TableFooter`,
-`TableHead`, `TableRow`, `TableCell` and `TableCaption` locally, and the package exports
-all eight under the same names.
-
-This is the worst shape a duplicate takes. A table is not a leaf a single page renders —
-it is what every list surface in this console is built out of, so a divergence between
-this copy and the package's is a divergence every list inherits at once. And because
-both are shadcn primitives that started from the same generator, they look identical
-today and will drift silently: a padding fix, a `data-slot` rename, an overflow change
-lands in one and not the other, and nobody meets the difference until two products are
-compared side by side.
-
-Shio has zero forks among its 24 ui files and Turing shimmed 39 of 59. Dumont is one
-file away from the same state, which is why this is worth its own line rather than being
-folded into the lint below: the lint reports it, and reporting is not fixing.
-
-Replace the eight declarations with a one-line re-export, the pattern the other 32 files
-already use. If a variation is genuinely needed — and check before assuming it is — wrap
-the shared component rather than re-declaring its name.
 
 ### XI.5 One declaration, read three times (D39)
 
@@ -257,26 +213,3 @@ migrated page failing to render is a red run rather than a support ticket.
 Land it early. A suite written after a migration documents whatever the migration
 produced, including its mistakes; a suite written before it is the only thing that can
 tell the two apart.
-
-### XI.9 A copy that lands where nobody reads (D43)
-
-`copy-ds.cmd` builds the design system and copies its `dist` into this console's
-`node_modules`, so a package change can be tried here before it is published. It sets
-
-    DS_DEST=d:\Git\viglet\dumont\dumont-react\node_modules\@viglet\viglet-design-system
-
-and that path does not exist. The repository is laid out by version — `dumont\2026.3\
-dumont-react` — so the copy lands in a directory nobody reads, `xcopy` creates it
-happily, and the script reports success. The failure mode is the expensive one: it looks
-like the package change had no effect.
-
-Both sibling repositories carry the same defect and both have a line for it, SH895 in
-Shio and T998 in Turing, which says something about how the three copies of this script
-came to exist rather than one. Fixing the path here is a one-line change; the reason it
-is worth a task is that every other line in this track is a package change tried against
-this console first, and each one of them silently gets the stale `dist` until this is
-right.
-
-Fix the destination, and make the script fail rather than succeed when the target
-directory is absent — a copy into a path that had to be created is the signal, and
-`xcopy /i` is what suppresses it today.

@@ -462,3 +462,6 @@
 
 ## Track I — The console adopts the shared bento layer
 
+- **D43** — copy-ds.cmd derives its destination from its own directory, so the copy reaches this checkout's node_modules, and refuses when npm has not run there instead of creating the path.
+- **D35** — npm run census reads the package's own exports.json and prints 39 pages, 0 on bento, and 88 components as 37 shim, 8 fork, 43 own (design §XI.1 superseded: app-footer.tsx forks package's AppFooter).
+- **D38** — ui/table.tsx is a one-line re-export of the package's eight Table primitives, byte-identical to what it declared, and no fork is left among the 33 ui files.
