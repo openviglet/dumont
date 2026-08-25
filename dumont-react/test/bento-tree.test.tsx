@@ -13,7 +13,7 @@
  * addition into a replacement — a redirect, a moved route, a deleted console line — fails here
  * rather than being noticed by a user who bookmarked the old URL.
  */
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import { render } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
@@ -91,14 +91,59 @@ describe("D37: both trees serve", () => {
 })
 
 describe("D37: the bento tree's own root", () => {
-  it("lands Home on a mosaic of what has actually migrated", async () => {
+  it("lands Home on the sections, each opening a hub the tree serves", async () => {
     stubConnector()
     renderApp(BENTO_HOME)
 
-    // The tree serves exactly what it holds. A home listing a surface with no bento route would
-    // be advertising a page the router does not answer.
-    const migrated = await screen.findByRole("link", { name: /database/i })
-    expect(migrated.getAttribute("href")).toBe(BENTO_DB)
+    /*
+     * Scoped to `main`, because the rail now lists the same sections in the same words — which is
+     * the point of D45, and would otherwise make every one of these assertions ambiguous.
+     */
+    const page = within(await screen.findByRole("main"))
+
+    // Home → hub → surface is the hierarchy the rail assumes, so Home lists sections rather than
+    // leaves. A tile pointing at a hub route this tree does not answer is the failure.
+    const sources = await page.findByRole("link", { name: /sources/i })
+    expect(sources.getAttribute("href")).toBe(`${BENTO_HOME}/area/sources`)
+  })
+
+  it("lists the sections on the rail, which is what a hub is for", async () => {
+    // D45's whole claim. The rail renders only sections carrying an `areaRoute`, so before the
+    // hubs existed it showed Home alone and the shell's only navigation was a keyboard shortcut.
+    stubConnector()
+    renderApp(BENTO_HOME)
+
+    const rail = within(await screen.findByRole("navigation", { name: /primary/i }))
+    expect(rail.getByRole("link", { name: /sources/i }).getAttribute("href")).toBe(
+      `${BENTO_HOME}/area/sources`,
+    )
+    expect(rail.getByRole("link", { name: /integration/i }).getAttribute("href")).toBe(
+      `${BENTO_HOME}/area/integration`,
+    )
+  })
+
+  it("reaches the migrated surface through its section hub", async () => {
+    // The other half of the hierarchy, and the reason the hub exists: the rail lists hubs, so a
+    // hub that could not reach its own surfaces would leave the rail pointing at a dead end.
+    stubConnector()
+    renderApp(`${BENTO_HOME}/area/sources`)
+
+    const page = within(await screen.findByRole("main"))
+    const db = await page.findByRole("link", { name: /database sources/i })
+    expect(db.getAttribute("href")).toBe(BENTO_DB)
+  })
+
+  it("sends an unknown section back Home instead of showing an empty one", async () => {
+    // A typed or stale URL. Rendering "nothing here" would claim the section exists and is empty,
+    // which is a different and wrong statement.
+    stubConnector()
+    renderApp(`${BENTO_HOME}/area/not-a-section`)
+
+    // Redirected to Home, so the page shows the section mosaic rather than an empty hub.
+    const page = within(await screen.findByRole("main"))
+    const sources = await page.findByRole("link", { name: /sources/i })
+    expect(sources.getAttribute("href")).toBe(`${BENTO_HOME}/area/sources`)
+    expect(page.queryByText(/nothing in this section/i)).toBeNull()
   })
 
   it("sends a not-yet-migrated detail page back to the console tree", async () => {

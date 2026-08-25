@@ -168,8 +168,7 @@ This track has no remaining pending tasks.
 
 ## Track J — Console surfaces move to bento chrome
 
-- 📋 **D45** (deps: —) **the bento rail lists no sections, so the shell's only navigation is a keyboard shortcut** — Sections appear on the rail once they have a hub page, and Dumont has none. → §XII.1
-- 📋 **D46** (deps: D45) **five source lists still render console chrome, so the bento tree serves one surface of six** — BentoListPage collapses the shape they share, and the migrated one already proves the pattern. → §XII.2
+- 📋 **D46** (deps: D45 ✅) **five source lists still render console chrome, so the bento tree serves one surface of six** — BentoListPage collapses the shape they share, and the migrated one already proves the pattern. → §XII.2
 - 📋 **D47** (deps: D46) **a migrated list sends every tile into the console, so a reader leaves the shell mid-task** — Detail pages have not moved, and BentoEntityShell is what a form page becomes. → §XII.3
 
 ## Track K — Frontend build and lint gates
@@ -178,11 +177,6 @@ This track has no remaining pending tasks.
 - 📋 **D49** (deps: —) **type declarations for the federated remotes fail to generate on every build, and the build still passes** — Turing consumes those remotes and gets no types across the boundary, where a mismatch surfaces at runtime. → §XIII.2
 - 📋 **D50** (deps: —) **the build-and-analyse workflow is dispatch-only, so a pull request is never actually built** — It also caches on a lockfile that does not exist and pins Sonar to the previous version's branch. → §XIII.3
 - 📋 **D51** (deps: —) **the census warns on every run about a probe for chrome no page has ever imported** — A standing warning is what teaches a reader to ignore the next one, which will be a real one. → §XIII.4
-
-## Done when — D45
-
-- **The rail lists Dumont's sections, and each opens a hub** A section reaches the rail
-  only once it carries an areaRoute, so the hub page is the deliverable.
 
 ## Done when — D46
 

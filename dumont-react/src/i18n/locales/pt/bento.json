@@ -3,9 +3,21 @@
     "skipToContent": "Ir para o conteúdo",
     "mainContent": "Conteúdo principal",
     "home": {
-      "subtitle": "Telas que já usam a nova interface.",
+      "subtitle": "Escolha uma seção para começar.",
       "emptyTitle": "Nada foi migrado ainda",
       "emptyDescription": "Todas as telas continuam sendo servidas pelo console."
+    },
+    "area": {
+      "emptyTitle": "Nada nesta seção",
+      "emptyDescription": "Nenhum plugin de conector ativo oferece uma tela aqui ainda."
+    },
+    "sections": {
+      "sources": {
+        "description": "De onde vem o conteúdo: conecte uma fonte e depois indexe-a."
+      },
+      "integration": {
+        "description": "Regras, indexação, monitoramento e tudo sobre este conector."
+      }
     }
   }
 }

@@ -117,27 +117,64 @@ export function resolveIcon(name: string): Icon {
 }
 
 /**
+ * One band of the console, plus where its hub lives.
+ *
+ * `areaRoute` is not stored: like a surface's route it is per-instance, so the declaration keeps
+ * the `path` and {@link dumontNavGroups} builds the route once it knows the id.
+ */
+export interface DumontNavSectionDecl extends Omit<BentoNavSection, "areaRoute"> {
+  id: DumontNavSectionId;
+  /*
+   * The package leaves these three optional — a section may render unlabelled, and one reached
+   * only through its items needs no icon. Dumont's always carry all three, because every one of
+   * them appears on the rail and as a tile on the home mosaic, and both need something to draw.
+   * Requiring them here is what lets the pages read the values instead of asserting them.
+   */
+  labelKey: string;
+  descriptionKey: string;
+  icon: Icon;
+  /** Hub path under the bento integration-instance base. */
+  path: string;
+  /** Tone for this section's tile on the bento home. */
+  tone: BentoTone;
+}
+
+/**
  * The bands the rail lists. The rail renders **sections**, never leaves — that is what keeps it a
  * fixed, small height however many surfaces exist, and it is the flat console sidebar's overflow
  * inverted.
  *
- * No `areaRoute` yet: a section appears on the rail only once it has a hub page to open, and
- * Dumont has none. The palette needs no hub, so it reads this map today while the rail waits.
+ * Each opens a hub that renders the section's surfaces as a mosaic (D45). One parameterised route
+ * serves them all, so a new section is a line here and nothing else.
  */
-export const DUMONT_NAV_SECTIONS: Record<DumontNavSectionId, BentoNavSection> = {
+export const DUMONT_NAV_SECTIONS: Record<DumontNavSectionId, DumontNavSectionDecl> = {
   sources: {
     id: "sources",
     labelKey: "sidebar.sources",
-    descriptionKey: "integration.detail.description",
+    descriptionKey: "bento.sections.sources.description",
     icon: IconPlugConnected,
+    path: "/area/sources",
+    tone: "indigo",
   },
   integration: {
     id: "integration",
     labelKey: "integration.title",
-    descriptionKey: "integration.detail.description",
+    descriptionKey: "bento.sections.integration.description",
     icon: IconAdjustmentsSearch,
+    path: "/area/integration",
+    tone: "blue",
   },
 };
+
+/** Every section, in the order the rail and the home mosaic list them. */
+export const DUMONT_NAV_SECTION_IDS = Object.keys(
+  DUMONT_NAV_SECTIONS,
+) as DumontNavSectionId[];
+
+/** Where a section's hub lives, for the given instance. */
+export function sectionAreaRoute(id: DumontNavSectionId, integrationId: string): string {
+  return `${ROUTES.BENTO_INTEGRATION_INSTANCE}/${integrationId}${DUMONT_NAV_SECTIONS[id].path}`;
+}
 
 /**
  * Every surface Dumont has. Order matches what `manifest.navItems` carried before D39, so the
@@ -197,12 +234,20 @@ export function dumontNavItems(integrationId: string, surfaces: DumontNavSurface
  * exist, because neither of them holds a list.
  */
 export function dumontNavGroups(integrationId: string, surfaces: DumontNavSurface[] = DUMONT_NAV): BentoNavGroup[] {
-  return (Object.keys(DUMONT_NAV_SECTIONS) as DumontNavSectionId[])
-    .map((id) => ({
-      section: DUMONT_NAV_SECTIONS[id],
+  return DUMONT_NAV_SECTION_IDS.map((id) => {
+    const declared = DUMONT_NAV_SECTIONS[id];
+    return {
+      // The hub is what puts this section on the rail; without an `areaRoute` the rail skips it.
+      section: {
+        id: declared.id,
+        labelKey: declared.labelKey,
+        descriptionKey: declared.descriptionKey,
+        icon: declared.icon,
+        areaRoute: sectionAreaRoute(id, integrationId),
+      },
       items: surfaces.filter((s) => s.section === id).map((s) => toBentoNavItem(s, integrationId)),
-    }))
-    .filter((group) => group.items.length > 0);
+    };
+  }).filter((group) => group.items.length > 0);
 }
 
 /**

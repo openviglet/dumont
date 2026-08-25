@@ -49,18 +49,34 @@ const PACKAGE_CHROME = [
   "nav.logOut",
 ]
 
-/** Chrome *this* shell owns — the skip link, the main landmark, the migration home. */
+/** Chrome *this* shell owns — the skip link, the main landmark, the home and the section hubs. */
 const DUMONT_CHROME = [
   "bento.skipToContent",
   "bento.mainContent",
   "bento.home.subtitle",
   "bento.home.emptyTitle",
   "bento.home.emptyDescription",
+  "bento.area.emptyTitle",
+  "bento.area.emptyDescription",
+  "bento.sections.sources.description",
+  "bento.sections.integration.description",
   "home.title",
   "sidebar.sources",
+  "sidebar.brandName",
+  "integration.title",
 ]
 
 const ALL_CHROME = [...PACKAGE_CHROME, ...DUMONT_CHROME]
+
+/**
+ * Keys whose Portuguese is *correctly* identical to their English.
+ *
+ * The differs-from-English rule has one honest exception: a proper noun is the same word in every
+ * language, and "translating" the product's name would be the actual bug. Listed explicitly
+ * rather than dropped from `ALL_CHROME`, so the exemption is visible and stays small — an
+ * unexplained absence is how a gate loses its teeth one key at a time.
+ */
+const SAME_IN_EVERY_LANGUAGE = new Set(["sidebar.brandName"])
 
 describe("D40: every bento chrome string is translated in every language shipped", () => {
   it.each(LANGUAGES)("resolves all of them in %s", (lang) => {
@@ -82,7 +98,9 @@ describe("D40: every bento chrome string is translated in every language shipped
      */
     const en = i18n.getFixedT("en")
     const pt = i18n.getFixedT("pt")
-    const stillEnglish = ALL_CHROME.filter((key) => en(key) === pt(key))
+    const stillEnglish = ALL_CHROME.filter(
+      (key) => !SAME_IN_EVERY_LANGUAGE.has(key) && en(key) === pt(key),
+    )
     expect(stillEnglish, "these render their English text under pt").toEqual([])
   })
 })

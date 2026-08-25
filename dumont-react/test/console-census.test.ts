@@ -49,12 +49,13 @@ const FORKED: Record<string, string[]> = {
  * one line per migrated surface after that. The count, not the names, is what the track is
  * measured by — but the names are what make each step reviewable.
  *
- * Two of the three below are the shell itself rather than migrated pages: a parallel tree needs a
- * root and somewhere for Home to land before any surface can move into it. Only the third is one
- * of the 39, which is why "Left to move" still reads 39 — the shell is what makes moving possible,
- * not progress through the list.
+ * Three of the four below are the shell itself rather than migrated pages: a parallel tree needs a
+ * root, somewhere for Home to land, and a hub per section before any surface can move into it.
+ * Only the last is one of the 39, which is why "Left to move" still reads 39 — the shell is what
+ * makes moving possible, not progress through the list.
  */
 const ON_BENTO: string[] = [
+  "app/bento/bento.area.page.tsx",
   "app/bento/bento.home.page.tsx",
   "app/bento/bento.root.page.tsx",
   "pages/bento/integration.instance.db.source.list.bento.page.tsx",

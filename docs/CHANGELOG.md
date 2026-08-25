@@ -475,5 +475,7 @@
 
 ## Track J — Console surfaces move to bento chrome
 
+- **D45** — Each section declares a hub path, one parameterised route renders it as a mosaic, and the rail lists both; home lists sections too, deleting its hand-written copy of what had migrated.
+
 ## Track K — Frontend build and lint gates
 

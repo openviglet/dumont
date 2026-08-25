@@ -3,9 +3,21 @@
     "skipToContent": "Skip to content",
     "mainContent": "Main content",
     "home": {
-      "subtitle": "Surfaces already running on the new chrome.",
+      "subtitle": "Choose a section to begin.",
       "emptyTitle": "Nothing has moved yet",
       "emptyDescription": "Every surface is still served by the console."
+    },
+    "area": {
+      "emptyTitle": "Nothing in this section",
+      "emptyDescription": "No connector plugin active here provides a surface yet."
+    },
+    "sections": {
+      "sources": {
+        "description": "Where content comes from: connect a source, then index it."
+      },
+      "integration": {
+        "description": "Rules, indexing, monitoring and everything about this connector."
+      }
     }
   }
 }

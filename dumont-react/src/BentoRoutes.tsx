@@ -1,6 +1,7 @@
 import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
 
 import { Route, Routes } from "react-router-dom";
+import BentoAreaPage from "./app/bento/bento.area.page";
 import BentoHomePage from "./app/bento/bento.home.page";
 import IntegrationInstanceDbSourceListBentoPage from "./pages/bento/integration.instance.db.source.list.bento.page";
 
@@ -24,6 +25,12 @@ export default function BentoRoutes() {
   return (
     <Routes>
       <Route index element={<BentoHomePage />} />
+      {/*
+       * One route for every section hub (D45). A section is data, so a new one is a line in
+       * `DUMONT_NAV_SECTIONS` — never a page here, and never a route the rail can point at and
+       * this tree cannot answer.
+       */}
+      <Route path="area/:sectionId" element={<BentoAreaPage />} />
       {/* Migrated in D37 — its console original at `db-source` is untouched. */}
       <Route path="db-source" element={<IntegrationInstanceDbSourceListBentoPage />} />
     </Routes>

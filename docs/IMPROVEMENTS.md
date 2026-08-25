@@ -78,21 +78,6 @@ These constrain every task above:
 
 ## XII Console surfaces move to bento chrome
 
-### XII.1 Hubs, so the rail becomes navigation (D45)
-
-Track I put the bento shell and its route tree in place, and left the rail with nothing
-to list. The rail renders only sections that carry an `areaRoute`, because it lists
-section hubs and never leaves — that is what keeps it a fixed, small height however many
-of the 39 surfaces migrate, and it is the flat console sidebar's overflow inverted.
-
-Dumont has no hub pages, so the rail shows Home alone and the tree's only navigation is
-the home mosaic. The `⌘K` palette covers the gap today, but a palette is a keyboard
-affordance and a rail is what a reader sees.
-
-The declaration already carries the two sections and every surface's membership. A hub
-renders one section's surfaces as a mosaic; giving the section an `areaRoute` is what
-makes the rail list it. Nothing else has to change.
-
 ### XII.2 The remaining source lists (D46)
 
 Six source lists render the same shape — a header, a grid of cards, a blank slate — and
