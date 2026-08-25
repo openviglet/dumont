@@ -3,8 +3,8 @@ import type { Icon } from "@tabler/icons-react"
 import * as React from "react"
 import { useTranslation } from "react-i18next"
 
+import { resolveIcon, visibleNavSurfaces, type DumontNavSurface } from "@/app/nav.const"
 import { ROUTES } from "@/app/routes.const"
-import manifest, { resolveIcon, type DumontNavItem } from "@/manifest"
 import { NavMain } from "@/components/nav-main"
 import { usePlugin } from "@/contexts/plugin.context"
 import { TurIntegrationQueueService } from "@/services/integration/integration-queue.service"
@@ -74,24 +74,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, []);
 
   const toNav = React.useCallback(
-    (item: DumontNavItem) => ({
-      title: t(item.titleKey),
-      url: `${BASE}${item.url}`,
-      icon: resolveIcon(item.icon),
+    (surface: DumontNavSurface) => ({
+      title: t(surface.titleKey),
+      url: `${BASE}${surface.path}`,
+      icon: resolveIcon(surface.iconName),
     }),
     [t]
   )
 
+  /*
+   * D39 — the sidebar's shape, read off the one declaration.
+   *
+   * The grouping is the sidebar's own and stays here: one group per active connector, then the
+   * common surfaces under "Integration". What moved out is the *list* — which surfaces exist,
+   * what they are called, where they point — so the rail and the palette read the same answer
+   * instead of each carrying a copy that drifts on the next rename.
+   *
+   * `visibleNavSurfaces` also owns the sort, so every reader orders them the same way.
+   */
   const navGroups = React.useMemo(
     () => {
-      const sorted = [...manifest.navItems].sort((a, b) => a.order - b.order);
+      const visible = visibleNavSurfaces(providers);
       const groups: { label?: string; items: { title: string; url: string; icon: Icon }[] }[] = [
         { items: [{ title: t("home.title"), url: ROUTES.HOME, icon: IconHome }] },
       ];
 
-      // Source items (those with a `provider`) show one group per active connector.
+      // Source surfaces (those with a `provider`) show one group per active connector.
       for (const provider of providers) {
-        const activeSources = sorted.filter((item) => item.provider && item.provider === provider);
+        const activeSources = visible.filter((surface) => surface.provider === provider);
         if (activeSources.length > 0) {
           groups.push({
             label: PROVIDER_LABELS[provider] ?? provider,
@@ -100,9 +110,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         }
       }
 
-      // Common items (no `provider`) are always shown.
-      const commonNavItems = sorted.filter((item) => !item.provider);
-      groups.push({ label: t("integration.title"), items: commonNavItems.map(toNav) });
+      // Common surfaces (no `provider`) are always shown.
+      groups.push({
+        label: t("integration.title"),
+        items: visible.filter((surface) => !surface.provider).map(toNav),
+      });
 
       return groups;
     },

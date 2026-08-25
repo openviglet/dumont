@@ -469,3 +469,4 @@
 - **D42** — vitest run mounts the shell, a list page and a form page against a stubbed HTTP boundary, and holds D35's census by name; dropping the footer turns the run red.
 - **D36** — bento.css joins the Tailwind build (bento-glass, bento-grid, the rail gutter reach the bundle) and seven cases mount the rail, the mosaic and the form hero against the affordances D42 pins.
 - **D37** — A bento tree serves under its own prefix and shell with the database source list migrated into it; the console route is untouched, nothing redirects, and six cases mount the real App to hold both.
+- **D39** — One declaration in nav.const holds all 16 surfaces in the package's schema; the sidebar, the rail and a wired command palette derive from it, and manifest's wire shape is derived and pinned unchanged.

@@ -1,23 +1,13 @@
-import {
-  IconActivityHeartbeat,
-  IconAdjustmentsSearch,
-  IconBuildingBank,
-  IconChartBar,
-  IconCloudComputing,
-  IconDatabase,
-  IconFolder,
-  IconGitCommit,
-  IconGlobe,
-  IconGraph,
-  IconInfoCircle,
-  IconListCheck,
-  IconPuzzle,
-  IconSparkles,
-  IconTools,
-  IconWand,
-} from "@tabler/icons-react";
-import type { Icon } from "@tabler/icons-react";
+import { DUMONT_NAV } from "@/app/nav.const";
 
+/**
+ * The Module Federation wire shape for one nav entry.
+ *
+ * Unchanged by D39 on purpose: a host (Turing) reads this over `./manifest`, and the declaration
+ * moving does not give us licence to change what the host receives. It is now *derived* from
+ * `DUMONT_NAV` rather than typed out beside it, so a renamed surface can no longer mean one thing
+ * in the sidebar and another on the wire.
+ */
 export interface DumontNavItem {
   titleKey: string;
   url: string;
@@ -33,61 +23,20 @@ export interface DumontManifest {
 }
 
 /**
- * The actual icon components Dumont ships, keyed by the names used in the
- * manifest. This is the single source of truth for nav icons — consumed both
- * by the standalone sidebar and, via {@link resolveIcon}, by hosts that mount
- * Dumont as a Module Federation remote (e.g. Turing). Adding a new connector
- * icon here is the ONLY change needed; the host never has to be touched.
+ * Re-exported so `./manifest` keeps offering it: the host renders Dumont's own icons without
+ * maintaining a parallel icon map. The map itself lives with the declaration that uses it.
  */
-const ICON_COMPONENTS: Record<string, Icon> = {
-  IconActivityHeartbeat,
-  IconGitCommit,
-  IconDatabase,
-  IconBuildingBank,
-  IconGlobe,
-  IconFolder,
-  IconCloudComputing,
-  IconTools,
-  IconAdjustmentsSearch,
-  IconGraph,
-  IconChartBar,
-  IconListCheck,
-  IconSparkles,
-  IconPuzzle,
-  IconInfoCircle,
-  IconWand,
-};
-
-/**
- * Resolves a manifest icon name to its component. Exposed through the Module
- * Federation `./manifest` remote so the host renders Dumont's own icons
- * without maintaining a parallel icon map. Falls back to {@link IconPuzzle}
- * so an unknown name still renders a sensible icon.
- */
-export function resolveIcon(name: string): Icon {
-  return ICON_COMPONENTS[name] ?? IconPuzzle;
-}
+export { resolveIcon } from "@/app/nav.const";
 
 const manifest: DumontManifest = {
   version: 1,
-  navItems: [
-    { titleKey: "integration.nav.sources", url: "/source", icon: "IconGitCommit", order: 10, provider: "AEM" },
-    { titleKey: "integration.nav.dbSources", url: "/db-source", icon: "IconDatabase", order: 10, provider: "JDBC-DATABASE" },
-    { titleKey: "integration.nav.wcSources", url: "/wc-source", icon: "IconGlobe", order: 10, provider: "WEB-CRAWLER" },
-    { titleKey: "integration.nav.assetsSources", url: "/assets-source", icon: "IconFolder", order: 10, provider: "ASSETS" },
-    { titleKey: "integration.nav.catalogSources", url: "/catalog-source", icon: "IconBuildingBank", order: 10, provider: "CATALOG-BRIDGE" },
-    { titleKey: "integration.nav.edsSources", url: "/eds-source", icon: "IconCloudComputing", order: 10, provider: "EDS" },
-    { titleKey: "integration.nav.sourceInference", url: "/source-inference", icon: "IconWand", order: 15 },
-    { titleKey: "integration.nav.indexingRules", url: "/indexing-rule", icon: "IconTools", order: 20 },
-    { titleKey: "integration.nav.indexingManager", url: "/indexing-manager", icon: "IconAdjustmentsSearch", order: 30 },
-    { titleKey: "integration.nav.monitoring", url: "/monitoring", icon: "IconGraph", order: 40 },
-    { titleKey: "integration.nav.indexingStats", url: "/indexing-stats", icon: "IconChartBar", order: 50 },
-    { titleKey: "integration.nav.coverage", url: "/coverage", icon: "IconActivityHeartbeat", order: 55 },
-    { titleKey: "integration.nav.doubleCheck", url: "/double-check", icon: "IconListCheck", order: 60 },
-    { titleKey: "integration.nav.insights", url: "/insights", icon: "IconSparkles", order: 90 },
-    { titleKey: "integration.nav.plugins", url: "/plugins", icon: "IconPuzzle", order: 100 },
-    { titleKey: "integration.nav.systemInfo", url: "/system-info", icon: "IconInfoCircle", order: 110 },
-  ],
+  navItems: DUMONT_NAV.map((surface) => ({
+    titleKey: surface.titleKey,
+    url: surface.path,
+    icon: surface.iconName,
+    order: surface.order,
+    ...(surface.provider ? { provider: surface.provider } : {}),
+  })),
 };
 
 export default manifest;

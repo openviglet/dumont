@@ -1,11 +1,30 @@
+import { dumontNavGroups, dumontNavItems, visibleNavSurfaces } from "@/app/nav.const";
 import { ROUTES } from "@/app/routes.const";
 import { DumontLogo } from "@/components/logo/dumont-logo";
 import { ModeToggle } from "@/components/mode-toggle";
+import { usePlugin } from "@/contexts/plugin.context";
 import { DumUserService } from "@/services/auth/user.service";
+import { IconSearch } from "@tabler/icons-react";
 import { UserProvider as VigUserProvider } from "@viglet/viglet-design-system";
-import { BentoBackToTop, BentoNavRail, BentoUserMenu } from "@viglet/viglet-design-system/bento";
+import {
+  BentoBackToTop,
+  BentoCommandPalette,
+  BentoNavRail,
+  BentoUserMenu,
+} from "@viglet/viglet-design-system/bento";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Outlet, useParams } from "react-router-dom";
+
+/**
+ * The palette's shortcut hint, honest per platform: macOS uses ⌘, everything else Ctrl (the
+ * handler accepts both). A bare ⌘K on Windows tells a user to press a key their keyboard has not
+ * got.
+ */
+const IS_MAC =
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad|iPod/.test(navigator.userAgent || "");
+const SHORTCUT_HINT = IS_MAC ? "⌘K" : "Ctrl K";
 
 const STANDALONE_ID = "local";
 
@@ -57,8 +76,49 @@ export default function BentoRootPage() {
 function BentoShell() {
   const { t } = useTranslation();
   const { id } = useParams<{ id?: string }>();
+  const { providers } = usePlugin();
   const integrationId = id ?? STANDALONE_ID;
   const home = `${ROUTES.BENTO_INTEGRATION_INSTANCE}/${integrationId}`;
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  /*
+   * D39 — the rail and the palette, from one declaration.
+   *
+   * `visibleNavSurfaces` answers which surfaces this reader may see, because that is a product
+   * question: the package renders what it is handed and has no way to read a connector's plugin
+   * list. Both derivations take the *same* filtered set, so `⌘K` and the rail cannot disagree
+   * about what exists.
+   */
+  const visible = useMemo(() => visibleNavSurfaces(providers), [providers]);
+  const navGroups = useMemo(
+    () => dumontNavGroups(integrationId, visible),
+    [integrationId, visible],
+  );
+  const navItems = useMemo(
+    () => dumontNavItems(integrationId, visible),
+    [integrationId, visible],
+  );
+
+  /*
+   * ⌘K / Ctrl+K, registered once at the root so it works from any bento surface. Ignored while
+   * the reader is typing, so it never eats a keystroke meant for a field.
+   */
+  useEffect(() => {
+    function isTyping(target: EventTarget | null): boolean {
+      const el = target as HTMLElement | null;
+      const tag = el?.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || Boolean(el?.isContentEditable);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        if (isTyping(event.target)) return;
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   return (
     <div className="bento-rail-gutter relative min-h-svh w-full bg-background text-foreground">
@@ -74,16 +134,12 @@ function BentoShell() {
       </a>
 
       {/*
-       * No sections yet, on purpose. The rail lists section *hubs*, never leaves — that is what
-       * keeps it a fixed, small height however many of the 39 surfaces migrate, and it is the flat
-       * console sidebar's overflow inverted. Dumont has no such declaration to hand it: its map
-       * still lives as markup inside `app-sidebar`, and turning that into data both the rail and
-       * the `⌘K` palette can read is D39. Passing a hand-copied array here would let the rail
-       * advertise bento routes this tree does not serve, so until D39 the mosaic below is the
-       * navigation and the rail carries Home alone.
+       * The rail renders only sections that have a hub page to open, so today it carries Home
+       * alone — Dumont has no hubs yet. It is handed the declaration all the same: the day a
+       * section gains an `areaRoute`, the rail lists it without a second list being written.
        */}
       <BentoNavRail
-        groups={[]}
+        groups={navGroups}
         homeRoute={home}
         homeLabel={t("common.home", { defaultValue: "Home" })}
       />
@@ -94,6 +150,24 @@ function BentoShell() {
           <span className="text-sm font-medium tracking-tight md:text-base">Viglet Dumont</span>
         </Link>
         <div className="flex items-center gap-2">
+          {/*
+           * On desktop this doubles as the hint that ⌘K exists; below `md`, where the rail is
+           * hidden, it is the only way to reach a surface that is not on screen.
+           */}
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            aria-label={t("bento.palette.open", { defaultValue: "Open command palette" })}
+            className="bento-tile bento-tile-clickable inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 py-1.5 pl-3 pr-2 text-sm text-muted-foreground backdrop-blur hover:text-foreground"
+          >
+            <IconSearch size={16} aria-hidden />
+            <span className="hidden sm:inline">
+              {t("bento.palette.search", { defaultValue: "Search" })}
+            </span>
+            <kbd className="hidden rounded border border-border/60 bg-muted px-1.5 py-0.5 text-[10px] font-medium tracking-wide sm:inline">
+              {SHORTCUT_HINT}
+            </kbd>
+          </button>
           <ModeToggle />
           <BentoUserMenu accountRoute={ROUTES.USER_ACCOUNT} logoutUrl={ROUTES.LOGOUT} />
         </div>
@@ -109,6 +183,12 @@ function BentoShell() {
       </main>
 
       <BentoBackToTop />
+      {/*
+       * The palette needs no hub, so it reads the declaration in full today: a migrated surface
+       * navigates inside the shell, one that has not moved links out to the console and is marked
+       * as leaving. That is what lets `⌘K` reach all 39 while only one of them has migrated.
+       */}
+      <BentoCommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} items={navItems} />
     </div>
   );
 }

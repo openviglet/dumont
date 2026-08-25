@@ -16,7 +16,8 @@
   "sidebar": {
     "brandName": "Dumont",
     "brandTagline": "Data Exchange Platform",
-    "indexing": "Indexing"
+    "indexing": "Indexing",
+    "sources": "Sources"
   },
   "home": {
     "title": "Home",

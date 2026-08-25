@@ -168,14 +168,8 @@ This track has no remaining pending tasks.
 
 ## Track I — The console adopts the shared bento layer
 
-- 📋 **D39** (deps: D37 ✅) **Dumont has no nav declaration a rail and a palette can share, so each surface would be listed twice** — Navigation lives as markup inside the console sidebar, and the package takes it as data. → §XI.5
 - 📋 **D40** (deps: D37 ✅) **bento chrome strings have no Dumont translations, so a shared rail and palette would render English** — This console already ships more than one language, and the chrome the package owns needs them here. → §XI.6
 - 📋 **D41** (deps: viglet-design-system VDS5) **nothing fails when a component is re-declared here instead of imported from the design system** — Nineteen names in eleven files already are, and only a reader has ever noticed. → §XI.7
-
-## Done when — D39
-
-- **One nav declaration drives the console sidebar** The surfaces are data shaped to the
-  package schema, and the sidebar reads it instead of markup.
 
 ## Done when — D40
 

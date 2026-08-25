@@ -78,29 +78,6 @@ These constrain every task above:
 
 ## XI The console adopts the shared bento layer
 
-### XI.5 One declaration, read three times (D39)
-
-The bento nav rail and the command palette are both driven by a declaration of what
-surfaces exist: their labels, their routes, their icons, which of them a given user may
-see. The package supplies the schema and takes that declaration as data, deliberately —
-routes and entity names are product data and the non-goals keep them out of the package.
-
-Dumont has never written that declaration down. Its navigation lives inside the console
-sidebar component as markup, which means a rail and a palette added later would each
-need their own copy, and the three would drift the moment a surface is renamed. Turing
-met the same problem from the other side: its `bento-nav.config` mixes behaviour with 29
-surfaces and has to become data over the package schema before the rail can move, which
-is a task of its own there.
-
-Dumont has the easier version of it, because nothing has been written twice yet. Extract
-the surfaces the console sidebar renders into one declaration shaped to the package's
-nav schema, and have the sidebar read it. That is a refactor with no visible change,
-which is the point: it can land before any bento surface exists, and it is what makes
-the rail and the palette a configuration rather than a second list.
-
-Write it once, read it three times — sidebar today, rail and palette when the shell
-arrives.
-
 ### XI.6 The chrome speaks, and not yet in this console's languages (D40)
 
 The bento chrome the package owns speaks: the save bar says "Unsaved changes" and "Title
