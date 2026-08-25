@@ -466,3 +466,4 @@
 - **D35** — npm run census reads the package's own exports.json and prints 39 pages, 0 on bento, and 88 components as 37 shim, 8 fork, 43 own (design §XI.1 superseded: app-footer.tsx forks package's AppFooter).
 - **D38** — ui/table.tsx is a one-line re-export of the package's eight Table primitives, byte-identical to what it declared, and no fork is left among the 33 ui files.
 - **D44** — Both grids take the v8 names from v9's ./legacy subpath, so tsc -b and vite build are green and neither grid was rewritten.
+- **D42** — vitest run mounts the shell, a list page and a form page against a stubbed HTTP boundary, and holds D35's census by name; dropping the footer turns the run red.

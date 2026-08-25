@@ -191,25 +191,3 @@ Adopt the lint the package ships — `viglet-ds-check-duplicates`, which reads
 `exports.json` from the installed package and ends each finding in the import that
 replaces the copy — and run it in this repository's CI. Annotate what is deliberate with
 its reason, so what fails is a new duplicate.
-
-### XI.8 A floor, not coverage (D42)
-
-There are no test files in `dumont-react` and no `test` script in its `package.json`.
-Not a thin suite — none. Every other line in this track is a change to what 39 pages
-render, and the only thing that would notice a regression is a person opening the page.
-
-That is affordable while nothing moves and unaffordable the moment something does.
-Turing had suites and they earned their keep twice inside one afternoon: the list-page
-suite caught a dropped Customize affordance that type-checked cleanly and would have
-reached 16 surfaces silently, and the status-marker suite caught a copy change that
-turned out to be correct. Both were invisible to the compiler. Neither would have been
-noticed here.
-
-The ask is not coverage. It is a floor: a runner wired up, and a handful of tests that
-render the surfaces this track touches and assert they still render — the shell mounts,
-a list page shows its rows, a form page shows its save affordance. Enough that a
-migrated page failing to render is a red run rather than a support ticket.
-
-Land it early. A suite written after a migration documents whatever the migration
-produced, including its mistakes; a suite written before it is the only thing that can
-tell the two apart.

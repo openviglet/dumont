@@ -48,9 +48,8 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const ROOT = join(HERE, "..")
 export const SRC = join(ROOT, "src")
-export const EXPORTS_JSON = join(
-  ROOT, "node_modules", "@viglet", "viglet-design-system", "dist", "exports.json",
-)
+export const DS_ROOT = join(ROOT, "node_modules", "@viglet", "viglet-design-system")
+export const EXPORTS_JSON = join(DS_ROOT, "dist", "exports.json")
 
 /**
  * Codepoint order, stated rather than defaulted, and deliberately not `localeCompare`: this
@@ -131,17 +130,48 @@ function walk(dir, accept, out = []) {
 
 const key = (file) => relative(SRC, file).replaceAll("\\", "/")
 
-/** The design system's own list of what it exports, by name, across every entry point. */
-export function designSystemExports(path = EXPORTS_JSON) {
-  if (!existsSync(path)) {
+/**
+ * The design system's own list of what it exports, by name, across every entry point.
+ *
+ * Two readings, and the report says which one it got. `dist/exports.json` is the package's own
+ * manifest and the better answer — it is emitted by the package's `scripts/emit-exports.mjs` and
+ * names the specifier each export belongs to. But the **published** package does not ship it:
+ * `2026.3.2` from the registry has no such file, and only a local `copy-ds.cmd` build does. A
+ * census that needed it would work on one machine and refuse on CI, which for an instrument whose
+ * whole job is to be re-run is the same as not existing.
+ *
+ * So the fallback reads the `.d.ts` each entry point in the package's `exports` map declares and
+ * takes the names out of its `export { … }` clause. That is the same set for every purpose this
+ * census has; what it loses is nothing the classifier consults.
+ */
+export function designSystemExports(path = EXPORTS_JSON, dsRoot = DS_ROOT) {
+  const reading = existsSync(path) ? fromManifest(path) : fromDeclarations(dsRoot)
+
+  /*
+   * A floor, not a zero check, and the first run of the fallback is why. `dist/index.d.ts` in the
+   * published package is eight lines of `export * from './components'`, so a reader that took
+   * only the names it spells found exactly **one** export — and one is not zero, so a `size === 0`
+   * guard passed it and the census reported the console had no forks at all. The package's root
+   * barrel alone carries 221 names; anything near single digits means the reader broke, not that
+   * the debt was paid.
+   */
+  if (reading.names.size < PLAUSIBLE_EXPORTS) {
     throw new Error(
-      `no design system exports at ${path}\n`
-      + "  The census classifies a component by asking whether the package already exports its\n"
-      + "  name, so without this file it cannot tell a fork from something Dumont owns — and a\n"
-      + "  census that reports no forks reads exactly like a finished migration.\n"
-      + "  Run `npm install` in dumont-react, or `copy-ds.cmd` for an unpublished build.",
+      `read only ${reading.names.size} exports from ${dsRoot} (via ${reading.source})\n`
+      + `  The package's root barrel alone carries far more than ${PLAUSIBLE_EXPORTS}, so this is\n`
+      + "  a reader that stopped working, not a package that shrank. Every component here would\n"
+      + "  classify as Dumont's own and the census would report a finished migration.\n"
+      + "  Re-run `pnpm install` at the repo root, or `copy-ds.cmd` for an unpublished build.",
     )
   }
+  return reading
+}
+
+/** Below this, the reading is broken rather than small. See the guard above for the incident. */
+const PLAUSIBLE_EXPORTS = 50
+
+/** The package's own emitted manifest: names and the specifier each belongs to. */
+function fromManifest(path) {
   const manifest = JSON.parse(readFileSync(path, "utf8"))
   const names = new Map()
   for (const entry of Object.values(manifest.entries ?? {})) {
@@ -149,8 +179,90 @@ export function designSystemExports(path = EXPORTS_JSON) {
       if (!names.has(name)) names.set(name, entry.specifier)
     }
   }
-  return { version: manifest.version ?? "unknown", names }
+  return { version: manifest.version ?? "unknown", names, source: "exports.json" }
 }
+
+/** Every entry point's `.d.ts`, as the published package ships it. */
+function fromDeclarations(dsRoot) {
+  const manifestPath = join(dsRoot, "package.json")
+  if (!existsSync(manifestPath)) {
+    throw new Error(
+      `no design system at ${dsRoot}\n`
+      + "  The census classifies a component by asking whether the package already exports its\n"
+      + "  name, so without the package it cannot tell a fork from something Dumont owns — and a\n"
+      + "  census that reports no forks reads exactly like a finished migration.\n"
+      + "  Run `pnpm install` at the repo root, or `copy-ds.cmd` for an unpublished build.",
+    )
+  }
+  const pkg = JSON.parse(readFileSync(manifestPath, "utf8"))
+  const names = new Map()
+  for (const [subpath, entry] of Object.entries(pkg.exports ?? {})) {
+    const declaration = declarationFor(dsRoot, entry)
+    if (!declaration) continue
+    const specifier = subpath === "."
+      ? "@viglet/viglet-design-system"
+      : `@viglet/viglet-design-system${subpath.slice(1)}`
+    for (const name of declaredNames(declaration)) {
+      if (!names.has(name)) names.set(name, specifier)
+    }
+  }
+  return { version: pkg.version ?? "unknown", names, source: "type declarations" }
+}
+
+function declarationFor(dsRoot, entry) {
+  const types = typeof entry === "object" && entry !== null ? entry.types : null
+  if (!types) return null
+  const declaration = join(dsRoot, types)
+  return existsSync(declaration) ? declaration : null
+}
+
+/**
+ * Every name one entry point's declarations expose, following `export * from` as far as it goes.
+ *
+ * The published package does not bundle its types: `dist/index.d.ts` is eight lines, six of them
+ * `export * from './components'` and friends. A reader that took only the names spelled in that
+ * file found **one** export and reported the console had zero forks — a finished migration, by
+ * arithmetic on an empty set. So the star re-exports are followed, and `seen` bounds the walk on
+ * a graph that is allowed to have cycles.
+ */
+function declaredNames(declaration, seen = new Set()) {
+  const resolved = existsSync(declaration) ? declaration : null
+  if (!resolved || seen.has(resolved)) return []
+  seen.add(resolved)
+
+  const source = readFileSync(resolved, "utf8")
+  const out = []
+
+  for (const [, clause] of source.matchAll(DTS_EXPORT)) {
+    for (const raw of clause.split(",")) {
+      const name = raw.trim().replace(/^type\s+/, "").split(/\s+as\s+/).pop()?.trim()
+      if (name) out.push(name)
+    }
+  }
+  for (const [, name] of source.matchAll(DTS_DECLARED)) out.push(name)
+  for (const [, specifier] of source.matchAll(DTS_STAR)) {
+    const next = resolveDeclaration(dirname(resolved), specifier)
+    if (next) out.push(...declaredNames(next, seen))
+  }
+  return out
+}
+
+/** `./components` is a directory in the published layout and a file in the bundled one. */
+function resolveDeclaration(from, specifier) {
+  if (!specifier.startsWith(".")) return null
+  const base = join(from, specifier.replace(/\.js$/, ""))
+  for (const candidate of [`${base}.d.ts`, join(base, "index.d.ts")]) {
+    if (existsSync(candidate)) return candidate
+  }
+  return null
+}
+
+/** `export { A, B as C };` — the whole surface in one clause, bundled or forwarded. */
+const DTS_EXPORT = /export\s*(?:type\s+)?\{([^}]*)\}/g
+/** `export declare function X`, `export declare const X`, `export type X =` — named in place. */
+const DTS_DECLARED = /export\s+(?:declare\s+)?(?:abstract\s+)?(?:function|const|let|var|class|type|interface|enum)\s+([A-Za-z_$][\w$]*)/g
+/** `export * from './components'` — the published layout's whole content, one level down. */
+const DTS_STAR = /export\s+\*\s+from\s*["']([^"']+)["']/g
 
 // `export { A, B as C } from "…"` — a shim, and the specifier it forwards to.
 const REEXPORT = /export\s*(?:type\s+)?\{([^}]*)\}\s*from\s*["']([^"']+)["']/g
@@ -232,6 +344,8 @@ export function census() {
 
   return {
     designSystem: ds.version,
+    read: ds.source,
+    exports: ds.names.size,
     pages,
     components,
     totals: {
@@ -250,7 +364,10 @@ export function census() {
 function report(result, all = false) {
   const t = result.totals
   const lines = []
-  lines.push(`Dumont console census — design system ${result.designSystem}`)
+  lines.push(
+    `Dumont console census — design system ${result.designSystem}, `
+    + `${result.exports} exports read from ${result.read}`,
+  )
   lines.push("")
   lines.push(`PAGES  ${t.pages} — ${t.bento} bento, ${t.console} console`)
   for (const [name, page] of Object.entries(result.pages)) {

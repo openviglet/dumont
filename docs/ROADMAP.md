@@ -173,7 +173,6 @@ This track has no remaining pending tasks.
 - 📋 **D39** (deps: D37) **Dumont has no nav declaration a rail and a palette can share, so each surface would be listed twice** — Navigation lives as markup inside the console sidebar, and the package takes it as data. → §XI.5
 - 📋 **D40** (deps: D37) **bento chrome strings have no Dumont translations, so a shared rail and palette would render English** — This console already ships more than one language, and the chrome the package owns needs them here. → §XI.6
 - 📋 **D41** (deps: viglet-design-system VDS5) **nothing fails when a component is re-declared here instead of imported from the design system** — Nineteen names in eleven files already are, and only a reader has ever noticed. → §XI.7
-- 🛠 **D42** (deps: D44 ✅) **the console has no test suite at all, so no migrated surface can be shown to still render** — Zero test files and no test script, which leaves every line in this track verifiable only by eye. → §XI.8
 
 ## Done when — D36
 
@@ -199,11 +198,6 @@ This track has no remaining pending tasks.
 
 - **A component re-declared here fails this repository's CI** check-duplicates runs in
   CI, names the replacing import, and a new duplicate exits non-zero.
-
-## Done when — D42
-
-- **A surface that stops rendering turns a run red** A test script exists, runs in CI,
-  and covers the shell and one list and one form surface.
 
 ## Non-goals (do NOT add as tasks)
 
