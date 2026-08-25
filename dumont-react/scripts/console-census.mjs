@@ -164,6 +164,30 @@ function isAdapter(source) {
 }
 
 /**
+ * Every source a page renders through — its own, plus the local modules it reaches.
+ *
+ * D51 — the chrome probes used to read the page file alone, and a page renders most of its chrome
+ * through components. `StickySaveBar` was the one that made it visible: the census reported the
+ * probe matching nothing and warned that it had gone stale, while the indexing manager page was
+ * rendering one the whole time, two files away. The warning was true about pages and false about
+ * the console, which is the worst kind — a reader learns to scroll past it, and the next probe
+ * that goes stale for the real reason reads identically.
+ *
+ * Same walk the era check uses, and the same bound: local modules only, `seen` to terminate.
+ */
+function localClosure(file, source, seen = new Set()) {
+  if (seen.has(file)) return []
+  seen.add(file)
+  const sources = [source]
+  for (const [, specifier] of source.matchAll(LOCAL_IMPORT)) {
+    const target = resolveLocal(file, specifier)
+    if (!target || seen.has(target)) continue
+    sources.push(...localClosure(target, readFileSync(target, "utf8"), seen))
+  }
+  return sources
+}
+
+/**
  * The console-era chrome this track is retiring, each probe naming what a bento page replaces.
  * Both spellings of every path: `@/components/…` and the relative `../…` this codebase also uses,
  * because a probe that reads only the alias goes blind to a third of its own subject.
@@ -393,12 +417,16 @@ export function census() {
   const pages = {}
   for (const file of walk(SRC, (n) => n.endsWith(".page.tsx")).sort(byCodepoint)) {
     const source = readFileSync(file, "utf8")
-    pages[key(file)] = isBentoThroughLocals(file, source)
-      ? { era: "bento", chrome: [] }
-      : {
-          era: "console",
-          chrome: CONSOLE_CHROME.filter(([, probe]) => probe.test(code(source))).map(([id]) => id),
-        }
+    if (isBentoThroughLocals(file, source)) {
+      pages[key(file)] = { era: "bento", chrome: [] }
+      continue
+    }
+    // The chrome a page renders, counting what its own components render (D51).
+    const rendered = localClosure(file, source).map(code).join("\n")
+    pages[key(file)] = {
+      era: "console",
+      chrome: CONSOLE_CHROME.filter(([, probe]) => probe.test(rendered)).map(([id]) => id),
+    }
   }
 
   const components = {}

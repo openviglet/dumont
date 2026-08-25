@@ -75,19 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XIII Frontend build and lint gates
-
-### XIII.4 A probe that cries wolf (D51)
-
-The census warns on every run that its `StickySaveBar` probe matches no page, and says
-what the two explanations are: every page carrying it migrated, or its import path moved
-and the census has quietly stopped counting it. Neither is true. No page has ever
-imported it, and `components/ui/sticky-save-bar.tsx` is a live shim re-exporting three
-names.
-
-So the probe counts a chrome component this console does not use. It is a warning on
-stderr and the script exits 0, which is the shape of a message people learn to scroll
-past — and the next probe that goes stale for the *real* reason will read identically.
-
-Drop the probe, or the shim it points at if nothing imports that either.

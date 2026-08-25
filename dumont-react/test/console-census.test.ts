@@ -210,6 +210,28 @@ describe("D46: era follows a page's local imports", () => {
     }
   })
 
+  it("counts the chrome a page renders through its components, not just its own imports", () => {
+    /*
+     * D51 — the census warned every run that its `StickySaveBar` probe matched no page, and
+     * offered two explanations: the last page carrying it migrated, or the probe went stale.
+     * Neither was true. The indexing manager page renders one, two files away, through
+     * `integration.indexing.manager.form` — and the chrome scan only ever read the page file.
+     *
+     * The warning was accurate about *pages* and false about the *console*, which is the worst
+     * kind: a reader learns to scroll past it, and the next probe that dies for the real reason
+     * reads exactly the same.
+     */
+    const { pages, totals } = census()
+    expect(pages["pages/integration.instance.indexing.manager.page.tsx"].chrome).toContain(
+      "StickySaveBar",
+    )
+    // And no probe is dead, which is what the script's own stderr guard checks on every run.
+    for (const [id, hits] of Object.entries(totals.chrome)) {
+      expect(hits, `the ${id} probe matches nothing — stale, or the console really has none`)
+        .toBeGreaterThan(0)
+    }
+  })
+
   it("keeps the console shell on console, though it reaches a module that names bento types", () => {
     // The regression the type-only rule prevents: the console root imports the sidebar, which
     // imports the nav declaration, which imports the nav *schema* as types.

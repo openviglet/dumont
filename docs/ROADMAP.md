@@ -168,8 +168,6 @@ This track has no remaining pending tasks.
 
 ## Track K — Frontend build and lint gates
 
-- 📋 **D51** (deps: —) **the census warns on every run about a probe for chrome no page has ever imported** — A standing warning is what teaches a reader to ignore the next one, which will be a real one. → §XIII.4
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
