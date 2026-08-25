@@ -467,3 +467,4 @@
 - **D38** — ui/table.tsx is a one-line re-export of the package's eight Table primitives, byte-identical to what it declared, and no fork is left among the 33 ui files.
 - **D44** — Both grids take the v8 names from v9's ./legacy subpath, so tsc -b and vite build are green and neither grid was rewritten.
 - **D42** — vitest run mounts the shell, a list page and a form page against a stubbed HTTP boundary, and holds D35's census by name; dropping the footer turns the run red.
+- **D36** — bento.css joins the Tailwind build (bento-glass, bento-grid, the rail gutter reach the bundle) and seven cases mount the rail, the mosaic and the form hero against the affordances D42 pins.

@@ -78,28 +78,6 @@ These constrain every task above:
 
 ## XI The console adopts the shared bento layer
 
-### XI.2 Render the layer once before trusting it (D36)
-
-Dumont installs the design system and takes 95 imports from it — 81 from the root entry,
-13 from `./router`, one stylesheet. Not one comes from `./bento`. The subpath is there,
-published since 2026.3.3, carrying the frosted surface, the airy hero, the mosaic and
-the save-bar morph, and this console has never rendered any of it.
-
-That is what makes three products that share a design system look unrelated. Turing has
-118 bento pages; Shio is migrating 43. Dumont renders 39 console-era pages and will keep
-looking like the previous era for as long as nothing here imports the new one.
-
-The first import is not a migration and should not be treated as one. It is the question
-every task below assumes an answer to: does the package render correctly inside this
-application's providers, its Tailwind build, its theme? Turing found out that the answer
-has a shape — its `BentoListPage` takes a layout as a prop rather than fetching one, and
-a naive adoption silently dropped an affordance on 16 surfaces. Wire the subpath and its
-stylesheet, render a handful of representative surfaces against it, and compare them
-against what the console renders today.
-
-Nothing below is safe until that comparison has been made once, because every later line
-is justified by the claim that the package does the same thing.
-
 ### XI.3 A parallel shell, so a page can move back (D37)
 
 A migration of 39 pages is only safe if it can be done one page at a time and undone the

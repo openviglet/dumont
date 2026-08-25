@@ -168,16 +168,10 @@ This track has no remaining pending tasks.
 
 ## Track I — The console adopts the shared bento layer
 
-- 📋 **D36** (deps: viglet-design-system VDS8) **the console imports no bento component, so a third product installs the design system and looks unrelated** — All 95 import sites take the root and router entries; the bento subpath is installed and untouched. → §XI.2
-- 📋 **D37** (deps: D36) **there is no bento route tree, so a migrated surface has nowhere to render beside the console one** — A parallel shell is what makes each of the 39 pages reversible one at a time. → §XI.3
+- 📋 **D37** (deps: D36 ✅) **there is no bento route tree, so a migrated surface has nowhere to render beside the console one** — A parallel shell is what makes each of the 39 pages reversible one at a time. → §XI.3
 - 📋 **D39** (deps: D37) **Dumont has no nav declaration a rail and a palette can share, so each surface would be listed twice** — Navigation lives as markup inside the console sidebar, and the package takes it as data. → §XI.5
 - 📋 **D40** (deps: D37) **bento chrome strings have no Dumont translations, so a shared rail and palette would render English** — This console already ships more than one language, and the chrome the package owns needs them here. → §XI.6
 - 📋 **D41** (deps: viglet-design-system VDS5) **nothing fails when a component is re-declared here instead of imported from the design system** — Nineteen names in eleven files already are, and only a reader has ever noticed. → §XI.7
-
-## Done when — D36
-
-- **Representative surfaces render from the bento subpath** The console imports the
-  subpath and its stylesheet, and those surfaces match what it renders today.
 
 ## Done when — D37
 

@@ -1,6 +1,19 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@viglet/viglet-design-system/styles";
+/*
+ * D36 — the bento layer's stylesheet, a second entry beside the console one.
+ *
+ * The package keeps it out of `./bento` so a consumer taking only the layout maths does not pull
+ * CSS it never renders. Dumont renders it, so it is imported here rather than per page: the
+ * frosted surfaces, the rail gutter and the save-bar morph are all class-based, and a page that
+ * imported its own copy would ship the rules once per surface.
+ *
+ * It sits *after* the console stylesheet on purpose. Both eras will be on screen at once for the
+ * length of Track I, and where they define the same custom property the bento value is the one a
+ * migrated surface expects.
+ */
+@import "@viglet/viglet-design-system/bento.css";
 
 @custom-variant dark (&:is(.dark *));
 
