@@ -1,12 +1,16 @@
+// D44 — the v8 table API, taken from v9's own compatibility subpath. The root entry renamed
+// every one of these when the dependency moved to ^9.0.0, which is what stopped the console
+// compiling; `./legacy` ships them unchanged, so the grid below needs no rewrite. Adopting the
+// v9 API is a separate decision.
+import type { SortingState } from "@tanstack/react-table";
 import {
+    getCoreRowModel,
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    getCoreRowModel,
-    useReactTable,
-    type ColumnDef,
-    type SortingState,
-} from "@tanstack/react-table";
+    useLegacyTable as useReactTable,
+    type LegacyColumnDef as ColumnDef,
+} from "@tanstack/react-table/legacy";
 import { type ReactNode, useState } from "react";
 import { Icon } from "@iconify/react";
 

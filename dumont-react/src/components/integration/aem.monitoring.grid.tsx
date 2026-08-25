@@ -1,9 +1,11 @@
+// D44 — see grid.list.tsx: the v8 names live on under v9's `./legacy` subpath, `flexRender`
+// stays on the root entry.
+import { flexRender } from "@tanstack/react-table";
 import {
-    flexRender,
     getCoreRowModel,
-    useReactTable,
-    type ColumnDef,
-} from "@tanstack/react-table";
+    useLegacyTable as useReactTable,
+    type LegacyColumnDef as ColumnDef,
+} from "@tanstack/react-table/legacy";
 import { useEffect, useMemo, useState, type PropsWithChildren } from "react";
 
 import { Card } from "@/components/ui/card";
