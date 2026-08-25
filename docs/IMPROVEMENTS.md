@@ -78,19 +78,6 @@ These constrain every task above:
 
 ## XIII Frontend build and lint gates
 
-### XIII.3 A CI workflow nothing triggers (D50)
-
-`validate.yml` runs the Maven build, the frontend build and a SonarCloud analysis, and
-its only trigger is `workflow_dispatch`. It gates nothing: a pull request can carry a
-failing backend build and a failing Sonar quality gate and report all checks green,
-because the workflow that would have caught it was never asked to run. `roadkeep` and
-`design-system` are the only two that fire on a push.
-
-Two smaller things are wrong in the same file. Its node_modules cache key hashes
-`dumont-react/package-lock.json`, a file that does not exist — the workspace is pnpm,
-and the key therefore hashes nothing and never hits. And `-Dsonar.branch.name=2026.2` is
-pinned to the previous version, so analysis lands on the wrong branch.
-
 ### XIII.4 A probe that cries wolf (D51)
 
 The census warns on every run that its `StickySaveBar` probe matches no page, and says

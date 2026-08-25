@@ -483,3 +483,4 @@
 
 - **D48** — A flat config runs ESLint for the first time: ten real defects fixed, including a missing effect cleanup, and the two structural classes carried as named files rather than a ceiling.
 - **D49** — The DTS build extends the app tsconfig, not the root solution file, and emits outside the wiped output dir, so all four remotes ship declarations; a script checks the artefact, not the exit code.
+- **D50** — validate.yml builds on every push and pull request, caches on pnpm rather than a lockfile that never existed, and takes the Sonar branch from the ref instead of the previous version.
