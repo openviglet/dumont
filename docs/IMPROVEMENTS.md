@@ -78,21 +78,6 @@ These constrain every task above:
 
 ## XVI The web console
 
-### XVI.2 The Integration hub's read-only surfaces (D58)
-
-The Integration section holds nine surfaces and not one of them has moved, so the hub
-the rail opens is a mosaic where every tile leaves the shell. That is the one place the
-parallel tree still reads as a migration rather than a product, and it is the band an
-operator spends the day in: monitoring, statistics, coverage, double-check, plugins,
-system information, insights.
-
-These seven are read-only. They render panels, tables and counts rather than forms, so
-the shape is `BentoHero` plus `BentoPanel` - the frosted container with no heading of
-its own, because the hero above already names the page.
-
-The forms in the same section are their own line, since the adaptive header they need is
-a different piece of work from a table in a panel.
-
 ### XVI.3 The Integration hub's forms (D59)
 
 The two remaining Integration surfaces are forms: the indexing rules, which are a list

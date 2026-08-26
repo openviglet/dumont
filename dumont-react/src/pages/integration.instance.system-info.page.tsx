@@ -1,6 +1,7 @@
-﻿import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { Input } from "@/components/ui/input";
-import { SectionCard } from "@/components/ui/section-card";
+import { AdaptivePanel } from "@/components/bento/adaptive-panel";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     IconCpu,
@@ -160,7 +161,7 @@ export default function IntegrationInstanceSystemInfoPage() {
     if (isLoading) {
         return (
             <>
-                <SubPageHeader
+                <AdaptivePageHeader
                     icon={IconInfoCircle}
                     feature={t("integration.connectorSystemInfo.title")}
                     name={t("integration.connectorSystemInfo.title")}
@@ -186,7 +187,7 @@ export default function IntegrationInstanceSystemInfoPage() {
 
     return (
         <>
-            <SubPageHeader
+            <AdaptivePageHeader
                 icon={IconInfoCircle}
                 feature="System Information"
                 name="System Information"
@@ -354,7 +355,7 @@ export default function IntegrationInstanceSystemInfoPage() {
                                         onChange={(e) => setVarSearch(e.target.value)}
                                     />
                                 </div>
-                                <div className="rounded-lg border overflow-hidden">
+                                <AdaptivePanel className="overflow-hidden" contentClassName="p-0">
                                     <div className="max-h-150 overflow-y-auto">
                                         <table className="w-full text-sm">
                                             <thead className="bg-muted/60 sticky top-0">
@@ -380,7 +381,7 @@ export default function IntegrationInstanceSystemInfoPage() {
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
+                                </AdaptivePanel>
                                 <p className="text-xs text-muted-foreground">
                                     {t("systemInfo.propertiesShown", { count: filteredVariables.length, total: Object.keys(variables).length })}
                                 </p>

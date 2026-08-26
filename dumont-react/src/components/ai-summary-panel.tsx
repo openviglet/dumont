@@ -1,4 +1,4 @@
-﻿import { Card, CardContent } from "@/components/ui/card";
+﻿import { AdaptivePanel } from "@/components/bento/adaptive-panel";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconLoader2, IconRefresh } from "@tabler/icons-react";
@@ -72,40 +72,34 @@ export function AiSummaryPanel({ endpoint, i18nPrefix }: Readonly<AiSummaryPanel
     return (
         <div className="px-6 py-6 space-y-4">
             {isLoading && (
-                <Card>
-                    <CardContent className="p-6 space-y-4">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                            <IconLoader2 className="size-4 animate-spin" />
-                            <span className="text-sm">{t(`${i18nPrefix}.generating`)}</span>
-                        </div>
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-5/6" />
-                        <Skeleton className="h-4 w-2/3" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-4/5" />
-                    </CardContent>
-                </Card>
+                <AdaptivePanel contentClassName="p-6 space-y-4">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <IconLoader2 className="size-4 animate-spin" />
+                        <span className="text-sm">{t(`${i18nPrefix}.generating`)}</span>
+                    </div>
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-4/5" />
+                </AdaptivePanel>
             )}
 
             {error && !isLoading && (
-                <Card>
-                    <CardContent className="p-6">
-                        <p className="text-sm text-destructive">{error}</p>
-                    </CardContent>
-                </Card>
+                <AdaptivePanel contentClassName="p-6">
+                    <p className="text-sm text-destructive">{error}</p>
+                </AdaptivePanel>
             )}
 
             {content && !isLoading && (
-                <Card>
-                    <CardContent className="p-6">
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-                                {content}
-                            </ReactMarkdown>
-                        </div>
-                    </CardContent>
-                </Card>
+                <AdaptivePanel contentClassName="p-6">
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+                            {content}
+                        </ReactMarkdown>
+                    </div>
+                </AdaptivePanel>
             )}
 
             {!isLoading && canRegenerate && (

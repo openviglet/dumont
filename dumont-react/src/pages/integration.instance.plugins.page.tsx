@@ -1,4 +1,5 @@
-﻿import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
+import { AdaptivePanel } from "@/components/bento/adaptive-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -134,14 +135,14 @@ export default function IntegrationInstancePluginsPage() {
 
     return (
         <>
-            <SubPageHeader
+            <AdaptivePageHeader
                 icon={IconPuzzle}
                 name={t("integration.plugins.title")}
                 feature={t("integration.plugins.feature")}
                 description={t("integration.plugins.description")}
             />
             <div className="space-y-6 p-4">
-                <div className="rounded-lg border p-4 flex items-center justify-between">
+                <AdaptivePanel contentClassName="p-4 flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-semibold">{t("integration.plugins.upload.title")}</h3>
                         <p className="text-xs text-muted-foreground">
@@ -162,9 +163,9 @@ export default function IntegrationInstancePluginsPage() {
                             ? t("integration.plugins.upload.uploading")
                             : t("integration.plugins.upload.button")}
                     </Button>
-                </div>
+                </AdaptivePanel>
 
-                <div className="rounded-lg border">
+                <AdaptivePanel className="overflow-hidden" contentClassName="p-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -267,7 +268,7 @@ export default function IntegrationInstancePluginsPage() {
                             })}
                         </TableBody>
                     </Table>
-                </div>
+                </AdaptivePanel>
             </div>
         </>
     );

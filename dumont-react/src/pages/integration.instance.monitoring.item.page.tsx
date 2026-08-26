@@ -1,10 +1,10 @@
-﻿import { ROUTES } from "@/app/routes.const";
+import { ROUTES } from "@/app/routes.const";
 import { BadgeAemEnv } from "@/components/badge-aem-env";
 import { BadgeIndexingStatus } from "@/components/badge-indexing-status";
 import { BadgeLocale } from "@/components/badge-locale";
 import { BadgeSites } from "@/components/badge-sites";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { SectionCard } from "@/components/ui/section-card";
 import {
@@ -378,7 +378,7 @@ export default function IntegrationInstanceMonitoringItemPage() {
             error={error}
             tryAgainUrl={monitoringListUrl}
         >
-            <SubPageHeader
+            <AdaptivePageHeader
                 icon={IconFileSearch}
                 name={t("integration.monitoring.item.title")}
                 feature={item?.objectId

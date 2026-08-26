@@ -51,8 +51,9 @@ const FORKED: Record<string, string[]> = {
  *
  * The first three are the shell rather than migrated pages: a parallel tree needs a root,
  * somewhere for Home to land, and a hub per section before any surface can move into it. The
- * thirteen below them are the six source lists (D46), the six detail pages behind them (D47) and
- * the inference wizard that completed the Sources section (D57).
+ * rest are the six source lists (D46), the six detail pages behind them (D47), the inference
+ * wizard that completed the Sources section (D57), and the Integration section's seven read-only
+ * surfaces plus the monitored-item page behind the grid (D58).
  *
  * "Left to move" still counts the console originals, because they still exist and still render
  * console chrome â€” that is what makes each migration reversible, not an oversight in the count.
@@ -65,13 +66,21 @@ const ON_BENTO: string[] = [
   "pages/bento/integration.instance.assets.source.list.bento.page.tsx",
   "pages/bento/integration.instance.catalog.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.catalog.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.coverage.bento.page.tsx",
   "pages/bento/integration.instance.db.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.db.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.double.check.bento.page.tsx",
   "pages/bento/integration.instance.eds.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.eds.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.indexing.stats.bento.page.tsx",
+  "pages/bento/integration.instance.insights.bento.page.tsx",
+  "pages/bento/integration.instance.monitoring.bento.page.tsx",
+  "pages/bento/integration.instance.monitoring.item.bento.page.tsx",
+  "pages/bento/integration.instance.plugins.bento.page.tsx",
   "pages/bento/integration.instance.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.source.inference.bento.page.tsx",
   "pages/bento/integration.instance.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.system-info.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.list.bento.page.tsx",
 ]

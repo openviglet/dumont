@@ -191,7 +191,10 @@ is what lets it move back.
   advertise a surface it does not serve.
 - **The whole Sources section has moved** — the six source surfaces (list + detail) plus the AI
   inference wizard, so a reader who opens Sources from the rail stays in the shell whatever they
-  click. Everything else is still console-only. `pnpm run census` prints which page is on which era.
+  click. In Integration, the **seven read-only surfaces** have moved too (monitoring and the
+  monitored-item page behind it, indexing stats, coverage, double-check, insights, system info,
+  plugins); its **two form surfaces are the remainder**. `pnpm run census` prints which page is on
+  which era.
 - Both are exposed over Module Federation (`./DumontRoutes`, `./BentoRoutes`); no turing-react
   change is needed when adding a page to either.
 - **`ROUTES.INTEGRATION_INSTANCE` derives its prefix from the live URL.** From inside the bento
@@ -289,10 +292,16 @@ read the chrome. Forking it would leave two copies drifting for the length of th
 <SectionCardChromeProvider chrome="bento"><IntegrationInstanceDbSourcePage /></SectionCardChromeProvider>
 ```
 
-**A page that is not a form** — a wizard, a panel, a table — takes the same shape with the other
-header: `AdaptivePageHeader` (`components/bento/`) → `SubPageHeader` or `BentoHero`. No save bar,
-because there is nothing to save; the package's own deprecation notice on `SubPageHeader` names
-`BentoHero` as its replacement, which is what the adapter picks between.
+**A page that is not a form** — a wizard, a panel, a table — takes the same shape with two other
+adapters, both in `components/bento/`:
+
+- `AdaptivePageHeader` → `SubPageHeader` or `BentoHero`. No save bar, because there is nothing to
+  save; the package's own deprecation notice on `SubPageHeader` names `BentoHero` as its
+  replacement, which is what this picks between.
+- `AdaptivePanel` → `Card` + `CardContent` or `BentoPanel` — a container with no heading, because
+  the header above already names the page. **Always pass `contentClassName` explicitly**: the two
+  eras disagree on the default inset (`BentoPanel`'s content wrapper has none, `CardContent`'s is
+  `px-6`), so naming it is what makes them render the same.
 
 - `AdaptiveFormHeader` (`components/bento/`) → `StickyPageHeader` or `BentoFormHero`. Declarative,
   not a passthrough: the console header takes Save/Cancel as children, while `BentoFormHero` owns

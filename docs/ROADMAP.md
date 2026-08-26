@@ -168,13 +168,7 @@ This track has no remaining pending tasks.
 
 ## Track N — The web console
 
-- 📋 **D58** (deps: —) **the Integration hub opens onto nine surfaces and every tile leaves the shell** — Seven of them are read-only panels and tables, which is BentoPanel under a hero rather than the form shape. → §XVI.2
 - 📋 **D59** (deps: —) **the indexing rules and the indexing manager are the section's two form surfaces** — They take the adaptive-chrome shape, and the manager holds the console's last StickySaveBar. → §XVI.3
-
-## Done when — D58
-
-- **The seven read-only Integration surfaces serve on both trees** Each console route
-  still answers, which is what keeps the move reversible.
 
 ## Done when — D59
 

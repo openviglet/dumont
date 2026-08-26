@@ -122,10 +122,11 @@ describe("D39: where a surface points depends on whether it has moved", () => {
     // navigate inside the shell or link out by whether this is set, so a placeholder value would
     // send a reader to a route the bento tree does not serve.
     //
-    // Monitoring, not a source list — all six of those moved in D46, and picking a migrated
-    // surface here would make the assertion pass for the wrong reason.
-    const monitoring = dumontNavItems(STANDALONE).find((item) => item.id === "monitoring")!
-    expect(monitoring.bentoRoute).toBeUndefined()
+    // Indexing rules: picking a migrated surface here would make the assertion pass for the wrong
+    // reason, and the pool of unmigrated ones is shrinking — the sources went in D46/D47/D57 and
+    // the read-only Integration band in D58, leaving the section's two form surfaces (D59).
+    const indexingRule = dumontNavItems(STANDALONE).find((item) => item.id === "indexing-rule")!
+    expect(indexingRule.bentoRoute).toBeUndefined()
   })
 
   it("gives every migrated surface a bento route the tree actually serves", () => {
@@ -135,10 +136,17 @@ describe("D39: where a surface points depends on whether it has moved", () => {
     expect(migrated.map((item) => item.id).sort()).toEqual([
       "assets-source",
       "catalog-source",
+      "coverage",
       "db-source",
+      "double-check",
       "eds-source",
+      "indexing-stats",
+      "insights",
+      "monitoring",
+      "plugins",
       "source",
       "source-inference",
+      "system-info",
       "wc-source",
     ])
   })

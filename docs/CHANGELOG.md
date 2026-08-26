@@ -500,3 +500,4 @@
 ## Track N — The web console
 
 - **D57** — the console wizard under a bento chrome declaration, with a new AdaptivePageHeader picking SubPageHeader or BentoHero; Sources is the first complete section
+- **D58** — seven console pages under a bento chrome declaration, with new AdaptivePageHeader and AdaptivePanel adapters; the monitored-item page moved too so the grid's links stay in the shell

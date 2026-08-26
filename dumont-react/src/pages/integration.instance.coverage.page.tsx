@@ -1,9 +1,9 @@
-﻿import { AiSummaryPanel } from "@/components/ai-summary-panel";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AiSummaryPanel } from "@/components/ai-summary-panel";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { AdaptivePanel } from "@/components/bento/adaptive-panel";
 import { Progress } from "@/components/ui/progress";
-import { SectionCard } from "@/components/ui/section-card";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
     Table,
@@ -117,7 +117,7 @@ export default function IntegrationInstanceCoveragePage() {
 
     return (
         <>
-            <SubPageHeader
+            <AdaptivePageHeader
                 icon={IconActivityHeartbeat}
                 feature={t("integration.coverage.title")}
                 name={t("integration.coverage.title")}
@@ -153,9 +153,9 @@ export default function IntegrationInstanceCoveragePage() {
                 )}
 
                 {!isLoading && source && history && history.length === 0 && (
-                    <Card className="p-6 text-center text-muted-foreground">
+                    <AdaptivePanel contentClassName="p-6 text-center text-muted-foreground">
                         {t("integration.coverage.noHistory")}
-                    </Card>
+                    </AdaptivePanel>
                 )}
 
                 {!isLoading && latest && (
@@ -189,10 +189,10 @@ export default function IntegrationInstanceCoveragePage() {
                             </SectionCard>
                         ) : (
                             history.length >= 2 && (
-                                <Card className="flex items-center gap-2 p-4 text-sm text-emerald-600">
+                                <AdaptivePanel contentClassName="flex items-center gap-2 p-4 text-sm text-emerald-600">
                                     <IconCircleCheck className="h-4 w-4" />
                                     {t("integration.coverage.noDrift")}
-                                </Card>
+                                </AdaptivePanel>
                             )
                         )}
 

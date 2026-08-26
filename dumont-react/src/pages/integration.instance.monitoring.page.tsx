@@ -1,7 +1,7 @@
-﻿import { ROUTES } from "@/app/routes.const";
+import { ROUTES } from "@/app/routes.const";
 import { AemMonitoringGrid } from "@/components/integration/aem.monitoring.grid";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -157,7 +157,7 @@ export default function IntegrationInstanceMonitoringPage() {
 
   return (
     <LoadProvider checkIsNotUndefined={monitoringPage} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/monitoring`}>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconGraph}
         name={t("integration.monitoring.title")}
         feature={t("integration.monitoring.title")}

@@ -1,4 +1,4 @@
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { AiSummaryPanel } from "@/components/ai-summary-panel";
 import { IconSparkles } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,7 @@ export default function IntegrationInstanceInsightsPage() {
 
     return (
         <>
-            <SubPageHeader
+            <AdaptivePageHeader
                 icon={IconSparkles}
                 name={t("integration.insights.title")}
                 feature={t("integration.insights.title")}

@@ -1,9 +1,17 @@
 import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
 
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import BentoAreaPage from "./app/bento/bento.area.page";
 import BentoHomePage from "./app/bento/bento.home.page";
 import IntegrationInstanceAssetsSourceDetailBentoPage from "./pages/bento/integration.instance.assets.source.detail.bento.page";
+import IntegrationInstanceCoverageBentoPage from "./pages/bento/integration.instance.coverage.bento.page";
+import IntegrationInstanceDoubleCheckBentoPage from "./pages/bento/integration.instance.double.check.bento.page";
+import IntegrationInstanceIndexingStatsBentoPage from "./pages/bento/integration.instance.indexing.stats.bento.page";
+import IntegrationInstanceInsightsBentoPage from "./pages/bento/integration.instance.insights.bento.page";
+import IntegrationInstanceMonitoringBentoPage from "./pages/bento/integration.instance.monitoring.bento.page";
+import IntegrationInstanceMonitoringItemBentoPage from "./pages/bento/integration.instance.monitoring.item.bento.page";
+import IntegrationInstancePluginsBentoPage from "./pages/bento/integration.instance.plugins.bento.page";
+import IntegrationInstanceSystemInfoBentoPage from "./pages/bento/integration.instance.system-info.bento.page";
 import IntegrationInstanceAssetsSourceListBentoPage from "./pages/bento/integration.instance.assets.source.list.bento.page";
 import IntegrationInstanceCatalogSourceDetailBentoPage from "./pages/bento/integration.instance.catalog.source.detail.bento.page";
 import IntegrationInstanceCatalogSourceListBentoPage from "./pages/bento/integration.instance.catalog.source.list.bento.page";
@@ -79,6 +87,27 @@ export default function BentoRoutes() {
       </Route>
       {/* AI source inference (D57) — the seventh Sources surface, and the one that completes it. */}
       <Route path="source-inference" element={<IntegrationInstanceSourceInferenceBentoPage />} />
+      {/*
+       * The Integration section's read-only surfaces (D58) — panels, tables and counts, so each is
+       * the console page under a `chrome="bento"` declaration and nothing about them is forked.
+       *
+       * Monitoring keeps the console tree's shape rather than a flattened one: the source segment
+       * is what the tab strip reads, and the item routes are reached from the grid through
+       * `ROUTES.INTEGRATION_INSTANCE`, which resolves to `/bento/…` from in here. Serving the grid
+       * and not the item would put a dead link on a page that had just been migrated.
+       */}
+      <Route path="monitoring">
+        <Route index element={<Navigate to="all" replace />} />
+        <Route path=":source/:itemId/:tab" element={<IntegrationInstanceMonitoringItemBentoPage />} />
+        <Route path=":source/:itemId" element={<IntegrationInstanceMonitoringItemBentoPage />} />
+        <Route path=":source" element={<IntegrationInstanceMonitoringBentoPage />} />
+      </Route>
+      <Route path="indexing-stats" element={<IntegrationInstanceIndexingStatsBentoPage />} />
+      <Route path="coverage" element={<IntegrationInstanceCoverageBentoPage />} />
+      <Route path="double-check" element={<IntegrationInstanceDoubleCheckBentoPage />} />
+      <Route path="insights" element={<IntegrationInstanceInsightsBentoPage />} />
+      <Route path="system-info" element={<IntegrationInstanceSystemInfoBentoPage />} />
+      <Route path="plugins" element={<IntegrationInstancePluginsBentoPage />} />
     </Routes>
   );
 }

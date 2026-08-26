@@ -1,10 +1,10 @@
-﻿import { ROUTES } from "@/app/routes.const";
+import { ROUTES } from "@/app/routes.const";
 import { BadgeAemEnv } from "@/components/badge-aem-env";
 import { BadgeIndexingStatus } from "@/components/badge-indexing-status";
 import { BadgeLocale } from "@/components/badge-locale";
 import { BadgeSites } from "@/components/badge-sites";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import {
   Accordion,
   AccordionContent,
@@ -142,7 +142,7 @@ export default function IntegrationInstanceDoubleCheckPage() {
 
   return (
     <LoadProvider checkIsNotUndefined={sources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/double-check`}>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconListCheck}
         name={t("integration.doubleCheck.title")}
         feature={t("integration.doubleCheck.title")}

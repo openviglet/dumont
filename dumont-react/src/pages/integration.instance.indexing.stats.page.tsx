@@ -1,8 +1,8 @@
-﻿import { ROUTES } from "@/app/routes.const";
+import { ROUTES } from "@/app/routes.const";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { AdaptivePanel } from "@/components/bento/adaptive-panel";
 import { Progress } from "@/components/ui/progress";
 import {
     Table,
@@ -150,7 +150,7 @@ export default function IntegrationInstanceIndexingStatsPage() {
             error={error}
             tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/indexing-stats`}
         >
-            <SubPageHeader
+            <AdaptivePageHeader
                 icon={IconChartBar}
                 name={t("integration.indexingStats.title")}
                 feature={t("integration.indexingStats.title")}
@@ -185,7 +185,7 @@ export default function IntegrationInstanceIndexingStatsPage() {
                             {sourceSummaries.map((summary) => {
                                 const lastDate = formatDateTime(summary.latestReindex.startTime);
                                 return (
-                                    <Card key={summary.source} className="p-6">
+                                    <AdaptivePanel key={summary.source} contentClassName="p-6">
                                         <div className="flex items-center gap-2 mb-4">
                                             <RefreshCcw className="h-5 w-5 text-amber-600" />
                                             <h3 className="text-sm font-semibold uppercase tracking-wide">
@@ -242,14 +242,14 @@ export default function IntegrationInstanceIndexingStatsPage() {
                                                 className={`h-2 ${getProgressBarColor(summary.progressPercent)}`}
                                             />
                                         </div>
-                                    </Card>
+                                    </AdaptivePanel>
                                 );
                             })}
                         </div>
                     ) : (
-                        <Card className="p-6 text-center text-muted-foreground">
+                        <AdaptivePanel contentClassName="p-6 text-center text-muted-foreground">
                             {t("integration.indexingStats.noReindexStats")}
-                        </Card>
+                        </AdaptivePanel>
                     )}
 
                     {filteredStats.length > 0 && (
@@ -257,7 +257,7 @@ export default function IntegrationInstanceIndexingStatsPage() {
                             <div className="flex justify-between p-2 items-center text-xs text-muted-foreground">
                                 <span>{filteredStats.length} records</span>
                             </div>
-                            <Card>
+                            <AdaptivePanel className="overflow-hidden" contentClassName="p-0">
                                 <div className="rounded-md">
                                     <Table>
                                         <TableHeader>
@@ -339,7 +339,7 @@ export default function IntegrationInstanceIndexingStatsPage() {
                                         </TableBody>
                                     </Table>
                                 </div>
-                            </Card>
+                            </AdaptivePanel>
                         </>
                     )}
                 </div>
