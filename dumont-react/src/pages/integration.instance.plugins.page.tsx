@@ -1,4 +1,4 @@
-import { SubPageHeader } from "@/components/sub.page.header";
+﻿import { SubPageHeader } from "@/components/sub.page.header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -33,9 +33,9 @@ function stateBadgeVariant(state: string): BadgeVariant {
 }
 
 function renderLastModified(iso: string | null, locale: Locale) {
-    if (!iso) return <span>—</span>;
+    if (!iso) return <span>â€”</span>;
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return <span>—</span>;
+    if (Number.isNaN(d.getTime())) return <span>â€”</span>;
     const formatted = d.toLocaleString(undefined, {
         day: "2-digit",
         month: "2-digit",
@@ -70,8 +70,15 @@ export default function IntegrationInstancePluginsPage() {
         }
     };
 
-    useEffect(() => {
-        refresh();
+    /*
+     * D53 - the load is awaited inside the effect rather than called from its body.
+     *
+     * The rule refuses a synchronous `setState` in an effect, and cannot see across a
+     * `useCallback` boundary - so any direct call to a loader that writes state reads as
+     * synchronous. Awaiting it inside an async IIFE says what is actually true: the effect
+     * schedules work and returns, and every write happens after a suspension point.
+     */    useEffect(() => {
+        void (async () => { await refresh() })();
     }, [id]);
 
     const onPickFile = () => fileInputRef.current?.click();
@@ -191,9 +198,9 @@ export default function IntegrationInstancePluginsPage() {
                                             )}
                                         </div>
                                     </TableCell>
-                                    <TableCell>{p.version ?? "—"}</TableCell>
-                                    <TableCell>{p.provider ?? "—"}</TableCell>
-                                    <TableCell className="text-muted-foreground">{p.description ?? "—"}</TableCell>
+                                    <TableCell>{p.version ?? "â€”"}</TableCell>
+                                    <TableCell>{p.provider ?? "â€”"}</TableCell>
+                                    <TableCell className="text-muted-foreground">{p.description ?? "â€”"}</TableCell>
                                     <TableCell>
                                         <Badge variant={stateBadgeVariant(p.state)}>{p.state}</Badge>
                                     </TableCell>

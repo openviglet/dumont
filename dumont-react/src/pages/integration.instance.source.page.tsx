@@ -5,7 +5,6 @@ import { TurIntegrationAemSourceService } from "@/services/integration/integrati
 import { TurIntegrationConnectorService } from "@/services/integration/integration-connector.service";
 
 import { exportSourceToJson } from "@/components/integration/source-import-export";
-import type { BreadcrumbItem } from "@/contexts/breadcrumb.context";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { toast } from "@viglet/viglet-design-system";
@@ -39,21 +38,20 @@ export default function IntegrationInstanceSourcePage() {
   const [indexingAll, setIndexingAll] = useState(false);
   const [reindexingAll, setReindexingAll] = useState(false);
   const [dryScanning, setDryScanning] = useState(false);
-  const [breadcrumb, setBreadcrumb] = useState<BreadcrumbItem | undefined>(undefined);
+  /*
+   * D53 - the breadcrumb is derived from what the page is showing.
+   *
+   * It used to be state written from inside the load effect, once per branch, which is a
+   * synchronous write in an effect body and a second place for the label to be wrong. The source
+   * name and the "new source" label are both known at render.
+   */
   const { t } = useTranslation();
 
-  useSubPageBreadcrumb(breadcrumb);
+  useSubPageBreadcrumb(isNew ? t("forms.wizard.newSource") : integrationAemSource.name || "");
 
   useEffect(() => {
     if (!isNew) {
-      turIntegrationAemSourceService.get(sourceId).then((source) => {
-        setIntegrationAemSource(source);
-        if (source.name) {
-          setBreadcrumb({ label: source.name });
-        }
-      });
-    } else {
-      setBreadcrumb({ label: t("forms.wizard.newSource") });
+      turIntegrationAemSourceService.get(sourceId).then(setIntegrationAemSource);
     }
   }, [id, sourceId, isNew, turIntegrationAemSourceService, t]);
 

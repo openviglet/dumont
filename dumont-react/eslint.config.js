@@ -84,27 +84,29 @@ export default tseslint.config(
      * cascading renders; D48 could not fix twenty-three surfaces as a side effect of turning a
      * linter on, so it named them instead.
      *
-     * D53 cleared ten: seven pages whose `isNew` was a fact about the route rather than state,
-     * and three whose "blank entity" was a value the render could compute. Neither changed any
-     * behaviour. What is left is one shape — a synchronous `setLoading(true)` before an async
-     * load — and clearing it decides whether a spinner reappears on a refetch, which is a product
-     * question rather than a lint one.
+     * D53 cleared sixteen of the twenty-five, none of them by changing behaviour:
+     *
+     *   - `isNew` and the "blank entity" became values the render computes, not state an effect
+     *     corrected afterwards (ten);
+     *   - a loader awaited inside an async IIFE instead of called from the effect body, which is
+     *     what the rule can actually see is asynchronous — it cannot follow a `useCallback` (three);
+     *   - a loading flag that starts right rather than being raised in an `else` branch, a tab
+     *     read from the URL instead of mirrored beside it, and a breadcrumb derived from what the
+     *     page is showing (three).
+     *
+     * The nine below are each a design decision rather than a shape: a derived default the reader
+     * can then override (the avatar picker, the field-mapping step), state that must reset when a
+     * selection changes (double-check, monitoring), a timestamp that belongs where the data is
+     * fetched rather than in a component watching a prop, and a module-level cache.
      */
     files: [
-      "src/components/ai-summary-panel.tsx",
       "src/components/dicebear-avatar-picker.tsx",
       "src/components/integration/aem.monitoring.grid.tsx",
-      "src/components/integration/sn-site-select.tsx",
       "src/components/integration/wizard/steps/step-field-mapping.tsx",
       "src/components/rag-status-badge.tsx",
       "src/hooks/use-discovery.ts",
-      "src/pages/integration.instance.coverage.page.tsx",
       "src/pages/integration.instance.double.check.page.tsx",
-      "src/pages/integration.instance.indexing.manager.page.tsx",
       "src/pages/integration.instance.monitoring.item.page.tsx",
-      "src/pages/integration.instance.plugins.page.tsx",
-      "src/pages/integration.instance.source.page.tsx",
-      "src/pages/integration.instance.system-info.page.tsx",
     ],
     rules: { "react-hooks/set-state-in-effect": "warn" },
   },

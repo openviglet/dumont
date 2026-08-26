@@ -1,4 +1,4 @@
-import { SubPageHeader } from "@/components/sub.page.header";
+﻿import { SubPageHeader } from "@/components/sub.page.header";
 import { Input } from "@/components/ui/input";
 import { SectionCard } from "@/components/ui/section-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -120,7 +120,12 @@ export default function IntegrationInstanceSystemInfoPage() {
 
     const [info, setInfo] = useState<ConnectorSystemInfo | null>(null);
     const [variables, setVariables] = useState<Record<string, string>>({});
-    const [isLoading, setIsLoading] = useState(true);
+    /*
+     * D53 - loading starts true only when there is something to load. The effect used to correct
+     * it in an `else` branch, which is a synchronous write in an effect body; the condition is
+     * known at first render, so the initial value can just be right.
+     */
+    const [isLoading, setIsLoading] = useState(() => Boolean(id && id !== "new"));
     const [status, setStatus] = useState<string>("DOWN");
     const [varSearch, setVarSearch] = useState("");
 
@@ -140,8 +145,6 @@ export default function IntegrationInstanceSystemInfoPage() {
                     toast.error("Failed to load connector system information.");
                 })
                 .finally(() => setIsLoading(false));
-        } else {
-            setIsLoading(false);
         }
     }, [id]);
 

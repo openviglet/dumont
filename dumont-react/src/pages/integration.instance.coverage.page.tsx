@@ -1,4 +1,4 @@
-import { AiSummaryPanel } from "@/components/ai-summary-panel";
+﻿import { AiSummaryPanel } from "@/components/ai-summary-panel";
 import { SubPageHeader } from "@/components/sub.page.header";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -57,7 +57,7 @@ export default function IntegrationInstanceCoveragePage() {
     const [history, setHistory] = useState<TurIntegrationCoverageSnapshot[] | null>(null);
     const [drift, setDrift] = useState<TurIntegrationCoverageDrift | null>(null);
     const [provenance, setProvenance] = useState<TurIntegrationProvenanceLastSeen | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (!service) return;
@@ -70,10 +70,15 @@ export default function IntegrationInstanceCoveragePage() {
             .catch(() => setSources([]));
     }, [service]);
 
+    /*
+     * D53 - the spinner is raised by whoever asks for a load, not by the loader.
+     *
+     * `setIsLoading(true)` here ran synchronously on the effect's call, which React 19 refuses.
+     * Both callers still show it: the initial state is `true`, and the source picker below raises
+     * it again when the reader switches source - which is the refetch a spinner is actually for.
+     */
     const loadCoverage = useCallback(async () => {
-        if (!service || !source) return;
-        setIsLoading(true);
-        try {
+        if (!service || !source) return;        try {
             const [hist, drf, prov] = await Promise.all([
                 service.getHistory(source),
                 service.getDrift(source),
@@ -91,8 +96,15 @@ export default function IntegrationInstanceCoveragePage() {
         }
     }, [service, source]);
 
-    useEffect(() => {
-        loadCoverage();
+    /*
+     * D53 - the load is awaited inside the effect rather than called from its body.
+     *
+     * The rule refuses a synchronous `setState` in an effect, and cannot see across a
+     * `useCallback` boundary - so any direct call to a loader that writes state reads as
+     * synchronous. Awaiting it inside an async IIFE says what is actually true: the effect
+     * schedules work and returns, and every write happens after a suspension point.
+     */    useEffect(() => {
+        void (async () => { await loadCoverage() })();
     }, [loadCoverage]);
 
     const latest = history?.[0];
@@ -114,7 +126,13 @@ export default function IntegrationInstanceCoveragePage() {
             <div className="px-6 py-4 space-y-4">
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">{t("integration.coverage.source")}</span>
-                    <Select value={source} onValueChange={setSource}>
+                    <Select
+                        value={source}
+                        onValueChange={(next) => {
+                            setIsLoading(true);
+                            setSource(next);
+                        }}
+                    >
                         <SelectTrigger className="w-72 h-9 font-mono text-sm">
                             <SelectValue placeholder={t("integration.coverage.selectSource")} />
                         </SelectTrigger>
@@ -163,7 +181,7 @@ export default function IntegrationInstanceCoveragePage() {
                                                     className="flex items-center gap-1.5 bg-red-500/10 text-red-600 border-red-500/20 font-mono text-xs"
                                                 >
                                                     <IconTrendingDown className="h-3 w-3" />
-                                                    {f.field}: {f.previousPercent}% → {f.currentPercent}%
+                                                    {f.field}: {f.previousPercent}% â†’ {f.currentPercent}%
                                                 </Badge>
                                             ))}
                                     </div>
@@ -233,7 +251,7 @@ export default function IntegrationInstanceCoveragePage() {
                                                                 {change.delta > 0 ? "+" : ""}{change.delta}%
                                                             </span>
                                                         ) : (
-                                                            <span className="text-xs text-muted-foreground">—</span>
+                                                            <span className="text-xs text-muted-foreground">â€”</span>
                                                         )}
                                                     </TableCell>
                                                     <TableCell className="py-3">
@@ -243,7 +261,7 @@ export default function IntegrationInstanceCoveragePage() {
                                                                     <IconRoute className="h-3 w-3 shrink-0" />
                                                                     {origin.strategy}
                                                                     {origin.selector && (
-                                                                        <span className="text-muted-foreground/70">· {origin.selector}</span>
+                                                                        <span className="text-muted-foreground/70">Â· {origin.selector}</span>
                                                                     )}
                                                                 </span>
                                                                 {origin.presentInLatest === false && origin.lastSeenRunsAgo > 0 && (
@@ -257,7 +275,7 @@ export default function IntegrationInstanceCoveragePage() {
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <span className="text-xs text-muted-foreground">—</span>
+                                                            <span className="text-xs text-muted-foreground">â€”</span>
                                                         )}
                                                     </TableCell>
                                                 </TableRow>

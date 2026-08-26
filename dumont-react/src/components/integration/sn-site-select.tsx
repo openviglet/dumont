@@ -34,8 +34,14 @@ export function SNSiteSelect({
     [integrationId],
   );
 
+  /*
+   * D53 — the flag starts true instead of being raised inside the effect.
+   *
+   * `setLoading(true)` in an effect body is a synchronous state write React 19 refuses, and it was
+   * only ever restoring a value the first render already wants. The list is fetched once per
+   * connector, so there is no refetch this loses a spinner for.
+   */
   useEffect(() => {
-    setLoading(true);
     service
       .query()
       .then(setSites)

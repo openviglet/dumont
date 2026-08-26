@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationIndexingManagerForm } from "@/components/integration/integration.indexing.manager.form";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
@@ -104,19 +104,18 @@ export default function IntegrationInstanceIndexAdminPage() {
     {} as Record<string, IndexingTabMode>,
   );
 
+  /*
+   * D53 - the tab is the URL, not state beside it.
+   *
+   * There used to be a `useState` seeded from the path and an effect that corrected it whenever
+   * the path changed - a synchronous write in an effect body, and a second source of truth that
+   * could disagree with the address bar after a back button. Changing tab navigates; the render
+   * reads whatever the router says.
+   */
   const pathSegment = location.pathname.split("/").pop();
-  const initialTab: IndexingTabMode = pathTabMap[pathSegment ?? ""] || "INDEXING";
-  const [selectedTab, setSelectedTab] = useState<IndexingTabMode>(initialTab);
-
-  useEffect(() => {
-    const path = location.pathname.split("/").pop();
-    const tab = pathTabMap[path ?? ""];
-    if (tab && tab !== selectedTab) setSelectedTab(tab);
-    else if (!tab && selectedTab !== "INDEXING") setSelectedTab("INDEXING");
-  }, [location.pathname, selectedTab]);
+  const selectedTab: IndexingTabMode = pathTabMap[pathSegment ?? ""] || "INDEXING";
 
   const handleTabChange = (mode: IndexingTabMode) => {
-    setSelectedTab(mode);
     navigate(
       `/admin/integration/instance/${id}/indexing-manager/${tabPathMap[mode]}`,
     );

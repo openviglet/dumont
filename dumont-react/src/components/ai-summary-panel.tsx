@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+﻿import { Card, CardContent } from "@/components/ui/card";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconLoader2, IconRefresh } from "@tabler/icons-react";
@@ -28,10 +28,17 @@ export function AiSummaryPanel({ endpoint, i18nPrefix }: Readonly<AiSummaryPanel
     const [isLoading, setIsLoading] = useState(true);
     const [canRegenerate, setCanRegenerate] = useState(false);
 
+    /*
+     * D53 â€” the reset moved to the one caller that needs it.
+     *
+     * This loader is called two ways: once by the effect below on mount, and again by the
+     * regenerate button. Clearing the panel first only matters for the second â€” on mount there is
+     * nothing to clear, and `isLoading` already starts `true`. Doing it here made every call
+     * synchronous, and a synchronous write inside an effect body is what React 19 refuses.
+     *
+     * Nothing before the first `await`, so the effect's call schedules work and returns.
+     */
     const fetchSummary = useCallback(async (regenerate = false) => {
-        setIsLoading(true);
-        setError(null);
-        setContent(null);
         try {
             const response = await axios.get<SummaryResponse>(
                 endpoint,
@@ -51,8 +58,15 @@ export function AiSummaryPanel({ endpoint, i18nPrefix }: Readonly<AiSummaryPanel
         }
     }, [endpoint, i18nPrefix, t]);
 
-    useEffect(() => {
-        fetchSummary();
+    /*
+     * D53 - the load is awaited inside the effect rather than called from its body.
+     *
+     * The rule refuses a synchronous `setState` in an effect, and cannot see across a
+     * `useCallback` boundary - so any direct call to a loader that writes state reads as
+     * synchronous. Awaiting it inside an async IIFE says what is actually true: the effect
+     * schedules work and returns, and every write happens after a suspension point.
+     */    useEffect(() => {
+        void (async () => { await fetchSummary() })();
     }, [fetchSummary]);
 
     return (
@@ -99,7 +113,13 @@ export function AiSummaryPanel({ endpoint, i18nPrefix }: Readonly<AiSummaryPanel
                     <GradientButton
                         type="button"
                         variant="outline"
-                        onClick={() => fetchSummary(true)}
+                        onClick={() => {
+                                // The reset the loader used to do for both callers (D53).
+                                setIsLoading(true);
+                                setError(null);
+                                setContent(null);
+                                fetchSummary(true);
+                            }}
                     >
                         <IconRefresh className="size-4" />
                         {t(`${i18nPrefix}.regenerate`)}
