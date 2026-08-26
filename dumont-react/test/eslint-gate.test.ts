@@ -5,15 +5,15 @@
  * `pnpm run lint` exited non-zero with "couldn't find an eslint.config.js" â€” a message that reads
  * like a broken command rather than an absent gate, which is why it survived.
  *
- * Turning it on found 105 problems in a codebase that had never been linted. Ten were fixed; two
- * classes were structural and are carried as **named files** in the config rather than as a
- * ceiling. That distinction is the whole design, and it is what this file holds: a ceiling lets
- * one change pay for another, while a named list means a new violation fails by name and clearing
- * a file deletes its line.
+ * Turning it on found 105 problems in a codebase that had never been linted. Ten were fixed at
+ * once; two classes were structural and were carried as **named files** rather than a ceiling —
+ * a ceiling lets one change pay for another, while a named list means a new violation fails by
+ * name and clearing a file is a diff somebody reviews.
  *
- * So the assertions are about severity, not about counts. Linting the tree only proves the config
- * parses; what matters is that the same code is an *error* in a new file and a *warning* in one
- * that carries the debt.
+ * D54 and D53 then emptied both lists, so nothing is excused today and both rules are errors
+ * across the console. That is what this file now holds: the severity, in the files that used to
+ * be exempt. Linting the tree only proves the config parses — an exemption trimmed to nothing
+ * looks exactly like one that was deleted until something checks which it was.
  */
 import { execFileSync } from "node:child_process"
 import { resolve } from "node:path"
@@ -21,8 +21,7 @@ import { describe, expect, it } from "vitest"
 
 const APP_ROOT = resolve(__dirname, "..")
 
-/** ESLint's numeric severities. */
-const WARNING = 1
+/** ESLint's numeric severity for an error. Nothing is a warning here any more (D53, D54). */
 const ERROR = 2
 
 interface LintMessage {
@@ -81,8 +80,8 @@ describe("D48: the config is wired to this project", () => {
   })
 })
 
-describe("D48: inherited debt is named, not capped", () => {
-  /** A `setState` run synchronously in an effect body â€” the rule that still carries a list. */
+describe("D48/D53: the inherited debt was named, then paid off", () => {
+  /** A `setState` run synchronously in an effect body. */
   const setsStateInEffect = [
     "import { useEffect, useState } from 'react'",
     "export function Planted() {",
@@ -92,44 +91,32 @@ describe("D48: inherited debt is named, not capped", () => {
     "}",
   ].join("\n")
 
-  it("fails a new file for something the debt list tolerates", () => {
-    // The half that makes this a gate rather than a record: the rule is live everywhere it is not
-    // explicitly excused, so the next one written here stops a build.
+  it("fails any file for a synchronous setState in an effect", () => {
+    // The half that makes this a gate rather than a record: nothing is excused any more, so the
+    // next one written anywhere stops a build.
     expect(severityOf(lintAs("src/planted.tsx", setsStateInEffect), "react-hooks/set-state-in-effect"))
       .toBe(ERROR)
   })
 
-  it("only warns in a file the config names, with its reason", () => {
-    // `monitoring.item.page.tsx` is on the list. Clearing it means deleting its line from the config,
-    // which is a diff somebody reviews â€” where lowering a ceiling is a number nobody reads.
-    expect(
-      severityOf(
-        lintAs("src/pages/integration.instance.monitoring.item.page.tsx", setsStateInEffect),
-        "react-hooks/set-state-in-effect",
-      ),
-    ).toBe(WARNING)
-  })
-
-  it("excuses a named file for that rule only, not for everything", () => {
-    // The failure a file-level exemption would ship. `monitoring.item.page.tsx` is excused its effect;
-    // it is not excused an unused variable.
-    const messages = lintAs(
-      "src/pages/integration.instance.monitoring.item.page.tsx",
-      `const unused = 1\n${setsStateInEffect}\n`,
-    )
-    expect(severityOf(messages, "@typescript-eslint/no-unused-vars")).toBe(ERROR)
-  })
-
-  it("holds every file to a rule whose list has been emptied", () => {
+  it("holds every file to both rules, now that neither list survives", () => {
     /*
-     * D54 emptied the `no-explicit-any` list, so the rule is an error across the console â€” and the
-     * list is *gone* rather than kept at zero. Asserted on a file that used to be excused, because
-     * that is where a leftover exemption would still be sitting.
+     * D54 emptied the `no-explicit-any` list and D53 emptied `set-state-in-effect` - twenty-five
+     * violations across twenty-three files. Both rules are errors across the console now, and both
+     * lists were deleted rather than kept at zero.
+     *
+     * Asserted on the files that used to be excused, because that is where a leftover exemption
+     * would still be sitting: a list trimmed to nothing looks identical to one that is gone until
+     * something checks.
      */
-    const usesAny = "export const value: any = 1\n"
-    for (const file of ["src/planted.ts", "src/hooks/use-grid-adapter.ts"]) {
-      expect(severityOf(lintAs(file, usesAny), "@typescript-eslint/no-explicit-any"), file)
-        .toBe(ERROR)
+    const wasExcused: [string, string, string][] = [
+      ["src/hooks/use-grid-adapter.ts", "export const value: any = 1\n", "@typescript-eslint/no-explicit-any"],
+      ["src/components/dicebear-avatar-picker.tsx", setsStateInEffect, "react-hooks/set-state-in-effect"],
+      ["src/pages/integration.instance.monitoring.item.page.tsx", setsStateInEffect, "react-hooks/set-state-in-effect"],
+      ["src/components/rag-status-badge.tsx", setsStateInEffect, "react-hooks/set-state-in-effect"],
+    ]
+
+    for (const [file, source, rule] of wasExcused) {
+      expect(severityOf(lintAs(file, source), rule), `${rule} in ${file}`).toBe(ERROR)
     }
   })
 })

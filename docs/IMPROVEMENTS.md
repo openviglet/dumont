@@ -75,20 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XIV Console build, lint and type gates
-
-### XIV.2 The data-load pattern the linter refuses (D53)
-
-Twenty-three surfaces load their data as `useEffect(() => { service.get().then(setX);
-setIsNew(false) }, [id])`, and the rule is right that a `setState` in an effect body
-causes cascading renders. D48 could not fix it: restructuring how twenty-three pages
-fetch is a refactor with its own risk, not a side effect of turning a linter on, so
-`eslint.config.js` names those files and holds the rest of the console to the rule.
-
-The list is the debt, and it only pays down by being emptied. Each file leaves it in the
-diff that fixes it, and the task finishes when the last line goes and the rule is an
-error everywhere.
-
-The pages share one pattern, so the fix is one decision applied twenty-three times
-rather than twenty-three decisions.

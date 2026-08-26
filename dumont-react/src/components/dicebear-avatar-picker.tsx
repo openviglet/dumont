@@ -72,6 +72,23 @@ interface DiceBearAvatarPickerProps {
   currentAvatarUrl?: string;
 }
 
+/** The style and seed encoded in a DiceBear URL, if it is one. */
+function parseDiceBearUrl(url?: string): { style: DiceBearStyle; seed: string } | null {
+  if (!url) return null;
+  const match = /dicebear\.com\/[\d.]+x\/([^/]+)\/svg\?seed=([^&]+)/.exec(url);
+  return match ? { style: match[1] as DiceBearStyle, seed: decodeURIComponent(match[2]) } : null;
+}
+
+const randomSeeds = () => Array.from({ length: 12 }, () => generateRandomSeed());
+
+/*
+ * D53 - the dialog mounts its body when it opens, so the body has no "on open" to react to.
+ *
+ * The picker used to seed its style, its seed and its previews from an effect watching `open` -
+ * three synchronous writes in an effect body, and a shape that had to remember to re-derive
+ * everything each time. Mounting on open makes those the body's *initial* state instead, which
+ * React computes once and nothing has to correct.
+ */
 export function DiceBearAvatarPicker({
   open,
   onOpenChange,
@@ -79,10 +96,36 @@ export function DiceBearAvatarPicker({
   defaultSeed = "",
   currentAvatarUrl,
 }: DiceBearAvatarPickerProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        {open && (
+          <AvatarPickerBody
+            onOpenChange={onOpenChange}
+            onSelect={onSelect}
+            defaultSeed={defaultSeed}
+            currentAvatarUrl={currentAvatarUrl}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AvatarPickerBody({
+  onOpenChange,
+  onSelect,
+  defaultSeed,
+  currentAvatarUrl,
+}: Readonly<Omit<DiceBearAvatarPickerProps, "open"> & { defaultSeed: string }>) {
   const { t } = useTranslation();
-  const [selectedStyle, setSelectedStyle] = useState<DiceBearStyle>("adventurer");
-  const [seed, setSeed] = useState(defaultSeed || generateRandomSeed());
-  const [previewSeeds, setPreviewSeeds] = useState<string[]>([]);
+  const [selectedStyle, setSelectedStyle] = useState<DiceBearStyle>(
+    () => parseDiceBearUrl(currentAvatarUrl)?.style ?? "adventurer",
+  );
+  const [seed, setSeed] = useState(
+    () => parseDiceBearUrl(currentAvatarUrl)?.seed ?? defaultSeed ?? generateRandomSeed(),
+  );
+  const [previewSeeds, setPreviewSeeds] = useState<string[]>(randomSeeds);
   /*
    * D53 — a default the reader can override, stored against the default it overrode.
    *
@@ -106,23 +149,9 @@ export function DiceBearAvatarPicker({
   const debouncedSeed = useDebounce(seed, 400);
 
   const generatePreviewSeeds = useCallback(() => {
-    const seeds = Array.from({ length: 12 }, () => generateRandomSeed());
-    setPreviewSeeds(seeds);
+    setPreviewSeeds(randomSeeds());
     setShuffleCount((n) => n + 1);
   }, []);
-
-  useEffect(() => {
-    if (open) {
-      if (currentAvatarUrl) {
-        const match = currentAvatarUrl.match(/dicebear\.com\/[\d.]+x\/([^/]+)\/svg\?seed=([^&]+)/);
-        if (match) {
-          setSelectedStyle(match[1] as DiceBearStyle);
-          setSeed(decodeURIComponent(match[2]));
-        }
-      }
-      generatePreviewSeeds();
-    }
-  }, [open, currentAvatarUrl, generatePreviewSeeds]);
 
   const mainPreviewUrl = useMemo(
     () => buildDiceBearUrl(selectedStyle, debouncedSeed),
@@ -147,8 +176,7 @@ export function DiceBearAvatarPicker({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+    <>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <IconPalette className="size-5" />
@@ -283,7 +311,6 @@ export function DiceBearAvatarPicker({
           </Button>
           <Button onClick={handleConfirm}>{t("forms.avatarPicker.useThisAvatar")}</Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }

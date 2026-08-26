@@ -489,6 +489,6 @@
 ## Track L — Console build, lint and type gates
 
 - **D52** — 56 aliases across 48 declarations are rewritten to relative specifiers after emit and the zip is repacked from the corrected tree; a gate fails on any that survive.
-- **D53 (the derived-state half)** — Ten of twenty-three cleared with no behaviour change: seven pages whose isNew was a fact about the route, three whose blank entity was a value the render computes.
+- **D53** — All twenty-five cleared and the named-file list deleted, so the rule is an error console-wide; the monitoring history got a test first, which found its jump-to-last-page never fired on a URL.
 - **D54** — All 22 anys are typed from the contracts they stood for, so the rule is an error across the console and its list is gone rather than kept at zero.
 - **D55** — The manualChunks block is gone and the build emits the same 25 chunks byte for byte, because Module Federation was already discarding it; its refusal no longer prints.

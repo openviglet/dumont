@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { BadgeAemEnv } from "@/components/badge-aem-env";
 import { BadgeIndexingStatus } from "@/components/badge-indexing-status";
 import { BadgeLocale } from "@/components/badge-locale";
@@ -196,17 +196,40 @@ export default function IntegrationInstanceMonitoringItemPage() {
     const [item, setItem] = useState<TurIntegrationIndexingDetail>();
     const [error, setError] = useState<string | null>(null);
     const [loggingStatus, setLoggingStatus] = useState<TurIntegrationLoggingStatus>();
-    const [history, setHistory] = useState<TurIntegrationLoggingEntry[]>([]);
-    const [historyLoading, setHistoryLoading] = useState(false);
     const [historyPage, setHistoryPage] = useState(0);
     const [historyPageSize, setHistoryPageSize] = useState(DEFAULT_PAGE_SIZE);
-    const [historyTotalElements, setHistoryTotalElements] = useState(0);
-    const [historyTotalPages, setHistoryTotalPages] = useState(0);
-    // When the user enters the History tab, the next fetch should jump to the
-    // last page so the most-recent entries (sorted asc, newest at the end) are
-    // visible by default. Subsequent navigation (prev/next, page-size) is left
-    // alone.
-    const jumpToLastPageRef = useRef(false);
+
+    /*
+     * D53 â€” one result, carrying the query that produced it.
+     *
+     * The entries, the totals and a loading flag used to be four states the effect reset on the
+     * way in, and "loading" was raised synchronously in an effect body. They only ever describe
+     * one thing: the answer to a particular page of a particular content id.
+     *
+     * Keeping the query beside the answer makes loading derivable â€” it is exactly the state of
+     * not yet holding the answer to the query being asked â€” and removes the resets, because an
+     * answer to a different query simply is not this one's.
+     */
+    const [historyResult, setHistoryResult] = useState<{
+        query: string;
+        entries: TurIntegrationLoggingEntry[];
+        totalElements: number;
+        totalPages: number;
+    } | null>(null);
+
+    /*
+     * Which content id has already been sent to its last page.
+     *
+     * Entries come back oldest-first, so the most recent are on the final page and that is where
+     * the reader should land when the tab opens. This was a `useRef` set by a separate effect â€”
+     * and it did not work on arrival by URL: both effects run on mount, the fetch read the flag
+     * before it was raised, and the flag's own `setHistoryPage(0)` was a no-op because the page
+     * was already 0. So the case the old comment claimed to cover was the one it missed.
+     *
+     * Driven by the response instead: the jump happens when the totals arrive, which is the only
+     * moment the last page is known, whichever way the reader got here.
+     */
+    const jumpedForRef = useRef<string | null>(null);
 
     const monitoringService = useMemo(
         () => (id ? new TurIntegrationMonitoringService(id) : null),
@@ -249,15 +272,29 @@ export default function IntegrationInstanceMonitoringItemPage() {
         };
     }, [loggingService]);
 
+    /** The page of history the screen is currently asking for. */
+    const contentId = item?.objectId;
+    const historyQuery = `${contentId ?? ""}|${historyPage}|${historyPageSize}`;
+    const historyIsAvailable = Boolean(
+        loggingService && contentId && loggingStatus?.enabled && activeTab === TAB_HISTORY,
+    );
+
+    const history = historyResult?.query === historyQuery ? historyResult.entries : [];
+    const historyTotalElements =
+        historyResult?.query === historyQuery ? historyResult.totalElements : 0;
+    const historyTotalPages = historyResult?.query === historyQuery ? historyResult.totalPages : 0;
+    const historyLoading = historyIsAvailable && historyResult?.query !== historyQuery;
+
     useEffect(() => {
         let cancelled = false;
-        if (!loggingService || !item?.objectId) return;
+        if (!loggingService || !contentId) return;
         if (!loggingStatus?.enabled) return;
         if (activeTab !== TAB_HISTORY) return;
-        setHistoryLoading(true);
+        const query = historyQuery;
+
         loggingService
             .indexingHistory({
-                contentId: item.objectId,
+                contentId,
                 page: historyPage,
                 pageSize: historyPageSize,
                 sort: "asc",
@@ -265,40 +302,43 @@ export default function IntegrationInstanceMonitoringItemPage() {
             .then((res) => {
                 if (cancelled) return;
                 const totalPages = res.totalPages ?? 0;
-                // First fetch after the tab opens: if there's more than one
-                // page, redirect to the last page (most recent entries).
-                if (jumpToLastPageRef.current && totalPages > 1 && historyPage !== totalPages - 1) {
-                    jumpToLastPageRef.current = false;
-                    setHistoryPage(totalPages - 1);
-                    return;
+                /*
+                 * The totals are the first moment the last page is known. If this content id has
+                 * not been sent there yet, do that instead of showing the oldest entries â€” the
+                 * next render asks for the new page and this branch does not run again.
+                 */
+                if (jumpedForRef.current !== contentId) {
+                    jumpedForRef.current = contentId;
+                    if (totalPages > 1 && historyPage !== totalPages - 1) {
+                        setHistoryPage(totalPages - 1);
+                        return;
+                    }
                 }
-                jumpToLastPageRef.current = false;
-                setHistory(res.content ?? []);
-                setHistoryTotalElements(res.totalElements ?? 0);
-                setHistoryTotalPages(totalPages);
+                setHistoryResult({
+                    query,
+                    entries: res.content ?? [],
+                    totalElements: res.totalElements ?? 0,
+                    totalPages,
+                });
             })
             .catch((err) => {
                 console.error("logging history failed", err);
                 if (!cancelled) {
-                    setHistory([]);
-                    setHistoryTotalElements(0);
-                    setHistoryTotalPages(0);
-                    jumpToLastPageRef.current = false;
+                    jumpedForRef.current = contentId;
+                    setHistoryResult({ query, entries: [], totalElements: 0, totalPages: 0 });
                 }
-            })
-            .finally(() => {
-                if (!cancelled) setHistoryLoading(false);
             });
         return () => {
             cancelled = true;
         };
     }, [
         loggingService,
-        item?.objectId,
+        contentId,
         loggingStatus?.enabled,
         activeTab,
         historyPage,
         historyPageSize,
+        historyQuery,
     ]);
 
     const monitoringListUrl = `${ROUTES.INTEGRATION_INSTANCE}/${id}/monitoring/${source ?? "all"}`;
@@ -312,15 +352,6 @@ export default function IntegrationInstanceMonitoringItemPage() {
         [itemBaseUrl, navigate],
     );
 
-    // Auto-jump to last page whenever the History tab becomes active. Covers
-    // both the tab-click path (state transition) and direct URL navigation
-    // (`/.../history`) on initial mount.
-    useEffect(() => {
-        if (activeTab === TAB_HISTORY) {
-            jumpToLastPageRef.current = true;
-            setHistoryPage(0);
-        }
-    }, [activeTab]);
 
     const handlePageSizeChange = useCallback((value: string) => {
         setHistoryPageSize(Number(value));
@@ -358,7 +389,7 @@ export default function IntegrationInstanceMonitoringItemPage() {
                           t("integration.monitoring.title"),
                           t("integration.monitoring.item.provider") + ": " + (item.provider ?? "-"),
                           t("integration.monitoring.item.source") + ": " + (item.source ?? "-"),
-                      ].join(" · ")
+                      ].join(" Â· ")
                     : t("integration.monitoring.item.description")}
             />
             {item && (
