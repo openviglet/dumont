@@ -104,13 +104,18 @@ export default tseslint.config(
      * about data it does not fetch — the page that fetches now stamps the response and passes it
      * down, which also retired a `refreshInterval` prop the grid no longer had a use for.
      *
-     * The four below are each a design decision rather than a shape: state that must reset when a
-     * selection changes (double-check, and the monitoring item's history paging), and a dialog
-     * that seeds itself from a prop when it opens.
+     * Double-check went the same way, and was the clearest case of all: five states the effect
+     * reset on the way in, replaced by two that each carry the source they describe.
+     *
+     * The three below are structural, and are left deliberately. The monitoring item's history
+     * paging would need its result keyed by the query *and* its "jump to the last page when the
+     * tab opens" behaviour rethought — a flow with no test covering it, where the risk of breaking
+     * paging outweighs a warning. The avatar picker seeds its style and seed from a prop when the
+     * dialog opens, which is the remount-on-key case: a decision about the dialog's contract
+     * rather than a local edit.
      */
     files: [
       "src/components/dicebear-avatar-picker.tsx",
-      "src/pages/integration.instance.double.check.page.tsx",
       "src/pages/integration.instance.monitoring.item.page.tsx",
     ],
     rules: { "react-hooks/set-state-in-effect": "warn" },

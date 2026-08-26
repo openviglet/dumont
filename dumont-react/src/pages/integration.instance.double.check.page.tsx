@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { BadgeAemEnv } from "@/components/badge-aem-env";
 import { BadgeIndexingStatus } from "@/components/badge-indexing-status";
 import { BadgeLocale } from "@/components/badge-locale";
@@ -37,10 +37,26 @@ export default function IntegrationInstanceDoubleCheckPage() {
 
   const [sources, setSources] = useState<TurIntegrationAemSource[]>([]);
   const [selectedSource, setSelectedSource] = useState<string>(NO_SOURCE);
-  const [doubleCheck, setDoubleCheck] = useState<TurIntegrationDoubleCheck | null>(null);
-  const [unprocessed, setUnprocessed] = useState<TurIntegrationMonitoring | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [loadingUnprocessed, setLoadingUnprocessed] = useState(false);
+  /*
+   * D53 â€” each answer carries the source it is about.
+   *
+   * These were five independent states that the load effect reset on the way in: clear both
+   * results, raise both flags, clear the error. Every one of those was a synchronous write in an
+   * effect body, and together they were a second description of something the data already knew â€”
+   * which source the numbers on screen belong to.
+   *
+   * Storing the source beside its result makes the resets unnecessary: a result for another source
+   * is simply not this source's answer, so it neither renders nor has to be cleared, and "loading"
+   * is exactly the state of not yet holding this source's result.
+   */
+  const [checked, setChecked] = useState<{
+    source: string;
+    doubleCheck: TurIntegrationDoubleCheck | null;
+  } | null>(null);
+  const [scanned, setScanned] = useState<{
+    source: string;
+    unprocessed: TurIntegrationMonitoring | null;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
 
@@ -65,25 +81,29 @@ export default function IntegrationInstanceDoubleCheckPage() {
       .catch(() => setError(t("integration.doubleCheck.loadSourcesFailed")));
   }, [id]);
 
+  /** What is on screen, and whether it is about the source currently selected. */
+  const doubleCheck = checked?.source === selectedSource ? checked.doubleCheck : null;
+  const unprocessed = scanned?.source === selectedSource ? scanned.unprocessed : null;
+  const hasSource = Boolean(doubleCheckService) && selectedSource !== NO_SOURCE;
+  const loading = hasSource && checked?.source !== selectedSource;
+  const loadingUnprocessed = hasSource && scanned?.source !== selectedSource;
+
   useEffect(() => {
     if (!doubleCheckService || !selectedSource) return;
-    setLoading(true);
-    setLoadingUnprocessed(true);
-    setDoubleCheck(null);
-    setUnprocessed(null);
-    setError(null);
+    const source = selectedSource;
 
     doubleCheckService
-      .get(selectedSource)
-      .then((data) => setDoubleCheck(data))
-      .catch(() => setError(t("integration.doubleCheck.loadValidationFailed")))
-      .finally(() => setLoading(false));
+      .get(source)
+      .then((data) => setChecked({ source, doubleCheck: data }))
+      .catch(() => {
+        setChecked({ source, doubleCheck: null });
+        setError(t("integration.doubleCheck.loadValidationFailed"));
+      });
 
     doubleCheckService
-      .getUnprocessed(selectedSource)
-      .then((data) => setUnprocessed(data))
-      .catch(() => { })
-      .finally(() => setLoadingUnprocessed(false));
+      .getUnprocessed(source)
+      .then((data) => setScanned({ source, unprocessed: data }))
+      .catch(() => setScanned({ source, unprocessed: null }));
   }, [selectedSource, id]);
 
   const handleIndex = useCallback(async (contentId: string) => {
@@ -274,7 +294,7 @@ function UnprocessedList({ items, t, onIndex }: { items: TurIntegrationIndexing[
                 <BadgeIndexingStatus status={item.status} />
               </td>
               <td className="px-3 py-2 text-xs text-muted-foreground">
-                {item.created ? new Date(item.created).toLocaleString() : "—"}
+                {item.created ? new Date(item.created).toLocaleString() : "â€”"}
               </td>
               <td className="px-3 py-2">
                 <Button

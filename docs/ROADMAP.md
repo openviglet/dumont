@@ -168,7 +168,7 @@ This track has no remaining pending tasks.
 
 ## Track L — Console build, lint and type gates
 
-- ⏳ **D53** (deps: —) **twenty-three surfaces set state inside an effect body, so the rule is a warning there** — Four remain in three files: state that must reset when a selection changes, and a dialog that seeds itself from a prop when it opens. → §XIV.2
+- ⏳ **D53** (deps: —) **twenty-three surfaces set state inside an effect body, so the rule is a warning there** — Three remain in two files, both structural: the monitoring item's history paging would need its query keyed and its jump-to-last-page rethought, and the avatar picker is a remount-on-key decision. → §XIV.2
 
 ## Done when — D53
 

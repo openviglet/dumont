@@ -100,21 +100,21 @@ describe("D48: inherited debt is named, not capped", () => {
   })
 
   it("only warns in a file the config names, with its reason", () => {
-    // `double.check.page.tsx` is on the list. Clearing it means deleting its line from the config,
+    // `monitoring.item.page.tsx` is on the list. Clearing it means deleting its line from the config,
     // which is a diff somebody reviews â€” where lowering a ceiling is a number nobody reads.
     expect(
       severityOf(
-        lintAs("src/pages/integration.instance.double.check.page.tsx", setsStateInEffect),
+        lintAs("src/pages/integration.instance.monitoring.item.page.tsx", setsStateInEffect),
         "react-hooks/set-state-in-effect",
       ),
     ).toBe(WARNING)
   })
 
   it("excuses a named file for that rule only, not for everything", () => {
-    // The failure a file-level exemption would ship. `double.check.page.tsx` is excused its effect;
+    // The failure a file-level exemption would ship. `monitoring.item.page.tsx` is excused its effect;
     // it is not excused an unused variable.
     const messages = lintAs(
-      "src/pages/integration.instance.double.check.page.tsx",
+      "src/pages/integration.instance.monitoring.item.page.tsx",
       `const unused = 1\n${setsStateInEffect}\n`,
     )
     expect(severityOf(messages, "@typescript-eslint/no-unused-vars")).toBe(ERROR)
