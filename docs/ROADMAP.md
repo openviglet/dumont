@@ -168,7 +168,7 @@ This track has no remaining pending tasks.
 
 ## Track L — Console build, lint and type gates
 
-- ⏳ **D53** (deps: —) **twenty-three surfaces set state inside an effect body, so the rule is a warning there** — Six remain, each a design decision rather than a shape: state that must reset when a selection changes, a dialog seeding itself on open, and a timestamp that belongs where the data is fetched. → §XIV.2
+- ⏳ **D53** (deps: —) **twenty-three surfaces set state inside an effect body, so the rule is a warning there** — Four remain in three files: state that must reset when a selection changes, and a dialog that seeds itself from a prop when it opens. → §XIV.2
 
 ## Done when — D53
 

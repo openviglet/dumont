@@ -6,7 +6,7 @@ import {
     useLegacyTable as useReactTable,
     type LegacyColumnDef as ColumnDef,
 } from "@tanstack/react-table/legacy";
-import { useEffect, useMemo, useState, type PropsWithChildren } from "react";
+import { useMemo, type PropsWithChildren } from "react";
 
 import { Card } from "@/components/ui/card";
 import {
@@ -41,7 +41,8 @@ import { GradientButton } from "../ui/gradient-button";
 
 interface Props {
     gridItemList: TurIntegrationIndexing[];
-    refreshInterval?: number;
+    /** When the data on screen was fetched. Owned by the page that fetches it (D53). */
+    lastSync: number;
     page: number;
     pageSize: number;
     totalElements: number;
@@ -170,7 +171,7 @@ function buildColumns(
 
 export const AemMonitoringGrid: React.FC<PropsWithChildren<Props>> = ({
     gridItemList,
-    refreshInterval,
+    lastSync,
     page,
     pageSize,
     totalElements,
@@ -212,20 +213,6 @@ export const AemMonitoringGrid: React.FC<PropsWithChildren<Props>> = ({
         },
     });
 
-    const [lastUpdated, setLastUpdated] = useState(() => Date.now());
-
-    useEffect(() => {
-        setLastUpdated(Date.now());
-    }, [gridItemList]);
-
-    useEffect(() => {
-        if (!refreshInterval) return;
-        const tick = setInterval(() => {
-            setLastUpdated(Date.now());
-        }, refreshInterval);
-
-        return () => clearInterval(tick);
-    }, [refreshInterval]);
 
     const handleSort = (field: string) => {
         if (sortBy === field) {
@@ -241,7 +228,7 @@ export const AemMonitoringGrid: React.FC<PropsWithChildren<Props>> = ({
                 <span>{t("forms.common.totalRecords", { count: totalElements.toLocaleString() })}</span>
                 <div className="flex items-center gap-2">
                     <RefreshCcw className="h-3 w-3 animate-spin-slow" />
-                    {t("forms.loggingGrid.lastSync", { time: new Date(lastUpdated).toLocaleTimeString() })}
+                    {t("forms.loggingGrid.lastSync", { time: new Date(lastSync).toLocaleTimeString() })}
                     <GradientButton
                         variant="outline"
                         size="sm"

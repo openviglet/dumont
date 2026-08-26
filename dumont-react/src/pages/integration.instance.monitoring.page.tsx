@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { AemMonitoringGrid } from "@/components/integration/aem.monitoring.grid";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
@@ -50,6 +50,8 @@ export default function IntegrationInstanceMonitoringPage() {
   const { id, source = DEFAULT_SOURCE } = useParams<{ id: string; source?: string }>();
 
   const [monitoringPage, setMonitoringPage] = useState<TurIntegrationMonitoringPage>();
+  /** When the last search response landed - the grid shows it as "last sync" (D53). */
+  const [lastSync, setLastSync] = useState(() => Date.now());
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -120,6 +122,14 @@ export default function IntegrationInstanceMonitoringPage() {
         if (!isMounted) return;
 
         setMonitoringPage(data);
+        /*
+         * D53 â€” the "last sync" stamp is taken where the sync happens.
+         *
+         * The grid used to derive it from a prop changing, in an effect: a synchronous write, and
+         * a clock reading in a component that only watches data rather than fetching it. This is
+         * the moment a response actually landed.
+         */
+        setLastSync(Date.now());
 
       } catch (err) {
         if (!isSilent) setError("Failed to load monitoring data.");
@@ -321,7 +331,7 @@ export default function IntegrationInstanceMonitoringPage() {
           <div className="mt-4">
             <AemMonitoringGrid
               gridItemList={monitoringPage.content || []}
-              refreshInterval={refreshInterval}
+              lastSync={lastSync}
               page={page}
               pageSize={pageSize}
               totalElements={monitoringPage.totalElements}

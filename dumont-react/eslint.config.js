@@ -99,15 +99,17 @@ export default tseslint.config(
      * status, the avatar picker keeps the preview a pick was made against, and the discovery hook
      * stopped branching on a warm cache it could simply await.
      *
-     * The six below are each a design decision rather than a shape: state that must reset when a
-     * selection changes (double-check, monitoring, the field-mapping step), a dialog that seeds
-     * itself from a prop when it opens, and a timestamp that belongs where the data is fetched
-     * rather than in a component watching a prop.
+     * Two more went the same way: the field-mapping step computes its preset and stores toggles
+     * against the preset they were made for, and the monitoring grid stopped reading the clock
+     * about data it does not fetch — the page that fetches now stamps the response and passes it
+     * down, which also retired a `refreshInterval` prop the grid no longer had a use for.
+     *
+     * The four below are each a design decision rather than a shape: state that must reset when a
+     * selection changes (double-check, and the monitoring item's history paging), and a dialog
+     * that seeds itself from a prop when it opens.
      */
     files: [
       "src/components/dicebear-avatar-picker.tsx",
-      "src/components/integration/aem.monitoring.grid.tsx",
-      "src/components/integration/wizard/steps/step-field-mapping.tsx",
       "src/pages/integration.instance.double.check.page.tsx",
       "src/pages/integration.instance.monitoring.item.page.tsx",
     ],
