@@ -311,7 +311,7 @@ adding it to `ON_BENTO` in `test/console-census.test.ts`.
 
 | Command | Gate |
 |---|---|
-| `pnpm run lint` | ESLint, **no exemptions**. It arrived on an unlinted console with 105 problems; the two structural rules were held as named files in `eslint.config.js` until D53/D54 emptied both lists, which were then deleted rather than kept at zero. If a rule needs that treatment again: name the files and say why at each one, never a ceiling — a ceiling lets one change pay for another. |
+| `pnpm run lint` | ESLint, **no exemptions**. It arrived on an unlinted console with 105 problems; three rules carried the debt as named files in `eslint.config.js` until D53, D54 and D56 emptied each list, which was then deleted rather than kept at zero. If a rule needs that treatment again: name the files and say why at each one, never a ceiling — a ceiling lets one change pay for another. One genuine one-off is an `eslint-disable-next-line` with its reason, in `use-grid-adapter.ts`. |
 | `pnpm run lint:ds` | No component re-declares a design system export (D41). |
 | `pnpm run census` | The migration count. Exits non-zero on a broken read; warns on stderr when a chrome probe matches nothing. |
 | `pnpm run compile:build` | `tsc -b`, the Vite build, then `scripts/check-mf-types.mjs`. |
@@ -339,6 +339,12 @@ honestly, and both were used to clear the twenty-five this console had:
 `void (async () => { await load() })()` is the accepted way to call a loader from an effect. Do
 **not** wrap a synchronous write in an IIFE to quiet the rule: the write is still synchronous, and
 that is a loophole rather than a fix.
+
+**Dependency arrays.** `react-hooks/exhaustive-deps` is an error too. When completing one is
+impossible, the array is not what is wrong: a function rebuilt every render needs `useCallback`, a
+value built inline needs `useMemo`, and a helper closing over nothing belongs at module scope.
+D56 found a list page constructing its service inline on every render that way — an honest array
+would have refetched forever, and the warning had been standing in front of it.
 
 ### Shared Components
 
