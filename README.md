@@ -26,10 +26,12 @@
 - **Web Console**: Configure sources, launch indexing and watch it run, in English or Portuguese.
   Built from the same component library as Viglet Turing ES and Viglet Shio, and mountable inside
   Turing as well as standalone.
-  - Every connector type is configured end to end in the new *bento* interface — a fixed nav rail,
-    section hubs and a `⌘K` command palette that reaches every screen.
-  - The previous console is still served at `/admin`, unchanged, while the remaining screens move
-    across one at a time.
+  - Every screen that configures or monitors a connector is served in the *bento* interface — a
+    fixed nav rail, section hubs and a `⌘K` command palette that reaches all of them. Sources and
+    their forms, indexing rules and the indexing manager, monitoring, statistics, coverage,
+    double-check, plugins, system info and AI insights.
+  - The previous console is still served at `/admin`, unchanged and complete, so a bookmark into it
+    keeps working. Sign-in, first-run setup and the user/group/role screens live there only.
   
 - **Enterprise Ready**:
   - JMS message queue support

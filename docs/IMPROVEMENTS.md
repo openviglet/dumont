@@ -75,5 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XVI The web console
