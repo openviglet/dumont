@@ -75,3 +75,102 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XVII Fetching AEM from the publish tier (D61)
+
+`DumAemCommonsUtils` fetches content with `.infinity.json`, `AemNodeNavigator` walks the
+tree the same way, `DumAemDependencyService` collects referenced `/content` paths out of
+it, and discovery runs through `/bin/querybuilder.json`. Track H added `.model.json`
+extraction on top (`DumAemExtModelJsonBase`), but the traversal and discovery underneath
+are unchanged.
+
+All four are author-tier Sling servlets. On AEM as a Cloud Service the publish tier does
+not serve them: `.infinity.json` is a dispatcher-blocked pattern by default, and
+`/bin/querybuilder.json` is not exposed on publish at all. So a Cloud Service customer
+can only be indexed by pointing the connector at author with a service user — which
+means reading unpublished content, inheriting the ACL question, and holding a credential
+into the authoring environment for a job that only ever needed published pages.
+
+Adobe's published delivery surface is the alternative and is already stable: the Content
+Fragment OpenAPI and GraphQL endpoints, the Assets Search API on the
+`delivery-pXXXX-eYYYY` host, and `.model.json` where Core Components serve it. Those are
+CDN-fronted, publish-only, and designed for exactly this consumer.
+
+The work is a second fetch strategy behind the existing configuration and selected per
+source, so on-prem and AMS keep the traversal that works there while Cloud Service gets
+the delivery APIs. The `publishURLPrefix` re-fetch already in `DumAemStructuredSource`
+is the seam this extends rather than replaces.
+
+## XVIII A journal under the webhook (D62)
+
+`DumAemWebhookController` receives Adobe I/O CloudEvents over HTTP and is push-only.
+Adobe I/O offers both directions — a push registration, and a **journal**: an ordered
+list of the same events, pulled at the consumer's own cadence behind a cursor.
+
+Push alone has no recovery. A webhook lost to a 502, a rolling restart, a network
+partition or an expired certificate is gone — Adobe retries for a bounded window and
+then drops it. The content it described stays at whatever version the index last saw,
+and nothing in the connector knows, because a missed event leaves no trace.
+
+The scheduled audit does eventually notice: `discoverContentIds` re-enumerates the
+source and files a NOT_PROCESSED record for anything unqueued. But that is a full
+re-discovery, it runs on a cron most deployments set to hours or leave off, and it
+corrects nothing that was published and then unpublished between two runs.
+
+A journal consumer closes the gap cheaply: persist the cursor, poll on a short interval,
+and feed the same handler the webhook already feeds. The cursor makes recovery exact
+rather than best-effort — replaying after downtime is a matter of not advancing it — and
+journaling is enabled automatically on every Adobe Developer Console event registration,
+so it costs no extra setup for the customer.
+
+The two paths coexist: the webhook stays the low-latency route, the journal is the floor
+under it.
+
+## XIX Send the schema before the documents (D63)
+
+`DumStructuredSchema` is Dumont's schema-as-code: an ordered, immutable declaration of
+every field a structured source publishes. It already produces the
+`TurSNJobAttributeSpec`s attached to each document and enforces the absent-versus-empty
+grounding rule (D03) at the record boundary.
+
+Nothing sends that declaration ahead of the documents. The connector starts indexing and
+Turing's indexing-time auto-create path invents each field the first time a document
+carries it, inferring the type from a single value. A field declared multi-valued but
+arriving with one value in the first document is created single-valued. A field the
+schema marks as a facet is created without it. An optional field absent from the early
+documents does not exist until it appears — and is then guessed too.
+
+Turing has accepted the declarative form since T382: `POST /api/sn/manifest` converges a
+site and its field schema idempotently, rejects an undeclared breaking change with a
+409, and offers a dry-run plan. Re-posting the same manifest is a no-op, so it is safe
+to send on every run.
+
+The missing step is the call itself, once per source before the first document, built
+from the schema the connector already holds. It waits on a manifest client in
+`turing-java-sdk`, filed there as T1030, since hand-rolling the HTTP would duplicate the
+auth and CSRF the SDK already does for indexing. With it, configuring a source in Dumont
+provisions the site in Turing.
+
+## XX The third comparison the audit cannot make (D64)
+
+`DumConnectorContentAuditTask` runs on a cron, calls `discoverContentIds` for each
+source, files a NOT_PROCESSED record for anything the connector never queued, and drops
+records whose environment no longer exists. It is the only thing in either product that
+goes looking for missing content.
+
+It compares two sets, and neither of them is the search index. The source is one;
+`DumConnectorIndexingModel`, the connector's own ledger, is the other. So the audit
+answers "did we queue everything the source has" and cannot answer "did everything we
+queued actually land". A document the ledger marks processed whose write to Turing
+failed, or one removed from the source whose delete never arrived, satisfies the audit
+completely while the index is wrong.
+
+That failure is silent and permanent. The index keeps answering queries — with a stale
+document or a ghost among the results — and the only repair anyone has is a full
+reindex: hours of embedding cost to fix a handful of records nobody can name.
+
+The third comparison needs a read Turing does not offer today: a paged enumeration of
+the ids the index holds for a source, with a version or checksum per id, filed there as
+T1029. Once that exists, this task grows the comparison and reports the three
+differences. Applying the repair stays here, since the connector already owns the queue
+and the retry.

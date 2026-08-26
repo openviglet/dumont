@@ -36,6 +36,8 @@ relations (what a task *enables*) live in the task text.
 > end-to-end · **D04** Pluggable enrichment stage (grounding-safe derive/normalize +
 > config-gated, cached LLM classification). All enable the tasks below.
 
+- 📋 **D63** (deps: Turing T1030) **The connector never provisions the SN site it indexes into** — DumStructuredSchema declares every field, but nothing sends it ahead of the documents, so Turing auto-creates each field by guessing from one value. → §XIX
+
 ## Track B — Web-crawler hardening (real-world sources)
 
 > **Objective**: close the gaps that make the current `DumWCPluginProcess` fail on
@@ -103,6 +105,9 @@ This track has no remaining pending tasks.
 > `dum_provenance` attribute; per-source last-seen history so a dropped field stays auditable).
 > Complements D09.
 
+- 📋 **D62** (deps: —) **A dropped Adobe I/O webhook is never recovered** — DumAemWebhookController is push-only, so an event lost to a 502 or a restart leaves that content stale until the next full audit. → §XVIII
+- 📋 **D64** (deps: Turing T1029) **The content audit never compares against the search index** — DumConnectorContentAuditTask reconciles the source against its own ledger only, so a document that never landed in Turing stays invisible. → §XX
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -165,6 +170,8 @@ This track has no remaining pending tasks.
 This track has no remaining pending tasks.
 
 ---
+
+- 📋 **D61** (deps: —) **Discovery and traversal rely on servlets the AEM publish tier blocks** — querybuilder.json and .infinity.json are author-tier shapes, so a Cloud Service source has to be reached through author instead of its delivery APIs. → §XVII
 
 ## Non-goals (do NOT add as tasks)
 
