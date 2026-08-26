@@ -189,9 +189,9 @@ export default function IntegrationInstanceSystemInfoPage() {
         <>
             <AdaptivePageHeader
                 icon={IconInfoCircle}
-                feature="System Information"
-                name="System Information"
-                description="Connector version and runtime details."
+                feature={t("integration.connectorSystemInfo.title")}
+                name={t("integration.connectorSystemInfo.title")}
+                description={t("integration.connectorSystemInfo.description")}
             />
             <div className="py-6 px-6">
                 <Tabs defaultValue="overview">
