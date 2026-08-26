@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationEdsSourceForm } from "@/components/integration/integration.eds.source.form";
 import type { TurIntegrationEdsSource } from "@/models/integration/integration-eds-source.model";
 import { TurIntegrationEdsSourceService } from "@/services/integration/integration-eds-source.service";
@@ -18,7 +18,12 @@ export default function IntegrationInstanceEdsSourcePage() {
   const [edsSource, setEdsSource] = useState<TurIntegrationEdsSource>(
     {} as TurIntegrationEdsSource,
   );
-  const [isNew, setIsNew] = useState<boolean>(true);
+  /*
+   * D53 - derived, not state. `isNew` is a fact about the route, so a `useState` seeded `true`
+   * and corrected inside an effect renders the wrong value first and the right one after, and
+   * the correction is a `setState` in an effect body that React 19 refuses.
+   */
+  const isNew = sourceId === "new";
   const service = useMemo(() => new TurIntegrationEdsSourceService(id), [id]);
   const [open, setOpen] = useState(false);
   const [indexing, setIndexing] = useState(false);
@@ -27,11 +32,10 @@ export default function IntegrationInstanceEdsSourcePage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (sourceId !== "new") {
+    if (!isNew) {
       service.get(sourceId).then(setEdsSource);
-      setIsNew(false);
     }
-  }, [id, sourceId, service]);
+  }, [id, sourceId, isNew, service]);
 
   async function onDelete() {
     try {
@@ -56,7 +60,7 @@ export default function IntegrationInstanceEdsSourcePage() {
       await service.index(edsSource);
       toast.success(t("integration.edsSources.indexStarted", { name: edsSource.title }));
     } catch (error) {
-      // 409 → "already running"; let the global 422 handler do its thing.
+      // 409 â†’ "already running"; let the global 422 handler do its thing.
       if (axios.isAxiosError(error) && error.response?.status === 409) {
         toast.warning(t("integration.edsSources.alreadyRunning", { name: edsSource.title }));
       } else {

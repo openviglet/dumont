@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationCatalogSourceForm } from "@/components/integration/integration.catalog.source.form";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationCatalogSourceService } from "@/services/integration/integration-catalog-source.service";
@@ -14,20 +14,24 @@ export default function IntegrationInstanceCatalogSourcePage() {
   const navigate = useNavigate();
   const { id, sourceId, tab = "general" } = useParams() as { id: string, sourceId: string, tab?: string };
   const [integrationCatalogSource, setIntegrationCatalogSource] = useState<TurIntegrationCatalogSource>({} as TurIntegrationCatalogSource);
-  const [isNew, setIsNew] = useState<boolean>(true);
+  /*
+   * D53 - derived, not state. `isNew` is a fact about the route, so a `useState` seeded `true`
+   * and corrected inside an effect renders the wrong value first and the right one after, and
+   * the correction is a `setState` in an effect body that React 19 refuses.
+   */
+  const isNew = sourceId === "new";
   const turIntegrationCatalogSourceService = useMemo(() => new TurIntegrationCatalogSourceService(id), [id]);
   const [open, setOpen] = useState(false);
   const [indexingAll, setIndexingAll] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (sourceId !== "new") {
+    if (!isNew) {
       turIntegrationCatalogSourceService.get(sourceId).then((source) => {
         setIntegrationCatalogSource(source);
       });
-      setIsNew(false);
     }
-  }, [id, sourceId, turIntegrationCatalogSourceService]);
+  }, [id, sourceId, isNew, turIntegrationCatalogSourceService]);
 
   async function onDelete() {
     try {

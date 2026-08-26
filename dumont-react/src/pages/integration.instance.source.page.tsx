@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationSourceForm } from "@/components/integration/integration.source.form";
 import { AemSourceWizard } from "@/components/integration/wizard/aem-source-wizard";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
@@ -27,7 +27,12 @@ export default function IntegrationInstanceSourcePage() {
     authorURLPrefix: "", publishURLPrefix: "",
     localePaths: [], attributeSpecifications: [], models: [],
   });
-  const [isNew, setIsNew] = useState<boolean>(true);
+  /*
+   * D53 - derived, not state. `isNew` is a fact about the route, so a `useState` seeded `true`
+   * and corrected inside an effect renders the wrong value first and the right one after, and
+   * the correction is a `setState` in an effect body that React 19 refuses.
+   */
+  const isNew = sourceId === "new";
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
   const turIntegrationConnectorService = useMemo(() => new TurIntegrationConnectorService(id), [id]);
   const [open, setOpen] = useState(false);
@@ -40,18 +45,17 @@ export default function IntegrationInstanceSourcePage() {
   useSubPageBreadcrumb(breadcrumb);
 
   useEffect(() => {
-    if (sourceId !== "new") {
+    if (!isNew) {
       turIntegrationAemSourceService.get(sourceId).then((source) => {
         setIntegrationAemSource(source);
         if (source.name) {
           setBreadcrumb({ label: source.name });
         }
       });
-      setIsNew(false);
     } else {
       setBreadcrumb({ label: t("forms.wizard.newSource") });
     }
-  }, [id, sourceId, turIntegrationAemSourceService, t]);
+  }, [id, sourceId, isNew, turIntegrationAemSourceService, t]);
 
   async function onDelete() {
     try {

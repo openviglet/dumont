@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationAssetsSourceForm } from "@/components/integration/integration.assets.source.form";
 import { GradientButton } from "@/components/ui/gradient-button";
 import type { TurIntegrationAssetsSource } from "@/models/integration/integration-assets-source.model";
@@ -12,15 +12,20 @@ export default function IntegrationInstanceAssetsSourcePage() {
   const navigate = useNavigate();
   const { id, sourceId, tab = "general" } = useParams() as { id: string, sourceId: string, tab?: string };
   const [source, setSource] = useState<TurIntegrationAssetsSource>({} as TurIntegrationAssetsSource);
-  const [isNew, setIsNew] = useState<boolean>(true);
+  /*
+   * D53 - derived, not state. `isNew` is a fact about the route, so a `useState` seeded `true`
+   * and corrected inside an effect renders the wrong value first and the right one after, and
+   * the correction is a `setState` in an effect body that React 19 refuses.
+   */
+  const isNew = sourceId === "new";
   const service = useMemo(() => new TurIntegrationAssetsSourceService(id), [id]);
   const [open, setOpen] = useState(false);
   const [indexingAll, setIndexingAll] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (sourceId !== "new") { service.get(sourceId).then(setSource); setIsNew(false); }
-  }, [id, sourceId, service]);
+    if (!isNew) { service.get(sourceId).then(setSource); }
+  }, [id, sourceId, isNew, service]);
 
   async function onDelete() {
     try {

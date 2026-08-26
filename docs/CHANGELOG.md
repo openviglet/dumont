@@ -489,3 +489,4 @@
 ## Track L — Console build, lint and type gates
 
 - **D52** — 56 aliases across 48 declarations are rewritten to relative specifiers after emit and the zip is repacked from the corrected tree; a gate fails on any that survive.
+- **D53 (the derived-state half)** — Ten of twenty-three cleared with no behaviour change: seven pages whose isNew was a fact about the route, three whose blank entity was a value the render computes.

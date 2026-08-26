@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { AdminUserForm } from "@/components/admin/admin.user.form";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
@@ -13,24 +13,33 @@ import { toast } from "@viglet/viglet-design-system";
 
 const adminUserService = new DumAdminUserService();
 
+/** What the form starts from on the `new` route. Frozen so no caller can edit the shared value. */
+const EMPTY_USER = Object.freeze({
+  username: "",
+  firstName: "",
+  lastName: "",
+  email: "",
+  admin: false,
+}) as DumUser;
+
 export default function AdminUserPage() {
   const { t } = useTranslation();
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const isNew = !username || username === "new";
-  const [user, setUser] = useState<DumUser>();
+  const [fetched, setFetched] = useState<DumUser>();
   const [error, setError] = useState<string | null>(null);
+
+  // D53 - a blank user is a value, not a fetch result; see the note in `admin.group.page`.
+  const user = isNew ? EMPTY_USER : fetched;
 
   useSubPageBreadcrumb(isNew ? t("admin.users.newUser") : username ?? "");
 
   useEffect(() => {
-    if (isNew) {
-      setUser({ username: "", firstName: "", lastName: "", email: "", admin: false } as DumUser);
-      return;
-    }
+    if (isNew) return;
     adminUserService
       .get(username!)
-      .then(setUser)
+      .then(setFetched)
       .catch(() => setError(t("admin.users.loadFailed")));
   }, [username, isNew, t]);
 

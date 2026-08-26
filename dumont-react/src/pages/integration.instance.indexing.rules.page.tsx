@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationIndexingRulesForm } from "@/components/integration/integration.indexing.rules.form";
 import type { TurIntegrationIndexingRule } from "@/models/integration/integration-indexing-rule.model";
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service";
@@ -15,15 +15,19 @@ export default function IntegrationInstanceIndexingRulePage() {
     () => new TurIntegrationIndexingRuleService(id || ""),
     [id]
   );
-  const [isNew, setIsNew] = useState<boolean>(true);
+  /*
+   * D53 - derived, not state. `isNew` is a fact about the route, so a `useState` seeded `true`
+   * and corrected inside an effect renders the wrong value first and the right one after, and
+   * the correction is a `setState` in an effect body that React 19 refuses.
+   */
+  const isNew = ruleId === "new";
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   useEffect(() => {
-    if (ruleId !== "new") {
+    if (!isNew) {
       turIntegrationIndexingRuleService.get(ruleId).then(setIntegrationIndexingRules);
-      setIsNew(false);
     }
-  }, [ruleId, turIntegrationIndexingRuleService]);
+  }, [ruleId, isNew, turIntegrationIndexingRuleService]);
   async function onDelete() {
     try {
       if (await turIntegrationIndexingRuleService.delete(integrationIndexingRules)) {

@@ -13,24 +13,32 @@ import { toast } from "@viglet/viglet-design-system";
 
 const roleService = new DumRoleService();
 
+/** What the form starts from on the `new` route. Frozen so no caller can edit the shared value. */
+const EMPTY_ROLE: DumRole = Object.freeze({
+  id: "",
+  name: "",
+  description: "",
+  dumPrivileges: [],
+}) as DumRole;
+
 export default function AdminRolePage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isNew = !id || id === "new";
-  const [role, setRole] = useState<DumRole>();
+  const [fetched, setFetched] = useState<DumRole>();
   const [error, setError] = useState<string | null>(null);
+
+  // D53 — a blank role is a value, not a fetch result; see the note in `admin.group.page`.
+  const role = isNew ? EMPTY_ROLE : fetched;
 
   useSubPageBreadcrumb(isNew ? t("admin.roles.newRole") : role?.name ?? "");
 
   useEffect(() => {
-    if (isNew) {
-      setRole({ id: "", name: "", description: "", dumPrivileges: [] });
-      return;
-    }
+    if (isNew) return;
     roleService
       .get(id!)
-      .then(setRole)
+      .then(setFetched)
       .catch(() => setError(t("admin.roles.loadFailed")));
   }, [id, isNew, t]);
 

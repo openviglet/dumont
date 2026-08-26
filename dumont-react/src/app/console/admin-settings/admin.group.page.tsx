@@ -13,24 +13,39 @@ import { toast } from "@viglet/viglet-design-system";
 
 const groupService = new DumGroupService();
 
+/** What the form starts from on the `new` route. Frozen so no caller can edit the shared value. */
+const EMPTY_GROUP: DumGroup = Object.freeze({
+  id: "",
+  name: "",
+  description: "",
+  dumRoles: [],
+  dumUsers: [],
+}) as DumGroup;
+
 export default function AdminGroupPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isNew = !id || id === "new";
-  const [group, setGroup] = useState<DumGroup>();
+  const [fetched, setFetched] = useState<DumGroup>();
   const [error, setError] = useState<string | null>(null);
+
+  /*
+   * D53 — a blank group is a value, not a fetch result.
+   *
+   * The effect used to write it with `setGroup`, which renders `undefined` first and the blank
+   * second, and is a `setState` in an effect body. Nothing is being synchronised here: on the new
+   * route there is no request to make and the shape is known at render.
+   */
+  const group = isNew ? EMPTY_GROUP : fetched;
 
   useSubPageBreadcrumb(isNew ? t("admin.groups.newGroup") : group?.name ?? "");
 
   useEffect(() => {
-    if (isNew) {
-      setGroup({ id: "", name: "", description: "", dumRoles: [], dumUsers: [] });
-      return;
-    }
+    if (isNew) return;
     groupService
       .get(id!)
-      .then(setGroup)
+      .then(setFetched)
       .catch(() => setError(t("admin.groups.loadFailed")));
   }, [id, isNew, t]);
 

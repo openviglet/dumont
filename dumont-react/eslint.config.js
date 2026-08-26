@@ -78,17 +78,17 @@ export default tseslint.config(
    */
   {
     /*
-     * D48 — `setState` called synchronously in an effect body (K: cleared by its own task).
+     * `setState` called synchronously in an effect body. The rule is right that it causes
+     * cascading renders; D48 could not fix twenty-three surfaces as a side effect of turning a
+     * linter on, so it named them instead.
      *
-     * The pattern is this console's standard data load: `useEffect(() => { service.get().then(setX);
-     * setIsNew(false) }, [id])`. The rule is right that it causes cascading renders, and fixing it
-     * means restructuring how ~23 surfaces fetch — which is a refactor with its own risk, not a
-     * side effect of turning a linter on for the first time.
+     * D53 cleared ten: seven pages whose `isNew` was a fact about the route rather than state,
+     * and three whose "blank entity" was a value the render could compute. Neither changed any
+     * behaviour. What is left is one shape — a synchronous `setLoading(true)` before an async
+     * load — and clearing it decides whether a spinner reappears on a refetch, which is a product
+     * question rather than a lint one.
      */
     files: [
-      "src/app/console/admin-settings/admin.group.page.tsx",
-      "src/app/console/admin-settings/admin.role.page.tsx",
-      "src/app/console/admin-settings/admin.user.page.tsx",
       "src/components/ai-summary-panel.tsx",
       "src/components/dicebear-avatar-picker.tsx",
       "src/components/integration/aem.monitoring.grid.tsx",
@@ -96,19 +96,13 @@ export default tseslint.config(
       "src/components/integration/wizard/steps/step-field-mapping.tsx",
       "src/components/rag-status-badge.tsx",
       "src/hooks/use-discovery.ts",
-      "src/pages/integration.instance.assets.source.page.tsx",
-      "src/pages/integration.instance.catalog.source.page.tsx",
       "src/pages/integration.instance.coverage.page.tsx",
-      "src/pages/integration.instance.db.source.page.tsx",
       "src/pages/integration.instance.double.check.page.tsx",
-      "src/pages/integration.instance.eds.source.page.tsx",
       "src/pages/integration.instance.indexing.manager.page.tsx",
-      "src/pages/integration.instance.indexing.rules.page.tsx",
       "src/pages/integration.instance.monitoring.item.page.tsx",
       "src/pages/integration.instance.plugins.page.tsx",
       "src/pages/integration.instance.source.page.tsx",
       "src/pages/integration.instance.system-info.page.tsx",
-      "src/pages/integration.instance.wc.source.page.tsx",
     ],
     rules: { "react-hooks/set-state-in-effect": "warn" },
   },

@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationWcSourceForm } from "@/components/integration/integration.wc.source.form";
 import { GradientButton } from "@/components/ui/gradient-button";
 import type { TurIntegrationWcSource } from "@/models/integration/integration-wc-source.model";
@@ -12,18 +12,22 @@ export default function IntegrationInstanceWcSourcePage() {
   const navigate = useNavigate();
   const { id, sourceId, tab = "general" } = useParams() as { id: string, sourceId: string, tab?: string };
   const [wcSource, setWcSource] = useState<TurIntegrationWcSource>({} as TurIntegrationWcSource);
-  const [isNew, setIsNew] = useState<boolean>(true);
+  /*
+   * D53 - derived, not state. `isNew` is a fact about the route, so a `useState` seeded `true`
+   * and corrected inside an effect renders the wrong value first and the right one after, and
+   * the correction is a `setState` in an effect body that React 19 refuses.
+   */
+  const isNew = sourceId === "new";
   const service = useMemo(() => new TurIntegrationWcSourceService(id), [id]);
   const [open, setOpen] = useState(false);
   const [crawling, setCrawling] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (sourceId !== "new") {
+    if (!isNew) {
       service.get(sourceId).then(setWcSource);
-      setIsNew(false);
     }
-  }, [id, sourceId, service]);
+  }, [id, sourceId, isNew, service]);
 
   async function onDelete() {
     try {

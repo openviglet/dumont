@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationDbSourceForm } from "@/components/integration/integration.db.source.form";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service";
@@ -14,7 +14,12 @@ export default function IntegrationInstanceDbSourcePage() {
   const navigate = useNavigate();
   const { id, sourceId, tab = "general" } = useParams() as { id: string, sourceId: string, tab?: string };
   const [integrationDbSource, setIntegrationDbSource] = useState<TurIntegrationDbSource>({} as TurIntegrationDbSource);
-  const [isNew, setIsNew] = useState<boolean>(true);
+  /*
+   * D53 - derived, not state. `isNew` is a fact about the route, so a `useState` seeded `true`
+   * and corrected inside an effect renders the wrong value first and the right one after, and
+   * the correction is a `setState` in an effect body that React 19 refuses.
+   */
+  const isNew = sourceId === "new";
   const turIntegrationDbSourceService = useMemo(() => new TurIntegrationDbSourceService(id), [id]);
   const [open, setOpen] = useState(false);
   const [indexingAll, setIndexingAll] = useState(false);
@@ -22,13 +27,12 @@ export default function IntegrationInstanceDbSourcePage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (sourceId !== "new") {
+    if (!isNew) {
       turIntegrationDbSourceService.get(sourceId).then((source) => {
         setIntegrationDbSource(source);
       });
-      setIsNew(false);
     }
-  }, [id, sourceId, turIntegrationDbSourceService]);
+  }, [id, sourceId, isNew, turIntegrationDbSourceService]);
 
   async function onDelete() {
     try {
