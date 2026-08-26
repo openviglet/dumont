@@ -166,6 +166,14 @@ This track has no remaining pending tasks.
 
 ---
 
+- 📋 **D60** (deps: —) **the AEM model and specification editors are dead links in the bento shell** — Their route resolves into the bento tree, which serves no three-segment path under source. → §I.1
+
+## Done when — D60
+
+- **Every route the AEM detail page can construct is served on both trees** The bug was
+  a link resolving into a tree with no route for it, so deleting the line has to mean
+  the routes answer, not that two files were added.
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
