@@ -28,6 +28,17 @@ export class TurIntegrationConnectorService {
     return `/v2/integration/${this.integrationId}/connector`;
   }
 
+  /**
+   * Active connector plugin of this instance, carried as `provider` in the same
+   * open string map the endpoints above answer with.
+   */
+  async status(): Promise<DumConnectorStatusResponse> {
+    const { data } = await this.axiosInstance.get<DumConnectorStatusResponse>(
+      `${this.connectorUrl}/status`,
+    );
+    return data;
+  }
+
   async indexAll(source: string): Promise<DumConnectorStatusResponse> {
     const { data } = await this.axiosInstance.get<DumConnectorStatusResponse>(
       `${this.connectorUrl}/index/${source}/all`,
