@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
@@ -31,35 +31,43 @@ interface Props {
 
 /**
  * Shows whether the target Turing SN site has RAG enabled, so a source bound to a non-RAG site is
- * flagged — its documents would be keyword-only, never embedded (roadmap D17). Renders nothing
+ * flagged â€” its documents would be keyword-only, never embedded (roadmap D17). Renders nothing
  * when no site name is set. The disabled state explains why via Turing's diagnostic reason code.
  */
 export const RagStatusBadge: React.FC<Props> = ({ integrationId, siteName, className }) => {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<RagStatus | null>(null);
-  const [loading, setLoading] = useState(false);
+  /*
+   * D53 â€” the answer is stored with the question it answers.
+   *
+   * `status` and `loading` used to be two independent states the effect corrected on the way in:
+   * clear the old status, raise the flag, fetch. Both writes were synchronous in an effect body,
+   * and the pair could disagree â€” a status from the previous site rendered as though it were this
+   * one until the new request landed.
+   *
+   * Keeping the site alongside its result makes both derivable: it is loading exactly while the
+   * result on hand is not this site's, and there is no stale status to show because a result for
+   * another site is not this site's answer.
+   */
+  const [result, setResult] = useState<{ site: string; status: RagStatus } | null>(null);
 
   const site = siteName?.trim();
+  const status = result?.site === site ? (result?.status ?? null) : null;
+  const loading = Boolean(site) && !status;
 
   useEffect(() => {
-    if (!site) {
-      setStatus(null);
-      return;
-    }
+    if (!site) return;
     let active = true;
-    setLoading(true);
     axios
       .get<RagStatus>(
         `/v2/integration/${integrationId}/connector/genai-status/${encodeURIComponent(site)}`
       )
       .then(({ data }) => {
-        if (active) setStatus(data);
+        if (active) setResult({ site, status: data });
       })
       .catch(() => {
-        if (active) setStatus({ site, ragEnabled: false, reason: "UNREACHABLE" });
-      })
-      .finally(() => {
-        if (active) setLoading(false);
+        if (active) {
+          setResult({ site, status: { site, ragEnabled: false, reason: "UNREACHABLE" } });
+        }
       });
     return () => {
       active = false;

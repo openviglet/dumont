@@ -83,7 +83,16 @@ export function DiceBearAvatarPicker({
   const [selectedStyle, setSelectedStyle] = useState<DiceBearStyle>("adventurer");
   const [seed, setSeed] = useState(defaultSeed || generateRandomSeed());
   const [previewSeeds, setPreviewSeeds] = useState<string[]>([]);
-  const [selectedUrl, setSelectedUrl] = useState("");
+  /*
+   * D53 — a default the reader can override, stored against the default it overrode.
+   *
+   * `selectedUrl` used to be plain state that an effect re-pointed at the main preview whenever
+   * the style or seed changed — a synchronous write in an effect body, and one that silently
+   * discarded a pick the reader had just made. Recording which preview a pick was made against
+   * lets the render decide: the pick counts while the preview it belongs to is still current, and
+   * a new style or seed simply makes it stale.
+   */
+  const [picked, setPicked] = useState<{ against: string; url: string } | null>(null);
   /*
    * D48 â€” state, not a ref, because the render reads it.
    *
@@ -120,9 +129,8 @@ export function DiceBearAvatarPicker({
     [selectedStyle, debouncedSeed]
   );
 
-  useEffect(() => {
-    setSelectedUrl(mainPreviewUrl);
-  }, [mainPreviewUrl]);
+  // The pick counts only while the preview it was made against is still the current one.
+  const selectedUrl = picked?.against === mainPreviewUrl ? picked.url : mainPreviewUrl;
 
   const handleRandomize = () => {
     setSeed(generateRandomSeed());
@@ -211,7 +219,7 @@ export function DiceBearAvatarPicker({
                     type="button"
                     onClick={() => {
                       setSelectedStyle(style.id);
-                      setSelectedUrl(url);
+                      setPicked({ against: mainPreviewUrl, url });
                     }}
                     className={cn(
                       "flex flex-col items-center gap-1 p-1.5 rounded-lg border-2 transition-all cursor-pointer hover:bg-accent",
@@ -253,7 +261,7 @@ export function DiceBearAvatarPicker({
                   <button
                     key={`${s}-${shuffleCount}`}
                     type="button"
-                    onClick={() => setSelectedUrl(url)}
+                    onClick={() => setPicked({ against: mainPreviewUrl, url })}
                     className={cn(
                       "aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 hover:shadow-md bg-muted",
                       isActive

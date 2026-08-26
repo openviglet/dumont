@@ -94,17 +94,20 @@ export default tseslint.config(
      *     read from the URL instead of mirrored beside it, and a breadcrumb derived from what the
      *     page is showing (three).
      *
-     * The nine below are each a design decision rather than a shape: a derived default the reader
-     * can then override (the avatar picker, the field-mapping step), state that must reset when a
-     * selection changes (double-check, monitoring), a timestamp that belongs where the data is
-     * fetched rather than in a component watching a prop, and a module-level cache.
+     * Three more went the same way afterwards, each by storing an answer against the question it
+     * answers rather than correcting it on the way in: the RAG badge keeps the site beside its
+     * status, the avatar picker keeps the preview a pick was made against, and the discovery hook
+     * stopped branching on a warm cache it could simply await.
+     *
+     * The six below are each a design decision rather than a shape: state that must reset when a
+     * selection changes (double-check, monitoring, the field-mapping step), a dialog that seeds
+     * itself from a prop when it opens, and a timestamp that belongs where the data is fetched
+     * rather than in a component watching a prop.
      */
     files: [
       "src/components/dicebear-avatar-picker.tsx",
       "src/components/integration/aem.monitoring.grid.tsx",
       "src/components/integration/wizard/steps/step-field-mapping.tsx",
-      "src/components/rag-status-badge.tsx",
-      "src/hooks/use-discovery.ts",
       "src/pages/integration.instance.double.check.page.tsx",
       "src/pages/integration.instance.monitoring.item.page.tsx",
     ],

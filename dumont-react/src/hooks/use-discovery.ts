@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import axios from "axios";
 import type { DumDiscoveryAPI } from "@/models/discovery";
 
 /**
  * Module-level cache so multiple components (header, sidebar, admin settings,
- * …) don't each issue their own request to /discovery.
+ * â€¦) don't each issue their own request to /discovery.
  */
 let cached: DumDiscoveryAPI | undefined;
 let inflight: Promise<DumDiscoveryAPI> | undefined;
@@ -32,30 +32,27 @@ function fetchDiscovery(): Promise<DumDiscoveryAPI> {
 export function useDiscovery(): DumDiscoveryAPI | undefined {
   const [data, setData] = useState<DumDiscoveryAPI | undefined>(cached);
 
+  /*
+   * D53 â€” one path, whether the cache is warm or cold.
+   *
+   * There used to be a branch that read the cache and wrote it straight into state, which is a
+   * synchronous write in an effect body and depended on `data` to re-run â€” an effect that sets the
+   * value it watches. `fetchDiscovery` already answers a warm cache with a resolved promise, so
+   * going through it always defers the write by a microtask and the branch buys nothing.
+   */
   useEffect(() => {
-    if (cached) {
-      if (data !== cached) setData(cached);
-      return;
-    }
     let alive = true;
     fetchDiscovery()
       .then((d) => {
         if (alive) setData(d);
       })
       .catch(() => {
-        // discovery failed — keep undefined, components fall back to defaults
+        // discovery failed â€” keep undefined, components fall back to defaults
       });
-    /*
-     * D48 — the cleanup this guard was always missing.
-     *
-     * `alive` was written but never cleared, so the check above was decorative: a component
-     * unmounted while discovery was in flight still set state afterwards. `prefer-const` is what
-     * noticed — "never reassigned" was the report, and the reassignment being absent was the bug.
-     */
     return () => {
       alive = false;
     };
-  }, [data]);
+  }, []);
 
   return data;
 }
