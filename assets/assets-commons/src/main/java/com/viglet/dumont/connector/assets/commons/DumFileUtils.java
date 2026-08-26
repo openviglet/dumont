@@ -37,6 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.extractor.EmbeddedDocumentExtractor;
+import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
@@ -147,21 +148,22 @@ public class DumFileUtils {
         Metadata metadata = new Metadata();
         EmbeddedDocumentExtractor embeddedDocumentExtractor = new EmbeddedDocumentExtractor() {
             @Override
-            public boolean shouldParseEmbedded(Metadata metadata) {
+            public boolean shouldParseEmbedded(Metadata metadata, ParseContext parseContext) {
                 return true;
             }
 
             @Override
-            public void parseEmbedded(InputStream stream, ContentHandler handler, Metadata metadata,
-                    boolean outputHtml) throws IOException {
+            public void parseEmbedded(TikaInputStream stream, ContentHandler handler,
+                    Metadata metadata, ParseContext parseContext, boolean outputHtml)
+                    throws IOException {
                 parseDocument(stream).ifPresent(contentFile::append);
 
             }
         };
         ParseContext parseContext = getParseContext(parser);
         parseContext.set(EmbeddedDocumentExtractor.class, embeddedDocumentExtractor);
-        try {
-            parser.parse(inputStream, handler, metadata, parseContext);
+        try (TikaInputStream tikaInputStream = TikaInputStream.get(inputStream)) {
+            parser.parse(tikaInputStream, handler, metadata, parseContext);
         } catch (IOException | SAXException | TikaException e) {
             log.error(e.getMessage(), e);
         }
@@ -294,8 +296,8 @@ public class DumFileUtils {
             ParseContext parseContextInner) throws IOException {
         File tempFile = createTempFile();
         Files.copy(stream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        try (FileInputStream fileInputStreamInner = new FileInputStream(tempFile)) {
-            parserInner.parse(fileInputStreamInner, handlerInner, metadataInner, parseContextInner);
+        try (TikaInputStream tikaInputStreamInner = TikaInputStream.get(tempFile.toPath())) {
+            parserInner.parse(tikaInputStreamInner, handlerInner, metadataInner, parseContextInner);
             return handlerInner.toString().describeConstable();
 
         } catch (IOException | SAXException | TikaException e) {
