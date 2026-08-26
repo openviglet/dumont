@@ -92,18 +92,3 @@ error everywhere.
 
 The pages share one pattern, so the fix is one decision applied twenty-three times
 rather than twenty-three decisions.
-
-### XIV.4 Chunking that never happens (D55)
-
-`vite.config.ts` declares a `manualChunks` splitting vendor code into `vendor-ui` and
-`vendor-lib`, and Module Federation discards it on every build, saying so on stdout:
-grouping its async-init-wrapped modules into one chunk creates circular dependencies
-that hang the application.
-
-So the config is dead, and the message explaining that it is dead prints on every build.
-Both halves are the shape D51 removed from the census — a standing line a reader learns
-to skip, sitting next to the ones that matter.
-
-Deleting it changes no output, since none of it was applied. What it costs to keep is a
-reviewer believing the console still controls its chunking, and a build log with one
-more line nobody reads.

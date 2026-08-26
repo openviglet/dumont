@@ -169,7 +169,6 @@ This track has no remaining pending tasks.
 ## Track L — Console build, lint and type gates
 
 - ⏳ **D53** (deps: —) **twenty-three surfaces set state inside an effect body, so the rule is a warning there** — Fourteen files set loading synchronously before an async load, so clearing them decides whether a spinner reappears on refetch. → §XIV.2
-- 📋 **D55** (deps: —) **the build declares a chunking strategy Module Federation discards, and says so every run** — Nothing applies it, and the standing message sits beside the ones a reader should not skip. → §XIV.4
 
 ## Done when — D53
 

@@ -138,16 +138,18 @@ export default defineConfig({
     emptyOutDir: true,
     chunkSizeWarningLimit: 1000,
     outDir: "../connector/connector-app/src/main/resources/public/",
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("@radix-ui") || id.includes("radix-ui")) return "vendor-ui";
-            return "vendor-lib";
-          }
-        },
-      },
-    },
+    /*
+     * D55 — no `manualChunks` here, and it is not an omission.
+     *
+     * There used to be one splitting `node_modules` into `vendor-ui` and `vendor-lib`. Module
+     * Federation discarded it on every build and said so on stdout: it wraps shared imports in
+     * async init, and grouping those into one chunk creates circular dependencies that hang the
+     * application silently. No `vendor-*` chunk has ever been emitted.
+     *
+     * So the config was dead and its refusal printed on every run — a standing line a reader
+     * learns to skip, next to the ones that matter. Chunking here is Module Federation's to
+     * decide; anything written above it is a belief, not a setting.
+     */
   },
   resolve: {
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
