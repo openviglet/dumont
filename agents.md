@@ -311,7 +311,7 @@ adding it to `ON_BENTO` in `test/console-census.test.ts`.
 
 | Command | Gate |
 |---|---|
-| `pnpm run lint` | ESLint. **Debt is carried as named files in `eslint.config.js`, never as a count** — `react-hooks/set-state-in-effect` and `@typescript-eslint/no-explicit-any` are warnings in the listed files and errors everywhere else. A ceiling would let one change pay for another. |
+| `pnpm run lint` | ESLint, **no exemptions**. It arrived on an unlinted console with 105 problems; the two structural rules were held as named files in `eslint.config.js` until D53/D54 emptied both lists, which were then deleted rather than kept at zero. If a rule needs that treatment again: name the files and say why at each one, never a ceiling — a ceiling lets one change pay for another. |
 | `pnpm run lint:ds` | No component re-declares a design system export (D41). |
 | `pnpm run census` | The migration count. Exits non-zero on a broken read; warns on stderr when a chrome probe matches nothing. |
 | `pnpm run compile:build` | `tsc -b`, the Vite build, then `scripts/check-mf-types.mjs`. |
@@ -325,6 +325,20 @@ check inspects the artefact.
 
 CI: `validate.yml` (Maven build every push and PR, Sonar on pushes) and `design-system.yml`
 (duplicates + ESLint, no build — the Maven one already covers it).
+
+**Effects.** `react-hooks/set-state-in-effect` is an error, and the rule cannot see through a
+`useCallback` — it reads any call reaching `setState` as synchronous. Two shapes satisfy it
+honestly, and both were used to clear the twenty-five this console had:
+
+- **Derive it.** Most of them were not state at all: `isNew` is a fact about the route, a blank
+  entity is a value the render computes, a tab is what the URL says.
+- **Store the answer against the question.** A result keyed by the query that produced it makes
+  "loading" derivable and the resets unnecessary — an answer to another query is not this one's.
+  This also removes stale-render bugs, which is how it found two.
+
+`void (async () => { await load() })()` is the accepted way to call a loader from an effect. Do
+**not** wrap a synchronous write in an IIFE to quiet the rule: the write is still synchronous, and
+that is a loophole rather than a fix.
 
 ### Shared Components
 

@@ -166,8 +166,6 @@ This track has no remaining pending tasks.
 
 ---
 
-## Track L — Console build, lint and type gates
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
