@@ -21,7 +21,12 @@ export function PluginModelList({ source, onSourceUpdated }: Readonly<PluginMode
   const navigate = useNavigate();
   const { id, sourceId } = useParams() as { id: string; sourceId: string };
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
-  const models = Array.isArray(source.models) ? source.models : [];
+  /*
+   * D56 - memoised, because a `useCallback` below depends on it. Rebuilt inline it was a new
+   * array every render, so the memo it fed was recreated every render too - a `useCallback`
+   * whose identity always changes is a plain function wearing a hook.
+   */
+  const models = useMemo(() => Array.isArray(source.models) ? source.models : [], [source]);
   const baseRoute = `${ROUTES.INTEGRATION_INSTANCE}/${id}/source/${sourceId}/models`;
 
   const handleAdd = useCallback(() => {

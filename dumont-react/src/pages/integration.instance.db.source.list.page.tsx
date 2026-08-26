@@ -18,11 +18,16 @@ export default function IntegrationInstanceDbSourceListPage() {
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
+  /*
+   * D56 - the array lists what the effect reads. It used to say `[id]` while reading the service
+   * and `t`: both derive from something that does change (the route, the language), so the array
+   * was describing a narrower effect than the one written.
+   */
   useEffect(() => {
     turIntegrationDbSourceService.query().then((sources) => {
       setIntegrationDbSources(sources);
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
-  }, [id]);
+  }, [id, turIntegrationDbSourceService, t]);
 
   const gridItemList = useGridAdapter(integrationDbSources, {
     name: "name",

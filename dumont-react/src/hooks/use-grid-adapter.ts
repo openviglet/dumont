@@ -53,5 +53,19 @@ export function useGridAdapter<T>(
       url: config.url(item),
       icon: config.icon ? resolveField(item, config.icon) || null : null,
     }));
+    /*
+     * D56 — keyed on the data alone, deliberately.
+     *
+     * Every caller passes `config` as an object literal, so it is a new object on every render:
+     * listing it would recompute this map each time and leave a `useMemo` that memoises nothing.
+     * What the config actually holds — field names and a URL builder — is the same on each of
+     * those renders.
+     *
+     * The exposure is a `url` closure capturing something that changed while `data` did not. In
+     * this console `url` captures the instance id, and a different instance means a different
+     * list, so the two move together. Give this hook a config that is genuinely dynamic and that
+     * stops being true — memoise it at the call site rather than widening this array.
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see the note above
   }, [data]);
 }

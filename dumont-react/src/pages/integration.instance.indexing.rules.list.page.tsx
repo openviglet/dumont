@@ -1,4 +1,4 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
 import { BlankSlate } from "@/components/blank-slate";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
@@ -7,22 +7,37 @@ import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationIndexingRule } from "@/models/integration/integration-indexing-rule.model";
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service";
 import { IconGitCommit } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 export default function IntegrationInstanceIndexingRulesListPage() {
   const { id } = useParams<{ id: string }>();
   const [integrationIndexingRules, setIntegrationIndexingRules] = useState<TurIntegrationIndexingRule[]>();
-  const turIntegrationIndexingRuleService = new TurIntegrationIndexingRuleService(id || "");
+  /*
+   * D56 â€” memoised, like every sibling list page. This one built its service inline on each
+   * render, so once the effect below honestly listed what it uses, the dependency changed every
+   * render and the list refetched forever. The array was not the problem; it was what the array
+   * revealed.
+   */
+  const turIntegrationIndexingRuleService = useMemo(
+    () => new TurIntegrationIndexingRuleService(id || ""),
+    [id],
+  );
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
+  /*
+   * D56 - the array lists what the effect reads. It used to say `[id]` while reading the service
+   * and `t`: both derive from something that does change (the route, the language), so the array
+   * was describing a narrower effect than the one written.
+   */
   useEffect(() => {
     turIntegrationIndexingRuleService.query().then((rules) => {
       setIntegrationIndexingRules(rules);
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
-  }, [id])
+  }, [id, turIntegrationIndexingRuleService, t]);
+
   const gridItemList = useGridAdapter(integrationIndexingRules, {
     name: "name",
     description: "description",

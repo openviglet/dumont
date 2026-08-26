@@ -77,7 +77,7 @@ export default function IntegrationInstanceMonitoringPage() {
   const handleTabChange = useCallback((newSource: string) => {
     setPage(0);
     navigate(`${ROUTES.INTEGRATION_INSTANCE}/${id}/monitoring/${newSource}`);
-  }, [navigate, id, t]);
+  }, [navigate, id]);
 
   const buildRequest = useCallback((): TurIntegrationMonitoringRequest => {
     return {
@@ -149,7 +149,7 @@ export default function IntegrationInstanceMonitoringPage() {
       isMounted = false;
       if (interval) clearInterval(interval);
     };
-  }, [source, id, refreshInterval, buildRequest]);
+  }, [source, id, refreshInterval, buildRequest, monitoringService]);
 
   if (!id) {
     return <div>{t("integration.indexingStats.invalidId")}</div>;

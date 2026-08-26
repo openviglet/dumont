@@ -75,20 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XV Console effect correctness
-
-### XV.1 Dependency arrays that lie (D56)
-
-Twenty-one dependency arrays across sixteen files do not list what their effect reads.
-Most omit `t`, so an error message keeps the language it was built in after the reader
-switches; several omit the service, which is memoised on `id` and so happens not to
-change today - the array is wrong either way, and it is wrong in the direction that
-hides a bug rather than causing one loudly.
-
-Two are the other shape: `attribute.specification.list` and `plugin.model.list` build a
-value during render that their `useCallback` then depends on, so its identity changes
-every render and the memo does nothing.
-
-D53 and D54 emptied their lists and deleted them; this one has never had a list, because
-the rule ships as a warning. Finished when it is an error like the other two.

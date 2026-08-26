@@ -91,6 +91,24 @@ describe("D48/D53: the inherited debt was named, then paid off", () => {
     "}",
   ].join("\n")
 
+  it("fails any file for a dependency array that does not list what it reads", () => {
+    /*
+     * D56 — promoted from the warning it ships as. A warning is what let twenty-one of these
+     * accumulate, and completing them uncovered a list page whose service was built inline every
+     * render: an honest array there would have refetched forever.
+     */
+    const lyingArray = [
+      "import { useEffect, useState } from 'react'",
+      "export function Planted({ url }: { url: string }) {",
+      "  const [v, setV] = useState('')",
+      "  useEffect(() => { void (async () => setV(url))() }, [])",
+      "  return v",
+      "}",
+    ].join("\n")
+    expect(severityOf(lintAs("src/planted.tsx", lyingArray), "react-hooks/exhaustive-deps"))
+      .toBe(ERROR)
+  })
+
   it("fails any file for a synchronous setState in an effect", () => {
     // The half that makes this a gate rather than a record: nothing is excused any more, so the
     // next one written anywhere stops a build.
@@ -118,7 +136,9 @@ describe("D48/D53: the inherited debt was named, then paid off", () => {
     for (const [file, source, rule] of wasExcused) {
       expect(severityOf(lintAs(file, source), rule), `${rule} in ${file}`).toBe(ERROR)
     }
-  })
+    // Four ESLint processes, one per file. Slow enough to trip the default timeout when the rest
+    // of the suite is running beside it, which is a busy machine rather than a broken gate.
+  }, 60_000)
 })
 
 describe("D48: the rules a type-check cannot see", () => {

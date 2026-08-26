@@ -79,7 +79,7 @@ export default function IntegrationInstanceDoubleCheckPage() {
         }
       })
       .catch(() => setError(t("integration.doubleCheck.loadSourcesFailed")));
-  }, [id]);
+  }, [id, aemSourceService, t]);
 
   /** What is on screen, and whether it is about the source currently selected. */
   const doubleCheck = checked?.source === selectedSource ? checked.doubleCheck : null;
@@ -104,7 +104,7 @@ export default function IntegrationInstanceDoubleCheckPage() {
       .getUnprocessed(source)
       .then((data) => setScanned({ source, unprocessed: data }))
       .catch(() => setScanned({ source, unprocessed: null }));
-  }, [selectedSource, id]);
+  }, [selectedSource, id, doubleCheckService, t]);
 
   const handleIndex = useCallback(async (contentId: string) => {
     if (!doubleCheckService || !selectedSource) return;

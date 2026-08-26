@@ -17,7 +17,7 @@ import {
 } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import { type Locale, formatDistanceToNow } from "date-fns";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
@@ -62,13 +62,20 @@ export default function IntegrationInstancePluginsPage() {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const refresh = async () => {
+    /*
+     * D56 - stable, so the effect below can list it.
+     *
+     * It was a plain function rebuilt on every render, which is why the effect depended on `id`
+     * and pretended not to call it: naming an unstable function in a dependency array re-runs the
+     * effect forever. `useCallback` makes the dependency true instead of impossible.
+     */
+    const refresh = useCallback(async () => {
         try {
             setPlugins(await service.list());
         } catch {
             toast.error(t("integration.plugins.loadFailed"));
         }
-    };
+    }, [service, t]);
 
     /*
      * D53 - the load is awaited inside the effect rather than called from its body.
@@ -77,9 +84,10 @@ export default function IntegrationInstancePluginsPage() {
      * `useCallback` boundary - so any direct call to a loader that writes state reads as
      * synchronous. Awaiting it inside an async IIFE says what is actually true: the effect
      * schedules work and returns, and every write happens after a suspension point.
-     */    useEffect(() => {
+     */
+    useEffect(() => {
         void (async () => { await refresh() })();
-    }, [id]);
+    }, [refresh]);
 
     const onPickFile = () => fileInputRef.current?.click();
 

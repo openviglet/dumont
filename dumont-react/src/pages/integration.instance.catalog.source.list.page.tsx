@@ -18,11 +18,16 @@ export default function IntegrationInstanceCatalogSourceListPage() {
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
+  /*
+   * D56 - the array lists what the effect reads. It used to say `[id]` while reading the service
+   * and `t`: both derive from something that does change (the route, the language), so the array
+   * was describing a narrower effect than the one written.
+   */
   useEffect(() => {
     turIntegrationCatalogSourceService.query().then((sources) => {
       setIntegrationCatalogSources(sources);
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
-  }, [id]);
+  }, [id, turIntegrationCatalogSourceService, t]);
 
   const gridItemList = useGridAdapter(integrationCatalogSources, {
     name: "name",

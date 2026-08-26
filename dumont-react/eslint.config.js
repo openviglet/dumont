@@ -50,6 +50,18 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
 
       /*
+       * D56 — an error, like the two rules before it.
+       *
+       * It ships as a warning, and a warning is what let twenty-one arrays describe a narrower
+       * effect than the one written: mostly a missing `t`, so a message kept the language it was
+       * built in. Completing them found the real defect the warnings were hiding — one list page
+       * built its service inline on every render, so an honest array would have refetched forever.
+       *
+       * One deliberate exception is annotated at its line in `use-grid-adapter.ts`.
+       */
+      "react-hooks/exhaustive-deps": "error",
+
+      /*
        * Fast refresh only works when a module exports components and nothing else. `allowConstantExport`
        * covers the `const X = ...` a few files pair with their component.
        */

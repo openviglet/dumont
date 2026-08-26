@@ -24,11 +24,16 @@ export default function IntegrationInstanceSourceListPage() {
   const { fileInputRef, open: handleImportClick, onFileChange: handleFileChange } =
     useAemSourceImport(turIntegrationAemSourceService, setIntegrationAemSources);
 
+  /*
+   * D56 - the array lists what the effect reads. It used to say `[id]` while reading the service
+   * and `t`: both derive from something that does change (the route, the language), so the array
+   * was describing a narrower effect than the one written.
+   */
   useEffect(() => {
     turIntegrationAemSourceService.query().then((sources) => {
       setIntegrationAemSources(sources);
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
-  }, [id]);
+  }, [id, turIntegrationAemSourceService, t]);
 
   const gridItemList = useGridAdapter(integrationAemSources, {
     name: "name",

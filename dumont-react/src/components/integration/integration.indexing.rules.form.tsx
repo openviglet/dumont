@@ -57,6 +57,37 @@ interface IntegrationIndexingRulesFormProps {
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+/** Internal form shape: values wrapped as `{ value }` so `useFieldArray` can manage them. */
+type IndexingRuleFormShape = Omit<TurIntegrationIndexingRule, "values"> & {
+  values: { value: string }[];
+};
+
+/*
+ * D56 - hoisted out of the component, because they close over nothing in it.
+ *
+ * Defined inside, they were rebuilt on every render, so the effects and callbacks that use them
+ * could not honestly list them: naming an unstable function in a dependency array re-runs the
+ * hook forever. At module scope they are simply stable, and the arrays below shrink instead of
+ * needing an exception.
+ */
+function toFormShape(rule: TurIntegrationIndexingRule): IndexingRuleFormShape {
+  return {
+    ...rule,
+    values: (rule.values ?? []).map((v) =>
+      typeof v === "string" ? { value: v } : (v as { value: string })
+    ),
+  };
+}
+
+function fromFormShape(data: IndexingRuleFormShape): TurIntegrationIndexingRule {
+  return {
+    ...data,
+    values: (data.values ?? [])
+      .map((v) => v?.value)
+      .filter((v): v is string => typeof v === "string"),
+  };
+}
+
 export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesFormProps> = ({
   value,
   integrationId,
@@ -96,25 +127,6 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
     type: string;
     snSiteNames: string[];
   };
-
-  // Internal form shape: values wrapped as { value: string } so useFieldArray can manage them
-  type IndexingRuleFormShape = Omit<TurIntegrationIndexingRule, "values"> & {
-    values: { value: string }[];
-  };
-
-  const toFormShape = (rule: TurIntegrationIndexingRule): IndexingRuleFormShape => ({
-    ...rule,
-    values: (rule.values ?? []).map((v) =>
-      typeof v === "string" ? { value: v } : (v as { value: string })
-    ),
-  });
-
-  const fromFormShape = (data: IndexingRuleFormShape): TurIntegrationIndexingRule => ({
-    ...data,
-    values: (data.values ?? [])
-      .map((v) => v?.value)
-      .filter((v): v is string => typeof v === "string"),
-  });
 
   // Form setup with default values
   const form = useForm<IndexingRuleFormShape>({
@@ -161,7 +173,7 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
       }
     };
     loadSites();
-  }, [turSNSiteService]);
+  }, [turSNSiteService, t]);
 
   useEffect(() => {
     const loadSources = async () => {
@@ -250,7 +262,7 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
     };
 
     loadFields();
-  }, [selectedSite?.id, turSNFieldService]);
+  }, [selectedSite?.id, turSNFieldService, t]);
 
   // Set attribute value after fields are loaded
   useEffect(() => {
@@ -291,7 +303,7 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
       console.error("Form submission error:", error);
       toast.error(t("forms.integrationRules.saveFailed"));
     }
-  }, [isNew, turIntegrationIndexingRuleService, navigate, form]);
+  }, [isNew, turIntegrationIndexingRuleService, navigate, form, integrationId, t]);
 
   // Check if attribute field should be disabled
   const isAttributeFieldDisabled = !selectedSource || isLoadingFields;
