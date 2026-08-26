@@ -492,3 +492,6 @@
 - **D53** — All twenty-five cleared and the named-file list deleted, so the rule is an error console-wide; the monitoring history got a test first, which found its jump-to-last-page never fired on a URL.
 - **D54** — All 22 anys are typed from the contracts they stood for, so the rule is an error across the console and its list is gone rather than kept at zero.
 - **D55** — The manualChunks block is gone and the build emits the same 25 chunks byte for byte, because Module Federation was already discarding it; its refusal no longer prints.
+
+## Track M — Console effect correctness
+

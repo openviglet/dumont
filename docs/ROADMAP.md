@@ -166,6 +166,15 @@ This track has no remaining pending tasks.
 
 ---
 
+## Track M — Console effect correctness
+
+- 📋 **D56** (deps: —) **twenty-one dependency arrays do not list what their effect reads** — Most omit t, so a message keeps the language it was built in, and two make a useCallback change identity every render. → §XV.1
+
+## Done when — D56
+
+- **react-hooks/exhaustive-deps is an error across the console** No named-file list is
+  left behind: like D53 and D54, the exemption is deleted rather than emptied.
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
