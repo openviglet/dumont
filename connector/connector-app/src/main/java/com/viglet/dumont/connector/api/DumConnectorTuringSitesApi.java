@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
@@ -30,6 +31,9 @@ public class DumConnectorTuringSitesApi {
     public record TuringSNSite(String id, String name, String description) {
     }
 
+    public record TuringSNSiteField(String id, String name, String type) {
+    }
+
     @Operation(summary = "List available Turing SN sites")
     @GetMapping
     public List<TuringSNSite> listSites() {
@@ -41,6 +45,27 @@ public class DumConnectorTuringSitesApi {
                     });
         } catch (Exception e) {
             log.error("Failed to fetch Turing SN sites: {}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Lists the fields of a Turing SN site through the connector, so the UI can
+     * read them in standalone mode too — a direct call to Turing's
+     * {@code /api/sn/{id}/field/ext} only resolves when the UI is embedded in
+     * Turing.
+     */
+    @Operation(summary = "List fields of a Turing SN site")
+    @GetMapping("/{siteId}/fields")
+    public List<TuringSNSiteField> listFields(@PathVariable String siteId) {
+        try {
+            return restClient.get()
+                    .uri("/api/sn/{siteId}/field/ext", siteId)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+        } catch (Exception e) {
+            log.error("Failed to fetch fields of Turing SN site {}: {}", siteId, e.getMessage());
             return Collections.emptyList();
         }
     }

@@ -1,5 +1,10 @@
 import axios, { type AxiosInstance } from "axios";
 
+export interface TurIntegrationConnectorStatus {
+  status: string;
+  provider: string;
+}
+
 export class TurIntegrationConnectorService {
   private readonly axiosInstance: AxiosInstance;
   integrationId: string;
@@ -11,6 +16,13 @@ export class TurIntegrationConnectorService {
 
   private get connectorUrl(): string {
     return `/v2/integration/${this.integrationId}/connector`;
+  }
+
+  async status(): Promise<TurIntegrationConnectorStatus> {
+    const { data } = await this.axiosInstance.get<TurIntegrationConnectorStatus>(
+      `${this.connectorUrl}/status`,
+    );
+    return data;
   }
 
   async indexAll(source: string): Promise<any> {

@@ -2,7 +2,7 @@
 
 import { toast } from "@viglet/viglet-design-system"
 import { StickyPageHeader } from "@viglet/viglet-design-system/router"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 
@@ -25,16 +25,18 @@ import {
   SelectValue
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useConnectorProvider } from "@/hooks/use-connector-provider"
+import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model"
+import type { TurIntegrationAssetsSource } from "@/models/integration/integration-assets-source.model"
+import type { TurIntegrationDbSource } from "@/models/integration/integration-db-source.model"
 import type { TurIntegrationIndexingRule } from "@/models/integration/integration-indexing-rule.model"
-import type { TurSNSiteField } from "@/models/sn/sn-site-field.model"
-import type { TurSNSite } from "@/models/sn/sn-site.model"
+import type { TurIntegrationWcSource } from "@/models/integration/integration-wc-source.model"
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service"
 import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service"
 import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service"
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service"
+import { TurIntegrationTuringSitesService, type TuringSNSite } from "@/services/integration/integration-turing-sites.service"
 import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service"
-import { TurSNFieldService } from "@/services/sn/sn.field.service"
-import { TurSNSiteService } from "@/services/sn/sn.service"
 import { IconDeviceFloppy, IconFileText, IconGavel, IconList, IconMap, IconTools, IconX } from "@tabler/icons-react"
 import { useTranslation } from "react-i18next"
 import { DialogDelete } from "../dialog.delete"
@@ -46,6 +48,76 @@ import { DynamicIndexingRuleFields } from "./dynamic.indexing.rule.field"
 const RULE_TYPES = [
   { value: "IGNORE", label: "Ignore" }
 ] as const;
+
+/** Connector provider names reported by `/v2/connector/status`. */
+const PROVIDER_AEM = "AEM";
+const PROVIDER_DB = "JDBC-DATABASE";
+const PROVIDER_WC = "WEB-CRAWLER";
+const PROVIDER_ASSETS = "ASSETS";
+
+type ConnectorSourceOption = {
+  /** Value persisted in the rule's `source` column. */
+  key: string;
+  /** Source primary key, used to fetch the full source when needed. */
+  id: string;
+  label: string;
+  type: string;
+  /** Turing SN site names the source indexes into. */
+  snSiteNames: string[];
+  /**
+   * Attribute names the source itself declares. The rule is evaluated against
+   * the job item attributes (see `IgnoreIndexingRuleStrategy`), so these are the
+   * authoritative options — SN site fields are only a complement.
+   */
+  attributeNames: string[];
+};
+
+const notBlank = (value: string | undefined | null): value is string => !!value;
+
+const toAemOption = (source: TurIntegrationAemSource): ConnectorSourceOption => ({
+  key: source.name,
+  id: source.id,
+  label: source.name,
+  type: "AEM",
+  snSiteNames: [source.authorSNSite, source.publishSNSite].filter(notBlank),
+  attributeNames: [
+    ...(source.attributeSpecifications ?? []).map((spec) => spec.name),
+    ...(source.models ?? []).flatMap((model) =>
+      (model.targetAttrs ?? []).map((attr) => attr.name)
+    ),
+  ].filter(notBlank),
+});
+
+const toDbOption = (source: TurIntegrationDbSource): ConnectorSourceOption => ({
+  key: source.name,
+  id: source.id,
+  label: source.name,
+  type: "DB",
+  snSiteNames: source.turSNSites ?? [],
+  // Attributes come from the SQL query columns, so they are only known after a
+  // run — fall back to the SN site fields.
+  attributeNames: [],
+});
+
+const toWcOption = (source: TurIntegrationWcSource): ConnectorSourceOption => ({
+  key: source.id,
+  id: source.id,
+  label: source.title,
+  type: "Web Crawler",
+  snSiteNames: source.turSNSites ?? [],
+  attributeNames: (source.attributeMappings ?? [])
+    .map((attr) => attr.name)
+    .filter(notBlank),
+});
+
+const toAssetsOption = (source: TurIntegrationAssetsSource): ConnectorSourceOption => ({
+  key: source.name,
+  id: source.id,
+  label: source.name,
+  type: "Assets",
+  snSiteNames: source.turSNSites ?? [],
+  attributeNames: [],
+});
 
 // Props interface with descriptive naming
 interface IntegrationIndexingRulesFormProps {
@@ -66,9 +138,12 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
   setOpen,
 }) => {
   const { t } = useTranslation();
+  const { provider, loading: isLoadingProvider } = useConnectorProvider(integrationId);
   // Services - memoized to prevent recreation on each render
-  const turSNSiteService = useMemo(() => new TurSNSiteService(), []);
-  const turSNFieldService = useMemo(() => new TurSNFieldService(), []);
+  const turingSitesService = useMemo(
+    () => new TurIntegrationTuringSitesService(integrationId),
+    [integrationId]
+  );
   const turIntegrationIndexingRuleService = useMemo(
     () => new TurIntegrationIndexingRuleService(integrationId),
     [integrationId]
@@ -90,20 +165,21 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
     [integrationId]
   );
 
-  type ConnectorSourceOption = {
-    key: string;
-    label: string;
-    type: string;
-    snSiteNames: string[];
-  };
-
   // Internal form shape: values wrapped as { value: string } so useFieldArray can manage them
   type IndexingRuleFormShape = Omit<TurIntegrationIndexingRule, "values"> & {
     values: { value: string }[];
   };
 
+  // Every text/select field is coerced to a string so the inputs are controlled
+  // from the first render — a Radix Select that starts with `value={undefined}`
+  // would switch from uncontrolled to controlled when the rule arrives.
   const toFormShape = (rule: TurIntegrationIndexingRule): IndexingRuleFormShape => ({
     ...rule,
+    name: rule.name ?? "",
+    description: rule.description ?? "",
+    source: rule.source ?? "",
+    attribute: rule.attribute ?? "",
+    ruleType: rule.ruleType ?? "",
     values: (rule.values ?? []).map((v) =>
       typeof v === "string" ? { value: v } : (v as { value: string })
     ),
@@ -120,150 +196,216 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
   const form = useForm<IndexingRuleFormShape>({
     defaultValues: toFormShape(value)
   });
-  const { control, register, setValue, watch } = form;
+  const { control, register, watch } = form;
 
   // State
-  const [turSNSites, setTurSNSites] = useState<TurSNSite[]>([]);
+  const [turingSites, setTuringSites] = useState<TuringSNSite[]>([]);
   const [connectorSources, setConnectorSources] = useState<ConnectorSourceOption[]>([]);
-  const [turSNSiteFields, setTurSNSiteFields] = useState<TurSNSiteField[]>([]);
+  const [snSiteFieldNames, setSnSiteFieldNames] = useState<string[]>([]);
+  const [detailAttributeNames, setDetailAttributeNames] = useState<string[]>([]);
   const [isLoadingFields, setIsLoadingFields] = useState(false);
-
-  // Ref to track pending attribute value that needs to be set after fields load
-  const pendingAttributeRef = useRef<string | null>(value.attribute || null);
 
   // Navigation
   const navigate = useNavigate();
-  // Watch selected source for dependent field loading
-  const selectedSource = watch("source");
+  // Watch the form values: they drive the dependent lookups and must stay
+  // selectable even before (or without) the option lists being resolved.
+  const sourceValue = watch("source");
+  const attributeValue = watch("attribute");
+
+  /*
+   * The rule's own values, taken straight from the props. `form.reset` only runs
+   * in an effect, so these are known one render EARLIER than the form values —
+   * and an option must exist no later than the commit that sets the value:
+   * Radix renders a hidden native <select> for form participation, and when it
+   * receives a value with no matching <option> it falls back to "", dispatches a
+   * change event and writes that "" back through onValueChange. That silently
+   * wipes the persisted source/attribute (ruleType escapes it because its
+   * options are static). Seeding the option lists from the props keeps the
+   * <option> ahead of the value.
+   */
+  const persistedSource = value.source;
+  const persistedAttribute = value.attribute;
+
+  // The source in effect: the form value once reset ran, the rule's own before.
+  const selectedSourceKey = sourceValue || persistedSource;
 
   // Find selected connector source - memoized for performance
   const selectedConnectorSource = useMemo(
-    () => connectorSources.find((s) => s.key === selectedSource),
-    [connectorSources, selectedSource]
+    () => connectorSources.find((s) => s.key === selectedSourceKey),
+    [connectorSources, selectedSourceKey]
   );
 
-  // Resolve the SN site whose fields will populate the attribute dropdown
-  const selectedSite = useMemo(() => {
+  // Resolve the SN site whose fields complement the attribute dropdown
+  const selectedSiteId = useMemo(() => {
     const firstSnSiteName = selectedConnectorSource?.snSiteNames?.[0];
     if (!firstSnSiteName) return undefined;
-    return turSNSites.find((site) => site.name === firstSnSiteName);
-  }, [turSNSites, selectedConnectorSource]);
+    return turingSites.find((site) => site.name === firstSnSiteName)?.id;
+  }, [turingSites, selectedConnectorSource]);
 
-  // Load initial data: SN sites (for field lookup) + connector sources (AEM/DB/WC/Assets)
+  // Turing SN sites, read through the connector so it also works standalone
   useEffect(() => {
-    const loadSites = async () => {
-      try {
-        const sites = await turSNSiteService.query();
-        setTurSNSites(sites);
-      } catch (error) {
-        console.error("Failed to load sites:", error);
-        toast.error(t("forms.integrationRules.siteLoadFailed"));
+    let active = true;
+    turingSitesService
+      .query()
+      .then((sites) => {
+        if (active) setTuringSites(sites);
+      })
+      .catch((error) => {
+        // Non-fatal: the field options fall back to the source's own attributes.
+        console.warn("Failed to load Turing SN sites:", error);
+      });
+    return () => {
+      active = false;
+    };
+  }, [turingSitesService]);
+
+  // Connector sources of the *active* provider only. A Dumont instance runs a
+  // single plugin, so querying the others would hit endpoints that do not exist.
+  useEffect(() => {
+    if (isLoadingProvider) return;
+
+    let active = true;
+    const loadSources = async (): Promise<ConnectorSourceOption[]> => {
+      switch (provider) {
+        case PROVIDER_AEM:
+          return (await aemSourceService.query()).map(toAemOption);
+        case PROVIDER_DB:
+          return (await dbSourceService.query()).map(toDbOption);
+        case PROVIDER_WC:
+          return (await wcSourceService.query()).map(toWcOption);
+        case PROVIDER_ASSETS:
+          return (await assetsSourceService.query()).map(toAssetsOption);
+        default:
+          // Provider detection failed; try every plugin so the form still works.
+          return (
+            await Promise.allSettled([
+              aemSourceService.query().then((s) => s.map(toAemOption)),
+              dbSourceService.query().then((s) => s.map(toDbOption)),
+              wcSourceService.query().then((s) => s.map(toWcOption)),
+              assetsSourceService.query().then((s) => s.map(toAssetsOption)),
+            ])
+          )
+            .filter((r) => r.status === "fulfilled")
+            .flatMap((r) => r.value);
       }
     };
-    loadSites();
-  }, [turSNSiteService]);
 
-  useEffect(() => {
-    const loadSources = async () => {
-      const [aem, db, wc, assets] = await Promise.allSettled([
-        aemSourceService.query(),
-        dbSourceService.query(),
-        wcSourceService.query(),
-        assetsSourceService.query(),
-      ]);
-      const items: ConnectorSourceOption[] = [];
-      if (aem.status === "fulfilled") {
-        aem.value.forEach((s) =>
-          items.push({
-            key: s.name,
-            label: s.name,
-            type: "AEM",
-            snSiteNames: [s.authorSNSite, s.publishSNSite].filter(
-              (n): n is string => !!n
-            ),
-          })
-        );
-      }
-      if (db.status === "fulfilled") {
-        db.value.forEach((s) =>
-          items.push({
-            key: s.name,
-            label: s.name,
-            type: "DB",
-            snSiteNames: s.turSNSites ?? [],
-          })
-        );
-      }
-      if (wc.status === "fulfilled") {
-        wc.value.forEach((s) =>
-          items.push({
-            key: s.id,
-            label: s.title,
-            type: "Web Crawler",
-            snSiteNames: s.turSNSites ?? [],
-          })
-        );
-      }
-      if (assets.status === "fulfilled") {
-        assets.value.forEach((s) =>
-          items.push({
-            key: s.name,
-            label: s.name,
-            type: "Assets",
-            snSiteNames: s.turSNSites ?? [],
-          })
-        );
-      }
-      if ([aem, db, wc, assets].every((r) => r.status === "rejected")) {
+    loadSources()
+      .then((items) => {
+        if (active) setConnectorSources(items);
+      })
+      .catch((error) => {
+        console.error("Failed to load sources:", error);
         toast.error(t("forms.integrationRules.sourceLoadFailed"));
-      }
-      setConnectorSources(items);
+      });
+
+    return () => {
+      active = false;
     };
-    loadSources();
-  }, [aemSourceService, dbSourceService, wcSourceService, assetsSourceService, t]);
+  }, [
+    provider,
+    isLoadingProvider,
+    aemSourceService,
+    dbSourceService,
+    wcSourceService,
+    assetsSourceService,
+    t,
+  ]);
 
   // Reset form when value changes
   useEffect(() => {
     form.reset(toFormShape(value));
-    // Store the attribute to be set after fields are loaded
-    pendingAttributeRef.current = value.attribute || null;
   }, [form, value]);
 
-  // Load fields when site selection changes
+  // Load SN site fields when the resolved site changes
   useEffect(() => {
-    const loadFields = async () => {
-      if (!selectedSite?.id) {
-        setTurSNSiteFields([]);
-        return;
-      }
+    if (!selectedSiteId) {
+      setSnSiteFieldNames([]);
+      return;
+    }
 
-      setIsLoadingFields(true);
-      try {
-        const fields = await turSNFieldService.query(selectedSite.id);
-        setTurSNSiteFields(fields);
-      } catch (error) {
+    let active = true;
+    setIsLoadingFields(true);
+    turingSitesService
+      .fields(selectedSiteId)
+      .then((fields) => {
+        if (active) setSnSiteFieldNames(fields.map((field) => field.name).filter(notBlank));
+      })
+      .catch((error) => {
         console.error("Failed to load fields:", error);
         toast.error(t("forms.integrationRules.fieldLoadFailed"));
-      } finally {
-        setIsLoadingFields(false);
-      }
+      })
+      .finally(() => {
+        if (active) setIsLoadingFields(false);
+      });
+
+    return () => {
+      active = false;
     };
+  }, [selectedSiteId, turingSitesService, t]);
 
-    loadFields();
-  }, [selectedSite?.id, turSNFieldService]);
-
-  // Set attribute value after fields are loaded
+  // The AEM list endpoint may omit the LAZY attributeSpecifications collection;
+  // when that happens, read them from the source detail endpoint, which always
+  // loads them explicitly.
   useEffect(() => {
-    if (turSNSiteFields.length > 0 && pendingAttributeRef.current) {
-      const attributeExists = turSNSiteFields.some(
-        (field) => field.name === pendingAttributeRef.current
-      );
-      if (attributeExists) {
-        setValue("attribute", pendingAttributeRef.current);
-      }
-      pendingAttributeRef.current = null;
+    const source = selectedConnectorSource;
+    if (!source?.id || source.type !== "AEM" || source.attributeNames.length > 0) {
+      setDetailAttributeNames([]);
+      return;
     }
-  }, [turSNSiteFields, setValue]);
+
+    let active = true;
+    aemSourceService
+      .get(source.id)
+      .then((detail) => {
+        if (active) setDetailAttributeNames(toAemOption(detail).attributeNames);
+      })
+      .catch((error) => {
+        console.warn("Failed to load AEM source attributes:", error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedConnectorSource, aemSourceService]);
+
+  // Source options always include the value in effect: the rule must keep
+  // showing its own source even if the source was renamed or is still loading.
+  const sourceOptions = useMemo(() => {
+    if (!selectedSourceKey || connectorSources.some((s) => s.key === selectedSourceKey)) {
+      return connectorSources;
+    }
+    return [
+      ...connectorSources,
+      {
+        key: selectedSourceKey,
+        id: "",
+        label: selectedSourceKey,
+        type: "",
+        snSiteNames: [],
+        attributeNames: [],
+      },
+    ];
+  }, [connectorSources, selectedSourceKey]);
+
+  // Field options: attributes declared by the source, complemented by the SN
+  // site fields, plus the rule's own attribute so editing never drops it.
+  const fieldOptions = useMemo(() => {
+    const names = new Set<string>([
+      ...(selectedConnectorSource?.attributeNames ?? []),
+      ...detailAttributeNames,
+      ...snSiteFieldNames,
+    ]);
+    if (persistedAttribute) names.add(persistedAttribute);
+    if (attributeValue) names.add(attributeValue);
+    return [...names].filter(notBlank).sort((a, b) => a.localeCompare(b));
+  }, [
+    selectedConnectorSource,
+    detailAttributeNames,
+    snSiteFieldNames,
+    persistedAttribute,
+    attributeValue,
+  ]);
 
   // Form submission handler - memoized with useCallback
   const onSubmit = useCallback(async (data: IndexingRuleFormShape) => {
@@ -293,8 +435,10 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
     }
   }, [isNew, turIntegrationIndexingRuleService, navigate, form]);
 
-  // Check if attribute field should be disabled
-  const isAttributeFieldDisabled = !selectedSource || isLoadingFields;
+  // Keep the dropdown usable as soon as there is something to pick: only block
+  // it while the first batch of options is still on its way.
+  const isAttributeFieldDisabled =
+    !selectedSourceKey || (isLoadingFields && fieldOptions.length === 0);
 
   return (
     <Form {...form}>
@@ -395,9 +539,9 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
                               <SelectValue placeholder={t("forms.integrationRules.selectSource")} />
                             </SelectTrigger>
                             <SelectContent>
-                              {connectorSources.map((source) => (
+                              {sourceOptions.map((source) => (
                                 <SelectItem key={`${source.type}:${source.key}`} value={source.key}>
-                                  {source.label} ({source.type})
+                                  {source.type ? `${source.label} (${source.type})` : source.label}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -435,9 +579,9 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
                               />
                             </SelectTrigger>
                             <SelectContent>
-                              {turSNSiteFields.map((siteField) => (
-                                <SelectItem key={siteField.id} value={siteField.name}>
-                                  {siteField.name}
+                              {fieldOptions.map((fieldName) => (
+                                <SelectItem key={fieldName} value={fieldName}>
+                                  {fieldName}
                                 </SelectItem>
                               ))}
                             </SelectContent>
