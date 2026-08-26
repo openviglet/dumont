@@ -12,6 +12,7 @@ import IntegrationInstanceDbSourceListBentoPage from "./pages/bento/integration.
 import IntegrationInstanceEdsSourceDetailBentoPage from "./pages/bento/integration.instance.eds.source.detail.bento.page";
 import IntegrationInstanceEdsSourceListBentoPage from "./pages/bento/integration.instance.eds.source.list.bento.page";
 import IntegrationInstanceSourceDetailBentoPage from "./pages/bento/integration.instance.source.detail.bento.page";
+import IntegrationInstanceSourceInferenceBentoPage from "./pages/bento/integration.instance.source.inference.bento.page";
 import IntegrationInstanceSourceListBentoPage from "./pages/bento/integration.instance.source.list.bento.page";
 import IntegrationInstanceWcSourceDetailBentoPage from "./pages/bento/integration.instance.wc.source.detail.bento.page";
 import IntegrationInstanceWcSourceListBentoPage from "./pages/bento/integration.instance.wc.source.list.bento.page";
@@ -76,6 +77,8 @@ export default function BentoRoutes() {
         <Route path=":sourceId" element={<IntegrationInstanceEdsSourceDetailBentoPage />} />
         <Route path=":sourceId/:tab" element={<IntegrationInstanceEdsSourceDetailBentoPage />} />
       </Route>
+      {/* AI source inference (D57) — the seventh Sources surface, and the one that completes it. */}
+      <Route path="source-inference" element={<IntegrationInstanceSourceInferenceBentoPage />} />
     </Routes>
   );
 }

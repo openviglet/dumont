@@ -78,20 +78,6 @@ These constrain every task above:
 
 ## XVI The web console
 
-### XVI.1 The last surface in Sources (D57)
-
-Six of the seven surfaces in the Sources section render bento; `source-inference` does
-not, so the hub that opens the section still sends one tile back to `/admin`. It is the
-odd one out in a band that is otherwise finished.
-
-It is also the smallest of the ten that remain, and finishing it makes the first hub
-complete - a reader who opens Sources from the rail stays in the shell whatever they
-click, which is the first time that has been true of any section.
-
-The page is a form over a URL and an editable strategy, so it is the D47 shape: the
-console page under a chrome declaration, with the header and the section cards reading
-`useSectionChrome`.
-
 ### XVI.2 The Integration hub's read-only surfaces (D58)
 
 The Integration section holds nine surfaces and not one of them has moved, so the hub

@@ -51,9 +51,10 @@ const FORKED: Record<string, string[]> = {
  *
  * The first three are the shell rather than migrated pages: a parallel tree needs a root,
  * somewhere for Home to land, and a hub per section before any surface can move into it. The
- * twelve below them are the six source lists (D46) and the six detail pages behind them (D47).
+ * thirteen below them are the six source lists (D46), the six detail pages behind them (D47) and
+ * the inference wizard that completed the Sources section (D57).
  *
- * "Left to move" still counts the twelve console originals, because they still exist and still render
+ * "Left to move" still counts the console originals, because they still exist and still render
  * console chrome â€” that is what makes each migration reversible, not an oversight in the count.
  */
 const ON_BENTO: string[] = [
@@ -69,6 +70,7 @@ const ON_BENTO: string[] = [
   "pages/bento/integration.instance.eds.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.eds.source.list.bento.page.tsx",
   "pages/bento/integration.instance.source.detail.bento.page.tsx",
+  "pages/bento/integration.instance.source.inference.bento.page.tsx",
   "pages/bento/integration.instance.source.list.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.list.bento.page.tsx",
@@ -204,7 +206,10 @@ describe("D46: era follows a page's local imports", () => {
     const { pages } = census()
     const lists = Object.entries(pages).filter(([path]) => path.startsWith("pages/bento/"))
 
-    expect(lists).toHaveLength(12)
+    // Counted against `ON_BENTO` rather than a literal, so a migration that adds a page here
+    // updates one list instead of two — and a walk that found nothing still fails, which is the
+    // only thing the number was ever guarding.
+    expect(lists).toHaveLength(ON_BENTO.filter((path) => path.startsWith("pages/bento/")).length)
     for (const [path, page] of lists) {
       expect(page.era, `${path} should be bento-era through its wrapper`).toBe("bento")
     }

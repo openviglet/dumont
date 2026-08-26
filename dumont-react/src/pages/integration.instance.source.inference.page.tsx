@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Input } from "@/components/ui/input";
-import { SectionCard } from "@/components/ui/section-card";
 import {
   Select,
   SelectContent,
@@ -18,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import {
   FIELD_TYPES,
   type DumInferredField,
@@ -29,6 +28,7 @@ import {
 import { TurIntegrationSourceInferenceService } from "@/services/integration/integration-source-inference.service";
 import { IconEye, IconPlus, IconTrash, IconWand } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -159,7 +159,7 @@ export default function IntegrationInstanceSourceInferencePage() {
 
   return (
     <>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconWand}
         name={t("integration.sourceInference.title")}
         feature={t("integration.sourceInference.title")}

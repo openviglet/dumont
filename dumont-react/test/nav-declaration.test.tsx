@@ -138,6 +138,7 @@ describe("D39: where a surface points depends on whether it has moved", () => {
       "db-source",
       "eds-source",
       "source",
+      "source-inference",
       "wc-source",
     ])
   })

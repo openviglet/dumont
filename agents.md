@@ -189,8 +189,9 @@ is what lets it move back.
 
 - A route belongs in `BentoRoutes.tsx` only once its page has actually moved — the tree must never
   advertise a surface it does not serve.
-- **All six source surfaces (list + detail) have moved.** Everything else is still console-only.
-  `pnpm run census` prints which page is on which era.
+- **The whole Sources section has moved** — the six source surfaces (list + detail) plus the AI
+  inference wizard, so a reader who opens Sources from the rail stays in the shell whatever they
+  click. Everything else is still console-only. `pnpm run census` prints which page is on which era.
 - Both are exposed over Module Federation (`./DumontRoutes`, `./BentoRoutes`); no turing-react
   change is needed when adding a page to either.
 - **`ROUTES.INTEGRATION_INSTANCE` derives its prefix from the live URL.** From inside the bento
@@ -287,6 +288,11 @@ read the chrome. Forking it would leave two copies drifting for the length of th
 // The bento page — the console page under a chrome declaration.
 <SectionCardChromeProvider chrome="bento"><IntegrationInstanceDbSourcePage /></SectionCardChromeProvider>
 ```
+
+**A page that is not a form** — a wizard, a panel, a table — takes the same shape with the other
+header: `AdaptivePageHeader` (`components/bento/`) → `SubPageHeader` or `BentoHero`. No save bar,
+because there is nothing to save; the package's own deprecation notice on `SubPageHeader` names
+`BentoHero` as its replacement, which is what the adapter picks between.
 
 - `AdaptiveFormHeader` (`components/bento/`) → `StickyPageHeader` or `BentoFormHero`. Declarative,
   not a passthrough: the console header takes Save/Cancel as children, while `BentoFormHero` owns
