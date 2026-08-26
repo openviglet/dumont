@@ -52,8 +52,9 @@ const FORKED: Record<string, string[]> = {
  * The first three are the shell rather than migrated pages: a parallel tree needs a root,
  * somewhere for Home to land, and a hub per section before any surface can move into it. The
  * rest are the six source lists (D46), the six detail pages behind them (D47), the inference
- * wizard that completed the Sources section (D57), and the Integration section's seven read-only
- * surfaces plus the monitored-item page behind the grid (D58).
+ * wizard that completed the Sources section (D57), the Integration section's seven read-only
+ * surfaces plus the monitored-item page behind the grid (D58), and its two form surfaces — the
+ * indexing rules, list and detail, and the indexing manager (D59), which completed it.
  *
  * "Left to move" still counts the console originals, because they still exist and still render
  * console chrome â€” that is what makes each migration reversible, not an oversight in the count.
@@ -72,6 +73,9 @@ const ON_BENTO: string[] = [
   "pages/bento/integration.instance.double.check.bento.page.tsx",
   "pages/bento/integration.instance.eds.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.eds.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.indexing.manager.bento.page.tsx",
+  "pages/bento/integration.instance.indexing.rules.bento.page.tsx",
+  "pages/bento/integration.instance.indexing.rules.list.bento.page.tsx",
   "pages/bento/integration.instance.indexing.stats.bento.page.tsx",
   "pages/bento/integration.instance.insights.bento.page.tsx",
   "pages/bento/integration.instance.monitoring.bento.page.tsx",
@@ -228,17 +232,20 @@ describe("D46: era follows a page's local imports", () => {
     /*
      * D51 — the census warned every run that its `StickySaveBar` probe matched no page, and
      * offered two explanations: the last page carrying it migrated, or the probe went stale.
-     * Neither was true. The indexing manager page renders one, two files away, through
+     * Neither was true. The indexing manager page rendered one, two files away, through
      * `integration.indexing.manager.form` — and the chrome scan only ever read the page file.
      *
      * The warning was accurate about *pages* and false about the *console*, which is the worst
      * kind: a reader learns to scroll past it, and the next probe that dies for the real reason
      * reads exactly the same.
+     *
+     * The same page still proves the property, with a different probe: D59 took its save bar to
+     * `AdaptiveSaveBar` and its container to `AdaptivePanel`, so `Card` is now two files away
+     * from it too. A reader of the page file alone would report it rendering no console chrome
+     * at all.
      */
     const { pages, totals } = census()
-    expect(pages["pages/integration.instance.indexing.manager.page.tsx"].chrome).toContain(
-      "StickySaveBar",
-    )
+    expect(pages["pages/integration.instance.indexing.manager.page.tsx"].chrome).toContain("Card")
     // And no probe is dead, which is what the script's own stderr guard checks on every run.
     for (const [id, hits] of Object.entries(totals.chrome)) {
       expect(hits, `the ${id} probe matches nothing — stale, or the console really has none`)

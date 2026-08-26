@@ -2,16 +2,16 @@ import type { TurIntegrationCatalogSource } from "@/models/integration/integrati
 import { TurIntegrationCatalogSourceService } from "@/services/integration/integration-catalog-source.service";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { BentoSourceList, useSourceList } from "./bento-source-list";
+import { BentoEntityList, useEntityList } from "./bento-entity-list";
 
 /** The catalog bridge source list, in bento chrome. Its console route is untouched. */
 export default function IntegrationInstanceCatalogSourceListBentoPage() {
   const { id } = useParams() as { id: string };
   const service = useMemo(() => new TurIntegrationCatalogSourceService(id), [id]);
-  const { items, error } = useSourceList<TurIntegrationCatalogSource>(service);
+  const { items, error } = useEntityList<TurIntegrationCatalogSource>(service);
 
   return (
-    <BentoSourceList<TurIntegrationCatalogSource>
+    <BentoEntityList<TurIntegrationCatalogSource>
       surfaceId="catalog-source"
       i18nPrefix="integration.catalogSources"
       items={items}

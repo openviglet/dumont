@@ -77,17 +77,3 @@ These constrain every task above:
   state — they do not change what a "document" is.
 
 ## XVI The web console
-
-### XVI.3 The Integration hub's forms (D59)
-
-The two remaining Integration surfaces are forms: the indexing rules, which are a list
-and a detail page like any source, and the indexing manager, which is the console's one
-`StickySaveBar` and a set of tabs.
-
-They take the D47 shape rather than a rewrite - the console page under a chrome
-declaration, with `AdaptiveFormHeader` and `AdaptiveSectionCard` reading which era they
-are in. The manager is the interesting one: its save bar is the last console-era
-instance of that component, so moving it is what lets the shim behind it go.
-
-Separate from the read-only surfaces because the work is different in kind, and because
-a form that saves is worth landing on its own rather than inside a batch of dashboards.

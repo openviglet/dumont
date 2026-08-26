@@ -2,7 +2,7 @@ import type { TurIntegrationDbSource } from "@/models/integration/integration-db
 import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { BentoSourceList, useSourceList } from "./bento-source-list";
+import { BentoEntityList, useEntityList } from "./bento-entity-list";
 
 /**
  * The database source list, in bento chrome.
@@ -14,10 +14,10 @@ import { BentoSourceList, useSourceList } from "./bento-source-list";
 export default function IntegrationInstanceDbSourceListBentoPage() {
   const { id } = useParams() as { id: string };
   const service = useMemo(() => new TurIntegrationDbSourceService(id), [id]);
-  const { items, error } = useSourceList<TurIntegrationDbSource>(service);
+  const { items, error } = useEntityList<TurIntegrationDbSource>(service);
 
   return (
-    <BentoSourceList<TurIntegrationDbSource>
+    <BentoEntityList<TurIntegrationDbSource>
       surfaceId="db-source"
       i18nPrefix="integration.dbSources"
       items={items}

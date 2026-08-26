@@ -2,16 +2,16 @@ import type { TurIntegrationWcSource } from "@/models/integration/integration-wc
 import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { BentoSourceList, useSourceList } from "./bento-source-list";
+import { BentoEntityList, useEntityList } from "./bento-entity-list";
 
 /** The web crawler source list, in bento chrome. Its console route is untouched. */
 export default function IntegrationInstanceWcSourceListBentoPage() {
   const { id } = useParams() as { id: string };
   const service = useMemo(() => new TurIntegrationWcSourceService(id), [id]);
-  const { items, error } = useSourceList<TurIntegrationWcSource>(service);
+  const { items, error } = useEntityList<TurIntegrationWcSource>(service);
 
   return (
-    <BentoSourceList<TurIntegrationWcSource>
+    <BentoEntityList<TurIntegrationWcSource>
       surfaceId="wc-source"
       i18nPrefix="integration.wcSources"
       items={items}

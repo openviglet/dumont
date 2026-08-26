@@ -1,8 +1,8 @@
-﻿import { ROUTES } from "@/app/routes.const";
+import { ROUTES } from "@/app/routes.const";
 import { IntegrationIndexingManagerForm } from "@/components/integration/integration.indexing.manager.form";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
-import { Card } from "@/components/ui/card";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
+import { AdaptivePanel } from "@/components/bento/adaptive-panel";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import {
@@ -115,10 +115,15 @@ export default function IntegrationInstanceIndexAdminPage() {
   const pathSegment = location.pathname.split("/").pop();
   const selectedTab: IndexingTabMode = pathTabMap[pathSegment ?? ""] || "INDEXING";
 
+  /*
+   * D59 - through `ROUTES.INTEGRATION_INSTANCE`, not the console prefix spelled out.
+   *
+   * The tab *is* the URL (D53 above), so changing tab navigates - and this page serves on both
+   * trees now. A hardcoded `/admin/...` here would have thrown a reader out of the bento shell on
+   * their first click, on the one page whose whole navigation is tabs.
+   */
   const handleTabChange = (mode: IndexingTabMode) => {
-    navigate(
-      `/admin/integration/instance/${id}/indexing-manager/${tabPathMap[mode]}`,
-    );
+    navigate(`${ROUTES.INTEGRATION_INSTANCE}/${id}/indexing-manager/${tabPathMap[mode]}`);
   };
 
   useEffect(() => {
@@ -138,7 +143,7 @@ export default function IntegrationInstanceIndexAdminPage() {
       error={error}
       tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}`}
     >
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconAdjustmentsSearch}
         feature={t("integration.indexingManager.title")}
         name={t("integration.indexingManager.title")}
@@ -185,7 +190,7 @@ export default function IntegrationInstanceIndexAdminPage() {
         </div>
 
         {/* Active Operation Content */}
-        <Card className="overflow-hidden p-0">
+        <AdaptivePanel className="overflow-hidden" contentClassName="p-0">
           {/* Header with colored accent */}
           <div className={`${activeItem.bgLight} px-6 py-4 border-b`}>
             <div className="flex items-center gap-3">
@@ -208,7 +213,7 @@ export default function IntegrationInstanceIndexAdminPage() {
               sources={sources}
             />
           </div>
-        </Card>
+        </AdaptivePanel>
       </div>
     </LoadProvider>
   );

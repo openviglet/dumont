@@ -1,4 +1,4 @@
-﻿import { DUMONT_NAV, resolveIcon } from "@/app/nav.const";
+import { DUMONT_NAV, resolveIcon } from "@/app/nav.const";
 import { ROUTES } from "@/app/routes.const";
 import { BentoEntityTile, BentoListPage } from "@viglet/viglet-design-system/bento";
 import { useEffect, useState, type ReactNode } from "react";
@@ -13,7 +13,7 @@ import { useParams } from "react-router-dom";
  * array shows every reader the blank slate for the length of the request, which looks like a
  * connector with no sources rather than one that is still answering.
  */
-export function useSourceList<T>(service: Readonly<{ query: () => Promise<T[]> }>) {
+export function useEntityList<T>(service: Readonly<{ query: () => Promise<T[]> }>) {
   const [items, setItems] = useState<T[]>();
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
@@ -29,19 +29,23 @@ export function useSourceList<T>(service: Readonly<{ query: () => Promise<T[]> }
 }
 
 /**
- * The shape every source list has, in bento chrome (D46).
+ * The shape every entity list has, in bento chrome (D46).
  *
  * Six source lists render the same thing â€” a header, a grid of cards, a blank slate â€” differing
  * only in which service answers, which two fields a card shows, and their translation keys. The
  * console era wrote that shape out six times; copying it into the bento era six more would be the
  * duplication the design system exists to prevent, one level down.
  *
+ * Named for the shape rather than for sources (D59): the indexing rules list is the same header,
+ * the same grid of cards and the same blank slate, and it is not a source. A seventh copy under a
+ * name that fit six of them would have been the duplication this exists to prevent.
+ *
  * What is *not* passed in is anything the navigation declaration already knows: the surface's
  * path, its icon and its tone are looked up by id. That is the second payoff of D39 â€” a surface
  * renamed or re-toned in one place changes here too, and a page cannot disagree with the rail
  * about what it is called.
  */
-export interface BentoSourceListProps<T> {
+export interface BentoEntityListProps<T> {
   /** The surface's id in `DUMONT_NAV` â€” supplies its path, icon and tone. */
   surfaceId: string;
   /**
@@ -59,9 +63,15 @@ export interface BentoSourceListProps<T> {
   itemDescription: (item: T) => string | null | undefined;
   /** Extra action rendered beside the hero, e.g. AEM's import-from-JSON. */
   headerAction?: ReactNode;
+  /**
+   * The new-entity button's label, when the surface does not spell it `<prefix>.newSource`. The
+   * indexing rules have called theirs `newRule` since long before this existed, and inventing a
+   * synonym in the locale files to satisfy a default would put two keys behind one string.
+   */
+  newLabel?: string;
 }
 
-export function BentoSourceList<T>({
+export function BentoEntityList<T>({
   surfaceId,
   i18nPrefix,
   items,
@@ -70,7 +80,8 @@ export function BentoSourceList<T>({
   itemTitle,
   itemDescription,
   headerAction,
-}: Readonly<BentoSourceListProps<T>>) {
+  newLabel,
+}: Readonly<BentoEntityListProps<T>>) {
   const { t } = useTranslation();
   const { id } = useParams() as { id: string };
 
@@ -99,7 +110,7 @@ export function BentoSourceList<T>({
       subtitle={t(`${i18nPrefix}.description`)}
       headerAction={headerAction}
       newRoute={`${base}/new`}
-      newLabel={t(`${i18nPrefix}.newSource`)}
+      newLabel={newLabel ?? t(`${i18nPrefix}.newSource`)}
       newSubtitle={t(`${i18nPrefix}.feature`)}
       itemKey={itemKey}
       renderTile={(item, emphasis) => (

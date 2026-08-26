@@ -2,16 +2,16 @@ import type { TurIntegrationAssetsSource } from "@/models/integration/integratio
 import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { BentoSourceList, useSourceList } from "./bento-source-list";
+import { BentoEntityList, useEntityList } from "./bento-entity-list";
 
 /** The filesystem assets source list, in bento chrome. Its console route is untouched. */
 export default function IntegrationInstanceAssetsSourceListBentoPage() {
   const { id } = useParams() as { id: string };
   const service = useMemo(() => new TurIntegrationAssetsSourceService(id), [id]);
-  const { items, error } = useSourceList<TurIntegrationAssetsSource>(service);
+  const { items, error } = useEntityList<TurIntegrationAssetsSource>(service);
 
   return (
-    <BentoSourceList<TurIntegrationAssetsSource>
+    <BentoEntityList<TurIntegrationAssetsSource>
       surfaceId="assets-source"
       i18nPrefix="integration.assetsSources"
       items={items}

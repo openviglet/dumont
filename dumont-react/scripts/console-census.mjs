@@ -202,7 +202,14 @@ export const CONSOLE_CHROME = [
   ["SubPageHeader", /["'](?:@\/components|\.{1,2})\/sub\.page\.header["']/],
   ["Card", /["'](?:@\/components|\.{1,2})\/(?:components\/)?ui\/card["']/],
   ["Sidebar", /["'](?:@\/components|\.{1,2})\/(?:(?:components\/)?ui\/sidebar|app-sidebar)["']/],
-  ["StickySaveBar", /["'](?:@\/components|\.{1,2})\/(?:components\/)?ui\/sticky-save-bar["']/],
+  /*
+   * `StickySaveBar` was here until D59, and it is gone rather than kept at zero.
+   *
+   * Its one subject was the indexing manager's bar. That page now serves on both trees and reaches
+   * the bar through `AdaptiveSaveBar`, which takes it from the package — so the shim this probe
+   * read, `components/ui/sticky-save-bar`, no longer exists to be imported. Deleting the probe is
+   * the case the rule above describes: every page carrying it was migrated, in the same diff.
+   */
 ]
 
 /**

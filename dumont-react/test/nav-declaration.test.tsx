@@ -20,6 +20,7 @@ import {
   DUMONT_NAV,
   dumontNavGroups,
   dumontNavItems,
+  toBentoNavItem,
   visibleNavSurfaces,
 } from "@/app/nav.const"
 import manifest from "@/manifest"
@@ -122,11 +123,18 @@ describe("D39: where a surface points depends on whether it has moved", () => {
     // navigate inside the shell or link out by whether this is set, so a placeholder value would
     // send a reader to a route the bento tree does not serve.
     //
-    // Indexing rules: picking a migrated surface here would make the assertion pass for the wrong
-    // reason, and the pool of unmigrated ones is shrinking — the sources went in D46/D47/D57 and
-    // the read-only Integration band in D58, leaving the section's two form surfaces (D59).
-    const indexingRule = dumontNavItems(STANDALONE).find((item) => item.id === "indexing-rule")!
-    expect(indexingRule.bentoRoute).toBeUndefined()
+    // Asserted against a constructed surface rather than a real one, because as of D59 there is no
+    // unmigrated surface left to point at. Reading this off `DUMONT_NAV` would have made the test
+    // vacuous — it would pass by finding nothing — and the property still has to hold for the next
+    // surface Dumont adds, which will be console-only on the day it lands.
+    const pending = toBentoNavItem(
+      { ...DUMONT_NAV[0], id: "not-yet", migrated: undefined },
+      STANDALONE,
+    )
+    expect(pending.bentoRoute).toBeUndefined()
+    expect(pending.fallbackRoute).toBe(
+      `/admin/integration/instance/${STANDALONE}${DUMONT_NAV[0].path}`,
+    )
   })
 
   it("gives every migrated surface a bento route the tree actually serves", () => {
@@ -140,6 +148,8 @@ describe("D39: where a surface points depends on whether it has moved", () => {
       "db-source",
       "double-check",
       "eds-source",
+      "indexing-manager",
+      "indexing-rule",
       "indexing-stats",
       "insights",
       "monitoring",

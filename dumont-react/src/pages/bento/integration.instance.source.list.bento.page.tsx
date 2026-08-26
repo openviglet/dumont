@@ -6,7 +6,7 @@ import { IconUpload } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { BentoSourceList, useSourceList } from "./bento-source-list";
+import { BentoEntityList, useEntityList } from "./bento-entity-list";
 
 /**
  * The AEM source list, in bento chrome. Its console route is untouched.
@@ -20,7 +20,7 @@ export default function IntegrationInstanceSourceListBentoPage() {
   const { t } = useTranslation();
   const { id } = useParams() as { id: string };
   const service = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
-  const { items, error, setItems } = useSourceList<TurIntegrationAemSource>(service);
+  const { items, error, setItems } = useEntityList<TurIntegrationAemSource>(service);
   const { fileInputRef, open, onFileChange } = useAemSourceImport(service, setItems);
 
   return (
@@ -34,7 +34,7 @@ export default function IntegrationInstanceSourceListBentoPage() {
         title={t("forms.importExport.import")}
         onChange={onFileChange}
       />
-      <BentoSourceList<TurIntegrationAemSource>
+      <BentoEntityList<TurIntegrationAemSource>
         surfaceId="source"
         i18nPrefix="integration.sources"
         items={items}

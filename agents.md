@@ -189,12 +189,12 @@ is what lets it move back.
 
 - A route belongs in `BentoRoutes.tsx` only once its page has actually moved — the tree must never
   advertise a surface it does not serve.
-- **The whole Sources section has moved** — the six source surfaces (list + detail) plus the AI
-  inference wizard, so a reader who opens Sources from the rail stays in the shell whatever they
-  click. In Integration, the **seven read-only surfaces** have moved too (monitoring and the
-  monitored-item page behind it, indexing stats, coverage, double-check, insights, system info,
-  plugins); its **two form surfaces are the remainder**. `pnpm run census` prints which page is on
-  which era.
+- **Every surface in `DUMONT_NAV` has moved** — all sixteen, across both sections, so a reader who
+  enters the shell stays in it whatever they click. What is still console-only is the surrounding
+  app — login, setup, console home, the six admin-settings pages, the three user ones — plus the
+  `source-model` and `source-spec` sub-pages, which no nav entry declares.
+  `pnpm run census` prints which page is on which era, and the console tree is untouched — every
+  migrated surface still serves on it, which is what keeps each step reversible.
 - Both are exposed over Module Federation (`./DumontRoutes`, `./BentoRoutes`); no turing-react
   change is needed when adding a page to either.
 - **`ROUTES.INTEGRATION_INSTANCE` derives its prefix from the live URL.** From inside the bento
@@ -280,7 +280,7 @@ it mounts itself). `BentoListPage` takes its layout as a prop rather than fetchi
 
 ### Migrating a page (D46, D47)
 
-**A list page** is one `BentoSourceList` call (`pages/bento/bento-source-list.tsx`): a service,
+**A list page** is one `BentoEntityList` call (`pages/bento/bento-entity-list.tsx`): a service,
 two field accessors, a translation prefix. Path, icon and tone come from `DUMONT_NAV` by id.
 
 **A detail page is never rewritten.** Its form is ~500 lines of field logic whose only

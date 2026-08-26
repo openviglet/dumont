@@ -6,6 +6,9 @@ import BentoHomePage from "./app/bento/bento.home.page";
 import IntegrationInstanceAssetsSourceDetailBentoPage from "./pages/bento/integration.instance.assets.source.detail.bento.page";
 import IntegrationInstanceCoverageBentoPage from "./pages/bento/integration.instance.coverage.bento.page";
 import IntegrationInstanceDoubleCheckBentoPage from "./pages/bento/integration.instance.double.check.bento.page";
+import IntegrationInstanceIndexingManagerBentoPage from "./pages/bento/integration.instance.indexing.manager.bento.page";
+import IntegrationInstanceIndexingRulesBentoPage from "./pages/bento/integration.instance.indexing.rules.bento.page";
+import IntegrationInstanceIndexingRulesListBentoPage from "./pages/bento/integration.instance.indexing.rules.list.bento.page";
 import IntegrationInstanceIndexingStatsBentoPage from "./pages/bento/integration.instance.indexing.stats.bento.page";
 import IntegrationInstanceInsightsBentoPage from "./pages/bento/integration.instance.insights.bento.page";
 import IntegrationInstanceMonitoringBentoPage from "./pages/bento/integration.instance.monitoring.bento.page";
@@ -108,6 +111,19 @@ export default function BentoRoutes() {
       <Route path="insights" element={<IntegrationInstanceInsightsBentoPage />} />
       <Route path="system-info" element={<IntegrationInstanceSystemInfoBentoPage />} />
       <Route path="plugins" element={<IntegrationInstancePluginsBentoPage />} />
+      {/*
+       * The Integration section's two form surfaces (D59), which completes it. The rules are a
+       * list and a detail page like any source; the manager is a single page whose tabs are its
+       * URL, so its `:mode` segment has to be served or changing tab would leave the shell.
+       */}
+      <Route path="indexing-rule">
+        <Route index element={<IntegrationInstanceIndexingRulesListBentoPage />} />
+        <Route path=":ruleId" element={<IntegrationInstanceIndexingRulesBentoPage />} />
+      </Route>
+      <Route path="indexing-manager">
+        <Route index element={<IntegrationInstanceIndexingManagerBentoPage />} />
+        <Route path=":mode" element={<IntegrationInstanceIndexingManagerBentoPage />} />
+      </Route>
     </Routes>
   );
 }

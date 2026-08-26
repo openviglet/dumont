@@ -1,4 +1,4 @@
-﻿import {
+import {
   Form,
   FormControl,
   FormDescription,
@@ -7,7 +7,7 @@
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { StickySaveBar } from "@/components/ui/sticky-save-bar";
+import { AdaptiveSaveBar } from "@/components/bento/adaptive-save-bar";
 import {
   Select,
   SelectContent,
@@ -188,7 +188,7 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
         className="space-y-0"
         autoComplete="off"
       >
-        <StickySaveBar
+        <AdaptiveSaveBar
           title={t("integration.indexingManager.title")}
           actions={
             <>

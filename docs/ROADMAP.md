@@ -168,14 +168,6 @@ This track has no remaining pending tasks.
 
 ## Track N — The web console
 
-- 📋 **D59** (deps: —) **the indexing rules and the indexing manager are the section's two form surfaces** — They take the adaptive-chrome shape, and the manager holds the console's last StickySaveBar. → §XVI.3
-
-## Done when — D59
-
-- **Both form surfaces serve on both trees, and no page renders StickySaveBar** The
-  census chrome count for StickySaveBar reaches zero, and its probe goes in the same
-  diff.
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
