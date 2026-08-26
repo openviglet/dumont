@@ -485,3 +485,6 @@
 - **D49** — The DTS build extends the app tsconfig, not the root solution file, and emits outside the wiped output dir, so all four remotes ship declarations; a script checks the artefact, not the exit code.
 - **D50** — validate.yml builds on every push and pull request, caches on pnpm rather than a lockfile that never existed, and takes the Sonar branch from the ref instead of the previous version.
 - **D51** — The probe was right and the scan was wrong: chrome is now counted through a page's components, so StickySaveBar reads 1, Card 20 instead of 3, and no probe matches nothing.
+
+## Track L — Console build, lint and type gates
+

@@ -75,3 +75,67 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XIV Console build, lint and type gates
+
+### XIV.1 Types that arrive unreadable (D52)
+
+D49 made the four remotes emit declarations for the first time. They are not yet usable
+by a host: eight imports in them name the `@/` path alias, and TypeScript does not
+rewrite an alias on emit. Every substantial entry carries one — `DumontRoutes` and
+`BentoRoutes` both open with `import "@/lib/axios"`, and `manifest` re-exports
+`resolveIcon` from `@/app/nav.const`.
+
+A consumer without the same `paths` mapping resolves none of them, so the types are
+present and still teach it nothing. That is the same silence D49 was about, one step
+further along: the build is green, the artefact exists, and the boundary is still
+untyped.
+
+The compiled tree beside them holds the real declarations, so the fix is a rewrite to
+relative specifiers at emit — or the six source imports changed, which is smaller but
+only holds until someone writes the next one.
+
+### XIV.2 The data-load pattern the linter refuses (D53)
+
+Twenty-three surfaces load their data as `useEffect(() => { service.get().then(setX);
+setIsNew(false) }, [id])`, and the rule is right that a `setState` in an effect body
+causes cascading renders. D48 could not fix it: restructuring how twenty-three pages
+fetch is a refactor with its own risk, not a side effect of turning a linter on, so
+`eslint.config.js` names those files and holds the rest of the console to the rule.
+
+The list is the debt, and it only pays down by being emptied. Each file leaves it in the
+diff that fixes it, and the task finishes when the last line goes and the rule is an
+error everywhere.
+
+The pages share one pattern, so the fix is one decision applied twenty-three times
+rather than twenty-three decisions.
+
+### XIV.3 The any that spreads (D54)
+
+Six files use `any`: the connector service's request and response payloads, the grid's
+column plumbing, the locale and indexing-manager forms, the AEM wizard and the grid
+adapter. Each is a contract someone has to read the backend to write down, which is why
+D48 named them rather than typing them under a lint adoption.
+
+Two of them matter more than the rest. `integration-connector.service.ts` is where the
+console meets the connector API, so every caller downstream inherits `any` from it; and
+`use-grid-adapter.ts` feeds `TurGridItem`, which the console-era grid renders
+everywhere.
+
+Finished when the list in `eslint.config.js` is empty and the rule is an error across
+the console.
+
+### XIV.4 Chunking that never happens (D55)
+
+`vite.config.ts` declares a `manualChunks` splitting vendor code into `vendor-ui` and
+`vendor-lib`, and Module Federation discards it on every build, saying so on stdout:
+grouping its async-init-wrapped modules into one chunk creates circular dependencies
+that hang the application.
+
+So the config is dead, and the message explaining that it is dead prints on every build.
+Both halves are the shape D51 removed from the census — a standing line a reader learns
+to skip, sitting next to the ones that matter.
+
+Deleting it changes no output, since none of it was applied. What it costs to keep is a
+reviewer believing the console still controls its chunking, and a build log with one
+more line nobody reads.
