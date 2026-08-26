@@ -75,3 +75,48 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XVI The web console
+
+### XVI.1 The last surface in Sources (D57)
+
+Six of the seven surfaces in the Sources section render bento; `source-inference` does
+not, so the hub that opens the section still sends one tile back to `/admin`. It is the
+odd one out in a band that is otherwise finished.
+
+It is also the smallest of the ten that remain, and finishing it makes the first hub
+complete - a reader who opens Sources from the rail stays in the shell whatever they
+click, which is the first time that has been true of any section.
+
+The page is a form over a URL and an editable strategy, so it is the D47 shape: the
+console page under a chrome declaration, with the header and the section cards reading
+`useSectionChrome`.
+
+### XVI.2 The Integration hub's read-only surfaces (D58)
+
+The Integration section holds nine surfaces and not one of them has moved, so the hub
+the rail opens is a mosaic where every tile leaves the shell. That is the one place the
+parallel tree still reads as a migration rather than a product, and it is the band an
+operator spends the day in: monitoring, statistics, coverage, double-check, plugins,
+system information, insights.
+
+These seven are read-only. They render panels, tables and counts rather than forms, so
+the shape is `BentoHero` plus `BentoPanel` - the frosted container with no heading of
+its own, because the hero above already names the page.
+
+The forms in the same section are their own line, since the adaptive header they need is
+a different piece of work from a table in a panel.
+
+### XVI.3 The Integration hub's forms (D59)
+
+The two remaining Integration surfaces are forms: the indexing rules, which are a list
+and a detail page like any source, and the indexing manager, which is the console's one
+`StickySaveBar` and a set of tabs.
+
+They take the D47 shape rather than a rewrite - the console page under a chrome
+declaration, with `AdaptiveFormHeader` and `AdaptiveSectionCard` reading which era they
+are in. The manager is the interesting one: its save bar is the last console-era
+instance of that component, so moving it is what lets the shim behind it go.
+
+Separate from the read-only surfaces because the work is different in kind, and because
+a form that saves is worth landing on its own rather than inside a batch of dashboards.

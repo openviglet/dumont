@@ -166,6 +166,28 @@ This track has no remaining pending tasks.
 
 ---
 
+## Track N — The web console
+
+- 📋 **D57** (deps: —) **one Sources surface still renders console chrome, so its hub sends a tile out of the shell** — AI source inference is the last of seven, and finishing it makes the first section complete in the bento tree. → §XVI.1
+- 📋 **D58** (deps: —) **the Integration hub opens onto nine surfaces and every tile leaves the shell** — Seven of them are read-only panels and tables, which is BentoPanel under a hero rather than the form shape. → §XVI.2
+- 📋 **D59** (deps: —) **the indexing rules and the indexing manager are the section's two form surfaces** — They take the adaptive-chrome shape, and the manager holds the console's last StickySaveBar. → §XVI.3
+
+## Done when — D57
+
+- **Every surface in the Sources section has a bento route** The hub reaches all seven
+  without a tile falling back to the console tree.
+
+## Done when — D58
+
+- **The seven read-only Integration surfaces serve on both trees** Each console route
+  still answers, which is what keeps the move reversible.
+
+## Done when — D59
+
+- **Both form surfaces serve on both trees, and no page renders StickySaveBar** The
+  census chrome count for StickySaveBar reaches zero, and its probe goes in the same
+  diff.
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
