@@ -1,4 +1,5 @@
-import { ROUTES } from "@/app/routes.const";
+﻿import { ROUTES } from "@/app/routes.const";
+import { stripAemSourceIds } from "@/components/integration/use-aem-source-import";
 import { Form } from "@/components/ui/form";
 import { GradientButton } from "@/components/ui/gradient-button";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
@@ -124,17 +125,9 @@ export function AemSourceWizard({
     setCreating(true);
     try {
       const data = form.getValues();
-      // Strip empty ids so JPA generates new UUIDs (persist) instead of merge
-      delete (data as any).id;
-      data.localePaths?.forEach((lp: any) => delete lp.id);
-      data.attributeSpecifications?.forEach((spec: any) => delete spec.id);
-      data.models?.forEach((model: any) => {
-        delete model.id;
-        model.targetAttrs?.forEach((ta: any) => {
-          delete ta.id;
-          ta.sourceAttrs?.forEach((sa: any) => delete sa.id);
-        });
-      });
+      // Strip empty ids so JPA generates new UUIDs (persist) instead of merge. Shared with the
+      // import flow (D54) â€” the walk has to reach the same leaves in both, and did not.
+      stripAemSourceIds(data);
       const result = await turIntegrationAemSourceService.create(data);
       if (result) {
         toast.success(

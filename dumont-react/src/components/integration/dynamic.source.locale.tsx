@@ -1,9 +1,9 @@
-import { LanguageSelect } from '@/components/language-select';
+﻿import { LanguageSelect } from '@/components/language-select';
 import type { TurLocale } from '@/models/locale/locale.model';
 import { TurLocaleService } from '@/services/locale/locale.service';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Controller, useFieldArray, type Control, type UseFormRegister, type FieldValues, type ArrayPath } from 'react-hook-form';
+import { Controller, useFieldArray, type Control, type UseFormRegister, type FieldValues, type ArrayPath, type Path, type FieldArray } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { GradientButton } from '../ui/gradient-button';
 import { AemPathBrowser } from './aem-path-browser';
@@ -42,7 +42,11 @@ export function DynamicSourceLocales<TFieldValues extends FieldValues = FieldVal
         turLocaleService.query().then(setLocales)
     }, []);
     const handleAddField = () => {
-        append({ locale: '', path: '' } as any);
+                /*
+         * D54 - a new row is a FieldArray entry, which is what ppend takes. The shape is
+         * this component's own; the cast is react-hook-form's generics, not an unknown value.
+         */
+        append({ locale: '', path: '' } as FieldArray<TFieldValues, ArrayPath<TFieldValues>>);
     };
 
     const canBrowse = !!connection?.endpoint && !!connection?.username && !!integrationId;
@@ -53,7 +57,7 @@ export function DynamicSourceLocales<TFieldValues extends FieldValues = FieldVal
                 <div key={field.id} className="flex items-start gap-2">
                     <Controller
                         control={control}
-                        name={`${fieldName}.${index}.locale` as any}
+                        name={`${fieldName}.${index}.locale` as Path<TFieldValues>}
                         render={({ field: controllerField }) => (
                             <LanguageSelect
                                 value={controllerField.value}
@@ -67,7 +71,7 @@ export function DynamicSourceLocales<TFieldValues extends FieldValues = FieldVal
                     {canBrowse ? (
                         <Controller
                             control={control}
-                            name={`${fieldName}.${index}.path` as any}
+                            name={`${fieldName}.${index}.path` as Path<TFieldValues>}
                             render={({ field: controllerField }) => (
                                 <AemPathBrowser
                                     value={controllerField.value ?? ""}
@@ -85,7 +89,7 @@ export function DynamicSourceLocales<TFieldValues extends FieldValues = FieldVal
                         <Input
                             className="grow"
                             placeholder={t("forms.integrationSource.rootPath")}
-                            {...register(`${fieldName}.${index}.path` as any)}
+                            {...register(`${fieldName}.${index}.path` as Path<TFieldValues>)}
                         />
                     )}
                     <GradientButton

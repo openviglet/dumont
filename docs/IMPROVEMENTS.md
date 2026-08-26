@@ -93,21 +93,6 @@ error everywhere.
 The pages share one pattern, so the fix is one decision applied twenty-three times
 rather than twenty-three decisions.
 
-### XIV.3 The any that spreads (D54)
-
-Six files use `any`: the connector service's request and response payloads, the grid's
-column plumbing, the locale and indexing-manager forms, the AEM wizard and the grid
-adapter. Each is a contract someone has to read the backend to write down, which is why
-D48 named them rather than typing them under a lint adoption.
-
-Two of them matter more than the rest. `integration-connector.service.ts` is where the
-console meets the connector API, so every caller downstream inherits `any` from it; and
-`use-grid-adapter.ts` feeds `TurGridItem`, which the console-era grid renders
-everywhere.
-
-Finished when the list in `eslint.config.js` is empty and the rule is an error across
-the console.
-
 ### XIV.4 Chunking that never happens (D55)
 
 `vite.config.ts` declares a `manualChunks` splitting vendor code into `vendor-ui` and

@@ -82,31 +82,55 @@ describe("D48: the config is wired to this project", () => {
 })
 
 describe("D48: inherited debt is named, not capped", () => {
-  const usesAny = "export const value: any = 1\n"
+  /** A `setState` run synchronously in an effect body — the rule that still carries a list. */
+  const setsStateInEffect = [
+    "import { useEffect, useState } from 'react'",
+    "export function Planted() {",
+    "  const [value, setValue] = useState(0)",
+    "  useEffect(() => { setValue(1) }, [])",
+    "  return value",
+    "}",
+  ].join("\n")
 
   it("fails a new file for something the debt list tolerates", () => {
     // The half that makes this a gate rather than a record: the rule is live everywhere it is not
-    // explicitly excused, so the next `any` written here stops a build.
-    expect(severityOf(lintAs("src/planted.tsx", usesAny), "@typescript-eslint/no-explicit-any"))
+    // explicitly excused, so the next one written here stops a build.
+    expect(severityOf(lintAs("src/planted.tsx", setsStateInEffect), "react-hooks/set-state-in-effect"))
       .toBe(ERROR)
   })
 
   it("only warns in a file the config names, with its reason", () => {
-    // `use-grid-adapter.ts` is on the list. Clearing it means deleting its line from the config,
+    // `ai-summary-panel.tsx` is on the list. Clearing it means deleting its line from the config,
     // which is a diff somebody reviews — where lowering a ceiling is a number nobody reads.
     expect(
-      severityOf(lintAs("src/hooks/use-grid-adapter.ts", usesAny), "@typescript-eslint/no-explicit-any"),
+      severityOf(
+        lintAs("src/components/ai-summary-panel.tsx", setsStateInEffect),
+        "react-hooks/set-state-in-effect",
+      ),
     ).toBe(WARNING)
   })
 
   it("excuses a named file for that rule only, not for everything", () => {
-    // The failure a file-level exemption would ship. `use-grid-adapter.ts` is excused `any`; it is
-    // not excused an unused variable.
+    // The failure a file-level exemption would ship. `ai-summary-panel.tsx` is excused its effect;
+    // it is not excused an unused variable.
     const messages = lintAs(
-      "src/hooks/use-grid-adapter.ts",
-      "const unused = 1\nexport const value: any = 2\n",
+      "src/components/ai-summary-panel.tsx",
+      `const unused = 1\n${setsStateInEffect}\n`,
     )
     expect(severityOf(messages, "@typescript-eslint/no-unused-vars")).toBe(ERROR)
+  })
+
+  it("holds every file to a rule whose list has been emptied", () => {
+    /*
+     * D54 emptied the `no-explicit-any` list, so the rule is an error across the console — and the
+     * list is *gone* rather than kept at zero. Asserted on a file that used to be excused, because
+     * that is where a leftover exemption would still be sitting.
+     */
+    const usesAny = "export const value: any = 1\n"
+    for (const file of ["src/planted.ts", "src/hooks/use-grid-adapter.ts"]) {
+      expect(severityOf(lintAs(file, usesAny), "@typescript-eslint/no-explicit-any"), file)
+        .toBe(ERROR)
+    }
   })
 })
 

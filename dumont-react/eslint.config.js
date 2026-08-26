@@ -74,7 +74,9 @@ export default tseslint.config(
    * fails by name, and clearing a file is a diff that also deletes its line here. The same reason
    * `console-census.test.ts` names every fork instead of counting them.
    *
-   * Neither rule is downgraded globally: anything not listed below is held to it.
+   * The rule is not downgraded globally: anything not listed below is held to it. There was a
+   * second list here for `@typescript-eslint/no-explicit-any`; D54 emptied it, so that rule is now
+   * an error across the console and the list is gone rather than kept at zero.
    */
   {
     /*
@@ -105,22 +107,6 @@ export default tseslint.config(
       "src/pages/integration.instance.system-info.page.tsx",
     ],
     rules: { "react-hooks/set-state-in-effect": "warn" },
-  },
-
-  {
-    /*
-     * D48 — `any` in six files, mostly service payloads and the grid's column plumbing. Typing
-     * them is real work on real contracts, and it is not this task.
-     */
-    files: [
-      "src/components/grid.list.tsx",
-      "src/components/integration/dynamic.source.locale.tsx",
-      "src/components/integration/integration.indexing.manager.form.tsx",
-      "src/components/integration/wizard/aem-source-wizard.tsx",
-      "src/hooks/use-grid-adapter.ts",
-      "src/services/integration/integration-connector.service.ts",
-    ],
-    rules: { "@typescript-eslint/no-explicit-any": "warn" },
   },
 
   {

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Form,
   FormControl,
   FormDescription,
@@ -32,6 +32,20 @@ import { useTranslation } from "react-i18next";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { Stepper } from "../ui/stepper";
 import { DynamicIndexingRuleFields } from "./dynamic.indexing.rule.field";
+
+/*
+ * D54 - what a row in `values` actually holds.
+ *
+ * The field array is declared `string[]`, but the tag input it is bound to hands back a
+ * `{ value }` wrapper for a row the user is still editing. Both shapes reach the submit, which is
+ * why two call sites used to unwrap with `any`; naming the union lets `pathValue` do it once.
+ */
+type IndexingManagerPath = string | { value: string };
+
+/** The path a row carries, whichever shape the input left it in. */
+function pathValue(row: IndexingManagerPath): string {
+  return typeof row === "object" && row !== null && "value" in row ? row.value : row;
+}
 
 interface IndexingManagerFormValues {
   source: string;
@@ -128,7 +142,7 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
   const step1Done = !!watchSource;
   const step2Done = !!selectedAttribute;
   const step3Done = Array.isArray(watchValues) && watchValues.some(
-    (v: any) => (typeof v === "object" && v !== null && "value" in v ? v.value : v)?.toString().trim(),
+    (v: IndexingManagerPath) => pathValue(v)?.toString().trim(),
   );
 
   async function onSubmit(data: IndexingManagerFormValues) {
@@ -144,7 +158,7 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
 
       const payload: TurIntegrationIndexingManager = {
         attribute: data.attribute.toUpperCase() as "ID" | "URL",
-        paths: data.values.map((v: any) => typeof v === "object" && v !== null && "value" in v ? v.value : v),
+        paths: data.values.map((v: IndexingManagerPath) => pathValue(v)),
         event: mode,
         ...(isRecursive && { recursive: true }),
       };
@@ -304,7 +318,7 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
           <Stepper.Completion />
         </Stepper>
 
-        {/* Advanced Settings — separate from the stepper, only for ID */}
+        {/* Advanced Settings â€” separate from the stepper, only for ID */}
         {selectedAttribute === "id" && (
           <AdvancedSettings form={form} />
         )}

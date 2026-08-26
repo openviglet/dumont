@@ -26,14 +26,24 @@ export function useGridAdapter<T>(
       return value === null || value === undefined ? "" : String(value);
     };
 
-    const resolveId = (item: T) => {
+    /*
+     * D54 — the id, without `any`.
+     *
+     * `TurGridItem.id` is a string, and the three ways of producing one are: the caller's
+     * function, the caller's key, or the conventional `id` field on an item whose type does not
+     * declare one. The last is the reason this was `any` — it is a *lookup on an unknown shape*,
+     * which `Record<string, unknown>` states honestly while `any` also switched off checking of
+     * everything downstream of the call.
+     */
+    const resolveId = (item: T): string => {
       if (!config.id) {
-        return (item as any).id;
+        const value = (item as Record<string, unknown>).id;
+        return value === null || value === undefined ? "" : String(value);
       }
       if (typeof config.id === "function") {
-        return config.id(item);
+        return String(config.id(item));
       }
-      return item[config.id] as any;
+      return String(item[config.id]);
     };
 
     return data.map((item) => ({

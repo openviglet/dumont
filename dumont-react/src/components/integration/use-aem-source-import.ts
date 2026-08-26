@@ -1,4 +1,4 @@
-import { importSourceFromJson } from "@/components/integration/source-import-export";
+﻿import { importSourceFromJson } from "@/components/integration/source-import-export";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import type { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { toast } from "@viglet/viglet-design-system";
@@ -6,10 +6,35 @@ import { useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 /**
+ * Strip every id from an AEM source payload, at every depth.
+ *
+ * An export â€” or a wizard's draft â€” carries the ids of the source it came from, and creating with
+ * them either collides with that source or silently edits it. The walk has to reach the leaves:
+ * locale paths, attribute specifications, models, and each model's target attributes and their
+ * source attributes.
+ *
+ * Exported because the import flow and the creation wizard both need it (D54). The wizard had its
+ * own copy, written with `any` at every level â€” six of them, and a second place for the walk to
+ * fall out of step with the model.
+ */
+export function stripAemSourceIds(payload: Partial<TurIntegrationAemSource>) {
+  delete (payload as { id?: string }).id;
+  payload.localePaths?.forEach((lp) => delete (lp as { id?: string }).id);
+  payload.attributeSpecifications?.forEach((spec) => delete (spec as { id?: string }).id);
+  payload.models?.forEach((model) => {
+    delete (model as { id?: string }).id;
+    model.targetAttrs?.forEach((ta) => {
+      delete (ta as { id?: string }).id;
+      ta.sourceAttrs?.forEach((sa) => delete (sa as { id?: string }).id);
+    });
+  });
+}
+
+/**
  * Import an AEM source from a JSON file.
  *
  * Extracted so the console list and the bento list share it rather than each carrying a copy
- * (D46). The two pages differ in what the reader clicks — a dropdown item, a button — and not at
+ * (D46). The two pages differ in what the reader clicks â€” a dropdown item, a button â€” and not at
  * all in what happens next, which is the part worth having in one place: a payload that kept its
  * ids would collide with the source it was exported from.
  */
@@ -30,19 +55,6 @@ export function useAemSourceImport(
    * attribute specifications, models, and each model's target attributes and their source
    * attributes.
    */
-  const stripIds = useCallback((payload: Partial<TurIntegrationAemSource>) => {
-    delete (payload as { id?: string }).id;
-    payload.localePaths?.forEach((lp) => delete (lp as { id?: string }).id);
-    payload.attributeSpecifications?.forEach((spec) => delete (spec as { id?: string }).id);
-    payload.models?.forEach((model) => {
-      delete (model as { id?: string }).id;
-      model.targetAttrs?.forEach((ta) => {
-        delete (ta as { id?: string }).id;
-        ta.sourceAttrs?.forEach((sa) => delete (sa as { id?: string }).id);
-      });
-    });
-  }, []);
-
   const onFileChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
@@ -57,7 +69,7 @@ export function useAemSourceImport(
       }
 
       const payload = { ...parsed } as Partial<TurIntegrationAemSource>;
-      stripIds(payload);
+      stripAemSourceIds(payload);
       try {
         const created = await service.create(payload as TurIntegrationAemSource);
         if (!created) {
@@ -70,7 +82,7 @@ export function useAemSourceImport(
         toast.error(t("forms.common.formSubmitFailed"));
       }
     },
-    [service, onImported, stripIds, t],
+    [service, onImported, t],
   );
 
   return { fileInputRef, open, onFileChange };

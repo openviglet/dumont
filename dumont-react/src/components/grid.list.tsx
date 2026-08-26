@@ -1,4 +1,4 @@
-// D44 — the v8 table API, taken from v9's own compatibility subpath. The root entry renamed
+﻿// D44 â€” the v8 table API, taken from v9's own compatibility subpath. The root entry renamed
 // every one of these when the dependency moved to ^9.0.0, which is what stopped the console
 // compiling; `./legacy` ships them unchanged, so the grid below needs no rewrite. Adopting the
 // v9 API is a separate decision.
@@ -46,7 +46,7 @@ interface NewButtonProps {
     label: string;
 }
 
-// Marker component — rendered inside DropdownMenuContent by GridListComponent
+// Marker component â€” rendered inside DropdownMenuContent by GridListComponent
 const GridListNewButton: React.FC<NewButtonProps> = () => null;
 GridListNewButton.displayName = "GridListNewButton";
 
@@ -54,7 +54,7 @@ interface ActionProps {
     children: ReactNode;
 }
 
-// Marker component — children rendered inside DropdownMenuContent by GridListComponent
+// Marker component â€” children rendered inside DropdownMenuContent by GridListComponent
 const GridListAction: React.FC<ActionProps> = () => null;
 GridListAction.displayName = "GridListAction";
 
@@ -96,11 +96,16 @@ const GridListComponent: React.FC<Props> = ({ gridItemList, children }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
+    /*
+     * D54 - a marker component is identified by its `displayName`, which React does not put on
+     * the `ElementType` union. Narrowing to the one property actually read says that, where `any`
+     * also silenced every mistake made with `child.type` afterwards.
+     */
     // Extract action definitions from marker children
     const actions: { key: string; render: () => ReactNode }[] = [];
     React.Children.forEach(children, (child) => {
         if (!React.isValidElement(child)) return;
-        if ((child.type as any)?.displayName === "GridListNewButton") {
+        if ((child.type as { displayName?: string })?.displayName === "GridListNewButton") {
             const { to, label } = child.props as NewButtonProps;
             actions.push({
                 key: `new-${label}`,
@@ -111,7 +116,7 @@ const GridListComponent: React.FC<Props> = ({ gridItemList, children }) => {
                     </DropdownMenuItem>
                 ),
             });
-        } else if ((child.type as any)?.displayName === "GridListAction") {
+        } else if ((child.type as { displayName?: string })?.displayName === "GridListAction") {
             const { children: actionChildren } = child.props as ActionProps;
             actions.push({
                 key: `action-${actions.length}`,
