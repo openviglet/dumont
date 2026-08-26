@@ -10,10 +10,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { FormItemTwoColumns } from "@/components/ui/form-item-two-columns";
-import { GradientButton } from "@/components/ui/gradient-button";
 import { GradientSwitch } from "@/components/ui/gradient-switch";
 import { Input } from "@/components/ui/input";
-import { SectionCard } from "@/components/ui/section-card";
+import { AdaptiveFormHeader } from "@/components/bento/adaptive-form-header";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 import {
   Select,
   SelectContent,
@@ -27,9 +27,8 @@ import { TurIntegrationAemSourceService } from "@/services/integration/integrati
 import { AemClassSelect } from "@/components/integration/aem-class-select";
 import type { TurIntegrationAemAttributeSpec } from "@/models/integration/integration-aem-attribute-spec.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
-import { IconDeviceFloppy, IconFileDescription, IconSettings, IconX } from "@tabler/icons-react";
+import { IconFileDescription, IconSettings } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
-import { StickyPageHeader } from "@viglet/viglet-design-system/router";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -113,23 +112,16 @@ export default function IntegrationInstanceSourceSpecPage() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
-        <StickyPageHeader>
-          <StickyPageHeader.Title
-            icon={IconFileDescription}
-            feature={t("forms.integrationSource.specifications")}
-            description={t("forms.integrationSource.specDetailDesc")}
-          />
-          <StickyPageHeader.Actions>
-            <GradientButton type="submit" size="sm">
-              <IconDeviceFloppy className="size-4" />
-              {t("forms.formActions.saveChanges")}
-            </GradientButton>
-            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(specTabRoute)}>
-              <IconX className="size-4" />
-              {t("forms.formActions.cancel")}
-            </GradientButton>
-          </StickyPageHeader.Actions>
-        </StickyPageHeader>
+        <AdaptiveFormHeader
+          icon={IconFileDescription}
+          feature={t("forms.integrationSource.specifications")}
+          description={t("forms.integrationSource.specDetailDesc")}
+          title={form.watch("name") ?? ""}
+          urlBase={specTabRoute}
+          onCancel={() => navigate(specTabRoute)}
+          dirty={isNew || form.formState.isDirty}
+          titleMissing={!form.watch("name")?.trim()}
+        />
           <SectionCard variant="blue">
             <SectionCard.Header
               icon={IconSettings}

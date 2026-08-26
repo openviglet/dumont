@@ -191,8 +191,7 @@ is what lets it move back.
   advertise a surface it does not serve.
 - **Every surface in `DUMONT_NAV` has moved** — all sixteen, across both sections, so a reader who
   enters the shell stays in it whatever they click. What is still console-only is the surrounding
-  app — login, setup, console home, the six admin-settings pages, the three user ones — plus the
-  `source-model` and `source-spec` sub-pages, which no nav entry declares.
+  app — login, setup, console home, the six admin-settings pages, the three user ones.
   `pnpm run census` prints which page is on which era, and the console tree is untouched — every
   migrated surface still serves on it, which is what keeps each step reversible.
 - Both are exposed over Module Federation (`./DumontRoutes`, `./BentoRoutes`); no turing-react
@@ -200,6 +199,13 @@ is what lets it move back.
 - **`ROUTES.INTEGRATION_INSTANCE` derives its prefix from the live URL.** From inside the bento
   shell it resolves to `/bento/…`, so a link to a not-yet-migrated page must use
   `ROUTES.CONSOLE_INTEGRATION_INSTANCE` instead, or it points at a route nothing serves.
+- **A link is only as migrated as the route that answers it**, and this was the migration's one
+  recurring defect — four instances (D59 twice, D60 twice). Two shapes: a route built with the
+  console prefix spelled out by hand, which leaves the shell; and a route resolved correctly into
+  a tree that declares nothing matching it, which renders a blank page. Neither the census nor the
+  nav tests read links, so the second kind fails silently — the AEM model and specification
+  editors were dead for three tasks. **When a page moves, walk every route it can construct**,
+  including the ones no nav entry declares.
 
 ### Navigation (`src/app/nav.const.ts`)
 One declaration, read by three surfaces — the console sidebar, the bento rail and the `⌘K`

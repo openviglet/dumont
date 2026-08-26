@@ -17,16 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SectionCard } from "@/components/ui/section-card";
-import { GradientButton } from "@/components/ui/gradient-button";
+import { AdaptiveFormHeader } from "@/components/bento/adaptive-form-header";
+import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 
 import { TargetAttributeList } from "@/components/integration/target.attribute.list";
 import type { TurIntegrationAemPluginModel } from "@/models/integration/integration-aem-plugin-model.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
-import { IconBox, IconDeviceFloppy, IconSettings, IconTarget, IconX } from "@tabler/icons-react";
+import { IconBox, IconSettings, IconTarget } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
-import { StickyPageHeader } from "@viglet/viglet-design-system/router";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -117,23 +116,16 @@ export default function IntegrationInstanceSourceModelPage() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-4 lg:px-6 pb-8">
-        <StickyPageHeader>
-          <StickyPageHeader.Title
-            icon={IconBox}
-            feature={t("forms.integrationSource.models")}
-            description={t("forms.integrationSource.modelDetailDesc")}
-          />
-          <StickyPageHeader.Actions>
-            <GradientButton type="submit" size="sm">
-              <IconDeviceFloppy className="size-4" />
-              {t("forms.formActions.saveChanges")}
-            </GradientButton>
-            <GradientButton type="button" variant="outline" size="sm" onClick={() => navigate(modelTabRoute)}>
-              <IconX className="size-4" />
-              {t("forms.formActions.cancel")}
-            </GradientButton>
-          </StickyPageHeader.Actions>
-        </StickyPageHeader>
+        <AdaptiveFormHeader
+          icon={IconBox}
+          feature={t("forms.integrationSource.models")}
+          description={t("forms.integrationSource.modelDetailDesc")}
+          title={form.watch("type") ?? ""}
+          urlBase={modelTabRoute}
+          onCancel={() => navigate(modelTabRoute)}
+          dirty={isNew || form.formState.isDirty}
+          titleMissing={!form.watch("type")?.trim()}
+        />
           <SectionCard variant="violet">
             <SectionCard.Header
               icon={IconSettings}

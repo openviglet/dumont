@@ -192,6 +192,76 @@ describe("D37: the bento tree's own root", () => {
   })
 })
 
+/*
+ * D60 — the routes no surface count would have found.
+ *
+ * The AEM detail page carries two editors that navigate three segments deep, and it has served on
+ * the bento tree since D47 while that tree matched two. Nothing failed: no nav entry declares
+ * these, so the census never counted them and the nav tests never resolved them. A reader who
+ * clicked a model inside the shell got a blank page.
+ *
+ * Asserted the same way as everything above — mount the real application at the address and see
+ * what came back — because a reconstruction of the route table is exactly what missed it.
+ */
+const AEM_SOURCE = {
+  id: "9",
+  name: "Author",
+  models: [
+    { id: "m1", type: "cq:Page", subType: "cq:PageContent", className: "", targetAttrs: [] },
+  ],
+  attributeSpecifications: [
+    { id: "s1", name: "pageTitle", type: "STRING", className: "", text: "", facetNames: {} },
+  ],
+}
+
+function stubAemSource() {
+  answerGet({
+    "/aem/source/9": AEM_SOURCE,
+    "/aem/source": [AEM_SOURCE],
+    // Both editors render an `AemClassSelect`, which lists the extractors it can pick from.
+    "/aem/source/extractors": [],
+    "/connector/status": CONNECTOR_STATUS,
+    "/user": USER,
+  })
+}
+
+describe("D60: the editors behind the AEM detail page", () => {
+  const BENTO_AEM = `/bento/integration/instance/${STANDALONE}/source`
+  const CONSOLE_AEM = `/admin/integration/instance/${STANDALONE}/source`
+
+  it("serves the model editor inside the bento shell", async () => {
+    stubAemSource()
+    const bento = renderApp(`${BENTO_AEM}/9/models/0`)
+
+    // The model's own subType, read back into the form — proof the route matched and the page
+    // loaded, not merely that a shell painted around nothing.
+    expect(await screen.findByDisplayValue("cq:PageContent")).toBeDefined()
+    expect(bento.container.querySelector(".bento-rail-gutter")).not.toBeNull()
+  })
+
+  it("serves the specification editor inside the bento shell", async () => {
+    stubAemSource()
+    const bento = renderApp(`${BENTO_AEM}/9/specifications/0`)
+
+    expect(await screen.findByDisplayValue("pageTitle")).toBeDefined()
+    expect(bento.container.querySelector(".bento-rail-gutter")).not.toBeNull()
+  })
+
+  it("leaves both console originals serving, in console chrome", async () => {
+    // The half that keeps the fix an addition. Two routes were added to one tree; nothing moved.
+    stubAemSource()
+    const model = renderApp(`${CONSOLE_AEM}/9/models/0`)
+    expect(await screen.findByDisplayValue("cq:PageContent")).toBeDefined()
+    expect(model.container.querySelector(".bento-rail-gutter")).toBeNull()
+    model.unmount()
+
+    stubAemSource()
+    const spec = renderApp(`${CONSOLE_AEM}/9/specifications/0`)
+    expect(await screen.findByDisplayValue("pageTitle")).toBeDefined()
+    expect(spec.container.querySelector(".bento-rail-gutter")).toBeNull()
+  })
+})
+
 /**
  * The six source lists, with what each service answers and the two fields its cards show.
  *

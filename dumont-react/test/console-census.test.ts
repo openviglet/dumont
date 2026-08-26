@@ -56,6 +56,10 @@ const FORKED: Record<string, string[]> = {
  * surfaces plus the monitored-item page behind the grid (D58), and its two form surfaces — the
  * indexing rules, list and detail, and the indexing manager (D59), which completed it.
  *
+ * The last two are the AEM model and specification editors (D60). No nav entry declares them, so
+ * they are the one pair this list would never have grown by counting surfaces — they were found by
+ * following a link the shell could construct and the tree could not answer.
+ *
  * "Left to move" still counts the console originals, because they still exist and still render
  * console chrome â€” that is what makes each migration reversible, not an oversight in the count.
  */
@@ -84,6 +88,8 @@ const ON_BENTO: string[] = [
   "pages/bento/integration.instance.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.source.inference.bento.page.tsx",
   "pages/bento/integration.instance.source.list.bento.page.tsx",
+  "pages/bento/integration.instance.source.model.bento.page.tsx",
+  "pages/bento/integration.instance.source.spec.bento.page.tsx",
   "pages/bento/integration.instance.system-info.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.list.bento.page.tsx",

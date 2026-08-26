@@ -57,29 +57,6 @@ partial degradation visible and the sidecar→native parity gate (D11) measurabl
 manual, and D16 (field-level provenance) made every published field traceable — all shipped,
 completing the trust track. Track F (semantics) follows the RAG maturity on the Turing side.
 
-### I.1 The AEM model and specification editors (D60)
-
-Two editors hang off the AEM source detail page - the plugin models list and the
-attribute specifications list - and each navigates to a route built through
-`ROUTES.INTEGRATION_INSTANCE`, whose prefix is read from the live URL. From inside the
-bento shell that resolves to `/bento/...`, and `BentoRoutes` serves only `:sourceId` and
-`:sourceId/:tab` beneath `source`. A model editor is three segments deep, so it matches
-nothing and the reader gets a blank page.
-
-The console tree declares those two routes and always has. Nothing is broken at
-`/admin`; what is broken is the tree the reader is on, which has served the AEM detail
-page since D47.
-
-The fix is two routes, not a rewrite. What the task has to decide is whether they get
-bento chrome or serve as they are, because no nav entry declares them - they are reached
-only from the form above them, which is why the migration count never counted them and
-why nothing failed when they stopped resolving.
-
-This is the third instance of one mistake: D59 fixed the indexing manager building an
-`/admin` prefix by hand, and the rules form doing the same. A link is only as migrated
-as the route that answers it, and neither the census nor the nav tests read links. A
-guard that walked every route a page can construct would have caught all three.
-
 ## IX. Cross-cutting decisions & restrictions
 
 These constrain every task above:

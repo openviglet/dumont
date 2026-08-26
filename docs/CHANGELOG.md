@@ -459,6 +459,7 @@
   content-type-routed model, and a monolithic (Insper-shaped) extractor through sequential-vs-parallel
   extraction over one shared instance, asserting identical attribute maps — and proves the harness catches a
   deliberately stateful extractor (it diverges under parallel extraction). ↳ Builds on D31, D24.
+- **D60** — two routes added to the bento tree, the two editors moved to the adaptive chrome, and three cases in bento-tree that mount the real app at both addresses
 
 ## Track I — The console adopts the shared bento layer
 

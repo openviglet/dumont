@@ -25,6 +25,8 @@ import IntegrationInstanceEdsSourceListBentoPage from "./pages/bento/integration
 import IntegrationInstanceSourceDetailBentoPage from "./pages/bento/integration.instance.source.detail.bento.page";
 import IntegrationInstanceSourceInferenceBentoPage from "./pages/bento/integration.instance.source.inference.bento.page";
 import IntegrationInstanceSourceListBentoPage from "./pages/bento/integration.instance.source.list.bento.page";
+import IntegrationInstanceSourceModelBentoPage from "./pages/bento/integration.instance.source.model.bento.page";
+import IntegrationInstanceSourceSpecBentoPage from "./pages/bento/integration.instance.source.spec.bento.page";
 import IntegrationInstanceWcSourceDetailBentoPage from "./pages/bento/integration.instance.wc.source.detail.bento.page";
 import IntegrationInstanceWcSourceListBentoPage from "./pages/bento/integration.instance.wc.source.list.bento.page";
 
@@ -60,6 +62,14 @@ export default function BentoRoutes() {
        */}
       <Route path="source">
         <Route index element={<IntegrationInstanceSourceListBentoPage />} />
+        {/*
+         * The two editors behind the AEM detail page (D60). Declared *before* `:sourceId/:tab`
+         * only for legibility — they are three segments deep, so they never competed with it; the
+         * bug was that nothing here matched three segments at all, and a reader who clicked a
+         * model in the shell got a blank page.
+         */}
+        <Route path=":sourceId/specifications/:specIndex" element={<IntegrationInstanceSourceSpecBentoPage />} />
+        <Route path=":sourceId/models/:modelIndex" element={<IntegrationInstanceSourceModelBentoPage />} />
         <Route path=":sourceId" element={<IntegrationInstanceSourceDetailBentoPage />} />
         <Route path=":sourceId/:tab" element={<IntegrationInstanceSourceDetailBentoPage />} />
       </Route>
