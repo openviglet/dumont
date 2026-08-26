@@ -488,3 +488,4 @@
 
 ## Track L — Console build, lint and type gates
 
+- **D52** — 56 aliases across 48 declarations are rewritten to relative specifiers after emit and the zip is repacked from the corrected tree; a gate fails on any that survive.

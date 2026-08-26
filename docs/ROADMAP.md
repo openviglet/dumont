@@ -168,15 +168,9 @@ This track has no remaining pending tasks.
 
 ## Track L — Console build, lint and type gates
 
-- 📋 **D52** (deps: —) **the emitted remote declarations import a path alias no consumer can resolve** — TypeScript does not rewrite @/ on emit, so a host reads types whose every import fails. → §XIV.1
 - 📋 **D53** (deps: —) **twenty-three surfaces set state inside an effect body, so the rule is a warning there** — The console's standard data load trips it, and eslint.config.js names every file until it does not. → §XIV.2
 - 📋 **D54** (deps: —) **six files type their payloads as any, so nothing downstream of them is checked** — Each is a real backend contract, and the two worst carry it into every caller and every grid. → §XIV.3
 - 📋 **D55** (deps: —) **the build declares a chunking strategy Module Federation discards, and says so every run** — Nothing applies it, and the standing message sits beside the ones a reader should not skip. → §XIV.4
-
-## Done when — D52
-
-- **A consumer resolves every import in the emitted declarations** No @/ remains in
-  mf-types, and the entry declarations name relative or package specifiers only.
 
 ## Done when — D53
 

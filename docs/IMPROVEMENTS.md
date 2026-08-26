@@ -78,23 +78,6 @@ These constrain every task above:
 
 ## XIV Console build, lint and type gates
 
-### XIV.1 Types that arrive unreadable (D52)
-
-D49 made the four remotes emit declarations for the first time. They are not yet usable
-by a host: eight imports in them name the `@/` path alias, and TypeScript does not
-rewrite an alias on emit. Every substantial entry carries one — `DumontRoutes` and
-`BentoRoutes` both open with `import "@/lib/axios"`, and `manifest` re-exports
-`resolveIcon` from `@/app/nav.const`.
-
-A consumer without the same `paths` mapping resolves none of them, so the types are
-present and still teach it nothing. That is the same silence D49 was about, one step
-further along: the build is green, the artefact exists, and the boundary is still
-untyped.
-
-The compiled tree beside them holds the real declarations, so the fix is a rewrite to
-relative specifiers at emit — or the six source imports changed, which is smaller but
-only holds until someone writes the next one.
-
 ### XIV.2 The data-load pattern the linter refuses (D53)
 
 Twenty-three surfaces load their data as `useEffect(() => { service.get().then(setX);

@@ -83,6 +83,31 @@ if (missing.length || empty.length) {
   process.exit(1)
 }
 
+/*
+ * D52 — no declaration may import through this project's `@/` alias.
+ *
+ * TypeScript preserves the specifier the source wrote, so an emitted declaration keeps an alias
+ * only this repository can resolve. `scripts/fix-mf-type-aliases.mjs` rewrites them; this is what
+ * says it ran, and what fails if the emitted set grows a file it did not reach.
+ */
+const aliased = []
+for (const entry of readdirSync(TYPES_DIR, { recursive: true })) {
+  const name = String(entry)
+  if (!name.endsWith(".d.ts")) continue
+  const file = join(TYPES_DIR, name)
+  if (/(["'])@\/[^"']+\1/.test(readFileSync(file, "utf8"))) aliased.push(name.replaceAll("\\", "/"))
+}
+
+if (aliased.length) {
+  console.error(
+    `\ncheck-mf-types: ${aliased.length} declaration(s) still import through the "@/" alias,\n` +
+      "which no consumer can resolve. Run `node scripts/fix-mf-type-aliases.mjs`.\n",
+  )
+  for (const name of aliased.slice(0, 10)) console.error(`  ${name}`)
+  if (aliased.length > 10) console.error(`  … and ${aliased.length - 10} more`)
+  process.exit(1)
+}
+
 const compiled = join(TYPES_DIR, "compiled-types")
 const compiledCount = existsSync(compiled) ? readdirSync(compiled, { recursive: true }).length : 0
 console.log(
