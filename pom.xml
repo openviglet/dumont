@@ -82,6 +82,9 @@
                 </executions>
                 <configuration>
                     <generateGitPropertiesFile>false</generateGitPropertiesFile>
+                    <!-- The bundled JGit does not follow a linked worktree's commondir,
+                         so it cannot resolve HEAD when building from a git worktree. -->
+                    <useNativeGit>true</useNativeGit>
                 </configuration>
             </plugin>
             <plugin>
