@@ -189,7 +189,7 @@ is what lets it move back.
 
 - A route belongs in `BentoRoutes.tsx` only once its page has actually moved — the tree must never
   advertise a surface it does not serve.
-- **Every surface in `DUMONT_NAV` has moved** — all sixteen, across both sections, so a reader who
+- **Every surface in `DUMONT_NAV` has moved** — all seventeen, across both sections, so a reader who
   enters the shell stays in it whatever they click. What is still console-only is the surrounding
   app — login, setup, console home, the six admin-settings pages, the three user ones.
   `pnpm run census` prints which page is on which era, and the console tree is untouched — every

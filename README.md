@@ -48,7 +48,7 @@
   - Every screen that configures or monitors a connector is served in the *bento* interface — a
     fixed nav rail, section hubs and a `⌘K` command palette that reaches all of them. Sources and
     their forms, indexing rules and the indexing manager, monitoring, statistics, coverage,
-    double-check, plugins, system info and AI insights.
+    double-check, orphan reports, plugins, system info and AI insights.
   - The previous console is still served at `/admin`, unchanged and complete, so a bookmark into it
     keeps working. Sign-in, first-run setup and the user/group/role screens live there only.
   
