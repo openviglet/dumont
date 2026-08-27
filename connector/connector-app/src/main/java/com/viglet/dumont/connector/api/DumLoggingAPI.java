@@ -60,6 +60,11 @@ public class DumLoggingAPI {
     public static final String CONTENT_ID_FIELD = "contentId";
     public static final String TOTAL_ELEMENTS = "totalElements";
     public static final String TOTAL_PAGES = "totalPages";
+    /**
+     * How many rows the engine could not read (D74). Always present, so a caller never has to
+     * tell "no unreadable rows" apart from "this response does not say".
+     */
+    public static final String UNREADABLE = "unreadable";
     public static final String PAGE = "page";
     public static final String PAGE_SIZE = "pageSize";
     public static final String ENGINE_NONE = "none";
@@ -156,6 +161,7 @@ public class DumLoggingAPI {
         result.put(PAGE_SIZE, pageSize);
         result.put(TOTAL_ELEMENTS, 0L);
         result.put(TOTAL_PAGES, 0);
+        result.put(UNREADABLE, 0);
         return result;
     }
 
@@ -214,22 +220,31 @@ public class DumLoggingAPI {
             List<String> raw = jedis.lrange(redisIndexingKey, 0, -1);
             ObjectMapper mapper = new ObjectMapper();
             List<Map<String, Object>> all = new ArrayList<>(raw.size());
+            int unreadable = 0;
             for (String json : raw) {
-                JsonNode node = mapper.readTree(json);
-                if (!matches(node, CONTENT_ID_FIELD, contentId)
-                        || !matches(node, SOURCE_FIELD, source)
-                        || !matches(node, TRANSACTION_ID_FIELD, transactionId)
-                        || !matches(node, "status", status)
-                        || !matches(node, "resultStatus", resultStatus)
-                        || !containsIgnoringCase(node, "url", url)
-                        || !withinRange(node, from, to)) {
-                    continue;
+                // D74: one row at a time. This parse used to sit under the query's own catch, so
+                // a single row Jackson could not read discarded every row that came before it and
+                // answered an empty page — indistinguishable, from the outside, from a log with
+                // nothing in it.
+                try {
+                    JsonNode node = mapper.readTree(json);
+                    if (matches(node, CONTENT_ID_FIELD, contentId)
+                            && matches(node, SOURCE_FIELD, source)
+                            && matches(node, TRANSACTION_ID_FIELD, transactionId)
+                            && matches(node, "status", status)
+                            && matches(node, "resultStatus", resultStatus)
+                            && containsIgnoringCase(node, "url", url)
+                            && withinRange(node, from, to)) {
+                        all.add(mapper.convertValue(node, Map.class));
+                    }
+                } catch (Exception e) {
+                    unreadable++;
                 }
-                all.add(mapper.convertValue(node, Map.class));
             }
             if ("asc".equalsIgnoreCase(sort)) {
                 Collections.reverse(all);
             }
+            reportUnreadable(unreadable, raw.size());
             int total = all.size();
             int totalPages = (int) Math.ceil((double) total / pageSize);
             int pageStart = Math.min(page * pageSize, total);
@@ -237,10 +252,29 @@ public class DumLoggingAPI {
             result.put(CONTENT, all.subList(pageStart, pageEnd));
             result.put(TOTAL_ELEMENTS, (long) total);
             result.put(TOTAL_PAGES, totalPages);
+            result.put(UNREADABLE, unreadable);
         } catch (Exception e) {
             log.error("Redis indexing log query failed", e);
         }
         return result;
+    }
+
+    /**
+     * Says once, loudly, that part of the log could not be read — and names the likeliest cause.
+     *
+     * <p>
+     * A list written before D73 holds rows carrying the Mongo shell's {@code ISODate("…")}, which
+     * no JSON reader accepts. They stay in the list until it rolls past {@code maxEntries}, so an
+     * upgraded connector reads a log that is part old and part new, and the operator deserves to
+     * be told which part they are missing rather than to infer it from a short count.
+     */
+    private void reportUnreadable(int unreadable, int scanned) {
+        if (unreadable > 0) {
+            log.warn("Indexing log: {} of {} Redis row(s) could not be read and were skipped. "
+                    + "Rows written before 2026.3.6 are not valid JSON; they clear as the list "
+                    + "rolls past its maxEntries, or delete the key to drop them now.",
+                    unreadable, scanned);
+        }
     }
 
     /**

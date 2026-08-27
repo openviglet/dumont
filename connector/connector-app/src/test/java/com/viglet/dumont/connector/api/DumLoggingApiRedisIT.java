@@ -118,6 +118,32 @@ class DumLoggingApiRedisIT {
     }
 
     @Test
+    @DisplayName("a row left over from before D73 costs its own row and nothing else (D74)")
+    void oneUnreadableRowDoesNotEmptyTheLog() {
+        try (Jedis jedis = new Jedis(REDIS.getHost(), REDIS.getMappedPort(6379))) {
+            // Exactly what an upgraded connector finds still sitting in its list: the Mongo shell
+            // notation the serializer used to emit, which no JSON reader accepts.
+            jedis.lpush(KEY, "{\"contentId\":\"c0\",\"date\":ISODate(\"2023-11-14T22:13:20Z\")}");
+        }
+
+        Map<String, Object> result = api.indexingLogging(0, 100, null, null, null, null, null, null,
+                null, null, "desc");
+
+        // The two good rows survive — they used to be discarded along with the bad one.
+        assertThat(result).containsEntry("totalElements", 2L);
+        assertThat((List<?>) result.get("content")).hasSize(2);
+        // And the caller is told what it is missing rather than inferring it from a short count.
+        assertThat(result).containsEntry("unreadable", 1);
+    }
+
+    @Test
+    @DisplayName("a listing with nothing wrong in it still says so")
+    void aCleanListingReportsNoUnreadableRows() {
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, null, null, null,
+                "desc")).containsEntry("unreadable", 0);
+    }
+
+    @Test
     @DisplayName("a row the appender actually wrote can be read back at all (D73)")
     void readsBackARowTheAppenderWrote() {
         // The seed goes through the same serializer the appender uses. While it emitted

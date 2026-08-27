@@ -242,6 +242,7 @@
 - **D71** — A DumJobTrail rides on each item across the queue and is stripped before indexing, and the six strategy call sites that held a session and discarded it now pass it, so every status names its source.
 - **D72** — The indexing log filters by source and transactionId on both the Mongo and Redis engines, and a row written before the trail existed is returned unfiltered rather than dropped.
 - **D73** — The Redis engine honours all seven filters. It was returning nothing at all: the shared serializer emitted Mongo shell ISODate, which no JSON reader accepts, so every query failed and answered empty.
+- **D74** — The Redis parse moved inside the loop, so a row Jackson cannot read costs its own row and nothing else; the response carries an unreadable count and a warning names pre-2026.3.6 rows as the cause.
 
 ## Track F — Enrichment & semantics
 
