@@ -59,6 +59,10 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
+## Track E — Data quality & trust
+
+- 📋 **D71** (deps: D69 ✅) **The indexing log loses the source at the queue boundary** — The queue files RECEIVED_AND_SENT_TO_TURING with no source and no transaction id, so a document filtered by source is queued and never delivered and a run cannot be followed past the queue. → §XXVII
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -98,6 +102,12 @@ This track has no remaining pending tasks.
 This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
+
+## Done when — D71
+
+- **A document's log names the same source at every status** A test drives one document
+  through queue and delivery and asserts the source and transaction id on the
+  RECEIVED_AND_SENT_TO_TURING row match the SENT_TO_QUEUE row before it.
 
 ## Non-goals (do NOT add as tasks)
 
