@@ -33,6 +33,7 @@ import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
+import com.viglet.dumont.connector.persistence.model.DumIndexOrphanReportModel;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,10 +63,12 @@ import lombok.extern.slf4j.Slf4j;
  * repairs are additive — the worst case is a document indexed twice.
  *
  * <p>
- * Orphans are <strong>reported, never deleted</strong>. Deleting index documents on the strength of
- * one discovery pass is the failure the standalone-finish guards (D33, D34) exist to prevent: a
- * source blip that under-reports ids would take live content out of the index. Naming them is what
- * this task owes; removing them is a destructive capability that needs its own decision.
+ * Orphans are <strong>never deleted here</strong>. Deleting index documents on the strength of one
+ * discovery pass is the failure the standalone-finish guards (D33, D34) exist to prevent: a source
+ * blip that under-reports ids would take live content out of the index. The set is instead handed
+ * to {@link DumIndexOrphanService}, which writes it down for an operator to review and apply
+ * (roadmap <strong>D68</strong>) — the decision stays deliberate, and the evidence is readable and
+ * dated before anything is removed.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.6
@@ -80,13 +83,16 @@ public class DumIndexAuditService {
             DumIndexingStatus.INDEXED,
             DumIndexingStatus.FINISHED);
 
-    /** What one source's index comparison found. */
+    /**
+     * What one source's index comparison found. {@code orphanReportId} names the review the
+     * orphans were written into (D68), and is {@code null} when the pass found none.
+     */
     public record IndexAuditReport(String source, String site, int indexed, int missing, int stale,
-            int orphaned, int queued, boolean comparable) {
+            int orphaned, int queued, boolean comparable, Integer orphanReportId) {
 
         /** A report the backend could not produce — no difference should be acted on. */
         public static IndexAuditReport notComparable(String source, String site) {
-            return new IndexAuditReport(source, site, 0, 0, 0, 0, 0, false);
+            return new IndexAuditReport(source, site, 0, 0, 0, 0, 0, false, null);
         }
 
         public boolean hasDifferences() {
@@ -96,13 +102,15 @@ public class DumIndexAuditService {
 
     private final DumConnectorIndexingService indexingService;
     private final DumIndexingPlugin indexingPlugin;
+    private final DumIndexOrphanService orphanService;
     private final boolean enabled;
 
     public DumIndexAuditService(DumConnectorIndexingService indexingService,
-            DumIndexingPlugin indexingPlugin,
+            DumIndexingPlugin indexingPlugin, DumIndexOrphanService orphanService,
             @Value("${dumont.audit.index.enabled:true}") boolean enabled) {
         this.indexingService = indexingService;
         this.indexingPlugin = indexingPlugin;
+        this.orphanService = orphanService;
         this.enabled = enabled;
     }
 
@@ -155,9 +163,15 @@ public class DumIndexAuditService {
         List<String> orphaned = byId.keySet().stream().filter(id -> !sourceIds.contains(id)).toList();
 
         int queued = queueForRepair(source, provider, site, locale, missing, stale);
-        report(source, site, indexed.size(), missing, stale, orphaned, queued);
+        // D68: the ghosts go to a review, not to a delete — and an agreeing pass retracts whatever
+        // the previous one recorded, so a report only ever describes the latest evidence.
+        Integer orphanReportId = orphanService
+                .record(source, provider, site, locale, orphaned)
+                .map(DumIndexOrphanReportModel::getId)
+                .orElse(null);
+        report(source, site, indexed.size(), missing, stale, orphaned, queued, orphanReportId);
         return new IndexAuditReport(source, site, indexed.size(), missing.size(), stale.size(),
-                orphaned.size(), queued, true);
+                orphaned.size(), queued, true, orphanReportId);
     }
 
     /**
@@ -185,7 +199,7 @@ public class DumIndexAuditService {
     }
 
     private void report(String source, String site, int indexed, List<String> missing,
-            List<String> stale, List<String> orphaned, int queued) {
+            List<String> stale, List<String> orphaned, int queued, Integer orphanReportId) {
         if (missing.isEmpty() && stale.isEmpty() && orphaned.isEmpty()) {
             log.info("Index audit for source '{}' site '{}': {} document(s), index agrees with "
                     + "the source", source, site, indexed);
@@ -197,11 +211,12 @@ public class DumIndexAuditService {
         logIds("missing from the index", source, missing);
         logIds("stale in the index", source, stale);
         logIds("orphaned in the index", source, orphaned);
-        if (!orphaned.isEmpty()) {
-            log.warn("Index audit for source '{}': {} orphaned document(s) left in place — the "
-                    + "audit reports ghosts but never deindexes them; deindex the listed ids "
-                    + "deliberately once you have confirmed they are gone from the source",
-                    source, orphaned.size());
+        if (!orphaned.isEmpty() && orphanReportId != null) {
+            log.warn("Index audit for source '{}': {} orphaned document(s) left in place and "
+                    + "recorded as orphan report {} — review it under "
+                    + "/api/v2/connector/orphans/{} and apply it once you have confirmed the ids "
+                    + "are gone from the source", source, orphaned.size(), orphanReportId,
+                    orphanReportId);
         }
     }
 

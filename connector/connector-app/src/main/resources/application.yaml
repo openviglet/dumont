@@ -39,6 +39,12 @@ dumont:
       # staying silently wrong. Orphans (in the index, gone from the source) are reported, never
       # deleted. Requires a backend that can enumerate its index — Turing does.
       enabled: true
+      # D68: how long an orphan report stays applicable (ISO-8601 duration). The audit writes the
+      # ghosts it found into a report an operator reviews and applies through
+      # /api/v2/connector/orphans; applying evidence a later reindex has overtaken would delete
+      # live content, so an aged report is refused and a fresh audit must re-establish it.
+      # PT0S or below switches expiry off.
+      orphanTtl: PT24H
   dependencies.enabled: false
   reactive.indexing: false
   reactive.parallelism: 10

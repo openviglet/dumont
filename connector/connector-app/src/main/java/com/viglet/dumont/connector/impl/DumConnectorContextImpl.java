@@ -20,10 +20,13 @@ import static com.viglet.turing.client.sn.TurSNConstants.ID_ATTR;
 import static com.viglet.turing.client.sn.TurSNConstants.SOURCE_APPS_ATTR;
 import static com.viglet.turing.client.sn.job.TurSNJobAction.DELETE;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -231,19 +234,48 @@ public class DumConnectorContextImpl implements DumConnectorContext {
                 dumConnectorIndexing.getLocale(),
                 session.getTransactionId());
 
+        createDeleteJob(session, dumConnectorIndexing.getObjectId(),
+                dumConnectorIndexing.getSites(), dumConnectorIndexing.getLocale());
+    }
+
+    /**
+     * The one place a delete job is built, so every deindex — the one a finished run performs and
+     * the deliberate one an operator applies (D68) — carries the same attributes and travels the
+     * same queue.
+     */
+    private void createDeleteJob(DumConnectorSession session, String objectId, List<String> sites,
+            Locale locale) {
         Map<String, Object> attributes = new HashMap<>();
-        attributes.put(ID_ATTR, dumConnectorIndexing.getObjectId());
+        attributes.put(ID_ATTR, objectId);
         attributes.put(SOURCE_APPS_ATTR, session.getProviderName());
 
-        TurSNJobItem deleteJobItem = new TurSNJobItem(
-                DELETE,
-                dumConnectorIndexing.getSites(),
-                dumConnectorIndexing.getLocale(),
-                attributes);
+        TurSNJobItem deleteJobItem = new TurSNJobItem(DELETE, sites, locale, attributes);
 
         // Use addDeferred so a large deindex list never triggers an auto-flush
         // while the source's write lock is held. finishIndexing flushes
         // explicitly after releasing the lock.
         batchProcessor.addDeferred(deleteJobItem);
+    }
+
+    /**
+     * Deindexes ids the caller already decided on (roadmap <strong>D68</strong>) — an audit's
+     * orphan report an operator applied. Unlike {@link #finishIndexing}, nothing here is inferred
+     * from what a run did or did not touch: the set arrives named, and every id in it becomes the
+     * same delete job the run-end deindex builds.
+     */
+    @Override
+    public int deIndexById(DumConnectorSession session, Collection<String> objectIds,
+            List<String> sites) {
+        if (objectIds == null || objectIds.isEmpty() || sites == null || sites.isEmpty()) {
+            return 0;
+        }
+        List<String> ids = objectIds.stream().filter(Objects::nonNull).distinct().toList();
+        ids.forEach(objectId -> {
+            log.info("DeIndex {} object on demand ({} - {} - {}: {})", objectId,
+                    session.getSource(), sites, session.getLocale(), session.getTransactionId());
+            createDeleteJob(session, objectId, sites, session.getLocale());
+        });
+        batchProcessor.flush(session);
+        return ids.size();
     }
 }

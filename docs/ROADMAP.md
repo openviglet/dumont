@@ -99,8 +99,6 @@ This track has no remaining pending tasks.
 
 ## Track E — Data quality & trust
 
-- 📋 **D68** (deps: —) **A ghost the audit names cannot be removed** — D64 reports documents left in the index after they leave the source but never deindexes them, and the connector offers no supported way to act on that list. → §XXIV
-
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
 ## Non-goals (do NOT add as tasks)

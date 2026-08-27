@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.commons;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
@@ -36,6 +37,25 @@ public interface DumConnectorContext {
      */
     default void provisionSchema(DumIndexingSchema schema) {
         // No backend to declare to.
+    }
+
+    /**
+     * Deindexes an explicitly named set of ids (roadmap <strong>D68</strong>), so a deliberate
+     * repair — an operator applying an audit's orphan report — goes through the same delete job and
+     * the same queue as the deindex a finished run performs, instead of deleting behind the
+     * connector's back and leaving the ledger describing documents the index no longer holds.
+     *
+     * <p>
+     * A no-op by default: a context that never owned a queue has nothing to send.
+     *
+     * @param session   the source, provider and locale to stamp on the delete jobs
+     * @param objectIds the ids to remove
+     * @param sites     the sites to remove them from
+     * @return how many delete jobs were queued
+     */
+    default int deIndexById(DumConnectorSession session, Collection<String> objectIds,
+            List<String> sites) {
+        return 0;
     }
 
     List<DumConnectorIndexing> getIndexingItem(String objectId, String source, String provider);

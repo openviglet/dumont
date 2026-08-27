@@ -75,29 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XXIV Naming a ghost is not removing it (D68)
-
-D64 made the audit report three differences and repair two of them. The third, a
-document still in the index after leaving the source, is logged with its id and left
-alone.
-
-That was the right default. An orphan is only an orphan if the discovery pass that
-failed to mention it was complete, and a pass that under-reports — a flaky gateway, a
-paginated listing that returned early — makes every unlisted id look like a ghost.
-Deleting on that evidence is the failure D33 and D34 exist to prevent, one step further:
-not skipping a deindex sweep but performing one against a lie.
-
-But the operator is left with a warning naming ids and no supported way to act on it.
-The repair is a manual deindex per id through the indexing manager, which is the state
-D64 was meant to improve on.
-
-What is missing is a deliberate step, not an automatic one: the audit persists the
-orphan set it found, and an operator reviews and applies it. That shape is what makes
-deletion safe — the evidence is dated and readable before anything is removed, and a
-source that was merely unreachable yields a report an operator recognises and discards.
-
-Two constraints. The apply path must reuse the deindex the connector already owns rather
-than delete behind its back, so ledger and index stay in step. And an orphan set must
-expire: applying a week-old report to a source since reindexed would delete live
-content.

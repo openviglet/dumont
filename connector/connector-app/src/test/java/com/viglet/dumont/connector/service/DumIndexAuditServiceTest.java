@@ -41,6 +41,7 @@ import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
+import com.viglet.dumont.connector.persistence.model.DumIndexOrphanReportModel;
 import com.viglet.dumont.connector.service.DumIndexAuditService.IndexAuditReport;
 
 /** The audit's third comparison: source and ledger against the index (roadmap D64). */
@@ -57,15 +58,19 @@ class DumIndexAuditServiceTest {
     private DumConnectorIndexingService indexingService;
     @Mock
     private DumIndexingPlugin indexingPlugin;
+    @Mock
+    private DumIndexOrphanService orphanService;
 
     private DumIndexAuditService service;
 
     @BeforeEach
     void setUp() {
-        service = new DumIndexAuditService(indexingService, indexingPlugin, true);
+        service = new DumIndexAuditService(indexingService, indexingPlugin, orphanService, true);
         when(indexingService.getAllBySourceAndProvider(SOURCE, PROVIDER)).thenReturn(List.of());
         when(indexingService.existsUnprocessedByObjectIdAndSourceAndProvider(anyString(),
                 anyString(), anyString())).thenReturn(false);
+        when(orphanService.record(anyString(), anyString(), anyString(), any(), any()))
+                .thenReturn(Optional.empty());
     }
 
     private void indexHolds(DumIndexInventoryEntry... entries) {
@@ -117,6 +122,28 @@ class DumIndexAuditServiceTest {
         assertThat(report.queued()).isZero();
         verify(indexingService, never()).createUnprocessedRecord(anyString(), anyString(),
                 anyString(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("the orphan set goes to the review, and the audit reports which one (D68)")
+    void aGhostIsHandedToTheReview() {
+        indexHolds(new DumIndexInventoryEntry("/a", 1L, "c1"),
+                new DumIndexInventoryEntry("/gone", 1L, "c9"));
+        when(orphanService.record(SOURCE, PROVIDER, SITE, Locale.US, List.of("/gone")))
+                .thenReturn(Optional.of(new DumIndexOrphanReportModel().setId(7)));
+
+        assertThat(auditOf(List.of("/a")).orphanReportId()).isEqualTo(7);
+        verify(orphanService).record(SOURCE, PROVIDER, SITE, Locale.US, List.of("/gone"));
+    }
+
+    @Test
+    @DisplayName("an agreeing pass still calls the review, so a stale report is retracted (D68)")
+    void anAgreeingPassRetractsAStandingReport() {
+        indexHolds(new DumIndexInventoryEntry("/a", 1L, "c1"));
+
+        assertThat(auditOf(List.of("/a")).orphanReportId()).isNull();
+        // Empty, not skipped: the service reads "no orphans" as a retraction of what it holds.
+        verify(orphanService).record(SOURCE, PROVIDER, SITE, Locale.US, List.of());
     }
 
     @Test
@@ -216,7 +243,8 @@ class DumIndexAuditServiceTest {
     @Test
     @DisplayName("switched off, or with no site, the comparison does not run")
     void disabledOrSitelessDoesNothing() {
-        DumIndexAuditService off = new DumIndexAuditService(indexingService, indexingPlugin, false);
+        DumIndexAuditService off = new DumIndexAuditService(indexingService, indexingPlugin,
+                orphanService, false);
         assertThat(off.audit(SOURCE, PROVIDER, Set.of(SITE), List.of("/a"), Locale.US)).isEmpty();
         assertThat(service.audit(SOURCE, PROVIDER, Set.of(), List.of("/a"), Locale.US)).isEmpty();
         verify(indexingPlugin, never()).inventory(anyString(), anyString());
