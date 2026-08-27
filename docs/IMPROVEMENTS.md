@@ -75,3 +75,29 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XXXI A failure that looks like an absence (D75)
+
+D74 fixed this one row at a time: a row that cannot be read costs its own row and is
+counted, not the whole query. One level up, the same shape survives untouched.
+
+Both engines wrap their query in `catch (Exception e)`, log it server-side, and return
+the `emptyPage` they started with. An unreachable Mongo, a refused Redis connection, a
+wrong URI, an expired credential — every one answers HTTP 200 with `content: []` and
+`totalElements: 0`. That is character for character what a log with nothing in it
+answers.
+
+An operator reading an empty screen concludes the connector indexed nothing. The truth
+may be that the connector indexed everything and the store is down. Nothing on the
+response distinguishes them, and the `status` endpoint does not help: its `enabled` is
+read from configuration, so it reports the engine a property names, not one that
+answers.
+
+This is the defect D74 named, at the query rather than the row: a failure
+indistinguishable from an absence. It is also why the serializer bug went unnoticed for
+so long — the engine had been answering empty since it was written, and empty is what a
+quiet log looks like.
+
+The response must say which it is. A store the endpoint could not reach is a 503, not an
+empty page; and `status` should answer from a ping rather than from a property, so "is
+the log on" means "does it answer" instead of "did someone set the flag".
