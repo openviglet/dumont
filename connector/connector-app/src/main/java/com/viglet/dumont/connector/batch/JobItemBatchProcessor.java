@@ -28,6 +28,7 @@ import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.logging.DumJobTrail;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 
 import lombok.extern.slf4j.Slf4j;
@@ -145,6 +146,9 @@ public class JobItemBatchProcessor {
             // D69: the session that produced the item, never the one that asked for the drain —
             // otherwise a concurrent run's rows are filed under whoever happened to flush.
             setSuccessStatus(buffered.turSNJobItem(), buffered.session(), SENT_TO_QUEUE);
+            // D71: and the same pair travels with it, because the session does not cross the
+            // queue and the listener has to file its own row under the same source.
+            DumJobTrail.stamp(buffered.turSNJobItem(), buffered.session());
             itemsToSend.add(buffered.turSNJobItem());
         }
         jmsMessagingTemplate.convertAndSend(CONNECTOR_INDEXING_QUEUE, itemsToSend);

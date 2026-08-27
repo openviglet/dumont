@@ -16,9 +16,13 @@
 
 package com.viglet.dumont.connector.queue;
 
+import static com.viglet.dumont.commons.indexing.DumIndexingStatus.RECEIVED_AND_SENT_TO_TURING;
+import static com.viglet.dumont.commons.indexing.DumIndexingStatus.SENT_TO_QUEUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mockStatic;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,8 +30,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 
+import com.viglet.dumont.commons.logging.DumLoggingIndexing;
+import com.viglet.dumont.commons.logging.DumLoggingIndexingLog;
+import com.viglet.dumont.connector.commons.DumConnectorSession;
+import com.viglet.dumont.connector.commons.logging.DumConnectorLoggingUtils;
+import com.viglet.dumont.connector.commons.logging.DumJobTrail;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
@@ -86,6 +98,54 @@ class DumConnectorProcessQueueTest {
                 "absent field must not reach the backend as an empty string (facet pollution)");
         assertFalse(indexed.getAttributes().containsKey("tags"),
                 "empty collection must be omitted, not indexed");
+    }
+
+    @Test
+    @DisplayName("a document's log names the same source at every status it passes through (D71)")
+    void theTrailSurvivesTheQueueAndComesOffBeforeIndexing() {
+        CapturingPlugin plugin = new CapturingPlugin();
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin);
+        DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
+
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("id", "c1");
+        attributes.put("title", "Algorithms");
+        TurSNJobItem jobItem =
+                new TurSNJobItem(TurSNJobAction.CREATE, List.of("Sample"), Locale.US, attributes);
+
+        // What the batch processor does on its way out: file the SENT_TO_QUEUE row under the
+        // session, and stamp the same pair onto the item so the far side can file its own.
+        DumLoggingIndexing sent = rowFiledBy(
+                () -> DumConnectorLoggingUtils.setSuccessStatus(jobItem, session, SENT_TO_QUEUE));
+        DumJobTrail.stamp(jobItem, session);
+
+        TurSNJobItems items = new TurSNJobItems();
+        items.add(jobItem);
+
+        DumLoggingIndexing delivered = rowFiledBy(() -> queue.receiveAndSendToDumont(items));
+
+        // The property, stated the way the roadmap's criterion states it.
+        assertEquals(sent.getSource(), delivered.getSource());
+        assertEquals(sent.getTransactionId(), delivered.getTransactionId());
+        assertEquals("wknd", delivered.getSource());
+        assertEquals(RECEIVED_AND_SENT_TO_TURING, delivered.getStatus());
+
+        // And the trail is bookkeeping, so it never becomes a field on the indexed document.
+        TurSNJobItem indexed = itemById(plugin.indexed, "c1");
+        assertFalse(indexed.getAttributes().containsKey(DumJobTrail.SOURCE));
+        assertFalse(indexed.getAttributes().containsKey(DumJobTrail.TRANSACTION_ID));
+        assertEquals("Algorithms", indexed.getAttributes().get("title"));
+    }
+
+    /** Runs `write` with the indexing log stubbed, and hands back the last row it filed. */
+    private static DumLoggingIndexing rowFiledBy(Runnable write) {
+        ArgumentCaptor<DumLoggingIndexing> rows =
+                ArgumentCaptor.forClass(DumLoggingIndexing.class);
+        try (MockedStatic<DumLoggingIndexingLog> logged = mockStatic(DumLoggingIndexingLog.class)) {
+            write.run();
+            logged.verify(() -> DumLoggingIndexingLog.setStatus(rows.capture()), atLeastOnce());
+        }
+        return rows.getValue();
     }
 
     @Test

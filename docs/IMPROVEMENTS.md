@@ -75,29 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XXVII The half of the trail the queue writes (D71)
-
-D69 fixed the half of the trail the connector writes: a `SENT_TO_QUEUE` row now names
-the source that produced the item rather than whoever flushed the buffer. The next row
-in the same document's history names nobody at all.
-
-`DumConnectorProcessQueue` files `RECEIVED_AND_SENT_TO_TURING` through the two-argument
-`setSuccessStatus`, which builds a `DumLoggingIndexing` with no `source` and no
-`transactionId` — not the wrong ones, absent ones. So a reader filtering the indexing
-log by source sees a document queued and never sees it delivered, and a reader following
-a transaction id sees the run stop at the queue boundary.
-
-The session carries both, and it does not cross that boundary: the JMS message is a
-`TurSNJobItems`, and an item carries sites, locale, checksum and a `sourceApps`
-attribute holding the *provider* — never the source name. This is not a missed argument
-at the call site; there is nothing there to pass.
-
-That makes the design question the task: what travels with a batch. An envelope beside
-the items is the obvious shape and the wrong one — D69 established that a drain spans
-sessions, so one envelope per message would name the wrong source again. Which leaves it
-per item: a reserved attribute the queue reads and the indexing plugins ignore, at the
-cost of putting connector bookkeeping inside the payload.
-
-The property to prove is one a test can state without ambiguity: a document's log
-history names the same source at every status it passes through.

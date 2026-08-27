@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 import com.viglet.dumont.connector.commons.ground.DumGrounding;
+import com.viglet.dumont.connector.commons.logging.DumJobTrail;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
@@ -60,11 +61,19 @@ public class DumConnectorProcessQueue {
         }
         log.info("Processing job from queue with provider: {}", indexingPlugin.getProviderName());
         for (TurSNJobItem turSNJobItem : turSNJobItems) {
+            // D71: read the trail before it is stripped. The session does not cross the queue, so
+            // this is the only way this row can name the same source the SENT_TO_QUEUE row did.
+            String source = DumJobTrail.source(turSNJobItem);
+            String transactionId = DumJobTrail.transactionId(turSNJobItem);
             // Grounding contract, enforced end-to-end (roadmap D03): no matter how a connector
             // assembled its attributes, an absent field must not reach the backend as an empty
             // value and pollute facets. The structured SPI already grounds at record-build time;
             // this is the single boundary that also covers the loose-map connectors.
-            turSNJobItem.setAttributes(DumGrounding.groundAttributes(turSNJobItem.getAttributes()));
+            //
+            // The trail comes off in the same replacement (D71) — it is connector bookkeeping, and
+            // anything still on the item here becomes a field on the indexed document.
+            turSNJobItem.setAttributes(
+                    DumGrounding.groundAttributes(DumJobTrail.strip(turSNJobItem.getAttributes())));
             if (!locales.contains(turSNJobItem.getLocale())) {
                 locales.add(turSNJobItem.getLocale());
             }
@@ -74,7 +83,8 @@ public class DumConnectorProcessQueue {
                 }
             });
             log.debug("Processing {} job item", turSNJobItem.getId());
-            setSuccessStatus(turSNJobItem, DumIndexingStatus.RECEIVED_AND_SENT_TO_TURING);
+            setSuccessStatus(turSNJobItem, source, transactionId,
+                    DumIndexingStatus.RECEIVED_AND_SENT_TO_TURING, null);
         }
         if (locales.isEmpty()) {
             turSNJobItems.add(new TurSNJobItem(TurSNJobAction.COMMIT, sites));

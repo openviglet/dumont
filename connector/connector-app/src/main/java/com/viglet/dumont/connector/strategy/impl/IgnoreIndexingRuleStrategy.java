@@ -118,7 +118,7 @@ public class IgnoreIndexingRuleStrategy implements JobProcessingStrategy {
                 jobItem.standalone());
 
         batchProcessor.add(deleteJobItem);
-        setSuccessStatus(jobItem.turSNJobItem(), DEINDEXED);
+        setSuccessStatus(jobItem, DEINDEXED);
     }
 
     private boolean matchesIgnoreRule(TurSNJobItem turSNJobItem,

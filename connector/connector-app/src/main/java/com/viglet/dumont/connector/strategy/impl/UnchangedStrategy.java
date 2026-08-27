@@ -60,7 +60,7 @@ public class UnchangedStrategy implements JobProcessingStrategy {
         indexingService.update(jobItem, indexingModelList, PREPARE_UNCHANGED);
 
         // Set success status
-        setSuccessStatus(jobItem.turSNJobItem(), PREPARE_UNCHANGED);
+        setSuccessStatus(jobItem, PREPARE_UNCHANGED);
 
         // Note: unchanged items are NOT added to the batch processor
         // They don't need to be sent to the queue
