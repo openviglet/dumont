@@ -105,8 +105,6 @@ This track has no remaining pending tasks.
 
 - 📋 **D67** (deps: —) **Content Fragments and Assets stay unreachable on the publish tier** — D61's delivery strategy reads pages through .model.json, so a Cloud Service source of fragments or assets still has to be indexed through author. → §XXIII
 
-## Track M — Console effect correctness
-
 ## Done when — D67
 
 - **A fragment and an asset source index with no author credential** A Cloud Service
