@@ -146,31 +146,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
-
-> **Objective**: today's AEM mapping offers a declarative *property→field* layer that real
-> deployments abandon — every serious source (e.g. the Insper portal,
-> `DumAemExtInsperModelJson`) drops it for a **single monolithic content-extractor** that fuses
-> template routing + component-tree traversal + business derivation + normalization. That
-> god-class is the indexing Achilles' heel: untestable in parts, un-reusable across institutions,
-> schema-less, and able to break **silently**. The mismatch is structural — AEM content is a
-> *tree of typed components grouped by content type*, not a bag of JCR properties. This track
-> realigns the AEM extraction model to that reality, **building on the contract D21 establishes**
-> and reusing the connector's crawl/auth/delta/navigator untouched (it redesigns the *mapping*
-> layer, it does not rip out the connector). The component shapes recur across institutions, so
-> the endgame ties into the D19 recipe library for multi-tenant reuse.
-
-> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D24** AEM component-extractor SPI · **D25**
-> Schema-per-content-type + template routing · **D26** Derivations → enrichment chain · **D27**
-> Versioned AEM recipes (component extractors + content-type schemas as versioned, parameterized
-> artifacts shared across institutions) · **D32** AEM extractor concurrency contract +
-> statelessness gate (stateless-during-extraction contract documented on the
-> `DumAemComponentExtractor` SPI + a parallel-vs-sequential parity test).
-
-This track has no remaining pending tasks.
-
----
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

@@ -10,7 +10,7 @@
 ## 🚀 Features 
 
 - **Multi-Source Connectors**: Connect and index content from various data sources
-  - Adobe Experience Manager (AEM)
+  - Adobe Experience Manager (AEM) — on-premise, AMS and as a Cloud Service
   - Relational Databases (JDBC)
   - File Systems
   - Web Crawlers
@@ -141,7 +141,10 @@ dumont:
 
 ### AEM Connector
 
-Index content from Adobe Experience Manager to your search engine.
+Index content from Adobe Experience Manager to your search engine. Each source picks the tier it reads: the author
+servlets (`infinity.json`, QueryBuilder) for on-premise and AMS, or the publish delivery APIs (`model.json`) for AEM
+as a Cloud Service, where the author servlets are not served. Extraction is declared per content type, optionally
+from a versioned recipe shared across sites.
 
 ```bash
 cd aem/aem-plugin-sample
