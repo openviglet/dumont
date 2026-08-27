@@ -38,8 +38,9 @@
   Per-field coverage is compared between runs, so a selector that stops matching raises a drift flag
   naming the field. Every published field carries where its value came from. An incomplete run never
   de-indexes what it did not reach. And a scheduled audit compares the source *and* the connector's
-  ledger against the index itself, reporting documents that never landed, went stale, or linger
-  after leaving the source.
+  ledger against the index itself: documents that never landed or went stale are requeued, and one
+  still indexed after leaving the source is written into a dated report you review and apply —
+  never deleted on the strength of a single discovery pass.
 
 - **Web Console**: Configure sources, launch indexing and watch it run, in English or Portuguese.
   Built from the same component library as Viglet Turing ES and Viglet Shio, and mountable inside

@@ -97,8 +97,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track E — Data quality & trust
-
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
 ## Non-goals (do NOT add as tasks)
