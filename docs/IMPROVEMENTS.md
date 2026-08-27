@@ -76,33 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XXI An exported source is not an importable one (D65)
-
-`DumAemExchangeProcess` writes an export from a hand-built `DumAemSourceExchange`, and
-that builder sets nine fields: id, endpoint, attributes, defaultLocale, localeClass,
-indexConditionClass, authorSNSite, publishSNSite, author, publish and name.
-
-The import side, `setSource`, reads seventeen. Everything the two do not have in common
-is silently lost: `rootPath` and `contentType`, which are what scopes a source at all;
-`username` and `password`; `authorURLPrefix` and `publishURLPrefix`; `oncePattern`;
-`deltaClass` and `dependencyClass`; and the `localePaths` and `models` collections the
-exchange bean declares and the exporter never fills.
-
-So an export is not a backup and not a way to move a source between instances. Importing
-one produces a source with a name, an endpoint and a field list, no scope, no
-credentials, and no model bindings — it does not fail, it indexes nothing, and the
-operator has to rediscover by hand what the original was configured with.
-
-The gap is invisible because both halves compile and the round trip appears to work: the
-source list shows the imported source, and the failure only surfaces on the first
-indexing run.
-
-The fix is to make the two directions one declaration rather than two lists that drifted
-— the exporter should not be able to omit a field the importer reads. Whatever shape
-that takes, the test is a round trip: export a fully configured source, import it into
-an empty instance, and assert the two entities are equal field for field, including the
-locale paths and the models.
-
 ## XXII The last synchronous write in an effect (D66)
 
 `pnpm run lint` exits 1. `useConnectorProvider` writes state synchronously twice inside

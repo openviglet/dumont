@@ -43,6 +43,7 @@ public class DumAemSourceExchange {
     private String password;
     private String rootPath;
     private String contentType;
+    private String subType;
     private boolean author;
     private boolean publish;
     private String authorSNSite;

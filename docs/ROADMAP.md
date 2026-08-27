@@ -75,8 +75,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-- 📋 **D65** (deps: —) **An exported AEM source cannot be imported back** — DumAemExchangeProcess omits rootPath, contentType, credentials, URL prefixes and models on export, so the imported source has no scope and indexes nothing. → §XXI
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -126,12 +124,6 @@ This track has no remaining pending tasks.
 ## Track M — Console effect correctness
 
 - 📋 **D66** (deps: —) **The console lint gate is red** — use-connector-provider.ts writes state synchronously inside an effect, so pnpm run lint exits 1 on a gate the project documents as having no exemptions. → §XXII
-
-## Done when — D65
-
-- **A round trip is field-for-field equal** Export a fully configured source, import it
-  into an empty instance, and the two entities match on every field including
-  localePaths and models.
 
 ## Done when — D67
 

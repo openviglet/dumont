@@ -179,6 +179,7 @@
   source-inference wizard gains a "Dry-run preview" action + a coverage / diff panel. Shares its
   coverage metric with D15. Proven by `DumStructuredPreviewerTest`,
   `DumStructuredPreviewPluginTest`.
+- **D65** — One MapStruct mapper now declares the exported field list for both directions with unmappedTargetPolicy=ERROR, so an unmapped field fails the build instead of vanishing from the export.
 
 ## Track E — Data quality & trust
 

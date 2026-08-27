@@ -18,6 +18,7 @@
 package com.viglet.dumont.connector.plugin.aem.export;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -44,9 +45,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceExchangeMapperImpl;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -103,7 +107,10 @@ class DumAemExchangeProcessTest {
                 dumAemModelRepository,
                 dumAemTargetAttributeRepository,
                 dumAemSourceAttributeRepository,
-                dumAemSourceLocalePathRepository);
+                dumAemSourceLocalePathRepository,
+                // The real generated mapper: D65's guarantee is that this is the only place the
+                // exported field list is declared, so mocking it would test nothing.
+                new DumAemSourceExchangeMapperImpl());
     }
 
     @Nested
@@ -245,6 +252,50 @@ class DumAemExchangeProcessTest {
 
             // Then
             verify(dumAemSourceRepository, times(1)).save(any());
+        }
+
+        @Test
+        @DisplayName("D65: an imported source keeps the scope and credentials it was exported with")
+        void shouldImportTheFieldsTheOldExportDropped() {
+            // Given a source as a full export now carries it.
+            DumAemSourceExchange exported = DumAemSourceExchange.builder()
+                    .id("src-1")
+                    .name("wknd")
+                    .endpoint("http://author.invalid:4502")
+                    .username("admin")
+                    .password("secret")
+                    .rootPath("/content/wknd/en")
+                    .contentType("cq:Page")
+                    .subType("cq:PageContent")
+                    .oncePattern(".*/once/.*")
+                    .authorURLPrefix("http://author.invalid")
+                    .publishURLPrefix("http://publish.invalid")
+                    .deltaClass("com.example.Delta")
+                    .dependencyClass("com.example.Dependency")
+                    .fetchStrategy("DELIVERY")
+                    .deliveryURLPrefix("https://delivery-p1-e1.adobeaemcloud.com")
+                    .build();
+            when(dumAemSourceRepository.findById(any())).thenReturn(Optional.empty());
+            ArgumentCaptor<DumAemSource> saved = ArgumentCaptor.forClass(DumAemSource.class);
+            when(dumAemSourceRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+            // When
+            exchangeProcess.importAemSource(new DumAemExchange(List.of(exported)));
+
+            // Then the imported source can actually index: it has a scope and credentials.
+            DumAemSource imported = saved.getValue();
+            assertEquals("src-1", imported.getId(), "the id travels, so a re-import updates");
+            assertEquals("/content/wknd/en", imported.getRootPath());
+            assertEquals("cq:Page", imported.getContentType());
+            assertEquals("cq:PageContent", imported.getSubType());
+            assertEquals("admin", imported.getUsername());
+            assertEquals("secret", imported.getPassword());
+            assertEquals(".*/once/.*", imported.getOncePattern());
+            assertEquals("http://author.invalid", imported.getAuthorURLPrefix());
+            assertEquals("http://publish.invalid", imported.getPublishURLPrefix());
+            assertEquals("com.example.Delta", imported.getDeltaClass());
+            assertEquals("com.example.Dependency", imported.getDependencyClass());
+            assertEquals("DELIVERY", imported.getFetchStrategy());
         }
 
         @Test

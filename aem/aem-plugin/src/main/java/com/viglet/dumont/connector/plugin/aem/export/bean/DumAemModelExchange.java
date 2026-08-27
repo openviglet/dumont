@@ -34,6 +34,7 @@ import java.util.HashSet;
 @Setter
 public class DumAemModelExchange {
     private String type;
+    private String subType;
     private String className;
     @Builder.Default
     private Collection<DumAemTargetAttrExchange> targetAttrs = new HashSet<>();

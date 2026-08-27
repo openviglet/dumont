@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -40,12 +41,14 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
-import com.viglet.dumont.connector.aem.commons.bean.DumAemFetchStrategy;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemAttribExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemModelExchange;
+import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemSourceAttrExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemSourceExchange;
+import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemSourceLocalePathExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemTargetAttrExchange;
+import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceExchangeMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemAttributeSpecification;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemPluginModel;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
@@ -84,19 +87,77 @@ public class DumAemExchangeProcess {
     private final DumAemTargetAttributeRepository dumAemTargetAttributeRepository;
     private final DumAemSourceAttributeRepository dumAemSourceAttributeRepository;
     private final DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository;
+    private final DumAemSourceExchangeMapper sourceExchangeMapper;
 
     public DumAemExchangeProcess(DumAemSourceRepository dumAemSourceRepository,
             DumAemAttributeSpecificationRepository dumAemAttributeSpecificationRepository,
             DumAemPluginModelRepository dumAemModelRepository,
             DumAemTargetAttributeRepository dumAemTargetAttributeRepository,
             DumAemSourceAttributeRepository dumAemSourceAttributeRepository,
-            DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository) {
+            DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository,
+            DumAemSourceExchangeMapper sourceExchangeMapper) {
         this.dumAemSourceRepository = dumAemSourceRepository;
         this.dumAemAttributeSpecificationRepository = dumAemAttributeSpecificationRepository;
         this.dumAemModelRepository = dumAemModelRepository;
         this.dumAemTargetAttributeRepository = dumAemTargetAttributeRepository;
         this.dumAemSourceAttributeRepository = dumAemSourceAttributeRepository;
         this.dumAemSourceLocalePathRepository = dumAemSourceLocalePathRepository;
+        this.sourceExchangeMapper = sourceExchangeMapper;
+    }
+
+    /**
+     * One source as it travels in an export (roadmap <strong>D65</strong>): every scalar through the
+     * mapper that fails the build when one is added and not mapped, plus the three collections, each
+     * built by its own exchange bean. Nothing here may hand-copy a scalar — that is what drifted.
+     */
+    private DumAemSourceExchange sourceExchange(DumAemSource dumAemSource) {
+        DumAemSourceExchange exchange = sourceExchangeMapper.toExchange(dumAemSource);
+        exchange.setAttributes(attributeExchange(dumAemSource.getAttributeSpecifications()));
+        exchange.setModels(modelExchange(dumAemSource.getModels()));
+        exchange.setLocalePaths(localePathExchange(dumAemSource.getLocalePaths()));
+        return exchange;
+    }
+
+    private Collection<DumAemSourceLocalePathExchange> localePathExchange(
+            Collection<DumAemSourceLocalePath> localePaths) {
+        return localePaths.stream()
+                .map(localePath -> DumAemSourceLocalePathExchange.builder()
+                        .locale(localePath.getLocale())
+                        .path(localePath.getPath())
+                        .build())
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private Collection<DumAemModelExchange> modelExchange(Collection<DumAemPluginModel> models) {
+        return models.stream()
+                .map(model -> DumAemModelExchange.builder()
+                        .type(model.getType())
+                        .subType(model.getSubType())
+                        .className(model.getClassName())
+                        .targetAttrs(targetAttrExchange(model.getTargetAttrs()))
+                        .build())
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private Collection<DumAemTargetAttrExchange> targetAttrExchange(
+            Collection<DumAemTargetAttribute> targetAttrs) {
+        return targetAttrs.stream()
+                .map(targetAttr -> DumAemTargetAttrExchange.builder()
+                        .name(targetAttr.getName())
+                        .sourceAttrs(sourceAttrExchange(targetAttr.getSourceAttrs()))
+                        .build())
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private Collection<DumAemSourceAttrExchange> sourceAttrExchange(
+            Collection<DumAemSourceAttribute> sourceAttrs) {
+        return sourceAttrs.stream()
+                .map(sourceAttr -> DumAemSourceAttrExchange.builder()
+                        .name(sourceAttr.getName())
+                        .className(sourceAttr.getClassName())
+                        .text(sourceAttr.getText())
+                        .build())
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private Collection<DumAemAttribExchange> attributeExchange(
@@ -111,6 +172,9 @@ public class DumAemExchangeProcess {
                 .multiValued(attributeSpecification.isMultiValued())
                 .description(attributeSpecification.getDescription())
                 .facet(attributeSpecification.isFacet())
+                // The import reads facetName back (setFacetName); omitting it here lost every
+                // per-locale facet label on a round trip.
+                .facetName(attributeSpecification.getFacetNames())
                 .build()));
         return attribExchanges;
     }
@@ -139,21 +203,7 @@ public class DumAemExchangeProcess {
             try {
                 mapper.writerWithDefaultPrettyPrinter().writeValue(exportFile,
                         new DumAemExchange(dumAemSources.stream()
-                                .map(dumAemSource -> DumAemSourceExchange.builder()
-                                        .id(dumAemSource.getId())
-                                        .endpoint(dumAemSource.getEndpoint())
-                                        .attributes(attributeExchange(dumAemSource.getAttributeSpecifications()))
-                                        .defaultLocale(dumAemSource.getDefaultLocale())
-                                        .localeClass(dumAemSource.getLocaleClass())
-                                        .indexConditionClass(dumAemSource.getIndexConditionClass())
-                                        .authorSNSite(dumAemSource.getAuthorSNSite())
-                                        .publishSNSite(dumAemSource.getPublishSNSite())
-                                        .author(dumAemSource.isAuthor())
-                                        .publish(dumAemSource.isPublish())
-                                        .fetchStrategy(dumAemSource.getFetchStrategy())
-                                        .deliveryURLPrefix(dumAemSource.getDeliveryURLPrefix())
-                                        .name(dumAemSource.getName())
-                                        .build())
+                                .map(this::sourceExchange)
                                 .toList()));
                 File zipFile = new File(tmpDir.getAbsolutePath().concat(File.separator + folderName + ".zip"));
                 DumCommonsUtils.addFilesToZip(exportDir, zipFile);
@@ -248,6 +298,7 @@ public class DumAemExchangeProcess {
     private @NotNull DumAemPluginModel setModel(DumAemModelExchange model, DumAemSource dumAemSource) {
         return dumAemModelRepository.save(DumAemPluginModel.builder()
                 .type(model.getType())
+                .subType(model.getSubType())
                 .className(model.getClassName())
                 .dumAemSource(dumAemSource)
                 .build());
@@ -300,30 +351,13 @@ public class DumAemExchangeProcess {
                 .build());
     }
 
+    /**
+     * Rebuilds one source from its exported shape (roadmap <strong>D65</strong>). Every scalar comes
+     * from the same mapper the export uses, so the two directions cannot disagree about which fields
+     * travel; the locale paths follow through their own repository.
+     */
     private @NotNull DumAemSource setSource(DumAemSourceExchange dumAemSourceExchange) {
-        DumAemSource dumAemSource = DumAemSource.builder()
-                .endpoint(dumAemSourceExchange.getEndpoint())
-                .authorSNSite(dumAemSourceExchange.getAuthorSNSite())
-                .publishSNSite(dumAemSourceExchange.getPublishSNSite())
-                .defaultLocale(dumAemSourceExchange.getDefaultLocale())
-                .localeClass(dumAemSourceExchange.getLocaleClass())
-                .deltaClass(dumAemSourceExchange.getDeltaClass())
-                .dependencyClass(dumAemSourceExchange.getDependencyClass())
-                .indexConditionClass(dumAemSourceExchange.getIndexConditionClass())
-                .authorURLPrefix(dumAemSourceExchange.getAuthorURLPrefix())
-                .publishURLPrefix(dumAemSourceExchange.getPublishURLPrefix())
-                .fetchStrategy(DumAemFetchStrategy
-                        .from(dumAemSourceExchange.getFetchStrategy()).name())
-                .deliveryURLPrefix(dumAemSourceExchange.getDeliveryURLPrefix())
-                .oncePattern(dumAemSourceExchange.getOncePattern())
-                .username(dumAemSourceExchange.getUsername())
-                .password(dumAemSourceExchange.getPassword())
-                .rootPath(dumAemSourceExchange.getRootPath())
-                .author(dumAemSourceExchange.isAuthor())
-                .publish(dumAemSourceExchange.isPublish())
-                .contentType(dumAemSourceExchange.getContentType())
-                .name(dumAemSourceExchange.getName())
-                .build();
+        DumAemSource dumAemSource = sourceExchangeMapper.toEntity(dumAemSourceExchange);
         dumAemSourceRepository.save(dumAemSource);
         dumAemSourceExchange.getLocalePaths()
                 .forEach(localePath -> dumAemSourceLocalePathRepository.save(DumAemSourceLocalePath.builder()
