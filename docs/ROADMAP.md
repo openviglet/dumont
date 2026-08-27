@@ -61,6 +61,8 @@ This track has no remaining pending tasks.
 
 ## Track E — Data quality & trust
 
+- 📋 **D72** (deps: D71 ✅) **Nothing can ask the indexing log what one source did** — D71 made every row name its source and its run, but the log API filters only by date, status, result status, content id and url, so the two fields the work made correct are the two nobody can query. → §XXVIII
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -100,6 +102,13 @@ This track has no remaining pending tasks.
 This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
+
+## Done when — D72
+
+- **The log answers what one source did and what one run did** GET
+  /api/v2/connector/logging/indexing accepts source and transactionId on both the Mongo
+  and Redis paths, and a row whose source is null is returned unfiltered rather than
+  dropped.
 
 ## Non-goals (do NOT add as tasks)
 
