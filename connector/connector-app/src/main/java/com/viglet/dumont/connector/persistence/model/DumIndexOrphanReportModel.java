@@ -98,6 +98,12 @@ public class DumIndexOrphanReportModel implements Serializable {
     private Locale locale;
     @Column
     private Instant discoveredAt;
+    /**
+     * How many documents the site held when the pass ran, so a reader can weigh the orphan count
+     * against it — a report naming most of the index is a failed discovery pass, not a cleanup.
+     */
+    @Column
+    private int indexedCount;
     @Column
     private Instant decidedAt;
     @Enumerated(EnumType.STRING)

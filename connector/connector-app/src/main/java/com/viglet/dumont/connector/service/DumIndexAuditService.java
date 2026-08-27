@@ -166,7 +166,7 @@ public class DumIndexAuditService {
         // D68: the ghosts go to a review, not to a delete — and an agreeing pass retracts whatever
         // the previous one recorded, so a report only ever describes the latest evidence.
         Integer orphanReportId = orphanService
-                .record(source, provider, site, locale, orphaned)
+                .record(source, provider, site, locale, orphaned, indexed.size())
                 .map(DumIndexOrphanReportModel::getId)
                 .orElse(null);
         report(source, site, indexed.size(), missing, stale, orphaned, queued, orphanReportId);

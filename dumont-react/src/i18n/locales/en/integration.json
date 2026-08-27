@@ -23,6 +23,7 @@
       "indexingStats": "Indexing Stats",
       "coverage": "Field Coverage",
       "doubleCheck": "Double Check",
+      "orphans": "Orphan Reports",
       "systemInfo": "System Information",
       "insights": "AI Insights",
       "plugins": "Extensions",
@@ -309,6 +310,34 @@
       "indexFailed": "Failed to send index request",
       "indexAllSent": "Index All request sent",
       "indexAllFailed": "Failed to send Index All request"
+    },
+    "orphans": {
+      "title": "Orphan Reports",
+      "description": "Documents the index still holds after they left the source. The audit records them; you decide whether they go.",
+      "empty": "No orphan reports. The last audit found nothing the index holds and the source does not.",
+      "loadFailed": "Failed to load orphan reports.",
+      "ratio": "{{count}} of {{indexed}} indexed",
+      "discoveredAt": "Found",
+      "expiresAt": "Applicable until",
+      "decidedAt": "Decided",
+      "noExpiry": "No expiry configured",
+      "expiredBadge": "Expired",
+      "expiredHelp": "Run the audit again to re-establish this report.",
+      "status": {
+        "PENDING": "Awaiting review",
+        "APPLIED": "Applied",
+        "DISCARDED": "Discarded"
+      },
+      "apply": "Apply — de-index these",
+      "discard": "Discard",
+      "confirmTitle": "De-index this report's documents?",
+      "confirmDescription": "{{count}} document(s) will be removed from {{site}} for source {{source}}. Only do this if you have confirmed they are gone from the source — a discovery pass that under-reported would take live content out of the index.",
+      "applied": "Applied — {{count}} document(s) queued for de-index",
+      "discarded": "Report discarded. Nothing was deleted.",
+      "refusedExpired": "This report's evidence expired. Run the audit again before applying it.",
+      "refusedDecided": "This report was already applied or discarded.",
+      "refusedSuperseded": "A later audit superseded this report. Review the new one.",
+      "decideFailed": "The connector could not act on this report."
     },
     "sample": {
       "title": "Sample",

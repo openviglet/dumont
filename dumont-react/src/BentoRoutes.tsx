@@ -13,6 +13,7 @@ import IntegrationInstanceIndexingStatsBentoPage from "./pages/bento/integration
 import IntegrationInstanceInsightsBentoPage from "./pages/bento/integration.instance.insights.bento.page";
 import IntegrationInstanceMonitoringBentoPage from "./pages/bento/integration.instance.monitoring.bento.page";
 import IntegrationInstanceMonitoringItemBentoPage from "./pages/bento/integration.instance.monitoring.item.bento.page";
+import IntegrationInstanceOrphansBentoPage from "./pages/bento/integration.instance.orphans.bento.page";
 import IntegrationInstancePluginsBentoPage from "./pages/bento/integration.instance.plugins.bento.page";
 import IntegrationInstanceSystemInfoBentoPage from "./pages/bento/integration.instance.system-info.bento.page";
 import IntegrationInstanceAssetsSourceListBentoPage from "./pages/bento/integration.instance.assets.source.list.bento.page";
@@ -118,6 +119,8 @@ export default function BentoRoutes() {
       <Route path="indexing-stats" element={<IntegrationInstanceIndexingStatsBentoPage />} />
       <Route path="coverage" element={<IntegrationInstanceCoverageBentoPage />} />
       <Route path="double-check" element={<IntegrationInstanceDoubleCheckBentoPage />} />
+      {/* The orphan-report review (D70) — the eighth read-only Integration surface. */}
+      <Route path="orphans" element={<IntegrationInstanceOrphansBentoPage />} />
       <Route path="insights" element={<IntegrationInstanceInsightsBentoPage />} />
       <Route path="system-info" element={<IntegrationInstanceSystemInfoBentoPage />} />
       <Route path="plugins" element={<IntegrationInstancePluginsBentoPage />} />

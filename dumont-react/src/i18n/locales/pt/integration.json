@@ -23,6 +23,7 @@
       "indexingStats": "Estatísticas de Indexação",
       "coverage": "Cobertura de Campos",
       "doubleCheck": "Verificação Dupla",
+      "orphans": "Relatórios de Órfãos",
       "systemInfo": "Informações do Sistema",
       "insights": "Insights de IA",
       "plugins": "Extensões",
@@ -309,6 +310,34 @@
       "indexFailed": "Falha ao enviar solicitação de indexação",
       "indexAllSent": "Solicitação de indexação em lote enviada",
       "indexAllFailed": "Falha ao enviar solicitação de indexação em lote"
+    },
+    "orphans": {
+      "title": "Relatórios de Órfãos",
+      "description": "Documentos que o índice ainda mantém depois de saírem da origem. A auditoria os registra; você decide se eles vão.",
+      "empty": "Nenhum relatório de órfãos. A última auditoria não encontrou nada que o índice tenha e a origem não.",
+      "loadFailed": "Falha ao carregar os relatórios de órfãos.",
+      "ratio": "{{count}} de {{indexed}} indexados",
+      "discoveredAt": "Encontrado em",
+      "expiresAt": "Aplicável até",
+      "decidedAt": "Decidido em",
+      "noExpiry": "Sem expiração configurada",
+      "expiredBadge": "Expirado",
+      "expiredHelp": "Execute a auditoria novamente para restabelecer este relatório.",
+      "status": {
+        "PENDING": "Aguardando revisão",
+        "APPLIED": "Aplicado",
+        "DISCARDED": "Descartado"
+      },
+      "apply": "Aplicar — remover do índice",
+      "discard": "Descartar",
+      "confirmTitle": "Remover do índice os documentos deste relatório?",
+      "confirmDescription": "{{count}} documento(s) serão removidos de {{site}} para a origem {{source}}. Faça isso apenas se você confirmou que eles saíram da origem — uma varredura que reportou menos do que deveria tiraria conteúdo vivo do índice.",
+      "applied": "Aplicado — {{count}} documento(s) na fila de remoção",
+      "discarded": "Relatório descartado. Nada foi excluído.",
+      "refusedExpired": "A evidência deste relatório expirou. Execute a auditoria novamente antes de aplicá-lo.",
+      "refusedDecided": "Este relatório já foi aplicado ou descartado.",
+      "refusedSuperseded": "Uma auditoria posterior substituiu este relatório. Revise o novo.",
+      "decideFailed": "O conector não conseguiu agir sobre este relatório."
     },
     "sample": {
       "title": "Exemplo",

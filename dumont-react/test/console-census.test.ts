@@ -84,6 +84,7 @@ const ON_BENTO: string[] = [
   "pages/bento/integration.instance.insights.bento.page.tsx",
   "pages/bento/integration.instance.monitoring.bento.page.tsx",
   "pages/bento/integration.instance.monitoring.item.bento.page.tsx",
+  "pages/bento/integration.instance.orphans.bento.page.tsx",
   "pages/bento/integration.instance.plugins.bento.page.tsx",
   "pages/bento/integration.instance.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.source.inference.bento.page.tsx",

@@ -1,6 +1,6 @@
 import "@/lib/axios"; // Configure axios baseURL + CSRF when mounted as MF remote.
 
-import { IconActivityHeartbeat, IconAdjustmentsSearch, IconBuildingBank, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools, IconWand } from "@tabler/icons-react";
+import { IconActivityHeartbeat, IconAdjustmentsSearch, IconBuildingBank, IconChartBar, IconCloudComputing, IconDatabase, IconFolder, IconGhost2, IconGitCommit, IconGlobe, IconGraph, IconInfoCircle, IconListCheck, IconPuzzle, IconSparkles, IconTools, IconWand } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Page } from "./components/page";
@@ -12,6 +12,7 @@ import IntegrationInstanceDbSourceListPage from "./pages/integration.instance.db
 import IntegrationInstanceDbSourcePage from "./pages/integration.instance.db.source.page";
 import IntegrationInstanceCoveragePage from "./pages/integration.instance.coverage.page";
 import IntegrationInstanceDoubleCheckPage from "./pages/integration.instance.double.check.page";
+import IntegrationInstanceOrphansPage from "./pages/integration.instance.orphans.page";
 import IntegrationInstanceEdsSourceListPage from "./pages/integration.instance.eds.source.list.page";
 import IntegrationInstanceEdsSourcePage from "./pages/integration.instance.eds.source.page";
 import IntegrationInstanceIndexingManagerPage from "./pages/integration.instance.indexing.manager.page";
@@ -110,6 +111,10 @@ export default function DumontRoutes() {
       {/* Double Check */}
       <Route path="double-check" element={<Page turIcon={IconListCheck} title={t("integration.nav.doubleCheck")} urlBase="double-check" />}>
         <Route index element={<IntegrationInstanceDoubleCheckPage />} />
+      </Route>
+      {/* Orphan Reports (D70) */}
+      <Route path="orphans" element={<Page turIcon={IconGhost2} title={t("integration.nav.orphans")} urlBase="orphans" />}>
+        <Route index element={<IntegrationInstanceOrphansPage />} />
       </Route>
       {/* AI Insights */}
       <Route path="insights" element={<Page turIcon={IconSparkles} title={t("integration.nav.insights")} urlBase="insights" />}>

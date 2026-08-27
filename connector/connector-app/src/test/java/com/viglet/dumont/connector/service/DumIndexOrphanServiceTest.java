@@ -84,6 +84,7 @@ class DumIndexOrphanServiceTest {
                 .site(SITE)
                 .locale(Locale.US)
                 .discoveredAt(Instant.now())
+                .indexedCount(120)
                 .status(ReportStatus.PENDING)
                 .objectIds(new ArrayList<>(List.of(ids)))
                 .build();
@@ -97,11 +98,12 @@ class DumIndexOrphanServiceTest {
     @DisplayName("an audit's orphans are written down as a pending report, not deleted")
     void orphansAreRecordedPending() {
         Optional<DumIndexOrphanReportModel> saved = service.record(SOURCE, PROVIDER, SITE,
-                Locale.US, List.of("/gone", "/also-gone"));
+                Locale.US, List.of("/gone", "/also-gone"), 120);
 
         assertThat(saved).isPresent();
         assertThat(saved.get().getStatus()).isEqualTo(ReportStatus.PENDING);
         assertThat(saved.get().getObjectIds()).containsExactly("/gone", "/also-gone");
+        assertThat(saved.get().getIndexedCount()).isEqualTo(120);
         verify(connectorContext, never()).deIndexById(any(), any(), any());
     }
 
@@ -112,7 +114,7 @@ class DumIndexOrphanServiceTest {
         when(repository.findAllByProviderAndSourceAndSiteAndStatus(PROVIDER, SOURCE, SITE,
                 ReportStatus.PENDING)).thenReturn(List.of(older));
 
-        service.record(SOURCE, PROVIDER, SITE, Locale.US, List.of("/gone"));
+        service.record(SOURCE, PROVIDER, SITE, Locale.US, List.of("/gone"), 120);
 
         // Deleted, not updated: an id that stops resolving is what stops an operator applying a
         // set they reviewed two passes ago.
@@ -126,7 +128,7 @@ class DumIndexOrphanServiceTest {
         when(repository.findAllByProviderAndSourceAndSiteAndStatus(PROVIDER, SOURCE, SITE,
                 ReportStatus.PENDING)).thenReturn(List.of(older));
 
-        assertThat(service.record(SOURCE, PROVIDER, SITE, Locale.US, List.of())).isEmpty();
+        assertThat(service.record(SOURCE, PROVIDER, SITE, Locale.US, List.of(), 120)).isEmpty();
 
         verify(repository).deleteAll(List.of(older));
         verify(repository, never()).save(any());

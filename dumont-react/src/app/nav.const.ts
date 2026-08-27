@@ -7,6 +7,7 @@ import {
   IconCloudComputing,
   IconDatabase,
   IconFolder,
+  IconGhost2,
   IconGitCommit,
   IconGlobe,
   IconGraph,
@@ -106,6 +107,7 @@ const ICON_COMPONENTS: Record<string, Icon> = {
   IconInfoCircle,
   IconWand,
   IconPlugConnected,
+  IconGhost2,
 };
 
 /**
@@ -194,6 +196,7 @@ export const DUMONT_NAV: DumontNavSurface[] = [
   { id: "indexing-stats", titleKey: "integration.nav.indexingStats", descriptionKey: "integration.indexingStats.description", iconName: "IconChartBar", section: "integration", tone: "emerald", path: "/indexing-stats", order: 50, migrated: true },
   { id: "coverage", titleKey: "integration.nav.coverage", descriptionKey: "integration.coverage.description", iconName: "IconActivityHeartbeat", section: "integration", tone: "amber", path: "/coverage", order: 55, migrated: true },
   { id: "double-check", titleKey: "integration.nav.doubleCheck", descriptionKey: "integration.doubleCheck.description", iconName: "IconListCheck", section: "integration", tone: "rose", path: "/double-check", order: 60, migrated: true },
+  { id: "orphans", titleKey: "integration.nav.orphans", descriptionKey: "integration.orphans.description", iconName: "IconGhost2", section: "integration", tone: "rose", path: "/orphans", order: 65, migrated: true },
   { id: "insights", titleKey: "integration.nav.insights", descriptionKey: "integration.insights.description", iconName: "IconSparkles", section: "integration", tone: "violet", path: "/insights", order: 90, migrated: true },
   { id: "plugins", titleKey: "integration.nav.plugins", descriptionKey: "integration.plugins.description", iconName: "IconPuzzle", section: "integration", tone: "slate", path: "/plugins", order: 100, migrated: true },
   { id: "system-info", titleKey: "integration.nav.systemInfo", descriptionKey: "integration.connectorSystemInfo.description", iconName: "IconInfoCircle", section: "integration", tone: "slate", path: "/system-info", order: 110, migrated: true },

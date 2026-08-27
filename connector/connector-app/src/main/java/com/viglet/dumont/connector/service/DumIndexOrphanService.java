@@ -97,7 +97,7 @@ public class DumIndexOrphanService {
      */
     public record OrphanReport(int id, String source, String provider, String site,
             Instant discoveredAt, Instant expiresAt, boolean expired, ReportStatus status,
-            Instant decidedAt, int count, List<String> objectIds) {
+            Instant decidedAt, int count, int indexedCount, List<String> objectIds) {
     }
 
     private final DumIndexOrphanReportRepository repository;
@@ -126,7 +126,7 @@ public class DumIndexOrphanService {
      * @return the recorded report, or empty when there was nothing to record
      */
     public Optional<DumIndexOrphanReportModel> record(String source, String provider, String site,
-            Locale locale, Collection<String> orphanIds) {
+            Locale locale, Collection<String> orphanIds, int indexedCount) {
         List<DumIndexOrphanReportModel> superseded = repository
                 .findAllByProviderAndSourceAndSiteAndStatus(provider, source, site,
                         ReportStatus.PENDING);
@@ -147,6 +147,7 @@ public class DumIndexOrphanService {
                 .site(site)
                 .locale(locale)
                 .discoveredAt(Instant.now())
+                .indexedCount(indexedCount)
                 .status(ReportStatus.PENDING)
                 .objectIds(new ArrayList<>(orphanIds))
                 .build());
@@ -230,7 +231,7 @@ public class DumIndexOrphanService {
         return new OrphanReport(report.getId(), report.getSource(), report.getProvider(),
                 report.getSite(), report.getDiscoveredAt(), expiresAt(report), isExpired(report),
                 report.getStatus(), report.getDecidedAt(), report.getObjectIds().size(),
-                report.getObjectIds());
+                report.getIndexedCount(), report.getObjectIds());
     }
 
     /** When the evidence stops being usable; {@code null} when expiry is switched off. */

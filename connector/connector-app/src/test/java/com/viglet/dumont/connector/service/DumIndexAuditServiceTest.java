@@ -17,6 +17,7 @@ package com.viglet.dumont.connector.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -69,7 +70,7 @@ class DumIndexAuditServiceTest {
         when(indexingService.getAllBySourceAndProvider(SOURCE, PROVIDER)).thenReturn(List.of());
         when(indexingService.existsUnprocessedByObjectIdAndSourceAndProvider(anyString(),
                 anyString(), anyString())).thenReturn(false);
-        when(orphanService.record(anyString(), anyString(), anyString(), any(), any()))
+        when(orphanService.record(anyString(), anyString(), anyString(), any(), any(), anyInt()))
                 .thenReturn(Optional.empty());
     }
 
@@ -129,11 +130,13 @@ class DumIndexAuditServiceTest {
     void aGhostIsHandedToTheReview() {
         indexHolds(new DumIndexInventoryEntry("/a", 1L, "c1"),
                 new DumIndexInventoryEntry("/gone", 1L, "c9"));
-        when(orphanService.record(SOURCE, PROVIDER, SITE, Locale.US, List.of("/gone")))
+        when(orphanService.record(SOURCE, PROVIDER, SITE, Locale.US, List.of("/gone"), 2))
                 .thenReturn(Optional.of(new DumIndexOrphanReportModel().setId(7)));
 
         assertThat(auditOf(List.of("/a")).orphanReportId()).isEqualTo(7);
-        verify(orphanService).record(SOURCE, PROVIDER, SITE, Locale.US, List.of("/gone"));
+        // The indexed count travels with the set: it is what tells a reader whether a report is a
+        // cleanup or a discovery pass that under-reported.
+        verify(orphanService).record(SOURCE, PROVIDER, SITE, Locale.US, List.of("/gone"), 2);
     }
 
     @Test
@@ -143,7 +146,7 @@ class DumIndexAuditServiceTest {
 
         assertThat(auditOf(List.of("/a")).orphanReportId()).isNull();
         // Empty, not skipped: the service reads "no orphans" as a retraction of what it holds.
-        verify(orphanService).record(SOURCE, PROVIDER, SITE, Locale.US, List.of());
+        verify(orphanService).record(SOURCE, PROVIDER, SITE, Locale.US, List.of(), 1);
     }
 
     @Test

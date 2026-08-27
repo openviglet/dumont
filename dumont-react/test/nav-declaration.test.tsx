@@ -29,14 +29,19 @@ import { answerGet } from "./support/harness"
 const STANDALONE = "local"
 
 /**
- * Exactly what `manifest.navItems` carried before D39, typed out rather than derived.
+ * Exactly what `manifest.navItems` carries, typed out rather than derived.
  *
  * The point of writing it twice *here* is that this is the one place duplication is correct: a
  * host reads this over `./manifest`, so the wire shape is a contract, and a test that built its
  * expectation from the same declaration the code builds it from would pass through any change at
- * all. If this fails, the refactor stopped being invisible to Turing.
+ * all. D39 wrote it to prove the refactor was invisible to Turing; it stays because the property
+ * outlives the refactor.
+ *
+ * A *changed* row here is a break: the host is reading a url, an icon name or an order that moved
+ * under it. A *new* row is a new surface, and adding one line in the same diff as the declaration
+ * is the whole cost of the guarantee. Only `orphans` (D70) has been added since D39.
  */
-const WIRE_BEFORE_D39 = [
+const WIRE = [
   { titleKey: "integration.nav.sources", url: "/source", icon: "IconGitCommit", order: 10, provider: "AEM" },
   { titleKey: "integration.nav.dbSources", url: "/db-source", icon: "IconDatabase", order: 10, provider: "JDBC-DATABASE" },
   { titleKey: "integration.nav.wcSources", url: "/wc-source", icon: "IconGlobe", order: 10, provider: "WEB-CRAWLER" },
@@ -50,14 +55,15 @@ const WIRE_BEFORE_D39 = [
   { titleKey: "integration.nav.indexingStats", url: "/indexing-stats", icon: "IconChartBar", order: 50 },
   { titleKey: "integration.nav.coverage", url: "/coverage", icon: "IconActivityHeartbeat", order: 55 },
   { titleKey: "integration.nav.doubleCheck", url: "/double-check", icon: "IconListCheck", order: 60 },
+  { titleKey: "integration.nav.orphans", url: "/orphans", icon: "IconGhost2", order: 65 },
   { titleKey: "integration.nav.insights", url: "/insights", icon: "IconSparkles", order: 90 },
   { titleKey: "integration.nav.plugins", url: "/plugins", icon: "IconPuzzle", order: 100 },
   { titleKey: "integration.nav.systemInfo", url: "/system-info", icon: "IconInfoCircle", order: 110 },
 ]
 
 describe("D39: the Module Federation wire is derived, not duplicated", () => {
-  it("still hands the host exactly what it handed before", () => {
-    expect(manifest.navItems).toEqual(WIRE_BEFORE_D39)
+  it("hands the host exactly the wire it declares", () => {
+    expect(manifest.navItems).toEqual(WIRE)
   })
 
   it("carries no `provider` key at all on a common surface", () => {
@@ -153,6 +159,7 @@ describe("D39: where a surface points depends on whether it has moved", () => {
       "indexing-stats",
       "insights",
       "monitoring",
+      "orphans",
       "plugins",
       "source",
       "source-inference",

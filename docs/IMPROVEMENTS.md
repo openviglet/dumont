@@ -75,28 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XXVI A review nobody can see is not a review (D70)
-
-D68 gave the audit's ghosts somewhere to wait: a dated report per source and site,
-applied or discarded through `/api/v2/connector/orphans`. The reasoning was that
-deletion should be a deliberate act by someone who read the evidence.
-
-The console shows none of it. So the review that gates every deletion happens over curl,
-against a JSON array of ids, by an operator who has to remember the report exists — and
-the audit's warning in the log is the only thing that tells them. A step designed to be
-deliberate becomes a step that is skipped, and the ghosts stay indexed exactly as they
-did before D68.
-
-What the surface owes is the judgement, not the data. Deciding whether a report
-describes content that genuinely went away takes the count of ids against the count the
-site indexes — a report naming most of the index is a failed discovery pass, not a
-cleanup — plus when it was found, when it stops being applicable, and the ids. Apply and
-discard are two buttons over endpoints that already exist.
-
-Two things it must not do. It must not apply on a bulk selection across reports: a
-report is per source and per site because that is the unit an operator can reason about.
-And it must not hide an expired report, which is evidence that the audit found something
-and nobody looked — the state worth seeing, not worth tidying away.
-
-It belongs beside monitoring, where the other per-source evidence reads.
