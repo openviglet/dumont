@@ -8,16 +8,23 @@ package com.viglet.dumont.connector.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.viglet.dumont.commons.indexing.DumIndexingStatus;
+import com.viglet.dumont.commons.indexing.DumLoggingStatus;
+import com.viglet.dumont.commons.logging.DumLoggingIndexing;
+
 import redis.clients.jedis.Jedis;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Integration test for {@link DumLoggingAPI}'s Redis engine, backed by a real Redis via
@@ -27,6 +34,8 @@ import redis.clients.jedis.Jedis;
 class DumLoggingApiRedisIT {
 
     private static final String KEY = "dumontLog:indexing";
+    private static final JsonMapper MAPPER = JsonMapper.builder().build();
+    private static final Instant SEEDED_AT = Instant.ofEpochMilli(1_700_000_000_000L);
 
     @Container
     private static final GenericContainer<?> REDIS =
@@ -42,11 +51,18 @@ class DumLoggingApiRedisIT {
     void seed() {
         try (Jedis jedis = new Jedis(REDIS.getHost(), REDIS.getMappedPort(6379))) {
             jedis.del(KEY);
-            // c1 carries the trail D71 put on every row; c2 is shaped like a row written before
-            // it existed, which is what the unattributed-row rule below is about.
-            jedis.lpush(KEY, "{\"contentId\":\"c1\",\"status\":\"INDEXED\","
-                    + "\"source\":\"wknd\",\"transactionId\":\"tx-1\"}");
-            jedis.lpush(KEY, "{\"contentId\":\"c2\",\"status\":\"DEINDEXED\"}");
+            // Seeded the way DumRedisIndexingAppender actually writes a row — Jackson over a
+            // DumLoggingIndexing — rather than by hand. Hand-written rows had no date, which is
+            // how a serializer emitting `ISODate("…")` made every query return an empty page
+            // without a single test noticing (D73).
+            jedis.lpush(KEY, MAPPER.writeValueAsString(DumLoggingIndexing.builder()
+                    .contentId("c1").status(DumIndexingStatus.INDEXED)
+                    .resultStatus(DumLoggingStatus.SUCCESS).url("http://site/a")
+                    .source("wknd").transactionId("tx-1").date(SEEDED_AT).build()));
+            jedis.lpush(KEY, MAPPER.writeValueAsString(DumLoggingIndexing.builder()
+                    .contentId("c2").status(DumIndexingStatus.DEINDEXED)
+                    .resultStatus(DumLoggingStatus.ERROR).url("http://site/b")
+                    .date(SEEDED_AT).build()));
         }
         api = new DumLoggingAPI("redis", false, "mongodb://localhost:27017", "dumontLog",
                 "indexing", true, redisUri(), KEY);
@@ -99,5 +115,34 @@ class DumLoggingApiRedisIT {
                 "desc")).containsEntry("totalElements", 2L);
         assertThat(api.indexingLogging(0, 100, null, null, null, null, null, null, "wknd", null,
                 "desc")).containsEntry("totalElements", 1L);
+    }
+
+    @Test
+    @DisplayName("a row the appender actually wrote can be read back at all (D73)")
+    void readsBackARowTheAppenderWrote() {
+        // The seed goes through the same serializer the appender uses. While it emitted
+        // `ISODate("…")` this returned an empty page for every query, because Jackson rejected
+        // the first row and the failure was swallowed as "query failed".
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, null, null, null,
+                "desc")).containsEntry("totalElements", 2L);
+    }
+
+    @Test
+    @DisplayName("every filter the endpoint accepts narrows the result here too (D73)")
+    void theFourFiltersThatUsedToBeDroppedAreHonoured() {
+        // Each of these was accepted by the endpoint and never reached the Redis query, so each
+        // used to answer 2 — the whole log, looking like a correct answer.
+        assertThat(api.indexingLogging(0, 100, null, null, "INDEXED", null, null, null, null, null,
+                "desc")).containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, "ERROR", null, null, null,
+                "desc")).containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, "SITE/A", null, null,
+                "desc")).as("url matches a case-insensitive substring, as it does on Mongo")
+                .containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, "2000-01-01", "2100-01-01", null, null, null, null,
+                null, null, "desc")).containsEntry("totalElements", 2L);
+        assertThat(api.indexingLogging(0, 100, "2100-01-01", null, null, null, null, null, null,
+                null, "desc")).as("a range the rows fall outside excludes them")
+                .containsEntry("totalElements", 0L);
     }
 }

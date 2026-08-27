@@ -7,12 +7,14 @@ package com.viglet.dumont.connector.api;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.bson.Document;
@@ -29,6 +31,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
+import com.viglet.dumont.commons.logging.IsoDateSerializer;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -132,7 +135,8 @@ public class DumLoggingAPI {
                     status, contentId, resultStatus, url, source, transactionId, sort);
         }
         if (isRedisActive()) {
-            return redisIndexingDocuments(page, pageSize, contentId, source, transactionId, sort);
+            return redisIndexingDocuments(page, pageSize, dateFrom, dateTo, status, contentId,
+                    resultStatus, url, source, transactionId, sort);
         }
         return emptyPage(page, pageSize);
     }
@@ -189,14 +193,22 @@ public class DumLoggingAPI {
 
     /**
      * The Redis path filters in Java after reading the whole list, so every filter here is a scan.
-     * That was already true of its sort and its paging, so {@code source} and {@code transactionId}
-     * (D72) add no new class of problem — but it is why Mongo is the engine to pick when the log
-     * is large enough to query rather than tail.
+     * That was already true of its sort and its paging, so the seven the endpoint accepts (D73)
+     * add no new class of problem — but it is why Mongo is the engine to pick when the log is
+     * large enough to query rather than tail.
+     *
+     * <p>
+     * All seven, deliberately. Four of them used to be accepted by the endpoint and never reach
+     * this method, so a request naming one got the whole log back looking exactly like a correct
+     * answer to a question that was never asked.
      */
     @SuppressWarnings("unchecked")
-    private Map<String, Object> redisIndexingDocuments(int page, int pageSize, String contentId,
+    private Map<String, Object> redisIndexingDocuments(int page, int pageSize, String dateFrom,
+            String dateTo, String status, String contentId, String resultStatus, String url,
             String source, String transactionId, String sort) {
         Map<String, Object> result = emptyPage(page, pageSize);
+        Instant from = dateFrom == null || dateFrom.isBlank() ? null : parseDate(dateFrom, false);
+        Instant to = dateTo == null || dateTo.isBlank() ? null : parseDate(dateTo, true);
         try (Jedis jedis = new Jedis(java.net.URI.create(redisUri))) {
             // LRANGE reads newest-first (LPUSH order); reverse for ascending sort.
             List<String> raw = jedis.lrange(redisIndexingKey, 0, -1);
@@ -206,7 +218,11 @@ public class DumLoggingAPI {
                 JsonNode node = mapper.readTree(json);
                 if (!matches(node, CONTENT_ID_FIELD, contentId)
                         || !matches(node, SOURCE_FIELD, source)
-                        || !matches(node, TRANSACTION_ID_FIELD, transactionId)) {
+                        || !matches(node, TRANSACTION_ID_FIELD, transactionId)
+                        || !matches(node, "status", status)
+                        || !matches(node, "resultStatus", resultStatus)
+                        || !containsIgnoringCase(node, "url", url)
+                        || !withinRange(node, from, to)) {
                     continue;
                 }
                 all.add(mapper.convertValue(node, Map.class));
@@ -216,9 +232,9 @@ public class DumLoggingAPI {
             }
             int total = all.size();
             int totalPages = (int) Math.ceil((double) total / pageSize);
-            int from = Math.min(page * pageSize, total);
-            int to = Math.min(from + pageSize, total);
-            result.put(CONTENT, all.subList(from, to));
+            int pageStart = Math.min(page * pageSize, total);
+            int pageEnd = Math.min(pageStart + pageSize, total);
+            result.put(CONTENT, all.subList(pageStart, pageEnd));
             result.put(TOTAL_ELEMENTS, (long) total);
             result.put(TOTAL_PAGES, totalPages);
         } catch (Exception e) {
@@ -276,6 +292,44 @@ public class DumLoggingAPI {
         }
         JsonNode value = node.get(field);
         return value != null && !value.isNull() && wanted.equals(value.asString());
+    }
+
+    /**
+     * The Redis counterpart of Mongo's case-insensitive url regex (D73) — a substring rather than
+     * a pattern, because the endpoint's contract is "matches somewhere in the url" and a scan in
+     * Java has no reason to compile one.
+     */
+    static boolean containsIgnoringCase(JsonNode node, String field, String wanted) {
+        if (wanted == null || wanted.isBlank()) {
+            return true;
+        }
+        JsonNode value = node.get(field);
+        return value != null && !value.isNull() && value.asString().toLowerCase(Locale.ROOT)
+                .contains(wanted.toLowerCase(Locale.ROOT));
+    }
+
+    /**
+     * Whether a Redis row falls in the requested date range (D73).
+     *
+     * <p>
+     * The row's timestamp is the ISO-8601 string the serializer writes. A row whose date is
+     * missing or unreadable fails a range that was asked for — it cannot be shown to be inside one
+     * — and passes when no range was asked for at all.
+     */
+    static boolean withinRange(JsonNode node, Instant from, Instant to) {
+        if (from == null && to == null) {
+            return true;
+        }
+        JsonNode value = node.get(IsoDateSerializer.DATE_FIELD);
+        if (value == null || value.isNull()) {
+            return false;
+        }
+        try {
+            Instant date = OffsetDateTime.parse(value.asString()).toInstant();
+            return (from == null || !date.isBefore(from)) && (to == null || !date.isAfter(to));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private static void addExactFilter(List<Bson> filters, String field, String value) {

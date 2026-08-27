@@ -61,8 +61,6 @@ This track has no remaining pending tasks.
 
 ## Track E — Data quality & trust
 
-- 📋 **D73** (deps: D72 ✅) **The Redis log engine accepts four filters and silently ignores them** — Date, status, result status and url never reach the Redis query, so a request naming one gets the whole log back looking like a correct answer to a question that was never asked. → §XXIX
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -102,12 +100,6 @@ This track has no remaining pending tasks.
 This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
-
-## Done when — D73
-
-- **Every filter the endpoint accepts is honoured on both engines** The Redis
-  integration test asserts each of date, status, result status and url narrows the
-  result, so a filter that is accepted and dropped fails rather than reads as a match.
 
 ## Non-goals (do NOT add as tasks)
 

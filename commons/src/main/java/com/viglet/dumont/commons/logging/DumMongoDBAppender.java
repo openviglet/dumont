@@ -49,7 +49,9 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
             log.error(e.getMessage(), e);
         }
         String json = JSON_MAPPER.writeValueAsString(dumLoggingGeneral);
-        collection.insertOne(Document.parse(json));
+        // D73: the same date conversion the indexing appender does — the serializer emits JSON
+        // now, so the BSON date is made here rather than smuggled through Mongo shell syntax.
+        collection.insertOne(DumMongoDBIndexingAppender.withBsonDate(Document.parse(json)));
     }
 
     private static @NotNull String getStackTrace(ILoggingEvent event) {
