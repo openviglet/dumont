@@ -234,6 +234,7 @@
   (default 0.5). Proven by `DumBoundedExtractionTest`, `DumStructuredSourcePluginTest`.
   ↳ Builds on D31. Complements D09, D33.
 - **D62** — An Adobe I/O journal consumer pulls the same events behind a cursor persisted only after a page is dispatched, so a dropped webhook replays instead of going stale.
+- **D64** — The audit now enumerates the index per site and reports missing, stale and orphaned ids, requeueing the first two; ghosts are named, never deleted.
 
 ## Track F — Enrichment & semantics
 

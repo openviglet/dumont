@@ -33,6 +33,12 @@ dumont:
   audit:
     cron: "0 0 3 * * *"
     cron.zone: UTC
+    index:
+      # D64: compare the source and the connector's ledger against the search index itself, so a
+      # document that never landed, or whose later write failed, is found and requeued instead of
+      # staying silently wrong. Orphans (in the index, gone from the source) are reported, never
+      # deleted. Requires a backend that can enumerate its index — Turing does.
+      enabled: true
   dependencies.enabled: false
   reactive.indexing: false
   reactive.parallelism: 10

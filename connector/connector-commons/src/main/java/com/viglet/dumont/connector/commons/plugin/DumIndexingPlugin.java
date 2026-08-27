@@ -16,6 +16,10 @@
 
 package com.viglet.dumont.connector.commons.plugin;
 
+import java.util.List;
+import java.util.Optional;
+
+import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 
@@ -55,5 +59,23 @@ public interface DumIndexingPlugin {
      */
     default void provision(DumIndexingSchema schema) {
         // Backends without a declarative schema endpoint have nothing to send.
+    }
+
+    /**
+     * Every document the index holds for one source on one site (roadmap <strong>D64</strong>), so a
+     * content audit can make the comparison it could not: not "did we queue everything the source
+     * has", but "did everything we queued actually land".
+     * <p>
+     * {@link Optional#empty()} means the backend cannot answer — it enumerates nothing, or the read
+     * failed. That is deliberately distinct from a present but empty list, which means the index
+     * genuinely holds nothing for this source: an audit that confused the two would read a failed
+     * read as an empty index and republish everything.
+     *
+     * @param siteName the site to enumerate
+     * @param source   the source whose documents to enumerate
+     * @return the indexed documents, or empty when the backend cannot report them
+     */
+    default Optional<List<DumIndexInventoryEntry>> inventory(String siteName, String source) {
+        return Optional.empty();
     }
 }

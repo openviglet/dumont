@@ -19,15 +19,22 @@
 package com.viglet.dumont.connector.indexing;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.auth.credentials.TurApiKeyCredentials;
 import com.viglet.turing.client.sn.TurSNServer;
+import com.viglet.turing.client.sn.inventory.TurSNInventoryClient;
+import com.viglet.turing.client.sn.inventory.TurSNInventoryEntry;
+import com.viglet.turing.client.sn.inventory.TurSNInventoryException;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 import com.viglet.turing.client.sn.job.TurSNJobUtils;
 import com.viglet.turing.client.sn.manifest.TurSNManifest;
@@ -104,6 +111,33 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
                 log.error("Could not provision site '{}': {} — indexing continues with the site's "
                         + "current schema", schema.siteName(), e.getMessage(), e);
             }
+        }
+    }
+
+    /**
+     * Enumerates what the index actually holds for a source (roadmap <strong>D64</strong>), walking
+     * Turing's inventory cursor across every locale of the site.
+     * <p>
+     * An unreadable index comes back as {@link Optional#empty()}, never as an empty list. The
+     * distinction is the whole point: the audit acts on a difference, and reporting a failed read as
+     * "the index holds nothing" would have it republish the entire source.
+     */
+    @Override
+    public Optional<List<DumIndexInventoryEntry>> inventory(String siteName, String source) {
+        try {
+            List<DumIndexInventoryEntry> entries = new ArrayList<>();
+            for (TurSNInventoryEntry entry : new TurSNInventoryClient(getTurSNServer(), siteName,
+                    TurSNInventoryClient.DEFAULT_ROWS).allLocales(source)) {
+                entries.add(new DumIndexInventoryEntry(entry.id(), entry.version(),
+                        entry.checksum()));
+            }
+            log.debug("Index inventory for site '{}' source '{}': {} document(s)", siteName, source,
+                    entries.size());
+            return Optional.of(entries);
+        } catch (TurSNInventoryException e) {
+            log.error("Could not read the index inventory for site '{}' source '{}': {}", siteName,
+                    source, e.getMessage(), e);
+            return Optional.empty();
         }
     }
 

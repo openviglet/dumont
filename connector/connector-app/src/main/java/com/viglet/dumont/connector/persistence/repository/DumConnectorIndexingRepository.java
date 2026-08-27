@@ -63,6 +63,13 @@ public interface DumConnectorIndexingRepository
         List<DumConnectorIndexingModel> findAllBySourceAndProviderOrderByModificationDateDesc(
                         String source, String provider, Limit limit);
 
+        /** Every record for a source, unlimited — the index audit (D64) needs all the checksums. */
+        List<DumConnectorIndexingModel> findAllBySourceAndProvider(String source, String provider);
+
+        boolean existsByObjectIdAndSourceAndProviderAndStatus(String objectId, String source,
+                        String provider,
+                        com.viglet.dumont.commons.indexing.DumIndexingStatus status);
+
         List<DumConnectorIndexingModel> findAllBySourceAndProviderAndStatusOrderByModificationDateDesc(
                         String source, String provider,
                         com.viglet.dumont.commons.indexing.DumIndexingStatus status, Limit limit);

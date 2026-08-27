@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin.Environment
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
+import com.viglet.dumont.connector.service.DumIndexAuditService;
 
 @ExtendWith(MockitoExtension.class)
 class DumConnectorContentAuditTaskTest {
@@ -46,14 +48,34 @@ class DumConnectorContentAuditTaskTest {
     private DumConnectorIndexingService indexingService;
     @Mock
     private DumConnectorPlugin plugin;
+    @Mock
+    private DumIndexAuditService indexAuditService;
 
     private DumConnectorContentAuditTask task;
 
     @BeforeEach
     void setUp() {
         // queryBuilder disabled -> sequential audit path
-        task = new DumConnectorContentAuditTask(pluginRegistry, indexingService, false, 4);
+        task = new DumConnectorContentAuditTask(pluginRegistry, indexingService, indexAuditService,
+                false, 4);
         lenient().when(plugin.getProviderName()).thenReturn("turing");
+    }
+
+    @Test
+    void auditSourceAsyncRunsTheIndexComparisonWithTheDiscoveredIdsAndCollectedSites() {
+        when(pluginRegistry.resolveBySource("wknd")).thenReturn(plugin);
+        when(plugin.discoverContentIds("wknd")).thenReturn(List.of("o1"));
+        when(plugin.resolveLocale(eq("wknd"), any())).thenReturn(Locale.US);
+        when(plugin.resolveEnvironments("wknd", "o1"))
+                .thenReturn(List.of(new EnvironmentInfo("prod", List.of("site1"))));
+        when(indexingService.findUnprocessedByObjectIdAndSourceAndProvider(any(), any(), any()))
+                .thenReturn(List.of());
+
+        task.auditSourceAsync("wknd");
+
+        // D64: the third comparison runs with the sites the per-object pass collected.
+        verify(indexAuditService).audit(eq("wknd"), eq("turing"), eq(Set.of("site1")),
+                eq(List.of("o1")), eq(Locale.US));
     }
 
     @Test

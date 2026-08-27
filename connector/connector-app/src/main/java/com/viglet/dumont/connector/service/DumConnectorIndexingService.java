@@ -349,6 +349,24 @@ public class DumConnectorIndexingService {
                                                 provider, Limit.of(50));
         }
 
+        /**
+         * Every ledger record for a source, unlimited — unlike
+         * {@link #getBySourceAndProvider(String, String)}, which caps at 50 for the monitoring UI.
+         * The index audit (D64) compares the whole source, so a cap would report the rest as stale.
+         */
+        public List<DumConnectorIndexingModel> getAllBySourceAndProvider(String source,
+                        String provider) {
+                return dumConnectorIndexingRepository.findAllBySourceAndProvider(source, provider);
+        }
+
+        /** Whether a repair is already queued for this id, so the audit does not queue it twice. */
+        public boolean existsUnprocessedByObjectIdAndSourceAndProvider(String objectId,
+                        String source, String provider) {
+                return dumConnectorIndexingRepository
+                                .existsByObjectIdAndSourceAndProviderAndStatus(objectId, source,
+                                                provider, DumIndexingStatus.NOT_PROCESSED);
+        }
+
         public List<String> getSites(String source, String provider) {
                 return dumConnectorIndexingRepository.distinctSites(source, provider);
         }

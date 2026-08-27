@@ -75,27 +75,3 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
-
-## XX The third comparison the audit cannot make (D64)
-
-`DumConnectorContentAuditTask` runs on a cron, calls `discoverContentIds` for each
-source, files a NOT_PROCESSED record for anything the connector never queued, and drops
-records whose environment no longer exists. It is the only thing in either product that
-goes looking for missing content.
-
-It compares two sets, and neither of them is the search index. The source is one;
-`DumConnectorIndexingModel`, the connector's own ledger, is the other. So the audit
-answers "did we queue everything the source has" and cannot answer "did everything we
-queued actually land". A document the ledger marks processed whose write to Turing
-failed, or one removed from the source whose delete never arrived, satisfies the audit
-completely while the index is wrong.
-
-That failure is silent and permanent. The index keeps answering queries — with a stale
-document or a ghost among the results — and the only repair anyone has is a full
-reindex: hours of embedding cost to fix a handful of records nobody can name.
-
-The third comparison needs a read Turing does not offer today: a paged enumeration of
-the ids the index holds for a source, with a version or checksum per id, filed there as
-T1029. Once that exists, this task grows the comparison and reports the three
-differences. Applying the repair stays here, since the connector already owns the queue
-and the retry.

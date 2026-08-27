@@ -39,6 +39,7 @@ import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsMo
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsModel.OperationType;
 import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
+import com.viglet.dumont.connector.service.DumIndexAuditService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,15 +48,18 @@ import lombok.extern.slf4j.Slf4j;
 public class DumConnectorContentAuditTask {
     private final DumConnectorPluginRegistry pluginRegistry;
     private final DumConnectorIndexingService indexingService;
+    private final DumIndexAuditService indexAuditService;
     private final boolean queryBuilderEnabled;
     private final int parallelism;
 
     public DumConnectorContentAuditTask(DumConnectorPluginRegistry pluginRegistry,
             DumConnectorIndexingService indexingService,
+            DumIndexAuditService indexAuditService,
             @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled,
             @Value("${dumont.aem.querybuilder.parallelism:10}") int parallelism) {
         this.pluginRegistry = pluginRegistry;
         this.indexingService = indexingService;
+        this.indexAuditService = indexAuditService;
         this.queryBuilderEnabled = queryBuilderEnabled;
         this.parallelism = Math.max(1, parallelism);
     }
@@ -105,6 +109,12 @@ public class DumConnectorContentAuditTask {
                 auditSequential(plugin, discoveredIds, source, provider, created,
                         allEnvironments, allSites, firstLocale);
             }
+
+            // D64: the third comparison — the source and the ledger against the index itself.
+            // Runs after the per-object pass because that is what collects the sites this source
+            // publishes to, and it needs the id set that pass already discovered.
+            indexAuditService.audit(source, provider, new LinkedHashSet<>(allSites),
+                    discoveredIds, firstLocale.get());
 
             Instant endTime = Instant.now();
             long durationMs = endTime.toEpochMilli() - startTime.toEpochMilli();

@@ -103,8 +103,6 @@ This track has no remaining pending tasks.
 > `dum_provenance` attribute; per-source last-seen history so a dropped field stays auditable).
 > Complements D09.
 
-- 📋 **D64** (deps: Turing T1029) **The content audit never compares against the search index** — DumConnectorContentAuditTask reconciles the source against its own ledger only, so a document that never landed in Turing stays invisible. → §XX
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
