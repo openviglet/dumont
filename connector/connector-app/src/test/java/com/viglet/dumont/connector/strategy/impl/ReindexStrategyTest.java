@@ -114,7 +114,7 @@ class ReindexStrategyTest {
 
         strategy.process(jobItem, batchProcessor);
 
-        verify(batchProcessor).add(jobItem.turSNJobItem(), jobItem.session());
+        verify(batchProcessor).add(jobItem);
         verify(indexingService).update(jobItem, list, PREPARE_REINDEX);
     }
 

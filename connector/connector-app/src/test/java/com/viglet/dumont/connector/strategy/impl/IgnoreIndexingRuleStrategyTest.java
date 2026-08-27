@@ -112,7 +112,7 @@ class IgnoreIndexingRuleStrategyTest {
         strategy.process(jobItem, batchProcessor);
 
         verify(indexingService).save(jobItem, IGNORED);
-        verify(batchProcessor).add(any(TurSNJobItem.class), any(DumConnectorSession.class));
+        verify(batchProcessor).add(any(DumJobItemWithSession.class));
     }
 
     @Test
@@ -125,6 +125,6 @@ class IgnoreIndexingRuleStrategyTest {
         strategy.process(jobItem, batchProcessor);
 
         verify(indexingService).update(jobItem);
-        verify(batchProcessor).add(any(TurSNJobItem.class), any(DumConnectorSession.class));
+        verify(batchProcessor).add(any(DumJobItemWithSession.class));
     }
 }

@@ -96,6 +96,6 @@ class IndexStrategyTest {
         strategy.process(jobItem, batchProcessor);
 
         verify(indexingService).save(jobItem, PREPARE_INDEX);
-        verify(batchProcessor).add(jobItem.turSNJobItem(), jobItem.session());
+        verify(batchProcessor).add(jobItem);
     }
 }

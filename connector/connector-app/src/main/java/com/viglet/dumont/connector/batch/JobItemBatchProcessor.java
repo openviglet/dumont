@@ -20,12 +20,14 @@ import static com.viglet.dumont.commons.indexing.DumIndexingStatus.SENT_TO_QUEUE
 import static com.viglet.dumont.connector.commons.logging.DumConnectorLoggingUtils.setSuccessStatus;
 import static com.viglet.dumont.connector.constant.DumConnectorConstants.CONNECTOR_INDEXING_QUEUE;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import com.viglet.dumont.connector.commons.DumConnectorSession;
-import com.viglet.turing.client.sn.job.TurSNJobItem;
+import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,13 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Batch processor for managing job items efficiently.
  * Handles buffering and sending job items to the message queue.
- * 
+ *
+ * <p>
+ * One buffer serves every source, so an item carries the session that produced it (roadmap
+ * <strong>D69</strong>) rather than borrowing whichever session happened to ask for the drain —
+ * which filed a concurrent run's {@code SENT_TO_QUEUE} entries under the wrong source and
+ * transaction id. A flush is a request to send what is buffered, not a claim about who owns it.
+ *
  * @author Alexandre Oliveira
  * @since 2026.1
  */
@@ -41,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class JobItemBatchProcessor {
 
-    private final TurSNJobItems buffer = new TurSNJobItems();
+    private final List<DumJobItemWithSession> buffer = new ArrayList<>();
     private final JmsMessagingTemplate jmsMessagingTemplate;
     private final int batchSize;
 
@@ -60,16 +68,15 @@ public class JobItemBatchProcessor {
      * threads calling {@link #add} are not blocked waiting on Artemis
      * producer flow control.
      *
-     * @param item    the job item to add
-     * @param session the connector session
+     * @param item the job item and the session that produced it
      */
-    public void add(TurSNJobItem item, DumConnectorSession session) {
-        TurSNJobItems toSend = null;
+    public void add(DumJobItemWithSession item) {
+        List<DumJobItemWithSession> toSend = null;
         synchronized (this) {
             buffer.add(item);
             logQueueInfo();
             if (buffer.size() >= batchSize) {
-                toSend = drainBuffer(session);
+                toSend = drainBuffer();
             }
         }
         if (toSend != null) {
@@ -79,13 +86,13 @@ public class JobItemBatchProcessor {
 
     /**
      * Adds a job item to the buffer without triggering an auto-flush.
-     * The caller is responsible for invoking {@link #flush(DumConnectorSession)}
+     * The caller is responsible for invoking {@link #flush()}
      * once the batch is complete. Useful when adding many items under a lock
      * where the JMS send must not happen until after the lock is released.
      *
-     * @param item the job item to add
+     * @param item the job item and the session that produced it
      */
-    public synchronized void addDeferred(TurSNJobItem item) {
+    public synchronized void addDeferred(DumJobItemWithSession item) {
         buffer.add(item);
         logQueueInfo();
     }
@@ -97,20 +104,23 @@ public class JobItemBatchProcessor {
      * threads calling {@link #add} or {@link #addDeferred} are not
      * blocked while Artemis flow control throttles this thread.
      *
-     * @param session the connector session
+     * <p>
+     * The drain covers everything buffered, whichever source put it there. That is what the
+     * caller wants — the queue is shared — and it is safe because each item carries its own
+     * session, so no row is attributed to the caller that asked for the send.
      */
-    public void flush(DumConnectorSession session) {
-        TurSNJobItems toSend;
+    public void flush() {
+        List<DumJobItemWithSession> toSend;
         synchronized (this) {
-            toSend = drainBuffer(session);
+            toSend = drainBuffer();
         }
         if (toSend != null) {
             sendBatch(toSend);
         }
     }
 
-    private TurSNJobItems drainBuffer(DumConnectorSession session) {
-        if (buffer.size() == 0) {
+    private List<DumJobItemWithSession> drainBuffer() {
+        if (buffer.isEmpty()) {
             log.debug("No job to drain from buffer.");
             return null;
         }
@@ -118,23 +128,27 @@ public class JobItemBatchProcessor {
         log.info("Draining {} jobs from buffer.", buffer.size());
 
         if (log.isDebugEnabled()) {
-            for (TurSNJobItem turSNJobItem : buffer) {
-                log.debug("TurSNJobItem Id: {}", turSNJobItem.getAttributes().get("id"));
+            for (DumJobItemWithSession buffered : buffer) {
+                log.debug("TurSNJobItem Id: {}",
+                        buffered.turSNJobItem().getAttributes().get("id"));
             }
         }
 
-        TurSNJobItems itemsToSend = new TurSNJobItems();
-        for (TurSNJobItem turSNJobItem : buffer) {
-            setSuccessStatus(turSNJobItem, session, SENT_TO_QUEUE);
-            itemsToSend.add(turSNJobItem);
-        }
+        List<DumJobItemWithSession> drained = List.copyOf(buffer);
         buffer.clear();
-        return itemsToSend;
+        return drained;
     }
 
-    private void sendBatch(TurSNJobItems items) {
-        jmsMessagingTemplate.convertAndSend(CONNECTOR_INDEXING_QUEUE, items);
-        log.info("Successfully sent batch of {} jobs to connector queue.", items.size());
+    private void sendBatch(List<DumJobItemWithSession> drained) {
+        TurSNJobItems itemsToSend = new TurSNJobItems();
+        for (DumJobItemWithSession buffered : drained) {
+            // D69: the session that produced the item, never the one that asked for the drain —
+            // otherwise a concurrent run's rows are filed under whoever happened to flush.
+            setSuccessStatus(buffered.turSNJobItem(), buffered.session(), SENT_TO_QUEUE);
+            itemsToSend.add(buffered.turSNJobItem());
+        }
+        jmsMessagingTemplate.convertAndSend(CONNECTOR_INDEXING_QUEUE, itemsToSend);
+        log.info("Successfully sent batch of {} jobs to connector queue.", itemsToSend.size());
     }
 
     /**

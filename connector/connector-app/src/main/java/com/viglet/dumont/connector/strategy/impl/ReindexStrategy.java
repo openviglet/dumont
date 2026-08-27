@@ -62,7 +62,7 @@ public class ReindexStrategy implements JobProcessingStrategy {
                 jobItem.turSNJobItem().getChecksum()));
 
         // Add to batch processor
-        batchProcessor.add(jobItem.turSNJobItem(), jobItem.session());
+        batchProcessor.add(jobItem);
 
         if (indexingModelList.size() > 1) {
             // Handle duplicated entries

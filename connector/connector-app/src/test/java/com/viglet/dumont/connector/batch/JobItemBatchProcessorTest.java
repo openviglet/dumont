@@ -16,23 +16,33 @@
 package com.viglet.dumont.connector.batch;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.springframework.jms.core.JmsMessagingTemplate;
 
+import com.viglet.dumont.commons.indexing.DumIndexingStatus;
+import com.viglet.dumont.commons.logging.DumLoggingIndexing;
+import com.viglet.dumont.commons.logging.DumLoggingIndexingLog;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
+import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
@@ -55,17 +65,25 @@ class JobItemBatchProcessorTest {
     }
 
     private static DumConnectorSession session() {
-        return new DumConnectorSession("wknd", "turing", Locale.US);
+        return session("wknd");
+    }
+
+    private static DumConnectorSession session(String source) {
+        return new DumConnectorSession(source, "turing", Locale.US);
+    }
+
+    private static DumJobItemWithSession buffered(String id, DumConnectorSession session) {
+        return new DumJobItemWithSession(item(id), session, Collections.emptySet(), false);
     }
 
     @Test
     void addBuffersUntilBatchSizeThenFlushes() {
-        processor.add(item("c1"), session());
+        processor.add(buffered("c1", session()));
         assertThat(processor.size()).isEqualTo(1);
         assertThat(processor.isEmpty()).isFalse();
         verify(jms, never()).convertAndSend(anyString(), any(Object.class));
 
-        processor.add(item("c2"), session());
+        processor.add(buffered("c2", session()));
 
         verify(jms, times(1)).convertAndSend(anyString(), any(TurSNJobItems.class));
         assertThat(processor.size()).isZero();
@@ -73,12 +91,12 @@ class JobItemBatchProcessorTest {
 
     @Test
     void deferredAddDoesNotFlushUntilExplicitFlush() {
-        processor.addDeferred(item("c1"));
-        processor.addDeferred(item("c2"));
-        processor.addDeferred(item("c3"));
+        processor.addDeferred(buffered("c1", session()));
+        processor.addDeferred(buffered("c2", session()));
+        processor.addDeferred(buffered("c3", session()));
         verify(jms, never()).convertAndSend(anyString(), any(Object.class));
 
-        processor.flush(session());
+        processor.flush();
 
         verify(jms, times(1)).convertAndSend(anyString(), any(TurSNJobItems.class));
         assertThat(processor.isEmpty()).isTrue();
@@ -86,7 +104,51 @@ class JobItemBatchProcessorTest {
 
     @Test
     void flushWithEmptyBufferDoesNotSend() {
-        processor.flush(session());
+        processor.flush();
         verify(jms, never()).convertAndSend(anyString(), any(Object.class));
+    }
+
+    @Test
+    @DisplayName("each item is logged under the session that produced it, not the flushing one (D69)")
+    void aDrainStampsEachItemWithItsOwnSession() {
+        // One buffer serves every source, so two runs can be mid-buffer at the same moment.
+        DumConnectorSession wknd = session("wknd");
+        DumConnectorSession docs = session("docs");
+        processor.addDeferred(buffered("/wknd/a", wknd));
+        processor.addDeferred(buffered("/docs/a", docs));
+
+        ArgumentCaptor<DumLoggingIndexing> rows = ArgumentCaptor.forClass(DumLoggingIndexing.class);
+        try (MockedStatic<DumLoggingIndexingLog> logged = mockStatic(DumLoggingIndexingLog.class)) {
+            // A third session asks for the drain — it owns neither item.
+            processor.flush();
+            logged.verify(() -> DumLoggingIndexingLog.setStatus(rows.capture()), times(2));
+        }
+
+        assertThat(rows.getAllValues())
+                .extracting(DumLoggingIndexing::getContentId, DumLoggingIndexing::getSource,
+                        DumLoggingIndexing::getTransactionId, DumLoggingIndexing::getStatus)
+                .containsExactly(
+                        tuple("/wknd/a", "wknd", wknd.getTransactionId(),
+                                DumIndexingStatus.SENT_TO_QUEUE),
+                        tuple("/docs/a", "docs", docs.getTransactionId(),
+                                DumIndexingStatus.SENT_TO_QUEUE));
+    }
+
+    @Test
+    @DisplayName("the auto-flush stamps the same way — it fires under whoever crossed the size")
+    void theAutoFlushIsAttributedPerItemToo() {
+        DumConnectorSession wknd = session("wknd");
+        DumConnectorSession docs = session("docs");
+        processor.add(buffered("/wknd/a", wknd));
+
+        ArgumentCaptor<DumLoggingIndexing> rows = ArgumentCaptor.forClass(DumLoggingIndexing.class);
+        try (MockedStatic<DumLoggingIndexingLog> logged = mockStatic(DumLoggingIndexingLog.class)) {
+            // The batch size is 2: this add crosses it and drains both.
+            processor.add(buffered("/docs/a", docs));
+            logged.verify(() -> DumLoggingIndexingLog.setStatus(rows.capture()), times(2));
+        }
+
+        assertThat(rows.getAllValues()).extracting(DumLoggingIndexing::getSource)
+                .containsExactly("wknd", "docs");
     }
 }

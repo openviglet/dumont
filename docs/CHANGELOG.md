@@ -237,6 +237,7 @@
 - **D62** — An Adobe I/O journal consumer pulls the same events behind a cursor persisted only after a page is dispatched, so a dropped webhook replays instead of going stale.
 - **D64** — The audit now enumerates the index per site and reports missing, stale and orphaned ids, requeueing the first two; ghosts are named, never deleted.
 - **D68** — The audit's orphans become a dated report reviewed and applied via /api/v2/connector/orphans, reusing the connector's own deindex; a fresh pass supersedes it and evidence past orphanTtl is refused.
+- **D69** — The batch buffer holds each item with the session that produced it, so a drain stamps every SENT_TO_QUEUE entry per item instead of under whoever asked to flush. Proven by JobItemBatchProcessorTest.
 
 ## Track F — Enrichment & semantics
 

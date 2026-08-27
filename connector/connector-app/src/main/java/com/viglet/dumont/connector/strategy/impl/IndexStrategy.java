@@ -51,7 +51,7 @@ public class IndexStrategy implements JobProcessingStrategy {
         indexingService.save(jobItem, PREPARE_INDEX);
 
         // Add to batch processor
-        batchProcessor.add(jobItem.turSNJobItem(), jobItem.session());
+        batchProcessor.add(jobItem);
 
         // Update status
         setSuccessStatus(jobItem, PREPARE_INDEX);

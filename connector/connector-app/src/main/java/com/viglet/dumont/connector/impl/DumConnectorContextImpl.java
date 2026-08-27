@@ -135,7 +135,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
         // Flush pending items BEFORE acquiring the write lock. The JMS send may
         // block on Artemis producer flow control; holding the write lock during
         // that wait blocks every addJobItem call in producer threads.
-        batchProcessor.flush(session);
+        batchProcessor.flush();
 
         ReadWriteLock lock = getLock(source);
         lock.writeLock().lock();
@@ -165,7 +165,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
         // Final flush for delete jobs queued during deindex — outside the lock.
         if (!standalone) {
-            batchProcessor.flush(session);
+            batchProcessor.flush();
         }
     }
 
@@ -253,8 +253,10 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
         // Use addDeferred so a large deindex list never triggers an auto-flush
         // while the source's write lock is held. finishIndexing flushes
-        // explicitly after releasing the lock.
-        batchProcessor.addDeferred(deleteJobItem);
+        // explicitly after releasing the lock. The session travels with the item (D69) so the
+        // drain — whoever asks for it — files the row under this source.
+        batchProcessor.addDeferred(new DumJobItemWithSession(deleteJobItem, session,
+                Collections.emptySet(), false));
     }
 
     /**
@@ -275,7 +277,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
                     session.getSource(), sites, session.getLocale(), session.getTransactionId());
             createDeleteJob(session, objectId, sites, session.getLocale());
         });
-        batchProcessor.flush(session);
+        batchProcessor.flush();
         return ids.size();
     }
 }

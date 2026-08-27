@@ -76,33 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XXV One buffer, many sessions (D69)
-
-`JobItemBatchProcessor` is a singleton with one `TurSNJobItems buffer` field, and every
-source's job items land in it. `flush(session)` drains the whole buffer and calls
-`setSuccessStatus` on each item with that one session — writing `session.getSource()`
-and `getTransactionId()` onto items produced by whichever source happened to be indexing
-at the same moment.
-
-Nothing in the buffer records which session put an item there, so this is not a race a
-lock would close: the attribution is lost at `add` time and invented at `flush` time.
-The auto-flush inside `add` has the same shape — it fires when the buffer reaches
-`dumont.job.size`, under whichever session made the crossing call.
-
-The result is a ledger that names the wrong source. A monitoring page filtered by source
-shows another's documents, one transaction id groups two runs, and the index audit reads
-a checksum it attributes to a source that never published it. That last one matters
-most: the audit's premise is that the ledger says what *this* source published.
-
-D68 widened the exposure rather than creating it — applying an orphan report flushes on
-an operator's request, at a moment nobody chose, while a scheduled run may be
-mid-buffer.
-
-The fix is to carry the session with the item rather than pass one at drain time.
-`DumJobItemWithSession` is already that shape and the queue uses it everywhere else.
-Flushing then stamps each item with the session that produced it, and `flush(session)`
-becomes a request to drain rather than a claim about ownership.
-
 ## XXVI A review nobody can see is not a review (D70)
 
 D68 gave the audit's ghosts somewhere to wait: a dated report per source and site,

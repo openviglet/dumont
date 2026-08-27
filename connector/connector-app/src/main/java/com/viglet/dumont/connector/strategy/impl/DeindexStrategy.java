@@ -56,7 +56,7 @@ public class DeindexStrategy implements JobProcessingStrategy {
         }
 
         // Add to batch processor
-        batchProcessor.add(jobItem.turSNJobItem(), jobItem.session());
+        batchProcessor.add(jobItem);
 
         // Update status
         setSuccessStatus(jobItem, DEINDEXED);

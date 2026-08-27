@@ -31,6 +31,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -150,7 +151,7 @@ class DumConnectorContextImplTest {
 
         context.finishIndexing(session, true);
 
-        verify(batchProcessor, times(1)).flush(session);
+        verify(batchProcessor, times(1)).flush();
         verify(indexingService, never()).completeIndexingStats(any(), any());
         verify(indexingService).finishProcessing("wknd");
     }
@@ -162,7 +163,7 @@ class DumConnectorContextImplTest {
 
         context.finishIndexing(session, false);
 
-        verify(batchProcessor, times(2)).flush(session);
+        verify(batchProcessor, times(2)).flush();
         verify(indexingService).completeIndexingStats("wknd", "turing");
         verify(indexingService).finishProcessing("wknd");
     }
@@ -178,7 +179,13 @@ class DumConnectorContextImplTest {
 
         context.finishIndexing(session, false);
 
-        verify(batchProcessor).addDeferred(any(TurSNJobItem.class));
+        // D69: the delete job carries the session that queued it, so a drain another source asks
+        // for still files this row under 'wknd'.
+        ArgumentCaptor<DumJobItemWithSession> deferred =
+                ArgumentCaptor.forClass(DumJobItemWithSession.class);
+        verify(batchProcessor).addDeferred(deferred.capture());
+        assertThat(deferred.getValue().session()).isSameAs(session);
+        assertThat(deferred.getValue().turSNJobItem().getId()).isEqualTo("/content/gone");
         verify(indexingService).deleteContentsToBeDeIndexed(session);
     }
 
