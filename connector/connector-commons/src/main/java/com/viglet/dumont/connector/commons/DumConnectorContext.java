@@ -19,12 +19,24 @@ package com.viglet.dumont.connector.commons;
 import java.util.List;
 
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
+import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 
 public interface DumConnectorContext {
     boolean addJobItem(DumJobItemWithSession dumJobItemWithSession);
 
     void finishIndexing(DumConnectorSession session, boolean standalone);
+
+    /**
+     * Declares a source's field schema to the configured search backend before its documents
+     * (roadmap <strong>D63</strong>). A no-op by default, so a plugin or test context that predates
+     * provisioning is unchanged.
+     *
+     * @param schema the site, locale and declared fields
+     */
+    default void provisionSchema(DumIndexingSchema schema) {
+        // No backend to declare to.
+    }
 
     List<DumConnectorIndexing> getIndexingItem(String objectId, String source, String provider);
 

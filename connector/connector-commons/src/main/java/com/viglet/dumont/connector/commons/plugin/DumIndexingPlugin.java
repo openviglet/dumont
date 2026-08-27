@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.commons.plugin;
 
+import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 
 /**
@@ -33,11 +34,26 @@ public interface DumIndexingPlugin {
      * @param turSNJobItems the job items to be indexed
      */
     void index(TurSNJobItems turSNJobItems);
-    
+
     /**
      * Gets the name of the indexing provider
-     * 
+     *
      * @return the provider name (e.g., "TURING", "SOLR", "ELASTICSEARCH")
      */
     String getProviderName();
+
+    /**
+     * Declares a source's field schema to the search engine <em>before</em> its documents (roadmap
+     * <strong>D63</strong>), so fields exist as declared instead of being invented from the first
+     * value that happens to arrive — a multi-valued field created single-valued, a facet created
+     * without one, an optional field that does not exist until it appears.
+     * <p>
+     * A no-op by default: a backend with no declarative schema endpoint is unchanged, and its
+     * indexing keeps whatever inference it did before.
+     *
+     * @param schema the site, locale and declared fields
+     */
+    default void provision(DumIndexingSchema schema) {
+        // Backends without a declarative schema endpoint have nothing to send.
+    }
 }

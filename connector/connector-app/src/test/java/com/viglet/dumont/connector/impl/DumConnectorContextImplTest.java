@@ -37,10 +37,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.viglet.dumont.connector.batch.JobItemBatchProcessor;
 import com.viglet.dumont.connector.chain.JobProcessingChain;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
+import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
+import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,12 +55,48 @@ class DumConnectorContextImplTest {
     private JobItemBatchProcessor batchProcessor;
     @Mock
     private JobProcessingChain processingChain;
+    @Mock
+    private DumIndexingPlugin indexingPlugin;
 
     private DumConnectorContextImpl context;
 
     @BeforeEach
     void setUp() {
-        context = new DumConnectorContextImpl(indexingService, batchProcessor, processingChain);
+        context = context(true);
+    }
+
+    private DumConnectorContextImpl context(boolean provisionEnabled) {
+        return new DumConnectorContextImpl(indexingService, batchProcessor, processingChain,
+                indexingPlugin, provisionEnabled);
+    }
+
+    private static DumIndexingSchema schema() {
+        return new DumIndexingSchema("Sample", Locale.US,
+                List.of(new TurSNJobAttributeSpec()));
+    }
+
+    @Test
+    void provisionSchemaReachesTheIndexingPlugin() {
+        DumIndexingSchema schema = schema();
+
+        context.provisionSchema(schema);
+
+        verify(indexingPlugin).provision(schema);
+    }
+
+    @Test
+    void provisionSchemaIsSkippedWhenDisabled() {
+        context(false).provisionSchema(schema());
+
+        verify(indexingPlugin, never()).provision(any());
+    }
+
+    @Test
+    void provisionSchemaIsSkippedForAnEmptyOrAbsentSchema() {
+        context.provisionSchema(null);
+        context.provisionSchema(new DumIndexingSchema("Sample", Locale.US, List.of()));
+
+        verify(indexingPlugin, never()).provision(any());
     }
 
     private static DumJobItemWithSession jobItem(String id) {

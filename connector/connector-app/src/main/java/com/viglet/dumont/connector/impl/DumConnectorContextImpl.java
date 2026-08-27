@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.batch.JobItemBatchProcessor;
@@ -36,7 +37,9 @@ import com.viglet.dumont.connector.chain.JobProcessingChain;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
+import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingModel;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
@@ -58,16 +61,35 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     private final DumConnectorIndexingService indexingService;
     private final JobItemBatchProcessor batchProcessor;
     private final JobProcessingChain processingChain;
+    private final DumIndexingPlugin indexingPlugin;
+    private final boolean provisionEnabled;
     private final Map<String, ConcurrentLinkedQueue<DumJobItemWithSession>> queuesBySource = new ConcurrentHashMap<>();
     private final Map<String, ReadWriteLock> locksBySource = new ConcurrentHashMap<>();
 
     public DumConnectorContextImpl(
             DumConnectorIndexingService indexingService,
             JobItemBatchProcessor batchProcessor,
-            JobProcessingChain processingChain) {
+            JobProcessingChain processingChain,
+            DumIndexingPlugin indexingPlugin,
+            @Value("${dumont.indexing.provision:true}") boolean provisionEnabled) {
         this.indexingService = indexingService;
         this.batchProcessor = batchProcessor;
         this.processingChain = processingChain;
+        this.indexingPlugin = indexingPlugin;
+        this.provisionEnabled = provisionEnabled;
+    }
+
+    /**
+     * Sends a source's declared schema to the active indexing backend (roadmap
+     * <strong>D63</strong>). Skipped when {@code dumont.indexing.provision=false} or the source
+     * declares no fields — provisioning an empty schema would say nothing and could only do harm.
+     */
+    @Override
+    public void provisionSchema(DumIndexingSchema schema) {
+        if (!provisionEnabled || schema == null || schema.isEmpty()) {
+            return;
+        }
+        indexingPlugin.provision(schema);
     }
 
     @Override

@@ -79,6 +79,10 @@ dumont:
     # Indexing provider: turing, solr, or elasticsearch
     # Default is turing (if not specified)
     provider: turing
+    # D63: send each source's declared field schema to the backend before its first document, so
+    # fields exist as declared instead of being inferred from whichever value arrives first. A
+    # rejected manifest is reported and indexing continues with the site's current schema.
+    provision: true
     solr:
       # Solr configuration (required when provider is solr)
       url: http://localhost:8983/solr

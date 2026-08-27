@@ -36,8 +36,6 @@ relations (what a task *enables*) live in the task text.
 > end-to-end · **D04** Pluggable enrichment stage (grounding-safe derive/normalize +
 > config-gated, cached LLM classification). All enable the tasks below.
 
-- 📋 **D63** (deps: Turing T1030) **The connector never provisions the SN site it indexes into** — DumStructuredSchema declares every field, but nothing sends it ahead of the documents, so Turing auto-creates each field by guessing from one value. → §XIX
-
 ## Track B — Web-crawler hardening (real-world sources)
 
 > **Objective**: close the gaps that make the current `DumWCPluginProcess` fail on

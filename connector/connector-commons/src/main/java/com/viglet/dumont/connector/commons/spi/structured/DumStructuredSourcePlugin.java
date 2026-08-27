@@ -26,6 +26,7 @@ import java.util.Set;
 
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
+import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumContentTypeCoverageRecorder;
@@ -255,6 +256,9 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     @Override
     public void indexAll(String source) {
         provider().resolve(source).ifPresentOrElse(structuredSource -> {
+            // Declare the schema before the first document (D63): the backend creates the fields as
+            // declared instead of inferring each one from whichever value arrives first.
+            provisionSchema(structuredSource);
             DumConnectorSession session = newSession(structuredSource);
             // Capture a fingerprint of every published document so a later dry-run preview (D14) can
             // diff against the last full index. Only indexAll captures it — a partial indexById run
@@ -307,6 +311,29 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             provenanceHistoryStore.recordSnapshot(source, provenance.documentCount(), provenance.fields());
             byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
         }, () -> log.error("Structured source '{}' not found", source));
+    }
+
+    /**
+     * Declares the source's schema to the indexing backend, once per site it publishes to, before
+     * any document of this run (roadmap <strong>D63</strong>).
+     *
+     * <p>
+     * The fields are the same {@code TurSNJobAttributeSpec}s attached to every published document,
+     * so there is no second schema to keep in step. Called from {@link #indexAll(String)} only: that
+     * is the run that establishes a source in the index, and the declaration is what the
+     * partial-run paths ({@link #finishPartialRunStandalone}) are protecting. A per-id
+     * {@link #indexById} call deliberately does not provision — it is a single-document update
+     * against a site a full run already declared, and a schema change belongs to a full run.
+     *
+     * <p>
+     * A source publishing to no site (no site names configured) has nothing to declare.
+     */
+    private void provisionSchema(DumStructuredSource structuredSource) {
+        List<TurSNJobAttributeSpec> fields = structuredSource.schema().toAttributeSpecs();
+        for (String siteName : structuredSource.getSiteNames()) {
+            dumConnectorContext.provisionSchema(
+                    new DumIndexingSchema(siteName, structuredSource.getLocale(), fields));
+        }
     }
 
     /**

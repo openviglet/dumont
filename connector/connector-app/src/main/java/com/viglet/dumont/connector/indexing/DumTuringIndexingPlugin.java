@@ -24,11 +24,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.auth.credentials.TurApiKeyCredentials;
 import com.viglet.turing.client.sn.TurSNServer;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 import com.viglet.turing.client.sn.job.TurSNJobUtils;
+import com.viglet.turing.client.sn.manifest.TurSNManifest;
+import com.viglet.turing.client.sn.manifest.TurSNManifestException;
+import com.viglet.turing.client.sn.manifest.TurSNManifestResult;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,6 +66,45 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
     @Override
     public String getProviderName() {
         return "TURING";
+    }
+
+    /**
+     * Converges the site and its field schema through Turing's manifest endpoint before the first
+     * document (roadmap <strong>D63</strong>). Re-posting the same manifest is a server-side no-op,
+     * so this is safe on every run and needs no local "already provisioned" bookkeeping.
+     * <p>
+     * A rejected manifest does <em>not</em> stop the run. A {@code 409} means Turing kept the site's
+     * current schema, so indexing proceeds exactly as it did before this call existed — with fields
+     * inferred at index time. Refusing to index would take a working index offline over a schema
+     * drift the operator may not be able to resolve at that moment, so the failure is reported
+     * loudly, naming the fields that would have had to be rewritten, and the documents still flow.
+     */
+    @Override
+    public void provision(DumIndexingSchema schema) {
+        TurSNManifest manifest = TurSNManifest.builder()
+                .name(schema.siteName())
+                .locale(schema.locale())
+                .fields(schema.fields())
+                .build();
+        try {
+            TurSNManifestResult result = getTurSNServer().provision(manifest);
+            if (result.isNoOp()) {
+                log.debug("Site '{}' schema already matches the {} declared field(s)",
+                        schema.siteName(), schema.fields().size());
+            } else {
+                log.info("Provisioned site '{}' (created={}) from {} declared field(s)",
+                        result.siteName(), result.siteCreated(), schema.fields().size());
+            }
+        } catch (TurSNManifestException e) {
+            if (e.isMigrationRequired()) {
+                log.error("Site '{}' schema needs a declared migration — indexing continues with the "
+                        + "site's current schema. Breaking change(s): {}", schema.siteName(),
+                        e.getBreakingChanges());
+            } else {
+                log.error("Could not provision site '{}': {} — indexing continues with the site's "
+                        + "current schema", schema.siteName(), e.getMessage(), e);
+            }
+        }
     }
 
     private TurSNServer getTurSNServer() {

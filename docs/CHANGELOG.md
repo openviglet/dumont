@@ -45,6 +45,7 @@
   production impl over Turing's `POST /api/v2/summary` (no new model wiring). Proven by
   `DumStructuredEnrichmentPluginTest` + the per-component tests and `DumTuringClassifierTest`.
   Enables D17/D18/D19.
+- **D63** — indexAll now posts the source's declared TurSNJobAttributeSpecs to Turing's manifest endpoint, once per site, before the first document, so fields exist as declared.
 
 ## Track B — Web-crawler hardening (real-world sources)
 

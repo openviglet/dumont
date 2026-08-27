@@ -76,31 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XIX Send the schema before the documents (D63)
-
-`DumStructuredSchema` is Dumont's schema-as-code: an ordered, immutable declaration of
-every field a structured source publishes. It already produces the
-`TurSNJobAttributeSpec`s attached to each document and enforces the absent-versus-empty
-grounding rule (D03) at the record boundary.
-
-Nothing sends that declaration ahead of the documents. The connector starts indexing and
-Turing's indexing-time auto-create path invents each field the first time a document
-carries it, inferring the type from a single value. A field declared multi-valued but
-arriving with one value in the first document is created single-valued. A field the
-schema marks as a facet is created without it. An optional field absent from the early
-documents does not exist until it appears — and is then guessed too.
-
-Turing has accepted the declarative form since T382: `POST /api/sn/manifest` converges a
-site and its field schema idempotently, rejects an undeclared breaking change with a
-409, and offers a dry-run plan. Re-posting the same manifest is a no-op, so it is safe
-to send on every run.
-
-The missing step is the call itself, once per source before the first document, built
-from the schema the connector already holds. It waits on a manifest client in
-`turing-java-sdk`, filed there as T1030, since hand-rolling the HTTP would duplicate the
-auth and CSRF the SDK already does for indexing. With it, configuring a source in Dumont
-provisions the site in Turing.
-
 ## XX The third comparison the audit cannot make (D64)
 
 `DumConnectorContentAuditTask` runs on a cron, calls `discoverContentIds` for each

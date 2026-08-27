@@ -16,10 +16,17 @@
 
 package com.viglet.dumont.connector.indexing;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
+import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 
 @SpringBootTest
 class DumTuringIndexingPluginTest {
@@ -35,5 +42,19 @@ class DumTuringIndexingPluginTest {
         // Assert
         assertNotNull(DumTuringIndexingPlugin.class.getAnnotation(
                 org.springframework.stereotype.Component.class));
+    }
+
+    /**
+     * D63: a manifest that cannot be sent must not abort the run. The SDK wraps every failure —
+     * unreachable host included — in {@code TurSNManifestException}, and the plugin reports it and
+     * lets the documents flow with the site's current schema.
+     */
+    @Test
+    void provisionDoesNotThrowWhenTuringIsUnreachable() {
+        DumTuringIndexingPlugin plugin =
+                new DumTuringIndexingPlugin("http://localhost:1/turing", "key");
+
+        assertDoesNotThrow(() -> plugin.provision(new DumIndexingSchema("Sample", Locale.US,
+                List.of(new TurSNJobAttributeSpec()))));
     }
 }
