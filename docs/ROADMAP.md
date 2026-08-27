@@ -75,20 +75,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track E — Data quality & trust (make Dumont trustworthy in production)
-
-> **Objective**: surface silent degradation and make every published field auditable.
-> This is what the parity gate (D11) and the RAG consumer both need — and the lever that
-> moves Dumont from "a pipe that ran" to "a pipe you can trust".
-
-> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D15** Field-coverage & drift monitoring
-> (per-run per-field coverage captured at `indexAll`, persisted history per source, drift flag
-> when a field's coverage drops sharply between two runs; surfaced on `DumConnectorMonitoringApi`
-> + a `dumont-react` panel with an `AiSummaryPanel` health summary). **D16** Field-level provenance
-> (each published field tagged with its origin and carried into the `TurSNJobItem` as a compact
-> `dum_provenance` attribute; per-source last-seen history so a dropped field stays auditable).
-> Complements D09.
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that

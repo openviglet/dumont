@@ -29,6 +29,13 @@
   through the same schema, per-field coverage is tracked so a layout change cannot silently drop a
   field, and an interrupted run leaves the previous index intact.
 
+- **Data Quality & Trust**: A run that reports success is not the same as an index you can trust.
+  Per-field coverage is compared between runs, so a selector that stops matching raises a drift flag
+  naming the field. Every published field carries where its value came from. An incomplete run never
+  de-indexes what it did not reach. And a scheduled audit compares the source *and* the connector's
+  ledger against the index itself, reporting documents that never landed, went stale, or linger
+  after leaving the source.
+
 - **Web Console**: Configure sources, launch indexing and watch it run, in English or Portuguese.
   Built from the same component library as Viglet Turing ES and Viglet Shio, and mountable inside
   Turing as well as standalone.
