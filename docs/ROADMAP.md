@@ -59,22 +59,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track D — Adoption & authoring (lower the cost of a new source)
-
-> **Objective**: make "index a new structured source" a guided, minutes-long task —
-> not a dev task. Track A turns a source into a declarative manifest; this track makes
-> *producing and validating that manifest* cheap and safe. This is the adoption layer
-> that turns the framework into a product capability — see [STRATEGY.md](STRATEGY.md)
-> §"The second bet".
-
-> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D13** AI-assisted source inference
-> (URL → shape classification + editable strategy/field-manifest draft over Turing's LLM
-> surface; a confirmed tabular draft materializes + indexes end-to-end, grounding-safe) ·
-> **D14** Dry-run preview & schema diff (bounded sample → per-field coverage + schema/document
-> diff vs the last indexed baseline, writes nothing).
-
-This track has no remaining pending tasks.
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that

@@ -29,6 +29,11 @@
   through the same schema, per-field coverage is tracked so a layout change cannot silently drop a
   field, and an interrupted run leaves the previous index intact.
 
+- **Guided Onboarding**: Point the wizard at a URL and Dumont infers the source's shape and field
+  manifest for you to correct. A dry run then shows what indexing *would* produce — per-field
+  coverage, records that would be skipped, and a diff against the last run — writing nothing. Only
+  a draft you confirm gets indexed; nothing is ever published on a guess.
+
 - **Data Quality & Trust**: A run that reports success is not the same as an index you can trust.
   Per-field coverage is compared between runs, so a selector that stops matching raises a drift flag
   naming the field. Every published field carries where its value came from. An incomplete run never
