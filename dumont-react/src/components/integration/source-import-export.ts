@@ -59,6 +59,8 @@ interface ExchangeSource {
   publishSNSite?: string;
   authorURLPrefix?: string;
   publishURLPrefix?: string;
+  fetchStrategy?: string;
+  deliveryURLPrefix?: string;
   rootPath?: string;
   contentType?: string;
   subType?: string;
@@ -173,6 +175,8 @@ function mapExchangeSource(src: ExchangeSource): Partial<TurIntegrationAemSource
     publishSNSite: src.publishSNSite ?? "",
     authorURLPrefix: src.authorURLPrefix ?? "",
     publishURLPrefix: src.publishURLPrefix ?? "",
+    fetchStrategy: src.fetchStrategy === "DELIVERY" ? "DELIVERY" : "SLING",
+    deliveryURLPrefix: src.deliveryURLPrefix ?? "",
     localePaths: (src.localePaths ?? []).map(mapLocalePath),
     attributeSpecifications: (src.attributes ?? src.targetAttrDefinitions ?? []).map(mapAttrib),
     models: (src.models ?? []).map(mapModel),
@@ -198,6 +202,9 @@ export function exportSourceToJson(source: TurIntegrationAemSource): string {
     publishSNSite: source.publishSNSite || undefined,
     authorURLPrefix: source.authorURLPrefix || undefined,
     publishURLPrefix: source.publishURLPrefix || undefined,
+    // Only the non-default strategy travels, so an existing export stays byte-identical.
+    fetchStrategy: source.fetchStrategy === "DELIVERY" ? "DELIVERY" : undefined,
+    deliveryURLPrefix: source.deliveryURLPrefix || undefined,
     rootPath: source.rootPath,
     contentType: source.contentType,
     subType: source.subType || undefined,

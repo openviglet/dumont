@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 
+import com.viglet.dumont.connector.aem.commons.bean.DumAemFetchStrategy;
 import com.viglet.dumont.connector.aem.commons.config.IAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.context.DumAemLocalePathContext;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
@@ -44,6 +45,8 @@ public class AemPluginHandlerConfiguration implements IAemConfiguration {
     private final boolean publish;
     private final String authorSNSite;
     private final String publishSNSite;
+    private final DumAemFetchStrategy fetchStrategy;
+    private final String deliveryURLPrefix;
 
     public AemPluginHandlerConfiguration(DumAemSource dumAemSource) {
         this.dumAemSource = dumAemSource;
@@ -63,6 +66,8 @@ public class AemPluginHandlerConfiguration implements IAemConfiguration {
         publish = dumAemSource.isPublish();
         authorSNSite = dumAemSource.getAuthorSNSite();
         publishSNSite = dumAemSource.getPublishSNSite();
+        fetchStrategy = DumAemFetchStrategy.from(dumAemSource.getFetchStrategy());
+        deliveryURLPrefix = dumAemSource.getDeliveryURLPrefix();
     }
 
     @Override
@@ -152,5 +157,15 @@ public class AemPluginHandlerConfiguration implements IAemConfiguration {
     @Override
     public String getPublishSNSite() {
         return publishSNSite;
+    }
+
+    @Override
+    public DumAemFetchStrategy getFetchStrategy() {
+        return fetchStrategy;
+    }
+
+    @Override
+    public String getDeliveryURLPrefix() {
+        return deliveryURLPrefix;
     }
 }

@@ -40,6 +40,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.bean.DumAemFetchStrategy;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemAttribExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemModelExchange;
@@ -149,6 +150,8 @@ public class DumAemExchangeProcess {
                                         .publishSNSite(dumAemSource.getPublishSNSite())
                                         .author(dumAemSource.isAuthor())
                                         .publish(dumAemSource.isPublish())
+                                        .fetchStrategy(dumAemSource.getFetchStrategy())
+                                        .deliveryURLPrefix(dumAemSource.getDeliveryURLPrefix())
                                         .name(dumAemSource.getName())
                                         .build())
                                 .toList()));
@@ -309,6 +312,9 @@ public class DumAemExchangeProcess {
                 .indexConditionClass(dumAemSourceExchange.getIndexConditionClass())
                 .authorURLPrefix(dumAemSourceExchange.getAuthorURLPrefix())
                 .publishURLPrefix(dumAemSourceExchange.getPublishURLPrefix())
+                .fetchStrategy(DumAemFetchStrategy
+                        .from(dumAemSourceExchange.getFetchStrategy()).name())
+                .deliveryURLPrefix(dumAemSourceExchange.getDeliveryURLPrefix())
                 .oncePattern(dumAemSourceExchange.getOncePattern())
                 .username(dumAemSourceExchange.getUsername())
                 .password(dumAemSourceExchange.getPassword())

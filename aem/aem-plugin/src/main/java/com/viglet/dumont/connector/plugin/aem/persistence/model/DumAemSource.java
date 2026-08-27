@@ -97,6 +97,14 @@ public class DumAemSource implements Serializable {
         private String authorURLPrefix;
         @Column
         private String publishURLPrefix;
+        /**
+         * How this source's content is fetched (roadmap D61): {@code SLING} (the author-tier
+         * servlets, the default) or {@code DELIVERY} (the publish-tier delivery APIs).
+         */
+        @Column
+        private String fetchStrategy;
+        @Column
+        private String deliveryURLPrefix;
 
         @Builder.Default
         @OneToMany(mappedBy = "dumAemSource", orphanRemoval = true, fetch = FetchType.LAZY, cascade = {

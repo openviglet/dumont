@@ -66,7 +66,7 @@ public class IndexingCommandFactory {
      * @return the index all command
      */
     public IndexingCommand createIndexAllCommand(DumAemSession session) {
-        if (queryBuilderEnabled) {
+        if (useQueryBuilder(session)) {
             log.info("Using QueryBuilder strategy for source: {}", session.getSource());
             return new IndexAllQueryBuilderCommand(session, nodeNavigator, parallelism);
         }
@@ -86,12 +86,21 @@ public class IndexingCommandFactory {
      * @return the index paths command
      */
     public IndexingCommand createIndexPathsCommand(DumAemSession session, List<String> paths) {
-        if (queryBuilderEnabled
+        if (useQueryBuilder(session)
                 && session.isRecursive()
                 && session.getEvent() != DumAemEvent.DEINDEXING) {
             log.info("Using QueryBuilder strategy for standalone source: {}", session.getSource());
             return new IndexPathsQueryBuilderCommand(session, paths, nodeNavigator, jobService, parallelism);
         }
         return new IndexPathsCommand(session, paths, nodeNavigator, jobService);
+    }
+
+    /**
+     * Whether this session may discover through {@code /bin/querybuilder.json}: the global flag,
+     * narrowed by the source's own configuration, which turns it off for a source on the delivery
+     * fetch strategy (roadmap <strong>D61</strong>) — the publish tier does not serve that servlet.
+     */
+    private boolean useQueryBuilder(DumAemSession session) {
+        return queryBuilderEnabled && session.getConfiguration().isQueryBuilderEnabled();
     }
 }

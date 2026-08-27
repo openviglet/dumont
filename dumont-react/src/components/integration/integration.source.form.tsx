@@ -12,7 +12,15 @@ import {
 import {
   Input
 } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TUR_INTEGRATION_AEM_FETCH_STRATEGIES } from "@/models/integration/integration-aem-source.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import type { TurLocale } from "@/models/locale/locale.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
@@ -83,6 +91,8 @@ export const IntegrationSourceForm: React.FC<Props> = ({
     publishSNSite: src.publishSNSite ?? "",
     authorURLPrefix: src.authorURLPrefix ?? "",
     publishURLPrefix: src.publishURLPrefix ?? "",
+    fetchStrategy: src.fetchStrategy ?? "SLING",
+    deliveryURLPrefix: src.deliveryURLPrefix ?? "",
     localePaths: src.localePaths ?? [],
     attributeSpecifications: src.attributeSpecifications ?? [],
     models: src.models ?? [],
@@ -96,6 +106,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
   const [locales, setLocales] = useState<TurLocale[]>([]);
   const authorEnabled = form.watch("author");
   const publishEnabled = form.watch("publish");
+  const deliveryFetch = form.watch("fetchStrategy") === "DELIVERY";
   useEffect(() => {
     form.reset(sanitize(value));
     turLocaleService.query().then(setLocales)
@@ -304,6 +315,53 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                       </FormItem>
                     )}
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="fetchStrategy"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("forms.integrationSource.fetchStrategy")}</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {TUR_INTEGRATION_AEM_FETCH_STRATEGIES.map((strategy) => (
+                              <SelectItem key={strategy} value={strategy}>
+                                {t(`forms.integrationSource.fetchStrategy${strategy}`)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          {t(`forms.integrationSource.fetchStrategy${field.value}Desc`)}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {deliveryFetch && (
+                    <FormField
+                      control={form.control}
+                      name="deliveryURLPrefix"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("forms.integrationSource.deliveryUrlPrefix")}</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="https://delivery-p12345-e67890.adobeaemcloud.com" type="url" />
+                          </FormControl>
+                          <FormDescription>{t("forms.integrationSource.deliveryUrlPrefixDesc")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
 
                 <FormField

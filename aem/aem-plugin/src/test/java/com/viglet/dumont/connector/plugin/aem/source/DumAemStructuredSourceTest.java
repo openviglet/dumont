@@ -24,6 +24,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -162,11 +164,27 @@ class DumAemStructuredSourceTest {
     void discoverViaQueryBuilder() {
         DumAemSource source = source(DumAemAttributeSpecification.builder().name("id").build());
         lenient().when(sessionService.getDumAemSession(source, false)).thenReturn(session);
+        lenient().when(session.getConfiguration()).thenReturn(configuration);
         when(navigator.collectAccessiblePathsViaQueryBuilder(session))
                 .thenReturn(List.of("/content/a", "/content/b"));
 
         assertThat(adapterWithNavigator(source, true).discover())
                 .containsExactly("/content/a", "/content/b");
+    }
+
+    @Test
+    @DisplayName("discover() uses the delivery APIs for a delivery source, never QueryBuilder (D61)")
+    void discoverViaDelivery() {
+        DumAemSource source = source(DumAemAttributeSpecification.builder().name("id").build());
+        lenient().when(sessionService.getDumAemSession(source, false)).thenReturn(session);
+        lenient().when(session.getConfiguration()).thenReturn(configuration);
+        when(configuration.isDeliveryFetch()).thenReturn(true);
+        when(navigator.collectAccessiblePathsViaDelivery(session))
+                .thenReturn(List.of("/content/a", "/content/b"));
+
+        assertThat(adapterWithNavigator(source, true).discover())
+                .containsExactly("/content/a", "/content/b");
+        verify(navigator, never()).collectAccessiblePathsViaQueryBuilder(session);
     }
 
     @Test

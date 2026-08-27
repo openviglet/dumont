@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.viglet.dumont.connector.aem.commons.bean.DumAemFetchStrategy;
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import com.viglet.dumont.connector.plugin.aem.api.dto.DumAemSourceRequest;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
@@ -171,6 +172,8 @@ public class DumAemSourceApi {
                 .publishSNSite(request.getPublishSNSite())
                 .authorURLPrefix(request.getAuthorURLPrefix())
                 .publishURLPrefix(request.getPublishURLPrefix())
+                .fetchStrategy(DumAemFetchStrategy.from(request.getFetchStrategy()).name())
+                .deliveryURLPrefix(request.getDeliveryURLPrefix())
                 .build();
         entity.setLocalePaths(request.getLocalePaths());
         entity.setAttributeSpecifications(request.getAttributeSpecifications());

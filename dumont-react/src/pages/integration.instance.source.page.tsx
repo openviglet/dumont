@@ -24,6 +24,7 @@ export default function IntegrationInstanceSourcePage() {
     author: false, publish: false,
     authorSNSite: "", publishSNSite: "",
     authorURLPrefix: "", publishURLPrefix: "",
+    fetchStrategy: "SLING", deliveryURLPrefix: "",
     localePaths: [], attributeSpecifications: [], models: [],
   });
   /*

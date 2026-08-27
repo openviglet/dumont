@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemDeliveryUtils;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemQueryBuilderUtils;
 import com.viglet.dumont.connector.plugin.aem.context.DumAemSession;
 import com.viglet.dumont.connector.plugin.aem.service.DumAemJobService;
@@ -277,6 +278,18 @@ public class AemNodeNavigator {
      */
     public List<String> collectAccessiblePathsViaQueryBuilder(DumAemSession session) {
         return DumAemQueryBuilderUtils.queryAllPaths(session.getConfiguration());
+    }
+
+    /**
+     * Collects every content path under the configured root through the publish-tier delivery APIs
+     * (roadmap <strong>D61</strong>) — the discovery a Cloud Service source uses, where neither
+     * {@code /bin/querybuilder.json} nor the {@code .infinity.json} descent is served.
+     *
+     * @param session the AEM session
+     * @return list of content paths
+     */
+    public List<String> collectAccessiblePathsViaDelivery(DumAemSession session) {
+        return DumAemDeliveryUtils.queryAllPaths(session.getConfiguration());
     }
 
     private void collectChildPaths(DumAemSession session, DumAemObjectGeneric aemObject, List<String> paths) {

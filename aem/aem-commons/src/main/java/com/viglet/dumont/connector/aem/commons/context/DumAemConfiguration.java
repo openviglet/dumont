@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 
+import com.viglet.dumont.connector.aem.commons.bean.DumAemFetchStrategy;
 import com.viglet.dumont.connector.aem.commons.config.IAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
 
@@ -59,8 +60,27 @@ public class DumAemConfiguration {
   private String contentType;
   private boolean queryBuilderEnabled;
 
+  /** How this source's content is fetched (roadmap D61); never null once built. */
+  @Builder.Default
+  private DumAemFetchStrategy fetchStrategy = DumAemFetchStrategy.SLING;
+  /** The {@code delivery-pXXXX-eYYYY} host, when the delivery strategy uses a dedicated one. */
+  private String deliveryURLPrefix;
+
   @Builder.Default
   private Collection<DumAemLocalePathContext> localePaths = new HashSet<>();
+
+  /**
+   * Whether content is reached through the publish-tier delivery APIs rather than the author-tier
+   * Sling servlets (roadmap <strong>D61</strong>).
+   */
+  public boolean isDeliveryFetch() {
+    return fetchStrategy == DumAemFetchStrategy.DELIVERY;
+  }
+
+  /** The copy constructors bypass the builder default, so a null strategy is normalised here. */
+  private static DumAemFetchStrategy defaulted(DumAemFetchStrategy strategy) {
+    return strategy != null ? strategy : DumAemFetchStrategy.SLING;
+  }
 
   public DumAemConfiguration(DumAemConfiguration dumAemConfiguration) {
     this.id = dumAemConfiguration.getId();
@@ -83,6 +103,8 @@ public class DumAemConfiguration {
     this.authorSNSite = dumAemConfiguration.getAuthorSNSite();
     this.publishSNSite = dumAemConfiguration.getPublishSNSite();
     this.queryBuilderEnabled = dumAemConfiguration.isQueryBuilderEnabled();
+    this.fetchStrategy = defaulted(dumAemConfiguration.getFetchStrategy());
+    this.deliveryURLPrefix = dumAemConfiguration.getDeliveryURLPrefix();
   }
 
   public DumAemConfiguration(IAemConfiguration iaemConfiguration) {
@@ -104,6 +126,8 @@ public class DumAemConfiguration {
     this.publish = iaemConfiguration.isPublish();
     this.authorSNSite = iaemConfiguration.getAuthorSNSite();
     this.publishSNSite = iaemConfiguration.getPublishSNSite();
+    this.fetchStrategy = defaulted(iaemConfiguration.getFetchStrategy());
+    this.deliveryURLPrefix = iaemConfiguration.getDeliveryURLPrefix();
 
     DumAemCommonsUtils.getInfinityJson(iaemConfiguration.getCmsRootPath(), this, false)
         .flatMap(infinityJson -> DumAemCommonsUtils.getSiteName(this,

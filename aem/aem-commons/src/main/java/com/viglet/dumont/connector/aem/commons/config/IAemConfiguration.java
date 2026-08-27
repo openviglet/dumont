@@ -21,6 +21,7 @@ package com.viglet.dumont.connector.aem.commons.config;
 import java.util.Collection;
 import java.util.Locale;
 
+import com.viglet.dumont.connector.aem.commons.bean.DumAemFetchStrategy;
 import com.viglet.dumont.connector.aem.commons.context.DumAemLocalePathContext;
 
 public interface IAemConfiguration {
@@ -59,4 +60,21 @@ public interface IAemConfiguration {
     String getAuthorSNSite();
 
     String getPublishSNSite();
+
+    /**
+     * How this source's content is fetched (roadmap <strong>D61</strong>). Defaults to
+     * {@link DumAemFetchStrategy#SLING} — the author-tier servlets — so an implementation that
+     * predates the delivery strategy keeps the behaviour it had.
+     */
+    default DumAemFetchStrategy getFetchStrategy() {
+        return DumAemFetchStrategy.SLING;
+    }
+
+    /**
+     * The {@code delivery-pXXXX-eYYYY} host the delivery strategy fetches from. Null falls back to the
+     * publish prefix, then the CMS host.
+     */
+    default String getDeliveryURLPrefix() {
+        return null;
+    }
 }

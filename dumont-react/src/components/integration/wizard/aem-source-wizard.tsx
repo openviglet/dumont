@@ -74,6 +74,8 @@ export function AemSourceWizard({
       publishSNSite: "",
       authorURLPrefix: "",
       publishURLPrefix: "",
+      fetchStrategy: "SLING",
+      deliveryURLPrefix: "",
       localePaths: [],
       attributeSpecifications: [],
       models: [],

@@ -285,10 +285,18 @@ public class DumAemCommonsUtils {
      * mitigate publish-side caching. Otherwise the call falls back to the
      * current author URL ({@code dumAemConfiguration.getUrl()}) with no
      * cache-buster, preserving the previous behavior.
+     * <p>
+     * A source configured for the delivery fetch strategy (roadmap <strong>D61</strong>) never
+     * reaches {@code .infinity.json} at all: the request is served from {@code .model.json} on the
+     * publish / delivery host and translated into the same node shape, so every caller of this seam
+     * works on a Cloud Service publish tier without knowing about it.
      */
     public static Optional<JSONObject> getInfinityJson(String url,
             DumAemConfiguration dumAemConfiguration, boolean useCache,
             DumAemEnv environment) {
+        if (dumAemConfiguration.isDeliveryFetch()) {
+            return DumAemDeliveryUtils.getContentNode(url, dumAemConfiguration);
+        }
         boolean targetPublish = environment == DumAemEnv.PUBLISHING
                 && StringUtils.isNotBlank(dumAemConfiguration.getPublishURLPrefix());
         String urlPrefix = targetPublish
@@ -329,10 +337,15 @@ public class DumAemCommonsUtils {
 
     /**
      * Fetches model.json for the given path, routing the request through the
-     * author or publish URL prefix depending on the target environment.
+     * author or publish URL prefix depending on the target environment — or through the delivery
+     * host when the source uses the delivery fetch strategy (roadmap <strong>D61</strong>), which has
+     * no author tier to fall back to.
      */
     public static Optional<JSONObject> getModelJson(String path,
             DumAemConfiguration dumAemConfiguration, DumAemEnv environment) {
+        if (dumAemConfiguration.isDeliveryFetch()) {
+            return DumAemDeliveryUtils.getModelJson(path, dumAemConfiguration);
+        }
         boolean targetPublish = environment == DumAemEnv.PUBLISHING
                 && StringUtils.isNotBlank(dumAemConfiguration.getPublishURLPrefix());
         String urlPrefix = targetPublish

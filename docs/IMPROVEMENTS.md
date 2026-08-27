@@ -76,31 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XVII Fetching AEM from the publish tier (D61)
-
-`DumAemCommonsUtils` fetches content with `.infinity.json`, `AemNodeNavigator` walks the
-tree the same way, `DumAemDependencyService` collects referenced `/content` paths out of
-it, and discovery runs through `/bin/querybuilder.json`. Track H added `.model.json`
-extraction on top (`DumAemExtModelJsonBase`), but the traversal and discovery underneath
-are unchanged.
-
-All four are author-tier Sling servlets. On AEM as a Cloud Service the publish tier does
-not serve them: `.infinity.json` is a dispatcher-blocked pattern by default, and
-`/bin/querybuilder.json` is not exposed on publish at all. So a Cloud Service customer
-can only be indexed by pointing the connector at author with a service user — which
-means reading unpublished content, inheriting the ACL question, and holding a credential
-into the authoring environment for a job that only ever needed published pages.
-
-Adobe's published delivery surface is the alternative and is already stable: the Content
-Fragment OpenAPI and GraphQL endpoints, the Assets Search API on the
-`delivery-pXXXX-eYYYY` host, and `.model.json` where Core Components serve it. Those are
-CDN-fronted, publish-only, and designed for exactly this consumer.
-
-The work is a second fetch strategy behind the existing configuration and selected per
-source, so on-prem and AMS keep the traversal that works there while Cloud Service gets
-the delivery APIs. The `publishURLPrefix` re-fetch already in `DumAemStructuredSource`
-is the seam this extends rather than replaces.
-
 ## XVIII A journal under the webhook (D62)
 
 `DumAemWebhookController` receives Adobe I/O CloudEvents over HTTP and is push-only.

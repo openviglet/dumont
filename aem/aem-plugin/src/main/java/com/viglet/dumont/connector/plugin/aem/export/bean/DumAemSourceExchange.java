@@ -49,6 +49,9 @@ public class DumAemSourceExchange {
     private String publishSNSite;
     private String authorURLPrefix;
     private String publishURLPrefix;
+    /** {@code SLING} (default) or {@code DELIVERY} — see roadmap D61. */
+    private String fetchStrategy;
+    private String deliveryURLPrefix;
 
     @Builder.Default
     private Collection<DumAemAttribExchange> attributes = new HashSet<>();

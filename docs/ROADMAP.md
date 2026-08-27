@@ -171,8 +171,6 @@ This track has no remaining pending tasks.
 
 ---
 
-- 📋 **D61** (deps: —) **Discovery and traversal rely on servlets the AEM publish tier blocks** — querybuilder.json and .infinity.json are author-tier shapes, so a Cloud Service source has to be reached through author instead of its delivery APIs. → §XVII
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

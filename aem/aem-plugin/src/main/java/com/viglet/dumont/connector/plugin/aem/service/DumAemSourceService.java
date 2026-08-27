@@ -71,11 +71,18 @@ public class DumAemSourceService {
                 .map(DumAemPluginSystem::isBooleanValue).orElse(false);
     }
 
+    /**
+     * The source's configuration, with the global QueryBuilder flag folded in.
+     * <p>
+     * QueryBuilder is forced off for a source on the delivery fetch strategy (roadmap
+     * <strong>D61</strong>): {@code /bin/querybuilder.json} is an author-tier servlet the publish tier
+     * does not expose, so the global flag must not reach a source that has no author to ask.
+     */
     public DumAemConfiguration getDumAemConfiguration(DumAemSource dumAemSource) {
         DumAemConfiguration config = new DumAemConfiguration(
                 new AemPluginHandlerConfiguration(dumAemSource));
         return config.toBuilder()
-                .queryBuilderEnabled(queryBuilderEnabled)
+                .queryBuilderEnabled(queryBuilderEnabled && !config.isDeliveryFetch())
                 .build();
     }
 

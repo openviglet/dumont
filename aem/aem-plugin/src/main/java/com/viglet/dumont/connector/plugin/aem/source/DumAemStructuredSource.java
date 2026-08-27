@@ -262,6 +262,9 @@ public class DumAemStructuredSource implements DumStructuredSource {
     @Override
     public List<String> discover() {
         DumAemSession aemSession = session();
+        if (aemSession.getConfiguration().isDeliveryFetch()) {
+            return navigator.collectAccessiblePathsViaDelivery(aemSession);
+        }
         if (queryBuilderEnabled) {
             return navigator.collectAccessiblePathsViaQueryBuilder(aemSession);
         }
@@ -325,10 +328,14 @@ public class DumAemStructuredSource implements DumStructuredSource {
      * {@code publishURLPrefix} is configured, re-fetch the content's infinity.json from publish so
      * extraction reflects what is live; otherwise reuse the author payload. Either way the object is
      * wrapped {@link DumAemEnv#PUBLISHING} so delivery is preserved.
+     * <p>
+     * On the delivery fetch strategy (roadmap <strong>D61</strong>) there is nothing to re-fetch: the
+     * payload already came from the delivery host, so a second request would only ask the same tier
+     * the same question.
      */
     private DumAemObject publishObject(String path, DumAemObjectGeneric authorGeneric,
             DumAemConfiguration config) {
-        if (StringUtils.isBlank(config.getPublishURLPrefix())) {
+        if (config.isDeliveryFetch() || StringUtils.isBlank(config.getPublishURLPrefix())) {
             return new DumAemObject(authorGeneric, DumAemEnv.PUBLISHING);
         }
         return DumAemCommonsUtils.getInfinityJson(path, config, false, DumAemEnv.PUBLISHING)

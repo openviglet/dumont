@@ -61,6 +61,9 @@ public class DumAemSourceRequest {
     private String publishSNSite;
     private String authorURLPrefix;
     private String publishURLPrefix;
+    /** {@code SLING} (default) or {@code DELIVERY} — see roadmap D61. */
+    private String fetchStrategy;
+    private String deliveryURLPrefix;
     private Collection<DumAemSourceLocalePath> localePaths = new HashSet<>();
     private Collection<DumAemAttributeSpecification> attributeSpecifications = new HashSet<>();
     private Collection<DumAemPluginModel> models = new HashSet<>();

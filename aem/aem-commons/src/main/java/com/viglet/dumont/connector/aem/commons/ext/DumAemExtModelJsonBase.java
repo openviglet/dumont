@@ -22,6 +22,7 @@ import com.viglet.dumont.connector.aem.commons.bean.DumAemAttrMap;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemEnv;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
 import com.viglet.dumont.connector.aem.commons.utils.DumAemCommonsUtils;
+import com.viglet.dumont.connector.aem.commons.utils.DumAemDeliveryUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import tools.jackson.databind.DeserializationFeature;
@@ -237,9 +238,16 @@ public abstract class DumAemExtModelJsonBase<T> implements DumAemExtContentInter
      * object is being indexed for the {@link DumAemEnv#PUBLISHING} environment
      * and a {@code publishURLPrefix} is configured. Otherwise falls back to the
      * author URL ({@code configuration.getUrl()}).
+     * <p>
+     * A source on the delivery fetch strategy (roadmap <strong>D61</strong>) always goes to the
+     * delivery host, for both environments — there is no author tier to fall back to.
      */
     private String buildModelJsonUrl(DumAemObject aemObject,
             DumAemConfiguration configuration) {
+        if (configuration.isDeliveryFetch()) {
+            return DumAemDeliveryUtils.deliveryUrlPrefix(configuration) + aemObject.getPath()
+                    + MODEL_JSON_EXTENSION + "?t=" + System.currentTimeMillis();
+        }
         if (aemObject.getEnvironment() == DumAemEnv.PUBLISHING
                 && StringUtils.isNotBlank(configuration.getPublishURLPrefix())) {
             return configuration.getPublishURLPrefix() + aemObject.getPath()
