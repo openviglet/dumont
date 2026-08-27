@@ -28,13 +28,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
+import com.viglet.dumont.connector.plugin.aem.service.DumAemEventDispatcher;
 
 class DumAemWebhookControllerTest {
 
     private final DumAemPluginProcess process = org.mockito.Mockito.mock(DumAemPluginProcess.class);
+    /* The real dispatcher over a mocked pipeline: the controller's job is now routing, and the
+     * event→path mapping it delegates is the same one the journal consumer uses (D62). */
+    private final DumAemEventDispatcher dispatcher = new DumAemEventDispatcher(process);
 
     private DumAemWebhookController open() {
-        return new DumAemWebhookController(process, "");
+        return new DumAemWebhookController(dispatcher, "");
     }
 
     @Test
@@ -86,7 +90,7 @@ class DumAemWebhookControllerTest {
 
     @Test
     void receiveRejectsUnauthorizedRecipient() {
-        DumAemWebhookController secured = new DumAemWebhookController(process, "expected-client");
+        DumAemWebhookController secured = new DumAemWebhookController(dispatcher, "expected-client");
         Map<String, Object> payload = Map.of("type", "aem.sites.page.published",
                 "recipient_client_id", "other-client",
                 "data", Map.of("resource_path", "/content/wknd/en"));
@@ -99,7 +103,7 @@ class DumAemWebhookControllerTest {
 
     @Test
     void receiveAuthorizesMatchingRecipient() {
-        DumAemWebhookController secured = new DumAemWebhookController(process, "expected-client");
+        DumAemWebhookController secured = new DumAemWebhookController(dispatcher, "expected-client");
         Map<String, Object> payload = Map.of("type", "aem.sites.page.unpublished",
                 "recipient_client_id", "expected-client",
                 "data", Map.of("resource_path", "/content/wknd/en"));

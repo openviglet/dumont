@@ -54,6 +54,22 @@ dumont:
         # POST /api/v2/aem/webhook/{source} requests from Adobe I/O Events.
         # Leave empty to keep the endpoint open (dev only — logs a WARN at startup).
         client-id: ~
+    journal:
+      # Pulls the same Adobe I/O events the webhook receives, behind a persisted cursor, so an
+      # event lost to a 502 or a restart is recovered instead of waiting for the next full audit.
+      # The webhook stays the low-latency route; this is the floor under it.
+      enabled: false
+      poll-ms: 60000
+      batch-size: 100
+      max-pages-per-poll: 20
+      # OAuth Server-to-Server credential of the Adobe Developer Console project.
+      client-id: ~
+      client-secret: ~
+      # Journal URL of the event registration, per Dumont source name. Journalling is enabled
+      # automatically on every registration, so no extra Adobe-side setup is needed.
+      #   sources:
+      #     wknd: https://events-va6.adobe.io/events/organizations/1/integrations/2/3
+      sources: {}
   scheduler:
     enabled: false
   plugins:

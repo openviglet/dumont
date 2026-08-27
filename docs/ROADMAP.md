@@ -105,7 +105,6 @@ This track has no remaining pending tasks.
 > `dum_provenance` attribute; per-source last-seen history so a dropped field stays auditable).
 > Complements D09.
 
-- 📋 **D62** (deps: —) **A dropped Adobe I/O webhook is never recovered** — DumAemWebhookController is push-only, so an event lost to a 502 or a restart leaves that content stale until the next full audit. → §XVIII
 - 📋 **D64** (deps: Turing T1029) **The content audit never compares against the search index** — DumConnectorContentAuditTask reconciles the source against its own ledger only, so a document that never landed in Turing stays invisible. → §XX
 
 ## Track F — Enrichment & semantics (the differentiator)

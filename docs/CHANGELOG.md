@@ -232,6 +232,7 @@
   `dumont.reactive.extractTimeoutMs` (default 0) and `dumont.reactive.failureRatioThreshold`
   (default 0.5). Proven by `DumBoundedExtractionTest`, `DumStructuredSourcePluginTest`.
   ↳ Builds on D31. Complements D09, D33.
+- **D62** — An Adobe I/O journal consumer pulls the same events behind a cursor persisted only after a page is dispatched, so a dropped webhook replays instead of going stale.
 
 ## Track F — Enrichment & semantics
 

@@ -76,31 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XVIII A journal under the webhook (D62)
-
-`DumAemWebhookController` receives Adobe I/O CloudEvents over HTTP and is push-only.
-Adobe I/O offers both directions — a push registration, and a **journal**: an ordered
-list of the same events, pulled at the consumer's own cadence behind a cursor.
-
-Push alone has no recovery. A webhook lost to a 502, a rolling restart, a network
-partition or an expired certificate is gone — Adobe retries for a bounded window and
-then drops it. The content it described stays at whatever version the index last saw,
-and nothing in the connector knows, because a missed event leaves no trace.
-
-The scheduled audit does eventually notice: `discoverContentIds` re-enumerates the
-source and files a NOT_PROCESSED record for anything unqueued. But that is a full
-re-discovery, it runs on a cron most deployments set to hours or leave off, and it
-corrects nothing that was published and then unpublished between two runs.
-
-A journal consumer closes the gap cheaply: persist the cursor, poll on a short interval,
-and feed the same handler the webhook already feeds. The cursor makes recovery exact
-rather than best-effort — replaying after downtime is a matter of not advancing it — and
-journaling is enabled automatically on every Adobe Developer Console event registration,
-so it costs no extra setup for the customer.
-
-The two paths coexist: the webhook stays the low-latency route, the journal is the floor
-under it.
-
 ## XIX Send the schema before the documents (D63)
 
 `DumStructuredSchema` is Dumont's schema-as-code: an ordered, immutable declaration of
