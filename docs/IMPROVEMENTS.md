@@ -75,3 +75,28 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XXX One bad row, no log (D74)
+
+`redisIndexingDocuments` reads every row in the list with `mapper.readTree`, inside a
+loop whose only `catch` wraps the whole block. One row Jackson cannot parse therefore
+ends the query: the partial result is discarded, an empty page is returned, and the
+reason is written to the server log as "Redis indexing log query failed" — where the
+operator staring at an empty screen is not looking.
+
+This is not hypothetical, and D73 is what makes it urgent. Every row written before D73
+carries `ISODate("…")`, which is exactly what Jackson rejects. An operator who upgrades
+keeps their existing Redis list, and the first old row in it makes the whole log
+unreadable — including all the new rows written correctly after the upgrade. The log
+stays empty until the list rolls past `maxEntries` or someone deletes the key, and
+nothing on the screen says so.
+
+It is also the reason the serialization bug survived: the failure mode of an unreadable
+log was indistinguishable from an empty one, so nobody could tell a broken engine from a
+quiet one.
+
+The fix is per-row rather than per-query. Parse each row in its own try, skip what will
+not read, and count the skips — then say so in the response, because a listing that
+silently drops rows is the same class of lie as one that silently drops filters (D73). A
+caller that gets 40 rows and a count of 2 unreadable knows both what it has and what it
+is missing.

@@ -61,6 +61,8 @@ This track has no remaining pending tasks.
 
 ## Track E — Data quality & trust
 
+- 📋 **D74** (deps: D73 ✅) **One unreadable row empties the whole Redis log** — The parse sits in a loop whose only catch wraps the query, so a single bad row discards every good one and answers an empty page - and rows written before D73 are exactly that shape. → §XXX
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -100,6 +102,12 @@ This track has no remaining pending tasks.
 This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
+
+## Done when — D74
+
+- **A bad row costs its own row and nothing else** A Redis list seeded with one pre-D73
+  row and several valid ones returns the valid ones, and the response says how many were
+  unreadable.
 
 ## Non-goals (do NOT add as tasks)
 
