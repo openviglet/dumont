@@ -23,6 +23,12 @@
   
 - **Plugin Architecture**: Easily extend functionality with custom plugins
 
+- **Structured Sources**: Model a source by its schema rather than as a link spider. The declared
+  fields are sent to the search index ahead of the documents, so they exist as declared instead of
+  being inferred from the first value seen; values are grounded rather than guessed, enrichment runs
+  through the same schema, per-field coverage is tracked so a layout change cannot silently drop a
+  field, and an interrupted run leaves the previous index intact.
+
 - **Web Console**: Configure sources, launch indexing and watch it run, in English or Portuguese.
   Built from the same component library as Viglet Turing ES and Viglet Shio, and mountable inside
   Turing as well as standalone.
@@ -46,7 +52,7 @@
 |--------|-------------|
 | `commons` | Shared utilities and common components |
 | `spring` | Spring Boot integration and configuration |
-| `connector` | Core connector application with indexing plugins |
+| `connector` | Core connector application with indexing plugins, and the structured-source SPI (`connector-commons`) |
 | `aem` | Adobe Experience Manager connector and plugin |
 | `aem-commons` | AEM shared components |
 | `db` | Database (JDBC) connector |

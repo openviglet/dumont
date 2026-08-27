@@ -22,20 +22,6 @@ relations (what a task *enables*) live in the task text.
 
 ---
 
-## Track A — Structured-source connector framework
-
-> **Objective**: a first-class way to model sources whose value is their *structure*
-> (tabular listings, per-item detail pages with a typed schema), **above** the
-> generic web-crawler link-spider. Once this lands, indexing a new structured source
-> is a small declarative adapter + a field manifest, not a bespoke stack.
-
-> **Shipped (see [CHANGELOG.md](CHANGELOG.md)):** **D01** Structured-source SPI
-> (`discover()/extract(id)→DumStructuredRecord` + schema-as-code + generic publish
-> loop) · **D02** Declarative extraction strategies (Sitemap / HtmlListing /
-> TabularListing) · **D03** Schema-as-code + conservative grounding enforced
-> end-to-end · **D04** Pluggable enrichment stage (grounding-safe derive/normalize +
-> config-gated, cached LLM classification). All enable the tasks below.
-
 ## Track B — Web-crawler hardening (real-world sources)
 
 > **Objective**: close the gaps that make the current `DumWCPluginProcess` fail on
