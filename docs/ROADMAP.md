@@ -75,6 +75,8 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
+- 📋 **D65** (deps: —) **An exported AEM source cannot be imported back** — DumAemExchangeProcess omits rootPath, contentType, credentials, URL prefixes and models on export, so the imported source has no scope and indexes nothing. → §XXI
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -112,6 +114,29 @@ This track has no remaining pending tasks.
 > migration path).
 
 This track has no remaining pending tasks.
+
+## Track E — Data quality & trust
+
+- 📋 **D68** (deps: —) **A ghost the audit names cannot be removed** — D64 reports documents left in the index after they leave the source but never deindexes them, and the connector offers no supported way to act on that list. → §XXIV
+
+## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
+
+- 📋 **D67** (deps: —) **Content Fragments and Assets stay unreachable on the publish tier** — D61's delivery strategy reads pages through .model.json, so a Cloud Service source of fragments or assets still has to be indexed through author. → §XXIII
+
+## Track M — Console effect correctness
+
+- 📋 **D66** (deps: —) **The console lint gate is red** — use-connector-provider.ts writes state synchronously inside an effect, so pnpm run lint exits 1 on a gate the project documents as having no exemptions. → §XXII
+
+## Done when — D65
+
+- **A round trip is field-for-field equal** Export a fully configured source, import it
+  into an empty instance, and the two entities match on every field including
+  localePaths and models.
+
+## Done when — D67
+
+- **A fragment and an asset source index with no author credential** A Cloud Service
+  source of each type completes indexAll with only a delivery host configured.
 
 ## Non-goals (do NOT add as tasks)
 
