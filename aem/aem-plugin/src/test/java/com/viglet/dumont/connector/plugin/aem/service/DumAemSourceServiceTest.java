@@ -62,7 +62,9 @@ class DumAemSourceServiceTest {
                 dumAemSourceRepository,
                 dumAemPluginSystemRepository,
                 dumAemContentMappingService,
-                false);
+                false,
+                // D67: blank means the Assets Search API's default mount.
+                "");
     }
 
     @Nested

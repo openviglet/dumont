@@ -76,32 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XXIII The two delivery surfaces D61 left (D67)
-
-D61 gave a source a fetch strategy and one publish-tier implementation: `.model.json` on
-the delivery host, whose `:children` carries the traversal and whose page model carries
-the metadata. That covers pages served by Core Components, which is most of a Sites
-deployment and none of two others.
-
-A source whose content type is a Content Fragment gets nothing from `.model.json`.
-Neither does a `dam:Asset` source. Both are indexed today by pointing the connector at
-author with a service user — the situation D61 exists to remove — and on AEM as a Cloud
-Service that means an authoring credential held for content that is already published.
-
-Adobe serves both from the publish tier. The Content Fragment OpenAPI lists and reads
-fragments (`/adobe/sites/cf/fragments`), cursor-paginated, with the fragment's model and
-field values in the response. The Assets Search API answers on the delivery host for
-assets and their metadata. Neither is a Sling servlet and neither is dispatcher-blocked.
-
-The work is two more implementations behind the strategy the seam already selects,
-chosen by the source's content type rather than by a new setting: `DumAemDeliveryUtils`
-becomes the page implementation beside a fragment one and an asset one. The translation
-each owes is the same one D61 wrote — produce the node shape `DumAemObjectGeneric`
-parses, so nothing downstream of the fetch changes.
-
-Note the Assets Search API is a POST, and the connector's shared fetch seam is GET-only;
-that seam has to grow before an asset source can use it.
-
 ## XXIV Naming a ghost is not removing it (D68)
 
 D64 made the audit report three differences and repair two of them. The third, a

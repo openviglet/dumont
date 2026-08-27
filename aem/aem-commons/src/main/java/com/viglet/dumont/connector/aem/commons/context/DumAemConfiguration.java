@@ -65,6 +65,11 @@ public class DumAemConfiguration {
   private DumAemFetchStrategy fetchStrategy = DumAemFetchStrategy.SLING;
   /** The {@code delivery-pXXXX-eYYYY} host, when the delivery strategy uses a dedicated one. */
   private String deliveryURLPrefix;
+  /**
+   * Overrides the Assets Search API path on the delivery host (roadmap D67). Blank uses the
+   * default; set it when the instance mounts that API somewhere else.
+   */
+  private String assetSearchPath;
 
   @Builder.Default
   private Collection<DumAemLocalePathContext> localePaths = new HashSet<>();
@@ -105,6 +110,7 @@ public class DumAemConfiguration {
     this.queryBuilderEnabled = dumAemConfiguration.isQueryBuilderEnabled();
     this.fetchStrategy = defaulted(dumAemConfiguration.getFetchStrategy());
     this.deliveryURLPrefix = dumAemConfiguration.getDeliveryURLPrefix();
+    this.assetSearchPath = dumAemConfiguration.getAssetSearchPath();
   }
 
   public DumAemConfiguration(IAemConfiguration iaemConfiguration) {

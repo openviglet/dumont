@@ -43,12 +43,16 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.util.TimeValue;
 import org.jetbrains.annotations.NotNull;
@@ -450,6 +454,40 @@ public class DumAemCommonsUtils {
         }
     }
 
+    /**
+     * POSTs a JSON body and returns the JSON response (roadmap <strong>D67</strong>).
+     *
+     * <p>
+     * The fetch seam was GET-only, which is fine for every Sling servlet and for
+     * {@code .model.json}, and not fine for the Assets Search API — the one delivery-tier read that
+     * takes its query in a body. Shares the pooled, credentialed client with the GET path so an
+     * asset source authenticates the same way everything else does.
+     *
+     * @param url  the absolute endpoint URL
+     * @param json the request body
+     * @return the response body when it is JSON, empty on any failure
+     */
+    public static @NotNull Optional<String> postResponseBody(@NotNull String url, String json,
+            DumAemConfiguration dumAemSourceContext) {
+        String escapedUrl = Objects.requireNonNull(UrlEscapers.urlFragmentEscaper().escape(url));
+        URI normalizedUri = URI.create(escapedUrl).normalize();
+        try {
+            CloseableHttpClient httpClient = getOrCreateHttpClient(dumAemSourceContext);
+            HttpPost request = new HttpPost(normalizedUri);
+            request.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+            request.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
+            String body = executeRequest(httpClient, request, url);
+            if (isValidJsonResponse(body, url)) {
+                return Optional.of(body);
+            }
+            log.warn("Invalid JSON response from POST: {}", url);
+            return Optional.empty();
+        } catch (IOException e) {
+            log.error("Failed to POST to URL: {} - {}", url, e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
     public static @NotNull Optional<String> fetchResponseBodyWithoutCache(@NotNull String url,
             DumAemConfiguration dumAemSourceContext) throws IOException {
         String escapedUrl = Objects.requireNonNull(UrlEscapers.urlFragmentEscaper().escape(url));
@@ -486,8 +524,8 @@ public class DumAemCommonsUtils {
         });
     }
 
-    private static String executeRequest(CloseableHttpClient httpClient, HttpGet request, String url)
-            throws IOException {
+    private static String executeRequest(CloseableHttpClient httpClient, ClassicHttpRequest request,
+            String url) throws IOException {
         return httpClient.execute(request, response -> {
             int statusCode = response.getCode();
             log.debug("HTTP {} - {}", statusCode, url);

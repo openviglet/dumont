@@ -76,6 +76,10 @@ dumont:
       #   sources:
       #     wknd: https://events-va6.adobe.io/events/organizations/1/integrations/2/3
       sources: {}
+    delivery:
+      # D67: overrides the Assets Search API path on the delivery host, for an instance that mounts
+      # it somewhere other than /adobe/assets/search. Blank uses the default.
+      assetSearchPath: ""
   scheduler:
     enabled: false
   plugins:

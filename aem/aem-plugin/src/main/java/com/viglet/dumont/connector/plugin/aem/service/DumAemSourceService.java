@@ -30,15 +30,18 @@ public class DumAemSourceService {
     private final DumAemPluginSystemRepository dumAemPluginSystemRepository;
     private final DumAemContentMappingService dumAemContentMappingService;
     private final boolean queryBuilderEnabled;
+    private final String assetSearchPath;
 
     public DumAemSourceService(DumAemSourceRepository dumAemSourceRepository,
             DumAemPluginSystemRepository dumAemPluginSystemRepository,
             DumAemContentMappingService dumAemContentMappingService,
-            @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled) {
+            @Value("${dumont.aem.querybuilder:false}") boolean queryBuilderEnabled,
+            @Value("${dumont.aem.delivery.assetSearchPath:}") String assetSearchPath) {
         this.dumAemSourceRepository = dumAemSourceRepository;
         this.dumAemPluginSystemRepository = dumAemPluginSystemRepository;
         this.dumAemContentMappingService = dumAemContentMappingService;
         this.queryBuilderEnabled = queryBuilderEnabled;
+        this.assetSearchPath = assetSearchPath;
     }
 
     public List<DumAemSource> getAllSources() {
@@ -83,6 +86,8 @@ public class DumAemSourceService {
                 new AemPluginHandlerConfiguration(dumAemSource));
         return config.toBuilder()
                 .queryBuilderEnabled(queryBuilderEnabled && !config.isDeliveryFetch())
+                // D67: blank means the Assets Search API's default mount on the delivery host.
+                .assetSearchPath(assetSearchPath)
                 .build();
     }
 

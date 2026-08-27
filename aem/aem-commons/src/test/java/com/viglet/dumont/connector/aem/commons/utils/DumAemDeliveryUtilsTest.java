@@ -39,6 +39,7 @@ import org.mockito.MockedStatic;
 import com.viglet.dumont.connector.aem.commons.DumAemObjectGeneric;
 import com.viglet.dumont.connector.aem.commons.bean.DumAemFetchStrategy;
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.delivery.DumAemPageDelivery;
 
 /** Covers the publish-tier fetch strategy (roadmap D61). */
 class DumAemDeliveryUtilsTest {
@@ -74,7 +75,7 @@ class DumAemDeliveryUtilsTest {
                 .put("lastModifiedDate", 1_700_000_000_000L);
 
         DumAemObjectGeneric generic = new DumAemObjectGeneric("/content/wknd/en",
-                DumAemDeliveryUtils.toContentNode("/content/wknd/en", modelJson));
+                DumAemPageDelivery.toContentNode("/content/wknd/en", modelJson));
 
         assertThat(generic.getType()).isEqualTo(CQ_PAGE);
         assertThat(generic.getTitle()).isEqualTo("Adventures");
@@ -85,7 +86,7 @@ class DumAemDeliveryUtilsTest {
 
     @Test
     void deliveredContentIsStampedDeliveredBecauseTheDeliveryTierOnlyServesPublished() {
-        JSONObject node = DumAemDeliveryUtils.toContentNode("/content/wknd/en", new JSONObject());
+        JSONObject node = DumAemPageDelivery.toContentNode("/content/wknd/en", new JSONObject());
         JSONObject jcrContent = node.getJSONObject(JCR_CONTENT);
 
         assertThat(jcrContent.getString(CQ_LAST_REPLICATION_ACTION)).isEqualTo("Activate");
@@ -95,7 +96,7 @@ class DumAemDeliveryUtilsTest {
 
     @Test
     void aModelWithoutADateOrTemplateOmitsThemRatherThanInventingAValue() {
-        JSONObject jcrContent = DumAemDeliveryUtils
+        JSONObject jcrContent = DumAemPageDelivery
                 .toContentNode("/content/wknd/en", new JSONObject().put("title", "Adventures"))
                 .getJSONObject(JCR_CONTENT);
 
@@ -114,7 +115,7 @@ class DumAemDeliveryUtilsTest {
                 .put("/content/wknd/en", new JSONObject())
                 .put("/content/wknd/fr/magazine", new JSONObject()));
 
-        JSONObject node = DumAemDeliveryUtils.toContentNode("/content/wknd/en", modelJson);
+        JSONObject node = DumAemPageDelivery.toContentNode("/content/wknd/en", modelJson);
 
         assertThat(node.keySet()).contains("adventures", "magazine");
         assertThat(node.keySet()).doesNotContain("surf-camp", "fr");

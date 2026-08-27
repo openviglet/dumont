@@ -465,6 +465,7 @@
   deliberately stateful extractor (it diverges under parallel extraction). ↳ Builds on D31, D24.
 - **D60** — two routes added to the bento tree, the two editors moved to the adaptive chrome, and three cases in bento-tree that mount the real app at both addresses
 - **D61** — A per-source fetch strategy: DELIVERY discovers and reads via .model.json on the publish or delivery host, so a Cloud Service source needs no author credential; SLING keeps the author servlets.
+- **D67** — One delivery surface per content kind, routed from the source's own contentType and subType: pages via model.json, fragments via the Content Fragment API, assets via Assets Search.
 
 ## Track I — The console adopts the shared bento layer
 

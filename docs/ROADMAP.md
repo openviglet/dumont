@@ -103,13 +103,6 @@ This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
-- 📋 **D67** (deps: —) **Content Fragments and Assets stay unreachable on the publish tier** — D61's delivery strategy reads pages through .model.json, so a Cloud Service source of fragments or assets still has to be indexed through author. → §XXIII
-
-## Done when — D67
-
-- **A fragment and an asset source index with no author credential** A Cloud Service
-  source of each type completes indexAll with only a delivery host configured.
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

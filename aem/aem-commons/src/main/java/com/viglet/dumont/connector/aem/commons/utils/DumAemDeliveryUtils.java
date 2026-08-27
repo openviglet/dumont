@@ -16,59 +16,36 @@
 
 package com.viglet.dumont.connector.aem.commons.utils;
 
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.ACTIVATE;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.CQ_LAST_MODIFIED;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.CQ_LAST_REPLICATED;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.CQ_LAST_REPLICATED_PUBLISH;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.CQ_LAST_REPLICATION_ACTION;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.CQ_LAST_REPLICATION_ACTION_PUBLISH;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.CQ_PAGE;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.CQ_TEMPLATE;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.DATE_JSON_FORMAT;
-import static com.viglet.dumont.connector.aem.commons.DumAemConstants.JCR_CONTENT;
-import static org.apache.jackrabbit.JcrConstants.JCR_PRIMARYTYPE;
-import static org.apache.jackrabbit.JcrConstants.JCR_TITLE;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import com.viglet.dumont.connector.aem.commons.context.DumAemConfiguration;
+import com.viglet.dumont.connector.aem.commons.delivery.DumAemAssetDelivery;
+import com.viglet.dumont.connector.aem.commons.delivery.DumAemContentFragmentDelivery;
+import com.viglet.dumont.connector.aem.commons.delivery.DumAemDeliverySurface;
+import com.viglet.dumont.connector.aem.commons.delivery.DumAemPageDelivery;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * The publish-tier fetch strategy (roadmap <strong>D61</strong>): reaches AEM content through
- * {@code .model.json} on the publish / delivery host instead of the author-tier Sling servlets
- * ({@code .infinity.json}, {@code /bin/querybuilder.json}) the {@code SLING} strategy uses.
+ * The publish-tier fetch strategy: picks the delivery surface a source's content is read from and
+ * delegates to it (roadmap <strong>D61</strong>, one surface per content kind since
+ * <strong>D67</strong>).
  *
  * <p>
- * {@code .model.json} is served by Core Components on publish, is CDN-fronted, and carries both the
- * page's own metadata and — for a hierarchy root — every descendant page under {@code :children}. That
- * is enough for the two things the author servlets were doing:
- * <ul>
- * <li><strong>Discovery / traversal</strong> — {@link #discoverPaths} walks {@code :children} instead
- * of paging {@code /bin/querybuilder.json} or descending {@code .infinity.json} children.</li>
- * <li><strong>Metadata</strong> — {@link #toContentNode} translates the page model into the
- * {@code .infinity.json} shape {@code DumAemObjectGeneric} already parses, so nothing downstream of the
- * fetch changes. Field extraction was already reading {@code .model.json} from the publish prefix
- * (see {@code DumAemExtModelJsonBase}).</li>
- * </ul>
+ * D61 read everything through {@code .model.json}, which serves pages and nothing else — a Content
+ * Fragment or an asset source still had to go through author. The choice of surface comes from the
+ * source's own {@code contentType} / {@code subType}, so nothing new has to be configured: an
+ * existing source keeps working and a fragment source stops needing an authoring credential.
  *
  * <p>
- * Content the delivery tier serves is by definition published, so the translated node is stamped
- * delivered — the same conclusion {@code DumAemEvent.PUBLISHING} forces on the Sling path.
+ * Every caller still reaches this class, and every surface owes the same translation — the
+ * {@code .infinity.json} node shape {@code DumAemObjectGeneric} parses — so the change stays behind
+ * the fetch.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -76,16 +53,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DumAemDeliveryUtils {
 
-    private static final String MODEL_JSON = ".model.json";
-    private static final String CHILDREN = ":children";
-    private static final String TITLE = "title";
-    private static final String TEMPLATE_NAME = "templateName";
-    private static final String LAST_MODIFIED_DATE = "lastModifiedDate";
-    /** Depth guard for the {@code :children} descent; a hierarchy root usually needs one level. */
-    private static final int MAX_DEPTH = 20;
-    /** {@code DATE_JSON_FORMAT} as a {@code java.time} formatter, for the translated dates. */
-    private static final DateTimeFormatter MODEL_DATE_FORMATTER = DateTimeFormatter
-            .ofPattern(DATE_JSON_FORMAT, Locale.ENGLISH);
+    /**
+     * Ordered by specificity: the page surface accepts anything, so it is last and acts as the
+     * default. Stateless, therefore shared.
+     */
+    private static final List<DumAemDeliverySurface> SURFACES = List.of(
+            new DumAemContentFragmentDelivery(),
+            new DumAemAssetDelivery(),
+            new DumAemPageDelivery());
 
     private DumAemDeliveryUtils() {
         throw new IllegalStateException("Utility class");
@@ -106,196 +81,49 @@ public class DumAemDeliveryUtils {
         return configuration.getUrl();
     }
 
-    /**
-     * Fetches the raw {@code .model.json} for a path from the delivery host, with a
-     * {@code ?t=<timestamp>} cache-buster so a CDN hit never hides a republish.
-     */
-    public static Optional<JSONObject> getModelJson(String path,
-            DumAemConfiguration configuration) {
-        String url = "%s%s%s?t=%d".formatted(deliveryUrlPrefix(configuration), path, MODEL_JSON,
-                System.currentTimeMillis());
-        try {
-            return DumAemCommonsUtils.getResponseBody(url, configuration, false)
-                    .filter(DumAemCommonsUtils::isResponseBodyJSONObject)
-                    .map(JSONObject::new);
-        } catch (IOException e) {
-            log.error("Delivery: model.json request failed for {}: {}", url, e.getMessage(), e);
-            return Optional.empty();
-        }
+    /** The surface this source reads from — the first that claims it. */
+    public static DumAemDeliverySurface surfaceFor(DumAemConfiguration configuration) {
+        return SURFACES.stream()
+                .filter(surface -> surface.supports(configuration))
+                .findFirst()
+                // Unreachable while the page surface accepts everything; stated rather than assumed.
+                .orElseThrow(() -> new IllegalStateException(
+                        "No delivery surface for contentType=" + configuration.getContentType()));
     }
 
     /**
-     * The delivery-tier stand-in for {@code .infinity.json}: fetches the page model and returns it
-     * translated into the JCR node shape the rest of the connector parses.
+     * The delivery-tier stand-in for {@code .infinity.json}: the content's metadata translated into
+     * the JCR node shape the rest of the connector parses.
      */
     public static Optional<JSONObject> getContentNode(String path,
             DumAemConfiguration configuration) {
-        return getModelJson(path, configuration).map(modelJson -> toContentNode(path, modelJson));
+        return surfaceFor(configuration).getContentNode(path, configuration);
     }
 
     /**
-     * Translates a Core Components page model into the {@code .infinity.json} node shape.
-     *
-     * <p>
-     * Only what {@code DumAemObjectGeneric} reads is populated: the primary type, the title and
-     * template under {@code jcr:content}, the last-modified date in AEM's JSON date format, and the
-     * replication properties that mark the page delivered. Direct child pages derived from
-     * {@code :children} are added as marker nodes under their <em>relative</em> name, which is what
-     * lets the existing traversal keep walking — it re-fetches each child by path and lands back
-     * here.
+     * The raw {@code .model.json} for a path, used by the model.json extraction base rather than by
+     * the fetch seam. Unlike {@link #getContentNode} this is page-shaped by definition, so it does
+     * not route.
      */
-    public static JSONObject toContentNode(String path, JSONObject modelJson) {
-        JSONObject jcrContent = new JSONObject();
-        putIfPresent(jcrContent, JCR_TITLE, modelJson.optString(TITLE, null));
-        putIfPresent(jcrContent, CQ_TEMPLATE, modelJson.optString(TEMPLATE_NAME, null));
-        String lastModified = formatModelDate(modelJson.opt(LAST_MODIFIED_DATE));
-        putIfPresent(jcrContent, CQ_LAST_MODIFIED, lastModified);
-        putIfPresent(jcrContent, CQ_LAST_REPLICATED, lastModified);
-        putIfPresent(jcrContent, CQ_LAST_REPLICATED_PUBLISH, lastModified);
-        jcrContent.put(CQ_LAST_REPLICATION_ACTION, ACTIVATE);
-        jcrContent.put(CQ_LAST_REPLICATION_ACTION_PUBLISH, ACTIVATE);
-
-        JSONObject node = new JSONObject();
-        node.put(JCR_PRIMARYTYPE, CQ_PAGE);
-        node.put(JCR_CONTENT, jcrContent);
-        for (String childName : childNames(path, modelJson)) {
-            node.put(childName, new JSONObject().put(JCR_PRIMARYTYPE, CQ_PAGE));
-        }
-        return node;
+    public static Optional<JSONObject> getModelJson(String path,
+            DumAemConfiguration configuration) {
+        return new DumAemPageDelivery().getModelJson(path, configuration);
     }
 
-    /**
-     * Discovers every page under the configured root and collects them into a list — the delivery
-     * counterpart of {@link DumAemQueryBuilderUtils#queryAllPaths}.
-     */
+    /** Discovers every content path under the configured root and collects them into a list. */
     public static List<String> queryAllPaths(DumAemConfiguration configuration) {
-        List<String> allPaths = new ArrayList<>();
-        discoverPaths(configuration, configuration.getRootPath(), allPaths::addAll);
-        return allPaths;
+        DumAemDeliverySurface surface = surfaceFor(configuration);
+        log.info("Delivery: '{}' surface answering for contentType={} subType={}",
+                surface.getName(), configuration.getContentType(), configuration.getSubType());
+        return surface.queryAllPaths(configuration);
     }
 
     /**
-     * Walks the {@code :children} hierarchy from {@code rootPath}, delivering each page's children to
-     * the consumer as they arrive, and returns the total discovered.
-     *
-     * <p>
-     * A hierarchy-enabled root lists every descendant in one response, so this normally makes a
-     * single request and stops — a response carrying paths more than one level deep says so, and
-     * descending into each of them would only re-fetch what is already in hand. When the model lists
-     * direct children only, the descent continues per child, bounded by {@link #MAX_DEPTH} and by a
-     * visited set that both dedupes the consumer's batches and keeps a self-referencing model from
-     * looping.
+     * Discovers content paths under {@code rootPath}, delivering each batch to the consumer as it
+     * arrives, and returns the total discovered.
      */
     public static long discoverPaths(DumAemConfiguration configuration, String rootPath,
             Consumer<List<String>> pageConsumer) {
-        log.info("Delivery: discovering pages under '{}' via {}", rootPath,
-                deliveryUrlPrefix(configuration));
-        Set<String> visited = new LinkedHashSet<>();
-        visited.add(rootPath);
-        long discovered = descend(configuration, rootPath, pageConsumer, visited, 0);
-        log.info("Delivery: discovered {} pages under '{}'", discovered, rootPath);
-        return discovered;
-    }
-
-    private static long descend(DumAemConfiguration configuration, String path,
-            Consumer<List<String>> pageConsumer, Set<String> visited, int depth) {
-        if (depth > MAX_DEPTH) {
-            log.warn("Delivery: depth limit {} reached at '{}'", MAX_DEPTH, path);
-            return 0;
-        }
-        Optional<JSONObject> modelJson = getModelJson(path, configuration);
-        if (modelJson.isEmpty()) {
-            log.warn("Delivery: no model.json for '{}'", path);
-            return 0;
-        }
-        List<String> descendants = descendantPaths(path, modelJson.get());
-        List<String> fresh = descendants.stream().filter(visited::add).toList();
-        if (fresh.isEmpty()) {
-            return 0;
-        }
-        pageConsumer.accept(fresh);
-        if (listsWholeHierarchy(path, descendants)) {
-            return fresh.size();
-        }
-        long discovered = fresh.size();
-        for (String child : fresh) {
-            discovered += descend(configuration, child, pageConsumer, visited, depth + 1);
-        }
-        return discovered;
-    }
-
-    /** True when the model listed something below a direct child, i.e. the whole sub-tree. */
-    private static boolean listsWholeHierarchy(String path, List<String> descendants) {
-        int prefixLength = (path.endsWith("/") ? path : path + "/").length();
-        return descendants.stream()
-                .anyMatch(descendant -> descendant.indexOf('/', prefixLength) >= 0);
-    }
-
-    /**
-     * The absolute descendant paths a page model declares under {@code :children}, restricted to
-     * paths actually below {@code path} so a model echoing its own or a sibling's path is dropped.
-     */
-    static List<String> descendantPaths(String path, JSONObject modelJson) {
-        JSONObject children = modelJson.optJSONObject(CHILDREN);
-        if (children == null) {
-            return List.of();
-        }
-        String prefix = path.endsWith("/") ? path : path + "/";
-        List<String> paths = new ArrayList<>();
-        for (String childPath : children.keySet()) {
-            if (StringUtils.isNotBlank(childPath) && childPath.startsWith(prefix)) {
-                paths.add(childPath);
-            }
-        }
-        return paths;
-    }
-
-    /**
-     * The <em>direct</em> child names under {@code path}: the first segment of each descendant path,
-     * deduplicated, so a hierarchy root listing every descendant still yields one marker node per
-     * direct child.
-     */
-    static Set<String> childNames(String path, JSONObject modelJson) {
-        String prefix = path.endsWith("/") ? path : path + "/";
-        Set<String> names = new LinkedHashSet<>();
-        for (String childPath : descendantPaths(path, modelJson)) {
-            String remainder = childPath.substring(prefix.length());
-            int slash = remainder.indexOf('/');
-            String name = slash < 0 ? remainder : remainder.substring(0, slash);
-            if (StringUtils.isNotBlank(name)) {
-                names.add(name);
-            }
-        }
-        return names;
-    }
-
-    /**
-     * Formats {@code lastModifiedDate} — epoch milliseconds in the Core Components page model — into
-     * the {@code .infinity.json} date format {@code DumAemObjectGeneric} parses. Returns {@code null}
-     * when the model carries no usable value, which leaves the date unset rather than invented.
-     */
-    private static String formatModelDate(Object value) {
-        Long epochMillis = asEpochMillis(value);
-        if (epochMillis == null) {
-            return null;
-        }
-        return MODEL_DATE_FORMATTER
-                .format(Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()));
-    }
-
-    private static Long asEpochMillis(Object value) {
-        if (value instanceof Number number) {
-            return number.longValue();
-        }
-        if (value instanceof String text && StringUtils.isNumeric(text.trim())) {
-            return Long.valueOf(text.trim());
-        }
-        return null;
-    }
-
-    private static void putIfPresent(JSONObject target, String key, String value) {
-        if (StringUtils.isNotBlank(value)) {
-            target.put(key, value);
-        }
+        return surfaceFor(configuration).discoverPaths(configuration, rootPath, pageConsumer);
     }
 }
