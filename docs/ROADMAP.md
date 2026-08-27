@@ -59,6 +59,11 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
+## Track E — Data quality & trust
+
+- 📋 **D69** (deps: —) **A source's ledger rows are stamped with another source's session** — One buffer field on a singleton holds every source's job items, so whichever session calls flush stamps them all, and two concurrent runs misattribute each other's ledger and log rows. → §XXV
+- 📋 **D70** (deps: D68 ✅) **The orphan evidence D68 wrote down is only readable over curl** — The console shows neither the reports nor the apply and discard actions, so the review that gates every deletion happens outside the product and is the step most likely to be skipped. → §XXVI
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -98,6 +103,18 @@ This track has no remaining pending tasks.
 This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
+
+## Done when — D69
+
+- **Every ledger row names the source that produced it** A test flushing a buffer that
+  holds two sources' items asserts each row carries its own source and transaction id,
+  not the flushing session's.
+
+## Done when — D70
+
+- **An operator applies a report without leaving the console** The page lists a source's
+  reports with count, dates and expiry, shows the ids, and applies or discards one; an
+  expired report is shown and refused, not hidden.
 
 ## Non-goals (do NOT add as tasks)
 
