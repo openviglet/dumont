@@ -502,6 +502,7 @@
 ## Track M — Console effect correctness
 
 - **D56** — All twenty-one arrays list what they read and the rule is an error; completing them exposed a list page building its service inline, which would have refetched forever.
+- **D66** — useConnectorProvider stores the resolved provider against the id that produced it, so loading is derived and the two synchronous writes are gone; pnpm run lint exits 0.
 
 ## Track N — The web console
 

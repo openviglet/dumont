@@ -20,22 +20,30 @@ export interface ConnectorProviderState {
   loading: boolean;
 }
 
+/**
+ * One resolved lookup, kept against the id that produced it (D66).
+ *
+ * Storing the answer with its question is what removes the two synchronous writes this effect
+ * used to make. `loading` stops being state — it is "no answer for the id being asked about
+ * yet" — so there is nothing to set on entry, and an answer for a previous id can never be
+ * read as this one's, which is the stale render the old reset was there to prevent.
+ */
+interface ResolvedProvider {
+  integrationId: string;
+  provider: string | null;
+}
+
 export function useConnectorProvider(
   integrationId: string | undefined,
 ): ConnectorProviderState {
-  const [state, setState] = useState<ConnectorProviderState>({
-    provider: null,
-    loading: true,
-  });
+  const [resolved, setResolved] = useState<ResolvedProvider | null>(null);
 
   useEffect(() => {
     if (!integrationId) {
-      setState({ provider: null, loading: false });
       return;
     }
 
     let active = true;
-    setState({ provider: null, loading: true });
 
     let request = providerCache.get(integrationId);
     if (!request) {
@@ -50,11 +58,13 @@ export function useConnectorProvider(
 
     request
       .then((provider) => {
-        if (active) setState({ provider, loading: false });
+        if (active) setResolved({ integrationId, provider });
       })
       .catch((error) => {
         console.error("Failed to resolve connector provider:", error);
-        if (active) setState({ provider: null, loading: false });
+        // A failed lookup is still an answer for this id: the provider is unknown, and the
+        // caller must stop waiting rather than spin.
+        if (active) setResolved({ integrationId, provider: null });
       });
 
     return () => {
@@ -62,5 +72,12 @@ export function useConnectorProvider(
     };
   }, [integrationId]);
 
-  return state;
+  // Derived, not stored: with no id there is nothing to wait for, and otherwise we are waiting
+  // until the answer in hand is the answer to *this* id.
+  if (!integrationId) {
+    return { provider: null, loading: false };
+  }
+  return resolved?.integrationId === integrationId
+    ? { provider: resolved.provider, loading: false }
+    : { provider: null, loading: true };
 }

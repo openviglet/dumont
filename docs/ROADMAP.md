@@ -107,8 +107,6 @@ This track has no remaining pending tasks.
 
 ## Track M — Console effect correctness
 
-- 📋 **D66** (deps: —) **The console lint gate is red** — use-connector-provider.ts writes state synchronously inside an effect, so pnpm run lint exits 1 on a gate the project documents as having no exemptions. → §XXII
-
 ## Done when — D67
 
 - **A fragment and an asset source index with no author credential** A Cloud Service

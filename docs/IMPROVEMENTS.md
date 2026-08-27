@@ -76,33 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XXII The last synchronous write in an effect (D66)
-
-`pnpm run lint` exits 1. `useConnectorProvider` writes state synchronously twice inside
-its effect body — `setState({provider: null, loading: false})` on the no-id branch, and
-`setState({provider: null, loading: true})` before the fetch — and
-`react-hooks/set-state-in-effect` is an error.
-
-The gate is documented as having no exemptions. Three rules carried named-file debt
-lists until D53, D54 and D56 emptied each one, and each list was then deleted rather
-than kept at zero, precisely so the next violation would fail the build instead of being
-absorbed. This one is failing the build, which means the gate is working and the repair
-is owed.
-
-Both writes are the shape D56 established as the fix, not the loophole: neither is
-state. `loading` is derivable from whether an answer for the current `integrationId` is
-in hand, and the reset before the fetch exists only because the answer is not keyed by
-the question it answers. Store the resolved provider against the id that produced it and
-the effect has nothing to write on entry — an answer to another id is not this one's, so
-no reset is needed and no stale render is possible.
-
-Do not wrap either write in `void (async () => …)()`. The rule cannot see through it,
-but the write is still synchronous, and the project treats that as a loophole rather
-than a fix.
-
-Done when `pnpm run lint` exits 0 with no new disable comment, and the hook still
-reports `loading` correctly when `integrationId` changes mid-flight.
-
 ## XXIII The two delivery surfaces D61 left (D67)
 
 D61 gave a source a fetch strategy and one publish-tier implementation: `.model.json` on
