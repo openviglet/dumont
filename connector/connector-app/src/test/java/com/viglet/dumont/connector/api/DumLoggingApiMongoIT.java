@@ -46,8 +46,11 @@ class DumLoggingApiMongoIT {
                     client.getDatabase(DB).getCollection(COLLECTION);
             collection.drop();
             Date fixedDate = new Date(1_700_000_000_000L);
+            // c1 carries the trail D71 put on every row; c2 is shaped like a row written before
+            // it existed, which is what the unattributed-row rule below is about.
             collection.insertOne(new Document("contentId", "c1").append("status", "INDEXED")
                     .append("resultStatus", "SUCCESS").append("url", "http://site/a")
+                    .append("source", "wknd").append("transactionId", "tx-1")
                     .append("date", fixedDate));
             collection.insertOne(new Document("contentId", "c2").append("status", "DEINDEXED")
                     .append("resultStatus", "ERROR").append("url", "http://site/b")
@@ -65,31 +68,56 @@ class DumLoggingApiMongoIT {
     @Test
     void returnsAllDocuments() {
         Map<String, Object> result = api.indexingLogging(0, 100, null, null, null, null, null, null,
-                "desc");
+                null, null, "desc");
         assertThat(result).containsEntry("totalElements", 2L);
         assertThat((List<?>) result.get("content")).hasSize(2);
     }
 
     @Test
     void filtersByStatusAndContentId() {
-        assertThat(api.indexingLogging(0, 100, null, null, "INDEXED", null, null, null, "asc"))
-                .containsEntry("totalElements", 1L);
-        assertThat(api.indexingLogging(0, 100, null, null, null, "c2", null, null, "desc"))
-                .containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, "INDEXED", null, null, null, null, null,
+                "asc")).containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, "c2", null, null, null, null,
+                "desc")).containsEntry("totalElements", 1L);
     }
 
     @Test
     void filtersByResultStatusAndUrlRegex() {
-        assertThat(api.indexingLogging(0, 100, null, null, null, null, "ERROR", null, "desc"))
-                .containsEntry("totalElements", 1L);
-        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, "site/a", "desc"))
-                .containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, "ERROR", null, null, null,
+                "desc")).containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, "site/a", null, null,
+                "desc")).containsEntry("totalElements", 1L);
     }
 
     @Test
     void appliesDateRangeFilter() {
         Map<String, Object> result = api.indexingLogging(0, 100, "2000-01-01", "2100-01-01", null,
-                null, null, null, "desc");
+                null, null, null, null, null, "desc");
         assertThat(result).containsEntry("totalElements", 2L);
+    }
+
+    @Test
+    void answersWhatOneSourceDidAndWhatOneRunDid() {
+        // The two questions D69 and D71 made the rows capable of answering (D72).
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, null, "wknd", null,
+                "desc")).containsEntry("totalElements", 1L);
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, null, null, "tx-1",
+                "desc")).containsEntry("totalElements", 1L);
+        // A source that published nothing here answers with nothing, not with everything.
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, null, "docs", null,
+                "desc")).containsEntry("totalElements", 0L);
+    }
+
+    @Test
+    void doesNotHideARowWrittenBeforeTheTrailExisted() {
+        // c2 has no source. It must still appear in a listing nobody filtered — an unattributed
+        // row is a fact about an old message, not a reason to hide the history.
+        Map<String, Object> unfiltered = api.indexingLogging(0, 100, null, null, null, null, null,
+                null, null, null, "desc");
+        assertThat(unfiltered).containsEntry("totalElements", 2L);
+
+        // But it is not evidence about any particular source, so it does not answer one.
+        assertThat(api.indexingLogging(0, 100, null, null, null, null, null, null, "wknd", null,
+                "desc")).containsEntry("totalElements", 1L);
     }
 }

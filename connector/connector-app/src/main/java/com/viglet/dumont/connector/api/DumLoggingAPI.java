@@ -51,6 +51,10 @@ public class DumLoggingAPI {
 
     public static final String DATE = "date";
     public static final String CONTENT = "content";
+    /** The two fields D69 and D71 made reliable, and D72 made queryable. */
+    public static final String SOURCE_FIELD = "source";
+    public static final String TRANSACTION_ID_FIELD = "transactionId";
+    public static final String CONTENT_ID_FIELD = "contentId";
     public static final String TOTAL_ELEMENTS = "totalElements";
     public static final String TOTAL_PAGES = "totalPages";
     public static final String PAGE = "page";
@@ -98,6 +102,17 @@ public class DumLoggingAPI {
         return body;
     }
 
+    /**
+     * The indexing log, filtered.
+     *
+     * <p>
+     * {@code source} and {@code transactionId} answer the two questions D69 and D71 made the rows
+     * capable of answering (roadmap <strong>D72</strong>): what did this source do, and what
+     * happened in this run. Every row carries both at every status, on both sides of the queue —
+     * except rows written by a connector that predates the trail, which carry neither. Those are
+     * returned whenever no filter names a source, because an unattributed row is a fact about an
+     * old message rather than a reason to hide it.
+     */
     @Operation(summary = "Indexing log entries (history)")
     @GetMapping("indexing")
     public Map<String, Object> indexingLogging(
@@ -109,13 +124,15 @@ public class DumLoggingAPI {
             @RequestParam(required = false) String contentId,
             @RequestParam(required = false) String resultStatus,
             @RequestParam(required = false) String url,
+            @RequestParam(required = false) String source,
+            @RequestParam(required = false) String transactionId,
             @RequestParam(defaultValue = "desc") String sort) {
         if (isMongoActive()) {
             return mongoIndexingDocuments(page, pageSize, dateFrom, dateTo,
-                    status, contentId, resultStatus, url, sort);
+                    status, contentId, resultStatus, url, source, transactionId, sort);
         }
         if (isRedisActive()) {
-            return redisIndexingDocuments(page, pageSize, contentId, sort);
+            return redisIndexingDocuments(page, pageSize, contentId, source, transactionId, sort);
         }
         return emptyPage(page, pageSize);
     }
@@ -140,20 +157,14 @@ public class DumLoggingAPI {
 
     private Map<String, Object> mongoIndexingDocuments(int page, int pageSize,
             String dateFrom, String dateTo, String status, String contentId,
-            String resultStatus, String url, String sort) {
+            String resultStatus, String url, String source, String transactionId, String sort) {
         Map<String, Object> result = emptyPage(page, pageSize);
         try (MongoClient mongoClient = MongoClients.create(mongoUri)) {
             MongoDatabase database = mongoClient.getDatabase(databaseName);
             MongoCollection<Document> collection = database.getCollection(indexingCollectionName);
 
-            List<Bson> filters = new ArrayList<>();
-            addDateRangeFilter(filters, dateFrom, dateTo);
-            addExactFilter(filters, "status", status);
-            addExactFilter(filters, "contentId", contentId);
-            addExactFilter(filters, "resultStatus", resultStatus);
-            addRegexFilter(filters, "url", url);
-
-            Bson filter = filters.isEmpty() ? new Document() : Filters.and(filters);
+            Bson filter = indexingFilter(dateFrom, dateTo, status, contentId, resultStatus, url,
+                    source, transactionId);
 
             long totalElements = collection.countDocuments(filter);
             int totalPages = (int) Math.ceil((double) totalElements / pageSize);
@@ -176,8 +187,15 @@ public class DumLoggingAPI {
         return result;
     }
 
+    /**
+     * The Redis path filters in Java after reading the whole list, so every filter here is a scan.
+     * That was already true of its sort and its paging, so {@code source} and {@code transactionId}
+     * (D72) add no new class of problem — but it is why Mongo is the engine to pick when the log
+     * is large enough to query rather than tail.
+     */
     @SuppressWarnings("unchecked")
-    private Map<String, Object> redisIndexingDocuments(int page, int pageSize, String contentId, String sort) {
+    private Map<String, Object> redisIndexingDocuments(int page, int pageSize, String contentId,
+            String source, String transactionId, String sort) {
         Map<String, Object> result = emptyPage(page, pageSize);
         try (Jedis jedis = new Jedis(java.net.URI.create(redisUri))) {
             // LRANGE reads newest-first (LPUSH order); reverse for ascending sort.
@@ -186,11 +204,10 @@ public class DumLoggingAPI {
             List<Map<String, Object>> all = new ArrayList<>(raw.size());
             for (String json : raw) {
                 JsonNode node = mapper.readTree(json);
-                if (contentId != null && !contentId.isBlank()) {
-                    JsonNode cid = node.get("contentId");
-                    if (cid == null || !contentId.equals(cid.asString())) {
-                        continue;
-                    }
+                if (!matches(node, CONTENT_ID_FIELD, contentId)
+                        || !matches(node, SOURCE_FIELD, source)
+                        || !matches(node, TRANSACTION_ID_FIELD, transactionId)) {
+                    continue;
                 }
                 all.add(mapper.convertValue(node, Map.class));
             }
@@ -210,7 +227,26 @@ public class DumLoggingAPI {
         return result;
     }
 
-    private void addDateRangeFilter(List<Bson> filters, String dateFrom, String dateTo) {
+    /**
+     * Every filter the indexing log accepts, as one Mongo predicate — a pure function of the query
+     * string, so what the endpoint will actually match is provable without a Mongo to match it
+     * against. An absent parameter contributes no clause, so no filter at all means every row.
+     */
+    static Bson indexingFilter(String dateFrom, String dateTo, String status, String contentId,
+            String resultStatus, String url, String source, String transactionId) {
+        List<Bson> filters = new ArrayList<>();
+        addDateRangeFilter(filters, dateFrom, dateTo);
+        addExactFilter(filters, "status", status);
+        addExactFilter(filters, CONTENT_ID_FIELD, contentId);
+        addExactFilter(filters, "resultStatus", resultStatus);
+        addRegexFilter(filters, "url", url);
+        // D72: two more exact filters beside the five that were already here.
+        addExactFilter(filters, SOURCE_FIELD, source);
+        addExactFilter(filters, TRANSACTION_ID_FIELD, transactionId);
+        return filters.isEmpty() ? new Document() : Filters.and(filters);
+    }
+
+    private static void addDateRangeFilter(List<Bson> filters, String dateFrom, String dateTo) {
         if (dateFrom != null && !dateFrom.isBlank()) {
             Instant from = parseDate(dateFrom, false);
             if (from != null) {
@@ -225,19 +261,36 @@ public class DumLoggingAPI {
         }
     }
 
-    private void addExactFilter(List<Bson> filters, String field, String value) {
+    /**
+     * Whether a Redis row satisfies one filter, where an absent filter matches everything.
+     *
+     * <p>
+     * A row whose field is missing or null fails a filter that names a value — it is not that
+     * source — but is returned untouched when no filter is given. Rows written before the trail
+     * existed (D71) are exactly that shape, and dropping them from an unfiltered listing would
+     * hide the history a reader came to read.
+     */
+    static boolean matches(JsonNode node, String field, String wanted) {
+        if (wanted == null || wanted.isBlank()) {
+            return true;
+        }
+        JsonNode value = node.get(field);
+        return value != null && !value.isNull() && wanted.equals(value.asString());
+    }
+
+    private static void addExactFilter(List<Bson> filters, String field, String value) {
         if (value != null && !value.isBlank()) {
             filters.add(Filters.eq(field, value));
         }
     }
 
-    private void addRegexFilter(List<Bson> filters, String field, String value) {
+    private static void addRegexFilter(List<Bson> filters, String field, String value) {
         if (value != null && !value.isBlank()) {
             filters.add(Filters.regex(field, value, "i"));
         }
     }
 
-    private Instant parseDate(String dateStr, boolean endOfDay) {
+    private static Instant parseDate(String dateStr, boolean endOfDay) {
         try {
             LocalDate localDate = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
             return endOfDay

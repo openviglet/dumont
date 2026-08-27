@@ -240,6 +240,7 @@
 - **D69** — The batch buffer holds each item with the session that produced it, so a drain stamps every SENT_TO_QUEUE entry per item instead of under whoever asked to flush. Proven by JobItemBatchProcessorTest.
 - **D70** — An Orphan Reports surface on both trees lists each report with its id count against the site's, its dates and expiry, shows the ids, and applies or discards one at a time; an expired one is shown.
 - **D71** — A DumJobTrail rides on each item across the queue and is stripped before indexing, and the six strategy call sites that held a session and discarded it now pass it, so every status names its source.
+- **D72** — The indexing log filters by source and transactionId on both the Mongo and Redis engines, and a row written before the trail existed is returned unfiltered rather than dropped.
 
 ## Track F — Enrichment & semantics
 
