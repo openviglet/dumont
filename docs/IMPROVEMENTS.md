@@ -75,3 +75,28 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XXIX A filter that is accepted and dropped (D73)
+
+`GET /api/v2/connector/logging/indexing` takes seven filters. On the Redis engine three
+of them are applied — content id, source and transaction id — and `dateFrom`, `dateTo`,
+`status`, `resultStatus` and `url` are never passed to the query at all.
+
+The caller is not told. A request for `status=INDEXED` against Redis returns every row
+in the log, paged and sorted, looking exactly like a correct answer to a question that
+was never asked. That is the worst shape a wrong answer can take: an operator counting
+failures gets a number, and the number is the size of the log.
+
+D72 made this visible by adding two filters to the Redis path and finding three there
+instead of seven. The note in the reference documents it, but documenting a silent wrong
+answer is not a fix — a reader who does not open the page is exactly the reader who is
+misled.
+
+Two ways out. Apply them: the Redis path already scans every row in Java, so the four
+are the same predicate Mongo expresses in BSON, with url as a case-insensitive substring
+rather than a regex. Or refuse them — answer 400 when a request names a filter this
+engine cannot honour, which is correct but turns a working call into a failing one the
+day someone switches engine.
+
+Applying keeps the endpoint's contract single, and the scan is already paid for on every
+request.
