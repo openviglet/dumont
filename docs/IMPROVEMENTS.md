@@ -75,3 +75,35 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XXXVII One switch, not two
+
+D84 gave the mismatch a name and a warning light. What it did not do is make the
+mismatch unreachable, which is the fix a configuration error of this shape actually
+wants.
+
+### XXXVII.1 The second setting should not be load-bearing (D85)
+
+D84 made the mismatch visible: `logging/status` now reports `writing` alongside
+`enabled`, and the console says so rather than showing an empty table. That is a good
+diagnostic for a problem that should not be reachable.
+
+Turning the indexing log on still takes two settings that no code relates to each other.
+`dumont.logging.engine: mongodb` and `dumont.mongodb.enabled: true` configure the
+reader. The writer needs `logging.config: classpath:logback-spring-mongo.xml`, named in
+a YAML comment and nowhere else. Every combination is accepted: engine without config
+writes nothing, config without engine writes rows the API refuses to read, and mongo
+config against a redis engine does both at once.
+
+Nothing about that is inherent. `logging.config` is a Spring property like any other,
+and the connector knows which engine it wants before Logback is initialised. Two routes
+are open. An `EnvironmentPostProcessor` can set `logging.config` from
+`dumont.logging.engine` unless the operator set it explicitly, which makes the engine
+property sufficient and keeps the override. Or a single `logback-spring.xml` can carry
+all three shapes and select between them, which keeps the resolution inside Logback
+where a reader expects it.
+
+Either way the second setting stops being load-bearing, and a mismatch someone sets
+deliberately should be refused at startup rather than reported at runtime. `writing`
+then becomes what it should have been from the start: a check that passes, not a
+footgun's warning light.
