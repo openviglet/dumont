@@ -7,6 +7,8 @@ package com.viglet.dumont.connector.api;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -44,8 +46,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.ConnectionPoolConfig;
+import redis.clients.jedis.DefaultJedisClientConfig;
+import redis.clients.jedis.RedisClient;
+import redis.clients.jedis.util.JedisURIHelper;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -100,6 +104,18 @@ public class DumLoggingAPI {
     private static final long PROBE_SERVER_SELECTION_MS = 5_000L;
 
     /**
+     * The Redis pool's bounds, stated rather than defaulted (roadmap <strong>D87</strong>).
+     *
+     * <p>
+     * Sized for an admin endpoint, not for the indexing loop: the writer's pool is larger because
+     * it is fed by a run, while this one serves a console screen. The wait is short for the same
+     * reason the Mongo probe timeout is — a page that hangs is worse than one that says the store
+     * is busy.
+     */
+    private static final int REDIS_POOL_MAX_TOTAL = 16;
+    private static final Duration REDIS_POOL_MAX_WAIT = Duration.ofSeconds(2);
+
+    /**
      * One client per store, not one per request (roadmap <strong>D76</strong>).
      *
      * <p>
@@ -109,13 +125,16 @@ public class DumLoggingAPI {
      * warm. {@code status} — the one a console screen polls — was the worst of them.
      *
      * <p>
-     * Redis gets a pool rather than a shared {@link Jedis}, because a {@code Jedis} is a single
-     * connection and is not thread-safe: sharing one across concurrent requests would trade this
-     * cost for a correctness bug. Both are {@code null} when their engine is not the active one,
-     * so a connector that logs to neither builds neither.
+     * Redis gets a pooled {@link RedisClient} rather than a bare {@code Jedis}, because a
+     * {@code Jedis} is a single connection and is not thread-safe: sharing one across concurrent
+     * requests would trade this cost for a correctness bug. It is the same API and the same pool
+     * configuration the appender that writes the log already uses (roadmap <strong>D87</strong>) —
+     * the reader started out on the deprecated {@code JedisPool}, whose bounds were whatever the
+     * library defaulted to. Both are {@code null} when their engine is not the active one, so a
+     * connector that logs to neither builds neither.
      */
     private final MongoClient mongoClient;
-    private final JedisPool redisPool;
+    private final RedisClient redisClient;
 
     public DumLoggingAPI(
             @Value("${dumont.logging.engine:none}") String loggingEngine,
@@ -135,7 +154,7 @@ public class DumLoggingAPI {
         this.redisUri = redisUri;
         this.redisIndexingKey = redisIndexingKey;
         this.mongoClient = isMongoActive() ? buildMongoClient() : null;
-        this.redisPool = isRedisActive() ? buildRedisPool() : null;
+        this.redisClient = isRedisActive() ? buildRedisClient() : null;
     }
 
     /**
@@ -162,9 +181,28 @@ public class DumLoggingAPI {
         }
     }
 
-    private JedisPool buildRedisPool() {
+    /**
+     * The same builder {@code DumRedisAppenderBase} uses to write the log (roadmap
+     * <strong>D87</strong>).
+     *
+     * <p>
+     * D76 reached for {@code new JedisPool(URI)}, which the driver deprecates and which takes
+     * whatever bounds the library defaults to. Stating them is the point: this endpoint is
+     * request-scoped, so its ceiling should be a number someone chose rather than one nobody saw.
+     */
+    private RedisClient buildRedisClient() {
         try {
-            return new JedisPool(java.net.URI.create(redisUri));
+            URI uri = URI.create(redisUri);
+            ConnectionPoolConfig pool = new ConnectionPoolConfig();
+            // Bounded for an admin endpoint: past this, queueing beats opening more sockets, and
+            // waiting longer than the probe timeout would only turn a busy pool into a hung page.
+            pool.setMaxTotal(REDIS_POOL_MAX_TOTAL);
+            pool.setMaxWait(REDIS_POOL_MAX_WAIT);
+            return RedisClient.builder()
+                    .hostAndPort(JedisURIHelper.getHostAndPort(uri))
+                    .clientConfig(DefaultJedisClientConfig.builder(uri).build())
+                    .poolConfig(pool)
+                    .build();
         } catch (Exception e) {
             log.error("Indexing log: the Redis URI could not be read, so the log cannot be "
                     + "queried. Check dumont.redis.uri.", e);
@@ -178,8 +216,8 @@ public class DumLoggingAPI {
         if (mongoClient != null) {
             mongoClient.close();
         }
-        if (redisPool != null) {
-            redisPool.close();
+        if (redisClient != null) {
+            redisClient.close();
         }
     }
 
@@ -238,13 +276,12 @@ public class DumLoggingAPI {
                 mongoClient.getDatabase(databaseName).runCommand(new Document("ping", 1));
                 return true;
             }
-            // Borrowed and returned, not built and destroyed (D76): the pool is what makes this
-            // endpoint cheap enough for a screen to poll.
-            if (isRedisActive() && redisPool != null) {
-                try (Jedis jedis = redisPool.getResource()) {
-                    jedis.ping();
-                    return true;
-                }
+            // Borrowed from the pool and returned by the client, not a socket opened and thrown
+            // away (D76): that is what makes this endpoint cheap enough for a screen to poll.
+            // RedisClient manages the borrow itself, so there is no resource to close here (D87).
+            if (isRedisActive() && redisClient != null) {
+                redisClient.ping();
+                return true;
             }
         } catch (Exception e) {
             log.warn("Indexing log store '{}' is configured but did not answer: {}", loggingEngine,
@@ -363,14 +400,15 @@ public class DumLoggingAPI {
         Map<String, Object> result = emptyPage(page, pageSize);
         Instant from = dateFrom == null || dateFrom.isBlank() ? null : parseDate(dateFrom, false);
         Instant to = dateTo == null || dateTo.isBlank() ? null : parseDate(dateTo, true);
-        if (redisPool == null) {
+        if (redisClient == null) {
             throw storeUnavailable("Redis", new IllegalStateException("no usable Redis URI"));
         }
-        // Borrowed from the shared pool and returned by the close (D76), rather than a fresh
-        // socket opened and thrown away per query.
-        try (Jedis jedis = redisPool.getResource()) {
+        // Served from the shared pool (D76) rather than a fresh socket per query. The client is
+        // held for the life of the bean, so it is not closed here — closing it would leave every
+        // later request querying a closed client, which is the same trap the Mongo path carries.
+        try {
             // LRANGE reads newest-first (LPUSH order); reverse for ascending sort.
-            List<String> raw = jedis.lrange(redisIndexingKey, 0, -1);
+            List<String> raw = redisClient.lrange(redisIndexingKey, 0, -1);
             ObjectMapper mapper = new ObjectMapper();
             List<Map<String, Object>> all = new ArrayList<>(raw.size());
             int unreadable = 0;

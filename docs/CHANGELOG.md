@@ -254,6 +254,7 @@
 - **D84** — status gains a writing flag answered by walking the logback context for an attached appender that would accept a row, and the history tab says so instead of rendering an empty table.
 - **D85** — logging.config is derived from dumont.logging.engine as the lowest-precedence source, so a custom file still wins, and two shipped profiles that name different engines are refused at startup.
 - **D86** — Every profile now writes to console and file as well as its store, so the Dockerfiles no longer pin a console-only profile and a container can enable the indexing log.
+- **D87** — The reader builds a pooled RedisClient with a stated maxTotal and maxWait, the same API the appender that writes the log uses, so the deprecated JedisPool and its unseen defaults are gone.
 
 ## Track F — Enrichment & semantics
 
