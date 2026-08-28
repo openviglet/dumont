@@ -337,6 +337,16 @@ adding it to `ON_BENTO` in `test/console-census.test.ts`.
 | `pnpm run census` | The migration count. Exits non-zero on a broken read; warns on stderr when a chrome probe matches nothing. |
 | `pnpm run compile:build` | `tsc -b`, the Vite build, then `scripts/check-mf-types.mjs`. |
 
+**Test timeouts (D77).** `vitest.config.ts` sets `testTimeout: 10_000` for a reason — a page test
+whose service call never resolves should fail rather than hang the run. A file that spawns real
+tools cannot live inside that budget, and `eslint-gate.test.ts` is the one that does: six ESLint
+processes, the first of which measured 18.7s cold and failed the gate on the clock rather than on
+an assertion, which reads as "the lint gate is broken". **Override in the file, never in the
+config** — `vi.setConfig({ testTimeout, hookTimeout })` scopes it, where raising the global bound
+would spend every other test's hang detection to pay for one file. And pay a known cold start in a
+`beforeAll` rather than leaving it on whichever case runs first, so the per-case timings stay
+meaningful and a case that blows its budget is one that earned it.
+
 **Federated type declarations (D49).** They emit to `dumont-react/mf-types/`, deliberately outside
 `build.outDir` — the Vite output directory is the connector's `public/` and `emptyOutDir` wipes it
 *after* the generator writes there. The DTS build extends `tsconfig.app.json`, not the root
