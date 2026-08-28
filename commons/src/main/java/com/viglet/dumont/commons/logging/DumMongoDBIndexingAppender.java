@@ -16,6 +16,19 @@ import tools.jackson.databind.json.JsonMapper;
 @Setter
 public class DumMongoDBIndexingAppender extends DumMongoDBAppenderBase {
 
+    /**
+     * One mapper for the life of the appender, not one per event (roadmap <strong>D79</strong>).
+     *
+     * <p>
+     * Building an {@code ObjectMapper} sets up the serializer caches, the type factory and the
+     * module registry — work meant to be paid once and amortised, which is why the class is built
+     * to be shared and is safe to use from any thread once constructed. This method used to
+     * construct one per logging event, on the hottest path in the connector: every document emits
+     * a row per status it passes through, so the cost scaled with exactly the work the log exists
+     * to record. {@link DumRedisIndexingAppender} already held a static one.
+     */
+    private static final ObjectMapper MAPPER = JsonMapper.builder().build();
+
     /** Says once per outage that rows are being lost, instead of not saying it at all (D78). */
     private final DumLogWriteFailureReporter failures = new DumLogWriteFailureReporter("MongoDB");
 
@@ -24,14 +37,13 @@ public class DumMongoDBIndexingAppender extends DumMongoDBAppenderBase {
         if (!enabled || collection == null || eventObject.getArgumentArray() == null) {
             return;
         }
-        ObjectMapper mapper = JsonMapper.builder().build();
         // One row at a time, the way D74 reads them back: a document this insert cannot take is
         // its own loss, not a reason to drop the arguments queued behind it. The catch is also
         // what keeps the exception out of AppenderBase.doAppend, which would have reported three
         // of them to the status manager and then gone quiet.
         for (Object object : eventObject.getArgumentArray()) {
             try {
-                String json = mapper.writeValueAsString(object);
+                String json = MAPPER.writeValueAsString(object);
                 collection.insertOne(withBsonDate(Document.parse(json)));
                 failures.wrote();
             } catch (Exception e) {
