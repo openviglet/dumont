@@ -1,0 +1,4 @@
+# Registered here rather than as a bean: it has to run before the logging system starts, which is
+# long before the application context exists. D85.
+org.springframework.boot.EnvironmentPostProcessor=\
+com.viglet.dumont.connector.logging.DumLoggingConfigEnvironmentPostProcessor

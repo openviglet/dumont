@@ -59,10 +59,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track E — Data quality & trust
-
-- 📋 **D85** (deps: —) **Turning the indexing log on takes two settings nothing relates** — dumont.logging.engine configures the reader and logging.config the writer, so every mismatched combination is accepted and D84 can only report the result after the fact. → §XXXVII.1
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that

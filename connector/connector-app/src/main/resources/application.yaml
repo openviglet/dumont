@@ -111,8 +111,10 @@ dumont:
       username: ~
       password: ~
   # Persistent indexing log (mirrors turing.logging.*).
-  # Switch logback config via `logging.config=classpath:logback-spring-mongo.xml`
-  # or `classpath:logback-spring-redis.xml` to actually persist entries.
+  # This engine is the only switch: `logging.config` is derived from it (D85), so mongodb selects
+  # logback-spring-mongo.xml and redis selects logback-spring-redis.xml. Set `logging.config`
+  # yourself only to point at a Logback file of your own; setting it to one of the shipped
+  # profiles for a *different* engine is refused at startup rather than half-honoured.
   logging:
     engine: none        # none | mongodb | redis
     database: dumontLog
@@ -181,7 +183,10 @@ spring:
     template:
       default-destination: connector-indexing.queue
 logging:
-  config: classpath:logback-spring.xml
+  # No `config` here on purpose (D85): it is derived from dumont.logging.engine by
+  # DumLoggingConfigEnvironmentPostProcessor, which contributes it as the lowest-precedence
+  # property source. Setting it here would outrank that derivation and pin every deployment to
+  # the console-only profile, which is the bug D84 reported.
   level:
     org:
       springframework: INFO
