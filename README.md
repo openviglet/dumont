@@ -44,7 +44,8 @@
   records every status a document passed through, attributed to the source and the run that caused
   it and queryable by either, so what happened can be checked rather than believed. And because a
   failure that looks like an absence is the way such a log lies, a store that cannot be reached
-  answers `503` instead of the empty page a quiet connector would return.
+  answers `503` instead of the empty page a quiet connector would return, and a row it will not
+  accept is reported rather than dropped in silence.
 
 - **Web Console**: Configure sources, launch indexing and watch it run, in English or Portuguese.
   Built from the same component library as Viglet Turing ES and Viglet Shio, and mountable inside
