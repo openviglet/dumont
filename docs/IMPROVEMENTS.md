@@ -105,28 +105,3 @@ its output to `FILE` and `CONSOLE` rather than back into the failing store — s
 wiring this needs is done.
 
 Worth doing with D80 and D81, which edit the same two methods.
-
-### XXXV.3 Two queues, one of them unbounded (D81)
-
-`DumRedisAppender` builds `Executors.newFixedThreadPool(2)` and submits every logging
-event to it. The logback profile already wraps the appender in an `AsyncAppender`. So an
-event crosses two queues, and only the first one is bounded.
-
-`newFixedThreadPool` uses an unbounded `LinkedBlockingQueue`. The `AsyncAppender` in
-front of it is configured `queueSize=512`, `discardingThreshold=0`, `neverBlock=true` —
-a deliberate policy that says: buffer this much, and drop rather than stall the
-application. That policy is now unreachable. The appender's `append` returns as soon as
-the task is submitted, so the async queue always looks empty and never discards; the
-real backlog accumulates in a queue with no ceiling and no metrics, and under a Redis
-slowdown it grows until the heap says otherwise.
-
-Shutdown has the mirror-image problem. `stop()` calls `executor.shutdown()`, which does
-not wait, and then `super.stop()` closes the Redis client. Tasks still queued then run
-against a closed pool and fail — so the log lines from the end of the run, which are the
-ones an operator most often wants, are the ones most likely to be lost. They fail into
-the `INFO` catch D82 is about.
-
-The second executor should go. An `AsyncAppender` is already the right mechanism and it
-is already configured; writing synchronously beneath it restores the bound and the
-discard policy in one move. If a worker is genuinely wanted, it needs a bounded queue, a
-rejection policy chosen on purpose, and an `awaitTermination` before the client closes.

@@ -8,8 +8,6 @@
 package com.viglet.dumont.commons.logging;
 
 import java.time.Instant;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -42,8 +40,6 @@ public class DumRedisAppender extends DumRedisAppenderBase {
             .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, true)
             .build();
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(2);
-
     @Override
     protected void append(ILoggingEvent event) {
         if (!enabled || pool == null) {
@@ -61,23 +57,29 @@ public class DumRedisAppender extends DumRedisAppenderBase {
                 .clusterNode(DumClusterNode.NAME)
                 .build();
 
-        executor.submit(() -> {
-            try {
-                String json = MAPPER.writeValueAsString(logEntry);
-                pool.lpush(key, json);
-                if (maxEntries > 0) {
-                    pool.ltrim(key, 0, maxEntries - 1L);
-                }
-            } catch (Exception e) {
-                log.info("Failed to log to Redis: {}", e.getMessage());
+        /*
+         * D81 — written here, on the caller's thread, rather than handed to an executor this class
+         * used to own.
+         *
+         * The logback profile already wraps this appender in an AsyncAppender configured
+         * queueSize=512, discardingThreshold=0, neverBlock=true: buffer this much, then drop
+         * rather than stall the application. A second queue behind it made that policy
+         * unreachable — `append` returned as soon as it had submitted, so the async queue always
+         * looked empty and never discarded, while the real backlog grew in a
+         * LinkedBlockingQueue with no ceiling. Shutdown had the mirror of it: `shutdown()` does
+         * not wait, so queued tasks ran after the client had closed, losing exactly the rows from
+         * the end of a run. Removing it restores the bound and the discard policy in one move,
+         * and matches DumRedisIndexingAppender, which was always synchronous under its own async.
+         */
+        try {
+            String json = MAPPER.writeValueAsString(logEntry);
+            pool.lpush(key, json);
+            if (maxEntries > 0) {
+                pool.ltrim(key, 0, maxEntries - 1L);
             }
-        });
-    }
-
-    @Override
-    public void stop() {
-        executor.shutdown();
-        super.stop();
+        } catch (Exception e) {
+            log.info("Failed to log to Redis: {}", e.getMessage());
+        }
     }
 
     private static @NotNull String getStackTrace(ILoggingEvent event) {

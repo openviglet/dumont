@@ -61,7 +61,6 @@ This track has no remaining pending tasks.
 
 ## Track E — Data quality & trust
 
-- 📋 **D81** (deps: —) **The Redis general appender hides an unbounded queue behind an async one** — Every event is submitted to its own fixed pool, whose LinkedBlockingQueue is unbounded, so the AsyncAppender's discard policy is defeated and shutdown closes the client without draining. → §XXXV.3
 - 📋 **D82** (deps: —) **The general-log appenders still lose rows without saying so** — D78 fixed the indexing pair only, so DumMongoDBAppender still wraps insertOne in no catch and DumRedisAppender still logs at INFO, and the server log stops silently with its store. → §XXXV.1
 
 ## Track F — Enrichment & semantics (the differentiator)
