@@ -251,6 +251,7 @@
         "historyDesc": "Registros persistentes de indexação para este conteúdo (motor: {{engine}}).",
         "historyLoading": "Carregando histórico...",
         "historyUnreachable": "O log de indexação está ligado, mas o armazenamento {{engine}} não respondeu. Isto não é um histórico vazio — os registros não podem ser lidos agora.",
+        "historyNotWriting": "O armazenamento {{engine}} responde, mas nada está gravando nele, portanto este histórico continuará vazio. Ligar o log também exige logging.config apontando para o perfil logback correspondente.",
         "noHistory": "Sem registros de log para este conteúdo.",
         "historyDate": "Data",
         "historyResult": "Resultado",

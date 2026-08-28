@@ -38,4 +38,12 @@ export type TurIntegrationLoggingStatus = {
    * rather than saying the log could not be read.
    */
   enabled: boolean;
+  /**
+   * Whether anything is actually writing the log (D84) — a Logback appender is attached and would
+   * accept a row. `configured` and `enabled` both describe the *reader*, so a deployment that set
+   * `dumont.logging.engine` but left `logging.config` at its default reports both true over a
+   * history that is empty and always will be. Optional, because a connector older than 2026.3.7
+   * does not send it, and absent is not the same as false.
+   */
+  writing?: boolean;
 };

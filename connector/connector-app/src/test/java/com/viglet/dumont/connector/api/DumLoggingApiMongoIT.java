@@ -71,6 +71,17 @@ class DumLoggingApiMongoIT {
     }
 
     @Test
+    @DisplayName("a readable log with nothing writing it says so (D84)")
+    void statusSeparatesTheReaderFromTheWriter() {
+        /*
+         * D84 — the endpoint's own client can reach this container, so `enabled` is true and
+         * honest. No logback profile is active in the test JVM, so nothing is writing, and that
+         * used to be indistinguishable from a working deployment with a quiet connector.
+         */
+        assertThat(api.status()).containsEntry("enabled", true).containsEntry("writing", false);
+    }
+
+    @Test
     @DisplayName("a store that is down is told apart from a log with nothing in it (D75)")
     void anUnreachableMongoIsNotAnEmptyLog() {
         // A short server-selection timeout: the point is the answer, not how long the driver

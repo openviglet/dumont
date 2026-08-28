@@ -14,7 +14,14 @@ import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @Setter
-public class DumMongoDBIndexingAppender extends DumMongoDBAppenderBase {
+public class DumMongoDBIndexingAppender extends DumMongoDBAppenderBase
+        implements DumIndexingLogAppender {
+
+    /** D84 — the two conditions {@code append} checks, asked before an event rather than during. */
+    @Override
+    public boolean isWritingEnabled() {
+        return enabled && collection != null;
+    }
 
     /**
      * One mapper for the life of the appender, not one per event (roadmap <strong>D79</strong>).

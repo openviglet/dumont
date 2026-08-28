@@ -42,10 +42,18 @@ function stubConnector({
   total = 120,
   loggingEnabled = true,
   loggingConfigured,
-}: { total?: number; loggingEnabled?: boolean; loggingConfigured?: boolean } = {}) {
+  loggingWriting = true,
+}: {
+  total?: number
+  loggingEnabled?: boolean
+  loggingConfigured?: boolean
+  loggingWriting?: boolean | undefined
+} = {}) {
   // D75 — the two halves the status endpoint reports separately. `configured` is what the
   // properties say; `enabled` is what a ping says. They default together because that is the
   // ordinary case; a store that is named and unreachable sets them apart.
+  // D84 adds a third: `writing` is whether an appender is attached, which the first two cannot
+  // see. It is `undefined` on a connector older than 2026.3.7, which is not the same as false.
   const configured = loggingConfigured ?? loggingEnabled
   requestedPages = []
   vi.spyOn(axios, "get").mockImplementation(async (url: string, config?: unknown) => {
@@ -53,7 +61,7 @@ function stubConnector({
 
     if (url.includes("/logging/status")) {
       return {
-        data: { engine: "solr", configured, enabled: loggingEnabled },
+        data: { engine: "solr", configured, enabled: loggingEnabled, writing: loggingWriting },
         status: 200,
       } as never
     }
@@ -177,6 +185,29 @@ describe("D53: the History tab asks only when it is open and available", () => {
     expect(await screen.findByText(/did not answer/i)).toBeDefined()
     // And it does not ask for pages it knows it cannot get.
     expect(requestedPages).toEqual([])
+  })
+
+  it("says nothing is writing rather than showing a history that will stay empty", async () => {
+    /*
+     * D84 — the third state, and the one the first two could not express. The store answers, so
+     * `enabled` is true and the old code rendered the table: an empty history indistinguishable
+     * from a connector that indexed nothing. The cause is a different setting from an outage
+     * (`logging.config`, not the URI), so it gets its own sentence.
+     */
+    stubConnector({ total: 0, loggingEnabled: true, loggingWriting: false })
+    renderItem("history")
+
+    expect(await screen.findByText(/nothing is writing to it/i)).toBeDefined()
+  })
+
+  it("still renders the history for a connector too old to report writing", async () => {
+    // `writing` absent is not `writing: false`. A pre-2026.3.7 connector says nothing about the
+    // writer, and refusing to show its history over a field it never sends would be a regression.
+    stubConnector({ total: 120, loggingEnabled: true, loggingWriting: undefined })
+    renderItem("history")
+
+    expect(await screen.findByText("entry-100")).toBeDefined()
+    expect(screen.queryByText(/nothing is writing to it/i)).toBeNull()
   })
 })
 

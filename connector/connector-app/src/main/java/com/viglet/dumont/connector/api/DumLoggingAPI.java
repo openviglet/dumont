@@ -37,6 +37,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
+import com.viglet.dumont.commons.logging.DumIndexingLogWriters;
 import com.viglet.dumont.commons.logging.IsoDateSerializer;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -192,7 +193,7 @@ public class DumLoggingAPI {
      * unreachable reported itself as on — and the reader that gates a screen on it showed an empty
      * history rather than a broken one.
      */
-    @Operation(summary = "Indexing log feature flag and reachability")
+    @Operation(summary = "Indexing log feature flag, reachability and whether anything writes it")
     @GetMapping("status")
     public Map<String, Object> status() {
         boolean configured = isMongoActive() || isRedisActive();
@@ -200,6 +201,17 @@ public class DumLoggingAPI {
         body.put("engine", loggingEngine);
         body.put("configured", configured);
         body.put("enabled", configured && reachable());
+        /*
+         * D84 — the third question, and the one the first two could not answer.
+         *
+         * `configured` and `enabled` both describe this endpoint's own client. The rows are
+         * written by a Logback appender selected separately by `logging.config`, whose default
+         * declares no store appender and switches the indexing logger off. So a deployment that
+         * set the engine and nothing else got `enabled: true` over a history that was empty and
+         * always would be — truthfully, because the reader really could reach the store, and
+         * uselessly, because nothing was putting anything in it.
+         */
+        body.put("writing", DumIndexingLogWriters.isWriting());
         return body;
     }
 

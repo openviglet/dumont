@@ -251,6 +251,7 @@
 - **D81** — The appender's own fixed pool is gone, so the row is pushed on the caller's thread and the AsyncAppender's bound and discard policy govern the only queue there is.
 - **D82** — Both general appenders report a lost row through the shared reporter at WARN, and its line now names the log as well as the store so a server-log outage is not read as an indexing one.
 - 🗑 **D83** — abandoned: Verified false: Spring Boot throws on any Logback ERROR status, so a malformed URI fails the boot loudly, and a merely unreachable host starts fine and is reported at runtime by D82.
+- **D84** — status gains a writing flag answered by walking the logback context for an attached appender that would accept a row, and the history tab says so instead of rendering an empty table.
 
 ## Track F — Enrichment & semantics
 

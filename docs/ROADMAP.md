@@ -59,10 +59,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track E — Data quality & trust
-
-- 📋 **D84** (deps: —) **The logging status endpoint answers for the reader, not the writer** — It pings the client DumLoggingAPI holds, which is configured separately from the logback appender, so it can report the log enabled while nothing has ever been written to it. → §XXXVI.2
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that

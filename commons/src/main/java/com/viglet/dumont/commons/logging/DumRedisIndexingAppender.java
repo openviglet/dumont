@@ -17,7 +17,14 @@ import tools.jackson.databind.ObjectMapper;
  * LIST. Trims to {@code maxEntries} so the key doesn't grow unbounded.
  */
 @Setter
-public class DumRedisIndexingAppender extends DumRedisAppenderBase {
+public class DumRedisIndexingAppender extends DumRedisAppenderBase
+        implements DumIndexingLogAppender {
+
+    /** D84 — the two conditions {@code append} checks, asked before an event rather than during. */
+    @Override
+    public boolean isWritingEnabled() {
+        return enabled && pool != null;
+    }
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
