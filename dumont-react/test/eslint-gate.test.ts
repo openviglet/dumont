@@ -17,7 +17,22 @@
  */
 import { execFileSync } from "node:child_process"
 import { resolve } from "node:path"
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it, vi } from "vitest"
+
+/*
+ * D77 — the clock, not the assertions.
+ *
+ * Every case below spawns a real ESLint, which is what makes this file worth having and also what
+ * makes it slow. The suite-wide `testTimeout` is 10s on purpose: a page test that never resolves
+ * its service call should fail rather than hang. That budget is right for the other eighty tests
+ * and wrong for these, where a cold run measured 18.7s on the first case alone and failed the
+ * gate for its own startup cost.
+ *
+ * Raising the global bound would spend everyone's hang-detection to pay for this file, so the
+ * override is scoped here. `hookTimeout` is the larger of the two because the warm-up below is
+ * where the cold start is now deliberately spent.
+ */
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 120_000 })
 
 const APP_ROOT = resolve(__dirname, "..")
 
@@ -71,6 +86,22 @@ function lintAs(filename: string, source: string): LintMessage[] {
 
 const severityOf = (messages: LintMessage[], ruleId: string) =>
   messages.find((message) => message.ruleId === ruleId)?.severity
+
+/*
+ * Pay the cold start once, here, where it belongs (D77).
+ *
+ * Each `lintAs` is its own process, so this does not warm ESLint in memory — what it warms is the
+ * filesystem: the flat config, typescript-eslint and the two React plugins are thousands of files
+ * that the OS page cache and Node's compiled-module cache have to see once. Measured, that is the
+ * difference between an 18.7s first spawn and the ~2s ones that follow.
+ *
+ * Charging it to a hook rather than to whichever case happens to run first is the point. It makes
+ * the per-case timings mean something, and a case that does blow its budget from now on is one
+ * that earned it.
+ */
+beforeAll(() => {
+  lintAs("src/warmup.ts", "export const value = 1\n")
+})
 
 describe("D48: the config is wired to this project", () => {
   it("resolves, and applies the TypeScript and React rules", () => {
@@ -136,8 +167,8 @@ describe("D48/D53: the inherited debt was named, then paid off", () => {
     for (const [file, source, rule] of wasExcused) {
       expect(severityOf(lintAs(file, source), rule), `${rule} in ${file}`).toBe(ERROR)
     }
-    // Four ESLint processes, one per file. Slow enough to trip the default timeout when the rest
-    // of the suite is running beside it, which is a busy machine rather than a broken gate.
+    // Four ESLint processes, one per file — four times the work of any other case here, so it
+    // keeps a bound of its own above the file's 30s (D77). A busy machine is not a broken gate.
   }, 60_000)
 })
 

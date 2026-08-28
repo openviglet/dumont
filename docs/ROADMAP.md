@@ -99,10 +99,6 @@ This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
-## Track K — Frontend build and lint gates
-
-- 📋 **D77** (deps: —) **A cold ESLint resolve fails the lint gate's own test** — Each case spawns a full ESLint; the first bears the type-aware cold start and took 18.7s against vitest's 10s default, so the gate fails for its startup cost, not for a lint error. → §XXXIII.1
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
