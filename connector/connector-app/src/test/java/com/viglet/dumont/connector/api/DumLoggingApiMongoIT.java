@@ -90,6 +90,36 @@ class DumLoggingApiMongoIT {
     }
 
     @Test
+    @DisplayName("the shared client survives the request that used it (D76)")
+    void repeatedQueriesReuseOneClient() {
+        /*
+         * D76 — the client is built once and held, so it must not be closed by whoever queries
+         * first. That is the whole failure mode of the change: a try-with-resources left in place
+         * would pass the first call and fail every later one with "state should be: open".
+         * Interleaved with `status`, whose ping shares the same client.
+         */
+        for (int i = 0; i < 5; i++) {
+            Map<String, Object> page = api.indexingLogging(0, 100, null, null, null, null, null,
+                    null, null, null, "desc");
+            assertThat(page).containsEntry("totalElements", 2L);
+            assertThat(api.status()).containsEntry("enabled", true);
+        }
+    }
+
+    @Test
+    @DisplayName("closing at shutdown does not leave the client half-open (D76)")
+    void closeIsIdempotentAtShutdown() {
+        DumLoggingAPI own = new DumLoggingAPI("mongodb", true, MONGO.getConnectionString(), DB,
+                COLLECTION, false, "redis://localhost:6379/0", "dumontLog:indexing");
+        assertThat(own.status()).containsEntry("enabled", true);
+
+        // @PreDestroy runs once in Spring, but a double close must not throw either — the driver
+        // tolerates it, and asserting so keeps a future lifecycle change from being a surprise.
+        own.closeClients();
+        own.closeClients();
+    }
+
+    @Test
     void returnsAllDocuments() {
         Map<String, Object> result = api.indexingLogging(0, 100, null, null, null, null, null, null,
                 null, null, "desc");

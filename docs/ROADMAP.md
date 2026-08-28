@@ -59,10 +59,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track E — Data quality & trust
-
-- 📋 **D76** (deps: —) **The indexing log opens a fresh store client on every request** — Four call sites build a MongoClient or Jedis per call; D75's ping added two, so each console status poll creates a connection pool and a topology thread to ask one question. → §XXXII.1
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that

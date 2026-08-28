@@ -76,34 +76,6 @@ These constrain every task above:
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
 
-## XXXII Cost of asking the log a question
-
-The indexing log answers cheaply on paper. What it costs to ask is a separate question,
-and D75 moved the most-asked question onto the most expensive path.
-
-### XXXII.1 A client per request (D76)
-
-`DumLoggingAPI` holds its connection details as strings and builds a client from them at
-the moment of use — four times over: the Mongo query, the Redis query, and the two
-reachability probes D75 added.
-
-A `MongoClient` is not a handle. It owns a connection pool and a background thread that
-monitors the topology, and the driver's own guidance is one per application. Building
-one per HTTP request pays that setup on every call and discards the pool before it is
-warm. `Jedis` is cheaper, but the shape is the same: a socket opened and closed per
-question.
-
-D75 made this visible rather than causing it. The reachability ping sits on the `status`
-endpoint, which is what a console screen polls to decide whether to show the history tab
-— so the endpoint called most often is now the one that builds a client to answer a
-single ping. The change that made an outage legible made the healthy path more
-expensive.
-
-The clients should be beans, built once from the same properties and injected, with the
-probe reusing the query client rather than opening its own. That also gives the timeout
-and pool settings one place to live, which the string-per-call shape currently denies
-them.
-
 ## XXXIII A gate that fails for its own startup cost
 
 The lint gates run real tools, which is what makes them worth trusting. It also means

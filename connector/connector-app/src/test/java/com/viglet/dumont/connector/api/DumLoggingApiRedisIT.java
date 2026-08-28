@@ -97,6 +97,24 @@ class DumLoggingApiRedisIT {
     }
 
     @Test
+    @DisplayName("many requests borrow from one pool and give the connection back (D76)")
+    void repeatedQueriesDoNotExhaustThePool() {
+        /*
+         * D76 — the endpoint now holds a JedisPool instead of opening a socket per call, and the
+         * way that goes wrong is a borrowed resource never returned. JedisPool's default maxTotal
+         * is 8, so a leak makes call nine block until it times out; twenty calls prove the close
+         * hands each one back. Interleaved with `status`, because the reachability ping borrows
+         * from the same pool and was one of the four sites that used to build its own client.
+         */
+        for (int i = 0; i < 20; i++) {
+            Map<String, Object> page = api.indexingLogging(0, 100, null, null, null, null, null,
+                    null, null, null, "desc");
+            assertThat(page).containsEntry("totalElements", 2L);
+            assertThat(api.status()).containsEntry("enabled", true);
+        }
+    }
+
+    @Test
     void returnsAllEntries() {
         Map<String, Object> result = api.indexingLogging(0, 100, null, null, null, null, null, null,
                 null, null, "desc");
