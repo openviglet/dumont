@@ -251,7 +251,7 @@
         "historyDesc": "Persistent indexing log entries for this content (engine: {{engine}}).",
         "historyLoading": "Loading history...",
         "historyUnreachable": "The indexing log is switched on, but the {{engine}} store did not answer. This is not an empty history — the entries cannot be read right now.",
-        "historyNotWriting": "The {{engine}} store answers, but nothing is writing to it, so this history will stay empty. Turning the log on also needs logging.config set to the matching logback profile.",
+        "historyNotWriting": "The {{engine}} store answers, but nothing is writing to it, so this history will stay empty. Check whether logging.config has been overridden to a profile that does not write this log.",
         "noHistory": "No log entries for this content.",
         "historyDate": "Date",
         "historyResult": "Result",

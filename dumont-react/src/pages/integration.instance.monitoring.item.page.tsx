@@ -555,10 +555,10 @@ export default function IntegrationInstanceMonitoringItemPage() {
                                     {/*
                                       * D84 — readable, but nothing writes it. The store answers,
                                       * so the table below would render an empty history that
-                                      * looks exactly like a connector that indexed nothing. The
-                                      * cause is almost always `logging.config` left at its
-                                      * default, which is a different fix from an outage and so
-                                      * gets a different sentence.
+                                      * looks exactly like a connector that indexed nothing. Since
+                                      * D85 the profile is derived from the engine, so the cause
+                                      * is an explicit `logging.config` override — a different
+                                      * fix from an outage, and so a different sentence.
                                       */}
                                     {loggingStatus.enabled && loggingStatus.writing === false && (
                                         <SectionCard.Content>
