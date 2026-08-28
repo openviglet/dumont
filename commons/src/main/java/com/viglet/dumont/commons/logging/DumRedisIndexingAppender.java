@@ -22,7 +22,8 @@ public class DumRedisIndexingAppender extends DumRedisAppenderBase {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /** Says once per outage that rows are being lost, at a level someone reads (D78). */
-    private final DumLogWriteFailureReporter failures = new DumLogWriteFailureReporter("Redis");
+    private final DumLogWriteFailureReporter failures =
+            new DumLogWriteFailureReporter("Indexing log", "Redis");
 
     @Override
     protected void append(ILoggingEvent eventObject) {

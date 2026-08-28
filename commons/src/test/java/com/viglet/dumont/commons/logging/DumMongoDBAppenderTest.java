@@ -9,8 +9,10 @@
 package com.viglet.dumont.commons.logging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.util.Date;
@@ -21,11 +23,14 @@ import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 import com.mongodb.client.MongoCollection;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 /**
  * The general appender writes the server log and is attached to <strong>root</strong>, and it had
@@ -42,13 +47,14 @@ class DumMongoDBAppenderTest {
     private static final long WHEN = 1_700_000_000_000L;
 
     private List<Document> inserted;
+    private MongoCollection<Document> collection;
     private DumMongoDBAppender appender;
 
     @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
         inserted = new CopyOnWriteArrayList<>();
-        MongoCollection<Document> collection = mock(MongoCollection.class);
+        collection = mock(MongoCollection.class);
         // Returning null rather than the boolean from List.add: insertOne returns an
         // InsertOneResult, and handing Mockito a Boolean makes every call throw ClassCastException
         // — which an appender that catches per row would then count as a lost write, quietly
@@ -114,6 +120,39 @@ class DumMongoDBAppenderTest {
 
         assertThat(inserted).singleElement().satisfies(document -> assertThat(
                 document.getString("logger")).isNotEqualTo(tooLong).contains("IndeedAClassName"));
+    }
+
+    @Test
+    @DisplayName("a refused insert is reported at WARN instead of vanishing (D82)")
+    void aRefusedInsertIsReported() {
+        /*
+         * D82 — this insert used to run under no catch, so what escaped went to Logback's status
+         * manager three times and then nowhere. Asserting the WARN and not merely "does not
+         * throw": a catch that swallows would satisfy the weaker assertion perfectly, which is the
+         * exact shape of the bug being fixed.
+         */
+        Logger reporterLogger =
+                (Logger) LoggerFactory.getLogger(DumLogWriteFailureReporter.class);
+        ListAppender<ILoggingEvent> captured = new ListAppender<>();
+        captured.start();
+        reporterLogger.addAppender(captured);
+        try {
+            doThrow(new IllegalStateException("connection refused"))
+                    .when(collection).insertOne(any(Document.class));
+
+            assertThatCode(() -> appender.append(eventFrom("com.viglet.dumont.X", "it broke")))
+                    .doesNotThrowAnyException();
+
+            assertThat(captured.list)
+                    .filteredOn(logged -> logged.getLevel() == Level.WARN)
+                    .singleElement(org.assertj.core.api.InstanceOfAssertFactories.type(
+                            ILoggingEvent.class))
+                    .extracting(ILoggingEvent::getFormattedMessage,
+                            org.assertj.core.api.InstanceOfAssertFactories.STRING)
+                    .startsWith("Server log:").contains("MongoDB");
+        } finally {
+            reporterLogger.detachAppender(captured);
+        }
     }
 
     @Test

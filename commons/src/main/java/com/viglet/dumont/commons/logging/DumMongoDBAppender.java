@@ -12,11 +12,9 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.CoreConstants;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.datatype.joda.JodaModule;
 
-@Slf4j
 @Setter
 public class DumMongoDBAppender extends DumMongoDBAppenderBase {
 
@@ -28,6 +26,10 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
     private static final JsonMapper JSON_MAPPER = JsonMapper.builder()
             .addModule(new JodaModule())
             .build();
+
+    /** Says once per outage that server-log rows are being lost, rather than nothing (D82). */
+    private final DumLogWriteFailureReporter failures =
+            new DumLogWriteFailureReporter("Server log", "MongoDB");
 
     @Override
     protected void append(ILoggingEvent event) {
@@ -45,10 +47,23 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
                 // application, it filled the queue and made logback discard log lines instead.
                 .clusterNode(DumClusterNode.NAME)
                 .build();
-        String json = JSON_MAPPER.writeValueAsString(dumLoggingGeneral);
-        // D73: the same date conversion the indexing appender does — the serializer emits JSON
-        // now, so the BSON date is made here rather than smuggled through Mongo shell syntax.
-        collection.insertOne(DumMongoDBIndexingAppender.withBsonDate(Document.parse(json)));
+        /*
+         * D82 — this insert used to run under no catch at all. What escaped went to
+         * AppenderBase.doAppend, which tells Logback's status manager about the first three and is
+         * silent after that; the status manager is not the application log, so nothing reached a
+         * reader even for those three. This appender is attached to root, so what stopped
+         * recording was everything — and an operator opening the server log after an incident
+         * found it ended an hour early and read the gap as quiet.
+         */
+        try {
+            String json = JSON_MAPPER.writeValueAsString(dumLoggingGeneral);
+            // D73: the same date conversion the indexing appender does — the serializer emits JSON
+            // now, so the BSON date is made here rather than smuggled through Mongo shell syntax.
+            collection.insertOne(DumMongoDBIndexingAppender.withBsonDate(Document.parse(json)));
+            failures.wrote();
+        } catch (Exception e) {
+            failures.failed(e);
+        }
     }
 
     private static @NotNull String getStackTrace(ILoggingEvent event) {

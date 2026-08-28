@@ -18,7 +18,6 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.CoreConstants;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.datatype.joda.JodaModule;
@@ -28,7 +27,6 @@ import tools.jackson.datatype.joda.JodaModule;
  * as a {@link DumLoggingGeneral} record and pushes the JSON payload to a Redis
  * LIST via {@code LPUSH}. Optionally trims the list to {@code maxEntries}.
  */
-@Slf4j
 @Setter
 public class DumRedisAppender extends DumRedisAppenderBase {
 
@@ -39,6 +37,10 @@ public class DumRedisAppender extends DumRedisAppenderBase {
             .addModule(new JodaModule())
             .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, true)
             .build();
+
+    /** Says once per outage that server-log rows are being lost, at a level someone reads (D82). */
+    private final DumLogWriteFailureReporter failures =
+            new DumLogWriteFailureReporter("Server log", "Redis");
 
     @Override
     protected void append(ILoggingEvent event) {
@@ -77,8 +79,11 @@ public class DumRedisAppender extends DumRedisAppenderBase {
             if (maxEntries > 0) {
                 pool.ltrim(key, 0, maxEntries - 1L);
             }
+            failures.wrote();
         } catch (Exception e) {
-            log.info("Failed to log to Redis: {}", e.getMessage());
+            // D82: was log.info with the message alone. A row that failed to persist is a hole in
+            // the server log, and INFO is not where a reader looks for one.
+            failures.failed(e);
         }
     }
 

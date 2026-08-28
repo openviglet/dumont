@@ -30,7 +30,8 @@ public class DumMongoDBIndexingAppender extends DumMongoDBAppenderBase {
     private static final ObjectMapper MAPPER = JsonMapper.builder().build();
 
     /** Says once per outage that rows are being lost, instead of not saying it at all (D78). */
-    private final DumLogWriteFailureReporter failures = new DumLogWriteFailureReporter("MongoDB");
+    private final DumLogWriteFailureReporter failures =
+            new DumLogWriteFailureReporter("Indexing log", "MongoDB");
 
     @Override
     protected void append(ILoggingEvent eventObject) {

@@ -59,10 +59,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track E — Data quality & trust
-
-- 📋 **D82** (deps: —) **The general-log appenders still lose rows without saying so** — D78 fixed the indexing pair only, so DumMongoDBAppender still wraps insertOne in no catch and DumRedisAppender still logs at INFO, and the server log stops silently with its store. → §XXXV.1
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that

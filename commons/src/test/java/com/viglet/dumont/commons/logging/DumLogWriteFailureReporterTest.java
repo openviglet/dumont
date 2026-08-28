@@ -39,7 +39,7 @@ class DumLogWriteFailureReporterTest {
     private Logger reporterLogger;
 
     private DumLogWriteFailureReporter reporter() {
-        return new DumLogWriteFailureReporter("MongoDB", QUIET_MS, now::get);
+        return new DumLogWriteFailureReporter("Indexing log", "MongoDB", QUIET_MS, now::get);
     }
 
     private List<String> warnings() {
@@ -122,6 +122,19 @@ class DumLogWriteFailureReporterTest {
 
         // `wrote()` runs on every successful row, so anything it emits here is emitted per row.
         assertThat(captured.list).isEmpty();
+    }
+
+    @Test
+    @DisplayName("the line names which log is losing rows, not just which store (D82)")
+    void namesTheLogNotOnlyTheEngine() {
+        // Both pairs of appenders report through this class and write different logs to the same
+        // store. "Indexing log" when the server log is the one going missing sends the reader to
+        // the wrong screen.
+        new DumLogWriteFailureReporter("Server log", "Redis", QUIET_MS, now::get)
+                .failed(new IllegalStateException("connection refused"));
+
+        assertThat(warnings()).singleElement(org.assertj.core.api.InstanceOfAssertFactories.STRING)
+                .startsWith("Server log:").contains("Redis");
     }
 
     @Test

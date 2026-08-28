@@ -21,9 +21,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import redis.clients.jedis.RedisClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -105,13 +108,35 @@ class DumRedisAppenderTest {
     }
 
     @Test
-    @DisplayName("a store that refuses the push does not throw into the logging call")
-    void aRefusedPushDoesNotEscape() {
-        doThrow(new IllegalStateException("connection refused"))
-                .when(pool).lpush(anyString(), anyString());
+    @DisplayName("a refused push is reported at WARN, not noted at INFO (D82)")
+    void aRefusedPushIsReported() {
+        /*
+         * D82 — this catch used to be `log.info("Failed to log to Redis: {}", e.getMessage())`.
+         * It did not throw then either, so "does not throw" is not the assertion that distinguishes
+         * before from after; the level and the wording are.
+         */
+        Logger reporterLogger =
+                (Logger) LoggerFactory.getLogger(DumLogWriteFailureReporter.class);
+        ListAppender<ILoggingEvent> captured = new ListAppender<>();
+        captured.start();
+        reporterLogger.addAppender(captured);
+        try {
+            doThrow(new IllegalStateException("connection refused"))
+                    .when(pool).lpush(anyString(), anyString());
 
-        assertThatCode(() -> appender.append(event("it broke"))).doesNotThrowAnyException();
-        verify(pool, never()).ltrim(anyString(), anyLong(), anyLong());
+            assertThatCode(() -> appender.append(event("it broke"))).doesNotThrowAnyException();
+            verify(pool, never()).ltrim(anyString(), anyLong(), anyLong());
+
+            assertThat(captured.list)
+                    .filteredOn(logged -> logged.getLevel() == Level.WARN)
+                    .singleElement(org.assertj.core.api.InstanceOfAssertFactories.type(
+                            ILoggingEvent.class))
+                    .extracting(ILoggingEvent::getFormattedMessage,
+                            org.assertj.core.api.InstanceOfAssertFactories.STRING)
+                    .startsWith("Server log:").contains("Redis");
+        } finally {
+            reporterLogger.detachAppender(captured);
+        }
     }
 
     @Test

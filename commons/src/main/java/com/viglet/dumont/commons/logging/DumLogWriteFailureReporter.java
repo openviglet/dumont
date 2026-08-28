@@ -39,8 +39,9 @@ import lombok.extern.slf4j.Slf4j;
  * {@code additivity="false"}, which is what makes this class's output reach a reader at all.
  *
  * <p>
- * Not thread-safe by accident: every method is synchronized, because Logback may call an appender
- * from any thread and the counters here are the whole point.
+ * Thread-safe on purpose: Logback may call an appender from any thread and the counters here are
+ * the whole point, so the state changes are synchronized. {@link #wrote()} reads a volatile first
+ * and takes the lock only when there is an outage to close.
  */
 @Slf4j
 class DumLogWriteFailureReporter {
@@ -48,21 +49,39 @@ class DumLogWriteFailureReporter {
     /** How long to count quietly before saying the outage is still going. */
     static final long DEFAULT_QUIET_PERIOD_MS = 60_000L;
 
+    /**
+     * Which log is losing rows — "Indexing log" or "Server log" (D82).
+     *
+     * <p>
+     * Both pairs of appenders report through this class, and they write different logs to the same
+     * store. A line that says "Indexing log" while the server log is the one going missing sends
+     * the reader to the wrong screen, which is the failure mode this whole track exists to remove.
+     */
+    private final String logName;
+
     private final String engine;
     private final long quietPeriodMs;
     private final LongSupplier clock;
 
-    private boolean failing;
+    /**
+     * Volatile so {@link #wrote()} can answer the ordinary case without taking the lock (D82).
+     * Once the general appenders hold one of these, this runs on every log line the connector
+     * emits, and the ordinary case is "nothing is wrong".
+     */
+    private volatile boolean failing;
+
     private long lostInThisOutage;
     private long lostSinceLastReport;
     private long lastReportAt;
 
-    DumLogWriteFailureReporter(String engine) {
-        this(engine, DEFAULT_QUIET_PERIOD_MS, System::currentTimeMillis);
+    DumLogWriteFailureReporter(String logName, String engine) {
+        this(logName, engine, DEFAULT_QUIET_PERIOD_MS, System::currentTimeMillis);
     }
 
     /** The clock is a seam so a test can prove the throttle without waiting a minute for it. */
-    DumLogWriteFailureReporter(String engine, long quietPeriodMs, LongSupplier clock) {
+    DumLogWriteFailureReporter(String logName, String engine, long quietPeriodMs,
+            LongSupplier clock) {
+        this.logName = logName;
         this.engine = engine;
         this.quietPeriodMs = quietPeriodMs;
         this.clock = clock;
@@ -75,15 +94,14 @@ class DumLogWriteFailureReporter {
         lostSinceLastReport++;
         if (!failing) {
             failing = true;
-            log.warn("Indexing log: a row could not be written to {}. Rows are being lost while "
-                    + "this lasts, so the history will read short rather than empty.", engine,
-                    cause);
+            log.warn("{}: a row could not be written to {}. Rows are being lost while this lasts, "
+                    + "so the history will read short rather than empty.", logName, engine, cause);
             startQuietPeriod(now);
             return;
         }
         if (now - lastReportAt >= quietPeriodMs) {
-            log.warn("Indexing log: {} is still refusing writes. {} further row(s) lost since the "
-                    + "last report, {} in this outage.", engine, lostSinceLastReport,
+            log.warn("{}: {} is still refusing writes. {} further row(s) lost since the last "
+                    + "report, {} in this outage.", logName, engine, lostSinceLastReport,
                     lostInThisOutage, cause);
             startQuietPeriod(now);
         }
@@ -93,15 +111,22 @@ class DumLogWriteFailureReporter {
      * One row reached the store. Silent in the ordinary case — this is called on every successful
      * write — and reports only the transition out of an outage, which is where the total lives.
      */
-    synchronized void wrote() {
+    void wrote() {
+        // The lock-free fast path: on a healthy connector this is every log line, and the answer
+        // is a single volatile read.
         if (!failing) {
             return;
         }
-        log.warn("Indexing log: writes to {} have resumed. {} row(s) were lost while it was "
-                + "unreachable and will not appear in the history.", engine, lostInThisOutage);
-        failing = false;
-        lostInThisOutage = 0;
-        lostSinceLastReport = 0;
+        synchronized (this) {
+            if (!failing) {
+                return;
+            }
+            log.warn("{}: writes to {} have resumed. {} row(s) were lost while it was unreachable "
+                    + "and will not appear in the history.", logName, engine, lostInThisOutage);
+            failing = false;
+            lostInThisOutage = 0;
+            lostSinceLastReport = 0;
+        }
     }
 
     private void startQuietPeriod(long now) {
