@@ -75,3 +75,61 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XXXVI The log that never started
+
+Track E has covered a store that goes down and a row it refuses. What it has not covered
+is the state before either: a store the connector never reached, and an endpoint that
+cannot tell.
+
+### XXXVI.1 Started, connected to nothing (D83)
+
+D75 covered a store that goes down while running, D78 and D82 a row it refuses to
+accept. Neither covers a store that was never reached at all, and that path is quieter
+than both.
+
+`DumMongoDBAppenderBase.start()` calls `super.start()` first and connects afterwards. So
+when the URI is malformed or the driver rejects it, the appender is already marked
+started while `collection` stays null. Every later `append` hits the `collection ==
+null` guard and returns — correctly, in the sense that it does not throw, and
+disastrously, in the sense that it never says anything. The only record is one
+`addError` to Logback's status manager, which is not the application log and which
+nobody reads unless they know to ask.
+
+The result is an appender that is enabled, running, and permanently writing nothing, for
+the life of the process. It cannot recover either: nothing retries the connection.
+
+The Redis base gets the ordering right by accident of style — it calls `super.start()`
+only after the client is built, so a failure leaves the appender unstarted and Logback
+at least complains about appending to a stopped appender. That is better and still not
+good: the complaint goes to the same status manager.
+
+Two things are needed. Connect before declaring the appender started, so the two bases
+agree; and report a startup failure through the application log the way
+`DumLogWriteFailureReporter` reports a write failure, on the routing D78 already added.
+A log that cannot start should be as loud as one that stops.
+
+### XXXVI.2 A ping that asks the wrong component (D84)
+
+D75 split `logging/status` into `configured` (what the properties say) and `enabled`
+(what a ping says), so that a store which is named but unreachable could not report
+itself healthy. The ping is honest about what it asks. It just asks the wrong component.
+
+`DumLoggingAPI` builds its own client from `dumont.mongodb.uri` and pings that. The rows
+are written by a Logback appender configured independently, from the same properties but
+through `logback-spring-*.xml`, with its own client and its own lifecycle. The endpoint
+therefore reports whether *the reader* can reach the store, and says nothing about
+whether *the writer* ever did.
+
+The two can disagree, and the interesting cases are exactly the ones an operator hits. A
+profile that never activated the appender, a `dumont.logging.engine` naming an engine
+whose `dumont.*.enabled` flag is false, or the startup failure D83 describes: in all
+three the API pings successfully, answers `enabled: true`, and the history is empty
+because nothing was ever written. The screen then shows a healthy log with no rows —
+which is precisely the "failure that reads as an absence" this track spent D73 to D82
+removing, reintroduced one level up.
+
+What `status` should report is the writer's state, or both states distinctly. The
+appenders know whether they started and whether their last write succeeded; that is the
+fact the endpoint is being asked for. Worth taking with D83, which gives the appenders
+somewhere to record it.
