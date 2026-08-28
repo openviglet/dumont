@@ -40,7 +40,11 @@
   de-indexes what it did not reach. And a scheduled audit compares the source *and* the connector's
   ledger against the index itself: documents that never landed or went stale are requeued, and one
   still indexed after leaving the source is written into a dated report you review and apply —
-  never deleted on the strength of a single discovery pass.
+  never deleted on the strength of a single discovery pass. Underneath all of it, an indexing log
+  records every status a document passed through, attributed to the source and the run that caused
+  it and queryable by either, so what happened can be checked rather than believed. And because a
+  failure that looks like an absence is the way such a log lies, a store that cannot be reached
+  answers `503` instead of the empty page a quiet connector would return.
 
 - **Web Console**: Configure sources, launch indexing and watch it run, in English or Portuguese.
   Built from the same component library as Viglet Turing ES and Viglet Shio, and mountable inside
