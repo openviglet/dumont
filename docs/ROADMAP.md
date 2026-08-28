@@ -59,6 +59,10 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
+## Track E — Data quality & trust
+
+- 📋 **D76** (deps: —) **The indexing log opens a fresh store client on every request** — Four call sites build a MongoClient or Jedis per call; D75's ping added two, so each console status poll creates a connection pool and a topology thread to ask one question. → §XXXII.1
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -98,6 +102,10 @@ This track has no remaining pending tasks.
 This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
+
+## Track K — Frontend build and lint gates
+
+- 📋 **D77** (deps: —) **A cold ESLint resolve fails the lint gate's own test** — Each case spawns a full ESLint; the first bears the type-aware cold start and took 18.7s against vitest's 10s default, so the gate fails for its startup cost, not for a lint error. → §XXXIII.1
 
 ## Non-goals (do NOT add as tasks)
 

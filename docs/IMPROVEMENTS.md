@@ -75,3 +75,58 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XXXII Cost of asking the log a question
+
+The indexing log answers cheaply on paper. What it costs to ask is a separate question,
+and D75 moved the most-asked question onto the most expensive path.
+
+### XXXII.1 A client per request (D76)
+
+`DumLoggingAPI` holds its connection details as strings and builds a client from them at
+the moment of use — four times over: the Mongo query, the Redis query, and the two
+reachability probes D75 added.
+
+A `MongoClient` is not a handle. It owns a connection pool and a background thread that
+monitors the topology, and the driver's own guidance is one per application. Building
+one per HTTP request pays that setup on every call and discards the pool before it is
+warm. `Jedis` is cheaper, but the shape is the same: a socket opened and closed per
+question.
+
+D75 made this visible rather than causing it. The reachability ping sits on the `status`
+endpoint, which is what a console screen polls to decide whether to show the history tab
+— so the endpoint called most often is now the one that builds a client to answer a
+single ping. The change that made an outage legible made the healthy path more
+expensive.
+
+The clients should be beans, built once from the same properties and injected, with the
+probe reusing the query client rather than opening its own. That also gives the timeout
+and pool settings one place to live, which the string-per-call shape currently denies
+them.
+
+## XXXIII A gate that fails for its own startup cost
+
+The lint gates run real tools, which is what makes them worth trusting. It also means
+their own cost can be mistaken for the failure they exist to report.
+
+### XXXIII.1 The cold ESLint resolve (D77)
+
+`eslint-gate.test.ts` asserts what the lint config does by running ESLint for real: each
+case spawns `eslint.js` with the source on stdin, which is the only honest way to ask
+"would this be an error in *this* file". Six cases, six processes.
+
+The first process pays for all of them. It resolves the flat config, loads
+typescript-eslint and the two React plugins, and starts the type-aware program. Measured
+here: 18.7s, against vitest's default 10s per-test timeout. The suite fails — not on an
+assertion, but on the clock.
+
+The failure is worse than a slow test, because of what it fails *as*. A red
+`eslint-gate` reads as "the lint gate is broken", which is exactly the alarm D48 built
+this file to raise. A gate that cries wolf on a cold runner is one people learn to
+re-run rather than read, and CI runners are cold by definition.
+
+Two fixes compose. Give the file a `testTimeout` that reflects what it actually does,
+since the cost is inherent to spawning ESLint and not a regression to be caught. And pay
+the cold start once in a `beforeAll` warm-up rather than charging it to whichever case
+happens to run first, so the per-case timings mean something and the failure, if one
+comes, names the case that earned it.
