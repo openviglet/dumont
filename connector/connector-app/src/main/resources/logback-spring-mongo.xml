@@ -56,6 +56,19 @@
 	<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}" />
 	<include resource="org/springframework/boot/logging/logback/file-appender.xml" />
 
+	<!--
+		D78 - the appenders' own diagnostics must never go to the store they are complaining about.
+		Root points at ASYNC_MONGO_GENERAL, so without this a "MongoDB refused a write" warning is
+		queued into MongoDB: lost when it is down, and a feedback loop across the async boundary,
+		where AppenderBase's re-entrancy guard does not reach. FILE and CONSOLE are where an
+		operator reads it. Declared after the include, because that is what defines FILE. The
+		DumLoggingIndexingLog logger above is more specific and still wins for the rows themselves.
+	-->
+	<logger name="com.viglet.dumont.commons.logging" level="warn" additivity="false">
+		<appender-ref ref="FILE" />
+		<appender-ref ref="CONSOLE" />
+	</logger>
+
 	<root level="INFO">
 		<appender-ref ref="ASYNC_MONGO_GENERAL" />
 	</root>

@@ -81,31 +81,6 @@ These constrain every task above:
 Track E spent D73 to D75 making the log readable and honest about failure. Every one of
 those was on the read path. What writes the rows was never looked at.
 
-### XXXIV.1 A write that failed, reported to nobody (D78)
-
-D75 fixed the read side: a store that cannot be reached answers 503 rather than an empty
-page. The write side still has the defect it was named for.
-
-`DumMongoDBIndexingAppender.append` calls `collection.insertOne` under no catch at all.
-Logback's `AppenderBase.doAppend` catches what escapes, but it reports only the first
-three occurrences to the status manager and is silent afterwards — and the status
-manager is not the application log, so nothing reaches `dum-connector.log` even for
-those three. A Mongo that is down therefore drops every row without a line anyone reads.
-
-`DumRedisIndexingAppender` does catch, and then logs at `INFO` with only
-`e.getMessage()`. An audit row that failed to persist is not information; it is a hole
-in the record that a reader of the log will later mistake for an absence of events.
-
-The two together mean the log's own integrity is unreported. An operator who checks the
-history after an outage sees fewer rows and has no way to learn that rows were lost
-rather than never produced — which is the failure D74 and D75 spent two tasks removing
-from the read path.
-
-Both appenders should report a write failure at `WARN` or above, through the application
-log, naming the engine and collapsing repeats so a sustained outage does not itself
-become the flood. An appender must not throw, so this stays a report rather than a
-propagated error.
-
 ### XXXIV.2 A mapper per event (D79)
 
 `DumMongoDBIndexingAppender.append` opens with `JsonMapper.builder().build()`, so an

@@ -2,7 +2,6 @@ package com.viglet.dumont.commons.logging;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.Date;
 
 import org.bson.Document;
@@ -17,16 +16,28 @@ import tools.jackson.databind.json.JsonMapper;
 @Setter
 public class DumMongoDBIndexingAppender extends DumMongoDBAppenderBase {
 
+    /** Says once per outage that rows are being lost, instead of not saying it at all (D78). */
+    private final DumLogWriteFailureReporter failures = new DumLogWriteFailureReporter("MongoDB");
+
     @Override
     protected void append(ILoggingEvent eventObject) {
         if (!enabled || collection == null || eventObject.getArgumentArray() == null) {
             return;
         }
         ObjectMapper mapper = JsonMapper.builder().build();
-        Arrays.stream(eventObject.getArgumentArray()).forEach(object -> {
-            String json = mapper.writeValueAsString(object);
-            collection.insertOne(withBsonDate(Document.parse(json)));
-        });
+        // One row at a time, the way D74 reads them back: a document this insert cannot take is
+        // its own loss, not a reason to drop the arguments queued behind it. The catch is also
+        // what keeps the exception out of AppenderBase.doAppend, which would have reported three
+        // of them to the status manager and then gone quiet.
+        for (Object object : eventObject.getArgumentArray()) {
+            try {
+                String json = mapper.writeValueAsString(object);
+                collection.insertOne(withBsonDate(Document.parse(json)));
+                failures.wrote();
+            } catch (Exception e) {
+                failures.failed(e);
+            }
+        }
     }
 
     /**

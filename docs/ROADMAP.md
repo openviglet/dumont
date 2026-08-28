@@ -61,7 +61,6 @@ This track has no remaining pending tasks.
 
 ## Track E — Data quality & trust
 
-- 📋 **D78** (deps: —) **A log row that could not be written looks like an event that never happened** — The Mongo appender wraps insertOne in no catch, so Logback reports three failures to its status manager and then goes silent; the Redis one catches but logs at INFO. → §XXXIV.1
 - 📋 **D79** (deps: —) **The indexing appender builds an ObjectMapper for every event** — DumMongoDBIndexingAppender constructs a JsonMapper per logging event on the hottest path in the system; its Redis counterpart already holds one static instance. → §XXXIV.2
 
 ## Track F — Enrichment & semantics (the differentiator)
