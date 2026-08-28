@@ -58,8 +58,15 @@ class DumMongoDBIndexingAppenderTest {
     void setUp() {
         inserted = new CopyOnWriteArrayList<>();
         collection = mock(MongoCollection.class);
-        doAnswer(invocation -> inserted.add(invocation.getArgument(0)))
-                .when(collection).insertOne(any(Document.class));
+        // Returning null rather than the boolean from List.add: insertOne returns an
+        // InsertOneResult, and handing Mockito a Boolean makes every call throw
+        // ClassCastException — which this appender's per-row catch would swallow, so the
+        // documents would still be captured while every write was counted as lost. The
+        // assertions below would pass without the success path ever running.
+        doAnswer(invocation -> {
+            inserted.add(invocation.getArgument(0));
+            return null;
+        }).when(collection).insertOne(any(Document.class));
 
         appender = new DumMongoDBIndexingAppender();
         appender.setEnabled(true);
@@ -113,7 +120,10 @@ class DumMongoDBIndexingAppenderTest {
     @DisplayName("a row the store refuses costs its own row and nothing behind it (D78)")
     void oneRefusedInsertDoesNotDropTheRest() {
         doThrow(new IllegalStateException("connection refused"))
-                .doAnswer(invocation -> inserted.add(invocation.getArgument(0)))
+                .doAnswer(invocation -> {
+                    inserted.add(invocation.getArgument(0));
+                    return null;
+                })
                 .when(collection).insertOne(any(Document.class));
 
         assertThatCode(() -> appender.append(eventFor(row("c1"), row("c2"))))

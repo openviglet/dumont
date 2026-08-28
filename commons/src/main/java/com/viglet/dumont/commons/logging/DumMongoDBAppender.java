@@ -1,7 +1,5 @@
 package com.viglet.dumont.commons.logging;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.Instant;
 
 import org.bson.Document;
@@ -42,12 +40,11 @@ public class DumMongoDBAppender extends DumMongoDBAppenderBase {
                 .message(event.getFormattedMessage())
                 .date(Instant.ofEpochMilli(event.getTimeStamp()))
                 .stackTrace(getStackTrace(event))
+                // D80: read, not resolved. This used to be a name-service call per event, on the
+                // async worker that drains this appender — so a slow resolver did not slow the
+                // application, it filled the queue and made logback discard log lines instead.
+                .clusterNode(DumClusterNode.NAME)
                 .build();
-        try {
-            dumLoggingGeneral.setClusterNode(InetAddress.getLocalHost().getHostName());
-        } catch (UnknownHostException e) {
-            log.error(e.getMessage(), e);
-        }
         String json = JSON_MAPPER.writeValueAsString(dumLoggingGeneral);
         // D73: the same date conversion the indexing appender does — the serializer emits JSON
         // now, so the BSON date is made here rather than smuggled through Mongo shell syntax.

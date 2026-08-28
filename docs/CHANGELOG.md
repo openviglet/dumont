@@ -247,6 +247,7 @@
 - **D76** — A shared MongoClient and a JedisPool are built once and held, so a status poll borrows rather than building a pool and a topology thread; an unset serverSelectionTimeoutMS is bounded to 5s.
 - **D78** — Both appenders report a lost row at WARN, once per outage with a count and a recovery line, and the profiles route those diagnostics to FILE rather than into the store refusing writes.
 - **D79** — The Mongo indexing appender holds one static mapper like its Redis counterpart, and append gained the test it never had: serialisation, per-row failure and the concurrency a shared mapper faces.
+- **D80** — The hostname resolves once in a shared DumClusterNode instead of per event, and the Redis sibling's private cache folds onto it rather than the two carrying the same lines twice.
 
 ## Track F — Enrichment & semantics
 

@@ -106,30 +106,6 @@ wiring this needs is done.
 
 Worth doing with D80 and D81, which edit the same two methods.
 
-### XXXV.2 A hostname lookup per log line (D80)
-
-`DumMongoDBAppender.append` calls `InetAddress.getLocalHost().getHostName()` to stamp
-the cluster node — once per logging event.
-
-That call is not arithmetic. It resolves the local host through the platform's name
-service, which can mean a reverse DNS lookup, and on a misconfigured or slow resolver it
-can take a long time. The JDK does not cache a negative result usefully, and the value
-it computes cannot change between two log lines of the same process.
-
-The cost does not land on application threads: the profile wraps this appender in an
-`AsyncAppender`, so the lookup happens on the async worker. That makes it a throughput
-problem rather than a latency one, and the shape it takes is worse for being indirect —
-the worker drains more slowly than events arrive, the 512-deep queue fills, and
-`neverBlock=true` with `discardingThreshold=0` means logback then throws events away. A
-slow resolver becomes missing log lines, with nothing anywhere connecting the two.
-
-The sibling class already shows the fix. `DumRedisAppender` resolves the hostname once
-in a static initialiser, falling back to `"unknown"`, and reads `cachedHostName` per
-event. The same three lines belong here. The current code also logs the failure with
-`log.error` from inside an appender attached to root, which is its own small recursion
-risk that caching removes by making the call happen once, at class-init, rather than per
-event.
-
 ### XXXV.3 Two queues, one of them unbounded (D81)
 
 `DumRedisAppender` builds `Executors.newFixedThreadPool(2)` and submits every logging

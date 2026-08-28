@@ -7,8 +7,6 @@
  */
 package com.viglet.dumont.commons.logging;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,7 +36,6 @@ public class DumRedisAppender extends DumRedisAppenderBase {
 
     public static final int MAX_LENGTH_PACKAGE_NAME = 40;
     private static final Abbreviator ABBREVIATOR = new TargetLengthBasedClassNameAbbreviator(1);
-    private static String cachedHostName;
 
     private static final JsonMapper MAPPER = JsonMapper.builder()
             .addModule(new JodaModule())
@@ -46,14 +43,6 @@ public class DumRedisAppender extends DumRedisAppenderBase {
             .build();
 
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
-
-    static {
-        try {
-            cachedHostName = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            cachedHostName = "unknown";
-        }
-    }
 
     @Override
     protected void append(ILoggingEvent event) {
@@ -67,7 +56,9 @@ public class DumRedisAppender extends DumRedisAppenderBase {
                 .message(event.getFormattedMessage())
                 .date(Instant.ofEpochMilli(event.getTimeStamp()))
                 .stackTrace(getStackTrace(event))
-                .clusterNode(cachedHostName)
+                // D80: the cache this class already had, moved somewhere the Mongo sibling can
+                // read it too rather than carrying its own copy of the same six lines.
+                .clusterNode(DumClusterNode.NAME)
                 .build();
 
         executor.submit(() -> {
