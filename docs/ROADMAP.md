@@ -59,6 +59,10 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
+## Track E — Data quality & trust
+
+- 📋 **D87** (deps: —) **The log reader pools Redis on a deprecated API the writer stopped using** — D76 reached for JedisPool, which the driver deprecates and which takes default bounds, while DumRedisAppenderBase already builds a RedisClient with a stated ConnectionPoolConfig. → §XXXIX.1
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
