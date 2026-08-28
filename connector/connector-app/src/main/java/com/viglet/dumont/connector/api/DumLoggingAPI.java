@@ -20,10 +20,12 @@ import java.util.Map;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -101,13 +103,63 @@ public class DumLoggingAPI {
         this.redisIndexingKey = redisIndexingKey;
     }
 
-    @Operation(summary = "Indexing log feature flag")
+    /**
+     * Whether the indexing log is on, and whether it actually answers (roadmap
+     * <strong>D75</strong>).
+     *
+     * <p>
+     * {@code configured} is what the properties say; {@code enabled} is what a ping says. They
+     * used to be one field read from configuration alone, so a store that was named and
+     * unreachable reported itself as on — and the reader that gates a screen on it showed an empty
+     * history rather than a broken one.
+     */
+    @Operation(summary = "Indexing log feature flag and reachability")
     @GetMapping("status")
     public Map<String, Object> status() {
+        boolean configured = isMongoActive() || isRedisActive();
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("engine", loggingEngine);
-        body.put("enabled", isMongoActive() || isRedisActive());
+        body.put("configured", configured);
+        body.put("enabled", configured && reachable());
         return body;
+    }
+
+    /**
+     * A query that could not reach its store is a 503, not an empty page (roadmap
+     * <strong>D75</strong>).
+     *
+     * <p>
+     * Both engines used to catch the failure, log it where only an administrator would see it, and
+     * answer HTTP 200 with an empty list — character for character what a log holding nothing
+     * answers. An operator reading that screen concluded the connector had indexed nothing, when
+     * the truth was that the connector had indexed everything and the store was down.
+     */
+    private ResponseStatusException storeUnavailable(String engine, Exception cause) {
+        log.error("{} indexing log query failed", engine, cause);
+        return new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "The indexing log store (" + engine + ") could not be reached", cause);
+    }
+
+    /** Whether the configured store answers right now. Never throws: this endpoint is the probe. */
+    private boolean reachable() {
+        try {
+            if (isMongoActive()) {
+                try (MongoClient mongoClient = MongoClients.create(mongoUri)) {
+                    mongoClient.getDatabase(databaseName).runCommand(new Document("ping", 1));
+                    return true;
+                }
+            }
+            if (isRedisActive()) {
+                try (Jedis jedis = new Jedis(java.net.URI.create(redisUri))) {
+                    jedis.ping();
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Indexing log store '{}' is configured but did not answer: {}", loggingEngine,
+                    e.getMessage());
+        }
+        return false;
     }
 
     /**
@@ -192,7 +244,7 @@ public class DumLoggingAPI {
             result.put(TOTAL_ELEMENTS, totalElements);
             result.put(TOTAL_PAGES, totalPages);
         } catch (Exception e) {
-            log.error("Mongo indexing log query failed", e);
+            throw storeUnavailable("Mongo", e);
         }
         return result;
     }
@@ -254,7 +306,7 @@ public class DumLoggingAPI {
             result.put(TOTAL_PAGES, totalPages);
             result.put(UNREADABLE, unreadable);
         } catch (Exception e) {
-            log.error("Redis indexing log query failed", e);
+            throw storeUnavailable("Redis", e);
         }
         return result;
     }

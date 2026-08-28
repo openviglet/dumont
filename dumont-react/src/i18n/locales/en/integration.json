@@ -250,6 +250,7 @@
         "history": "Indexing History",
         "historyDesc": "Persistent indexing log entries for this content (engine: {{engine}}).",
         "historyLoading": "Loading history...",
+        "historyUnreachable": "The indexing log is switched on, but the {{engine}} store did not answer. This is not an empty history — the entries cannot be read right now.",
         "noHistory": "No log entries for this content.",
         "historyDate": "Date",
         "historyResult": "Result",

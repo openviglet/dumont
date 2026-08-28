@@ -61,8 +61,6 @@ This track has no remaining pending tasks.
 
 ## Track E — Data quality & trust
 
-- 📋 **D75** (deps: D74 ✅) **A log store that is down answers exactly like an empty log** — Both engines catch a query failure, log it server-side and return the empty page, so an unreachable Mongo or Redis reads as a connector that indexed nothing. → §XXXI
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
@@ -102,12 +100,6 @@ This track has no remaining pending tasks.
 This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
-
-## Done when — D75
-
-- **An unreachable store is told apart from an empty log** An integration test pointed
-  at a stopped container gets a 503 rather than an empty page, and the status endpoint
-  reports enabled from a ping rather than from the property.
 
 ## Non-goals (do NOT add as tasks)
 

@@ -425,7 +425,14 @@ export default function IntegrationInstanceMonitoringItemPage() {
                                 <IconInfoCircle className="size-4 mr-1" />
                                 {t("integration.monitoring.item.tabDetail")}
                             </TabsTrigger>
-                            {loggingStatus?.enabled && (
+                            {/*
+                              * D75 — the tab follows `configured`, not `enabled`. They used to be
+                              * the same flag read from a property, so a store that was named and
+                              * unreachable still showed a tab, which opened onto an empty list.
+                              * Now the tab says the log is switched on and its body says whether
+                              * the store answered.
+                              */}
+                            {loggingStatus?.configured && (
                                 <TabsTrigger value={TAB_HISTORY}>
                                     <IconHistory className="size-4 mr-1" />
                                     {t("integration.monitoring.item.tabHistory")}
@@ -526,7 +533,7 @@ export default function IntegrationInstanceMonitoringItemPage() {
                             </SectionCard>
                         </TabsContent>
 
-                        {loggingStatus?.enabled && (
+                        {loggingStatus?.configured && (
                             <TabsContent value={TAB_HISTORY} className="mt-4 space-y-4">
                                 <SectionCard variant="amber">
                                     <SectionCard.StaticHeader
@@ -536,6 +543,16 @@ export default function IntegrationInstanceMonitoringItemPage() {
                                             engine: loggingStatus.engine,
                                         })}
                                     />
+                                    {!loggingStatus.enabled && (
+                                        <SectionCard.Content>
+                                            <p className="text-sm text-muted-foreground">
+                                                {t("integration.monitoring.item.historyUnreachable", {
+                                                    engine: loggingStatus.engine,
+                                                })}
+                                            </p>
+                                        </SectionCard.Content>
+                                    )}
+                                    {loggingStatus.enabled && (
                                     <SectionCard.Content>
                                         <HistoryBody
                                             loading={historyLoading}
@@ -606,6 +623,7 @@ export default function IntegrationInstanceMonitoringItemPage() {
                                             </div>
                                         </div>
                                     </SectionCard.Content>
+                                    )}
                                 </SectionCard>
                             </TabsContent>
                         )}

@@ -38,13 +38,24 @@ let requestedPages: number[] = []
  * Entries are numbered so a row names the page it came from: the last page of 25 entries at 10 per
  * page holds `entry-100` upward, and nothing else does.
  */
-function stubConnector({ total = 120, loggingEnabled = true } = {}) {
+function stubConnector({
+  total = 120,
+  loggingEnabled = true,
+  loggingConfigured,
+}: { total?: number; loggingEnabled?: boolean; loggingConfigured?: boolean } = {}) {
+  // D75 — the two halves the status endpoint reports separately. `configured` is what the
+  // properties say; `enabled` is what a ping says. They default together because that is the
+  // ordinary case; a store that is named and unreachable sets them apart.
+  const configured = loggingConfigured ?? loggingEnabled
   requestedPages = []
   vi.spyOn(axios, "get").mockImplementation(async (url: string, config?: unknown) => {
     const params = (config as { params?: Record<string, unknown> } | undefined)?.params
 
     if (url.includes("/logging/status")) {
-      return { data: { engine: "solr", enabled: loggingEnabled }, status: 200 } as never
+      return {
+        data: { engine: "solr", configured, enabled: loggingEnabled },
+        status: 200,
+      } as never
     }
 
     if (url.includes("/logging/indexing")) {
@@ -150,6 +161,21 @@ describe("D53: the History tab asks only when it is open and available", () => {
     renderItem("history")
 
     await waitFor(() => expect(axios.get).toHaveBeenCalled())
+    expect(requestedPages).toEqual([])
+  })
+
+  it("says the store did not answer rather than showing an empty history", async () => {
+    /*
+     * D75 — the state that had nowhere to go. A configured store that does not answer used to
+     * report itself enabled, so the tab opened onto an empty table and the reader concluded the
+     * connector had indexed nothing. The tab now follows `configured` and its body follows
+     * `enabled`, so "switched on" and "answering" are two different sentences on screen.
+     */
+    stubConnector({ total: 120, loggingConfigured: true, loggingEnabled: false })
+    renderItem("history")
+
+    expect(await screen.findByText(/did not answer/i)).toBeDefined()
+    // And it does not ask for pages it knows it cannot get.
     expect(requestedPages).toEqual([])
   })
 })

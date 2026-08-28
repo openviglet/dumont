@@ -250,6 +250,7 @@
         "history": "Histórico de Indexação",
         "historyDesc": "Registros persistentes de indexação para este conteúdo (motor: {{engine}}).",
         "historyLoading": "Carregando histórico...",
+        "historyUnreachable": "O log de indexação está ligado, mas o armazenamento {{engine}} não respondeu. Isto não é um histórico vazio — os registros não podem ser lidos agora.",
         "noHistory": "Sem registros de log para este conteúdo.",
         "historyDate": "Data",
         "historyResult": "Resultado",

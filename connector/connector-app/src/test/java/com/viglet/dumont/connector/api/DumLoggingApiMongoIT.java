@@ -7,6 +7,7 @@
 package com.viglet.dumont.connector.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Date;
 import java.util.List;
@@ -14,7 +15,10 @@ import java.util.Map;
 
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -62,7 +66,27 @@ class DumLoggingApiMongoIT {
 
     @Test
     void statusReportsMongoEnabled() {
-        assertThat(api.status()).containsEntry("engine", "mongodb").containsEntry("enabled", true);
+        assertThat(api.status()).containsEntry("engine", "mongodb")
+                .containsEntry("configured", true).containsEntry("enabled", true);
+    }
+
+    @Test
+    @DisplayName("a store that is down is told apart from a log with nothing in it (D75)")
+    void anUnreachableMongoIsNotAnEmptyLog() {
+        // A short server-selection timeout: the point is the answer, not how long the driver
+        // spends being hopeful about it.
+        DumLoggingAPI unreachable = new DumLoggingAPI("mongodb", true,
+                "mongodb://localhost:1/?serverSelectionTimeoutMS=500", DB, COLLECTION, false,
+                "redis://localhost:6379/0", "dumontLog:indexing");
+
+        assertThatThrownBy(() -> unreachable.indexingLogging(0, 100, null, null, null, null, null,
+                null, null, null, "desc"))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(caught -> ((ResponseStatusException) caught).getStatusCode())
+                .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+
+        assertThat(unreachable.status()).containsEntry("configured", true)
+                .containsEntry("enabled", false);
     }
 
     @Test

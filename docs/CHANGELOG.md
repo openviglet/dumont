@@ -243,6 +243,7 @@
 - **D72** — The indexing log filters by source and transactionId on both the Mongo and Redis engines, and a row written before the trail existed is returned unfiltered rather than dropped.
 - **D73** — The Redis engine honours all seven filters. It was returning nothing at all: the shared serializer emitted Mongo shell ISODate, which no JSON reader accepts, so every query failed and answered empty.
 - **D74** — The Redis parse moved inside the loop, so a row Jackson cannot read costs its own row and nothing else; the response carries an unreadable count and a warning names pre-2026.3.6 rows as the cause.
+- **D75** — An unreachable store answers 503, not an empty page, and status splits into configured (the property) and enabled (a ping); the history tab follows the first, its body the second.
 
 ## Track F — Enrichment & semantics
 

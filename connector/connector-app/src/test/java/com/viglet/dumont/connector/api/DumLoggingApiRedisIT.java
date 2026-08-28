@@ -7,6 +7,7 @@
 package com.viglet.dumont.connector.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Instant;
 import java.util.List;
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 import com.viglet.dumont.commons.indexing.DumLoggingStatus;
@@ -70,7 +73,27 @@ class DumLoggingApiRedisIT {
 
     @Test
     void statusReportsRedisEnabled() {
-        assertThat(api.status()).containsEntry("engine", "redis").containsEntry("enabled", true);
+        assertThat(api.status()).containsEntry("engine", "redis")
+                .containsEntry("configured", true).containsEntry("enabled", true);
+    }
+
+    @Test
+    @DisplayName("a store that is down is told apart from a log with nothing in it (D75)")
+    void anUnreachableRedisIsNotAnEmptyLog() {
+        DumLoggingAPI unreachable = new DumLoggingAPI("redis", false, "mongodb://localhost:27017",
+                "dumontLog", "indexing", true, "redis://localhost:1/0", KEY);
+
+        // Not an empty page: an operator reading one would conclude the connector indexed nothing.
+        assertThatThrownBy(() -> unreachable.indexingLogging(0, 100, null, null, null, null, null,
+                null, null, null, "desc"))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(caught -> ((ResponseStatusException) caught).getStatusCode())
+                .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+
+        // And the flag a screen gates on says the log is configured but not answering, rather
+        // than reporting it on because a property names it.
+        assertThat(unreachable.status()).containsEntry("configured", true)
+                .containsEntry("enabled", false);
     }
 
     @Test

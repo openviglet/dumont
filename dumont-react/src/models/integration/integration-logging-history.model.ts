@@ -30,5 +30,12 @@ export type TurIntegrationLoggingPage = {
 
 export type TurIntegrationLoggingStatus = {
   engine: string;
+  /** What the properties say: an engine is named and switched on. */
+  configured: boolean;
+  /**
+   * What a ping says (D75) — configured *and* answering. Gate a screen on this: a store that is
+   * named and unreachable used to report itself on, so the history tab opened onto an empty list
+   * rather than saying the log could not be read.
+   */
   enabled: boolean;
 };
