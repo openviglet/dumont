@@ -75,3 +75,82 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XXXV The general log, and what the indexing pair was fixed without
+
+D73 to D79 went through the indexing appenders twice. The pair beside them writes the
+server log, is attached to root, and was never read.
+
+### XXXV.1 The same silence, on the log that holds everything (D82)
+
+D78 gave the indexing appenders a throttled failure report and routed it away from the
+store it complains about. It did not touch the general pair, and they carry the same two
+defects it named.
+
+`DumMongoDBAppender.append` calls `collection.insertOne` under no catch.
+`DumRedisAppender` catches and logs at `INFO` with `e.getMessage()` alone. So the server
+log — the one that holds every WARN and ERROR the connector has ever emitted — stops
+recording the moment its store does, and says so either three times to Logback's status
+manager or once per row at a level nobody greps.
+
+This matters more than the indexing case, not less. These appenders are attached to
+**root** in the `mongo` and `redis` profiles, so what stops is everything. And an
+operator investigating an incident is exactly the person who will open that log, find it
+ends an hour before the incident, and read the gap as quiet.
+
+`DumLogWriteFailureReporter` already exists and is built for this: one line per outage,
+a count while it lasts, a total on recovery. Both classes should hold one, and the
+`com.viglet.dumont .commons.logging` routing D78 added to both profiles already sends
+its output to `FILE` and `CONSOLE` rather than back into the failing store — so the
+wiring this needs is done.
+
+Worth doing with D80 and D81, which edit the same two methods.
+
+### XXXV.2 A hostname lookup per log line (D80)
+
+`DumMongoDBAppender.append` calls `InetAddress.getLocalHost().getHostName()` to stamp
+the cluster node — once per logging event.
+
+That call is not arithmetic. It resolves the local host through the platform's name
+service, which can mean a reverse DNS lookup, and on a misconfigured or slow resolver it
+can take a long time. The JDK does not cache a negative result usefully, and the value
+it computes cannot change between two log lines of the same process.
+
+The cost does not land on application threads: the profile wraps this appender in an
+`AsyncAppender`, so the lookup happens on the async worker. That makes it a throughput
+problem rather than a latency one, and the shape it takes is worse for being indirect —
+the worker drains more slowly than events arrive, the 512-deep queue fills, and
+`neverBlock=true` with `discardingThreshold=0` means logback then throws events away. A
+slow resolver becomes missing log lines, with nothing anywhere connecting the two.
+
+The sibling class already shows the fix. `DumRedisAppender` resolves the hostname once
+in a static initialiser, falling back to `"unknown"`, and reads `cachedHostName` per
+event. The same three lines belong here. The current code also logs the failure with
+`log.error` from inside an appender attached to root, which is its own small recursion
+risk that caching removes by making the call happen once, at class-init, rather than per
+event.
+
+### XXXV.3 Two queues, one of them unbounded (D81)
+
+`DumRedisAppender` builds `Executors.newFixedThreadPool(2)` and submits every logging
+event to it. The logback profile already wraps the appender in an `AsyncAppender`. So an
+event crosses two queues, and only the first one is bounded.
+
+`newFixedThreadPool` uses an unbounded `LinkedBlockingQueue`. The `AsyncAppender` in
+front of it is configured `queueSize=512`, `discardingThreshold=0`, `neverBlock=true` —
+a deliberate policy that says: buffer this much, and drop rather than stall the
+application. That policy is now unreachable. The appender's `append` returns as soon as
+the task is submitted, so the async queue always looks empty and never discards; the
+real backlog accumulates in a queue with no ceiling and no metrics, and under a Redis
+slowdown it grows until the heap says otherwise.
+
+Shutdown has the mirror-image problem. `stop()` calls `executor.shutdown()`, which does
+not wait, and then `super.stop()` closes the Redis client. Tasks still queued then run
+against a closed pool and fail — so the log lines from the end of the run, which are the
+ones an operator most often wants, are the ones most likely to be lost. They fail into
+the `INFO` catch D82 is about.
+
+The second executor should go. An `AsyncAppender` is already the right mechanism and it
+is already configured; writing synchronously beneath it restores the bound and the
+discard policy in one move. If a worker is genuinely wanted, it needs a bounded queue, a
+rejection policy chosen on purpose, and an `awaitTermination` before the client closes.

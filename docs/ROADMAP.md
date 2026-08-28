@@ -59,6 +59,12 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
+## Track E — Data quality & trust
+
+- 📋 **D80** (deps: —) **The Mongo general appender resolves the hostname on every event** — InetAddress.getLocalHost() runs per log line on the async worker, so a slow lookup throttles the drain and the queue discards events; the Redis sibling caches it in a static. → §XXXV.2
+- 📋 **D81** (deps: —) **The Redis general appender hides an unbounded queue behind an async one** — Every event is submitted to its own fixed pool, whose LinkedBlockingQueue is unbounded, so the AsyncAppender's discard policy is defeated and shutdown closes the client without draining. → §XXXV.3
+- 📋 **D82** (deps: —) **The general-log appenders still lose rows without saying so** — D78 fixed the indexing pair only, so DumMongoDBAppender still wraps insertOne in no catch and DumRedisAppender still logs at INFO, and the server log stops silently with its store. → §XXXV.1
+
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
