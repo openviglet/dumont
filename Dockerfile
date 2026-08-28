@@ -46,4 +46,8 @@ ENV JAVA_OPTS="-Xmx512m -Xms512m"
 ENV DEBUG_OPTS=""
 # LOADER_PATH points PropertiesLauncher at the bundled connector plugins.
 ENV LOADER_PATH="/app/libs"
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} ${DEBUG_OPTS} -Djava.security.egd=file:/dev/./urandom -Dloader.path=${LOADER_PATH} -Dlogging.config=classpath:logback-spring-console.xml -jar /app/app.jar"]
+# No -Dlogging.config here (D86). It used to pin the console-only profile, which switches the
+# indexing log off — and a -D system property outranks the mounted dumont-connector.properties,
+# so the log could not be enabled in a container at all. Every profile now writes to the console,
+# so stdout for the orchestrator costs nothing; dumont.logging.engine picks the profile (D85).
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} ${DEBUG_OPTS} -Djava.security.egd=file:/dev/./urandom -Dloader.path=${LOADER_PATH} -jar /app/app.jar"]

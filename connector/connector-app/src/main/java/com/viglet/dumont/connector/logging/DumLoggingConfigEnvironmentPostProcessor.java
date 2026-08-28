@@ -54,6 +54,22 @@ public class DumLoggingConfigEnvironmentPostProcessor
             "mongodb", "classpath:logback-spring-mongo.xml",
             "redis", "classpath:logback-spring-redis.xml");
 
+    /**
+     * Which engine each shipped profile actually writes — the inverse of the map above, plus the
+     * console profile, which is nobody's derived value and writes no store at all.
+     *
+     * <p>
+     * The console profile is why this is not simply {@code PROFILE_BY_ENGINE} read backwards. It
+     * was what the Docker images pinned before D86, and pinning it while naming an engine is the
+     * same contradiction as pinning the redis profile against mongodb: one store is read and none
+     * is written. A profile absent from this map is the operator's own file and is left alone.
+     */
+    static final Map<String, String> ENGINE_BY_PROFILE = Map.of(
+            "classpath:logback-spring.xml", "none",
+            "classpath:logback-spring-console.xml", "none",
+            "classpath:logback-spring-mongo.xml", "mongodb",
+            "classpath:logback-spring-redis.xml", "redis");
+
     @Override
     public int getOrder() {
         return Ordered.LOWEST_PRECEDENCE;
@@ -81,19 +97,19 @@ public class DumLoggingConfigEnvironmentPostProcessor
     }
 
     /**
-     * A bespoke Logback file is none of this class's business; one of ours naming another engine
-     * is. Only the shipped profiles are recognised, so an operator pointing at their own file —
-     * whatever it contains — passes through untouched.
+     * A bespoke Logback file is none of this class's business; one of ours writing a different
+     * store is. Only the shipped profiles are recognised, so an operator pointing at their own
+     * file — whatever it contains — passes through untouched.
      */
     private void refuseAContradiction(String engine, String derived, String explicit) {
-        boolean isOneOfOurs = PROFILE_BY_ENGINE.containsValue(explicit);
-        if (!isOneOfOurs || explicit.equals(derived)) {
+        String written = ENGINE_BY_PROFILE.get(explicit);
+        if (written == null || written.equals(engine)) {
             return;
         }
         throw new IllegalStateException(
-                "Contradictory logging configuration: %s is '%s', which writes the log through '%s', but %s is set to '%s'. Set them to the same engine, or leave %s unset and it will be derived."
+                "Contradictory logging configuration: %s is '%s', which writes the log through '%s', but %s is set to '%s', which writes '%s'. Set them to the same engine, or leave %s unset and it will be derived."
                         .formatted(ENGINE_PROPERTY, engine, derived, CONFIG_PROPERTY, explicit,
-                                CONFIG_PROPERTY));
+                                written, CONFIG_PROPERTY));
     }
 
     private static String normalise(String engine) {

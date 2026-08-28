@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	The MongoDB profile. Selected when dumont.logging.engine is `mongodb`, which
+	DumLoggingConfigEnvironmentPostProcessor derives for you (D85).
+
+	Root writes to CONSOLE, FILE *and* the store (D86). It used to write to the store alone, which
+	had two costs: a container had to pin logging.config to a console-only profile and so could
+	never enable the indexing log at all, and the file named by logging.file.name stayed empty for
+	anyone who did enable it. The store is an addition here, not an alternative.
+-->
 <configuration>
 	<springProperty scope="context" name="MONGO_URI" source="dumont.mongodb.uri" defaultValue="mongodb://localhost:27017" />
 	<springProperty scope="context" name="MONGO_ENABLED" source="dumont.mongodb.enabled" defaultValue="false" />
@@ -32,7 +41,7 @@
 		<neverBlock>true</neverBlock>
 	</appender>
 
-	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+	<appender name="BANNER" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<Pattern>%msg%n</Pattern>
 		</encoder>
@@ -46,14 +55,15 @@
 	</logger>
 
 	<logger name="com.viglet.dumont.connector.DumConnectorApplication" level="info" additivity="false">
-		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="BANNER" />
 	</logger>
 	<logger name="com.viglet.dumont.connector.onstartup.DumConnectorOnStartup" level="info" additivity="false">
-		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="BANNER" />
 	</logger>
 
 	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
 	<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}" />
+	<include resource="org/springframework/boot/logging/logback/console-appender.xml" />
 	<include resource="org/springframework/boot/logging/logback/file-appender.xml" />
 
 	<!--
@@ -70,6 +80,8 @@
 	</logger>
 
 	<root level="INFO">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="FILE" />
 		<appender-ref ref="ASYNC_MONGO_GENERAL" />
 	</root>
 </configuration>

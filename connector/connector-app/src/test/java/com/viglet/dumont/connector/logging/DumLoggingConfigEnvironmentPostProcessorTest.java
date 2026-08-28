@@ -93,6 +93,21 @@ class DumLoggingConfigEnvironmentPostProcessorTest {
     }
 
     @Test
+    @DisplayName("the console profile is still allowed when no engine is named")
+    void theConsoleProfileWithoutAnEngineIsFine() {
+        // It writes no store and no store was asked for, so there is nothing to disagree about.
+        // Redundant since D86 — every profile writes to the console now — but not wrong.
+        MockEnvironment environment =
+                environmentWith("none", "classpath:logback-spring-console.xml");
+
+        assertThatCode(() -> processor.postProcessEnvironment(environment, null))
+                .doesNotThrowAnyException();
+
+        assertThat(environment.getProperty(CONFIG_PROPERTY))
+                .isEqualTo("classpath:logback-spring-console.xml");
+    }
+
+    @Test
     @DisplayName("setting the matching profile by hand is redundant, not wrong")
     void anExplicitMatchingProfileIsAccepted() {
         MockEnvironment environment =
@@ -111,6 +126,10 @@ class DumLoggingConfigEnvironmentPostProcessorTest {
             "redis,   classpath:logback-spring-mongo.xml",
             "mongodb, classpath:logback-spring.xml",
             "none,    classpath:logback-spring-mongo.xml",
+            // The console profile writes no store, so naming an engine beside it is the same
+            // contradiction. This is what the Docker images pinned before D86.
+            "mongodb, classpath:logback-spring-console.xml",
+            "redis,   classpath:logback-spring-console.xml",
     })
     @DisplayName("two shipped profiles that disagree are refused at startup, not half-honoured")
     void refusesAContradiction(String engine, String explicitConfig) {

@@ -1,23 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	The default profile: no indexing-log store. Selected when dumont.logging.engine is `none`,
+	which DumLoggingConfigEnvironmentPostProcessor derives for you (D85).
+
+	Root writes to CONSOLE and FILE, the pair Spring Boot's own base.xml uses (D86). Console is not
+	a separate profile any more: a container gets its stdout from here, so it no longer has to pin
+	logging.config to a file that switched the indexing log off.
+-->
 <configuration>
-	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+	<!--
+		The banner console: a bare %msg%n for the two loggers that print startup art, which would
+		be unreadable with a timestamp and a thread in front of it. Distinct from the CONSOLE the
+		Spring Boot include defines, which is what everything else uses.
+	-->
+	<appender name="BANNER" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<Pattern>
-				%msg%n
-			</Pattern>
+			<Pattern>%msg%n</Pattern>
 		</encoder>
 	</appender>
 	<logger name="com.viglet.dumont.connector.DumConnectorApplication" level="info" additivity="false">
-		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="BANNER" />
 	</logger>
 	<logger name="com.viglet.dumont.connector.onstartup.DumConnectorOnStartup" level="info" additivity="false">
-		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="BANNER" />
 	</logger>
+
+	<!-- No store to write the indexing log to, so the rows are not produced at all. -->
 	<logger name="com.viglet.dumont.commons.logging.DumLoggingIndexingLog" level="OFF" />
+
 	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
 	<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}" />
+	<include resource="org/springframework/boot/logging/logback/console-appender.xml" />
 	<include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+
 	<root level="INFO">
+		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE" />
 	</root>
 </configuration>

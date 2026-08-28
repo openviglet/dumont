@@ -253,6 +253,7 @@
 - 🗑 **D83** — abandoned: Verified false: Spring Boot throws on any Logback ERROR status, so a malformed URI fails the boot loudly, and a merely unreachable host starts fine and is reported at runtime by D82.
 - **D84** — status gains a writing flag answered by walking the logback context for an attached appender that would accept a row, and the history tab says so instead of rendering an empty table.
 - **D85** — logging.config is derived from dumont.logging.engine as the lowest-precedence source, so a custom file still wins, and two shipped profiles that name different engines are refused at startup.
+- **D86** — Every profile now writes to console and file as well as its store, so the Dockerfiles no longer pin a console-only profile and a container can enable the indexing log.
 
 ## Track F — Enrichment & semantics
 

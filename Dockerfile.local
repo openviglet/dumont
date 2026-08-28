@@ -32,4 +32,6 @@ ENV JAVA_OPTS="-Xmx512m -Xms512m"
 ENV DEBUG_OPTS=""
 # LOADER_PATH points PropertiesLauncher at the bundled connector plugins.
 ENV LOADER_PATH="/app/libs"
-ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} ${DEBUG_OPTS} -Djava.security.egd=file:/dev/./urandom -Dloader.path=${LOADER_PATH} -Dlogging.config=classpath:logback-spring-console.xml -jar /app/app.jar"]
+# No -Dlogging.config here (D86); see the comment in Dockerfile. Every profile writes to the
+# console now, so pinning one to get stdout would only switch the indexing log off.
+ENTRYPOINT ["sh", "-c", "exec java ${JAVA_OPTS} ${DEBUG_OPTS} -Djava.security.egd=file:/dev/./urandom -Dloader.path=${LOADER_PATH} -jar /app/app.jar"]

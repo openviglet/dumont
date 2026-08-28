@@ -59,10 +59,6 @@ This track has no remaining pending tasks.
 
 This track has no remaining pending tasks.
 
-## Track E — Data quality & trust
-
-- 📋 **D86** (deps: —) **The Docker image cannot enable the indexing log at all** — Both Dockerfiles pin -Dlogging.config to the console profile, the highest-precedence source, and it switches the indexing logger off, so no engine setting can reach a store. → §XXXVIII.1
-
 ## Track F — Enrichment & semantics (the differentiator)
 
 > **Objective**: turn D04's enrichment hook from "one derived field" into the layer that
