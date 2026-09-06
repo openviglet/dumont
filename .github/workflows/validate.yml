@@ -31,7 +31,7 @@ jobs:
       # The frontend is a pnpm workspace. The Maven build installs its own Node and pnpm through
       # frontend-maven-plugin, so these two exist for the cache below and to keep a local
       # `pnpm` invocation on the same version as the one Maven downloads.
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
       - name: Use Node.js 26.3.1
         uses: actions/setup-node@v7
@@ -40,7 +40,7 @@ jobs:
           cache: pnpm
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           java-version: "21"
           distribution: "temurin"
