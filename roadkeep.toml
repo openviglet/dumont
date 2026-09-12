@@ -66,3 +66,8 @@ symptom = false
 # which — the roadmap being empty — means they hold for every line ever added to it.
 one_sentence = false
 terminator = false
+
+[project]
+name = "Viglet Dumont"
+description = "Dumont DEP: the React micro-frontend and connector plugin samples."
+icon = "🧭"
