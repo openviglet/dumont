@@ -1,8 +1,9 @@
 import { ROUTES } from "@/app/routes.const";
-import { BlankSlate } from "@/components/blank-slate";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
+import { BentoEmptyState } from "@viglet/viglet-design-system/bento";
+import { GradientButtonLink } from "@viglet/viglet-design-system/router";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationCatalogSource } from "@/models/integration/integration-catalog-source.model";
 import { TurIntegrationCatalogSourceService } from "@/services/integration/integration-catalog-source.service";
@@ -37,7 +38,7 @@ export default function IntegrationInstanceCatalogSourceListPage() {
   return (
     <LoadProvider checkIsNotUndefined={integrationCatalogSources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/catalog-source`}>
       {gridItemList.length > 0 ? (<>
-        <SubPageHeader icon={IconBuildingBank} name={t("integration.catalogSources.title")}
+        <AdaptivePageHeader icon={IconBuildingBank} name={t("integration.catalogSources.title")}
           feature={t("integration.catalogSources.feature")}
           description={t("integration.catalogSources.description")} />
         <GridList gridItemList={gridItemList}>
@@ -45,12 +46,15 @@ export default function IntegrationInstanceCatalogSourceListPage() {
         </GridList>
 
       </>) : (
-        <BlankSlate
+        <BentoEmptyState
           icon={IconBuildingBank}
           title={t("integration.catalogSources.blankTitle")}
           description={t("integration.catalogSources.blankDescription")}
-          buttonText={t("integration.catalogSources.newSource")}
-          urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/catalog-source/new`} />
+          action={
+            <GradientButtonLink to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/catalog-source/new`}>
+              {t("integration.catalogSources.newSource")}
+            </GradientButtonLink>
+          } />
       )}
     </LoadProvider>
   )

@@ -1,7 +1,7 @@
 import { ROUTES } from "@/app/routes.const";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { DumRole } from "@/models/auth/role";
@@ -34,7 +34,7 @@ export default function AdminRolesListPage() {
 
   return (
     <LoadProvider checkIsNotUndefined={roles} error={error} tryAgainUrl={ROUTES.ADMIN_ROLES}>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconShieldCheck}
         feature={t("admin.roles.title")}
         name={t("admin.roles.title")}

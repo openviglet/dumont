@@ -2,6 +2,7 @@
   "account": {
     "title": "Configurações da Conta",
     "feature": "Conta",
+    "description": "Seu perfil, senha e preferências de interface.",
     "firstName": "Nome",
     "lastName": "Sobrenome",
     "email": "E-mail",

@@ -1,7 +1,7 @@
 import { ROUTES } from "@/app/routes.const";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { DumKeycloakUser } from "@/models/auth/keycloak-user";
@@ -77,7 +77,7 @@ export default function AdminUsersListPage() {
 
   return (
     <LoadProvider checkIsNotUndefined={users} error={error} tryAgainUrl={ROUTES.ADMIN_USERS}>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconUsers}
         feature={t("admin.users.title")}
         name={t("admin.users.title")}

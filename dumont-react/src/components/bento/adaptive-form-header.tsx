@@ -1,44 +1,35 @@
-import { GradientButton } from "@/components/ui/gradient-button";
-import { IconDeviceFloppy, IconX } from "@tabler/icons-react";
-import { StickyPageHeader } from "@viglet/viglet-design-system/router";
-import {
-  BentoActionsMenu,
-  BentoFormHero,
-  useSectionChrome,
-} from "@viglet/viglet-design-system/bento";
+import { BentoActionsMenu, BentoFormHero } from "@viglet/viglet-design-system/bento";
 import type { ComponentType, ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 
 /**
  * A secondary action — Export, Dry scan, Index all, Delete.
  *
- * Both eras hide these behind a `⋮` menu, so the two headers agree on the shape and differ only
- * in which component draws it: `StickyPageHeader.Action` is a marker the console header collects
- * into its dropdown, and `BentoActionsMenu` is the bento equivalent. Passing the console markers
- * straight through as bento `trailing` would render them as nothing.
+ * Kept as a declaration rather than as markup because the hero collects these into its own `⋮`
+ * menu: handing `BentoActionsMenu` a button a caller drew would render it outside the menu, or
+ * not at all.
  */
 export interface AdaptiveFormAction {
   label: string;
   icon: ComponentType<{ size?: number }>;
   onSelect: () => void;
   disabled?: boolean;
-  /** Tints the item in bento chrome; the console dropdown has no tone of its own. */
+  /** Tints the item. */
   tone?: "default" | "destructive";
 }
 
 export interface AdaptiveFormHeaderProps {
   icon: React.ElementType;
-  /** The surface's name — "Database Sources". The console header's headline. */
+  /** The surface's name — "Database Sources". Drawn as the eyebrow, beside `urlBase`. */
   feature: string;
   description: string;
-  /** The entity's own name, watched from the form. Becomes the bento hero's headline. */
+  /** The entity's own name, watched from the form. The hero's headline. */
   title?: string;
-  /** Console only: wraps the headline in a link back to the list. */
+  /** Where the eyebrow's back-link goes. Without it the hero draws no eyebrow. */
   urlBase?: string;
   /** Where Cancel goes. */
   onCancel: () => void;
   loading?: boolean;
-  /** There is something to save. Bento disables Save without it; the console never did. */
+  /** There is something to save. Save is disabled without it. */
   dirty?: boolean;
   /** The entity has no name yet — Save is refused, and the bar says why. */
   titleMissing?: boolean;
@@ -50,26 +41,24 @@ export interface AdaptiveFormHeaderProps {
    * rendered in both halves of the morph opens two modals at once.
    */
   actions?: ReactNode;
-  /** Secondary actions, rendered behind a `⋮` in both eras. */
+  /** Secondary actions, rendered behind a `⋮`. */
   menuActions?: AdaptiveFormAction[];
 }
 
 /**
- * One form header, in whichever era it is rendered (D47).
+ * One form header (D47).
  *
- * The six source forms are 500-line files of real field logic, and the only part of them that
- * differs between the two chromes is this header. Forking them to migrate the detail pages would
- * mean two copies of that logic drifting for the length of the migration, which is the cost the
- * parallel tree exists to avoid — so instead the form is written once and the header asks which
- * era it is in.
+ * The six source forms are 500-line files of real field logic, and the header was the only part of
+ * them that differed between the two chromes. Forking them to migrate the detail pages would have
+ * meant two copies of that logic drifting for the length of the migration, which is the cost the
+ * parallel tree exists to avoid — so the form was written once and the header asked, through
+ * `useSectionChrome`, which era it was in.
  *
- * `useSectionChrome` answers from the nearest `SectionCardChromeProvider`, and the default is
- * `console`, so a form that knows nothing about this behaves exactly as it always did.
- *
- * The two headers are not the same shape, which is why this is a declarative component rather
- * than a passthrough: the console header takes Save and Cancel as children among the rest, and
- * `BentoFormHero` owns both halves of the save-bar morph itself and must not be handed a second
- * pair.
+ * D88 retired the console-era answer. `BentoFormHero` is what every tree renders now, and this
+ * stays because the two are not the same shape: the console header took Save and Cancel as
+ * children among the rest, while `BentoFormHero` owns both halves of the save-bar morph itself and
+ * must not be handed a second pair. Declaring the actions rather than passing them through is what
+ * kept that invariant, and it is still what keeps it.
  */
 export function AdaptiveFormHeader({
   icon: Icon,
@@ -84,60 +73,24 @@ export function AdaptiveFormHeader({
   actions,
   menuActions = [],
 }: Readonly<AdaptiveFormHeaderProps>) {
-  const { t } = useTranslation();
-  const chrome = useSectionChrome();
-
-  if (chrome === "bento") {
-    return (
-      <BentoFormHero
-        backTo={urlBase}
-        backLabel={feature}
-        leading={<Icon size={28} aria-hidden />}
-        title={title?.trim() ? title : feature}
-        subtitle={description}
-        trailing={
-          <>
-            {actions}
-            {menuActions.length > 0 && <BentoActionsMenu actions={menuActions} />}
-          </>
-        }
-        onCancel={onCancel}
-        loading={loading}
-        dirty={dirty}
-        titleMissing={titleMissing}
-        stickyTitle={title?.trim() ? title : feature}
-      />
-    );
-  }
-
   return (
-    <StickyPageHeader>
-      <StickyPageHeader.Title
-        icon={Icon}
-        feature={feature}
-        description={description}
-        urlBase={urlBase}
-      />
-      <StickyPageHeader.Actions>
-        {menuActions.map((action) => (
-          <StickyPageHeader.Action
-            key={action.label}
-            label={action.label}
-            icon={action.icon}
-            onClick={action.onSelect}
-            disabled={action.disabled}
-          />
-        ))}
-        {actions}
-        <GradientButton type="submit" size="sm" loading={loading}>
-          <IconDeviceFloppy className="size-4" />
-          {t("forms.formActions.saveChanges")}
-        </GradientButton>
-        <GradientButton type="button" variant="outline" size="sm" onClick={onCancel}>
-          <IconX className="size-4" />
-          {t("forms.formActions.cancel")}
-        </GradientButton>
-      </StickyPageHeader.Actions>
-    </StickyPageHeader>
+    <BentoFormHero
+      backTo={urlBase}
+      backLabel={feature}
+      leading={<Icon size={28} aria-hidden />}
+      title={title?.trim() ? title : feature}
+      subtitle={description}
+      trailing={
+        <>
+          {actions}
+          {menuActions.length > 0 && <BentoActionsMenu actions={menuActions} />}
+        </>
+      }
+      onCancel={onCancel}
+      loading={loading}
+      dirty={dirty}
+      titleMissing={titleMissing}
+      stickyTitle={title?.trim() ? title : feature}
+    />
   );
 }

@@ -1,33 +1,31 @@
-import { SubPageHeader } from "@/components/sub.page.header";
-import { BentoHero, useSectionChrome } from "@viglet/viglet-design-system/bento";
+import { BentoHero } from "@viglet/viglet-design-system/bento";
 import type { ReactNode } from "react";
 
 export interface AdaptivePageHeaderProps {
   icon: React.ElementType;
-  /** The surface's name — "AI Source Inference". The console header's headline. */
+  /** The surface's name — "AI Source Inference". Drawn as the eyebrow, beside `urlBase`. */
   feature: string;
   /** What this particular page is. Usually the same as `feature` on a singleton surface. */
   name: string;
   description: string;
-  /** Where the breadcrumb goes back to. The console links its headline; bento draws an eyebrow. */
+  /** Where the eyebrow's back-link goes. Without it the hero draws no eyebrow. */
   urlBase?: string;
-  /** Header-level actions — chips, buttons. Trailing in both eras. */
+  /** Header-level actions — chips, buttons. Trailing. */
   children?: ReactNode;
 }
 
 /**
- * One page header for a surface that is not a form, in whichever era it is rendered (D57).
+ * One page header for a surface that is not a form (D57).
  *
  * `AdaptiveFormHeader` is the same idea for the six source forms, and it carries a save bar
- * because a form has one. Most of what is left to migrate does not: a wizard, a panel, a table.
- * Those pages differ between the eras only in the header and the section cards, so they take the
- * D47 shape too — the console page under a `chrome="bento"` declaration — and this is the header
- * half of it.
+ * because a form has one. Most of what this console renders does not: a wizard, a panel, a table.
  *
- * The package's own deprecation notice on `SubPageHeader` names `BentoHero` as the replacement,
- * which is what this picks between. `useSectionChrome` answers from the nearest
- * `SectionCardChromeProvider` and defaults to `console`, so a page that knows nothing about this
- * renders exactly what it always did.
+ * It was written to pick between `SubPageHeader` and `BentoHero` off `useSectionChrome`, which is
+ * what let a page serve on both route trees while only one of them had moved. D88 retired the
+ * console-era half: every surface that reaches this now renders bento chrome on either tree, so
+ * there is nothing left to pick between and the branch is gone rather than kept at one arm. What
+ * survives is the mapping — Dumont says `icon`/`feature`/`name`/`description` where the hero says
+ * `leading`/`backLabel`/`title`/`subtitle`, and twenty-odd call sites say it once here.
  */
 export function AdaptivePageHeader({
   icon: Icon,
@@ -37,24 +35,14 @@ export function AdaptivePageHeader({
   urlBase,
   children,
 }: Readonly<AdaptivePageHeaderProps>) {
-  const chrome = useSectionChrome();
-
-  if (chrome === "bento") {
-    return (
-      <BentoHero
-        backTo={urlBase}
-        backLabel={feature}
-        leading={<Icon size={28} aria-hidden />}
-        title={name}
-        subtitle={description}
-        trailing={children}
-      />
-    );
-  }
-
   return (
-    <SubPageHeader icon={Icon} feature={feature} name={name} description={description} urlBase={urlBase}>
-      {children}
-    </SubPageHeader>
+    <BentoHero
+      backTo={urlBase}
+      backLabel={feature}
+      leading={<Icon size={28} aria-hidden />}
+      title={name}
+      subtitle={description}
+      trailing={children}
+    />
   );
 }

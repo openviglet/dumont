@@ -2,7 +2,7 @@ import { IconWorld } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "@viglet/viglet-design-system";
 
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
@@ -27,7 +27,7 @@ export default function UserPreferencesPage() {
 
   return (
     <>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconWorld}
         name={t("account.preferences.title")}
         feature={t("account.preferences.title")}

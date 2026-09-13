@@ -45,28 +45,42 @@ const FORKED: Record<string, string[]> = {
 }
 
 /**
- * Surfaces that render bento chrome. Empty until D37 built the route tree, and it grows by exactly
+ * Surfaces that render bento chrome. Empty until D37 built the route tree, and it grew by exactly
  * one line per migrated surface after that. The count, not the names, is what the track is
- * measured by â€” but the names are what make each step reviewable.
+ * measured by — but the names are what make each step reviewable.
  *
- * The first three are the shell rather than migrated pages: a parallel tree needs a root,
- * somewhere for Home to land, and a hub per section before any surface can move into it. The
- * rest are the six source lists (D46), the six detail pages behind them (D47), the inference
- * wizard that completed the Sources section (D57), the Integration section's seven read-only
- * surfaces plus the monitored-item page behind the grid (D58), and its two form surfaces — the
- * indexing rules, list and detail, and the indexing manager (D59), which completed it.
+ * The `app/bento` three are the shell rather than migrated pages: a parallel tree needs a root,
+ * somewhere for Home to land, and a hub per section before any surface can move into it.
  *
- * The last two are the AEM model and specification editors (D60). No nav entry declares them, so
- * they are the one pair this list would never have grown by counting surfaces — they were found by
- * following a link the shell could construct and the tree could not answer.
+ * The `pages/bento` twenty-seven are the surfaces that moved onto it: the six source lists (D46),
+ * the six detail pages behind them (D47), the inference wizard that completed the Sources section
+ * (D57), the Integration section's seven read-only surfaces plus the monitored-item page behind
+ * the grid (D58), its two form surfaces and the indexing manager (D59), and the AEM model and
+ * specification editors (D60) — the one pair this list would never have grown by counting
+ * surfaces, found by following a link the shell could construct and the tree could not answer.
  *
- * "Left to move" still counts the console originals, because they still exist and still render
- * console chrome â€” that is what makes each migration reversible, not an oversight in the count.
+ * The rest arrived in one step, and none of them is a surface that moved. D88 retired the four
+ * console-era components this console still took from the package, and with them the console
+ * branch of `AdaptivePageHeader` and `AdaptiveFormHeader`. A page behind either of those renders
+ * the bento hero on whichever tree it is reached from, so the console originals read bento as
+ * well — which is the same sentence the era rule has always spoken, now that the answer changed.
+ *
+ * Four pages are left on console chrome, and they are the surrounding app rather than surfaces:
+ * the console shell, its home, login and setup.
  */
 const ON_BENTO: string[] = [
   "app/bento/bento.area.page.tsx",
   "app/bento/bento.home.page.tsx",
   "app/bento/bento.root.page.tsx",
+  "app/console/admin-settings/admin.group.page.tsx",
+  "app/console/admin-settings/admin.groups.list.page.tsx",
+  "app/console/admin-settings/admin.role.page.tsx",
+  "app/console/admin-settings/admin.roles.list.page.tsx",
+  "app/console/admin-settings/admin.user.page.tsx",
+  "app/console/admin-settings/admin.users.list.page.tsx",
+  "app/console/user/preferences/user.preferences.page.tsx",
+  "app/console/user/profile/user.profile.page.tsx",
+  "app/console/user/user.account.page.tsx",
   "pages/bento/integration.instance.assets.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.assets.source.list.bento.page.tsx",
   "pages/bento/integration.instance.catalog.source.detail.bento.page.tsx",
@@ -94,6 +108,33 @@ const ON_BENTO: string[] = [
   "pages/bento/integration.instance.system-info.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.detail.bento.page.tsx",
   "pages/bento/integration.instance.wc.source.list.bento.page.tsx",
+  "pages/integration.instance.assets.source.list.page.tsx",
+  "pages/integration.instance.assets.source.page.tsx",
+  "pages/integration.instance.catalog.source.list.page.tsx",
+  "pages/integration.instance.catalog.source.page.tsx",
+  "pages/integration.instance.coverage.page.tsx",
+  "pages/integration.instance.db.source.list.page.tsx",
+  "pages/integration.instance.db.source.page.tsx",
+  "pages/integration.instance.double.check.page.tsx",
+  "pages/integration.instance.eds.source.list.page.tsx",
+  "pages/integration.instance.eds.source.page.tsx",
+  "pages/integration.instance.indexing.manager.page.tsx",
+  "pages/integration.instance.indexing.rules.list.page.tsx",
+  "pages/integration.instance.indexing.rules.page.tsx",
+  "pages/integration.instance.indexing.stats.page.tsx",
+  "pages/integration.instance.insights.page.tsx",
+  "pages/integration.instance.monitoring.item.page.tsx",
+  "pages/integration.instance.monitoring.page.tsx",
+  "pages/integration.instance.orphans.page.tsx",
+  "pages/integration.instance.plugins.page.tsx",
+  "pages/integration.instance.source.inference.page.tsx",
+  "pages/integration.instance.source.list.page.tsx",
+  "pages/integration.instance.source.model.page.tsx",
+  "pages/integration.instance.source.page.tsx",
+  "pages/integration.instance.source.spec.page.tsx",
+  "pages/integration.instance.system-info.page.tsx",
+  "pages/integration.instance.wc.source.list.page.tsx",
+  "pages/integration.instance.wc.source.page.tsx",
 ]
 
 describe("D35: the console census", () => {
@@ -246,13 +287,13 @@ describe("D46: era follows a page's local imports", () => {
      * kind: a reader learns to scroll past it, and the next probe that dies for the real reason
      * reads exactly the same.
      *
-     * The same page still proves the property, with a different probe: D59 took its save bar to
-     * `AdaptiveSaveBar` and its container to `AdaptivePanel`, so `Card` is now two files away
-     * from it too. A reader of the page file alone would report it rendering no console chrome
-     * at all.
+     * The subject is the login page since D88, because the indexing manager is bento-era now and
+     * a bento page has no chrome list to check. Login renders `Card` two files away, through
+     * `components/login/login-form`, and imports nothing console-era itself — so a reader of the
+     * page file alone would report it rendering no console chrome at all.
      */
     const { pages, totals } = census()
-    expect(pages["pages/integration.instance.indexing.manager.page.tsx"].chrome).toContain("Card")
+    expect(pages["app/login/login.page.tsx"].chrome).toContain("Card")
     // And no probe is dead, which is what the script's own stderr guard checks on every run.
     for (const [id, hits] of Object.entries(totals.chrome)) {
       expect(hits, `the ${id} probe matches nothing — stale, or the console really has none`)

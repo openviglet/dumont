@@ -64,9 +64,13 @@ const byCodepoint = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
  * page* and render console chrome by default. A page that takes one of these has adopted nothing
  * yet. Kept by name rather than by loosening the pattern: a page importing an adapter **and**
  * `BentoHero` is migrated, and this still says so.
+ *
+ * `AdaptivePageHeader` was on this list until D88 retired its console branch. It renders the bento
+ * hero on either tree now, so a page taking it has adopted the layer, and naming it here would
+ * have gone on subtracting surfaces that had moved.
  */
 export const ERA_NEUTRAL = [
-  "AdaptiveSectionCard", "AdaptivePageHeader", "AdaptivePanel", "AdaptiveEmptyState",
+  "AdaptiveSectionCard", "AdaptivePanel", "AdaptiveEmptyState",
   "SectionCardChromeProvider", "useSectionChrome",
 ]
 
@@ -156,11 +160,16 @@ function isBentoThroughLocals(file, source, seen = new Set()) {
  * logic whose only era-specific part is the header.
  *
  * Without this, following imports made every page reaching such a form read as bento, including
- * the console originals that still render `StickyPageHeader`. The package's own `ERA_NEUTRAL`
- * list says the same thing about its adapters; this says it about a product's.
+ * the console originals that still rendered the console-era header. The package's own
+ * `ERA_NEUTRAL` list says the same thing about its adapters; this says it about a product's.
+ *
+ * Comments are stripped first (D88). A module that *used* to adapt and says so in its own doc
+ * comment is not an adapter, and the two headers that stopped adapting both explain themselves
+ * that way — so reading the raw text kept every page behind them on console after the branch they
+ * were counted for had gone. A census must not be movable by prose about itself.
  */
 function isAdapter(source) {
-  return source.includes("useSectionChrome")
+  return code(source).includes("useSectionChrome")
 }
 
 /**
@@ -199,7 +208,6 @@ function localClosure(file, source, seen = new Set()) {
  */
 export const CONSOLE_CHROME = [
   ["PageHeader", /["'](?:@\/components|\.{1,2})\/page-header["']/],
-  ["SubPageHeader", /["'](?:@\/components|\.{1,2})\/sub\.page\.header["']/],
   ["Card", /["'](?:@\/components|\.{1,2})\/(?:components\/)?ui\/card["']/],
   ["Sidebar", /["'](?:@\/components|\.{1,2})\/(?:(?:components\/)?ui\/sidebar|app-sidebar)["']/],
   /*
@@ -209,6 +217,10 @@ export const CONSOLE_CHROME = [
    * the bar through `AdaptiveSaveBar`, which takes it from the package — so the shim this probe
    * read, `components/ui/sticky-save-bar`, no longer exists to be imported. Deleting the probe is
    * the case the rule above describes: every page carrying it was migrated, in the same diff.
+   *
+   * `SubPageHeader` went the same way in D88, and for the same reason: the shim it read,
+   * `components/sub.page.header`, was deleted once the last sixteen importers moved to the bento
+   * hero. Nothing spells that path any more, so the probe could only ever match zero.
    */
 ]
 

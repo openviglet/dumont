@@ -93,7 +93,11 @@ describe("D42: a form surface", () => {
     // The save button is the whole point of a form page: a migration that rearranged the header
     // and lost it produces a page that looks right and cannot be submitted, which is the exact
     // regression a type-check cannot see.
-    expect(await screen.findByRole("button", { name: /save/i })).toBeDefined()
+    //
+    // Two of them match since D88. `BentoFormHero` draws both halves of the hero → sticky-bar
+    // morph and each half carries a Save, so this counts them rather than singling one out: which
+    // half is on screen is the package's transition, and the claim here is about the page.
+    expect(await screen.findAllByRole("button", { name: /save/i })).not.toHaveLength(0)
 
     // And the form is bound to what the connector returned, rather than rendering empty fields
     // beside a working button.

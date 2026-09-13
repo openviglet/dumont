@@ -1,8 +1,9 @@
 import { ROUTES } from "@/app/routes.const";
-import { BlankSlate } from "@/components/blank-slate";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
+import { BentoEmptyState } from "@viglet/viglet-design-system/bento";
+import { GradientButtonLink } from "@viglet/viglet-design-system/router";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationDbSource } from "@/models/integration/integration-db-source.model";
 import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service";
@@ -37,7 +38,7 @@ export default function IntegrationInstanceDbSourceListPage() {
   return (
     <LoadProvider checkIsNotUndefined={integrationDbSources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/db-source`}>
       {gridItemList.length > 0 ? (<>
-        <SubPageHeader icon={IconDatabase} name={t("integration.dbSources.title")}
+        <AdaptivePageHeader icon={IconDatabase} name={t("integration.dbSources.title")}
           feature={t("integration.dbSources.feature")}
           description={t("integration.dbSources.description")} />
         <GridList gridItemList={gridItemList}>
@@ -45,12 +46,15 @@ export default function IntegrationInstanceDbSourceListPage() {
         </GridList>
 
       </>) : (
-        <BlankSlate
+        <BentoEmptyState
           icon={IconDatabase}
           title={t("integration.dbSources.blankTitle")}
           description={t("integration.dbSources.blankDescription")}
-          buttonText={t("integration.dbSources.newSource")}
-          urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/db-source/new`} />
+          action={
+            <GradientButtonLink to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/db-source/new`}>
+              {t("integration.dbSources.newSource")}
+            </GradientButtonLink>
+          } />
       )}
     </LoadProvider>
   )

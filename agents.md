@@ -191,9 +191,15 @@ is what lets it move back.
   advertise a surface it does not serve.
 - **Every surface in `DUMONT_NAV` has moved** — all seventeen, across both sections, so a reader who
   enters the shell stays in it whatever they click. What is still console-only is the surrounding
-  app — login, setup, console home, the six admin-settings pages, the three user ones.
-  `pnpm run census` prints which page is on which era, and the console tree is untouched — every
-  migrated surface still serves on it, which is what keeps each step reversible.
+  app — login, setup and console home. `pnpm run census` prints which page is on which era, and
+  the console tree is untouched: every migrated surface still serves on it, which is what keeps
+  each step reversible.
+- **Reversible means the route, not the chrome** (D88). Retiring the console-era components took
+  the console branch out of the two header adapters, so a surface reached from `/admin/…` renders
+  the same bento hero as one reached from `/bento/…`; only the shell around it differs. Moving a
+  page back to the console tree restores the sidebar and the breadcrumb, never the old header.
+  The census reads 66 of 70 pages as bento for exactly this reason — it counts chrome, and the
+  four left are the surrounding app.
 - Both are exposed over Module Federation (`./DumontRoutes`, `./BentoRoutes`); no turing-react
   change is needed when adding a page to either.
 - **`ROUTES.INTEGRATION_INSTANCE` derives its prefix from the live URL.** From inside the bento
@@ -301,21 +307,23 @@ read the chrome. Forking it would leave two copies drifting for the length of th
 **A page that is not a form** — a wizard, a panel, a table — takes the same shape with two other
 adapters, both in `components/bento/`:
 
-- `AdaptivePageHeader` → `SubPageHeader` or `BentoHero`. No save bar, because there is nothing to
-  save; the package's own deprecation notice on `SubPageHeader` names `BentoHero` as its
-  replacement, which is what this picks between.
+- `AdaptivePageHeader` → `BentoHero`. No save bar, because there is nothing to save. It picked
+  between the two eras until D88; now it only maps Dumont's `icon`/`feature`/`name`/`description`
+  onto the hero's slots, which is why twenty-odd call sites still go through it.
 - `AdaptivePanel` → `Card` + `CardContent` or `BentoPanel` — a container with no heading, because
   the header above already names the page. **Always pass `contentClassName` explicitly**: the two
   eras disagree on the default inset (`BentoPanel`'s content wrapper has none, `CardContent`'s is
   `px-6`), so naming it is what makes them render the same.
 
-- `AdaptiveFormHeader` (`components/bento/`) → `StickyPageHeader` or `BentoFormHero`. Declarative,
-  not a passthrough: the console header takes Save/Cancel as children, while `BentoFormHero` owns
-  **both halves of the save-bar morph** and must never be handed a second pair. Secondary actions
-  go through `menuActions` (→ `StickyPageHeader.Action` or `BentoActionsMenu`); destructive ones
-  belong there, never in the save bar.
+- `AdaptiveFormHeader` (`components/bento/`) → `BentoFormHero`. Declarative, not a passthrough:
+  `BentoFormHero` owns **both halves of the save-bar morph** and must never be handed a second
+  pair, so Save and Cancel are its own and secondary actions go through `menuActions` (→
+  `BentoActionsMenu`); destructive ones belong there, never in the save bar. Both halves render a
+  Save, so a test that queries for one by name must count rather than expect a single match.
 - `AdaptiveSectionCard as SectionCard` → collapsible card or frosted section. Same markup.
-- Both default to `console`, so a form that knows nothing about this is unchanged.
+- The two headers no longer read `useSectionChrome` (D88): they render bento chrome on either
+  tree. The panel and the section card still default to `console`, so a form that knows nothing
+  about this keeps the console's cards.
 - Then set `migrated: true` in `nav.const.ts` — that is what mints the `bentoRoute` the palette
   and hubs use to stay inside the shell.
 
@@ -324,9 +332,11 @@ renders — a page renders most of its chrome through components, and reading th
 under-counted `Card` by 17 and reported a live `StickySaveBar` as dead (D51). Three rules keep the
 era half honest: a page is bento-era if it reaches a bento import through its own local modules; a
 **type-only** import never counts (it is erased and renders nothing); and a module reading
-`useSectionChrome` is an *adapter* the walk does not follow, because it renders whichever era it
-is placed in. `chrome="bento"` is itself the strongest era statement. Adding a bento page means
-adding it to `ON_BENTO` in `test/console-census.test.ts`.
+`useSectionChrome` **in code** is an *adapter* the walk does not follow, because it renders
+whichever era it is placed in. Comments are stripped before that read (D88) — a module that used
+to adapt and explains so in its own doc comment would otherwise keep every page behind it on
+console. `chrome="bento"` is itself the strongest era statement. Adding a bento page means adding
+it to `ON_BENTO` in `test/console-census.test.ts`.
 
 ### Build and lint gates (Track K)
 

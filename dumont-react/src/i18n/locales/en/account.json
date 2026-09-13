@@ -2,6 +2,7 @@
   "account": {
     "title": "Account Settings",
     "feature": "Account",
+    "description": "Your profile, password and interface preferences.",
     "firstName": "First Name",
     "lastName": "Last Name",
     "email": "Email",

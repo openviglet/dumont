@@ -1,7 +1,7 @@
 import { ROUTES } from "@/app/routes.const";
 import { AdminGroupForm } from "@/components/admin/admin.group.form";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { DumGroup } from "@/models/auth/group";
 import { DumGroupService } from "@/services/auth/group.service";
@@ -77,11 +77,12 @@ export default function AdminGroupPage() {
 
   return (
     <LoadProvider checkIsNotUndefined={group} error={error} tryAgainUrl={ROUTES.ADMIN_GROUPS}>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconUsersGroup}
         feature={t("admin.groups.title")}
         name={isNew ? t("admin.groups.newGroup") : group?.name ?? ""}
         description={isNew ? t("admin.groups.createDescription") : t("admin.groups.editDescription")}
+        urlBase={ROUTES.ADMIN_GROUPS}
       />
       {group && (
         <AdminGroupForm

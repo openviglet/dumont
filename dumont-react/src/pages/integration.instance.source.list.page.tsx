@@ -1,8 +1,9 @@
 import { ROUTES } from "@/app/routes.const";
-import { BlankSlate } from "@/components/blank-slate";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { BentoEmptyState } from "@viglet/viglet-design-system/bento";
+import { GradientButtonLink } from "@viglet/viglet-design-system/router";
 import { useAemSourceImport } from "@/components/integration/use-aem-source-import";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
@@ -52,7 +53,7 @@ export default function IntegrationInstanceSourceListPage() {
         onChange={handleFileChange}
       />
       {gridItemList.length > 0 ? (<>
-        <SubPageHeader icon={IconGitCommit} name={t("integration.sources.title")}
+        <AdaptivePageHeader icon={IconGitCommit} name={t("integration.sources.title")}
           feature={t("integration.sources.feature")}
           description={t("integration.sources.description")} />
         <GridList gridItemList={gridItemList}>
@@ -66,12 +67,15 @@ export default function IntegrationInstanceSourceListPage() {
         </GridList>
 
       </>) : (
-        <BlankSlate
+        <BentoEmptyState
           icon={IconGitCommit}
           title={t("integration.sources.blankTitle")}
           description={t("integration.sources.blankDescription")}
-          buttonText={t("integration.sources.newSource")}
-          urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/source/new`} />
+          action={
+            <GradientButtonLink to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/source/new`}>
+              {t("integration.sources.newSource")}
+            </GradientButtonLink>
+          } />
       )}
     </LoadProvider>
   )

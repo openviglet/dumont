@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "@viglet/viglet-design-system";
 
 import { AvatarField } from "@/components/avatar-field";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -138,7 +138,7 @@ export default function UserProfilePage() {
 
   return (
     <>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconUser}
         name={t("account.profile.title")}
         feature={t("account.profile.title")}

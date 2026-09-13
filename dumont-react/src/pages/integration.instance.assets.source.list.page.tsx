@@ -1,8 +1,9 @@
 import { ROUTES } from "@/app/routes.const";
-import { BlankSlate } from "@/components/blank-slate";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
+import { BentoEmptyState } from "@viglet/viglet-design-system/bento";
+import { GradientButtonLink } from "@viglet/viglet-design-system/router";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationAssetsSource } from "@/models/integration/integration-assets-source.model";
 import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service";
@@ -36,12 +37,20 @@ export default function IntegrationInstanceAssetsSourceListPage() {
   return (
     <LoadProvider checkIsNotUndefined={sources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/assets-source`}>
       {gridItemList.length > 0 ? (<>
-        <SubPageHeader icon={IconFolder} name={t("integration.assetsSources.title")} feature={t("integration.assetsSources.feature")} description={t("integration.assetsSources.description")} />
+        <AdaptivePageHeader icon={IconFolder} name={t("integration.assetsSources.title")} feature={t("integration.assetsSources.feature")} description={t("integration.assetsSources.description")} />
         <GridList gridItemList={gridItemList}>
           <GridList.NewButton to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/assets-source/new`} label={t("integration.assetsSources.feature")} />
         </GridList>
       </>) : (
-        <BlankSlate icon={IconFolder} title={t("integration.assetsSources.blankTitle")} description={t("integration.assetsSources.blankDescription")} buttonText={t("integration.assetsSources.newSource")} urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/assets-source/new`} />
+        <BentoEmptyState
+          icon={IconFolder}
+          title={t("integration.assetsSources.blankTitle")}
+          description={t("integration.assetsSources.blankDescription")}
+          action={
+            <GradientButtonLink to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/assets-source/new`}>
+              {t("integration.assetsSources.newSource")}
+            </GradientButtonLink>
+          } />
       )}
     </LoadProvider>
   )

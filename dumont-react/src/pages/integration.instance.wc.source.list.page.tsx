@@ -1,8 +1,9 @@
 import { ROUTES } from "@/app/routes.const";
-import { BlankSlate } from "@/components/blank-slate";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
+import { BentoEmptyState } from "@viglet/viglet-design-system/bento";
+import { GradientButtonLink } from "@viglet/viglet-design-system/router";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationWcSource } from "@/models/integration/integration-wc-source.model";
 import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service";
@@ -37,18 +38,21 @@ export default function IntegrationInstanceWcSourceListPage() {
   return (
     <LoadProvider checkIsNotUndefined={sources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/wc-source`}>
       {gridItemList.length > 0 ? (<>
-        <SubPageHeader icon={IconGlobe} name={t("integration.wcSources.title")}
+        <AdaptivePageHeader icon={IconGlobe} name={t("integration.wcSources.title")}
           feature={t("integration.wcSources.feature")}
           description={t("integration.wcSources.description")} />
         <GridList gridItemList={gridItemList}>
           <GridList.NewButton to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/wc-source/new`} label={t("integration.wcSources.feature")} />
         </GridList>
       </>) : (
-        <BlankSlate icon={IconGlobe}
+        <BentoEmptyState icon={IconGlobe}
           title={t("integration.wcSources.blankTitle")}
           description={t("integration.wcSources.blankDescription")}
-          buttonText={t("integration.wcSources.newSource")}
-          urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/wc-source/new`} />
+          action={
+            <GradientButtonLink to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/wc-source/new`}>
+              {t("integration.wcSources.newSource")}
+            </GradientButtonLink>
+          } />
       )}
     </LoadProvider>
   )

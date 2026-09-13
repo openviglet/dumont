@@ -1,7 +1,7 @@
 ﻿import { ROUTES } from "@/app/routes.const";
 import { AdminUserForm } from "@/components/admin/admin.user.form";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { DumUser } from "@/models/auth/user";
 import { DumAdminUserService } from "@/services/auth/admin-user.service";
@@ -71,11 +71,12 @@ export default function AdminUserPage() {
 
   return (
     <LoadProvider checkIsNotUndefined={user} error={error} tryAgainUrl={ROUTES.ADMIN_USERS}>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconUser}
         feature={t("admin.users.title")}
         name={isNew ? t("admin.users.newUser") : user?.username ?? ""}
         description={isNew ? t("admin.users.createDescription") : t("admin.users.editDescription")}
+        urlBase={ROUTES.ADMIN_USERS}
       />
       {user && (
         <AdminUserForm

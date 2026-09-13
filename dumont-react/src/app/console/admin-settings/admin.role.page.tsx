@@ -1,7 +1,7 @@
 import { ROUTES } from "@/app/routes.const";
 import { AdminRoleForm } from "@/components/admin/admin.role.form";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { DumRole } from "@/models/auth/role";
 import { DumRoleService } from "@/services/auth/role.service";
@@ -70,11 +70,12 @@ export default function AdminRolePage() {
 
   return (
     <LoadProvider checkIsNotUndefined={role} error={error} tryAgainUrl={ROUTES.ADMIN_ROLES}>
-      <SubPageHeader
+      <AdaptivePageHeader
         icon={IconShieldCheck}
         feature={t("admin.roles.title")}
         name={isNew ? t("admin.roles.newRole") : role?.name ?? ""}
         description={isNew ? t("admin.roles.createDescription") : t("admin.roles.editDescription")}
+        urlBase={ROUTES.ADMIN_ROLES}
       />
       {role && (
         <AdminRoleForm

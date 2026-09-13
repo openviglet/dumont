@@ -1,8 +1,9 @@
 import { ROUTES } from "@/app/routes.const";
-import { BlankSlate } from "@/components/blank-slate";
+import { AdaptivePageHeader } from "@/components/bento/adaptive-page-header";
+import { BentoEmptyState } from "@viglet/viglet-design-system/bento";
+import { GradientButtonLink } from "@viglet/viglet-design-system/router";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
-import { SubPageHeader } from "@/components/sub.page.header";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationEdsSource } from "@/models/integration/integration-eds-source.model";
 import { TurIntegrationEdsSourceService } from "@/services/integration/integration-eds-source.service";
@@ -44,7 +45,7 @@ export default function IntegrationInstanceEdsSourceListPage() {
     >
       {gridItemList.length > 0 ? (
         <>
-          <SubPageHeader
+          <AdaptivePageHeader
             icon={IconCloudComputing}
             name={t("integration.edsSources.title")}
             feature={t("integration.edsSources.feature")}
@@ -58,12 +59,15 @@ export default function IntegrationInstanceEdsSourceListPage() {
           </GridList>
         </>
       ) : (
-        <BlankSlate
+        <BentoEmptyState
           icon={IconCloudComputing}
           title={t("integration.edsSources.blankTitle")}
           description={t("integration.edsSources.blankDescription")}
-          buttonText={t("integration.edsSources.newSource")}
-          urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/eds-source/new`}
+          action={
+            <GradientButtonLink to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/eds-source/new`}>
+              {t("integration.edsSources.newSource")}
+            </GradientButtonLink>
+          }
         />
       )}
     </LoadProvider>
