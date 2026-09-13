@@ -238,7 +238,7 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                       <FormItem>
                         <FormLabel>{t("forms.catalogSource.authHeaderValue")}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Bearer â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password" />
+                          <Input {...field} placeholder="Bearer ••••••••" type="password" />
                         </FormControl>
                         <FormDescription>{t("forms.catalogSource.authHeaderValueDesc")}</FormDescription>
                         <FormMessage />

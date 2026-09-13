@@ -318,7 +318,7 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
           <Stepper.Completion />
         </Stepper>
 
-        {/* Advanced Settings â€” separate from the stepper, only for ID */}
+        {/* Advanced Settings — separate from the stepper, only for ID */}
         {selectedAttribute === "id" && (
           <AdvancedSettings form={form} />
         )}

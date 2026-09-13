@@ -8,7 +8,7 @@ import { useParams } from "react-router-dom";
 /**
  * Load a source list, in the one shape every source service already offers.
  *
- * `items` starts `undefined` and only becomes an array once the request answers â€” that gap is the
+ * `items` starts `undefined` and only becomes an array once the request answers — that gap is the
  * package's loading contract, and it is not the same value as `[]`. A page defaulting to an empty
  * array shows every reader the blank slate for the length of the request, which looks like a
  * connector with no sources rather than one that is still answering.
@@ -31,7 +31,7 @@ export function useEntityList<T>(service: Readonly<{ query: () => Promise<T[]> }
 /**
  * The shape every entity list has, in bento chrome (D46).
  *
- * Six source lists render the same thing â€” a header, a grid of cards, a blank slate â€” differing
+ * Six source lists render the same thing — a header, a grid of cards, a blank slate — differing
  * only in which service answers, which two fields a card shows, and their translation keys. The
  * console era wrote that shape out six times; copying it into the bento era six more would be the
  * duplication the design system exists to prevent, one level down.
@@ -41,12 +41,12 @@ export function useEntityList<T>(service: Readonly<{ query: () => Promise<T[]> }
  * name that fit six of them would have been the duplication this exists to prevent.
  *
  * What is *not* passed in is anything the navigation declaration already knows: the surface's
- * path, its icon and its tone are looked up by id. That is the second payoff of D39 â€” a surface
+ * path, its icon and its tone are looked up by id. That is the second payoff of D39 — a surface
  * renamed or re-toned in one place changes here too, and a page cannot disagree with the rail
  * about what it is called.
  */
 export interface BentoEntityListProps<T> {
-  /** The surface's id in `DUMONT_NAV` â€” supplies its path, icon and tone. */
+  /** The surface's id in `DUMONT_NAV` — supplies its path, icon and tone. */
   surfaceId: string;
   /**
    * Translation key prefix, e.g. `integration.dbSources`. Reuses the console's own keys: the same
@@ -54,12 +54,12 @@ export interface BentoEntityListProps<T> {
    * disagree about what a source is called.
    */
   i18nPrefix: string;
-  /** Query result â€” `undefined` while loading, which is not the same as an empty list. */
+  /** Query result — `undefined` while loading, which is not the same as an empty list. */
   items: T[] | undefined;
   error: string | null;
   itemKey: (item: T) => string;
   itemTitle: (item: T) => string;
-  /** The second line on a card â€” an endpoint, a directory, a URL. */
+  /** The second line on a card — an endpoint, a directory, a URL. */
   itemDescription: (item: T) => string | null | undefined;
   /** Extra action rendered beside the hero, e.g. AEM's import-from-JSON. */
   headerAction?: ReactNode;
@@ -90,7 +90,7 @@ export function BentoEntityList<T>({
 
   const bentoBase = `${ROUTES.BENTO_INTEGRATION_INSTANCE}/${id}`;
   /*
-   * D47 â€” the detail pages serve on this tree now, so a card keeps the reader inside the shell.
+   * D47 — the detail pages serve on this tree now, so a card keeps the reader inside the shell.
    * Until they did, these had to name the console tree explicitly through
    * CONSOLE_INTEGRATION_INSTANCE, and crossing eras mid-task was the one place the parallel tree
    * was visibly a migration rather than a product.

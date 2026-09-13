@@ -128,7 +128,7 @@ export function AemSourceWizard({
     try {
       const data = form.getValues();
       // Strip empty ids so JPA generates new UUIDs (persist) instead of merge. Shared with the
-      // import flow (D54) â€” the walk has to reach the same leaves in both, and did not.
+      // import flow (D54) — the walk has to reach the same leaves in both, and did not.
       stripAemSourceIds(data);
       const result = await turIntegrationAemSourceService.create(data);
       if (result) {

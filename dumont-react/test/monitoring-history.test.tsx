@@ -1,15 +1,15 @@
 ﻿/*
- * D53 â€” the behaviour that has to survive the refactor.
+ * D53 — the behaviour that has to survive the refactor.
  *
  * The monitoring item's History tab is the last of the `set-state-in-effect` debt, and it is the
  * one place where the fix is not a local edit: the result has to be keyed by the query that
- * produced it, and that query interacts with a rule nothing else in the console has â€” when the tab
+ * produced it, and that query interacts with a rule nothing else in the console has — when the tab
  * opens, the reader is sent to the **last** page, because entries are sorted oldest-first and the
  * interesting ones are the most recent.
  *
  * That rule lives in a `useRef` consulted inside a `.then`, re-entering the same effect with a new
  * page. It has no test. Restructuring it to satisfy a lint rule, with nothing watching, is how a
- * paging flow quietly starts landing on page one â€” so this goes in first and the refactor happens
+ * paging flow quietly starts landing on page one — so this goes in first and the refactor happens
  * behind it.
  *
  * The stub reads `params`, which the shared harness deliberately does not: the whole subject here
@@ -26,7 +26,7 @@ const STANDALONE = "local"
 const ITEM_ID = "42"
 const CONTENT_ID = "/content/wknd/en/home"
 
-/** Every history request the page made, in order â€” the assertions are about these. */
+/** Every history request the page made, in order — the assertions are about these. */
 const DEFAULT_PAGE_SIZE = 50
 
 /** Every history request the page made, in order. */
@@ -126,7 +126,7 @@ describe("D53: the History tab opens on the most recent entries", () => {
     await waitFor(() => expect(requestedPages.length).toBeGreaterThan(1))
 
     expect(requestedPages[0]).toBe(0)
-    expect(requestedPages.at(-1)).toBe(2) // 25 entries, 10 per page â†’ pages 0..2
+    expect(requestedPages.at(-1)).toBe(2) // 25 entries, 10 per page → pages 0..2
   })
 
   it("shows the last page's rows, not the first page's", async () => {

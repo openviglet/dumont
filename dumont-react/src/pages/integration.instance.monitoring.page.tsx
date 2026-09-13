@@ -123,7 +123,7 @@ export default function IntegrationInstanceMonitoringPage() {
 
         setMonitoringPage(data);
         /*
-         * D53 â€” the "last sync" stamp is taken where the sync happens.
+         * D53 — the "last sync" stamp is taken where the sync happens.
          *
          * The grid used to derive it from a prop changing, in an effect: a synchronous write, and
          * a clock reading in a component that only watches data rather than fetching it. This is

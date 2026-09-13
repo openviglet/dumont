@@ -60,7 +60,7 @@ export default function IntegrationInstanceEdsSourcePage() {
       await service.index(edsSource);
       toast.success(t("integration.edsSources.indexStarted", { name: edsSource.title }));
     } catch (error) {
-      // 409 â†’ "already running"; let the global 422 handler do its thing.
+      // 409 → "already running"; let the global 422 handler do its thing.
       if (axios.isAxiosError(error) && error.response?.status === 409) {
         toast.warning(t("integration.edsSources.alreadyRunning", { name: edsSource.title }));
       } else {

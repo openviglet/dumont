@@ -103,8 +103,6 @@ This track has no remaining pending tasks.
 
 ## Track K — Frontend build and lint gates
 
-- 📋 **D90** (deps: —) **Twenty-four frontend files carry double-encoded UTF-8 in their comments** — An em-dash reads as three characters and an accented letter as two, so a third of this console's longest comments render as noise and cannot be matched by an exact-text edit. → §XL.2
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

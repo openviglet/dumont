@@ -38,11 +38,11 @@ export default function IntegrationInstanceDoubleCheckPage() {
   const [sources, setSources] = useState<TurIntegrationAemSource[]>([]);
   const [selectedSource, setSelectedSource] = useState<string>(NO_SOURCE);
   /*
-   * D53 â€” each answer carries the source it is about.
+   * D53 — each answer carries the source it is about.
    *
    * These were five independent states that the load effect reset on the way in: clear both
    * results, raise both flags, clear the error. Every one of those was a synchronous write in an
-   * effect body, and together they were a second description of something the data already knew â€”
+   * effect body, and together they were a second description of something the data already knew —
    * which source the numbers on screen belong to.
    *
    * Storing the source beside its result makes the resets unnecessary: a result for another source
@@ -294,7 +294,7 @@ function UnprocessedList({ items, t, onIndex }: { items: TurIntegrationIndexing[
                 <BadgeIndexingStatus status={item.status} />
               </td>
               <td className="px-3 py-2 text-xs text-muted-foreground">
-                {item.created ? new Date(item.created).toLocaleString() : "â€”"}
+                {item.created ? new Date(item.created).toLocaleString() : "—"}
               </td>
               <td className="px-3 py-2">
                 <Button

@@ -345,7 +345,15 @@ it to `ON_BENTO` in `test/console-census.test.ts`.
 | `pnpm run lint` | ESLint, **no exemptions**. It arrived on an unlinted console with 105 problems; three rules carried the debt as named files in `eslint.config.js` until D53, D54 and D56 emptied each list, which was then deleted rather than kept at zero. If a rule needs that treatment again: name the files and say why at each one, never a ceiling — a ceiling lets one change pay for another. One genuine one-off is an `eslint-disable-next-line` with its reason, in `use-grid-adapter.ts`. |
 | `pnpm run lint:ds` | No component re-declares a design system export (D41). |
 | `pnpm run census` | The migration count. Exits non-zero on a broken read; warns on stderr when a chrome probe matches nothing. |
+| `pnpm run check:encoding` | No file holds UTF-8 that was round-tripped through Windows-1252 (D90). `--fix` rewrites them; `test/source-encoding.test.ts` is what re-runs it. |
 | `pnpm run compile:build` | `tsc -b`, the Vite build, then `scripts/check-mf-types.mjs`. |
+
+**Encoding (D90).** Twenty-seven files had been saved through a Windows-1252 round trip, so an
+em-dash arrived as three characters. It read as a comment problem until the check asked the
+property rather than grepping the four spellings somebody had noticed — four source forms were
+masking a password with eight mangled bullets and the coverage page had a mangled arrow, both in
+the JSX. A test or a script that needs to *name* one of these sequences must build it from code
+points: the tree is scanned whole, so an example written as itself is repaired by the next `--fix`.
 
 **Test timeouts (D77).** `vitest.config.ts` sets `testTimeout: 10_000` for a reason — a page test
 whose service call never resolves should fail rather than hang the run. A file that spawns real

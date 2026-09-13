@@ -34,9 +34,9 @@ function stateBadgeVariant(state: string): BadgeVariant {
 }
 
 function renderLastModified(iso: string | null, locale: Locale) {
-    if (!iso) return <span>â€”</span>;
+    if (!iso) return <span>—</span>;
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return <span>â€”</span>;
+    if (Number.isNaN(d.getTime())) return <span>—</span>;
     const formatted = d.toLocaleString(undefined, {
         day: "2-digit",
         month: "2-digit",
@@ -207,9 +207,9 @@ export default function IntegrationInstancePluginsPage() {
                                             )}
                                         </div>
                                     </TableCell>
-                                    <TableCell>{p.version ?? "â€”"}</TableCell>
-                                    <TableCell>{p.provider ?? "â€”"}</TableCell>
-                                    <TableCell className="text-muted-foreground">{p.description ?? "â€”"}</TableCell>
+                                    <TableCell>{p.version ?? "—"}</TableCell>
+                                    <TableCell>{p.provider ?? "—"}</TableCell>
+                                    <TableCell className="text-muted-foreground">{p.description ?? "—"}</TableCell>
                                     <TableCell>
                                         <Badge variant={stateBadgeVariant(p.state)}>{p.state}</Badge>
                                     </TableCell>

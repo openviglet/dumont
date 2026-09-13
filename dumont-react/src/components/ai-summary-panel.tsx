@@ -29,10 +29,10 @@ export function AiSummaryPanel({ endpoint, i18nPrefix }: Readonly<AiSummaryPanel
     const [canRegenerate, setCanRegenerate] = useState(false);
 
     /*
-     * D53 â€” the reset moved to the one caller that needs it.
+     * D53 — the reset moved to the one caller that needs it.
      *
      * This loader is called two ways: once by the effect below on mount, and again by the
-     * regenerate button. Clearing the panel first only matters for the second â€” on mount there is
+     * regenerate button. Clearing the panel first only matters for the second — on mount there is
      * nothing to clear, and `isLoading` already starts `true`. Doing it here made every call
      * synchronous, and a synchronous write inside an effect body is what React 19 refuses.
      *

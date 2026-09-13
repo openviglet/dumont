@@ -273,7 +273,7 @@ export const IntegrationDbSourceForm: React.FC<Props> = ({ value, isNew, integra
                       <FormItem>
                         <FormLabel>{t("forms.dbSource.dbPassword")}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password" />
+                          <Input {...field} placeholder="••••••••" type="password" />
                         </FormControl>
                         <FormDescription>{t("forms.dbSource.dbPasswordDesc")}</FormDescription>
                         <FormMessage />

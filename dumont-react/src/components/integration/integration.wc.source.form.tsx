@@ -129,7 +129,7 @@ export const IntegrationWcSourceForm: React.FC<Props> = ({ value, isNew, integra
                   <FormField control={form.control} name="password"
                     render={({ field }) => (
                       <FormItem><FormLabel>{t("forms.wcSource.password")}</FormLabel>
-                        <FormControl><Input {...field} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password" /></FormControl>
+                        <FormControl><Input {...field} placeholder="••••••••" type="password" /></FormControl>
                         <FormDescription>{t("forms.wcSource.passwordDesc")}</FormDescription><FormMessage /></FormItem>
                     )} />
                 </div>

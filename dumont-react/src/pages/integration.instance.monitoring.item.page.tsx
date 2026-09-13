@@ -200,14 +200,14 @@ export default function IntegrationInstanceMonitoringItemPage() {
     const [historyPageSize, setHistoryPageSize] = useState(DEFAULT_PAGE_SIZE);
 
     /*
-     * D53 â€” one result, carrying the query that produced it.
+     * D53 — one result, carrying the query that produced it.
      *
      * The entries, the totals and a loading flag used to be four states the effect reset on the
      * way in, and "loading" was raised synchronously in an effect body. They only ever describe
      * one thing: the answer to a particular page of a particular content id.
      *
-     * Keeping the query beside the answer makes loading derivable â€” it is exactly the state of
-     * not yet holding the answer to the query being asked â€” and removes the resets, because an
+     * Keeping the query beside the answer makes loading derivable — it is exactly the state of
+     * not yet holding the answer to the query being asked — and removes the resets, because an
      * answer to a different query simply is not this one's.
      */
     const [historyResult, setHistoryResult] = useState<{
@@ -221,7 +221,7 @@ export default function IntegrationInstanceMonitoringItemPage() {
      * Which content id has already been sent to its last page.
      *
      * Entries come back oldest-first, so the most recent are on the final page and that is where
-     * the reader should land when the tab opens. This was a `useRef` set by a separate effect â€”
+     * the reader should land when the tab opens. This was a `useRef` set by a separate effect —
      * and it did not work on arrival by URL: both effects run on mount, the fetch read the flag
      * before it was raised, and the flag's own `setHistoryPage(0)` was a no-op because the page
      * was already 0. So the case the old comment claimed to cover was the one it missed.
@@ -304,7 +304,7 @@ export default function IntegrationInstanceMonitoringItemPage() {
                 const totalPages = res.totalPages ?? 0;
                 /*
                  * The totals are the first moment the last page is known. If this content id has
-                 * not been sent there yet, do that instead of showing the oldest entries â€” the
+                 * not been sent there yet, do that instead of showing the oldest entries — the
                  * next render asks for the new page and this branch does not run again.
                  */
                 if (jumpedForRef.current !== contentId) {
@@ -389,7 +389,7 @@ export default function IntegrationInstanceMonitoringItemPage() {
                           t("integration.monitoring.title"),
                           t("integration.monitoring.item.provider") + ": " + (item.provider ?? "-"),
                           t("integration.monitoring.item.source") + ": " + (item.source ?? "-"),
-                      ].join(" Â· ")
+                      ].join(" · ")
                     : t("integration.monitoring.item.description")}
             />
             {item && (

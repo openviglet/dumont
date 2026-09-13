@@ -8,13 +8,13 @@ import { useTranslation } from "react-i18next";
 /**
  * Strip every id from an AEM source payload, at every depth.
  *
- * An export â€” or a wizard's draft â€” carries the ids of the source it came from, and creating with
+ * An export — or a wizard's draft — carries the ids of the source it came from, and creating with
  * them either collides with that source or silently edits it. The walk has to reach the leaves:
  * locale paths, attribute specifications, models, and each model's target attributes and their
  * source attributes.
  *
  * Exported because the import flow and the creation wizard both need it (D54). The wizard had its
- * own copy, written with `any` at every level â€” six of them, and a second place for the walk to
+ * own copy, written with `any` at every level — six of them, and a second place for the walk to
  * fall out of step with the model.
  */
 export function stripAemSourceIds(payload: Partial<TurIntegrationAemSource>) {
@@ -34,7 +34,7 @@ export function stripAemSourceIds(payload: Partial<TurIntegrationAemSource>) {
  * Import an AEM source from a JSON file.
  *
  * Extracted so the console list and the bento list share it rather than each carrying a copy
- * (D46). The two pages differ in what the reader clicks â€” a dropdown item, a button â€” and not at
+ * (D46). The two pages differ in what the reader clicks — a dropdown item, a button — and not at
  * all in what happens next, which is the part worth having in one place: a payload that kept its
  * ids would collide with the source it was exported from.
  */

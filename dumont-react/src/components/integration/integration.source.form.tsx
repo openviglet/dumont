@@ -167,7 +167,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
               : []),
           ]}
           actions={
-            /* Rendered without its own trigger â€” the menu item above is what opens it. */
+            /* Rendered without its own trigger — the menu item above is what opens it. */
             open !== undefined && onDelete && setOpen ? (
               <DialogDelete trigger={null} feature={t("integration.sources.title")} name={form.watch("name") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
             ) : undefined
@@ -260,7 +260,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                       <FormItem>
                         <FormLabel>{t("forms.integrationSource.password")}</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password" />
+                          <Input {...field} placeholder="••••••••" type="password" />
                         </FormControl>
                         <FormDescription>{t("forms.integrationSource.password")}</FormDescription>
                         <FormMessage />

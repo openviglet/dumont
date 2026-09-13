@@ -137,7 +137,7 @@ function AvatarPickerBody({
    */
   const [picked, setPicked] = useState<{ against: string; url: string } | null>(null);
   /*
-   * D48 â€” state, not a ref, because the render reads it.
+   * D48 — state, not a ref, because the render reads it.
    *
    * This counter forces the twelve preview images to remount on each shuffle, and it was a ref
    * read straight into a `key`. Reading a ref during render is what `react-hooks/refs` refuses:

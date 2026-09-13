@@ -31,17 +31,17 @@ interface Props {
 
 /**
  * Shows whether the target Turing SN site has RAG enabled, so a source bound to a non-RAG site is
- * flagged â€” its documents would be keyword-only, never embedded (roadmap D17). Renders nothing
+ * flagged — its documents would be keyword-only, never embedded (roadmap D17). Renders nothing
  * when no site name is set. The disabled state explains why via Turing's diagnostic reason code.
  */
 export const RagStatusBadge: React.FC<Props> = ({ integrationId, siteName, className }) => {
   const { t } = useTranslation();
   /*
-   * D53 â€” the answer is stored with the question it answers.
+   * D53 — the answer is stored with the question it answers.
    *
    * `status` and `loading` used to be two independent states the effect corrected on the way in:
    * clear the old status, raise the flag, fetch. Both writes were synchronous in an effect body,
-   * and the pair could disagree â€” a status from the previous site rendered as though it were this
+   * and the pair could disagree — a status from the previous site rendered as though it were this
    * one until the new request landed.
    *
    * Keeping the site alongside its result makes both derivable: it is loading exactly while the

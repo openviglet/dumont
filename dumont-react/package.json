@@ -10,6 +10,7 @@
     "check:mf-types": "node scripts/check-mf-types.mjs",
     "compile": "npm run compile:deps && npm run compile:build",
     "census": "node scripts/console-census.mjs",
+    "check:encoding": "node scripts/mojibake.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",

@@ -643,7 +643,7 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
                       placeholder="title"
                       className="w-1/3"
                     />
-                    <span className="text-muted-foreground">â†’</span>
+                    <span className="text-muted-foreground">→</span>
                     <Input
                       {...form.register(`fieldMappings.${index}.targetField`)}
                       placeholder="page_title"

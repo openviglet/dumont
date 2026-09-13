@@ -1,8 +1,8 @@
 ﻿/*
- * D48 â€” the lint that had never run, and the shape that keeps it running.
+ * D48 — the lint that had never run, and the shape that keeps it running.
  *
  * ESLint, typescript-eslint and the two React plugins were devDependencies here all along, and
- * `pnpm run lint` exited non-zero with "couldn't find an eslint.config.js" â€” a message that reads
+ * `pnpm run lint` exited non-zero with "couldn't find an eslint.config.js" — a message that reads
  * like a broken command rather than an absent gate, which is why it survived.
  *
  * Turning it on found 105 problems in a codebase that had never been linted. Ten were fixed at
@@ -48,7 +48,7 @@ interface LintMessage {
  * Lint `source` **as if** it were the file at `filename`, without writing anything.
  *
  * `--stdin-filename` is what makes the config's `files` patterns apply, which is the only way to
- * ask "would this be an error *here*" â€” the question the named lists exist to answer differently
+ * ask "would this be an error *here*" — the question the named lists exist to answer differently
  * per file.
  */
 function lintAs(filename: string, source: string): LintMessage[] {
@@ -70,7 +70,7 @@ function lintAs(filename: string, source: string): LintMessage[] {
     stdio: ["pipe", "pipe", "ignore"] as ("pipe" | "ignore")[],
   }
 
-  // A non-zero exit *is* the gate firing, and the JSON still comes back on stdout â€” so the throw
+  // A non-zero exit *is* the gate firing, and the JSON still comes back on stdout — so the throw
   // is caught rather than avoided with `--max-warnings`, which would hide the distinction this
   // file exists to assert.
   let out: string

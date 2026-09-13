@@ -181,7 +181,7 @@ export default function IntegrationInstanceCoveragePage() {
                                                     className="flex items-center gap-1.5 bg-red-500/10 text-red-600 border-red-500/20 font-mono text-xs"
                                                 >
                                                     <IconTrendingDown className="h-3 w-3" />
-                                                    {f.field}: {f.previousPercent}% â†’ {f.currentPercent}%
+                                                    {f.field}: {f.previousPercent}% → {f.currentPercent}%
                                                 </Badge>
                                             ))}
                                     </div>
@@ -251,7 +251,7 @@ export default function IntegrationInstanceCoveragePage() {
                                                                 {change.delta > 0 ? "+" : ""}{change.delta}%
                                                             </span>
                                                         ) : (
-                                                            <span className="text-xs text-muted-foreground">â€”</span>
+                                                            <span className="text-xs text-muted-foreground">—</span>
                                                         )}
                                                     </TableCell>
                                                     <TableCell className="py-3">
@@ -261,7 +261,7 @@ export default function IntegrationInstanceCoveragePage() {
                                                                     <IconRoute className="h-3 w-3 shrink-0" />
                                                                     {origin.strategy}
                                                                     {origin.selector && (
-                                                                        <span className="text-muted-foreground/70">Â· {origin.selector}</span>
+                                                                        <span className="text-muted-foreground/70">· {origin.selector}</span>
                                                                     )}
                                                                 </span>
                                                                 {origin.presentInLatest === false && origin.lastSeenRunsAgo > 0 && (
@@ -275,7 +275,7 @@ export default function IntegrationInstanceCoveragePage() {
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <span className="text-xs text-muted-foreground">â€”</span>
+                                                            <span className="text-xs text-muted-foreground">—</span>
                                                         )}
                                                     </TableCell>
                                                 </TableRow>

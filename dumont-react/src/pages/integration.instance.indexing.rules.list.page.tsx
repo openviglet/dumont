@@ -16,7 +16,7 @@ export default function IntegrationInstanceIndexingRulesListPage() {
   const { id } = useParams<{ id: string }>();
   const [integrationIndexingRules, setIntegrationIndexingRules] = useState<TurIntegrationIndexingRule[]>();
   /*
-   * D56 â€” memoised, like every sibling list page. This one built its service inline on each
+   * D56 — memoised, like every sibling list page. This one built its service inline on each
    * render, so once the effect below honestly listed what it uses, the dependency changed every
    * render and the list refetched forever. The array was not the problem; it was what the array
    * revealed.

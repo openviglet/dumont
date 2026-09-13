@@ -55,7 +55,7 @@ export default defineConfig({
         "./DumontRoutes": "./src/DumontRoutes.tsx",
         /*
          * The bento tree, offered beside the console one (D37). Turing mounts Dumont under its own
-         * prefix, and its bento shell is at `/bento` â€” so the host already supplies the chrome
+         * prefix, and its bento shell is at `/bento` — so the host already supplies the chrome
          * there and needs the *routes* that belong to it. Without this entry the parallel tree
          * would exist only in standalone mode, which is not where anyone uses Dumont.
          *
@@ -80,10 +80,10 @@ export default defineConfig({
         "@viglet/viglet-design-system/floating-formulas-bg": { singleton: true, requiredVersion: "*" },
       },
       /*
-       * D49 â€” the type declarations the host consumes, which had never once been generated.
+       * D49 — the type declarations the host consumes, which had never once been generated.
        *
        * Every build printed `#TYPE-001` and then exited 0, so a remote shipped with no types
-       * across the federation boundary â€” the one place a mismatch is most expensive, because the
+       * across the federation boundary — the one place a mismatch is most expensive, because the
        * host and the remote are built separately and a prop that stopped matching surfaces at
        * runtime in someone else's product.
        *
@@ -103,7 +103,7 @@ export default defineConfig({
           tsConfigPath: "./tsconfig.app.json",
           /*
            * `import.meta.env` is declared in `vite-env.d.ts`, and the generated config lists its
-           * files explicitly with an empty `include` â€” so an ambient declaration nothing imports
+           * files explicitly with an empty `include` — so an ambient declaration nothing imports
            * is never part of the program unless it is named.
            */
           additionalFilesToCompile: ["src/vite-env.d.ts"],
@@ -118,7 +118,7 @@ export default defineConfig({
           /*
            * Fail the build when the generator reports an error. Necessary and *not sufficient*:
            * pointed at the wrong tsconfig it reports nothing, writes the wrong layout and still
-           * exits 0 â€” which is why `scripts/check-mf-types.mjs` checks the artefact instead.
+           * exits 0 — which is why `scripts/check-mf-types.mjs` checks the artefact instead.
            */
           abortOnError: true,
         } as Record<string, unknown>,

@@ -1,4 +1,4 @@
-﻿// D44 â€” the v8 table API, taken from v9's own compatibility subpath. The root entry renamed
+﻿// D44 — the v8 table API, taken from v9's own compatibility subpath. The root entry renamed
 // every one of these when the dependency moved to ^9.0.0, which is what stopped the console
 // compiling; `./legacy` ships them unchanged, so the grid below needs no rewrite. Adopting the
 // v9 API is a separate decision.
@@ -46,7 +46,7 @@ interface NewButtonProps {
     label: string;
 }
 
-// Marker component â€” rendered inside DropdownMenuContent by GridListComponent
+// Marker component — rendered inside DropdownMenuContent by GridListComponent
 const GridListNewButton: React.FC<NewButtonProps> = () => null;
 GridListNewButton.displayName = "GridListNewButton";
 
@@ -54,7 +54,7 @@ interface ActionProps {
     children: ReactNode;
 }
 
-// Marker component â€” children rendered inside DropdownMenuContent by GridListComponent
+// Marker component — children rendered inside DropdownMenuContent by GridListComponent
 const GridListAction: React.FC<ActionProps> = () => null;
 GridListAction.displayName = "GridListAction";
 
