@@ -513,6 +513,7 @@
 - **D50** — validate.yml builds on every push and pull request, caches on pnpm rather than a lockfile that never existed, and takes the Sonar branch from the ref instead of the previous version.
 - **D51** — The probe was right and the scan was wrong: chrome is now counted through a page's components, so StickySaveBar reads 1, Card 20 instead of 3, and no probe matches nothing.
 - **D77** — A beforeAll warm-up pays the cold start once, so the first case went 18.7s to 2.9s, and a file-scoped 30s testTimeout replaces the global 10s here without spending the suite's hang detection.
+- **D89** — Both halves of the census strip comments before reading era, so a file that quotes chrome="bento" or a bento import describes the layer rather than joining it.
 
 ## Track L — Console build, lint and type gates
 

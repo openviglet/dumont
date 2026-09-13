@@ -252,6 +252,24 @@ describe("D35: era is decided by the bento subpath", () => {
     // A value import alongside an inline type still counts: the page renders that component.
     expect(isBento(importing("BentoHero, type BentoTone"))).toBe(true)
   })
+
+  it("does not read a comment that quotes the layer as adopting it", () => {
+    /*
+     * D89 — the mirror of the classifier's "does not count a commented-out declaration", which it
+     * had and this reader did not. `BentoRoutes.tsx` spells `chrome="bento"` in the paragraph
+     * explaining how a detail page migrates, and read bento-era off that sentence; only the page
+     * walk's `*.page.tsx` filter kept the router out of the count.
+     *
+     * D88 is why the pair is worth holding together: the same hole in `isAdapter` read the two
+     * header wrappers' own doc comments — which say they *used* to call `useSectionChrome` — as
+     * the call, and left every page behind them on console after their branch had gone.
+     */
+    expect(isBento('// the console page under a `chrome="bento"` declaration')).toBe(false)
+    expect(isBento(`/* migrating: <SectionCardChromeProvider chrome="bento"> */`)).toBe(false)
+    expect(isBento(`// ${importing("BentoHero")}`)).toBe(false)
+    // And the declaration itself still commits, which is the claim the stripping must not weaken.
+    expect(isBento('<SectionCardChromeProvider chrome="bento">')).toBe(true)
+  })
 })
 
 describe("D46: era follows a page's local imports", () => {

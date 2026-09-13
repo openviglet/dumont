@@ -68,10 +68,15 @@ const byCodepoint = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
  * `AdaptivePageHeader` was on this list until D88 retired its console branch. It renders the bento
  * hero on either tree now, so a page taking it has adopted the layer, and naming it here would
  * have gone on subtracting surfaces that had moved.
+ *
+ * Only a name the package exports can ever reach this list, because it is checked against the
+ * clause of a `@viglet/viglet-design-system/bento` import. `AdaptivePanel` and `AdaptiveEmptyState`
+ * sat here anyway until D89 — the first is Dumont's own and is imported from a local path, and the
+ * second has never existed in either codebase. Neither had matched anything, and a list a reader
+ * takes for the set of adapters should not name two that cannot be.
  */
 export const ERA_NEUTRAL = [
-  "AdaptiveSectionCard", "AdaptivePanel", "AdaptiveEmptyState",
-  "SectionCardChromeProvider", "useSectionChrome",
+  "AdaptiveSectionCard", "SectionCardChromeProvider", "useSectionChrome",
 ]
 
 const BENTO_SUBPATH = "@viglet/viglet-design-system/bento"
@@ -86,8 +91,15 @@ const BENTO_CLAUSE = /import\s*(type\s+)?\{([^}]*)\}\s*from\s*["']@viglet\/vigle
  * and renders nothing, so it says what shape a module speaks in, not which era it belongs to —
  * `nav.const.ts` takes the nav schema that way and is read by the console sidebar, which is as
  * console-era as a file gets.
+ *
+ * Neither does anything written in a comment (D89). A file that *quotes* the recipe — as
+ * `BentoRoutes.tsx` does, spelling `chrome="bento"` in the paragraph explaining how a detail page
+ * migrates — is describing the layer, not rendering it. `classify` had stripped comments since
+ * D35 and this reader had not, so the two halves of one census disagreed about whether a sentence
+ * counts; D88 found the same hole in `isAdapter`, which is what made the pair worth closing.
  */
 export function isBento(source) {
+  const body = code(source)
   /*
    * D47 — declaring the chrome is the strongest statement of era there is.
    *
@@ -96,9 +108,9 @@ export function isBento(source) {
    * `chrome="bento"` puts everything beneath it in bento chrome, which is exactly how the six
    * source detail pages migrate without their 500-line forms being forked.
    */
-  if (/chrome=["']bento["']/.test(source)) return true
-  if (!source.includes(BENTO_SUBPATH)) return false
-  const clauses = [...source.matchAll(BENTO_CLAUSE)]
+  if (/chrome=["']bento["']/.test(body)) return true
+  if (!body.includes(BENTO_SUBPATH)) return false
+  const clauses = [...body.matchAll(BENTO_CLAUSE)]
   if (!clauses.length) return true
   return clauses.some(([, typeOnly, names]) => !typeOnly && names
     .split(",")

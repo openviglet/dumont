@@ -103,7 +103,6 @@ This track has no remaining pending tasks.
 
 ## Track K — Frontend build and lint gates
 
-- 📋 **D89** (deps: —) **The census reads a chrome declaration written inside a comment as the declaration itself** — isBento tests the raw file, so BentoRoutes.tsx reads bento-era off a sentence quoting the migration recipe, and only the page walk's file filter keeps that out of the count. → §XL.1
 - 📋 **D90** (deps: —) **Twenty-four frontend files carry double-encoded UTF-8 in their comments** — An em-dash reads as three characters and an accented letter as two, so a third of this console's longest comments render as noise and cannot be matched by an exact-text edit. → §XL.2
 
 ## Non-goals (do NOT add as tasks)

@@ -83,31 +83,6 @@ naming the incident the code exists for, and the census reads those same files. 
 things go wrong with that, both found while D88 retired the console-era chrome, and
 neither is about what the code does.
 
-### XL.1 The era reader still reads comments (D89)
-
-`isBento` in `scripts/console-census.mjs` tests the file as it is on disk, so a
-`chrome="bento"` written inside a comment counts as the declaration itself.
-`src/BentoRoutes.tsx` is the live case: line 106 quotes the declaration while explaining
-how a detail page migrates, and the reader calls the router bento-era on the strength of
-that sentence. Nothing is miscounted today only because the page walk classifies
-`*.page.tsx` and the router is not one.
-
-D88 fixed exactly this in `isAdapter`, two functions above — a wrapper that had stopped
-adapting still said `useSectionChrome` in its own doc comment, and every page behind it
-stayed on console until the reader stripped comments first. `isBento` was left alone in
-that diff because no page's era moved either way, which makes it latent rather than
-absent.
-
-The fix is the same one: `code(source)` before the test, in both the `chrome=` probe and
-the import clause scan. The classifier half already has a case for this — "does not
-count a commented-out declaration" — and the era half has none, which is how the two
-drifted. Add the mirror case, asserting that a commented-out bento import and a quoted
-`chrome="bento"` both read console.
-
-Worth checking in the same pass whether `ERA_NEUTRAL` should still name
-`AdaptiveEmptyState`: no such component has ever existed here, so that entry has never
-matched anything.
-
 ### XL.2 Double-encoded comments, and the guard that would hold them (D90)
 
 Twenty-four files under `dumont-react/src`, `test` and `scripts` hold UTF-8 that was
