@@ -1,5 +1,4 @@
-﻿import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
-import IntegrationInstanceDbSourcePage from "@/pages/integration.instance.db.source.page";
+﻿import IntegrationInstanceDbSourcePage from "@/pages/integration.instance.db.source.page";
 
 /**
  * The database source detail page, in bento chrome (D47).
@@ -16,8 +15,6 @@ import IntegrationInstanceDbSourcePage from "@/pages/integration.instance.db.sou
  */
 export default function IntegrationInstanceDbSourceDetailBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceDbSourcePage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceDbSourcePage />
   );
 }

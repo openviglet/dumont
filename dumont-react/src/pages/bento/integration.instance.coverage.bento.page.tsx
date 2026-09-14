@@ -1,4 +1,3 @@
-import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
 import IntegrationInstanceCoveragePage from "@/pages/integration.instance.coverage.page";
 
 /**
@@ -10,8 +9,6 @@ import IntegrationInstanceCoveragePage from "@/pages/integration.instance.covera
  */
 export default function IntegrationInstanceCoverageBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceCoveragePage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceCoveragePage />
   );
 }

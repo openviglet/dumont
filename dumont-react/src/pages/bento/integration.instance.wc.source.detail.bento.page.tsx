@@ -1,5 +1,4 @@
-﻿import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
-import IntegrationInstanceWcSourcePage from "@/pages/integration.instance.wc.source.page";
+﻿import IntegrationInstanceWcSourcePage from "@/pages/integration.instance.wc.source.page";
 
 /**
  * The web crawler source detail page, in bento chrome (D47).
@@ -16,8 +15,6 @@ import IntegrationInstanceWcSourcePage from "@/pages/integration.instance.wc.sou
  */
 export default function IntegrationInstanceWcSourceDetailBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceWcSourcePage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceWcSourcePage />
   );
 }

@@ -1,4 +1,3 @@
-import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
 import IntegrationInstanceSourceInferencePage from "@/pages/integration.instance.source.inference.page";
 
 /**
@@ -14,8 +13,6 @@ import IntegrationInstanceSourceInferencePage from "@/pages/integration.instance
  */
 export default function IntegrationInstanceSourceInferenceBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceSourceInferencePage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceSourceInferencePage />
   );
 }

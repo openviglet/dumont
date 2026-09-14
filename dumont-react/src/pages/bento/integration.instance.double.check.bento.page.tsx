@@ -1,4 +1,3 @@
-import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
 import IntegrationInstanceDoubleCheckPage from "@/pages/integration.instance.double.check.page";
 
 /**
@@ -10,8 +9,6 @@ import IntegrationInstanceDoubleCheckPage from "@/pages/integration.instance.dou
  */
 export default function IntegrationInstanceDoubleCheckBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceDoubleCheckPage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceDoubleCheckPage />
   );
 }

@@ -1,5 +1,4 @@
-﻿import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
-import IntegrationInstanceAssetsSourcePage from "@/pages/integration.instance.assets.source.page";
+﻿import IntegrationInstanceAssetsSourcePage from "@/pages/integration.instance.assets.source.page";
 
 /**
  * The assets source detail page, in bento chrome (D47).
@@ -16,8 +15,6 @@ import IntegrationInstanceAssetsSourcePage from "@/pages/integration.instance.as
  */
 export default function IntegrationInstanceAssetsSourceDetailBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceAssetsSourcePage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceAssetsSourcePage />
   );
 }

@@ -1,5 +1,4 @@
-﻿import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
-import IntegrationInstanceEdsSourcePage from "@/pages/integration.instance.eds.source.page";
+﻿import IntegrationInstanceEdsSourcePage from "@/pages/integration.instance.eds.source.page";
 
 /**
  * The Edge Delivery Services source detail page, in bento chrome (D47).
@@ -16,8 +15,6 @@ import IntegrationInstanceEdsSourcePage from "@/pages/integration.instance.eds.s
  */
 export default function IntegrationInstanceEdsSourceDetailBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceEdsSourcePage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceEdsSourcePage />
   );
 }

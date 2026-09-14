@@ -1,5 +1,4 @@
-﻿import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
-import IntegrationInstanceCatalogSourcePage from "@/pages/integration.instance.catalog.source.page";
+﻿import IntegrationInstanceCatalogSourcePage from "@/pages/integration.instance.catalog.source.page";
 
 /**
  * The catalog bridge source detail page, in bento chrome (D47).
@@ -16,8 +15,6 @@ import IntegrationInstanceCatalogSourcePage from "@/pages/integration.instance.c
  */
 export default function IntegrationInstanceCatalogSourceDetailBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceCatalogSourcePage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceCatalogSourcePage />
   );
 }

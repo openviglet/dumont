@@ -1,4 +1,3 @@
-import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
 import IntegrationInstanceSystemInfoPage from "@/pages/integration.instance.system-info.page";
 
 /**
@@ -10,8 +9,6 @@ import IntegrationInstanceSystemInfoPage from "@/pages/integration.instance.syst
  */
 export default function IntegrationInstanceSystemInfoBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceSystemInfoPage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceSystemInfoPage />
   );
 }

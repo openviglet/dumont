@@ -1,4 +1,3 @@
-import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
 import IntegrationInstanceIndexAdminPage from "@/pages/integration.instance.indexing.manager.page";
 
 /**
@@ -11,8 +10,6 @@ import IntegrationInstanceIndexAdminPage from "@/pages/integration.instance.inde
  */
 export default function IntegrationInstanceIndexingManagerBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceIndexAdminPage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceIndexAdminPage />
   );
 }

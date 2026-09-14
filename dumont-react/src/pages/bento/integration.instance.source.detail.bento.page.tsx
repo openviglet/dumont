@@ -1,5 +1,4 @@
-﻿import { SectionCardChromeProvider } from "@viglet/viglet-design-system/bento";
-import IntegrationInstanceSourcePage from "@/pages/integration.instance.source.page";
+﻿import IntegrationInstanceSourcePage from "@/pages/integration.instance.source.page";
 
 /**
  * The AEM source detail page, in bento chrome (D47).
@@ -16,8 +15,6 @@ import IntegrationInstanceSourcePage from "@/pages/integration.instance.source.p
  */
 export default function IntegrationInstanceSourceDetailBentoPage() {
   return (
-    <SectionCardChromeProvider chrome="bento">
-      <IntegrationInstanceSourcePage />
-    </SectionCardChromeProvider>
+    <IntegrationInstanceSourcePage />
   );
 }
