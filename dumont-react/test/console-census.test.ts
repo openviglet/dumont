@@ -34,14 +34,14 @@ const SRC = join(HERE, "..", "src")
  * debt.** A component shimmed onto the package is deleted from this map; a new one that
  * re-declares a package export has to be written into it.
  */
+// GridList, NavMain, PageHeader and Page left this list without being shimmed: the design system
+// removed all four with the rest of its console-era vocabulary (VDS147, released in 2026.3.11), so
+// the copies here no longer re-declare a name the package exports. They are this console's own
+// components now, not forks of a shared one — which is what the census measures.
 const FORKED: Record<string, string[]> = {
   "components/app-footer.tsx": ["AppFooter"],
   "components/dialog.delete.tsx": ["DialogDelete"],
-  "components/grid.list.tsx": ["GridList"],
   "components/language-select.tsx": ["LanguageSelect"],
-  "components/nav-main.tsx": ["NavMain"],
-  "components/page-header.tsx": ["PageHeader"],
-  "components/page.tsx": ["Page"],
 }
 
 /**

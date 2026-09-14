@@ -1,4 +1,4 @@
-import { vigDesignSystemTranslations } from "@viglet/viglet-design-system";
+import { vigDesignSystemTranslations } from "@viglet/viglet-design-system/i18n";
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";

@@ -23,7 +23,7 @@
  * dropped an affordance on 16 surfaces before anyone noticed. An import that type-checks proves
  * the module resolved, not that the surface survived.
  */
-import { screen, within } from "@testing-library/react"
+import { fireEvent, screen, within } from "@testing-library/react"
 import {
   BentoEntityTile,
   BentoFormHero,
@@ -32,7 +32,7 @@ import {
   type BentoNavGroup,
 } from "@viglet/viglet-design-system/bento"
 import { IconDatabase, IconPlugConnected } from "@tabler/icons-react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { renderSurface } from "./support/harness"
 
@@ -198,8 +198,9 @@ describe("D36: a bento form surface", () => {
     expect(saves).toHaveLength(2)
 
     // Dirty enables them. Rendering a Save that can never be pressed is the same broken page as
-    // rendering no Save at all.
-    for (const save of saves) expect(save.hasAttribute("disabled")).toBe(false)
+    // rendering no Save at all. Since the design system's VDS143 an unavailable Save says so with
+    // `aria-disabled` and stays focusable, so that is the attribute that means "cannot press".
+    for (const save of saves) expect(save.getAttribute("aria-disabled")).not.toBe("true")
 
     // Both are plain submits posting the enclosing form. A button that defaulted to `type=button`
     // renders identically and silently does nothing.
@@ -212,8 +213,9 @@ describe("D36: a bento form surface", () => {
   })
 
   it("disables Save and marks the page when the title is missing", () => {
+    const submitted = vi.fn((event: { preventDefault: () => void }) => event.preventDefault())
     renderSurface(
-      <form>
+      <form onSubmit={submitted}>
         <BentoFormHero title="" onCancel={() => {}} dirty titleMissing stickyTitle="" />
       </form>,
       { pattern: "/integration/:id/bento/db-source/:sourceId", path: `${BENTO_ROOT}/db-source/new` },
@@ -221,9 +223,18 @@ describe("D36: a bento form surface", () => {
 
     // `titleMissing` beats `dirty`: a new source with no name must not be submittable, and the
     // console form refuses the same save today.
-    for (const save of screen.getAllByRole("button", { name: /save/i })) {
-      expect(save.hasAttribute("disabled")).toBe(true)
+    //
+    // This read the `disabled` attribute until the design system's VDS143, which keeps an
+    // unavailable Save focusable — `disabled` would drop the focus of the control just pressed —
+    // and marks it `aria-disabled` while ignoring the press instead. So the claim is asserted
+    // as the two things it is: the button says it is unavailable, and pressing it posts nothing.
+    const saves = screen.getAllByRole("button", { name: /save/i })
+    expect(saves.length).toBeGreaterThan(0)
+    for (const save of saves) {
+      expect(save.getAttribute("aria-disabled")).toBe("true")
+      fireEvent.click(save)
     }
+    expect(submitted).not.toHaveBeenCalled()
   })
 })
 
