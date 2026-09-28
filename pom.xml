@@ -42,8 +42,8 @@
         <viglet-core.version>2026.3.10</viglet-core.version>
         <tika.version>4.0.0</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <mongodb.version>5.11.0</mongodb.version>
-        <pf4j.version>3.15.1</pf4j.version>
+        <mongodb.version>5.12.0</mongodb.version>
+        <pf4j.version>3.16.0</pf4j.version>
         <sonar.organization>viglet</sonar.organization>
         <sonar.projectKey>viglet_dumont</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -72,7 +72,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>5.7.0.6970</version>
+                <version>5.8.0.7211</version>
             </plugin>
             <plugin>
                 <groupId>pl.project13.maven</groupId>
@@ -371,7 +371,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>2.0.18</version>
+                <version>2.0.20</version>
             </dependency>
             <dependency>
                 <groupId>org.xerial</groupId>
@@ -411,12 +411,12 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.23.0</version>
+                <version>5.24.0</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
-                <version>5.23.0</version>
+                <version>5.24.0</version>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
@@ -522,12 +522,12 @@
             <dependency>
                 <groupId>co.elastic.clients</groupId>
                 <artifactId>elasticsearch-java</artifactId>
-                <version>9.5.3</version>
+                <version>9.5.4</version>
             </dependency>
             <dependency>
                 <groupId>org.elasticsearch.client</groupId>
                 <artifactId>elasticsearch-rest-client</artifactId>
-                <version>9.5.3</version>
+                <version>9.5.4</version>
             </dependency>
             <dependency>
                 <groupId>org.mapstruct</groupId>
