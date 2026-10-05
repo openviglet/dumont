@@ -39,10 +39,10 @@
         <turing.version>2026.3.4</turing.version>
         <!-- Shared backend platform — external project (github.com/openviglet/viglet-core),
              published to GitHub Packages and versioned independently. -->
-        <viglet-core.version>2026.3.10</viglet-core.version>
-        <tika.version>4.0.0</tika.version>
+        <viglet-core.version>2026.3.12</viglet-core.version>
+        <tika.version>4.1.0</tika.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <mongodb.version>5.12.0</mongodb.version>
+        <mongodb.version>5.13.0</mongodb.version>
         <pf4j.version>3.16.0</pf4j.version>
         <sonar.organization>viglet</sonar.organization>
         <sonar.projectKey>viglet_dumont</sonar.projectKey>
@@ -356,12 +356,12 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.20.0</version>
+                <version>3.21.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>33.7.1-jre</version>
+                <version>33.7.2-jre</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
