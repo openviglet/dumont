@@ -1,0 +1,28 @@
+{
+  "data": {
+    "listVagas": [
+      {
+        "Id": 4410005,
+        "Idf_Vaga": "F00DBABE",
+        "Title": "Vendedor Externo",
+        "Description": "<p>Vendas na região metropolitana.</p>  <p>Veículo próprio.</p>",
+        "Area": "Comercial - Vendas",
+        "City": "Curitiba",
+        "State": "PR"
+      },
+      {
+        "Id": 4410006,
+        "Idf_Vaga": "BEEF1234",
+        "Title": "Analista de Suporte Híbrido",
+        "Description": "Modelo híbrido: dois dias remoto, três no escritório.",
+        "Area": "Tecnologia",
+        "City": "Recife",
+        "State": "Pernambuco"
+      }
+    ],
+    "pagination": {
+      "TotalCount": 6,
+      "TotalPages": 2
+    }
+  }
+}

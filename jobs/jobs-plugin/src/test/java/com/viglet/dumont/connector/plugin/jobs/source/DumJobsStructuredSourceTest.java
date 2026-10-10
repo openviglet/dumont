@@ -321,4 +321,42 @@ class DumJobsStructuredSourceTest {
         assertThatThrownBy(failing::discover).hasMessage("partner down");
         assertThat(stored.getCursor()).isEqualTo("1");
     }
+    @Test
+    void theAdapterSeesWhenEachIdWasFirstFetchedAndTheStoreKeepsIt() {
+        Instant earlier = NOW.minus(Duration.ofDays(4));
+        seen.seed(SOURCE_ID, "old", NOW.plus(Duration.ofDays(3)), "{\"id\":\"old\"}");
+        seen.find(SOURCE_ID, "old").orElseThrow().setFirstSeenAt(earlier);
+        List<Instant> answers = new ArrayList<>();
+        source(jobSource(), context -> {
+            answers.add(context.firstSeenAt("old"));
+            answers.add(context.firstSeenAt("new-1"));
+            return List.of(job("old", NOW), job("new-1", NOW));
+        }, Map.of()).discover();
+
+        // An earlier run's time for a known id, this run's for a new one.
+        assertThat(answers).containsExactly(earlier, NOW);
+        assertThat(seen.find(SOURCE_ID, "new-1").orElseThrow().getFirstSeenAt()).isEqualTo(NOW);
+
+        clock.advance(Duration.ofDays(1));
+        source(List.of(job("new-1", NOW))).discover();
+        var row = seen.find(SOURCE_ID, "new-1").orElseThrow();
+        assertThat(row.getFirstSeenAt()).isEqualTo(NOW);
+        assertThat(row.getLastSeenAt()).isEqualTo(NOW.plus(Duration.ofDays(1)));
+        assertThat(seen.find(SOURCE_ID, "old").orElseThrow().getFirstSeenAt()).isEqualTo(earlier);
+    }
+
+    @Test
+    void aRowFromBeforeFirstSeenAtExistedFallsBackToItsLastSeenAt() {
+        // seed() leaves firstSeenAt null and lastSeenAt one day before the expiry.
+        seen.seed(SOURCE_ID, "legacy", NOW.plus(Duration.ofDays(3)), "{\"id\":\"legacy\"}");
+        Instant legacyLastSeen = NOW.plus(Duration.ofDays(2));
+        List<Instant> answers = new ArrayList<>();
+        source(jobSource(), context -> {
+            answers.add(context.firstSeenAt("legacy"));
+            return List.of(job("legacy", NOW));
+        }, Map.of()).discover();
+
+        assertThat(answers).containsExactly(legacyLastSeen);
+        assertThat(seen.find(SOURCE_ID, "legacy").orElseThrow().getFirstSeenAt()).isEqualTo(legacyLastSeen);
+    }
 }

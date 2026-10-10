@@ -83,6 +83,15 @@ public class DumJobSeen implements Serializable {
     @Column(name = "last_seen_at", nullable = false)
     private Instant lastSeenAt;
 
+    /**
+     * When a run first fetched the posting (trabalharei <strong>TRA18</strong>) — the only date a
+     * partner that sends none (BNE) can publish. Nullable so {@code ddl-auto: update} adds it to an
+     * existing table; a row written before the column existed is backfilled from
+     * {@link #lastSeenAt} the next time it is fetched.
+     */
+    @Column(name = "first_seen_at")
+    private Instant firstSeenAt;
+
     /** The record (JSON object keyed by schema field names) as the adapter last returned it. */
     @Lob
     @Column(name = "payload")

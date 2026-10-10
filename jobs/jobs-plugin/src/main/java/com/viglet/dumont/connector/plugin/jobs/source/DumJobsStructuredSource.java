@@ -168,7 +168,8 @@ public class DumJobsStructuredSource implements DumStructuredSource {
         Instant now = clock.instant();
         Map<String, Map<String, Object>> live = new LinkedHashMap<>();
         int fetched = 0;
-        DumJobFetchContext context = new DumJobFetchContext(source, budget(now), this::seenBefore);
+        DumJobFetchContext context = new DumJobFetchContext(source, budget(now), this::seenBefore,
+                jobId -> firstSeen(jobId, now));
         String cursorBefore = source.getCursor();
         List<Map<String, Object>> postings;
         try {
@@ -220,6 +221,21 @@ public class DumJobsStructuredSource implements DumStructuredSource {
         return seenRepository.findBySourceIdAndJobId(source.getId(), jobId).isPresent();
     }
 
+    /**
+     * When an earlier run first fetched {@code jobId}, else {@code now} (this run is the first). A row
+     * written before {@code firstSeenAt} existed answers its {@code lastSeenAt}, the earliest time
+     * recorded for it.
+     */
+    private Instant firstSeen(String jobId, Instant now) {
+        return seenRepository.findBySourceIdAndJobId(source.getId(), jobId)
+                .map(DumJobsStructuredSource::firstSeenOf)
+                .orElse(now);
+    }
+
+    private static Instant firstSeenOf(DumJobSeen seen) {
+        return seen.getFirstSeenAt() != null ? seen.getFirstSeenAt() : seen.getLastSeenAt();
+    }
+
     /** Persist the cursor the adapter left on the source, onto the stored row only. */
     private void saveCursor(String before) {
         String after = source.getCursor();
@@ -265,6 +281,10 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     private void remember(String id, JSONObject payload, Instant expiresAt, Instant now) {
         DumJobSeen seen = seenRepository.findBySourceIdAndJobId(source.getId(), id)
                 .orElseGet(() -> DumJobSeen.builder().sourceId(source.getId()).jobId(id).build());
+        if (seen.getFirstSeenAt() == null) {
+            Instant first = firstSeenOf(seen);
+            seen.setFirstSeenAt(first != null ? first : now);
+        }
         seen.setPayload(payload.toString());
         seen.setExpiresAt(expiresAt);
         seen.setLastSeenAt(now);

@@ -19,6 +19,7 @@ package com.viglet.dumont.connector.plugin.jobs.source;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.Normalizer;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -75,6 +76,9 @@ public final class DumJobNormalizer {
             Map.entry("sao paulo", "SP"),
             Map.entry("sergipe", "SE"),
             Map.entry("tocantins", "TO"));
+
+    /** The 27 UF codes in alphabetical order (trabalharei <strong>TRA18</strong>). */
+    public static final List<String> UFS = UF_BY_NAME.values().stream().sorted().toList();
 
     private static final Pattern MARKS = Pattern.compile("\\p{M}+");
     private static final Pattern NON_ALNUM = Pattern.compile("[^a-z0-9]+");
