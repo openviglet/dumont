@@ -118,3 +118,19 @@ What a JSON API source needs, declared in a manifest or recipe rather than code:
 
 Workaround in the meantime: trabalharei writes one Java source per API in a `jobs`
 module. Once this ships, those sources become recipes.
+
+### XLI.3 Admin password from configuration (D93)
+
+Found while adding Dumont to trabalharei's local compose (trabalharei TRA67, on
+`ghcr.io/openviglet/dumont-ce:latest`). `DumUserOnStartup` seeds a password-less
+`admin`, and the only way to set its password is the first-access setup (`POST
+/api/setup`), the screen the console shows. Turing reads `TURING_ADMIN_PASSWORD` at boot
+and skips that screen (`TurAdminPasswordService.bootstrapFromConfiguration`), so a
+compose file or CI can start Turing with a usable login, but not Dumont.
+
+Expected: a `dumont.admin.password` property (`DUMONT_ADMIN_PASSWORD`) applied at boot
+while no password is stored, with the same minimum length and the same "ignored, already
+configured" log as Turing, so both products are configured the same way.
+
+Workaround: trabalharei's `scripts/turing-dev-setup.mjs` waits for Dumont and posts the
+password to `/api/setup` itself.
