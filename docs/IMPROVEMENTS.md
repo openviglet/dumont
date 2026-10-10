@@ -79,30 +79,3 @@ These constrain every task above:
 ## XLI Structured sources over paged JSON APIs
 
 ## XLII Web-crawler hardening (real-world sources)
-
-### XLII.1 Incremental EDS runs keep what they skip (D95)
-
-Found while shipping D92, by reading the code; not yet reproduced against a running
-connector.
-
-`DumEDSPluginProcess.start()` diffs discovery against `DumEDSCrawlState` and fetches
-only pages whose `lastModified` changed (`filterUnchanged`). Unchanged pages are never
-submitted as job items, so their `dum_indexing` rows keep the previous run's
-`transactionId`. The `finally` block then calls
-`connectorContext.finishIndexing(session, false)`, and the non-standalone finish runs
-the delta sweep: `getShouldBeDeIndexedList` selects every row of the source whose
-`transactionId` differs from this session's and queues a DELETE for each. On the second
-incremental run, then, every unchanged page would be deindexed while its crawl state
-still says it is current, and the next run would skip it again, leaving it out of the
-index until its `lastModified` moves.
-
-EDS already detects removals itself (`removeMissingPaths`, `removeNotFoundPaths` with
-explicit DELETEs), so the sweep is redundant there. Expected: an incremental run
-finishes standalone (`finishIndexing(session, true)`), and only `reindex` (crawl state
-cleared, everything resubmitted) finishes with the sweep. A test should run `start()`
-twice against a context that models the ledger and assert that the skipped page is not
-deleted.
-
-Related: `deleteContentsToBeDeIndexed` deletes ledger rows without the `standalone =
-false` filter its DELETE selection uses, so rows written standalone lose their ledger
-entry with no DELETE sent. Check whether that is intended while fixing this.

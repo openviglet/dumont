@@ -43,8 +43,6 @@ relations (what a task *enables*) live in the task text.
 
 This track has no remaining pending tasks.
 
-- 📋 **D95** (deps: —) **An incremental EDS run skips unchanged pages, then its closing sweep deindexes them** — Every second incremental run would drop each unchanged page from the index until it next changes. → §XLII.1
-
 ## Track C — cursarei reference connector
 
 > **Objective**: prove the framework on the real workload, and honor the migration's

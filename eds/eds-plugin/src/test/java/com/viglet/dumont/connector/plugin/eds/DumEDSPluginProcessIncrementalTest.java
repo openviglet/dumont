@@ -118,6 +118,9 @@ class DumEDSPluginProcessIncrementalTest {
             assertThat(context.creates().get(0).getAttributes())
                     .containsEntry("path", PAGE_B);
             assertThat(state.touched()).contains(PAGE_A);
+            // D95: page A was never resubmitted, so its ledger row still carries the previous
+            // run's transaction; only a standalone finish keeps the sweep from deindexing it.
+            assertThat(context.finishedStandalone()).containsExactly(true);
         }
     }
 
@@ -275,6 +278,7 @@ class DumEDSPluginProcessIncrementalTest {
 
     private static final class RecordingContext implements DumConnectorContext {
         private final List<TurSNJobItem> items = new ArrayList<>();
+        private final List<Boolean> finishedStandalone = new ArrayList<>();
 
         @Override
         public boolean addJobItem(DumJobItemWithSession item) {
@@ -284,7 +288,11 @@ class DumEDSPluginProcessIncrementalTest {
 
         @Override
         public void finishIndexing(DumConnectorSession session, boolean standalone) {
-            // no-op
+            finishedStandalone.add(standalone);
+        }
+
+        List<Boolean> finishedStandalone() {
+            return finishedStandalone;
         }
 
         @Override

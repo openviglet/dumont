@@ -111,6 +111,7 @@
   re-index. `DumWCCrawlReport` gains an `unchanged` counter; a re-run where every page is `304` is no
   longer a total failure. Proven by `DumWCPluginProcessIncrementalTest`, `DumWCSitemapTest`. Builds on
   D06; pairs with D07.
+- **D95** — An incremental EDS run finishes standalone so the pages it skipped stay indexed; only a reindex, which resubmits every page, still ends with the sweep.
 
 ## Track C — cursarei reference connector
 

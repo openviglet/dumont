@@ -184,7 +184,8 @@ class DumEDSPluginProcessTest {
                 .satisfies(page -> assertThat(page.path()).isEqualTo(PATH_PF));
         verify(connectorContext, atLeastOnce()).addJobItem(any());
         verify(crawlStateService).upsert(eq(source), eq(PATH_PF), any(), any(), eq(true));
-        verify(connectorContext).finishIndexing(any(), eq(false));
+        // D95: an incremental run finishes standalone; the pages it skipped keep their documents.
+        verify(connectorContext).finishIndexing(any(), eq(true));
     }
 
     @Test
@@ -194,7 +195,7 @@ class DumEDSPluginProcessTest {
 
         assertThat(process.start(source)).isEmpty();
 
-        verify(connectorContext).finishIndexing(any(), eq(false));
+        verify(connectorContext).finishIndexing(any(), eq(true));
     }
 
     @Test
@@ -206,6 +207,8 @@ class DumEDSPluginProcessTest {
         assertThat(process.reindex(source)).isEmpty();
 
         verify(crawlStateService).deleteAll(source);
+        // A reindex resubmits every page, so it is the one run that may sweep.
+        verify(connectorContext).finishIndexing(any(), eq(false));
     }
 
     @Test

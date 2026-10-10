@@ -116,6 +116,17 @@ public class DumEDSPluginProcess {
      * {@link DumConnectorContext}.
      */
     public List<DumEDSFetchedPage> start(DumEDSSource source) {
+        return run(source, false);
+    }
+
+    /**
+     * @param sweep whether the run may end with the connector's delta sweep. Only a run that
+     *              resubmitted every page (a {@link #reindex}) may: an incremental run skips the
+     *              unchanged pages, so their ledger rows still carry the previous run's
+     *              transaction and the sweep would deindex them (D95). Removals are already sent
+     *              explicitly by {@link #removeMissingPaths} and {@link #removeNotFoundPaths}.
+     */
+    private List<DumEDSFetchedPage> run(DumEDSSource source, boolean sweep) {
         MDC.put(MDC_SOURCE, source.getTitle() == null ? source.getId() : source.getTitle());
         DumConnectorSession session = new DumConnectorSession(source.getId(),
                 DumEDSJobItemBuilder.PROVIDER_NAME, source.getLocale());
@@ -140,7 +151,7 @@ public class DumEDSPluginProcess {
             pushToIndexingPipeline(source, session, phase.fetched());
             return phase.fetched();
         } finally {
-            connectorContext.finishIndexing(session, false);
+            connectorContext.finishIndexing(session, !sweep);
             MDC.remove(MDC_PHASE);
             MDC.remove(MDC_SOURCE);
         }
@@ -156,7 +167,8 @@ public class DumEDSPluginProcess {
         int cleared = crawlStateService.deleteAll(source);
         log.info("Reindex: cleared {} crawl-state row(s) for source {}", cleared,
                 source.getTitle());
-        return start(source);
+        // Every discovered page is resubmitted, so the sweep removes exactly what is gone.
+        return run(source, true);
     }
 
     /**
