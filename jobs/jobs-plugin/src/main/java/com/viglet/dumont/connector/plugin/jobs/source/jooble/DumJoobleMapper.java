@@ -17,12 +17,8 @@
 package com.viglet.dumont.connector.plugin.jobs.source.jooble;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,16 +132,7 @@ public final class DumJoobleMapper {
         if (partnerId != null) {
             return SOURCE + "-" + partnerId;
         }
-        if (link == null) {
-            return null;
-        }
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256")
-                    .digest(link.getBytes(StandardCharsets.UTF_8));
-            return SOURCE + "-h" + HexFormat.of().formatHex(digest, 0, 8);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is missing from this JVM", e);
-        }
+        return link == null ? null : SOURCE + "-h" + DumJobNormalizer.shortHash(link);
     }
 
     /**

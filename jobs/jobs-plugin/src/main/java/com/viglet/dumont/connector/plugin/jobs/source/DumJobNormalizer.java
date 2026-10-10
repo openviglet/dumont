@@ -18,7 +18,11 @@ package com.viglet.dumont.connector.plugin.jobs.source;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -178,6 +182,24 @@ public final class DumJobNormalizer {
             root = root + "/";
         }
         return root + slug + "-" + id + "/";
+    }
+
+    /**
+     * The first 16 hex characters (8 bytes) of the SHA-256 of {@code value} in UTF-8 — a short, stable
+     * id part for a partner key that is long or not URL-safe (trabalharei <strong>TRA19</strong>);
+     * {@code null} for {@code null}.
+     */
+    public static String shortHash(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(value.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest, 0, 8);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is missing from this JVM", e);
+        }
     }
 
     /** {@code text} with HTML tags removed and whitespace collapsed; {@code null} when nothing is left. */

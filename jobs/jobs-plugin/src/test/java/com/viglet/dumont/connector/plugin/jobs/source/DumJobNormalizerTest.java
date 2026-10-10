@@ -69,6 +69,13 @@ class DumJobNormalizerTest {
     }
 
     @Test
+    void shortHashIsTheStartOfTheSha256() {
+        // SHA-256("abc") = ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+        assertThat(DumJobNormalizer.shortHash("abc")).isEqualTo("ba7816bf8f01cfea");
+        assertThat(DumJobNormalizer.shortHash(null)).isNull();
+    }
+
+    @Test
     void unknownStatesAreNull() {
         assertThat(DumJobNormalizer.uf("Lisboa")).isNull();
         assertThat(DumJobNormalizer.uf("Brasil")).isNull();

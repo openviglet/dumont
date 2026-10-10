@@ -25,8 +25,9 @@ import java.util.stream.Collectors;
 /**
  * One partner API call (trabalharei <strong>TRA16</strong>): the method, the URI, extra headers, an
  * optional JSON body and the secrets the URI carries outside its query string. A partner that puts
- * its key in a path segment (Jooble: {@code POST /api/{apiKey}}) lists that key in {@code secrets},
- * and the fetcher masks it in every log line and error message.
+ * its key in a path segment (Jooble: {@code POST /api/{apiKey}}) or a header (JSearch:
+ * {@code X-RapidAPI-Key}) lists that key in {@code secrets}, and the fetcher masks it in every log
+ * line and error message; {@link #toString()} masks it too.
  *
  * @param method  {@code GET} or {@code POST}
  * @param uri     the full request URI
@@ -59,6 +60,38 @@ public record DumJobRequest(String method, URI uri, Map<String, String> headers,
     /** A GET with no secret outside the query string. */
     public static DumJobRequest get(URI uri, Map<String, String> headers) {
         return new DumJobRequest(GET, uri, headers, null, Set.of());
+    }
+
+    /**
+     * A GET whose {@code secrets} travel outside the query string — in a header (JSearch/RapidAPI:
+     * {@code X-RapidAPI-Key}) or a path segment (trabalharei <strong>TRA19</strong>).
+     */
+    public static DumJobRequest get(URI uri, Map<String, String> headers, Set<String> secrets) {
+        return new DumJobRequest(GET, uri, headers, null, secrets);
+    }
+
+    /**
+     * The request as it may be logged: the URI without its query string and with secrets masked,
+     * header names with any header value that holds a secret masked, and the body length only. The
+     * record's generated {@code toString} would print a header-borne key verbatim.
+     */
+    @Override
+    public String toString() {
+        StringBuilder text = new StringBuilder(method).append(' ')
+                .append(DumJobHttpFetcher.redacted(uri, secrets)).append(" headers {");
+        String separator = "";
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            String value = header.getValue();
+            boolean secret = value != null && secrets.stream().anyMatch(value::contains);
+            text.append(separator).append(header.getKey()).append('=')
+                    .append(secret ? DumJobHttpFetcher.MASK : DumJobHttpFetcher.scrub(value, secrets));
+            separator = ", ";
+        }
+        text.append('}');
+        if (body != null) {
+            text.append(" body ").append(body.length()).append(" chars");
+        }
+        return text.toString();
     }
 
     /** A JSON POST. */

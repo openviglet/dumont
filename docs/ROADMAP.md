@@ -110,6 +110,7 @@ This track has no remaining pending tasks.
 - 📋 **D93** (deps: —) **Dumont has no admin-password variable, so a compose or CI start needs a scripted call to the first-access setup** — Turing already reads TURING_ADMIN_PASSWORD at boot, and the two products should start configured the same way. → §XLI.3
 - 📋 **D94** (deps: —) **An incremental source cannot keep an unchanged id indexed without replaying its whole record through extract** — Quota-bound APIs fetch only new items, so every connector must store payloads just to stop the sweep deindexing them. → §XLI.4
 - 📋 **D95** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
+- 📋 **D96** (deps: —) **A structured source cannot report why a run ended early, so a budget stop looks like a successful smaller run** — Paid and rate-limited partners stop runs on purpose, and only the logs say so. → §XLI.6
 
 ## Non-goals (do NOT add as tasks)
 

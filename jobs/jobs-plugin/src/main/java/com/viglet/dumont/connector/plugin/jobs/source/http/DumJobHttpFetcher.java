@@ -36,7 +36,9 @@ import lombok.extern.slf4j.Slf4j;
  * Default {@link DumJobFetcher}: a JDK {@link HttpClient} GET or JSON POST asking for JSON. Logs and
  * error messages name the host and path only ({@link #redacted(URI, Collection)}), never the query
  * string, so an {@code app_key} sent as a parameter does not end up in a log; a key a partner takes
- * as a path segment (Jooble) is listed in the request's secrets and masked there too.
+ * as a path segment (Jooble) is listed in the request's secrets and masked there too. Header values
+ * are never logged; a key a partner takes as a header (JSearch's {@code X-RapidAPI-Key}) is listed in
+ * the secrets as well, so the error of a header the JDK rejects is scrubbed of it.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -68,9 +70,16 @@ public class DumJobHttpFetcher implements DumJobFetcher {
         } else {
             http.GET();
         }
-        request.headers().forEach(http::header);
         Set<String> secrets = request.secrets();
         String where = request.method() + " " + redacted(request.uri(), secrets);
+        try {
+            request.headers().forEach(http::header);
+        } catch (IllegalArgumentException e) {
+            // The JDK may quote the offending value (a header-borne key with a stray newline):
+            // scrub it, and do not chain the cause, whose message would still carry it.
+            throw new DumJobFetchException(where + " has an invalid header: "
+                    + scrub(String.valueOf(e.getMessage()), secrets));
+        }
         try {
             HttpResponse<String> response =
                     httpClient.send(http.build(), HttpResponse.BodyHandlers.ofString());

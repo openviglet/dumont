@@ -167,3 +167,21 @@ executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallb
 `agents.md` names the flag in the meantime.
 
 Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
+
+### XLI.6 Run notes from structured sources (D96)
+
+Found while building trabalharei's paid JSearch adapter (trabalharei TRA19) in the
+`jobs` module. `DumStructuredSource` (`connector-commons/.../spi/structured`) offers
+only `discover()`, `extract()` and getters, so a source has no way to tell the run
+record why a run ended early. When the monthly paid-call budget is spent, the adapter
+can only log a WARN line; in Dumont's run history the run looks like a success with
+fewer documents, and the same is true of a partner returning HTTP 429 or a quota refusal
+on any source.
+
+Expected: a way for a structured source to attach a status and short notes to the run
+(for example `discover()` returning a result carrying `partial` plus a reason, or a
+`runNotes()` the loop reads at the end), shown in the run record and the coverage view
+(D15), so "stopped by budget" and "partner rate-limited" are visible without reading
+logs.
+
+Workaround: the jobs module logs one distinct WARN line per budget stop.

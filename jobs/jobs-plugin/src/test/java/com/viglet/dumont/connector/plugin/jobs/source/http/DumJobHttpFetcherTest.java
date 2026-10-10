@@ -143,6 +143,46 @@ class DumJobHttpFetcherTest {
     }
 
     @Test
+    void aSecretHeaderIsSentButNeverInAnError() {
+        String body = fetcher.send(DumJobRequest.get(URI.create(baseUrl + "/search?page=1"),
+                Map.of("X-Test", "h3ad3r-key"), Set.of("h3ad3r-key")));
+        assertThat(body).contains("results");
+        assertThat(header.get()).isEqualTo("h3ad3r-key");
+
+        status = 401;
+        DumJobRequest refused = DumJobRequest.get(URI.create(baseUrl + "/search?page=1"),
+                Map.of("X-Test", "h3ad3r-key"), Set.of("h3ad3r-key"));
+        assertThatThrownBy(() -> fetcher.send(refused))
+                .isInstanceOf(DumJobFetchException.class).hasMessageContaining("HTTP 401")
+                .hasMessageNotContaining("h3ad3r-key");
+    }
+
+    @Test
+    void aHeaderTheJdkRejectsFailsWithoutItsValue() {
+        // A key pasted with a stray line break: the JDK refuses the header value.
+        String key = "h3ad3r\nkey";
+        DumJobRequest request = DumJobRequest.get(URI.create(baseUrl + "/search"),
+                Map.of("X-RapidAPI-Key", key), Set.of(key));
+        assertThatThrownBy(() -> fetcher.send(request))
+                .isInstanceOf(DumJobFetchException.class).hasMessageContaining("invalid header")
+                .hasMessageNotContaining("h3ad3r").hasNoCause();
+    }
+
+    @Test
+    void aRequestPrintsNoSecret() {
+        DumJobRequest request = DumJobRequest.get(
+                URI.create("https://jsearch.p.rapidapi.com/search?query=vagas&page=1"),
+                Map.of("X-RapidAPI-Key", "h3ad3r-key", "X-RapidAPI-Host", "jsearch.p.rapidapi.com"),
+                Set.of("h3ad3r-key"));
+        assertThat(request.toString()).doesNotContain("h3ad3r-key").doesNotContain("query=")
+                .contains("GET https://jsearch.p.rapidapi.com/search").contains("X-RapidAPI-Key=***")
+                .contains("X-RapidAPI-Host=jsearch.p.rapidapi.com");
+        DumJobRequest post = DumJobRequest.post(URI.create("https://jooble.org/api/abc-123"), Map.of(),
+                "{\"keywords\":\"vagas\"}", Set.of("abc-123"));
+        assertThat(post.toString()).isEqualTo("POST https://jooble.org/api/*** headers {} body 20 chars");
+    }
+
+    @Test
     void onlyGetAndPostAreRequests() {
         assertThatThrownBy(() -> new DumJobRequest("DELETE", URI.create(baseUrl), null, null, null))
                 .isInstanceOf(IllegalArgumentException.class);
