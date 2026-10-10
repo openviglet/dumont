@@ -33,6 +33,7 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePro
 import com.viglet.dumont.connector.plugin.jobs.DumJobsPlugin;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
+import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobCallRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
 
@@ -54,19 +55,24 @@ public class DumJobsSourceProvider implements DumStructuredSourceProvider {
 
     private final DumJobSourceRepository sourceRepository;
     private final DumJobSeenRepository seenRepository;
+    private final DumJobCallRepository callRepository;
     private final Map<String, DumJobSourceAdapter> adapters;
     private final Clock clock;
 
     @Autowired
     public DumJobsSourceProvider(DumJobSourceRepository sourceRepository,
-            DumJobSeenRepository seenRepository, ObjectProvider<DumJobSourceAdapter> adapters) {
-        this(sourceRepository, seenRepository, adapters.orderedStream().toList(), Clock.systemUTC());
+            DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
+            ObjectProvider<DumJobSourceAdapter> adapters) {
+        this(sourceRepository, seenRepository, callRepository, adapters.orderedStream().toList(),
+                Clock.systemUTC());
     }
 
     public DumJobsSourceProvider(DumJobSourceRepository sourceRepository,
-            DumJobSeenRepository seenRepository, List<DumJobSourceAdapter> adapters, Clock clock) {
+            DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
+            List<DumJobSourceAdapter> adapters, Clock clock) {
         this.sourceRepository = sourceRepository;
         this.seenRepository = seenRepository;
+        this.callRepository = callRepository;
         this.clock = clock;
         this.adapters = new LinkedHashMap<>();
         for (DumJobSourceAdapter adapter : adapters) {
@@ -100,7 +106,8 @@ public class DumJobsSourceProvider implements DumStructuredSourceProvider {
     /** The running source for {@code source}, or empty when no adapter serves its type. */
     public Optional<DumStructuredSource> resolve(DumJobSource source) {
         return adapterFor(source).map(adapter -> new DumJobsStructuredSource(source,
-                DumJobsSchema.schema(), adapter, seenRepository, clock));
+                DumJobsSchema.schema(), adapter, seenRepository, callRepository, sourceRepository,
+                clock));
     }
 
     private Optional<DumJobSourceAdapter> adapterFor(DumJobSource source) {

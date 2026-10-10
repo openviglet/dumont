@@ -35,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.viglet.dumont.connector.plugin.jobs.api.dto.DumJobSourceRequest;
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
+import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobCallRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
 
@@ -45,12 +46,14 @@ class DumJobSourceApiTest {
     private DumJobSourceRepository repository;
     @Mock
     private DumJobSeenRepository seenRepository;
+    @Mock
+    private DumJobCallRepository callRepository;
 
     private DumJobSourceApi api;
 
     @BeforeEach
     void setUp() {
-        api = new DumJobSourceApi(repository, seenRepository);
+        api = new DumJobSourceApi(repository, seenRepository, callRepository);
     }
 
     private static DumJobSource withCredentials() {
@@ -107,6 +110,7 @@ class DumJobSourceApiTest {
         req.setApiKey("new-api-key");
         req.setCapPerDay(250);
         req.setEnabled(false);
+        req.setSettings("{\"maxDaysOld\":7}");
 
         ResponseEntity<DumJobSource> response = api.jobSourceUpdate("a", req);
 
@@ -117,6 +121,7 @@ class DumJobSourceApiTest {
         assertThat(stored.getCapPerDay()).isEqualTo(250);
         assertThat(stored.isEnabled()).isFalse();
         assertThat(stored.getLocale()).isEqualTo("pt_BR");
+        assertThat(stored.getSettings()).isEqualTo("{\"maxDaysOld\":7}");
         assertThat(response.getBody().getApiKey()).isEqualTo(DumJobSourceApi.MASK);
     }
 
@@ -171,5 +176,6 @@ class DumJobSourceApiTest {
         assertThat(api.jobSourceDelete("a")).isTrue();
         assertThat(api.jobSourceDelete("missing")).isFalse();
         verify(seenRepository).deleteBySourceId("a");
+        verify(callRepository).deleteBySourceId("a");
     }
 }

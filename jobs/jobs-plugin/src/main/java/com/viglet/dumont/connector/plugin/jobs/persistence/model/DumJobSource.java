@@ -30,6 +30,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -100,21 +101,49 @@ public class DumJobSource implements Serializable {
     @Column
     private String locale = DEFAULT_LOCALE;
 
-    /** Maximum partner API calls per rolling minute; {@code null} or {@code <= 0} means uncapped. */
+    /**
+     * Maximum partner API calls per rolling minute; {@code null} uses the adapter's default
+     * ({@code DumJobSourceAdapter#defaultCaps()}), {@code <= 0} means uncapped.
+     */
     @Column(name = "cap_per_minute")
     private Integer capPerMinute;
 
-    /** Maximum partner API calls per rolling day; {@code null} or {@code <= 0} means uncapped. */
+    /**
+     * Maximum partner API calls per rolling day; {@code null} uses the adapter's default
+     * ({@code DumJobSourceAdapter#defaultCaps()}), {@code <= 0} means uncapped.
+     */
     @Column(name = "cap_per_day")
     private Integer capPerDay;
 
-    /** Maximum partner API calls per rolling week; {@code null} or {@code <= 0} means uncapped. */
+    /**
+     * Maximum partner API calls per rolling week; {@code null} uses the adapter's default
+     * ({@code DumJobSourceAdapter#defaultCaps()}), {@code <= 0} means uncapped.
+     */
     @Column(name = "cap_per_week")
     private Integer capPerWeek;
 
-    /** Maximum partner API calls per rolling 30 days; {@code null} or {@code <= 0} means uncapped. */
+    /**
+     * Maximum partner API calls per rolling 30 days; {@code null} uses the adapter's default
+     * ({@code DumJobSourceAdapter#defaultCaps()}), {@code <= 0} means uncapped.
+     */
     @Column(name = "cap_per_month")
     private Integer capPerMonth;
+
+    /**
+     * Adapter-specific settings as a JSON object (e.g. Adzuna's {@code maxDaysOld} and category
+     * rotation). Each adapter documents the keys it reads; an unknown key is ignored.
+     */
+    @Lob
+    @Column(name = "settings")
+    private String settings;
+
+    /**
+     * Run-to-run state an adapter keeps between fetches (e.g. the next category-rotation slot).
+     * Written by the adapter during a fetch and saved by {@code DumJobsStructuredSource}; not
+     * writable through the API.
+     */
+    @Column(name = "fetch_cursor", length = 512)
+    private String cursor;
 
     @Builder.Default
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)

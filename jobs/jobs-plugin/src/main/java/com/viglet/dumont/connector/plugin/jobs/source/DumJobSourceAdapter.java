@@ -19,6 +19,8 @@ package com.viglet.dumont.connector.plugin.jobs.source;
 import java.util.List;
 import java.util.Map;
 
+import com.viglet.dumont.connector.plugin.jobs.source.DumJobCallBudget.Window;
+
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 
 /**
@@ -38,6 +40,9 @@ import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
  * and stops — returning what it already has — when the budget refuses.</li>
  * <li>Dates ({@code publishedAt}, {@code expiresAt}, {@code modificationDate}) are ISO-8601 strings
  * or {@code java.time} values.</li>
+ * <li>State an adapter needs from one run to the next (a rotation slot, a paging token) goes in
+ * {@code context.source().setCursor(...)}; the structured source saves it after the fetch returns.
+ * Adapter-specific configuration is read from {@code context.source().getSettings()} (JSON).</li>
  * </ul>
  */
 public interface DumJobSourceAdapter {
@@ -47,4 +52,12 @@ public interface DumJobSourceAdapter {
 
     /** Fetch the newest postings the budget allows. A failure throws; an empty list is a valid answer. */
     List<Map<String, Object>> fetch(DumJobFetchContext context);
+
+    /**
+     * The partner plan's call caps, used for every window a source leaves {@code null}. Empty (the
+     * default) means a source without configured caps is uncapped.
+     */
+    default Map<Window, Integer> defaultCaps() {
+        return Map.of();
+    }
 }

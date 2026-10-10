@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.json.JSONObject;
@@ -40,9 +41,12 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsPlugin;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
+import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobCall;
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSeen;
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
+import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobCallRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
+import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,6 +67,12 @@ import lombok.extern.slf4j.Slf4j;
  * discover, so the next full run deindexes them.
  *
  * <p>
+ * Each run's call budget is seeded with the calls earlier runs made ({@link DumJobCall}), and every
+ * call it grants is written back at once, so the daily, weekly and monthly caps hold across runs and
+ * survive a run that fails half-way. The adapter is told which ids earlier runs fetched, and any
+ * {@code cursor} it leaves on the source is saved after the fetch.
+ *
+ * <p>
  * The fetched set is memoized on the instance: the indexing loop resolves a source once, then calls
  * {@code discover()} followed by many {@code extract()} calls on the same instance.
  *
@@ -79,16 +89,21 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     private final DumStructuredSchema schema;
     private final DumJobSourceAdapter adapter;
     private final DumJobSeenRepository seenRepository;
+    private final DumJobCallRepository callRepository;
+    private final DumJobSourceRepository sourceRepository;
     private final Clock clock;
 
     private Map<String, Map<String, Object>> records;
 
     public DumJobsStructuredSource(DumJobSource source, DumStructuredSchema schema,
-            DumJobSourceAdapter adapter, DumJobSeenRepository seenRepository, Clock clock) {
+            DumJobSourceAdapter adapter, DumJobSeenRepository seenRepository,
+            DumJobCallRepository callRepository, DumJobSourceRepository sourceRepository, Clock clock) {
         this.source = source;
         this.schema = schema;
         this.adapter = adapter;
         this.seenRepository = seenRepository;
+        this.callRepository = callRepository;
+        this.sourceRepository = sourceRepository;
         this.clock = clock;
     }
 
@@ -153,8 +168,15 @@ public class DumJobsStructuredSource implements DumStructuredSource {
         Instant now = clock.instant();
         Map<String, Map<String, Object>> live = new LinkedHashMap<>();
         int fetched = 0;
-        DumJobFetchContext context = new DumJobFetchContext(source, DumJobCallBudget.of(source, clock));
-        for (Map<String, Object> raw : adapter.fetch(context)) {
+        DumJobFetchContext context = new DumJobFetchContext(source, budget(now), this::seenBefore);
+        String cursorBefore = source.getCursor();
+        List<Map<String, Object>> postings;
+        try {
+            postings = adapter.fetch(context);
+        } finally {
+            saveCursor(cursorBefore);
+        }
+        for (Map<String, Object> raw : postings) {
             if (ingest(raw, now, live)) {
                 fetched++;
             }
@@ -171,6 +193,43 @@ public class DumJobsStructuredSource implements DumStructuredSource {
                 source.getName(), live.size(), fetched, kept);
         records = live;
         return records;
+    }
+
+    /**
+     * This run's budget: the source's caps (the adapter's plan caps where the source sets none),
+     * seeded with the calls of earlier runs still inside the longest window, and persisting every
+     * call it grants. Calls past {@link DumJobCall#RETENTION_DAYS} are pruned first.
+     */
+    private DumJobCallBudget budget(Instant now) {
+        String sourceId = source.getId();
+        callRepository.deleteBySourceIdAndCalledAtLessThanEqual(sourceId,
+                now.minus(Duration.ofDays(DumJobCall.RETENTION_DAYS)));
+        List<Instant> prior = callRepository
+                .findBySourceIdAndCalledAtAfter(sourceId, now.minus(DumJobCallBudget.Window.MONTH.length()))
+                .stream().map(DumJobCall::getCalledAt).toList();
+        return DumJobCallBudget.builder(clock)
+                .caps(source, adapter.defaultCaps())
+                .priorCalls(prior)
+                .onGranted(at -> callRepository
+                        .save(DumJobCall.builder().sourceId(sourceId).calledAt(at).build()))
+                .build();
+    }
+
+    /** Whether an earlier run fetched {@code jobId} (this run's postings are stored after the fetch). */
+    private boolean seenBefore(String jobId) {
+        return seenRepository.findBySourceIdAndJobId(source.getId(), jobId).isPresent();
+    }
+
+    /** Persist the cursor the adapter left on the source, onto the stored row only. */
+    private void saveCursor(String before) {
+        String after = source.getCursor();
+        if (Objects.equals(before, after)) {
+            return;
+        }
+        sourceRepository.findById(source.getId()).ifPresent(stored -> {
+            stored.setCursor(after);
+            sourceRepository.save(stored);
+        });
     }
 
     /**

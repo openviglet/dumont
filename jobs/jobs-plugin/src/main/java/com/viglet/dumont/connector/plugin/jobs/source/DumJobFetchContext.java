@@ -16,16 +16,22 @@
 
 package com.viglet.dumont.connector.plugin.jobs.source;
 
+import java.util.function.Predicate;
+
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
 
 /**
  * What an adapter gets for one fetch (trabalharei <strong>TRA13</strong>): the source configuration
- * (credentials, API URL, locale) and the call budget it must ask before every partner request.
+ * (credentials, API URL, locale, settings), the call budget it must ask before every partner request
+ * and, since <strong>TRA15</strong>, which posting ids earlier runs already fetched, so a newest-first
+ * adapter can stop paging once it reaches postings it has.
  *
  * @param source the configured source being fetched
  * @param budget the call budget for this run; {@link DumJobCallBudget#tryAcquire()} before each call
+ * @param seen   whether a document id (e.g. {@code adzuna-4512}) was fetched by an earlier run of this
+ *               source; it never reports ids this run fetched
  */
-public record DumJobFetchContext(DumJobSource source, DumJobCallBudget budget) {
+public record DumJobFetchContext(DumJobSource source, DumJobCallBudget budget, Predicate<String> seen) {
 
     public DumJobFetchContext {
         if (source == null) {
@@ -34,5 +40,18 @@ public record DumJobFetchContext(DumJobSource source, DumJobCallBudget budget) {
         if (budget == null) {
             throw new IllegalArgumentException("A fetch context needs a call budget");
         }
+        if (seen == null) {
+            seen = id -> false;
+        }
+    }
+
+    /** A context with no seen history: every id reads as new. */
+    public DumJobFetchContext(DumJobSource source, DumJobCallBudget budget) {
+        this(source, budget, null);
+    }
+
+    /** Whether {@code id} was fetched by an earlier run. */
+    public boolean wasSeen(String id) {
+        return id != null && seen.test(id);
     }
 }

@@ -1,0 +1,87 @@
+{
+  "__CLASS__": "Adzuna::API::Response::JobSearchResults",
+  "count": 48213,
+  "mean": 52811.37,
+  "results": [
+    {
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "id": "4876542801",
+      "adref": "eyJhbGciOiJIUzI1NiJ9.eyJzIjoiVGdZaE5qIiwiaSI6IjQ4NzY1NDI4MDEifQ.Tu6v",
+      "title": "Gerente de Vendas – Modelo Híbrido",
+      "description": "Liderança de equipe comercial B2B. Modelo híbrido: três dias no escritório da Barra e dois de home office.",
+      "created": "2026-10-09T16:05:52Z",
+      "redirect_url": "https://www.adzuna.com.br/land/ad/4876542801?se=TgYhNj&utm_medium=api&utm_source=a1b2c3d4&v=9S0T1U2V3W4X",
+      "company": {
+        "__CLASS__": "Adzuna::API::Response::Company",
+        "display_name": "Distribuidora Atlântica S.A."
+      },
+      "location": {
+        "__CLASS__": "Adzuna::API::Response::Location",
+        "display_name": "Rio de Janeiro, Rio de Janeiro",
+        "area": ["Brasil", "Rio de Janeiro", "Rio de Janeiro"]
+      },
+      "category": {
+        "__CLASS__": "Adzuna::API::Response::Category",
+        "tag": "sales-jobs",
+        "label": "Vagas de Vendas"
+      },
+      "salary_min": 180000,
+      "salary_max": 240000,
+      "salary_is_predicted": "0",
+      "contract_type": "permanent",
+      "contract_time": "full_time"
+    },
+    {
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "id": "4876542777",
+      "adref": "eyJhbGciOiJIUzI1NiJ9.eyJzIjoiTWtPbFBpIiwiaSI6IjQ4NzY1NDI3NzcifQ.Wx7y",
+      "title": "Atendente de Telemarketing Home Office",
+      "description": "Atendimento receptivo a clientes de telefonia. Equipamento fornecido pela empresa.",
+      "created": "2026-10-09T14:44:10Z",
+      "redirect_url": "https://www.adzuna.com.br/land/ad/4876542777?se=MkOlPi&utm_medium=api&utm_source=a1b2c3d4&v=5Y6Z7A8B9C0D",
+      "company": {
+        "__CLASS__": "Adzuna::API::Response::Company",
+        "display_name": "Contact Center Nordeste"
+      },
+      "location": {
+        "__CLASS__": "Adzuna::API::Response::Location",
+        "display_name": "Salvador, Bahia",
+        "area": ["Brasil", "Bahia", "Salvador"]
+      },
+      "category": {
+        "__CLASS__": "Adzuna::API::Response::Category",
+        "tag": "customer-services-jobs",
+        "label": "Vagas de Atendimento ao Cliente"
+      },
+      "salary_min": 19800,
+      "salary_max": 21600,
+      "salary_is_predicted": "0"
+    },
+    {
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "id": "4876542650",
+      "adref": "eyJhbGciOiJIUzI1NiJ9.eyJzIjoiQnZDeFp6IiwiaSI6IjQ4NzY1NDI2NTAifQ.Za8b",
+      "title": "Motorista Entregador",
+      "description": "Entregas na região metropolitana com veículo da empresa. CNH categoria B.",
+      "created": "2026-10-09T11:20:00Z",
+      "redirect_url": "https://www.adzuna.com.br/land/ad/4876542650?se=BvCxZz&utm_medium=api&utm_source=a1b2c3d4&v=1E2F3G4H5I6J",
+      "company": {
+        "__CLASS__": "Adzuna::API::Response::Company",
+        "display_name": "Log Sul Transportes"
+      },
+      "location": {
+        "__CLASS__": "Adzuna::API::Response::Location",
+        "display_name": "Porto Alegre, Rio Grande do Sul",
+        "area": ["Brasil", "Rio Grande do Sul", "Porto Alegre"]
+      },
+      "category": {
+        "__CLASS__": "Adzuna::API::Response::Category",
+        "tag": "logistics-warehouse-jobs",
+        "label": "Vagas de Logística e Armazém"
+      },
+      "salary_min": 36000,
+      "salary_is_predicted": "0",
+      "contract_type": "permanent"
+    }
+  ]
+}

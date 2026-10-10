@@ -53,5 +53,6 @@ public class DumJobSourceRequest {
     private Integer capPerDay;
     private Integer capPerWeek;
     private Integer capPerMonth;
+    private String settings;
     private Collection<String> turSNSites = new HashSet<>();
 }

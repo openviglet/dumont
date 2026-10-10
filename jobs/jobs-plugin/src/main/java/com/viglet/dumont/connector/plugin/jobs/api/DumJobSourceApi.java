@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.viglet.dumont.connector.plugin.jobs.api.dto.DumJobSourceRequest;
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
+import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobCallRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
 
@@ -53,11 +54,13 @@ public class DumJobSourceApi {
 
     private final DumJobSourceRepository sourceRepository;
     private final DumJobSeenRepository seenRepository;
+    private final DumJobCallRepository callRepository;
 
     public DumJobSourceApi(DumJobSourceRepository sourceRepository,
-            DumJobSeenRepository seenRepository) {
+            DumJobSeenRepository seenRepository, DumJobCallRepository callRepository) {
         this.sourceRepository = sourceRepository;
         this.seenRepository = seenRepository;
+        this.callRepository = callRepository;
     }
 
     @GetMapping
@@ -100,6 +103,7 @@ public class DumJobSourceApi {
     public boolean jobSourceDelete(@PathVariable String id) {
         return sourceRepository.findById(id).map(source -> {
             seenRepository.deleteBySourceId(source.getId());
+            callRepository.deleteBySourceId(source.getId());
             sourceRepository.delete(source);
             return true;
         }).orElse(false);
@@ -131,6 +135,9 @@ public class DumJobSourceApi {
         existing.setCapPerDay(jobSource.getCapPerDay());
         existing.setCapPerWeek(jobSource.getCapPerWeek());
         existing.setCapPerMonth(jobSource.getCapPerMonth());
+        existing.setSettings(jobSource.getSettings() == null || jobSource.getSettings().isBlank()
+                ? null
+                : jobSource.getSettings());
         if (existing.getTurSNSites() == null) {
             existing.setTurSNSites(new HashSet<>());
         }

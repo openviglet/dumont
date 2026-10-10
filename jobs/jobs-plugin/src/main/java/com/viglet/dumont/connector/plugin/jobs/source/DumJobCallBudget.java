@@ -27,6 +27,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.function.Consumer;
 
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
 
@@ -37,9 +38,11 @@ import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
  * stops fetching instead of burning the quota or getting the key suspended.
  *
  * <p>
- * Pure: no I/O, time comes from the injected {@link Clock}. The budget only knows the calls it was
- * told about — the ones it granted plus any {@code priorCalls} it was seeded with — so a daily or
- * monthly cap holds across runs only when the caller seeds it with the calls of earlier runs.
+ * No I/O of its own, time comes from the injected {@link Clock}. The budget only knows the calls it
+ * was told about — the ones it granted plus any {@code priorCalls} it was seeded with — so a daily or
+ * monthly cap holds across runs only when the caller seeds it with the calls of earlier runs and
+ * records each granted call ({@link Builder#onGranted}); {@code DumJobsStructuredSource} does both
+ * through the {@code job_call} table.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -67,10 +70,13 @@ public final class DumJobCallBudget {
     private final Map<Window, Integer> caps;
     private final Clock clock;
     private final Deque<Instant> calls = new ArrayDeque<>();
+    private final Consumer<Instant> onGranted;
 
-    private DumJobCallBudget(Map<Window, Integer> caps, Clock clock, Collection<Instant> priorCalls) {
+    private DumJobCallBudget(Map<Window, Integer> caps, Clock clock, Collection<Instant> priorCalls,
+            Consumer<Instant> onGranted) {
         this.caps = caps;
         this.clock = clock;
+        this.onGranted = onGranted;
         if (priorCalls != null) {
             priorCalls.stream().sorted().forEach(calls::addLast);
         }
@@ -83,12 +89,7 @@ public final class DumJobCallBudget {
 
     /** The budget for {@code source}'s configured caps. */
     public static DumJobCallBudget of(DumJobSource source, Clock clock) {
-        return builder(clock)
-                .cap(Window.MINUTE, source.getCapPerMinute())
-                .cap(Window.DAY, source.getCapPerDay())
-                .cap(Window.WEEK, source.getCapPerWeek())
-                .cap(Window.MONTH, source.getCapPerMonth())
-                .build();
+        return builder(clock).caps(source, Map.of()).build();
     }
 
     public static Builder builder(Clock clock) {
@@ -108,6 +109,9 @@ public final class DumJobCallBudget {
             }
         }
         calls.addLast(now);
+        if (onGranted != null) {
+            onGranted.accept(now);
+        }
         return true;
     }
 
@@ -160,6 +164,7 @@ public final class DumJobCallBudget {
         private final Clock clock;
         private final Map<Window, Integer> caps = new EnumMap<>(Window.class);
         private Collection<Instant> priorCalls;
+        private Consumer<Instant> onGranted;
 
         private Builder(Clock clock) {
             if (clock == null) {
@@ -178,6 +183,30 @@ public final class DumJobCallBudget {
             return this;
         }
 
+        /**
+         * Cap every window from {@code source}; a window the source leaves {@code null} falls back to
+         * {@code defaults} (the adapter's plan caps). A value {@code <= 0} on the source leaves that
+         * window uncapped even when a default exists.
+         */
+        public Builder caps(DumJobSource source, Map<Window, Integer> defaults) {
+            Map<Window, Integer> fallback = defaults == null ? Map.of() : defaults;
+            cap(Window.MINUTE, orDefault(source.getCapPerMinute(), fallback.get(Window.MINUTE)));
+            cap(Window.DAY, orDefault(source.getCapPerDay(), fallback.get(Window.DAY)));
+            cap(Window.WEEK, orDefault(source.getCapPerWeek(), fallback.get(Window.WEEK)));
+            cap(Window.MONTH, orDefault(source.getCapPerMonth(), fallback.get(Window.MONTH)));
+            return this;
+        }
+
+        private static Integer orDefault(Integer configured, Integer fallback) {
+            return configured != null ? configured : fallback;
+        }
+
+        /** Called with the instant of every granted call, so the caller can persist it. */
+        public Builder onGranted(Consumer<Instant> onGranted) {
+            this.onGranted = onGranted;
+            return this;
+        }
+
         /** Calls made before this budget existed (earlier runs), so the long windows count them. */
         public Builder priorCalls(Collection<Instant> priorCalls) {
             this.priorCalls = priorCalls;
@@ -185,7 +214,7 @@ public final class DumJobCallBudget {
         }
 
         public DumJobCallBudget build() {
-            return new DumJobCallBudget(new EnumMap<>(caps), clock, priorCalls);
+            return new DumJobCallBudget(new EnumMap<>(caps), clock, priorCalls, onGranted);
         }
     }
 }

@@ -23,15 +23,15 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 
 /** A test clock that only moves when told to. */
-final class MutableClock extends Clock {
+public final class MutableClock extends Clock {
 
     private Instant now;
 
-    MutableClock(Instant start) {
+    public MutableClock(Instant start) {
         this.now = start;
     }
 
-    void advance(Duration by) {
+    public void advance(Duration by) {
         now = now.plus(by);
     }
 

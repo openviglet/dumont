@@ -103,7 +103,7 @@ class DumJobsPluginTest {
             }
         };
         DumJobsSourceProvider provider = new DumJobsSourceProvider(repository, seen.repository,
-                List.of(adapter), new MutableClock(NOW));
+                new InMemoryCallRepository().repository, List.of(adapter), new MutableClock(NOW));
         CapturingContext context = new CapturingContext();
 
         new DumJobsPlugin(context, provider).indexAll("adzuna-br");

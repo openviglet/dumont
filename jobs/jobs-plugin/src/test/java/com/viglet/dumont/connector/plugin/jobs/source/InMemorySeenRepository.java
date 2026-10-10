@@ -31,12 +31,12 @@ import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSeen;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
 
 /** A {@link DumJobSeenRepository} mock backed by a list, answering the queries the source uses. */
-final class InMemorySeenRepository {
+public final class InMemorySeenRepository {
 
-    final List<DumJobSeen> rows = new ArrayList<>();
-    final DumJobSeenRepository repository = mock(DumJobSeenRepository.class);
+    public final List<DumJobSeen> rows = new ArrayList<>();
+    public final DumJobSeenRepository repository = mock(DumJobSeenRepository.class);
 
-    InMemorySeenRepository() {
+    public InMemorySeenRepository() {
         lenient().when(repository.findBySourceIdAndJobId(anyString(), anyString()))
                 .thenAnswer(inv -> find(inv.getArgument(0), inv.getArgument(1)));
         lenient().when(repository.save(any(DumJobSeen.class))).thenAnswer(inv -> {
@@ -65,13 +65,13 @@ final class InMemorySeenRepository {
     }
 
     /** Seed a row as an earlier run would have left it. */
-    void seed(String sourceId, String jobId, Instant expiresAt, String payload) {
+    public void seed(String sourceId, String jobId, Instant expiresAt, String payload) {
         rows.add(DumJobSeen.builder().id(UUID.randomUUID().toString()).sourceId(sourceId)
                 .jobId(jobId).expiresAt(expiresAt).lastSeenAt(expiresAt.minusSeconds(86400))
                 .payload(payload).build());
     }
 
-    Optional<DumJobSeen> find(String sourceId, String jobId) {
+    public Optional<DumJobSeen> find(String sourceId, String jobId) {
         return rows.stream()
                 .filter(r -> r.getSourceId().equals(sourceId) && r.getJobId().equals(jobId))
                 .findFirst();

@@ -17,6 +17,12 @@
 package com.viglet.dumont.connector.plugin.jobs.source;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -25,13 +31,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
+import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
+import com.viglet.dumont.connector.plugin.jobs.source.DumJobCallBudget.Window;
 
 /** The seen-id store keeps older postings alive across quota-bound runs until they expire. */
 class DumJobsStructuredSourceTest {
@@ -41,6 +51,8 @@ class DumJobsStructuredSourceTest {
 
     private final MutableClock clock = new MutableClock(NOW);
     private final InMemorySeenRepository seen = new InMemorySeenRepository();
+    private final InMemoryCallRepository calls = new InMemoryCallRepository();
+    private final DumJobSourceRepository sourceRepository = mock(DumJobSourceRepository.class);
     private final List<DumJobFetchContext> contexts = new ArrayList<>();
 
     private DumJobSource jobSource() {
@@ -49,6 +61,13 @@ class DumJobsStructuredSourceTest {
     }
 
     private DumJobsStructuredSource source(List<Map<String, Object>> fetched) {
+        return source(jobSource(), context -> fetched, Map.of());
+    }
+
+    /** A source whose adapter runs {@code fetch} and declares {@code defaultCaps}. */
+    private DumJobsStructuredSource source(DumJobSource jobSource,
+            Function<DumJobFetchContext, List<Map<String, Object>>> fetch,
+            Map<Window, Integer> defaultCaps) {
         DumJobSourceAdapter adapter = new DumJobSourceAdapter() {
             @Override
             public String id() {
@@ -58,11 +77,26 @@ class DumJobsStructuredSourceTest {
             @Override
             public List<Map<String, Object>> fetch(DumJobFetchContext context) {
                 contexts.add(context);
-                return fetched;
+                return fetch.apply(context);
+            }
+
+            @Override
+            public Map<Window, Integer> defaultCaps() {
+                return defaultCaps;
             }
         };
-        return new DumJobsStructuredSource(jobSource(), DumJobsSchema.schema(), adapter,
-                seen.repository, clock);
+        return new DumJobsStructuredSource(jobSource, DumJobsSchema.schema(), adapter,
+                seen.repository, calls.repository, sourceRepository, clock);
+    }
+
+    /** An adapter body that asks the budget {@code n} times and fetches nothing. */
+    private static Function<DumJobFetchContext, List<Map<String, Object>>> spend(int n) {
+        return context -> {
+            for (int i = 0; i < n; i++) {
+                context.budget().tryAcquire();
+            }
+            return List.of();
+        };
     }
 
     private static Map<String, Object> job(String id, Instant publishedAt) {
@@ -197,5 +231,94 @@ class DumJobsStructuredSourceTest {
         assertThat(source.getLocale()).isEqualTo(Locale.of("pt", "BR"));
         assertThat(source.getSiteNames()).containsExactly("trabalharei");
         assertThat(source.getProviderName()).isEqualTo("JOBS");
+    }
+
+    @Test
+    void grantedCallsArePersistedAndSeedTheNextRunsBudget() {
+        DumJobSource capped = jobSource().toBuilder().capPerMinute(null).capPerDay(3).build();
+
+        source(capped, spend(2), Map.of()).discover();
+        assertThat(calls.calls(SOURCE_ID)).containsExactly(NOW, NOW);
+
+        // A second run an hour later starts with the 2 calls of the first: 1 left today.
+        clock.advance(Duration.ofHours(1));
+        source(capped, spend(5), Map.of()).discover();
+        assertThat(calls.calls(SOURCE_ID)).hasSize(3);
+        assertThat(contexts.getLast().budget().remaining(Window.DAY)).hasValue(0);
+
+        // The next day the window has rolled over.
+        clock.advance(Duration.ofDays(1));
+        source(capped, spend(1), Map.of()).discover();
+        assertThat(contexts.getLast().budget().remaining(Window.DAY)).hasValue(2);
+    }
+
+    @Test
+    void callsOlderThanTheRetentionArePrunedAndOtherSourcesIgnored() {
+        calls.seed(SOURCE_ID, NOW.minus(Duration.ofDays(32)));
+        calls.seed(SOURCE_ID, NOW.minus(Duration.ofDays(10)));
+        calls.seed("other-source", NOW.minus(Duration.ofHours(1)));
+
+        source(jobSource().toBuilder().capPerMonth(5).build(), spend(0), Map.of()).discover();
+
+        assertThat(calls.calls(SOURCE_ID)).containsExactly(NOW.minus(Duration.ofDays(10)));
+        assertThat(calls.calls("other-source")).hasSize(1);
+        assertThat(contexts.getLast().budget().remaining(Window.MONTH)).hasValue(4);
+    }
+
+    @Test
+    void theAdaptersDefaultCapsApplyWhereTheSourceSetsNone() {
+        DumJobSource source = jobSource().toBuilder().capPerMinute(null).capPerDay(0).build();
+        source(source, spend(0), Map.of(Window.MINUTE, 25, Window.DAY, 250, Window.WEEK, 1000))
+                .discover();
+
+        DumJobCallBudget budget = contexts.getLast().budget();
+        assertThat(budget.remaining(Window.MINUTE)).hasValue(25);
+        // An explicit 0 on the source means uncapped, even with an adapter default.
+        assertThat(budget.remaining(Window.DAY)).isEmpty();
+        assertThat(budget.remaining(Window.WEEK)).hasValue(1000);
+        assertThat(budget.remaining(Window.MONTH)).isEmpty();
+    }
+
+    @Test
+    void theAdapterSeesOnlyIdsOfEarlierRuns() {
+        seen.seed(SOURCE_ID, "old", NOW.plus(Duration.ofDays(3)), "{\"id\":\"old\"}");
+        List<Boolean> answers = new ArrayList<>();
+        source(jobSource(), context -> {
+            answers.add(context.wasSeen("old"));
+            answers.add(context.wasSeen("new-1"));
+            return List.of(job("new-1", NOW));
+        }, Map.of()).discover();
+
+        assertThat(answers).containsExactly(true, false);
+    }
+
+    @Test
+    void aCursorTheAdapterMovesIsSavedOnTheStoredRow() {
+        DumJobSource stored = jobSource();
+        when(sourceRepository.findById(SOURCE_ID)).thenReturn(Optional.of(stored));
+
+        source(jobSource(), context -> {
+            context.source().setCursor("3");
+            return List.of();
+        }, Map.of()).discover();
+
+        assertThat(stored.getCursor()).isEqualTo("3");
+        verify(sourceRepository).save(stored);
+    }
+
+    @Test
+    void anUnchangedCursorIsNotSavedAndAFailingFetchStillSavesAMovedOne() {
+        source(List.of()).discover();
+        verify(sourceRepository, never()).save(any());
+
+        DumJobSource stored = jobSource();
+        when(sourceRepository.findById(SOURCE_ID)).thenReturn(Optional.of(stored));
+        DumJobsStructuredSource failing = source(jobSource(), context -> {
+            context.source().setCursor("1");
+            throw new IllegalStateException("partner down");
+        }, Map.of());
+
+        assertThatThrownBy(failing::discover).hasMessage("partner down");
+        assertThat(stored.getCursor()).isEqualTo("1");
     }
 }

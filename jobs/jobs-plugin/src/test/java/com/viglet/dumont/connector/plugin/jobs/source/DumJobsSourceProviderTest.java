@@ -51,7 +51,8 @@ class DumJobsSourceProviderTest {
     }
 
     private DumJobsSourceProvider provider(DumJobSourceAdapter... adapters) {
-        return new DumJobsSourceProvider(repository, seen.repository, List.of(adapters),
+        return new DumJobsSourceProvider(repository, seen.repository,
+                new InMemoryCallRepository().repository, List.of(adapters),
                 new MutableClock(Instant.parse("2026-10-10T12:00:00Z")));
     }
 
