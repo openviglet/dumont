@@ -78,32 +78,6 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.1 Declarative JSON API source (D92)
-
-Found while planning trabalharei's job ingestion (TRA13, TRA15-19): Adzuna, Jooble, BNE
-and JSearch are all paged JSON APIs.
-
-Landed: `spi/structured/jsonapi` in connector-commons (manifest, paging and stop rules,
-a per-run call cap and per-minute pace, JSON-path mapping; a walk cut short finishes
-standalone through `discoveryComplete()`), and the binding: a catalog source with
-`jsonApiManifest` set resolves to `DumJsonApiSource` in `DumCatalogSourceProvider`, its
-`jsonApiSecrets` fill `{secret:NAME}`, the API refuses a manifest that cannot run, the
-export leaves the secrets out, and the console edits both on the Connection tab.
-
-Still to build:
-
-- **Budgets per day, week and month.** These need a counter that outlives the run: a JPA
-  row per source and window (`catalog_json_api_budget`: source, window, window start,
-  calls), read before the walk to cap `maxCallsPerRun` at what every window has left and
-  written as calls are made. The manifest's `budget` gains `callsPerDay`, `callsPerWeek`,
-  `callsPerMonth`; the source takes the remaining allowance through its builder, so
-  connector-commons stays free of JPA.
-- **Incremental mode.** A budget-bound source never sees everything in one run, so it
-  finishes standalone and nothing is ever deindexed. With `"incremental": {"expiry":
-  "P7D"}` in the manifest, the plugin keeps a last-seen time per id, finishes every run
-  standalone, and deindexes only ids unseen for longer than the expiry (`deIndexById`,
-  D68).
-
 ### XLI.3 Admin password from configuration (D93)
 
 Found while adding Dumont to trabalharei's local compose (trabalharei TRA67, on

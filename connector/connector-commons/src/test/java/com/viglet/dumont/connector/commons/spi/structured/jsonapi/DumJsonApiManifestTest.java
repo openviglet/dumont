@@ -98,7 +98,26 @@ class DumJsonApiManifestTest {
     }
 
     @Test
+    void readsBudgetWindowsAndTheIncrementalExpiry() {
+        DumJsonApiManifest manifest = DumJsonApiManifest.parse(ADZUNA.replace(
+                "\"budget\": { \"maxCallsPerRun\": 20, \"callsPerMinute\": 25 },",
+                "\"budget\": { \"callsPerDay\": 250, \"callsPerMonth\": 2500 }, \"incremental\": { \"expiry\": \"P7D\" },"));
+
+        assertEquals(java.util.Map.of(DumJsonApiState.Window.DAY, 250, DumJsonApiState.Window.MONTH, 2500),
+                manifest.budget().windows());
+        assertTrue(manifest.incremental());
+        assertEquals(java.time.Duration.ofDays(7), manifest.expiry());
+        assertTrue(!DumJsonApiManifest.parse(ADZUNA).incremental(), "a manifest is not incremental by default");
+    }
+
+    @Test
     void refusesWhatCannotRun() {
+        assertRefused(ADZUNA.replace("\"records\"", "\"incremental\": {}, \"records\""), "declares an expiry");
+        assertRefused(ADZUNA.replace("\"records\"", "\"incremental\": {\"expiry\": \"7 days\"}, \"records\""),
+                "ISO-8601");
+        assertRefused(ADZUNA.replace("\"records\"", "\"incremental\": {\"expiry\": \"PT0S\"}, \"records\""),
+                "positive incremental expiry");
+        assertRefused(ADZUNA.replace("\"callsPerMinute\": 25", "\"callsPerDay\": -1"), "cannot be negative");
         assertRefused("{not json", "must be a JSON object");
         assertRefused(ADZUNA.replace("\"id\": \"id\",", ""), "needs an id path");
         assertRefused(ADZUNA.replace("\"name\": \"adzuna\",", ""), "needs a name");

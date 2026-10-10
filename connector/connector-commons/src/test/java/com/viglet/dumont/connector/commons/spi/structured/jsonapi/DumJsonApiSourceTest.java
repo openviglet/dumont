@@ -23,6 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -274,7 +278,117 @@ class DumJsonApiSourceTest {
         assertFalse(context.standalone, "a complete walk lets the sweep remove what disappeared");
     }
 
+    @Test
+    void aDailyAllowanceIsSharedAcrossRunsAndRenewsAtMidnight() {
+        DumInMemoryJsonApiState state = new DumInMemoryJsonApiState();
+        MutableClock clock = new MutableClock(Instant.parse("2026-10-10T22:00:00Z"));
+        String manifest = """
+                {"name": "jobs", "request": {"url": "https://api.example/jobs?p={page}"},
+                 "paging": {"mode": "page"}, "budget": {"callsPerDay": 3}, "records": "results", %s}
+                """.formatted(FIELDS);
+        DumJsonFetcher endless = request -> page(requests.size()).toString();
+
+        DumJsonApiSource first = bound(manifest, endless, state, clock);
+        assertEquals(3, first.discover().size());
+        assertFalse(first.discoveryComplete(), "the day's allowance stopped the walk");
+
+        DumJsonApiSource sameDay = bound(manifest, endless, state, clock);
+        assertEquals(List.of(), sameDay.discover(), "nothing is left today");
+        assertEquals(0, sameDay.calls());
+
+        clock.now = Instant.parse("2026-10-11T00:00:01Z");
+        DumJsonApiSource nextDay = bound(manifest, endless, state, clock);
+        assertEquals(3, nextDay.discover().size(), "a new UTC day renews the allowance");
+    }
+
+    @Test
+    void windowsStartAtMidnightMondayAndTheFirst() {
+        Instant saturday = Instant.parse("2026-10-10T15:30:00Z");
+        assertEquals(Instant.parse("2026-10-10T00:00:00Z"), DumJsonApiState.Window.DAY.start(saturday));
+        assertEquals(Instant.parse("2026-10-05T00:00:00Z"), DumJsonApiState.Window.WEEK.start(saturday));
+        assertEquals(Instant.parse("2026-10-01T00:00:00Z"), DumJsonApiState.Window.MONTH.start(saturday));
+    }
+
+    @Test
+    void anIncrementalSourceDeindexesOnlyWhatExpired() {
+        DumInMemoryJsonApiState state = new DumInMemoryJsonApiState();
+        MutableClock clock = new MutableClock(Instant.parse("2026-10-01T08:00:00Z"));
+        String manifest = """
+                {"name": "jobs", "request": {"url": "https://api.example/jobs"},
+                 "incremental": {"expiry": "P7D"}, "records": "results", %s}
+                """.formatted(FIELDS);
+
+        CapturingContext day1 = new CapturingContext();
+        new JsonApiPlugin(day1, bound(manifest, request -> page(1, 2).toString(), state, clock))
+                .indexAll("jobs");
+        assertTrue(day1.standalone, "an incremental run never sweeps");
+        assertEquals(List.of(), day1.deindexed);
+
+        // Two days later only job 2 is returned: job 1 is missing but has not expired.
+        clock.now = Instant.parse("2026-10-03T08:00:00Z");
+        CapturingContext day3 = new CapturingContext();
+        new JsonApiPlugin(day3, bound(manifest, request -> page(2).toString(), state, clock))
+                .indexAll("jobs");
+        assertEquals(List.of(), day3.deindexed);
+
+        // Nine days after it was last seen, job 1 expires; job 2, seen today, stays.
+        clock.now = Instant.parse("2026-10-10T08:00:00Z");
+        CapturingContext day10 = new CapturingContext();
+        new JsonApiPlugin(day10, bound(manifest, request -> page(2).toString(), state, clock))
+                .indexAll("jobs");
+        assertEquals(List.of("1"), day10.deindexed);
+        assertEquals(List.of("site"), day10.deindexSites);
+        assertTrue(day10.standalone);
+    }
+
+    @Test
+    void aWalkThatFoundNothingExpiresNothing() {
+        DumInMemoryJsonApiState state = new DumInMemoryJsonApiState();
+        state.markSeen(List.of("old"), Instant.parse("2026-01-01T00:00:00Z"));
+        MutableClock clock = new MutableClock(Instant.parse("2026-10-10T08:00:00Z"));
+        DumJsonApiSource down = bound("""
+                {"name": "jobs", "request": {"url": "https://api.example/jobs"},
+                 "incremental": {"expiry": "P7D"}, "records": "results", %s}
+                """.formatted(FIELDS), request -> {
+                    throw new IOException("HTTP 503");
+                }, state, clock);
+
+        assertEquals(List.of(), down.expiredIds(), "an outage says nothing about what is gone");
+    }
+
     // --- helpers -------------------------------------------------------------------------------
+
+    private DumJsonApiSource bound(String manifest, DumJsonFetcher responses, DumJsonApiState state,
+            Clock clock) {
+        return DumJsonApiSource.builder(DumJsonApiManifest.parse(manifest), request -> {
+            requests.add(request);
+            return responses.fetch(request);
+        }).sourceName("jobs").siteNames(List.of("site")).state(state).clock(clock)
+                .pacer(minIntervalMs -> { }).build();
+    }
+
+    private static final class MutableClock extends Clock {
+        private Instant now;
+
+        MutableClock(Instant now) {
+            this.now = now;
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return ZoneOffset.UTC;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return now;
+        }
+    }
 
     private DumJsonApiSource source(String manifest, DumJsonFetcher responses) {
         return source(manifest, responses, Map.of());
@@ -341,7 +455,17 @@ class DumJsonApiSourceTest {
 
     private static final class CapturingContext implements DumConnectorContext {
         private final List<DumJobItemWithSession> items = new ArrayList<>();
+        private final List<String> deindexed = new ArrayList<>();
+        private List<String> deindexSites = List.of();
         private boolean standalone;
+
+        @Override
+        public int deIndexById(DumConnectorSession session, Collection<String> objectIds,
+                List<String> sites) {
+            deindexed.addAll(objectIds);
+            deindexSites = sites;
+            return objectIds.size();
+        }
 
         @Override
         public boolean addJobItem(DumJobItemWithSession dumJobItemWithSession) {

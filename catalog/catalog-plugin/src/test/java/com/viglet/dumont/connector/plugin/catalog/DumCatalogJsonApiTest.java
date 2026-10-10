@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,8 +39,10 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumInMemoryJsonApiState;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiRequest;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiSource;
+import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiState;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetcher;
 import com.viglet.dumont.connector.plugin.catalog.export.DumCatalogExchangeProcess;
@@ -59,6 +62,7 @@ class DumCatalogJsonApiTest {
             """;
 
     private final List<DumJsonApiRequest> requests = new ArrayList<>();
+    private final Map<String, DumJsonApiState> states = new HashMap<>();
 
     @Test
     void aManifestSourceIndexesThroughThePlugin() {
@@ -73,6 +77,21 @@ class DumCatalogJsonApiTest {
         assertThat(requests).extracting(DumJsonApiRequest::url).containsExactly(
                 "https://api.example/jobs?p=1&key=s3cret", "https://api.example/jobs?p=2&key=s3cret");
         assertThat(context.standalone).isFalse();
+    }
+
+    @Test
+    void eachRunReadsTheSourcesOwnBudgetState() {
+        DumCatalogSource source = jobs();
+        source.setJsonApiManifest(MANIFEST.replace("\"records\"", "\"budget\": {\"callsPerDay\": 2}, \"records\""));
+        DumCatalogSourceRepository repository = repositoryWith(source);
+
+        new DumCatalogPlugin(new CapturingContext(), provider(repository)).indexAll("jobs");
+        CapturingContext second = new CapturingContext();
+        new DumCatalogPlugin(second, provider(repository)).indexAll("jobs");
+
+        assertThat(requests).hasSize(2);
+        assertThat(second.published).isEmpty();
+        assertThat(second.standalone).as("a spent day stops the run without a sweep").isTrue();
     }
 
     @Test
@@ -152,7 +171,7 @@ class DumCatalogJsonApiTest {
                     return requests.size() == 1
                             ? page(new int[] {1, 2})
                             : page(new int[] {3});
-                });
+                }, name -> states.computeIfAbsent(name, n -> new DumInMemoryJsonApiState()));
     }
 
     private static DumCatalogSourceRepository repositoryWith(DumCatalogSource source) {

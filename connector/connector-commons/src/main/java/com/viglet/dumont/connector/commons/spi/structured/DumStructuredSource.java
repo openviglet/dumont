@@ -76,6 +76,23 @@ public interface DumStructuredSource {
         return true;
     }
 
+    /**
+     * Whether this source is incremental (roadmap D92): no single run is expected to see every
+     * item, so a run never sweeps what it did not reach; items leave the index through
+     * {@link #expiredIds()} instead. Defaults to {@code false}.
+     */
+    default boolean incremental() {
+        return false;
+    }
+
+    /**
+     * For an {@link #incremental()} source, the ids gone long enough to deindex, read once after a
+     * run's extraction. Defaults to none.
+     */
+    default Collection<String> expiredIds() {
+        return List.of();
+    }
+
     /** The locale of the published documents; defaults to {@link Locale#US}. */
     default Locale getLocale() {
         return Locale.US;

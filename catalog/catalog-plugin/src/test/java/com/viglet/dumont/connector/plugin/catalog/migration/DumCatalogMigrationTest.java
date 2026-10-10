@@ -92,7 +92,8 @@ class DumCatalogMigrationTest {
         DumHtmlFetcher htmlFetcher = DumHtmlFetcher.ofPages(Map.of(LISTING, listingHtml));
         DumCatalogSourceRepository repository = mock(DumCatalogSourceRepository.class);
         return new DumCatalogSourceProvider(repository, catalogFetcher, library, htmlFetcher,
-                request -> "[]");
+                request -> "[]",
+                name -> new com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumInMemoryJsonApiState());
     }
 
     @Test

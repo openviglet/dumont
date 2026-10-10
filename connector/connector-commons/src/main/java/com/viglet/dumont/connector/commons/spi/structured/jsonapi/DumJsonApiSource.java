@@ -19,6 +19,8 @@ package com.viglet.dumont.connector.commons.spi.structured.jsonapi;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -59,6 +61,12 @@ import lombok.extern.slf4j.Slf4j;
  * finishes the run standalone so the records this run never reached are not deindexed.
  *
  * <p>
+ * <strong>Budgets and increments.</strong> Day, week and month allowances are counted in the
+ * source's {@link DumJsonApiState} across runs, and a spent window stops the walk like the run cap.
+ * An incremental manifest marks every id it found as seen; the plugin then never sweeps, and
+ * {@link #expiredIds()} names the ids unseen for longer than the expiry.
+ *
+ * <p>
  * A value whose type does not fit its field is dropped, not coerced — the same grounding contract
  * every structured source keeps.
  *
@@ -79,6 +87,8 @@ public final class DumJsonApiSource implements DumStructuredSource {
     private final Map<String, String> secrets;
     private final DumJsonFetcher fetcher;
     private final Pacer pacer;
+    private final DumJsonApiState state;
+    private final Clock clock;
     private final DumJsonPath recordsPath;
     private final DumJsonPath idPath;
     private final Map<String, DumJsonPath> fieldPaths = new LinkedHashMap<>();
@@ -97,6 +107,8 @@ public final class DumJsonApiSource implements DumStructuredSource {
         this.secrets = Map.copyOf(builder.secrets);
         this.fetcher = builder.fetcher;
         this.pacer = builder.pacer;
+        this.state = builder.state;
+        this.clock = builder.clock;
         this.recordsPath = DumJsonPath.compile(manifest.records());
         this.idPath = DumJsonPath.compile(manifest.idPath());
         manifest.fields().forEach(f -> fieldPaths.put(f.name(), DumJsonPath.compile(f.path())));
@@ -167,11 +179,46 @@ public final class DumJsonApiSource implements DumStructuredSource {
         return Optional.of(rec.build());
     }
 
+    @Override
+    public boolean incremental() {
+        return manifest.incremental();
+    }
+
+    /**
+     * The ids not seen for longer than the manifest's expiry, forgotten as they are returned. Empty
+     * for a source that is not incremental, and for a walk that failed before it found anything —
+     * that run learned nothing about what is gone.
+     */
+    @Override
+    public synchronized List<String> expiredIds() {
+        if (!manifest.incremental()) {
+            return List.of();
+        }
+        if (records().isEmpty() && !complete) {
+            return List.of();
+        }
+        return state.expire(clock.instant().minus(manifest.expiry()));
+    }
+
     private synchronized Map<String, JSONObject> records() {
         if (recordsById == null) {
             recordsById = walk();
+            if (manifest.incremental() && !recordsById.isEmpty()) {
+                state.markSeen(recordsById.keySet(), clock.instant());
+            }
         }
         return recordsById;
+    }
+
+    /** The first budget window with nothing left, or {@code null} when every one has room. */
+    private DumJsonApiState.Window spentWindow() {
+        Instant now = clock.instant();
+        for (Map.Entry<DumJsonApiState.Window, Integer> window : manifest.budget().windows().entrySet()) {
+            if (state.calls(window.getKey(), window.getKey().start(now)) >= window.getValue()) {
+                return window.getKey();
+            }
+        }
+        return null;
     }
 
     private Map<String, JSONObject> walk() {
@@ -183,6 +230,13 @@ public final class DumJsonApiSource implements DumStructuredSource {
         for (int step = 0;; step++) {
             if (maxCalls > 0 && calls >= maxCalls) {
                 log.info("JSON API source '{}' stopped at its call cap of {}", sourceName, maxCalls);
+                complete = false;
+                return found;
+            }
+            DumJsonApiState.Window spent = spentWindow();
+            if (spent != null) {
+                log.info("JSON API source '{}' stopped: its {} allowance of {} calls is spent", sourceName,
+                        spent.name().toLowerCase(Locale.ROOT), manifest.budget().windows().get(spent));
                 complete = false;
                 return found;
             }
@@ -247,6 +301,9 @@ public final class DumJsonApiSource implements DumStructuredSource {
         DumJsonApiRequest request = resolve(step, cursor);
         pacer.awaitTurn(manifest.budget().minIntervalMs());
         calls++;
+        // Counted before the answer: a call that failed was still spent against the provider's quota.
+        Instant now = clock.instant();
+        manifest.budget().windows().keySet().forEach(window -> state.addCall(window, window.start(now)));
         String body;
         try {
             body = fetcher.fetch(request);
@@ -418,6 +475,8 @@ public final class DumJsonApiSource implements DumStructuredSource {
         private Locale locale = Locale.US;
         private Map<String, String> secrets = Map.of();
         private Pacer pacer = Pacer.sleeping();
+        private DumJsonApiState state = new DumInMemoryJsonApiState();
+        private Clock clock = Clock.systemUTC();
 
         private Builder(DumJsonApiManifest manifest, DumJsonFetcher fetcher) {
             if (manifest == null) {
@@ -458,6 +517,21 @@ public final class DumJsonApiSource implements DumStructuredSource {
 
         public Builder pacer(Pacer pacer) {
             this.pacer = pacer == null ? Pacer.sleeping() : pacer;
+            return this;
+        }
+
+        /**
+         * What the source remembers between runs: budget windows and last-seen ids. Defaults to
+         * memory, which a restart forgets.
+         */
+        public Builder state(DumJsonApiState state) {
+            this.state = state == null ? new DumInMemoryJsonApiState() : state;
+            return this;
+        }
+
+        /** The clock budget windows and expiry are read against. */
+        public Builder clock(Clock clock) {
+            this.clock = clock == null ? Clock.systemUTC() : clock;
             return this;
         }
 

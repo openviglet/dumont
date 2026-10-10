@@ -69,15 +69,17 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
     private final DumRecipeLibrary recipeLibrary;
     private final DumHtmlFetcher htmlFetcher;
     private final DumJsonFetcher jsonFetcher;
+    private final DumCatalogJsonApiStates jsonApiStates;
 
     public DumCatalogSourceProvider(DumCatalogSourceRepository sourceRepository,
             DumCatalogFetcher fetcher, DumRecipeLibrary recipeLibrary, DumHtmlFetcher htmlFetcher,
-            DumJsonFetcher jsonFetcher) {
+            DumJsonFetcher jsonFetcher, DumCatalogJsonApiStates jsonApiStates) {
         this.sourceRepository = sourceRepository;
         this.fetcher = fetcher;
         this.recipeLibrary = recipeLibrary;
         this.htmlFetcher = htmlFetcher;
         this.jsonFetcher = jsonFetcher;
+        this.jsonApiStates = jsonApiStates;
     }
 
     @Override
@@ -164,6 +166,7 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
                 .siteNames(source.getTurSNSites() == null ? List.of() : List.copyOf(source.getTurSNSites()))
                 .locale(localeOf(source))
                 .secrets(secretsOf(source))
+                .state(jsonApiStates.forSource(source.getName()))
                 .build();
     }
 

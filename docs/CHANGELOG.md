@@ -537,4 +537,4 @@
 ## Track O — Structured sources over paged JSON APIs
 
 - **D91** — Both images bundle every `<connector>/*-plugin` jar by glob, catalog included, and the root build fails when a plugin module produced no jar.
-- **D92 (engine and catalog binding)** — A catalog source runs a stored JSON API manifest with its secrets through DumJsonApiSource, validated on save and edited in the console; a walk cut short finishes standalone.
+- **D92** — A paged JSON API indexes from a manifest stored on a catalog source, with day/week/month budgets that survive restarts and incremental runs that deindex only expired ids.

@@ -16,7 +16,10 @@
 
 package com.viglet.dumont.connector.commons.spi.structured.jsonapi;
 
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,7 +50,8 @@ import com.viglet.turing.commons.se.field.TurSEFieldType;
  *   "request": { "method": "GET",
  *     "url": "https://api.adzuna.com/v1/api/jobs/br/search/{page}?app_id={secret:appId}&app_key={secret:appKey}&results_per_page={size}" },
  *   "paging": { "mode": "page", "start": 1, "size": 50, "maxPages": 20, "totalPath": "count" },
- *   "budget": { "maxCallsPerRun": 20, "callsPerMinute": 25 },
+ *   "budget": { "maxCallsPerRun": 20, "callsPerMinute": 25, "callsPerDay": 250, "callsPerMonth": 2500 },
+ *   "incremental": { "expiry": "P7D" },
  *   "records": "results",
  *   "id": "id",
  *   "fields": [
@@ -71,12 +75,14 @@ import com.viglet.turing.commons.se.field.TurSEFieldType;
  * @param records the path to the record array in each response ({@code $} for a bare array)
  * @param idPath  the path to each record's id, relative to the record
  * @param fields  the field mappings, in schema order
+ * @param expiry  for an incremental source, how long an id may go unseen before it is deindexed;
+ *                {@code null} for a source whose every complete run sees everything
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
 public record DumJsonApiManifest(String name, int version, Request request, Paging paging,
-        Budget budget, String records, String idPath, List<FieldMapping> fields) {
+        Budget budget, String records, String idPath, List<FieldMapping> fields, Duration expiry) {
 
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{([a-zA-Z]+)(?::([^{}]+))?}");
     private static final Set<String> VARIABLES = Set.of("page", "offset", "size", "cursor", "secret");
@@ -105,6 +111,8 @@ public record DumJsonApiManifest(String name, int version, Request request, Pagi
                 "manifest '%s' pages by offset but its request never uses {offset}".formatted(name));
         require(paging.mode() != PagingMode.OFFSET || paging.size() > 0,
                 "manifest '%s' pages by offset but declares no page size".formatted(name));
+        require(expiry == null || (!expiry.isNegative() && !expiry.isZero()),
+                "manifest '%s' needs a positive incremental expiry".formatted(name));
         DumJsonPath.compile(records);
         DumJsonPath.compile(idPath);
         if (paging.cursorPath() != null) {
@@ -141,9 +149,30 @@ public record DumJsonApiManifest(String name, int version, Request request, Pagi
                     Request.parse(root.optJSONObject("request")),
                     Paging.parse(root.optJSONObject("paging")),
                     Budget.parse(root.optJSONObject("budget")),
-                    root.optString("records", "$"), root.optString("id", null), fields);
+                    root.optString("records", "$"), root.optString("id", null), fields,
+                    expiry(root.optJSONObject("incremental")));
         } catch (JSONException e) {
             throw new IllegalArgumentException("Invalid JSON API manifest: " + e.getMessage(), e);
+        }
+    }
+
+    /** Whether the source is incremental: runs never sweep, and ids expire instead. */
+    public boolean incremental() {
+        return expiry != null;
+    }
+
+    private static Duration expiry(JSONObject incremental) {
+        if (incremental == null) {
+            return null;
+        }
+        String text = incremental.optString("expiry", null);
+        require(text != null && !text.isBlank(),
+                "an incremental source declares an expiry, e.g. \"P7D\"");
+        try {
+            return Duration.parse(text.trim());
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(
+                    "the incremental expiry '%s' is not an ISO-8601 duration such as \"P7D\"".formatted(text), e);
         }
     }
 
@@ -296,24 +325,48 @@ public record DumJsonApiManifest(String name, int version, Request request, Pagi
     }
 
     /**
-     * What one run may spend.
+     * What the source may spend. The day, week and month allowances are calendar windows in UTC,
+     * counted across runs by the source's {@link DumJsonApiState}.
      *
      * @param maxCallsPerRun the most calls one run makes, or {@code 0} for no cap; a run the cap
      *                       stops is incomplete, so the sweep keeps what it did not fetch
      * @param callsPerMinute the pace, or {@code 0} for none: calls are spaced so no minute holds more
+     * @param callsPerDay    the most calls in one UTC day, or {@code 0} for no cap
+     * @param callsPerWeek   the most calls in one ISO week (from Monday), or {@code 0} for no cap
+     * @param callsPerMonth  the most calls in one calendar month, or {@code 0} for no cap
      */
-    public record Budget(int maxCallsPerRun, int callsPerMinute) {
+    public record Budget(int maxCallsPerRun, int callsPerMinute, int callsPerDay, int callsPerWeek,
+            int callsPerMonth) {
 
-        public static final Budget UNLIMITED = new Budget(0, 0);
+        public static final Budget UNLIMITED = new Budget(0, 0, 0, 0, 0);
 
         public Budget {
             require(maxCallsPerRun >= 0, "a call cap cannot be negative");
             require(callsPerMinute >= 0, "a call pace cannot be negative");
+            require(callsPerDay >= 0 && callsPerWeek >= 0 && callsPerMonth >= 0,
+                    "a window allowance cannot be negative");
         }
 
         static Budget parse(JSONObject json) {
             return json == null ? UNLIMITED
-                    : new Budget(json.optInt("maxCallsPerRun", 0), json.optInt("callsPerMinute", 0));
+                    : new Budget(json.optInt("maxCallsPerRun", 0), json.optInt("callsPerMinute", 0),
+                            json.optInt("callsPerDay", 0), json.optInt("callsPerWeek", 0),
+                            json.optInt("callsPerMonth", 0));
+        }
+
+        /** The allowance of each window this budget caps, in window order. */
+        public Map<DumJsonApiState.Window, Integer> windows() {
+            Map<DumJsonApiState.Window, Integer> windows = new EnumMap<>(DumJsonApiState.Window.class);
+            if (callsPerDay > 0) {
+                windows.put(DumJsonApiState.Window.DAY, callsPerDay);
+            }
+            if (callsPerWeek > 0) {
+                windows.put(DumJsonApiState.Window.WEEK, callsPerWeek);
+            }
+            if (callsPerMonth > 0) {
+                windows.put(DumJsonApiState.Window.MONTH, callsPerMonth);
+            }
+            return windows;
         }
 
         /** The least time between two calls, in milliseconds. */

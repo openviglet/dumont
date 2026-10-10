@@ -33,6 +33,7 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumInMemoryJsonApiState;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetcher;
 import com.viglet.dumont.connector.plugin.catalog.fetch.DumCatalogFetcher;
@@ -85,7 +86,7 @@ class DumCatalogPluginTest {
     private static DumCatalogSourceProvider sidecarProvider(DumCatalogSourceRepository repository,
             DumCatalogFetcher fetcher) {
         return new DumCatalogSourceProvider(repository, fetcher, new DumRecipeLibrary(),
-                DumHtmlFetcher.ofPages(Map.of()), request -> "[]");
+                DumHtmlFetcher.ofPages(Map.of()), request -> "[]", name -> new DumInMemoryJsonApiState());
     }
 
     private DumCatalogSource ufmg() {

@@ -17,6 +17,7 @@
 package com.viglet.dumont.connector.commons.spi.structured;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -295,6 +296,10 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                         .formatted(outcome.processed(), outcome.discovered()), null);
                 return;
             }
+            if (structuredSource.incremental()) {
+                finishIncrementalRun(structuredSource, session, source, outcome);
+                return;
+            }
             if (!structuredSource.discoveryComplete()) {
                 // Discovery itself stopped short (a call budget, a page cap, a failed page), so the
                 // ids it never listed are not removals; finishing non-standalone would deindex them.
@@ -354,6 +359,24 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
      *
      * @param cause the exception that aborted the run, or {@code null} for a clean interrupt
      */
+    private void finishIncrementalRun(DumStructuredSource structuredSource, DumConnectorSession session,
+            String source, DumExtractionOutcome outcome) {
+        // An incremental source (D92) never sweeps: no run is expected to reach every item, so what a
+        // run missed is not a removal. Items leave by expiry instead — unless this run was a failure
+        // wave, which says nothing about what is gone.
+        if (isFailureWave(outcome)) {
+            finishPartialRunStandalone(session, source, failureWaveReason(outcome), null);
+            return;
+        }
+        Collection<String> expired = structuredSource.expiredIds();
+        if (!expired.isEmpty()) {
+            int queued = dumConnectorContext.deIndexById(session, expired,
+                    List.copyOf(structuredSource.getSiteNames()));
+            log.info("Incremental source '{}' deindexed {} expired id(s)", source, queued);
+        }
+        dumConnectorContext.finishIndexing(session, true);
+    }
+
     protected void finishPartialRunStandalone(DumConnectorSession session, String source,
             String reason, RuntimeException cause) {
         dumConnectorContext.finishIndexing(session, true);

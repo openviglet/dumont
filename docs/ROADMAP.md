@@ -107,15 +107,8 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
-- ⏳ **D92** (deps: —) **A paged JSON API cannot be a source without a Java plugin: no manifest declares its request, paging, budget or mapping** — Budgets per day, week and month need a counter that outlives the run, and a budget-bound source needs per-record expiry to ever deindex. → §XLI.1
 - 📋 **D93** (deps: —) **Dumont has no admin-password variable, so a compose or CI start needs a scripted call to the first-access setup** — Turing already reads TURING_ADMIN_PASSWORD at boot, and the two products should start configured the same way. → §XLI.3
 - 📋 **D94** (deps: D91 ✅) **The install zip, installer and AppImage ship without the EDS plugin, because each lists plugins by hand** — A connector missing from the packages is invisible to anyone who installs Dumont outside a container. → §XLI.4
-
-## Done when — D92
-
-- **A stored manifest indexes from the console without Java** A source saved with a
-  manifest and its secrets runs indexAll end to end, its budget windows survive a
-  restart, and an id not seen this run is deindexed only after its expiry.
 
 ## Non-goals (do NOT add as tasks)
 
