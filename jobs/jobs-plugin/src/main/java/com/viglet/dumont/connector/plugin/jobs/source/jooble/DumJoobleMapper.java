@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
+import com.viglet.dumont.connector.plugin.jobs.source.DumJobSourceAdapter;
 
 /**
  * Maps one Jooble search result to a job record keyed by {@link DumJobsSchema#FIELDS} (trabalharei
@@ -41,7 +42,8 @@ import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
  * <li>{@code state}/{@code city} come from the free-text {@code location} ({@code "Campinas, SP"},
  * {@code "São Paulo - SP"}): the state is the last part that names a UF, the city the part just
  * before it. A location that names no UF ({@code "Brasil"}) or says the work is remote
- * ({@code "Remoto"}, {@code "Home office"}) sets neither.</li>
+ * ({@code "Remoto"}, {@code "Home office"}) sets neither. The text itself is kept, as received, under
+ * {@code locationRaw} for the location enricher (TRA20), which writes the canonical city and UF.</li>
  * <li>{@code contract} maps {@code type} only when it names exactly one kind of the site's vocabulary
  * (CLT/efetivo, PJ, estágio, temporário); full-time/part-time never sets one.</li>
  * <li>Salaries are stated only when {@code salary} is a BRL amount or range that is monthly or names
@@ -115,6 +117,8 @@ public final class DumJoobleMapper {
         if (!remoteLocation) {
             putPlace(job, location);
         }
+        // The text as received, for the location enricher (TRA20) — not a schema field.
+        put(job, DumJobSourceAdapter.LOCATION_RAW, location);
         put(job, DumJobsSchema.REMOTE, DumJobNormalizer.remote(title, snippet, location));
         put(job, DumJobsSchema.CONTRACT, contract(text(result, "type")));
         putSalary(job, text(result, "salary"));

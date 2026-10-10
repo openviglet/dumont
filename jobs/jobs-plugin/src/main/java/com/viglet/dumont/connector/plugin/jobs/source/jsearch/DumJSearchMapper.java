@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
+import com.viglet.dumont.connector.plugin.jobs.source.DumJobSourceAdapter;
 
 /**
  * Maps one JSearch search result to a job record keyed by {@link DumJobsSchema#FIELDS} (trabalharei
@@ -42,7 +43,8 @@ import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
  * <li>Only Brazilian postings are kept: a result whose {@code job_country} is not {@code BR} (or is
  * missing) is dropped.</li>
  * <li>{@code state} is the UF of {@code job_state} ({@code "SP"} or {@code "São Paulo"});
- * {@code city} is {@code job_city}.</li>
+ * {@code city} is {@code job_city}; {@code job_location} is kept as received under {@code locationRaw}
+ * for the location enricher (TRA20), which writes the canonical city and UF.</li>
  * <li>{@code remote} is {@code remoto} only when {@code job_is_remote} is true.</li>
  * <li>{@code contract}: {@code CONTRACTOR} &rarr; {@code pj}, {@code INTERN} &rarr; {@code estagio};
  * {@code FULLTIME}/{@code PARTTIME} are working time and never set one. Read from
@@ -95,6 +97,8 @@ public final class DumJSearchMapper {
         put(job, DumJobsSchema.COMPANY, text(result, "employer_name"));
         put(job, DumJobsSchema.CITY, text(result, "job_city"));
         put(job, DumJobsSchema.STATE, DumJobNormalizer.uf(text(result, "job_state")));
+        // The free-text place as received, for the location enricher (TRA20) — not a schema field.
+        put(job, DumJobSourceAdapter.LOCATION_RAW, text(result, "job_location"));
         put(job, DumJobsSchema.REMOTE, isTrue(result.opt("job_is_remote")) ? DumJobNormalizer.REMOTE : null);
         put(job, DumJobsSchema.CONTRACT, contract(employmentTypes(result)));
         putSalary(job, result);

@@ -135,7 +135,7 @@ class DumJSearchAdapterTest {
         String id = id(JAVA);
         Map<String, Object> job = all().get(id);
 
-        assertThat(job).containsOnlyKeys("id", "title", "text", "company", "city", "state", "remote",
+        assertThat(job).containsOnlyKeys("id", "title", "text", "company", "city", "state", "locationRaw", "remote",
                 "salaryMin", "salaryMax", "salaryPeriod", "salaryBand", "source", "url", "applyUrl",
                 "publishedAt", "modificationDate", "expiresAt");
         assertThat(job)
@@ -157,7 +157,11 @@ class DumJSearchAdapterTest {
                 .containsEntry("expiresAt", "2026-11-07T12:00:00.000Z");
         // FULLTIME is working time: no contract.
         assertThat(job).doesNotContainKeys("contract", "abstract", "seniority", "occupation");
-        assertThat(DumJobsSchema.FIELDS).containsAll(job.keySet());
+        // TRA20: the partner's place text rides along for the location enricher; it is a record
+        // key, not a schema field.
+        assertThat(job).containsEntry("locationRaw", "São Paulo, SP");
+        assertThat(DumJobsSchema.FIELDS).containsAll(job.keySet().stream()
+                .filter(key -> !key.equals("locationRaw")).toList());
     }
 
     @Test

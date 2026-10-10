@@ -185,3 +185,60 @@ Expected: a way for a structured source to attach a status and short notes to th
 logs.
 
 Workaround: the jobs module logs one distinct WARN line per budget stop.
+
+### XLI.7 Transient record attributes (D97)
+
+Found while adding location normalization to the `jobs` module (trabalharei TRA20).
+`DumStructuredRecord.Builder.set` rejects any key the schema does not declare, so a
+source cannot hand an enricher working data that must not be indexed: the jobs adapters'
+raw location text (`locationRaw`) and the enricher's `locationUnresolved` note. The
+enricher instead reaches back into the source through a module-specific
+`DumJobsStructuredSource.posting(id)` lookup, using the `source` argument of `enrich()`.
+
+Expected: a record carries transient, non-indexed attributes (a separate map, or fields
+the schema marks `indexed=false`) that enrichers read and the publish step drops.
+
+Workaround: `DumJobsStructuredSource.posting(id)` in `jobs/jobs-plugin`.
+
+### XLI.8 Enrichers can clear fields (D98)
+
+Found while adding location normalization to the `jobs` module (trabalharei TRA20).
+`DumEnrichmentChain.merge` applies the source's values first and ignores blank
+contributions, so an enricher can add or overwrite a field but never remove one. A
+canonicalizer must sometimes drop a value the source sent: a city that does not exist in
+the stated UF keeps the UF and loses the city, and a remote posting has no city.
+
+Expected: an enricher can clear a field explicitly (a tombstone value, or a
+`remove(field)` on its contribution), applied by the merge.
+
+Workaround: the jobs module's `extract()` leaves city and state off the record entirely
+and lets the enricher write them, falling back to the adapter's values when the taxonomy
+is missing.
+
+### XLI.9 Tabular taxonomies from resources (D99)
+
+Found while shipping the IBGE municipality list (5,571 rows of code, name, UF) as a D19
+taxonomy for trabalharei's `jobs` module (TRA20). `DumTaxonomy` is a flat
+string-to-string map and the recipe library has no loader for a classpath or file
+resource, so a reference table with more than one attribute per row cannot be a
+taxonomy. The module maps IBGE code to name and derives the UF from the code's first two
+digits, checked against the file at load time, and loads the JSON with its own code.
+
+Expected: taxonomies whose entries carry several attributes (or a tabular taxonomy
+type), and a loader that registers a versioned taxonomy from a resource with its source
+and download date.
+
+Workaround: `DumIbgeMunicipalities` in `jobs/jobs-plugin`.
+
+### XLI.10 Enricher end-of-run hook (D100)
+
+Found while counting unresolved locations per source in trabalharei's `jobs` module
+(TRA20). `DumEnricher` is called per record and has no end-of-run hook, so an enricher
+that aggregates over a run (unresolved counts, coverage, rejected values) cannot emit
+its summary. The jobs plugin overrides `indexAll` to log one line per source after the
+run, which every enriching connector would have to repeat.
+
+Expected: an `onRunEnd(source, context)` callback on enrichers, whose output joins the
+run record once D96 gives runs a place for notes.
+
+Workaround: `DumJobsPlugin.indexAll` override in `jobs/jobs-plugin`.

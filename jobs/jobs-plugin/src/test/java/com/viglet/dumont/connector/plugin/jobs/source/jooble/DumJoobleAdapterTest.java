@@ -81,7 +81,7 @@ class DumJoobleAdapterTest {
     void mapsEveryFieldJoobleStates() {
         Map<String, Object> job = all().get("jooble-7316540912345678901");
 
-        assertThat(job).containsOnlyKeys("id", "title", "text", "company", "city", "state", "remote",
+        assertThat(job).containsOnlyKeys("id", "title", "text", "company", "city", "state", "locationRaw", "remote",
                 "contract", "salaryMin", "salaryMax", "salaryPeriod", "salaryBand", "source", "url",
                 "applyUrl", "publishedAt", "modificationDate");
         assertThat(job)
@@ -104,7 +104,11 @@ class DumJoobleAdapterTest {
         assertThat(job.get("text")).isEqualTo("...squad de pagamentos. Atuação 100% remota, com "
                 + "encontros trimestrais em Campinas. Requisitos: Java 17, Spring Boot, PostgreSQL ...");
         assertThat(job).doesNotContainKeys("abstract", "seniority", "occupation", "expiresAt");
-        assertThat(DumJobsSchema.FIELDS).containsAll(job.keySet());
+        // TRA20: the partner's place text rides along for the location enricher; it is a record
+        // key, not a schema field.
+        assertThat(job).containsEntry("locationRaw", "Campinas, SP");
+        assertThat(DumJobsSchema.FIELDS).containsAll(job.keySet().stream()
+                .filter(key -> !key.equals("locationRaw")).toList());
     }
 
     @Test

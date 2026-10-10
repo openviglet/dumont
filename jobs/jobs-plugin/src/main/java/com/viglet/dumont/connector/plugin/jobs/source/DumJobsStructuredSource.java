@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.json.JSONObject;
 
@@ -84,6 +85,9 @@ public class DumJobsStructuredSource implements DumStructuredSource {
 
     /** How long a posting stays live when the partner gives no expiry date. */
     public static final Duration DEFAULT_TTL = Duration.ofDays(30);
+
+    /** Fields {@link #extract} leaves to the location enricher (trabalharei TRA20). */
+    static final Set<String> LOCATION_FIELDS = Set.of(DumJobsSchema.CITY, DumJobsSchema.STATE);
 
     private final DumJobSource source;
     private final DumStructuredSchema schema;
@@ -137,16 +141,22 @@ public class DumJobsStructuredSource implements DumStructuredSource {
         return new ArrayList<>(load().keySet());
     }
 
+    /**
+     * Extract one posting. {@code city} and {@code state} are left to the location enricher
+     * (trabalharei <strong>TRA20</strong>), which reads them from {@link #posting(String)}: a D04
+     * enricher can override a record value but never remove one, and the canonical step must be able
+     * to drop a city that is not in its UF or that only said "Remoto".
+     */
     @Override
     public Optional<DumStructuredRecord> extract(String contentId) {
-        Map<String, Object> values = records != null ? records.get(contentId) : storedPosting(contentId);
+        Map<String, Object> values = posting(contentId);
         if (values == null) {
             return Optional.empty();
         }
         DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, schema);
         for (String field : DumJobsSchema.FIELDS) {
             Object value = values.get(field);
-            if (value == null || !schema.hasField(field)) {
+            if (value == null || !schema.hasField(field) || LOCATION_FIELDS.contains(field)) {
                 continue;
             }
             try {
@@ -158,6 +168,27 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             }
         }
         return Optional.of(rec.build());
+    }
+
+    /**
+     * The posting {@code contentId} as the adapter returned it — every key, including record keys that
+     * are not schema fields ({@link DumJobSourceAdapter#LOCATION_RAW}) — or {@code null} when it is
+     * neither in this run nor in the store. After {@link #discover()} it is this run's live map, so an
+     * {@link #annotate} shows up here; before it, a fresh copy is read from the store.
+     */
+    public Map<String, Object> posting(String contentId) {
+        return records != null ? records.get(contentId) : storedPosting(contentId);
+    }
+
+    /**
+     * Attach a record key that is not a schema field (e.g. {@link DumJobSourceAdapter#LOCATION_UNRESOLVED})
+     * to a posting of this run. Never published; a no-op before {@link #discover()} or for an unknown id.
+     */
+    public void annotate(String contentId, String key, Object value) {
+        Map<String, Object> posting = records != null ? records.get(contentId) : null;
+        if (posting != null) {
+            posting.put(key, value);
+        }
     }
 
     /** Fetch once, record what was fetched, and merge in every stored posting still open. */

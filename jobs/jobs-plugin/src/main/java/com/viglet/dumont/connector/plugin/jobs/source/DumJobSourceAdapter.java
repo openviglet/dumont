@@ -34,6 +34,10 @@ import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
  * <li>{@link #fetch} returns raw postings as maps keyed by {@link DumJobsSchema#FIELDS} names. A key
  * outside the schema is ignored; a missing, {@code null} or blank value stays absent (grounding) —
  * never fill a field with a placeholder.</li>
+ * <li>{@code city} and {@code state} are what the partner wrote (split as far as the adapter can);
+ * the location enricher turns them into the canonical IBGE city and UF (trabalharei
+ * <strong>TRA20</strong>). An adapter whose partner sends one free-text place also puts it, as
+ * received, under {@link #LOCATION_RAW} — a record key the enricher reads, not a schema field.</li>
  * <li>Every map carries {@link DumJobsSchema#ID}, unique across every source publishing to the same
  * site — conventionally {@code <id()>-<partner id>} (e.g. {@code adzuna-4512}).</li>
  * <li>Before each partner request it calls {@link DumJobFetchContext#budget()}{@code .tryAcquire()},
@@ -46,6 +50,18 @@ import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
  * </ul>
  */
 public interface DumJobSourceAdapter {
+
+    /**
+     * Record key for the partner's raw location text ({@code "Campinas, SP"}). Kept with the stored
+     * posting and read by the location enricher; never a schema field, never indexed.
+     */
+    String LOCATION_RAW = "locationRaw";
+
+    /**
+     * Record key the location enricher sets to the raw place text it could not resolve. Never a schema
+     * field, never indexed.
+     */
+    String LOCATION_UNRESOLVED = "locationUnresolved";
 
     /** The source type this adapter serves: {@code adzuna}, {@code jooble}, {@code bne} or {@code jsearch}. */
     String id();
