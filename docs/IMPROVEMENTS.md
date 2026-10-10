@@ -75,3 +75,46 @@ These constrain every task above:
 - **Additive state, not migrations of meaning.** Conditional-fetch validators (D12),
   coverage history (D15) and provenance (D16) are new state alongside existing checksum
   state — they do not change what a "document" is.
+
+## XLI Structured sources over paged JSON APIs
+
+### XLI.2 Every connector module reaches the image (D91)
+
+Found while planning trabalharei's ingestion on dumont.viglet.cloud (trabalharei TRA61).
+The `Dockerfile` copies the aem, eds, db, web-crawler and assets plugin jars into
+`/app/libs` (picked up through `LOADER_PATH=/app/libs`), but has no COPY line for
+`catalog-plugin`, so the `ghcr.io/openviglet/dumont-ce` image that viglet/cloud runs
+cannot use the catalog connector D10 shipped. Any later structured-source module (a
+`jobs` module, say) would be missing the same way.
+
+Expected: every connector module the build produces lands in the image, ideally from one
+list or a glob in the build, so adding a module cannot silently leave it out. A test or
+CI check that compares the modules declared in `pom.xml` with the jars in `/app/libs`
+would keep it that way.
+
+### XLI.1 Declarative JSON API source (D92)
+
+Found while planning trabalharei's job ingestion (trabalharei roadmap, TRA13 and
+TRA15-19): four job sources (Adzuna, Jooble, BNE, JSearch) are all paged JSON APIs, and
+every one of them needs its own Java `DumStructuredSource` today.
+
+What exists: `catalog-plugin` (D10) does a single GET of one URL with one optional auth
+header, expects a bare array or a `{courses:[...]}` envelope, and maps fixed course
+fields (`DumCatalogSchema`). It has no paging and no configurable mapping. The no-code
+paths (D02 strategies, D13 source inference) target sitemaps, HTML listings and tables,
+not JSON.
+
+What a JSON API source needs, declared in a manifest or recipe rather than code:
+
+- request: URL template, GET or POST with a JSON body, and credentials as a query
+  parameter, header or path segment;
+- paging: page, offset or cursor, a stop rule (empty page, total count, id already seen)
+  and a page cap;
+- a call budget per minute, day, week and month that ends the run cleanly at the cap;
+- record path (`results`, `jobs`, `data.listVagas`) and a field mapping by JSON path,
+  with an id field;
+- an incremental mode for budget-bound sources: ids seen earlier stay alive until a
+  per-record expiry, so the delta sweep does not deindex what this run did not fetch.
+
+Workaround in the meantime: trabalharei writes one Java source per API in a `jobs`
+module. Once this ships, those sources become recipes.
