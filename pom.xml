@@ -192,6 +192,7 @@
                 <module>aem</module>
                 <module>web-crawler</module>
                 <module>catalog</module>
+                <module>jobs</module>
                 <module>eds</module>
             </modules>
         </profile>
@@ -306,6 +307,11 @@
             <dependency>
                 <groupId>com.viglet.dumont</groupId>
                 <artifactId>catalog-plugin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.viglet.dumont</groupId>
+                <artifactId>jobs-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

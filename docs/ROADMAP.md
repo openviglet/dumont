@@ -108,6 +108,8 @@ This track has no remaining pending tasks.
 - 📋 **D91** (deps: —) **The dumont-ce image ships without the catalog plugin, so the D10 connector cannot run on dumont.viglet.cloud** — A connector that builds but never reaches the image is invisible to every tenant, and the next module would be dropped the same way. → §XLI.2
 - 📋 **D92** (deps: —) **A paged JSON API cannot be a source without a Java plugin: no manifest declares its request, paging, budget or mapping** — Job boards, catalogs and most partner feeds are paged JSON APIs, and each one now costs a Java module instead of a recipe. → §XLI.1
 - 📋 **D93** (deps: —) **Dumont has no admin-password variable, so a compose or CI start needs a scripted call to the first-access setup** — Turing already reads TURING_ADMIN_PASSWORD at boot, and the two products should start configured the same way. → §XLI.3
+- 📋 **D94** (deps: —) **An incremental source cannot keep an unchanged id indexed without replaying its whole record through extract** — Quota-bound APIs fetch only new items, so every connector must store payloads just to stop the sweep deindexing them. → §XLI.4
+- 📋 **D95** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
 
 ## Non-goals (do NOT add as tasks)
 

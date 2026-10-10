@@ -134,3 +134,36 @@ configured" log as Turing, so both products are configured the same way.
 
 Workaround: trabalharei's `scripts/turing-dev-setup.mjs` waits for Dumont and posts the
 password to `/api/setup` itself.
+
+### XLI.4 Keep-alive for incremental sources (D94)
+
+Found while building the `jobs` module for trabalharei (TRA13). A job API bounded by a
+call quota (Adzuna's default is 250 calls a day) can only fetch the newest postings each
+run, while older postings stay open for weeks. The run-end sweep in
+`DumConnectorContextImpl` deindexes every tracking row whose `transactionId` differs
+from the session's, and a row only takes the new id when its document passes through
+`addJobItem`. Returning an id from `discover()` is not enough: `extract()` must hand
+back a full record for every still-open posting, so the module keeps each posting's last
+payload in its own `job_seen` table only to replay it, and normalizes every record
+through JSON so a replay and a fresh fetch produce the same checksum.
+
+Expected: a keep-alive primitive on the structured-source path, for example `discover()`
+returning ids marked "unchanged, keep" that stamp the session's transactionId on the
+existing rows without an extract, so incremental sources need no payload store.
+
+Workaround: `DumJobSeen.payload` in `jobs/jobs-plugin`.
+
+### XLI.5 Build in a git worktree (D95)
+
+Found while building the `jobs` module (trabalharei TRA13) in a git worktree of this
+repo (`git worktree add`). `./mvnw -pl jobs/jobs-plugin -am test` fails before
+compiling: `git-commit-id-plugin` on `dumont-commons` reports "Missing unknown <sha>",
+because JGit cannot resolve HEAD through a worktree's `.git` file. Passing
+`-Dmaven.gitcommitid.skip=true` makes the build green, and nothing in `agents.md` says
+so.
+
+Expected: the build works in a worktree, by switching the plugin to the native git
+executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallback, and
+`agents.md` names the flag in the meantime.
+
+Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
