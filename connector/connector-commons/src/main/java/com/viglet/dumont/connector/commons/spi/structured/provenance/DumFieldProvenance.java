@@ -87,6 +87,14 @@ public record DumFieldProvenance(String strategy, String selector, Double confid
         return new DumFieldProvenance("filesystem", locator, null, null);
     }
 
+    /**
+     * A JSON API origin (roadmap D92); {@code path} is the manifest path the value was read from,
+     * relative to the record.
+     */
+    public static DumFieldProvenance json(String path) {
+        return new DumFieldProvenance("json", path, null, null);
+    }
+
     /** A value an enricher derived (roadmap D04); {@code name} identifies the enricher. */
     public static DumFieldProvenance enrichment(String name) {
         String suffix = (name == null || name.isBlank()) ? "" : ":" + name.trim();

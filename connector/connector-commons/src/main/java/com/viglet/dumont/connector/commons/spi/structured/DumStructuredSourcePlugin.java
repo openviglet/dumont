@@ -295,6 +295,13 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                         .formatted(outcome.processed(), outcome.discovered()), null);
                 return;
             }
+            if (!structuredSource.discoveryComplete()) {
+                // Discovery itself stopped short (a call budget, a page cap, a failed page), so the
+                // ids it never listed are not removals; finishing non-standalone would deindex them.
+                finishPartialRunStandalone(session, source, "discovery stopped before the end of the source",
+                        null);
+                return;
+            }
             if (isFailureWave(outcome)) {
                 // A wave of extraction failures (e.g. a network blip) would otherwise deindex every id
                 // it could not re-fetch; finish standalone so the prior index survives (D34).

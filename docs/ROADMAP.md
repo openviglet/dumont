@@ -43,6 +43,8 @@ relations (what a task *enables*) live in the task text.
 
 This track has no remaining pending tasks.
 
+- 📋 **D95** (deps: —) **An incremental EDS run skips unchanged pages, then its closing sweep deindexes them** — Every second incremental run would drop each unchanged page from the index until it next changes. → §XLII.1
+
 ## Track C — cursarei reference connector
 
 > **Objective**: prove the framework on the real workload, and honor the migration's
@@ -105,9 +107,15 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
-- 📋 **D92** (deps: —) **A paged JSON API cannot be a source without a Java plugin: no manifest declares its request, paging, budget or mapping** — Job boards, catalogs and most partner feeds are paged JSON APIs, and each one now costs a Java module instead of a recipe. → §XLI.1
+- ⏳ **D92** (deps: —) **A paged JSON API cannot be a source without a Java plugin: no manifest declares its request, paging, budget or mapping** — No plugin binds a stored manifest and its secrets to a source yet, and day/week/month budgets and per-record expiry are still missing. → §XLI.1
 - 📋 **D93** (deps: —) **Dumont has no admin-password variable, so a compose or CI start needs a scripted call to the first-access setup** — Turing already reads TURING_ADMIN_PASSWORD at boot, and the two products should start configured the same way. → §XLI.3
 - 📋 **D94** (deps: D91 ✅) **The install zip, installer and AppImage ship without the EDS plugin, because each lists plugins by hand** — A connector missing from the packages is invisible to anyone who installs Dumont outside a container. → §XLI.4
+
+## Done when — D92
+
+- **A stored manifest indexes from the console without Java** A source saved with a
+  manifest and its secrets runs indexAll end to end, its budget windows survive a
+  restart, and an id not seen this run is deindexed only after its expiry.
 
 ## Non-goals (do NOT add as tasks)
 

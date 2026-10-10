@@ -65,6 +65,17 @@ public interface DumStructuredSource {
      */
     Optional<DumStructuredRecord> extract(String contentId);
 
+    /**
+     * Whether the last {@link #discover()} reached every item the source holds (roadmap D92). A
+     * source that stops early — a call budget spent, a page cap hit, a page that failed — answers
+     * {@code false}, and the indexing loop then finishes the run standalone so the items it never
+     * reached are not deindexed. Defaults to {@code true}: a source that cannot be cut short has
+     * nothing to report.
+     */
+    default boolean discoveryComplete() {
+        return true;
+    }
+
     /** The locale of the published documents; defaults to {@link Locale#US}. */
     default Locale getLocale() {
         return Locale.US;

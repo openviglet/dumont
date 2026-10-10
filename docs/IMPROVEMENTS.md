@@ -80,30 +80,28 @@ These constrain every task above:
 
 ### XLI.1 Declarative JSON API source (D92)
 
-Found while planning trabalharei's job ingestion (trabalharei roadmap, TRA13 and
-TRA15-19): four job sources (Adzuna, Jooble, BNE, JSearch) are all paged JSON APIs, and
-every one of them needs its own Java `DumStructuredSource` today.
+Found while planning trabalharei's job ingestion (TRA13, TRA15-19): Adzuna, Jooble, BNE
+and JSearch are all paged JSON APIs.
 
-What exists: `catalog-plugin` (D10) does a single GET of one URL with one optional auth
-header, expects a bare array or a `{courses:[...]}` envelope, and maps fixed course
-fields (`DumCatalogSchema`). It has no paging and no configurable mapping. The no-code
-paths (D02 strategies, D13 source inference) target sitemaps, HTML listings and tables,
-not JSON.
+Landed: `spi/structured/jsonapi` in connector-commons. `DumJsonApiManifest.parse` reads
+the request (GET or POST, `{page}` `{offset}` `{size}` `{cursor}` `{secret:NAME}`),
+paging (page, offset or cursor; empty or short page, total, repeated cursor or ids end
+it), a per-run call cap and a per-minute pace, the record path and JSON-path field
+mappings. `DumJsonApiSource` runs it. A walk a cap or a failed call cuts short reports
+`discoveryComplete() == false`, and `DumStructuredSourcePlugin` then finishes
+standalone.
 
-What a JSON API source needs, declared in a manifest or recipe rather than code:
+Still to build:
 
-- request: URL template, GET or POST with a JSON body, and credentials as a query
-  parameter, header or path segment;
-- paging: page, offset or cursor, a stop rule (empty page, total count, id already seen)
-  and a page cap;
-- a call budget per minute, day, week and month that ends the run cleanly at the cap;
-- record path (`results`, `jobs`, `data.listVagas`) and a field mapping by JSON path,
-  with an id field;
-- an incremental mode for budget-bound sources: ids seen earlier stay alive until a
-  per-record expiry, so the delta sweep does not deindex what this run did not fetch.
-
-Workaround in the meantime: trabalharei writes one Java source per API in a `jobs`
-module. Once this ships, those sources become recipes.
+- **Binding.** No plugin yet turns a stored manifest plus secrets into a source. Either a
+  `json-api` mode on `catalog-plugin` (manifest text and secrets on `DumCatalogSource`,
+  resolved in `DumCatalogSourceProvider`) or a small `jsonapi-plugin`; the catalog route
+  reuses its console, import and API. Secrets stay out of the manifest and the export.
+- **Budgets per day, week and month.** These need a counter that outlives the run (a JPA
+  row per source and window); the run then caps its calls at what the windows have left.
+- **Incremental mode.** A budget-bound source never sees everything in one run, so it
+  finishes standalone and nothing is ever deindexed. Ids seen earlier should stay alive
+  until a per-record expiry, and only expired ids are deindexed (`deIndexById`, D68).
 
 ### XLI.3 Admin password from configuration (D93)
 
@@ -141,3 +139,32 @@ the root Dockerfile's staging loop does. The installer's per-connector sections 
 user choice, so EDS gets its own section rather than a glob there. Decide whether loose
 release assets should carry every plugin or none beyond the installers, and retire
 `upload_to_release.cmd` if `publish.yml` replaced it.
+
+## XLII Web-crawler hardening (real-world sources)
+
+### XLII.1 Incremental EDS runs keep what they skip (D95)
+
+Found while shipping D92, by reading the code; not yet reproduced against a running
+connector.
+
+`DumEDSPluginProcess.start()` diffs discovery against `DumEDSCrawlState` and fetches
+only pages whose `lastModified` changed (`filterUnchanged`). Unchanged pages are never
+submitted as job items, so their `dum_indexing` rows keep the previous run's
+`transactionId`. The `finally` block then calls
+`connectorContext.finishIndexing(session, false)`, and the non-standalone finish runs
+the delta sweep: `getShouldBeDeIndexedList` selects every row of the source whose
+`transactionId` differs from this session's and queues a DELETE for each. On the second
+incremental run, then, every unchanged page would be deindexed while its crawl state
+still says it is current, and the next run would skip it again, leaving it out of the
+index until its `lastModified` moves.
+
+EDS already detects removals itself (`removeMissingPaths`, `removeNotFoundPaths` with
+explicit DELETEs), so the sweep is redundant there. Expected: an incremental run
+finishes standalone (`finishIndexing(session, true)`), and only `reindex` (crawl state
+cleared, everything resubmitted) finishes with the sweep. A test should run `start()`
+twice against a context that models the ledger and assert that the skipped page is not
+deleted.
+
+Related: `deleteContentsToBeDeIndexed` deletes ledger rows without the `standalone =
+false` filter its DELETE selection uses, so rows written standalone lose their ledger
+entry with no DELETE sent. Check whether that is intended while fixing this.
