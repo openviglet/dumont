@@ -539,3 +539,4 @@
 - **D91** — Both images bundle every `<connector>/*-plugin` jar by glob, catalog included, and the root build fails when a plugin module produced no jar.
 - **D92** — A paged JSON API indexes from a manifest stored on a catalog source, with day/week/month budgets that survive restarts and incremental runs that deindex only expired ids.
 - **D93** — DUMONT_ADMIN_PASSWORD sets the admin password at boot while none is stored, through the same service the setup screen uses, so compose and CI start with a login.
+- **D94** — The zip, installer and AppImage carry the EDS plugin with launchers, staging fails when a plugin module is left out, and releases upload every plugin jar.

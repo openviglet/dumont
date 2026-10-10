@@ -78,27 +78,6 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.4 Every connector module reaches the packages (D94)
-
-Found while shipping D91. The Docker images now collect every `<connector>/*-plugin` jar
-by glob, but the other distribution paths still list plugins by hand, and each list has
-drifted:
-
-- `scripts/package-dist.sh` and `scripts/package-dist.bat` stage aem, db, web-crawler, assets
-  and catalog, but not `eds/eds-plugin/target/eds-plugin.jar`, so `dumont-install.zip`, the
-  NSIS installer and the AppImage that `publish.yml` builds from that stage ship without EDS.
-- `scripts/installer/dumont.nsi` has one `File` section per plugin, also without EDS.
-- `publish.yml` uploads only `dumont-connector.jar` and `aem-plugin.jar` as loose release
-  assets; `upload_to_release.cmd` still names `db/db-app` and `filesystem/fs-connector`,
-  modules that no longer exist.
-
-Expected: the staging scripts iterate `*/*-plugin/target/*-plugin.jar` (each into
-`connector/libs/<connector>/`) and fail when a plugin module produced no jar, the way
-the root Dockerfile's staging loop does. The installer's per-connector sections are a
-user choice, so EDS gets its own section rather than a glob there. Decide whether loose
-release assets should carry every plugin or none beyond the installers, and retire
-`upload_to_release.cmd` if `publish.yml` replaced it.
-
 ## XLII Web-crawler hardening (real-world sources)
 
 ### XLII.1 Incremental EDS runs keep what they skip (D95)

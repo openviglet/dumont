@@ -43,6 +43,7 @@ mkdir -p "$STAGE/connector/libs/db"
 mkdir -p "$STAGE/connector/libs/webcrawler"
 mkdir -p "$STAGE/connector/libs/assets"
 mkdir -p "$STAGE/connector/libs/catalog"
+mkdir -p "$STAGE/connector/libs/eds"
 mkdir -p "$STAGE/connector/export"
 mkdir -p "$STAGE/bin"
 
@@ -73,6 +74,29 @@ cp "assets/assets-plugin-sample/scripts/sample/export/sample-assets.json" "$STAG
 cp "catalog/catalog-plugin/target/catalog-plugin.jar"     "$STAGE/connector/libs/catalog/"
 cp "catalog/catalog-plugin/scripts/sample/export/cursarei.json" "$STAGE/connector/export/"
 
+# Edge Delivery Services Plugin
+cp "eds/eds-plugin/target/eds-plugin.jar"                 "$STAGE/connector/libs/eds/"
+
+# Every connector plugin module must have reached libs/ (D94). The lists above are per
+# connector because each gets its own directory and launcher, so a new module is easy to
+# forget: fail here rather than ship a package that silently lacks it.
+MISSING=()
+for module in */*-plugin; do
+    [ -f "$module/pom.xml" ] || continue
+    for jar in "$module"/target/*-plugin.jar; do
+        if [ ! -f "$jar" ]; then
+            MISSING+=("$module (no jar built)")
+        elif [ -z "$(find "$STAGE/connector/libs" -name "$(basename "$jar")" -print -quit)" ]; then
+            MISSING+=("$module ($(basename "$jar") not staged)")
+        fi
+    done
+done
+if [ ${#MISSING[@]} -gt 0 ]; then
+    printf 'Error: connector plugin(s) missing from the package:\n' >&2
+    printf '  %s\n' "${MISSING[@]}" >&2
+    exit 1
+fi
+
 # Scripts
 cp "$SCRIPT_DIR/bin/dumont-aem.sh"          "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-aem.bat"         "$STAGE/bin/"
@@ -82,6 +106,8 @@ cp "$SCRIPT_DIR/bin/dumont-db.sh"           "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-db.bat"          "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-catalog.sh"      "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-catalog.bat"     "$STAGE/bin/"
+cp "$SCRIPT_DIR/bin/dumont-eds.sh"          "$STAGE/bin/"
+cp "$SCRIPT_DIR/bin/dumont-eds.bat"         "$STAGE/bin/"
 chmod +x "$STAGE/bin/"*.sh 2>/dev/null || true
 
 # Config and docs

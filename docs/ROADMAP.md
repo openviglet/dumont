@@ -107,8 +107,6 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
-- 📋 **D94** (deps: D91 ✅) **The install zip, installer and AppImage ship without the EDS plugin, because each lists plugins by hand** — A connector missing from the packages is invisible to anyone who installs Dumont outside a container. → §XLI.4
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

@@ -8,6 +8,8 @@
 #   ./Dumont-DEP.AppImage --connector webcrawler
 #   ./Dumont-DEP.AppImage --connector db
 #   ./Dumont-DEP.AppImage --connector assets
+#   ./Dumont-DEP.AppImage --connector catalog
+#   ./Dumont-DEP.AppImage --connector eds
 # --------------------------------------------------------------------------
 set -euo pipefail
 
@@ -54,9 +56,11 @@ case "$CONNECTOR" in
   webcrawler) start_connector "$CONNECTOR_DIR/libs/webcrawler" "Web Crawler" ;;
   db)         start_connector "$CONNECTOR_DIR/libs/db"         "Database" ;;
   assets)     start_connector "$CONNECTOR_DIR/libs/assets"     "Assets" ;;
+  catalog)    start_connector "$CONNECTOR_DIR/libs/catalog"    "Catalog Bridge" ;;
+  eds)        start_connector "$CONNECTOR_DIR/libs/eds"        "EDS" ;;
   *)
     echo "Unknown connector: $CONNECTOR"
-    echo "Available: aem, webcrawler, db, assets"
+    echo "Available: aem, webcrawler, db, assets, catalog, eds"
     exit 1
     ;;
 esac
