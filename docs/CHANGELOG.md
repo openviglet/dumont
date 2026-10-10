@@ -536,3 +536,4 @@
 
 ## Track O — Structured sources over paged JSON APIs
 
+- **D91** — Both images bundle every `<connector>/*-plugin` jar by glob, catalog included, and the root build fails when a plugin module produced no jar.

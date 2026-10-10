@@ -1,53 +1,22 @@
 # Per-Dockerfile ignore for Dockerfile.local (BuildKit uses <dockerfile>.dockerignore
-# in preference to .dockerignore). The runtime-only image needs ONLY the six
-# host-built jars, so exclude everything else and keep the build context tiny.
-# (Re-including a nested file requires un-ignoring each parent directory.)
+# in preference to .dockerignore). The runtime-only image needs ONLY the host-built
+# jars, so exclude everything else and keep the build context tiny.
+# (Re-including a nested file requires un-ignoring each parent directory, and the
+# last matching rule wins, so the connector block must follow the generic one.)
 *
 
-!connector/
-connector/*
+# Every connector plugin, by shape rather than by name (D91): `<connector>/*-plugin`
+# modules, whose shaded jar is `target/*-plugin.jar`. Samples end in `-sample`.
+!*/
+*/*
+!*/*-plugin/
+*/*-plugin/*
+!*/*-plugin/target/
+*/*-plugin/target/*
+!*/*-plugin/target/*-plugin.jar
+
 !connector/connector-app/
 connector/connector-app/*
 !connector/connector-app/target/
 connector/connector-app/target/*
 !connector/connector-app/target/dumont-connector.jar
-
-!aem/
-aem/*
-!aem/aem-plugin/
-aem/aem-plugin/*
-!aem/aem-plugin/target/
-aem/aem-plugin/target/*
-!aem/aem-plugin/target/aem-plugin.jar
-
-!eds/
-eds/*
-!eds/eds-plugin/
-eds/eds-plugin/*
-!eds/eds-plugin/target/
-eds/eds-plugin/target/*
-!eds/eds-plugin/target/eds-plugin.jar
-
-!db/
-db/*
-!db/db-plugin/
-db/db-plugin/*
-!db/db-plugin/target/
-db/db-plugin/target/*
-!db/db-plugin/target/db-plugin.jar
-
-!web-crawler/
-web-crawler/*
-!web-crawler/wc-plugin/
-web-crawler/wc-plugin/*
-!web-crawler/wc-plugin/target/
-web-crawler/wc-plugin/target/*
-!web-crawler/wc-plugin/target/web-crawler-plugin.jar
-
-!assets/
-assets/*
-!assets/assets-plugin/
-assets/assets-plugin/*
-!assets/assets-plugin/target/
-assets/assets-plugin/target/*
-!assets/assets-plugin/target/assets-plugin.jar

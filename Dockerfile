@@ -22,6 +22,18 @@ RUN --mount=type=cache,target=/root/.m2 \
     --mount=type=cache,target=/src/dumont-react/node \
     ./mvnw clean package -DskipTests \
     -pl '!aem/aem-plugin-sample,!assets/assets-plugin-sample,!db/db-plugin-sample,!web-crawler/wc-plugin-sample' 2>&1
+# Stage every connector plugin into one directory (D91). A plugin is any `<connector>/*-plugin`
+# module, so a new connector reaches the image without a line here — catalog-plugin was once
+# built and never copied. The loop fails the build when a plugin module produced no jar,
+# rather than shipping an image that silently lacks it.
+RUN mkdir -p /plugins \
+    && for module in /src/*/*-plugin; do \
+         [ -f "$module/pom.xml" ] || continue; \
+         jar=$(ls "$module"/target/*-plugin.jar 2>/dev/null | head -n 1); \
+         if [ -z "$jar" ]; then echo "No plugin jar built for $module" >&2; exit 1; fi; \
+         cp "$jar" /plugins/; \
+       done \
+    && ls /plugins
 
 FROM eclipse-temurin:21-jre
 ARG CACHE_BUST=none
@@ -29,15 +41,12 @@ LABEL org.opencontainers.image.revision=$CACHE_BUST
 RUN groupadd -r java && useradd -r -g java -u 1001 java
 WORKDIR /app
 COPY --from=build /src/connector/connector-app/target/dumont-connector.jar app.jar
-# Bundle every connector plugin (AEM, EDS, DB, Web Crawler, Assets) so a single
-# image supports all connector types at once. They are added to the application
-# classpath at startup via Spring Boot's PropertiesLauncher `loader.path`, which
-# lets each plugin's Spring components be discovered and several plugins coexist.
-COPY --from=build /src/aem/aem-plugin/target/aem-plugin.jar /app/libs/aem-plugin.jar
-COPY --from=build /src/eds/eds-plugin/target/eds-plugin.jar /app/libs/eds-plugin.jar
-COPY --from=build /src/db/db-plugin/target/db-plugin.jar /app/libs/db-plugin.jar
-COPY --from=build /src/web-crawler/wc-plugin/target/web-crawler-plugin.jar /app/libs/web-crawler-plugin.jar
-COPY --from=build /src/assets/assets-plugin/target/assets-plugin.jar /app/libs/assets-plugin.jar
+# Bundle every connector plugin staged above (AEM, EDS, DB, Web Crawler, Assets,
+# Catalog, ...) so a single image supports all connector types at once. They are
+# added to the application classpath at startup via Spring Boot's PropertiesLauncher
+# `loader.path`, which lets each plugin's Spring components be discovered and
+# several plugins coexist.
+COPY --from=build /plugins/ /app/libs/
 RUN mkdir -p /app/store && chown -R java:java /app
 USER java
 VOLUME ["/app/store"]

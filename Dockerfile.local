@@ -16,14 +16,11 @@ LABEL org.opencontainers.image.revision=$CACHE_BUST
 RUN groupadd -r java && useradd -r -g java -u 1001 java
 WORKDIR /app
 COPY connector/connector-app/target/dumont-connector.jar app.jar
-# Bundle every connector plugin (AEM, EDS, DB, Web Crawler, Assets) so a single
-# image supports all connector types at once. Added to the classpath at startup
-# via Spring Boot's PropertiesLauncher `loader.path`.
-COPY aem/aem-plugin/target/aem-plugin.jar /app/libs/aem-plugin.jar
-COPY eds/eds-plugin/target/eds-plugin.jar /app/libs/eds-plugin.jar
-COPY db/db-plugin/target/db-plugin.jar /app/libs/db-plugin.jar
-COPY web-crawler/wc-plugin/target/web-crawler-plugin.jar /app/libs/web-crawler-plugin.jar
-COPY assets/assets-plugin/target/assets-plugin.jar /app/libs/assets-plugin.jar
+# Bundle every connector plugin (AEM, EDS, DB, Web Crawler, Assets, Catalog, ...)
+# so a single image supports all connector types at once. Added to the classpath
+# at startup via Spring Boot's PropertiesLauncher `loader.path`. A glob rather
+# than one line per plugin (D91): any `<connector>/*-plugin` module is picked up.
+COPY */*-plugin/target/*-plugin.jar /app/libs/
 RUN mkdir -p /app/store && chown -R java:java /app
 USER java
 VOLUME ["/app/store"]
