@@ -1036,7 +1036,16 @@
       "authHeaderName": "Auth Header Name",
       "authHeaderNameDesc": "Optional request header sent when fetching the catalog (e.g., Authorization).",
       "authHeaderValue": "Auth Header Value",
-      "authHeaderValueDesc": "The value for the auth header (e.g., a bearer token or API key)."
+      "authHeaderValueDesc": "The value for the auth header (e.g., a bearer token or API key).",
+      "catalogUrlOrManifestRequired": "Set a catalog URL or a JSON API manifest.",
+      "jsonApi": "JSON API",
+      "jsonApiDesc": "Index a paged JSON API from a manifest instead of the catalog URL. When a manifest is set, it replaces the catalog URL and its fields become the schema.",
+      "jsonApiManifest": "Manifest",
+      "jsonApiManifestDesc": "The request, paging, call budget, record path and field mappings, as JSON. Use {secret:NAME} wherever a key goes.",
+      "jsonApiManifestInvalid": "The manifest must be a JSON object.",
+      "jsonApiSecrets": "Secrets",
+      "jsonApiSecretsDesc": "A JSON object of the values the manifest's {secret:NAME} placeholders resolve to. Never exported.",
+      "jsonApiSecretsInvalid": "Secrets must be a JSON object of name to value."
     },
     "dbSource": {
       "general": "General",

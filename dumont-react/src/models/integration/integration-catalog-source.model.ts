@@ -8,6 +8,10 @@ export type TurIntegrationCatalogSource = {
   authHeaderName: string;
   authHeaderValue: string;
   locale: string;
+  /** A declarative JSON API manifest (D92); when set it replaces `catalogUrl`. */
+  jsonApiManifest?: string;
+  /** JSON object of the values the manifest's `{secret:NAME}` placeholders resolve to. */
+  jsonApiSecrets?: string;
   /** Turing Semantic Navigation site(s) this source publishes to. */
   turSNSites: string[];
 };

@@ -33,6 +33,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -107,6 +108,24 @@ public class DumCatalogSource implements Serializable {
     /** The public listing URL the native recipe crawls when {@code NATIVE}. */
     @Column(name = "native_listing_url", length = 2000)
     private String nativeListingUrl;
+
+    /**
+     * A declarative JSON API manifest (roadmap <strong>D92</strong>). When set, the source runs the
+     * manifest through {@code DumJsonApiSource} instead of fetching {@link #catalogUrl}, and its
+     * schema is the manifest's own fields.
+     */
+    @Lob
+    @Column(name = "json_api_manifest")
+    private String jsonApiManifest;
+
+    /**
+     * The values the manifest's {@code {secret:NAME}} placeholders resolve to, as a JSON object of
+     * name to value. Kept apart from the manifest so the manifest can be shared and versioned, and
+     * left out of the export.
+     */
+    @Lob
+    @Column(name = "json_api_secrets")
+    private String jsonApiSecrets;
 
     @Builder.Default
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)

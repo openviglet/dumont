@@ -88,6 +88,28 @@ class DumCatalogSourceApiTest {
     }
 
     @Test
+    void createRefusesAJsonApiManifestThatCannotRun() {
+        // D92: a manifest is checked on save, not discovered broken on the first crawl.
+        DumCatalogSourceRequest req = new DumCatalogSourceRequest();
+        req.setName("jobs");
+        req.setJsonApiManifest("""
+                {"name": "jobs", "request": {"url": "https://api.example/jobs?key={secret:key}"},
+                 "id": "id", "fields": [{"name": "title"}]}
+                """);
+
+        org.springframework.web.server.ResponseStatusException e = org.junit.jupiter.api.Assertions
+                .assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                        () -> api.catalogSourceAdd(req));
+        assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(e.getReason()).contains("[key]");
+        verify(repository, never()).save(any());
+
+        req.setJsonApiSecrets("{\"key\": \"k\"}");
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        assertThat(api.catalogSourceAdd(req).getJsonApiSecrets()).isEqualTo("{\"key\": \"k\"}");
+    }
+
+    @Test
     void updateAppliesFieldsAndSites() {
         DumCatalogSource existing = DumCatalogSource.builder().id("a").build();
         when(repository.findById("a")).thenReturn(Optional.of(existing));

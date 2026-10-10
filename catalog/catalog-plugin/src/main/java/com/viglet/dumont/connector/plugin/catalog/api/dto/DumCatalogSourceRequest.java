@@ -45,5 +45,7 @@ public class DumCatalogSourceRequest {
     private String leva;
     private String nativeRecipe;
     private String nativeListingUrl;
+    private String jsonApiManifest;
+    private String jsonApiSecrets;
     private Collection<String> turSNSites = new HashSet<>();
 }

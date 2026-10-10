@@ -19,6 +19,7 @@ package com.viglet.dumont.connector.plugin.catalog.api;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.viglet.dumont.connector.commons.spi.structured.parity.DumParityCriteria;
 import com.viglet.dumont.connector.commons.spi.structured.parity.DumParityReport;
@@ -41,6 +43,7 @@ import com.viglet.dumont.connector.plugin.catalog.api.dto.DumCatalogSourceReques
 import com.viglet.dumont.connector.plugin.catalog.migration.DumCatalogParityService;
 import com.viglet.dumont.connector.plugin.catalog.persistence.model.DumCatalogSource;
 import com.viglet.dumont.connector.plugin.catalog.persistence.repository.DumCatalogSourceRepository;
+import com.viglet.dumont.connector.plugin.catalog.source.DumCatalogSourceProvider;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -110,6 +113,15 @@ public class DumCatalogSourceApi {
         existing.setLeva(catalogSource.getLeva());
         existing.setNativeRecipe(catalogSource.getNativeRecipe());
         existing.setNativeListingUrl(catalogSource.getNativeListingUrl());
+        // A JSON API manifest (D92) is checked here, so a source that cannot run is refused on save
+        // rather than discovered on its first crawl.
+        existing.setJsonApiManifest(catalogSource.getJsonApiManifest());
+        existing.setJsonApiSecrets(catalogSource.getJsonApiSecrets());
+        try {
+            DumCatalogSourceProvider.validateJsonApi(existing);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
         if (existing.getTurSNSites() == null) {
             existing.setTurSNSites(new HashSet<>());
         }

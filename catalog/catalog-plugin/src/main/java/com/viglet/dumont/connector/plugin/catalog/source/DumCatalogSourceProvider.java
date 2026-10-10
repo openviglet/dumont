@@ -17,13 +17,21 @@
 package com.viglet.dumont.connector.plugin.catalog.source;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourceProvider;
+import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiManifest;
+import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiSource;
+import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeParameters;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeRef;
@@ -60,13 +68,16 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
     private final DumCatalogFetcher fetcher;
     private final DumRecipeLibrary recipeLibrary;
     private final DumHtmlFetcher htmlFetcher;
+    private final DumJsonFetcher jsonFetcher;
 
     public DumCatalogSourceProvider(DumCatalogSourceRepository sourceRepository,
-            DumCatalogFetcher fetcher, DumRecipeLibrary recipeLibrary, DumHtmlFetcher htmlFetcher) {
+            DumCatalogFetcher fetcher, DumRecipeLibrary recipeLibrary, DumHtmlFetcher htmlFetcher,
+            DumJsonFetcher jsonFetcher) {
         this.sourceRepository = sourceRepository;
         this.fetcher = fetcher;
         this.recipeLibrary = recipeLibrary;
         this.htmlFetcher = htmlFetcher;
+        this.jsonFetcher = jsonFetcher;
     }
 
     @Override
@@ -81,11 +92,29 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
 
     @Override
     public Optional<DumStructuredSource> resolve(String sourceName) {
-        return sourceRepository.findByName(sourceName).map(this::resolve);
+        return sourceRepository.findByName(sourceName).flatMap(source -> {
+            try {
+                return Optional.of(resolve(source));
+            } catch (IllegalArgumentException e) {
+                // Only a JSON API binding can be refused here; the API validates it on save, so this
+                // is a row written around the API (an import, a hand edit).
+                log.error("Catalog source '{}' cannot run its JSON API manifest: {}", sourceName,
+                        e.getMessage());
+                return Optional.empty();
+            }
+        });
     }
 
-    /** Pick the running source for {@code source}: native when flipped and bound, else the sidecar. */
+    /**
+     * Pick the running source for {@code source}: its JSON API manifest when it has one (D92), else
+     * native when flipped and bound, else the sidecar.
+     *
+     * @throws IllegalArgumentException when the source's JSON API manifest or secrets cannot run
+     */
     public DumStructuredSource resolve(DumCatalogSource source) {
+        if (isJsonApi(source)) {
+            return jsonApiSource(source);
+        }
         if (isNative(source)) {
             Optional<DumStructuredSource> nativeSource = nativeSource(source);
             if (nativeSource.isPresent()) {
@@ -118,6 +147,63 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
         }
         return recipeLibrary.materialize(ref, params.build(), DumCatalogPlugin.PROVIDER_NAME,
                 htmlFetcher);
+    }
+
+    /**
+     * The JSON API source a manifest declares (roadmap <strong>D92</strong>), bound to this source's
+     * name, sites, locale and secrets.
+     *
+     * @throws IllegalArgumentException when the manifest does not parse, or a secret it uses is not
+     *                                  set
+     */
+    public DumJsonApiSource jsonApiSource(DumCatalogSource source) {
+        DumJsonApiManifest manifest = DumJsonApiManifest.parse(source.getJsonApiManifest());
+        return DumJsonApiSource.builder(manifest, jsonFetcher)
+                .sourceName(source.getName())
+                .providerName(DumCatalogPlugin.PROVIDER_NAME)
+                .siteNames(source.getTurSNSites() == null ? List.of() : List.copyOf(source.getTurSNSites()))
+                .locale(localeOf(source))
+                .secrets(secretsOf(source))
+                .build();
+    }
+
+    /**
+     * Checks that a source's JSON API binding can run, without calling the API: the manifest parses
+     * and every secret it uses is set. A source with no manifest passes.
+     *
+     * @throws IllegalArgumentException naming what is wrong
+     */
+    public static void validateJsonApi(DumCatalogSource source) {
+        if (!isJsonApi(source)) {
+            return;
+        }
+        DumJsonApiSource.builder(DumJsonApiManifest.parse(source.getJsonApiManifest()), request -> "")
+                .sourceName(notBlank(source.getName()) ? source.getName() : "unnamed")
+                .secrets(secretsOf(source)).build();
+    }
+
+    /** Whether this source runs a JSON API manifest rather than the sidecar or a recipe. */
+    public static boolean isJsonApi(DumCatalogSource source) {
+        return notBlank(source.getJsonApiManifest());
+    }
+
+    /**
+     * The source's secrets, read from their JSON object form.
+     *
+     * @throws IllegalArgumentException when they are not a JSON object of strings
+     */
+    public static Map<String, String> secretsOf(DumCatalogSource source) {
+        if (!notBlank(source.getJsonApiSecrets())) {
+            return Map.of();
+        }
+        try {
+            JSONObject json = new JSONObject(source.getJsonApiSecrets());
+            Map<String, String> secrets = new LinkedHashMap<>();
+            json.keySet().forEach(key -> secrets.put(key, json.get(key).toString()));
+            return secrets;
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("The JSON API secrets must be a JSON object of name to value");
+        }
     }
 
     /** Whether this source should index natively: flagged {@code NATIVE} and bound to a recipe. */

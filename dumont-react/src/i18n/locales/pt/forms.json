@@ -1036,7 +1036,16 @@
       "authHeaderName": "Nome do Header de Autenticação",
       "authHeaderNameDesc": "Header opcional enviado ao buscar o catálogo (ex: Authorization).",
       "authHeaderValue": "Valor do Header de Autenticação",
-      "authHeaderValueDesc": "O valor do header de autenticação (ex: um bearer token ou API key)."
+      "authHeaderValueDesc": "O valor do header de autenticação (ex: um bearer token ou API key).",
+      "catalogUrlOrManifestRequired": "Informe uma URL de catálogo ou um manifesto de API JSON.",
+      "jsonApi": "API JSON",
+      "jsonApiDesc": "Indexe uma API JSON paginada a partir de um manifesto em vez da URL do catálogo. Com um manifesto, ele substitui a URL do catálogo e seus campos passam a ser o schema.",
+      "jsonApiManifest": "Manifesto",
+      "jsonApiManifestDesc": "A requisição, a paginação, o orçamento de chamadas, o caminho dos registros e o mapeamento dos campos, em JSON. Use {secret:NOME} onde vai uma chave.",
+      "jsonApiManifestInvalid": "O manifesto precisa ser um objeto JSON.",
+      "jsonApiSecrets": "Segredos",
+      "jsonApiSecretsDesc": "Um objeto JSON com os valores dos placeholders {secret:NOME} do manifesto. Nunca é exportado.",
+      "jsonApiSecretsInvalid": "Os segredos precisam ser um objeto JSON de nome para valor."
     },
     "dbSource": {
       "general": "Geral",

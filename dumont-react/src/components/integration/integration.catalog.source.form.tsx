@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { TurIntegrationCatalogSource } from "@/models/integration/integration-catalog-source.model";
 import { TurIntegrationCatalogSourceService } from "@/services/integration/integration-catalog-source.service";
-import { IconBuildingBank, IconPlugConnected, IconSettings } from "@tabler/icons-react";
+import { IconApi, IconBuildingBank, IconPlugConnected, IconSettings } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import { AdaptiveFormHeader } from "@/components/bento/adaptive-form-header";
 import { useEffect, useMemo } from "react";
@@ -26,6 +26,26 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
+
+const MANIFEST_PLACEHOLDER = `{
+  "name": "jobs",
+  "request": { "url": "https://api.example/jobs/{page}?key={secret:appKey}" },
+  "paging": { "mode": "page", "size": 50, "maxPages": 20 },
+  "records": "results",
+  "id": "id",
+  "fields": [{ "name": "title", "type": "TEXT", "mandatory": true }]
+}`;
+
+/** Blank, or text that parses as a JSON object — what the manifest and secrets fields accept. */
+function isJsonObjectOrBlank(text: string | undefined): boolean {
+  if (!text?.trim()) return true;
+  try {
+    const parsed: unknown = JSON.parse(text);
+    return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+}
 
 /** The catalog source publishes to a single SN site; the form edits it as one `site` field. */
 type CatalogFormValues = TurIntegrationCatalogSource & { site?: string };
@@ -202,7 +222,12 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                 <FormField
                   control={form.control}
                   name="catalogUrl"
-                  rules={{ required: t("forms.catalogSource.catalogUrlRequired") }}
+                  rules={{
+                    // A JSON API manifest (D92) replaces the catalog URL, so one of the two is enough.
+                    validate: (url, values) =>
+                      Boolean(url?.trim() || values.jsonApiManifest?.trim()) ||
+                      t("forms.catalogSource.catalogUrlOrManifestRequired"),
+                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("forms.catalogSource.catalogUrl")}</FormLabel>
@@ -246,6 +271,43 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                     )}
                   />
                 </div>
+              </SectionCard.Content>
+            </SectionCard>
+
+            <SectionCard variant="emerald">
+              <SectionCard.Header icon={IconApi} title={t("forms.catalogSource.jsonApi")} description={t("forms.catalogSource.jsonApiDesc")} />
+              <SectionCard.Content>
+                <FormField
+                  control={form.control}
+                  name="jsonApiManifest"
+                  rules={{ validate: (manifest) => isJsonObjectOrBlank(manifest) || t("forms.catalogSource.jsonApiManifestInvalid") }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("forms.catalogSource.jsonApiManifest")}</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} value={field.value ?? ""} rows={14} className="font-mono text-xs" placeholder={MANIFEST_PLACEHOLDER} />
+                      </FormControl>
+                      <FormDescription>{t("forms.catalogSource.jsonApiManifestDesc")}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="jsonApiSecrets"
+                  rules={{ validate: (secrets) => isJsonObjectOrBlank(secrets) || t("forms.catalogSource.jsonApiSecretsInvalid") }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("forms.catalogSource.jsonApiSecrets")}</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} value={field.value ?? ""} rows={3} className="font-mono text-xs" placeholder='{"appKey": "..."}' />
+                      </FormControl>
+                      <FormDescription>{t("forms.catalogSource.jsonApiSecretsDesc")}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </SectionCard.Content>
             </SectionCard>
           </TabsContent>

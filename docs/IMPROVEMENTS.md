@@ -83,25 +83,26 @@ These constrain every task above:
 Found while planning trabalharei's job ingestion (TRA13, TRA15-19): Adzuna, Jooble, BNE
 and JSearch are all paged JSON APIs.
 
-Landed: `spi/structured/jsonapi` in connector-commons. `DumJsonApiManifest.parse` reads
-the request (GET or POST, `{page}` `{offset}` `{size}` `{cursor}` `{secret:NAME}`),
-paging (page, offset or cursor; empty or short page, total, repeated cursor or ids end
-it), a per-run call cap and a per-minute pace, the record path and JSON-path field
-mappings. `DumJsonApiSource` runs it. A walk a cap or a failed call cuts short reports
-`discoveryComplete() == false`, and `DumStructuredSourcePlugin` then finishes
-standalone.
+Landed: `spi/structured/jsonapi` in connector-commons (manifest, paging and stop rules,
+a per-run call cap and per-minute pace, JSON-path mapping; a walk cut short finishes
+standalone through `discoveryComplete()`), and the binding: a catalog source with
+`jsonApiManifest` set resolves to `DumJsonApiSource` in `DumCatalogSourceProvider`, its
+`jsonApiSecrets` fill `{secret:NAME}`, the API refuses a manifest that cannot run, the
+export leaves the secrets out, and the console edits both on the Connection tab.
 
 Still to build:
 
-- **Binding.** No plugin yet turns a stored manifest plus secrets into a source. Either a
-  `json-api` mode on `catalog-plugin` (manifest text and secrets on `DumCatalogSource`,
-  resolved in `DumCatalogSourceProvider`) or a small `jsonapi-plugin`; the catalog route
-  reuses its console, import and API. Secrets stay out of the manifest and the export.
-- **Budgets per day, week and month.** These need a counter that outlives the run (a JPA
-  row per source and window); the run then caps its calls at what the windows have left.
+- **Budgets per day, week and month.** These need a counter that outlives the run: a JPA
+  row per source and window (`catalog_json_api_budget`: source, window, window start,
+  calls), read before the walk to cap `maxCallsPerRun` at what every window has left and
+  written as calls are made. The manifest's `budget` gains `callsPerDay`, `callsPerWeek`,
+  `callsPerMonth`; the source takes the remaining allowance through its builder, so
+  connector-commons stays free of JPA.
 - **Incremental mode.** A budget-bound source never sees everything in one run, so it
-  finishes standalone and nothing is ever deindexed. Ids seen earlier should stay alive
-  until a per-record expiry, and only expired ids are deindexed (`deIndexById`, D68).
+  finishes standalone and nothing is ever deindexed. With `"incremental": {"expiry":
+  "P7D"}` in the manifest, the plugin keeps a last-seen time per id, finishes every run
+  standalone, and deindexes only ids unseen for longer than the expiry (`deIndexById`,
+  D68).
 
 ### XLI.3 Admin password from configuration (D93)
 

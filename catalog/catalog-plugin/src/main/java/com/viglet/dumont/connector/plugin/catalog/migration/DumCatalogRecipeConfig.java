@@ -19,6 +19,8 @@ package com.viglet.dumont.connector.plugin.catalog.migration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumHttpJsonFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumJsoupFetcher;
@@ -49,5 +51,11 @@ public class DumCatalogRecipeConfig {
     @Bean
     DumHtmlFetcher dumCatalogHtmlFetcher() {
         return new DumJsoupFetcher();
+    }
+
+    /** The JDK client a source with a JSON API manifest (D92) calls its API with. */
+    @Bean
+    DumJsonFetcher dumCatalogJsonFetcher() {
+        return new DumHttpJsonFetcher();
     }
 }
