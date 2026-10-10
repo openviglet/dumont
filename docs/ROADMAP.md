@@ -105,8 +105,6 @@ This track has no remaining pending tasks.
 
 ## Track K — Frontend build and lint gates
 
-## Track O — Structured sources over paged JSON APIs
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
