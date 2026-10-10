@@ -32,6 +32,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.viglet.dumont.connector.api.auth.DumSetupAPI.SetupRequest;
 import com.viglet.dumont.connector.persistence.model.auth.DumUser;
 import com.viglet.dumont.connector.persistence.repository.auth.DumUserRepository;
+import com.viglet.dumont.connector.properties.DumAuthConfigProperties;
+import com.viglet.dumont.connector.service.auth.DumAdminPasswordService;
 
 @ExtendWith(MockitoExtension.class)
 class DumSetupAPITest {
@@ -45,7 +47,8 @@ class DumSetupAPITest {
 
     @BeforeEach
     void setUp() {
-        api = new DumSetupAPI(userRepository, passwordEncoder);
+        api = new DumSetupAPI(new DumAdminPasswordService(userRepository, passwordEncoder,
+                new DumAuthConfigProperties()));
     }
 
     @Test

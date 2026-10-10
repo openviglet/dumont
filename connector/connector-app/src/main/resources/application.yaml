@@ -22,6 +22,11 @@ dumont:
   # configured under spring.security.oauth2.client.provider.keycloak.
   keycloak: false
   keycloak-admin-id: ~
+  # Local admin password applied at boot while none is stored, so a container or CI start
+  # skips the first-access setup screen (env DUMONT_ADMIN_PASSWORD, at least 6 characters).
+  # Ignored once a password is set.
+  admin:
+    password: ~
   authentication:
     # Enable third-party OAuth2 login buttons (Google, GitHub, ...)
     thirdparty: true

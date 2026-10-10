@@ -9,26 +9,23 @@
  */
 package com.viglet.dumont.connector.api.auth;
 
-import java.time.Instant;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.viglet.dumont.connector.persistence.model.auth.DumUser;
-import com.viglet.dumont.connector.persistence.repository.auth.DumUserRepository;
+import com.viglet.dumont.connector.service.auth.DumAdminPasswordService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * First-access setup endpoint. Allows setting the admin password when it has
  * not been configured yet. Once the admin password is set, the mutation
- * endpoint returns 403. Mirrors {@code TurSetupAPI}.
+ * endpoint returns 403. Mirrors {@code TurSetupAPI}; the password rules live in
+ * {@link DumAdminPasswordService}, shared with the {@code DUMONT_ADMIN_PASSWORD}
+ * boot bootstrap (D93).
  *
  * @since 2026.2.14
  */
@@ -37,15 +34,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Setup", description = "First-access setup")
 public class DumSetupAPI {
 
-    private static final String ADMIN = "admin";
-    private static final int PASSWORD_MINIMUM_SIZE = 6;
+    private final DumAdminPasswordService adminPasswordService;
 
-    private final DumUserRepository dumUserRepository;
-    private final PasswordEncoder passwordEncoder;
-
-    public DumSetupAPI(DumUserRepository dumUserRepository, PasswordEncoder passwordEncoder) {
-        this.dumUserRepository = dumUserRepository;
-        this.passwordEncoder = passwordEncoder;
+    public DumSetupAPI(DumAdminPasswordService adminPasswordService) {
+        this.adminPasswordService = adminPasswordService;
     }
 
     public record SetupStatus(boolean required) {}
@@ -54,37 +46,19 @@ public class DumSetupAPI {
 
     @GetMapping
     public ResponseEntity<SetupStatus> status() {
-        return ResponseEntity.ok(new SetupStatus(isSetupRequired()));
+        return ResponseEntity.ok(new SetupStatus(adminPasswordService.isSetupRequired()));
     }
 
     @PostMapping
     public ResponseEntity<Void> setAdminPassword(@RequestBody SetupRequest request) {
-        if (!isSetupRequired()) {
+        if (!adminPasswordService.isSetupRequired()) {
             return ResponseEntity.status(403).build();
         }
-        if (!StringUtils.hasText(request.password())
-                || request.password().trim().length() < PASSWORD_MINIMUM_SIZE) {
+        try {
+            adminPasswordService.setPassword(request.password());
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
-        DumUser admin = dumUserRepository.findByUsername(ADMIN);
-        if (admin == null) {
-            admin = DumUser.builder()
-                    .username(ADMIN)
-                    .firstName("Admin")
-                    .lastName("Administrator")
-                    .email("admin@localhost.local")
-                    .realm("default")
-                    .enabled(1)
-                    .lastLogin(Instant.now())
-                    .build();
-        }
-        admin.setPassword(passwordEncoder.encode(request.password().trim()));
-        dumUserRepository.save(admin);
         return ResponseEntity.ok().build();
-    }
-
-    private boolean isSetupRequired() {
-        DumUser admin = dumUserRepository.findByUsername(ADMIN);
-        return admin == null || !StringUtils.hasText(admin.getPassword());
     }
 }

@@ -107,7 +107,6 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
-- 📋 **D93** (deps: —) **Dumont has no admin-password variable, so a compose or CI start needs a scripted call to the first-access setup** — Turing already reads TURING_ADMIN_PASSWORD at boot, and the two products should start configured the same way. → §XLI.3
 - 📋 **D94** (deps: D91 ✅) **The install zip, installer and AppImage ship without the EDS plugin, because each lists plugins by hand** — A connector missing from the packages is invisible to anyone who installs Dumont outside a container. → §XLI.4
 
 ## Non-goals (do NOT add as tasks)

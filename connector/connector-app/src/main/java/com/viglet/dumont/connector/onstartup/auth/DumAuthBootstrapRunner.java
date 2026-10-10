@@ -16,6 +16,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.viglet.dumont.connector.service.auth.DumAdminPasswordService;
+
 /**
  * Runs the full auth bootstrap (roles → groups → admin user) before the
  * application starts serving requests. Ordered to execute before
@@ -32,13 +34,16 @@ public class DumAuthBootstrapRunner implements ApplicationRunner {
     private final DumRoleOnStartup dumRoleOnStartup;
     private final DumGroupOnStartup dumGroupOnStartup;
     private final DumUserOnStartup dumUserOnStartup;
+    private final DumAdminPasswordService adminPasswordService;
 
     public DumAuthBootstrapRunner(DumRoleOnStartup dumRoleOnStartup,
                                   DumGroupOnStartup dumGroupOnStartup,
-                                  DumUserOnStartup dumUserOnStartup) {
+                                  DumUserOnStartup dumUserOnStartup,
+                                  DumAdminPasswordService adminPasswordService) {
         this.dumRoleOnStartup = dumRoleOnStartup;
         this.dumGroupOnStartup = dumGroupOnStartup;
         this.dumUserOnStartup = dumUserOnStartup;
+        this.adminPasswordService = adminPasswordService;
     }
 
     @Override
@@ -47,6 +52,8 @@ public class DumAuthBootstrapRunner implements ApplicationRunner {
         dumRoleOnStartup.createDefaultRows();
         dumGroupOnStartup.createDefaultRows();
         dumUserOnStartup.createDefaultRows();
+        // After the admin is seeded, so DUMONT_ADMIN_PASSWORD (D93) lands on the seeded account.
+        adminPasswordService.bootstrapFromConfiguration();
         log.info("Authentication bootstrap complete.");
     }
 }

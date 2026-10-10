@@ -54,4 +54,19 @@ public class DumAuthConfigProperties {
      * {@code registrationEmailAsUsername} is on). Env: {@code DUMONT_ADMIN_EMAILS}.
      */
     private String adminEmails;
+    /**
+     * The local {@code admin} account (roadmap D93). Env: {@code DUMONT_ADMIN_PASSWORD}.
+     */
+    private Admin admin = new Admin();
+
+    @Getter
+    @Setter
+    public static class Admin {
+        /**
+         * Applied at boot while the {@code admin} account has no password, so a compose file or CI
+         * starts with a usable login and the first-access setup screen is skipped. Ignored once a
+         * password is stored. Env: {@code DUMONT_ADMIN_PASSWORD}.
+         */
+        private String password;
+    }
 }
