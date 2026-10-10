@@ -60,4 +60,19 @@ public interface DumJobSourceAdapter {
     default Map<Window, Integer> defaultCaps() {
         return Map.of();
     }
+
+    /**
+     * The rotation slot a source cursor points at, for an adapter that rotates one query per run
+     * through a list of {@code size} entries; an unset or unreadable cursor starts at 0.
+     */
+    static int rotationSlot(String cursor, int size) {
+        if (size <= 0 || cursor == null || cursor.isBlank()) {
+            return 0;
+        }
+        try {
+            return Math.floorMod(Integer.parseInt(cursor.trim()), size);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 }

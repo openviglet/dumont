@@ -1,0 +1,41 @@
+{
+  "totalCount": 18734,
+  "jobs": [
+    {
+      "title": "Motorista Entregador",
+      "location": "Belo Horizonte, Minas Gerais",
+      "snippet": "Entregas na região metropolitana, CNH categoria B...",
+      "salary": "R$ 2.500,00 a R$ 3.000,00 /mês",
+      "source": "empregos.com.br",
+      "type": "Temporário",
+      "link": "https://jooble.org/desc/5521938827364019922?ckey=motorista&rgn=-1&pos=1&groupId=40906&p=2",
+      "company": "Rápido Log",
+      "updated": "2026-10-07T15:20:00.0000000",
+      "id": 5521938827364019922
+    },
+    {
+      "title": "Auxiliar de Limpeza",
+      "location": "Rio de Janeiro, RJ, Brasil",
+      "snippet": "Limpeza e conservação de áreas comuns em condomínio residencial...",
+      "salary": "A combinar",
+      "source": "sine.com.br",
+      "type": "Full-time",
+      "link": "https://jooble.org/desc/1093847561029384756?ckey=auxiliar&rgn=-1&pos=2&groupId=40906&p=2",
+      "company": "Conserva Rio Serviços",
+      "updated": "2026-10-06T08:00:00.0000000",
+      "id": 1093847561029384756
+    },
+    {
+      "title": "Analista de Dados",
+      "location": "Híbrido - Curitiba, PR",
+      "snippet": "Modelo híbrido, três dias no escritório e dois de home office. SQL, Python, Power BI...",
+      "salary": "R$ 60.000 por ano",
+      "source": "gupy.io",
+      "type": "CLT, Tempo integral",
+      "link": "https://jooble.org/desc/8837261540918273645?ckey=analista&rgn=-1&pos=3&groupId=40906&p=2",
+      "company": "Dados Sul S.A.",
+      "updated": "2026-10-05T10:45:00.0000000",
+      "id": 8837261540918273645
+    }
+  ]
+}

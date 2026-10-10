@@ -134,14 +134,7 @@ public class DumAdzunaAdapter implements DumJobSourceAdapter {
 
     /** The rotation slot a cursor points at; an unset or unreadable cursor starts at 0. */
     static int slot(String cursor, int size) {
-        if (cursor == null || cursor.isBlank()) {
-            return 0;
-        }
-        try {
-            return Math.floorMod(Integer.parseInt(cursor.trim()), size);
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+        return DumJobSourceAdapter.rotationSlot(cursor, size);
     }
 
     /** One fetch: the postings gathered so far (by id, first seen wins order) and the calls made. */
