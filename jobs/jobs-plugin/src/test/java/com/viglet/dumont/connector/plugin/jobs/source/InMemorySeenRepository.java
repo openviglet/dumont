@@ -62,6 +62,18 @@ public final class InMemorySeenRepository {
                     rows.removeAll(gone);
                     return (long) gone.size();
                 });
+        lenient().when(repository.findBySourceId(anyString())).thenAnswer(inv -> rows.stream()
+                .filter(r -> r.getSourceId().equals(inv.getArgument(0))).toList());
+        lenient().when(repository.findBySourceIdAndExpiresAtLessThanEqual(anyString(), any(Instant.class)))
+                .thenAnswer(inv -> rows.stream()
+                        .filter(r -> r.getSourceId().equals(inv.getArgument(0))
+                                && !r.getExpiresAt().isAfter(inv.getArgument(1)))
+                        .toList());
+        lenient().doAnswer(inv -> {
+            Iterable<DumJobSeen> gone = inv.getArgument(0);
+            gone.forEach(rows::remove);
+            return null;
+        }).when(repository).deleteAll(any(Iterable.class));
     }
 
     /** Seed a row as an earlier run would have left it. */

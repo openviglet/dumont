@@ -37,6 +37,8 @@ import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobCall
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
 import com.viglet.dumont.connector.plugin.jobs.source.dedupe.DumJobDeduplicator;
+import com.viglet.dumont.connector.plugin.jobs.source.expiry.DumJobLinkChecker;
+import com.viglet.dumont.connector.plugin.jobs.source.expiry.DumJobTombstones;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,7 +51,9 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>
  * The Spring-built provider hands every source the {@link DumJobDeduplicator} (trabalharei
- * <strong>TRA23</strong>), so the same opening reached through several sources is published once.
+ * <strong>TRA23</strong>), so the same opening reached through several sources is published once, and
+ * the {@link DumJobLinkChecker} and {@link DumJobTombstones} (trabalharei <strong>TRA24</strong>), so
+ * dead apply links expire their postings and the job site hears of every document that leaves.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -64,13 +68,16 @@ public class DumJobsSourceProvider implements DumStructuredSourceProvider {
     private final Map<String, DumJobSourceAdapter> adapters;
     private final Clock clock;
     private final DumJobDeduplicator deduplicator;
+    private final DumJobLinkChecker linkChecker;
+    private final DumJobTombstones tombstones;
 
     @Autowired
     public DumJobsSourceProvider(DumJobSourceRepository sourceRepository,
             DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
-            ObjectProvider<DumJobSourceAdapter> adapters, DumJobDeduplicator deduplicator) {
+            ObjectProvider<DumJobSourceAdapter> adapters, DumJobDeduplicator deduplicator,
+            DumJobLinkChecker linkChecker, DumJobTombstones tombstones) {
         this(sourceRepository, seenRepository, callRepository, adapters.orderedStream().toList(),
-                Clock.systemUTC(), deduplicator);
+                Clock.systemUTC(), deduplicator, linkChecker, tombstones);
     }
 
     /** A provider whose sources publish every posting on its own id (no deduplication). */
@@ -83,7 +90,17 @@ public class DumJobsSourceProvider implements DumStructuredSourceProvider {
     public DumJobsSourceProvider(DumJobSourceRepository sourceRepository,
             DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
             List<DumJobSourceAdapter> adapters, Clock clock, DumJobDeduplicator deduplicator) {
+        this(sourceRepository, seenRepository, callRepository, adapters, clock, deduplicator, null, null);
+    }
+
+    /** A provider whose sources may also check apply links and queue tombstones (either may be null). */
+    public DumJobsSourceProvider(DumJobSourceRepository sourceRepository,
+            DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
+            List<DumJobSourceAdapter> adapters, Clock clock, DumJobDeduplicator deduplicator,
+            DumJobLinkChecker linkChecker, DumJobTombstones tombstones) {
         this.deduplicator = deduplicator;
+        this.linkChecker = linkChecker;
+        this.tombstones = tombstones;
         this.sourceRepository = sourceRepository;
         this.seenRepository = seenRepository;
         this.callRepository = callRepository;
@@ -121,7 +138,12 @@ public class DumJobsSourceProvider implements DumStructuredSourceProvider {
     public Optional<DumStructuredSource> resolve(DumJobSource source) {
         return adapterFor(source).map(adapter -> new DumJobsStructuredSource(source,
                 DumJobsSchema.schema(), adapter, seenRepository, callRepository, sourceRepository,
-                clock, deduplicator));
+                clock, deduplicator, linkChecker, tombstones));
+    }
+
+    /** Where this provider's sources queue tombstones, or empty when there is nowhere. */
+    public Optional<DumJobTombstones> tombstones() {
+        return Optional.ofNullable(tombstones);
     }
 
     /** The deduplicator every source of this provider runs through, or empty when there is none. */

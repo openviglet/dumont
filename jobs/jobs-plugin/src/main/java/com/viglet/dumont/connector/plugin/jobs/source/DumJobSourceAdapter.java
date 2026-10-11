@@ -97,6 +97,26 @@ public interface DumJobSourceAdapter {
     }
 
     /**
+     * Whether the partner dates its postings (trabalharei <strong>TRA24</strong>). A dated posting
+     * without its own {@code expiresAt} expires 30 days after its {@code publishedAt}. An undated
+     * partner's {@code publishedAt} is only when this source first fetched the posting (BNE), so
+     * counting from it would drop a posting the partner still lists: such a posting expires 30 days
+     * after the run that last fetched it instead, and lives on while the partner keeps returning it.
+     */
+    default boolean datedPostings() {
+        return true;
+    }
+
+    /**
+     * Whether the run may HEAD-check this partner's apply links for dead postings (trabalharei
+     * <strong>TRA24</strong>). {@code false} for a partner whose apply links are billed per click
+     * (Jooble): a HEAD request is a visit to the tracking redirect and may be counted as one.
+     */
+    default boolean checkApplyLinks() {
+        return true;
+    }
+
+    /**
      * The rotation slot a source cursor points at, for an adapter that rotates one query per run
      * through a list of {@code size} entries; an unset or unreadable cursor starts at 0.
      */

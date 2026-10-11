@@ -122,6 +122,9 @@ This track has no remaining pending tasks.
 - 📋 **D110** (deps: —) **Entity resolution has no survivorship rule: the first source wins and later ones fill fields** — Keeping one whole record by a comparator is the common need, and field filling mixes partners' data. → §XLI.18
 - 📋 **D111** (deps: —) **One source's run-end sweep deindexes a document another source of the same provider still tracks** — The other source's unchanged checksum stops it resending, so a shared document vanishes silently. → §XLI.19
 - 📋 **D112** (deps: —) **The crawl resolve path skips the per-source guards and never sweeps a source whose records all merged** — A run through resolution loses the zero-yield and failure-wave protections that indexAll applies. → §XLI.20
+- 📋 **D113** (deps: —) **A structured source is not told when the run-end sweep deindexes one of its documents** — Reacting to a removal, such as telling a site a job ended, means re-deriving the sweep's decision. → §XLI.21
+- 📋 **D114** (deps: —) **Only incremental sources can deindex a given id now, and choosing that mode gives up the sweep** — A posting found dead mid-cycle should leave the index at once without a source changing its run mode. → §XLI.22
+- 📋 **D115** (deps: —) **Structured sources have no end-of-run hook, so post-run work needs a plugin indexAll override** — Flushing notifications and writing summaries once per run is common, and every connector repeats the override. → §XLI.23
 
 ## Non-goals (do NOT add as tasks)
 

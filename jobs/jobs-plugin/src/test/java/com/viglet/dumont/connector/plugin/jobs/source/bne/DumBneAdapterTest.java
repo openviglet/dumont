@@ -233,7 +233,8 @@ class DumBneAdapterTest {
         String payload = first.getPayload();
         assertThat(first.getFirstSeenAt()).isEqualTo(NOW);
         assertThat(new JSONObject(payload).getString("publishedAt")).isEqualTo(NOW_TEXT);
-        assertThat(first.getExpiresAt()).isEqualTo(Instant.parse(NOW_TEXT).plus(Duration.ofDays(30)));
+        // TRA24: BNE is undated, so a posting lives 30 days past the run that last fetched it.
+        assertThat(first.getExpiresAt()).isEqualTo(NOW.plus(Duration.ofDays(30)));
 
         clock.advance(Duration.ofDays(2).plusMinutes(7));
         run.apply(source(null)).discover();
@@ -241,6 +242,7 @@ class DumBneAdapterTest {
         DumJobSeen again = seen.find("src-bne", "bne-4410001").orElseThrow();
         assertThat(again.getFirstSeenAt()).isEqualTo(NOW);
         assertThat(again.getLastSeenAt()).isEqualTo(clock.instant());
+        assertThat(again.getExpiresAt()).isEqualTo(clock.instant().plus(Duration.ofDays(30)));
         assertThat(new JSONObject(again.getPayload()).similar(new JSONObject(payload))).isTrue();
         assertThat(new JSONObject(again.getPayload()).getString("modificationDate")).isEqualTo(NOW_TEXT);
     }

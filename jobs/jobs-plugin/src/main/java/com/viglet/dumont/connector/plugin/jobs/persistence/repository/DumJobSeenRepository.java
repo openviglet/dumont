@@ -32,6 +32,12 @@ public interface DumJobSeenRepository extends JpaRepository<DumJobSeen, String> 
     /** Every posting of {@code sourceId} still open at {@code now}. */
     List<DumJobSeen> findBySourceIdAndExpiresAtAfter(String sourceId, Instant now);
 
+    /** Every row of {@code sourceId}, open, expired or dead-linked (trabalharei TRA24). */
+    List<DumJobSeen> findBySourceId(String sourceId);
+
+    /** Every row of {@code sourceId} expired at or before {@code now}, dead-linked ones included. */
+    List<DumJobSeen> findBySourceIdAndExpiresAtLessThanEqual(String sourceId, Instant now);
+
     /** Prune the postings of {@code sourceId} that expired at or before {@code now}. */
     @Transactional
     long deleteBySourceIdAndExpiresAtLessThanEqual(String sourceId, Instant now);
