@@ -157,6 +157,17 @@ public final class DumTabularRecipe {
             return this;
         }
 
+        /**
+         * Apply {@code taxonomy} over {@code sourceField}, writing the row's {@code attribute} (another
+         * column of the matched row, e.g. a municipality's {@code uf}) to {@code targetField} (D99).
+         */
+        public Builder taxonomyAttribute(DumRecipeRef taxonomy, String sourceField, String targetField,
+                String attribute) {
+            this.taxonomyApplications
+                    .add(new DumTaxonomyApplication(taxonomy, sourceField, targetField, attribute));
+            return this;
+        }
+
         public DumTabularRecipe build() {
             if (rowSelector == null || rowSelector.isBlank()) {
                 throw new IllegalStateException("A row selector is required");

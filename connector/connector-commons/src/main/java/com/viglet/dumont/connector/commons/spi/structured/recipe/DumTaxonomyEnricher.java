@@ -64,8 +64,11 @@ public final class DumTaxonomyEnricher implements DumEnricher {
             // rather than fail the record. Grounding-safe: a missing map cannot fabricate a value.
             return Map.of();
         }
+        // D99: an application naming an attribute writes that column of the row instead.
+        Map<String, String> table = application.attribute() == null ? taxonomy.table()
+                : taxonomy.attributeTable(application.attribute());
         return DumNormalizationEnricher
-                .lookup(name(), application.sourceField(), application.targetField(), taxonomy.table())
+                .lookup(name(), application.sourceField(), application.targetField(), table)
                 .enrich(source, rec);
     }
 }

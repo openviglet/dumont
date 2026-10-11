@@ -16,9 +16,11 @@
 
 package com.viglet.dumont.connector.commons.spi.structured.recipe;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A canonical taxonomy map as a first-class <em>versioned</em> artifact (roadmap
@@ -41,11 +43,20 @@ public final class DumTaxonomy {
     private final String name;
     private final int version;
     private final Map<String, String> table;
+    private final Map<String, Map<String, String>> attributes;
+    private final String source;
+    private final String downloadedAt;
+    private final Map<String, Map<String, String>> attributeTables = new ConcurrentHashMap<>();
 
-    private DumTaxonomy(String name, int version, Map<String, String> table) {
-        this.name = name;
-        this.version = version;
-        this.table = Map.copyOf(table);
+    private DumTaxonomy(Builder builder) {
+        this.name = builder.name;
+        this.version = builder.version;
+        this.table = Map.copyOf(builder.table);
+        Map<String, Map<String, String>> copied = new LinkedHashMap<>();
+        builder.attributes.forEach((raw, row) -> copied.put(raw, Map.copyOf(row)));
+        this.attributes = Collections.unmodifiableMap(copied);
+        this.source = builder.source;
+        this.downloadedAt = builder.downloadedAt;
     }
 
     public static Builder builder(String name, int version) {
@@ -75,10 +86,59 @@ public final class DumTaxonomy {
         return raw == null ? Optional.empty() : Optional.ofNullable(table.get(raw));
     }
 
+    /**
+     * The other columns of a raw label's row (roadmap <strong>D99</strong>), e.g. a municipality's
+     * {@code uf}; empty for an unmapped label or a flat taxonomy.
+     */
+    public Map<String, String> attributes(String raw) {
+        return raw == null ? Map.of() : attributes.getOrDefault(raw, Map.of());
+    }
+
+    /** One attribute of a raw label's row, or {@link Optional#empty()} when absent (D99). */
+    public Optional<String> attribute(String raw, String attribute) {
+        return Optional.ofNullable(attributes(raw).get(attribute));
+    }
+
+    /**
+     * Raw label &rarr; one attribute, for every row that carries it (D99): the table a taxonomy
+     * application reads when it writes an attribute instead of the canonical value. Built once per
+     * attribute.
+     */
+    public Map<String, String> attributeTable(String attribute) {
+        return attributeTables.computeIfAbsent(attribute, name -> {
+            Map<String, String> built = new LinkedHashMap<>();
+            attributes.forEach((raw, row) -> {
+                String value = row.get(name);
+                if (value != null) {
+                    built.put(raw, value);
+                }
+            });
+            return Map.copyOf(built);
+        });
+    }
+
+    /** Where the table came from (a URL or a dataset name), or {@code null} when not declared. */
+    public String source() {
+        return source;
+    }
+
+    /** When the table was downloaded from its {@link #source()}, as declared, or {@code null}. */
+    public String downloadedAt() {
+        return downloadedAt;
+    }
+
+    /** How many raw labels the taxonomy maps. */
+    public int size() {
+        return table.size();
+    }
+
     public static final class Builder {
         private final String name;
         private final int version;
         private final Map<String, String> table = new LinkedHashMap<>();
+        private final Map<String, Map<String, String>> attributes = new LinkedHashMap<>();
+        private String source;
+        private String downloadedAt;
 
         private Builder(String name, int version) {
             if (name == null || name.isBlank()) {
@@ -109,8 +169,43 @@ public final class DumTaxonomy {
             return this;
         }
 
+        /**
+         * Map a raw label to its canonical form with the rest of its row (roadmap
+         * <strong>D99</strong>). Blank attribute values are left out, so an attribute a row lacks is
+         * absent rather than {@code ""}.
+         */
+        public Builder row(String raw, String canonical, Map<String, String> rowAttributes) {
+            map(raw, canonical);
+            Map<String, String> kept = new LinkedHashMap<>();
+            if (rowAttributes != null) {
+                rowAttributes.forEach((attribute, value) -> {
+                    if (attribute != null && !attribute.isBlank() && value != null && !value.isBlank()) {
+                        kept.put(attribute, value);
+                    }
+                });
+            }
+            if (kept.isEmpty()) {
+                attributes.remove(raw);
+            } else {
+                attributes.put(raw, kept);
+            }
+            return this;
+        }
+
+        /** Where the table came from, e.g. the dataset URL (D99). */
+        public Builder source(String source) {
+            this.source = source == null || source.isBlank() ? null : source.trim();
+            return this;
+        }
+
+        /** When the table was downloaded from its source, as the file declares it (D99). */
+        public Builder downloadedAt(String downloadedAt) {
+            this.downloadedAt = downloadedAt == null || downloadedAt.isBlank() ? null : downloadedAt.trim();
+            return this;
+        }
+
         public DumTaxonomy build() {
-            return new DumTaxonomy(name, version, table);
+            return new DumTaxonomy(this);
         }
     }
 }

@@ -34,9 +34,17 @@ package com.viglet.dumont.connector.commons.spi.structured.recipe;
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
-public record DumTaxonomyApplication(DumRecipeRef taxonomy, String sourceField, String targetField) {
+public record DumTaxonomyApplication(DumRecipeRef taxonomy, String sourceField, String targetField,
+        String attribute) {
+
+    /** An application writing the canonical value, as before attributes existed. */
+    public DumTaxonomyApplication(DumRecipeRef taxonomy, String sourceField, String targetField) {
+        this(taxonomy, sourceField, targetField, null);
+    }
 
     public DumTaxonomyApplication {
+        // D99: a named attribute writes that column of the row instead of the canonical value.
+        attribute = attribute == null || attribute.isBlank() ? null : attribute.trim();
         if (taxonomy == null) {
             throw new IllegalArgumentException("Taxonomy application needs a taxonomy ref");
         }
@@ -50,6 +58,7 @@ public record DumTaxonomyApplication(DumRecipeRef taxonomy, String sourceField, 
 
     /** A stable enricher name for ordering/diagnostics, e.g. {@code taxonomy:area->canonicalArea}. */
     public String enricherName() {
-        return "taxonomy:" + taxonomy.name() + ":" + sourceField + "->" + targetField;
+        return "taxonomy:" + taxonomy.name() + (attribute == null ? "" : "." + attribute) + ":"
+                + sourceField + "->" + targetField;
     }
 }

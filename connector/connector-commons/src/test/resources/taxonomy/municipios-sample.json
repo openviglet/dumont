@@ -1,0 +1,15 @@
+{
+  "name": "municipios-sample",
+  "version": 2,
+  "source": "https://servicodados.ibge.gov.br/api/v1/localidades/municipios",
+  "downloadedAt": "2026-10-01",
+  "key": "id",
+  "canonical": "nome",
+  "rows": "municipios",
+  "count": 3,
+  "municipios": [
+    { "id": 2611606, "nome": "Recife", "uf": "PE" },
+    { "id": 3550308, "nome": "São Paulo", "uf": "SP" },
+    { "id": 5300108, "nome": "Brasília", "uf": "DF", "capital": true }
+  ]
+}

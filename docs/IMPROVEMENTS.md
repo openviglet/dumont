@@ -116,6 +116,25 @@ concrete source class. With D98, `extract()` can also keep the adapter's city an
 and the location enricher removes a city outside the stated UF with `DumClear.field()`
 instead of writing both fields itself.
 
+### XLI.16 Jobs loads IBGE through the taxonomy loader (D108)
+
+Found while shipping D99. `DumTaxonomyLoader.fromResource(loader, path)` in
+connector-commons now reads a versioned taxonomy from a JSON resource. Each row's `key`
+column maps to its `canonical` column, the other columns become attributes
+(`DumTaxonomy.attributes(raw)`, `attributeTable(name)`), and the file's `source`,
+`downloadedAt` and `count` are kept or checked. A taxonomy application can also write an
+attribute instead of the canonical value (`DumTabularRecipe.Builder.taxonomyAttribute`).
+
+The `jobs` module still loads the IBGE municipality list with its own code
+(`DumIbgeMunicipalities`). It maps code to name and derives the UF from the first two
+digits of the code, with a hand-kept prefix table.
+
+Expected: `jobs/ibge-municipios.json` declares `"key": "id"`, `"canonical": "nome"` and
+`"rows": "municipios"`, and the module registers `DumTaxonomyLoader.fromResource(...)`.
+The UF is then read with `attribute(code, "uf")` instead of from the code prefix, so the
+prefix table and the module's loader go away. The file's existing `uf`-versus-prefix
+check can stay as a test over the loaded taxonomy.
+
 ## XLII Web-crawler hardening (real-world sources)
 ### XLI.4 Keep-alive for incremental sources (D104)
 
@@ -149,21 +168,6 @@ executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallb
 `agents.md` names the flag in the meantime.
 
 Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
-
-### XLI.9 Tabular taxonomies from resources (D99)
-
-Found while shipping the IBGE municipality list (5,571 rows of code, name, UF) as a D19
-taxonomy for trabalharei's `jobs` module (TRA20). `DumTaxonomy` is a flat
-string-to-string map and the recipe library has no loader for a classpath or file
-resource, so a reference table with more than one attribute per row cannot be a
-taxonomy. The module maps IBGE code to name and derives the UF from the code's first two
-digits, checked against the file at load time, and loads the JSON with its own code.
-
-Expected: taxonomies whose entries carry several attributes (or a tabular taxonomy
-type), and a loader that registers a versioned taxonomy from a resource with its source
-and download date.
-
-Workaround: `DumIbgeMunicipalities` in `jobs/jobs-plugin`.
 
 ### XLI.10 Enricher end-of-run hook (D100)
 
