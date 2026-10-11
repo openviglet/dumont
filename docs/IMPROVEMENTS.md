@@ -136,7 +136,7 @@ Expected: the resolve path goes through the same per-source run lifecycle as `in
 
 Workaround: none; the jobs module does not use the D18 path.
 
-### XLI.21 Jobs runs report their stops (D113)
+### XLI.24 Jobs runs report their stops (D116)
 
 Found while shipping D96. Structured sources can now return `runNotes()`
 (connector-commons `DumStructuredSource`), and the plugin loop records them, with the
@@ -158,7 +158,7 @@ location enricher's `onRunEnd`, and the override goes away. With D104, still-ope
 postings the quota did not reach are returned from `unchangedIds()`, so
 `DumJobSeen.payload` and its replay through `extract()` can go.
 
-### XLI.22 Jobs enrichers read transients (D114)
+### XLI.25 Jobs enrichers read transients (D117)
 
 Found while shipping D97. A structured record now carries transient, never-indexed
 attributes: `DumStructuredRecord.Builder.transientValue(key, value)`, read back through
@@ -184,7 +184,7 @@ keeps its own provenance. With D103, the contract and seniority enrichers become
 D106, the occupation LLM fallback takes the optional `DumClassifierFactory` bean instead
 of a `jobsOccupationClassifier` nobody declares.
 
-### XLI.23 Jobs loads IBGE through the taxonomy loader (D115)
+### XLI.26 Jobs loads IBGE through the taxonomy loader (D118)
 
 Found while shipping D99. `DumTaxonomyLoader.fromResource(loader, path)` in
 connector-commons now reads a versioned taxonomy from a JSON resource. Each row's `key`
