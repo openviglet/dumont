@@ -107,31 +107,6 @@ and the summary wait on this line (TRA28's remainder).
 
 ## XLIV Frontend build and lint gates
 
-### XLIV.1 Vulnerable transitive build dependencies (D133)
-
-Found in the Dependabot alerts on `openviglet/dumont` (2026-10-11): 46 of the 69 open
-alerts are in the root `pnpm-lock.yaml`, all transitive and all build or test tooling of
-`dumont-react`:
-
-- `undici` 7.28.0 (via `@module-federation/dts-plugin` 2.6.0) and 8.11.2 (via `jsdom`): 15
-  alerts, fixed in 7.29.1 and the current 8.x;
-- `adm-zip` 0.5.10 (via `dts-plugin`): fixed in 0.6.1, the version `dumont-react` itself declares;
-- `postcss`, `nanoid`, `source-map-js`, `browserslist` and `baseline-browser-mapping` under
-  `vite`, `@tailwindcss/vite` and Babel: each fixed by a patch release.
-
-Expected: the lockfile resolves no version an alert names. Dependencies whose own range
-already admits the fix are refreshed in the lockfile; the two that pin an old line
-(`dts-plugin`'s `undici` and `adm-zip`) get a `pnpm.overrides` entry in the root
-`package.json`, each with a comment naming why, so it can be dropped when the parent
-catches up. The gates (vitest, lint, `compile:build`, the Maven build) prove the
-overrides changed nothing the build relies on.
-
-One `adm-zip` alert, destination symlinks followed on extract, has no fixed release.
-Dumont uses `adm-zip` only in `scripts/fix-mf-type-aliases.mjs` and
-`test/mf-type-aliases.test.ts`, to rewrite and read the archive its own build just
-produced, never an untrusted one, and never through `extractAllTo`. That alert stays
-open as an accepted build-time risk; dismissing it on GitHub is the maintainer's call.
-
 ### XLIV.2 Unpatched xlsx through the design system (D134)
 
 Found in the Dependabot alerts on `openviglet/dumont` (2026-10-11): four high alerts,

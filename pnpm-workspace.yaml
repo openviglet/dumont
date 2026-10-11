@@ -19,3 +19,17 @@ confirmModulesPurge: false
 
 minimumReleaseAgeExclude:
   - '@viglet/viglet-design-system@2026.3.5||2026.3.11'
+
+# Security floors for transitive build and test tooling (D133): each selector lifts only the
+# vulnerable range a Dependabot alert names to its first fixed release, and leaves every newer
+# line alone. Drop an entry once nothing in the lockfile resolves below its floor.
+overrides:
+  # @module-federation/dts-plugin pins undici 7.28; jsdom's undici 8.x is not affected.
+  "undici@>=7 <7.29.1": "^7.29.1"
+  # dts-plugin pins adm-zip 0.5.10; 0.6.1 is what dumont-react's own scripts already use.
+  "adm-zip@<0.6.1": "^0.6.1"
+  "postcss@<8.5.23": "^8.5.23"
+  "nanoid@>=3 <3.3.18": "^3.3.18"
+  "source-map-js@<1.2.2": "^1.2.2"
+  "browserslist@<4.28.7": "^4.28.7"
+  "baseline-browser-mapping@<2.11.0": "^2.11.0"
