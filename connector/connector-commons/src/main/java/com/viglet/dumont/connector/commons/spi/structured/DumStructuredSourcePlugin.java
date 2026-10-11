@@ -250,6 +250,12 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         provider().sourceNames().forEach(this::indexAll);
     }
 
+    /** Every source this plugin serves, so the scheduler runs each under its run lock (D128). */
+    @Override
+    public Collection<String> scheduledSources() {
+        return provider().sourceNames();
+    }
+
     /**
      * How the live members of a canonical id become its document (roadmap <strong>D110</strong>). The
      * default is {@link DumSurvivorship#fieldMerge()}, the D18 rule; a provider that must keep one

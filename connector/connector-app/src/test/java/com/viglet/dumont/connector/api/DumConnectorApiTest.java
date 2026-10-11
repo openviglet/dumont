@@ -42,6 +42,7 @@ import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.scheduled.DumConnectorContentAuditTask;
 import com.viglet.dumont.connector.service.DumConnectorIndexAllByTabService;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
+import com.viglet.dumont.connector.service.DumConnectorRunService;
 import com.viglet.dumont.connector.service.DumConnectorSolrService;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,7 +66,7 @@ class DumConnectorApiTest {
     @BeforeEach
     void setUp() {
         api = new DumConnectorApi(indexingService, dumConnectorSolr, pluginRegistry, auditTask,
-                indexAllByTabService, "secret-key");
+                indexAllByTabService, new DumConnectorRunService(indexingService), "secret-key");
     }
 
     @Test

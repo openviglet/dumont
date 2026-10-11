@@ -41,6 +41,8 @@ import com.viglet.dumont.connector.persistence.model.DumConnectorIndexingStatsMo
 import com.viglet.dumont.connector.scheduled.DumConnectorContentAuditTask;
 import com.viglet.dumont.connector.service.DumConnectorIndexAllByTabService;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
+import com.viglet.dumont.connector.service.DumConnectorRunService;
+import com.viglet.dumont.connector.service.DumConnectorRunService.RunStart;
 import com.viglet.dumont.connector.service.DumConnectorSolrService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,18 +59,21 @@ public class DumConnectorApi {
     private final DumConnectorPluginRegistry pluginRegistry;
     private final DumConnectorContentAuditTask auditTask;
     private final DumConnectorIndexAllByTabService indexAllByTabService;
+    private final DumConnectorRunService runService;
     private final String apiKey;
 
     public DumConnectorApi(DumConnectorIndexingService indexingService,
             DumConnectorSolrService dumConnectorSolr, DumConnectorPluginRegistry pluginRegistry,
             DumConnectorContentAuditTask auditTask,
             DumConnectorIndexAllByTabService indexAllByTabService,
+            DumConnectorRunService runService,
             @Value("${turing.apiKey}") String apiKey) {
         this.indexingService = indexingService;
         this.dumConnectorSolr = dumConnectorSolr;
         this.pluginRegistry = pluginRegistry;
         this.auditTask = auditTask;
         this.indexAllByTabService = indexAllByTabService;
+        this.runService = runService;
         this.apiKey = apiKey;
     }
 
@@ -120,28 +125,16 @@ public class DumConnectorApi {
 
     /**
      * Starts a whole-source run. The owner is resolved before the lock is taken, so a name no
-     * plugin manages answers 404 instead of locking itself; and a start that throws before the
-     * plugin hands the run off releases the lock, so a failed start never strands the source
-     * behind a 409 (D124).
+     * plugin manages answers 404 instead of locking itself (D124); the start itself is
+     * {@link DumConnectorRunService}'s, shared with the scheduler (D128).
      */
     private ResponseEntity<Map<String, String>> startRun(String name, OperationType operation) {
         Optional<DumConnectorPlugin> owner = pluginRegistry.findBySource(name);
         if (owner.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusUnknownSource(name));
         }
-        if (!indexingService.tryStartProcessing(name)) {
+        if (runService.start(owner.get(), name, operation) == RunStart.ALREADY_RUNNING) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(statusAlreadyRunning());
-        }
-        DumConnectorPlugin plugin = owner.get();
-        try {
-            if (operation == OperationType.REINDEX_ALL) {
-                indexingService.deleteByProviderAndSource(plugin.getProviderName(), name);
-            }
-            indexingService.trackIndexingStart(name, plugin.getProviderName(), operation);
-            plugin.indexAll(name);
-        } catch (RuntimeException e) {
-            indexingService.finishProcessing(name);
-            throw e;
         }
         return ResponseEntity.ok(statusSent());
     }

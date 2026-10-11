@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.commons.plugin;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,6 +25,15 @@ public interface DumConnectorPlugin {
     record EnvironmentInfo(String environment, List<String> sites) {}
 
     void crawl();
+
+    /**
+     * The sources a scheduled crawl starts one at a time through {@link #indexAll(String)}, each
+     * under the same run lock an on-demand run takes (D128). Empty, the default, means the plugin
+     * crawls on its own and the scheduler calls {@link #crawl()} instead.
+     */
+    default Collection<String> scheduledSources() {
+        return List.of();
+    }
 
     String getProviderName();
 
