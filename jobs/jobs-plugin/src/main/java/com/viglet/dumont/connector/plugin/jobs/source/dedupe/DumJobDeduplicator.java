@@ -50,11 +50,10 @@ import lombok.extern.slf4j.Slf4j;
  * same opening reached through several partners is published once.
  *
  * <p>
- * <strong>Why not D18.</strong> Dumont's entity resolution ({@code DumEntityResolver}) only runs in
- * {@code crawl()}, holds one call's records in memory, and merges field by field with the first
- * contributor winning. The jobs connector is driven per source through {@code indexAll(source)}, so a
- * later source's run must find what an earlier source's run fetched, and the published record must be
- * the <em>preferred</em> member whole ({@link DumJobPreference}). So the index is kept here, in the
+ * <strong>Why not D18.</strong> Dumont's entity resolution ({@code DumResolutionIndex}, D109) keeps
+ * its index in memory only, and merges field by field with the first contributor winning. The jobs
+ * connector needs a later source's run to find what an earlier source's run fetched across restarts,
+ * and the published record must be the <em>preferred</em> member whole ({@link DumJobPreference}). So the index is kept here, in the
  * {@code job_fingerprint} table ({@link DumJobFingerprintEntry}), and a source's run consults it from
  * {@code discover()}.
  *

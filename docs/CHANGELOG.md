@@ -554,3 +554,4 @@
 - **D106** — With dumont.enrichment.llm.enabled=true, plugins get a DumClassifierFactory bean that builds Turing-backed classifiers for their classification enrichers.
 - **D107** — DumClassificationEnricher keeps answers in a SHA-256-keyed store (persistent in connector-app), caps calls per rolling day, and publishes only labels of a closed set.
 - **D108** — DumTuringClassifier keys Turing's cache by the SHA-256 of prompt and input, so colliding inputs such as "Aa" and "BB" no longer share an answer.
+- **D109 (in-memory resolution index)** — indexAll and crawl resolve every source's records against one shared index across runs, and a source keeps publishing a canonical document another source still holds.

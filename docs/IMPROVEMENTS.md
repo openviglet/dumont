@@ -80,17 +80,27 @@ These constrain every task above:
 
 ### XLI.17 Persistent cross-run resolution (D109)
 
-Found while deduplicating jobs across sources for trabalharei (TRA23). The D18
-cross-source resolve stage runs only inside `crawl()` and holds one call's records in
-memory, so it never sees another run, and the per-source `indexAll` path the API uses
-never reaches it. Sources that publish the same entity on different schedules (four job
-APIs with their own quotas) cannot be resolved against each other at all.
+Found while deduplicating jobs across sources for trabalharei (TRA23). The D18 resolve
+stage used to run only inside `crawl()`, holding one call's records in memory.
 
-Expected: resolution backed by a persistent canonical-id index (fingerprint to member
-ids) that every run of every source of a provider consults, on both `crawl()` and
-`indexAll`.
+The first slice landed in connector-commons. `DumStructuredSourcePlugin.indexAll` files
+every keyed record in a `DumResolutionIndex` shared by the provider's sources, and
+publishes the merge of every live member (`DumResolutionRun`). `crawl()` is now
+`indexAll` per source. A complete run holds the members it no longer saw, and keeps
+publishing a canonical document while another source has a live member, so its own sweep
+cannot delete it. The plugin constructor takes the index; without one,
+`DumInMemoryResolutionIndex` is used.
+
+Left: a persistent `DumResolutionIndex` in connector-app (a members table keyed by
+canonical id, source and record id, with live flag and first-filed order), registered as
+a bean a plugin passes to the constructor. A member stores the record, so the table
+needs a codec for a `DumStructuredRecord`: values typed by the schema (dates and lists
+must round-trip), per-field `DumFieldProvenance`, and transients. Without that codec, a
+restart forgets every member.
 
 Workaround: `DumJobDeduplicator` with a `job_fingerprint` table in `jobs/jobs-plugin`.
+It publishes the preferred member whole rather than a field merge, so it is not a
+drop-in user of this index.
 
 ### XLI.18 Pluggable survivorship (D110)
 

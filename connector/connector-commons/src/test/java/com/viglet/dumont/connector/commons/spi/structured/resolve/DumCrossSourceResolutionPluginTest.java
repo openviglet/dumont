@@ -49,6 +49,8 @@ import com.viglet.turing.commons.se.field.TurSEFieldType;
 /**
  * Plugin-level test for D18 (Done criteria): the same entity arriving from two sources indexes as one
  * canonical document with merged, provenance-tagged fields — each field citing the source that won it.
+ * And D109: resolution holds across separate runs and through {@code indexAll}, and a source keeps
+ * publishing a canonical document another source still carries.
  */
 class DumCrossSourceResolutionPluginTest {
 
@@ -71,9 +73,9 @@ class DumCrossSourceResolutionPluginTest {
 
         plugin.crawl();
 
-        assertEquals(1, context.items.size(),
+        assertEquals(List.of("cs101"), context.ids().stream().distinct().toList(),
                 "the two source records collapse to a single canonical document");
-        TurSNJobItem item = context.items.get(0).turSNJobItem();
+        TurSNJobItem item = context.last("cs101");
         Map<String, Object> attributes = item.getAttributes();
 
         // Merged values: title from catalog-a, workload from catalog-b, code from the first contributor.
@@ -88,8 +90,9 @@ class DumCrossSourceResolutionPluginTest {
         assertTrue(tokens.contains("workload|catalog-b|css|.workload"),
                 "the workload field cites the other source that supplied it");
 
-        // The canonical document is published under its primary source's sites/locale.
-        assertEquals(List.of("Sample-A"), item.getSiteNames());
+        // Each source holding a member publishes the document under its own sites (D109).
+        assertEquals(List.of(List.of("Sample-A"), List.of("Sample-B")),
+                context.items.stream().map(i -> i.turSNJobItem().getSiteNames()).toList());
     }
 
     @Test
@@ -103,11 +106,14 @@ class DumCrossSourceResolutionPluginTest {
                 catalogA, catalogB);
 
         plugin.crawl();
+        plugin.crawl();
 
-        assertEquals(1, context.items.size());
-        Map<String, Object> attributes = context.items.get(0).turSNJobItem().getAttributes();
+        Map<String, Object> attributes = context.last("cs101").getAttributes();
         assertEquals("Algorithms", attributes.get("title"), "the first contributor's title is kept");
         assertEquals("60h", attributes.get("workload"), "the gap is still filled by the mirror");
+        assertTrue(context.items.stream()
+                .allMatch(i -> "Algorithms".equals(i.turSNJobItem().getAttributes().get("title"))),
+                "no run of either source publishes the later contributor's title");
     }
 
     @Test
@@ -120,6 +126,89 @@ class DumCrossSourceResolutionPluginTest {
 
         assertEquals(1, context.items.size(), "an unkeyed record still indexes, on its own id");
         assertEquals("a-1", context.items.get(0).turSNJobItem().getAttributes().get("id"));
+    }
+
+    @Test
+    void sourcesRunSeparatelyThroughIndexAllStillResolve() {
+        FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture("CS101", "Algorithms", null)));
+        FixtureSource catalogB = new FixtureSource("catalog-b", List.of("Sample-B"), Map.of(
+                "b-7", fixture("cs101", null, "60h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"),
+                catalogA, catalogB);
+
+        plugin.indexAll("catalog-b");
+        plugin.indexAll("catalog-a");
+
+        Map<String, Object> attributes = context.last("cs101").getAttributes();
+        assertEquals("Algorithms", attributes.get("title"), "catalog-a's run found catalog-b's member");
+        assertEquals("60h", attributes.get("workload"));
+        assertEquals("cs101", attributes.get("code"), "catalog-b was filed first, so its code wins");
+    }
+
+    @Test
+    void aSourceKeepsPublishingADocumentAnotherSourceStillCarries() {
+        FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture("CS101", "Algorithms", null)));
+        FixtureSource catalogB = new FixtureSource("catalog-b", List.of("Sample-B"), Map.of(
+                "b-7", fixture("CS101", "Intro to Algorithms", "60h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"),
+                catalogA, catalogB);
+        plugin.crawl();
+
+        catalogA.forget("a-1");
+        context.items.clear();
+        plugin.indexAll("catalog-a");
+
+        assertEquals(List.of("cs101"), context.ids(),
+                "catalog-a still publishes the document, so its own sweep does not delete it");
+        Map<String, Object> attributes = context.last("cs101").getAttributes();
+        assertEquals("Intro to Algorithms", attributes.get("title"),
+                "a held member contributes nothing: the document is catalog-b's alone");
+        assertEquals(List.of("Sample-A"), context.last("cs101").getSiteNames());
+    }
+
+    @Test
+    void aDocumentLeavesOnceNoSourceHasAMember() {
+        FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture("CS101", "Algorithms", null)));
+        FixtureSource catalogB = new FixtureSource("catalog-b", List.of("Sample-B"), Map.of(
+                "b-7", fixture("CS101", "Intro to Algorithms", "60h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"),
+                catalogA, catalogB);
+        plugin.crawl();
+
+        catalogA.forget("a-1");
+        catalogB.forget("b-7");
+        context.items.clear();
+        plugin.indexAll("catalog-a");
+        assertEquals(List.of("cs101"), context.ids(), "catalog-b's member is live until its own run");
+
+        context.items.clear();
+        plugin.indexAll("catalog-b");
+        plugin.indexAll("catalog-a");
+        assertTrue(context.items.isEmpty(),
+                "with no live member left, neither source publishes it and their sweeps remove it");
+    }
+
+    @Test
+    void aMergeCanCompleteAMandatoryFieldAcrossRuns() {
+        // catalog-b's record has no title, which is mandatory: alone it is skipped, merged it publishes.
+        FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture("CS101", "Algorithms", null)));
+        FixtureSource catalogB = new FixtureSource("catalog-b", List.of("Sample-B"), Map.of(
+                "b-7", fixture("CS101", null, "60h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"),
+                catalogA, catalogB);
+
+        plugin.indexAll("catalog-b");
+        assertTrue(context.items.isEmpty(), "catalog-b's record alone misses the mandatory title");
+
+        plugin.indexAll("catalog-a");
+        plugin.indexAll("catalog-b");
+        assertEquals(List.of(List.of("Sample-A"), List.of("Sample-B")),
+                context.items.stream().map(i -> i.turSNJobItem().getSiteNames()).toList(),
+                "once catalog-a filed the title, catalog-b's run publishes the merged document too");
     }
 
     // --- Fixtures --------------------------------------------------------------------------------
@@ -147,6 +236,11 @@ class DumCrossSourceResolutionPluginTest {
             this.name = name;
             this.sites = sites;
             this.fixtures = new LinkedHashMap<>(fixtures);
+        }
+
+        /** The source no longer has the record. */
+        void forget(String contentId) {
+            fixtures.remove(contentId);
         }
 
         @Override
@@ -228,6 +322,18 @@ class DumCrossSourceResolutionPluginTest {
 
     private static final class CapturingContext implements DumConnectorContext {
         private final List<DumJobItemWithSession> items = new ArrayList<>();
+
+        /** The id of every published document, in publish order. */
+        List<String> ids() {
+            return items.stream().map(i -> String.valueOf(i.turSNJobItem().getAttributes().get("id"))).toList();
+        }
+
+        /** The last published document with {@code id}. */
+        TurSNJobItem last(String id) {
+            return items.stream().map(DumJobItemWithSession::turSNJobItem)
+                    .filter(i -> id.equals(i.getAttributes().get("id")))
+                    .reduce((first, second) -> second).orElseThrow();
+        }
 
         @Override
         public boolean addJobItem(DumJobItemWithSession dumJobItemWithSession) {

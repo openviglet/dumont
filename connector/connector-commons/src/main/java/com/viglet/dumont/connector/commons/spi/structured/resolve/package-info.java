@@ -22,8 +22,10 @@
  * mirrors, one item under canonical + tracking URLs — into a single canonical document. A
  * {@link com.viglet.dumont.connector.commons.spi.structured.resolve.DumCanonicalKey} derives the
  * stable identity from grounded fields; a
- * {@link com.viglet.dumont.connector.commons.spi.structured.resolve.DumEntityResolver} accumulates
- * records across a crawl and folds those that share an id through the grounding-safe
+ * {@link com.viglet.dumont.connector.commons.spi.structured.resolve.DumResolutionIndex} files every
+ * source's records under it across runs (D109), and a
+ * {@link com.viglet.dumont.connector.commons.spi.structured.resolve.DumResolutionRun} folds those
+ * that share an id through the grounding-safe
  * {@link com.viglet.dumont.connector.commons.spi.structured.resolve.DumRecordMerge} (first
  * contributor wins, never overwrite, never invent), tagging each merged-in field with the source
  * that supplied it so the published provenance stays auditable.

@@ -19,7 +19,6 @@ package com.viglet.dumont.connector.commons.spi.structured;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,7 +35,9 @@ import com.viglet.dumont.connector.commons.spi.structured.coverage.DumCoverageMo
 import com.viglet.dumont.connector.commons.spi.structured.coverage.DumInMemoryCoverageHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnrichmentChain;
 import com.viglet.dumont.connector.commons.spi.structured.resolve.DumCanonicalKey;
-import com.viglet.dumont.connector.commons.spi.structured.resolve.DumEntityResolver;
+import com.viglet.dumont.connector.commons.spi.structured.resolve.DumInMemoryResolutionIndex;
+import com.viglet.dumont.connector.commons.spi.structured.resolve.DumResolutionIndex;
+import com.viglet.dumont.connector.commons.spi.structured.resolve.DumResolutionRun;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumInMemoryProvenanceHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenance;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceHistoryStore;
@@ -80,13 +81,15 @@ import lombok.extern.slf4j.Slf4j;
  * document.
  *
  * <p>
- * <strong>Cross-source resolution (roadmap D18).</strong> When a {@link DumCanonicalKey} is
- * configured, {@link #crawl()} switches from per-source streaming publish to a resolve-then-publish
- * pass: every source's records are accumulated in a {@link DumEntityResolver} and those that share a
- * canonical id are folded — grounding-safe — into one canonical document, published once under its
- * primary source. Because the merge can complete a mandatory field from a second source, the
- * mandatory-field check runs on the <em>merged</em> record. Without a canonical key the per-source
- * behaviour is unchanged.
+ * <strong>Cross-source resolution (roadmap D18, D109).</strong> When a {@link DumCanonicalKey} is
+ * configured, every {@link #indexAll(String)} run files its records in a {@link DumResolutionIndex}
+ * shared by every source of the provider and across runs, and publishes each keyed record as the
+ * canonical document merged — grounding-safe — from every live member any source has filed. Each
+ * source holding a member publishes the document under its own session, so no source's deindex sweep
+ * removes a document another source still carries; it leaves the index once no member is live.
+ * Because the merge can complete a mandatory field from a second source, the mandatory-field check
+ * runs on the <em>merged</em> record. {@link #crawl()} is {@code indexAll} for each source. Without a
+ * canonical key the per-source behaviour is unchanged.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -101,6 +104,8 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     protected final DumProvenanceHistoryStore provenanceHistoryStore;
     /** Cross-source canonical key (D18); {@code null} disables resolution (per-source publish). */
     protected final DumCanonicalKey canonicalKey;
+    /** The canonical-id index every run consults (D109); {@code null} without a canonical key. */
+    protected final DumResolutionIndex resolutionIndex;
 
     protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext) {
         this(dumConnectorContext, DumEnrichmentChain.empty(), new DumInMemoryPreviewSnapshotStore(),
@@ -138,6 +143,19 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore,
             DumCoverageHistoryStore coverageHistoryStore,
             DumProvenanceHistoryStore provenanceHistoryStore, DumCanonicalKey canonicalKey) {
+        this(dumConnectorContext, enrichmentChain, previewSnapshotStore, coverageHistoryStore,
+                provenanceHistoryStore, canonicalKey, null);
+    }
+
+    /**
+     * @param resolutionIndex the canonical-id index (D109); {@code null} keeps one in memory when a
+     *                        canonical key is given
+     */
+    protected DumStructuredSourcePlugin(DumConnectorContext dumConnectorContext,
+            DumEnrichmentChain enrichmentChain, DumPreviewSnapshotStore previewSnapshotStore,
+            DumCoverageHistoryStore coverageHistoryStore,
+            DumProvenanceHistoryStore provenanceHistoryStore, DumCanonicalKey canonicalKey,
+            DumResolutionIndex resolutionIndex) {
         this.dumConnectorContext = dumConnectorContext;
         this.enrichmentChain = enrichmentChain != null ? enrichmentChain : DumEnrichmentChain.empty();
         this.previewSnapshotStore = previewSnapshotStore != null ? previewSnapshotStore
@@ -147,6 +165,11 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         this.provenanceHistoryStore = provenanceHistoryStore != null ? provenanceHistoryStore
                 : new DumInMemoryProvenanceHistoryStore();
         this.canonicalKey = canonicalKey;
+        if (canonicalKey == null) {
+            this.resolutionIndex = null;
+        } else {
+            this.resolutionIndex = resolutionIndex != null ? resolutionIndex : new DumInMemoryResolutionIndex();
+        }
     }
 
     /** The provider that resolves this plugin's configured structured sources. */
@@ -215,43 +238,49 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
 
     @Override
     public void crawl() {
-        if (canonicalKey == null) {
-            provider().sourceNames().forEach(this::indexAll);
-        } else {
-            resolveAndIndex();
+        provider().sourceNames().forEach(this::indexAll);
+    }
+
+    /** A run of {@code source} against the resolution index, or {@code null} without a canonical key. */
+    private DumResolutionRun resolutionRun(DumStructuredSource source) {
+        return canonicalKey == null ? null : new DumResolutionRun(canonicalKey, resolutionIndex, source);
+    }
+
+    /** {@code rec} as it publishes: its canonical document when resolution is on (D109). */
+    private static DumStructuredRecord resolved(DumResolutionRun resolution, DumStructuredRecord rec) {
+        return resolution == null ? rec : resolution.resolve(rec);
+    }
+
+    /**
+     * D104: ids the source reports unchanged and still present stay alive without an extract, so
+     * whichever finish follows does not deindex them. A resolved record stays alive under its
+     * canonical id (D109).
+     */
+    private void keepUnchangedAlive(DumStructuredSource structuredSource, DumConnectorSession session,
+            DumResolutionRun resolution) {
+        Collection<String> unchanged = structuredSource.unchangedIds();
+        if (resolution != null) {
+            unchanged = resolution.documentIds(unchanged);
+        }
+        if (!unchanged.isEmpty()) {
+            int kept = dumConnectorContext.keepAlive(session, unchanged);
+            log.debug("Structured source '{}' kept {} unchanged id(s) alive",
+                    structuredSource.getSourceName(), kept);
         }
     }
 
     /**
-     * Cross-source entity resolution (roadmap <strong>D18</strong>): accumulate every source's
-     * (extracted, enriched) records in a {@link DumEntityResolver}, then publish each resolved entity
-     * once. Records sharing a {@link #canonicalKey canonical id} are folded — grounding-safe — into a
-     * single canonical document under its primary source's session; the mandatory-field check runs on
-     * the merged record, so a field a second source supplied can satisfy it. A record with no
-     * canonical id is published on its own, unmerged.
+     * A run that saw the whole source (D109): hold the members it no longer has, and keep publishing
+     * the canonical documents another source still has a live member of, so this source's sweep does
+     * not delete them.
      */
-    private void resolveAndIndex() {
-        DumEntityResolver resolver = new DumEntityResolver(canonicalKey);
-        provider().sourceNames().forEach(sourceName -> provider().resolve(sourceName)
-                .ifPresent(source -> source.discover().forEach(contentId -> source.extract(contentId)
-                        .map(rec -> enrichmentChain.apply(source, rec))
-                        .ifPresent(rec -> resolver.add(source, rec)))));
-        Map<String, DumConnectorSession> sessions = new LinkedHashMap<>();
-        for (DumEntityResolver.Entity entity : resolver.entities()) {
-            DumStructuredRecord rec = entity.rec();
-            List<String> missing = rec.missingMandatoryFields();
-            if (!missing.isEmpty()) {
-                log.warn("Skipping canonical entity '{}' — missing mandatory field(s) after merge: {}",
-                        rec.id(), missing);
-                continue;
-            }
-            DumStructuredSource primary = entity.source();
-            DumConnectorSession session =
-                    sessions.computeIfAbsent(primary.getSourceName(), name -> newSession(primary));
-            dumConnectorContext.addJobItem(new DumJobItemWithSession(
-                    toJobItem(primary, rec), session, Set.of(), false));
+    private void publishHeld(DumStructuredSource structuredSource, DumConnectorSession session,
+            DumResolutionRun resolution, DumPreviewSnapshot.Builder snapshot,
+            DumProvenanceSnapshot.Builder provenance, DumContentTypeCoverageRecorder byType) {
+        if (resolution != null) {
+            resolution.closeComplete().forEach(held -> publish(structuredSource, held, session,
+                    snapshot, provenance, byType));
         }
-        sessions.values().forEach(session -> dumConnectorContext.finishIndexing(session, false));
     }
 
     @Override
@@ -272,6 +301,8 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // Per content-type coverage/provenance (D25): a typed source buckets each record by its
             // resolved content type so drift reads per type, additively to the source-level series.
             DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
+            // Cross-source resolution (D109): each keyed record publishes as its canonical document.
+            DumResolutionRun resolution = resolutionRun(structuredSource);
             // Bounded-concurrency extraction (roadmap D31): extract(id) may run on a small pool while
             // the consumer below — publish + snapshot/coverage/provenance capture — stays serial on
             // this thread, so capture remains single-threaded and order-independent. Default
@@ -281,8 +312,8 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 outcome = DumBoundedExtraction.extractEach(structuredSource, structuredSource.discover(),
                         extractionConcurrency(), extractionTimeoutMs(),
                         rec -> publish(structuredSource,
-                                enrichmentChain.apply(structuredSource, rec), session, snapshot,
-                                provenance, byType));
+                                resolved(resolution, enrichmentChain.apply(structuredSource, rec)),
+                                session, snapshot, provenance, byType));
             } catch (RuntimeException e) {
                 // An exception escaped the extraction loop — finish standalone (D33) so the
                 // destructive deindex sweep is skipped and the prior index survives.
@@ -292,11 +323,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             }
             // D104: ids the source reports unchanged and still present stay alive without an
             // extract, so whichever finish follows does not deindex them.
-            Collection<String> unchanged = structuredSource.unchangedIds();
-            if (!unchanged.isEmpty()) {
-                int kept = dumConnectorContext.keepAlive(session, unchanged);
-                log.debug("Structured source '{}' kept {} unchanged id(s) alive", source, kept);
-            }
+            keepUnchangedAlive(structuredSource, session, resolution);
             if (!outcome.completed()) {
                 // The run was interrupted before visiting every discovered id; finishing
                 // non-standalone would treat the rest of the catalog as removed (D33).
@@ -306,7 +333,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 return;
             }
             if (structuredSource.incremental()) {
-                finishIncrementalRun(structuredSource, session, source, outcome);
+                finishIncrementalRun(structuredSource, session, source, outcome, resolution);
                 return;
             }
             if (!structuredSource.discoveryComplete()) {
@@ -323,6 +350,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                         runNotes(structuredSource));
                 return;
             }
+            publishHeld(structuredSource, session, resolution, snapshot, provenance, byType);
             // A complete run can still have something to say (D96); an empty note list records nothing.
             List<String> notes = runNotes(structuredSource);
             if (!notes.isEmpty()) {
@@ -386,7 +414,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     }
 
     private void finishIncrementalRun(DumStructuredSource structuredSource, DumConnectorSession session,
-            String source, DumExtractionOutcome outcome) {
+            String source, DumExtractionOutcome outcome, DumResolutionRun resolution) {
         // An incremental source (D92) never sweeps: no run is expected to reach every item, so what a
         // run missed is not a removal. Items leave by expiry instead — unless this run was a failure
         // wave, which says nothing about what is gone.
@@ -397,6 +425,12 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         }
         List<String> notes = new ArrayList<>(runNotes(structuredSource));
         Collection<String> expired = structuredSource.expiredIds();
+        if (resolution != null && !expired.isEmpty()) {
+            // An expired member leaves its canonical document only once no member of it is live (D109).
+            DumResolutionRun.Expiry expiry = resolution.expire(expired);
+            expiry.republish().forEach(kept -> publish(structuredSource, kept, session, null, null, null));
+            expired = expiry.deindex();
+        }
         if (!expired.isEmpty()) {
             int queued = dumConnectorContext.deIndexById(session, expired,
                     List.copyOf(structuredSource.getSiteNames()));
@@ -438,7 +472,12 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     public void indexById(String source, List<String> contentId) {
         provider().resolve(source).ifPresentOrElse(structuredSource -> {
             DumConnectorSession session = newSession(structuredSource);
-            contentId.forEach(id -> indexOne(structuredSource, id, session, null, null, null));
+            DumResolutionRun resolution = resolutionRun(structuredSource);
+            contentId.forEach(id -> structuredSource.extract(id).ifPresentOrElse(
+                    rec -> publish(structuredSource,
+                            resolved(resolution, enrichmentChain.apply(structuredSource, rec)), session,
+                            null, null, null),
+                    () -> log.warn("No record extracted for id '{}' in source '{}'", id, source)));
             dumConnectorContext.finishIndexing(session, true);
         }, () -> log.error("Structured source '{}' not found", source));
     }
@@ -468,16 +507,6 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         return provider().resolve(source)
                 .map(DumStructuredSource::getLocale)
                 .orElse(null);
-    }
-
-    private void indexOne(DumStructuredSource source, String contentId, DumConnectorSession session,
-            DumPreviewSnapshot.Builder snapshot, DumProvenanceSnapshot.Builder provenance,
-            DumContentTypeCoverageRecorder byType) {
-        source.extract(contentId).ifPresentOrElse(
-                rec -> publish(source, enrichmentChain.apply(source, rec), session, snapshot,
-                        provenance, byType),
-                () -> log.warn("No record extracted for id '{}' in source '{}'", contentId,
-                        source.getSourceName()));
     }
 
     private void publish(DumStructuredSource source, DumStructuredRecord rec,
