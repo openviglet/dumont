@@ -164,17 +164,27 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
     @Override
     public void indexAll(String source) {
         sourceService.getDumAemSourceByName(source).ifPresentOrElse(
-                aemSource -> indexAllEnvironments(source, aemSource),
-                () -> log.error("AEM source '{}' not found", source));
+                aemSource -> indexEnabledEnvironments(source, aemSource),
+                () -> {
+                    log.error("AEM source '{}' not found", source);
+                    // D132: no session will finish this run, so it ends here or its lock is never
+                    // released.
+                    dumConnectorContext.endRunWithoutSession(source);
+                });
     }
 
-    private void indexAllEnvironments(String source, DumAemSource aemSource) {
+    private void indexEnabledEnvironments(String source, DumAemSource aemSource) {
         List<DumAemEnv> environments = provider.enabledEnvironments(aemSource);
         if (environments.isEmpty()) {
             log.warn("AEM source '{}' has no enabled environment (author/publish) — nothing to index",
                     source);
+            dumConnectorContext.endRunWithoutSession(source);
             return;
         }
+        indexAllEnvironments(source, aemSource, environments);
+    }
+
+    private void indexAllEnvironments(String source, DumAemSource aemSource, List<DumAemEnv> environments) {
         DumConnectorSession session = newSession(aemSource);
         DumAemEnv primaryEnv = environments.getFirst();
         DumAemStructuredSource primary = provider.adapter(aemSource, primaryEnv);
@@ -184,7 +194,14 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         // Per content-type coverage/provenance (D25): bucket each record by its resolved content type
         // so drift reads per type, additively to the source-level series. Captured once, primary env.
         DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
-        List<String> contentIds = primary.discover();
+        List<String> contentIds;
+        try {
+            contentIds = primary.discover();
+        } catch (RuntimeException e) {
+            // D132: a failed discovery ends the run like any other abort, finishing its session.
+            finishPartialRunStandalone(session, source, "aborted by an exception", e);
+            return;
+        }
         DumExtractionOutcome outcome = DumExtractionOutcome.completed(contentIds.size());
         try {
             for (DumAemEnv environment : environments) {

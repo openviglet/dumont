@@ -82,25 +82,3 @@ These constrain every task above:
 
 ## XLIII Connector run control
 
-### XLIII.9 AEM run ends without releasing its lock (D132)
-
-Found while shipping D128, which made the scheduler take the same run lock as the API.
-
-The lock a run start takes (`DumConnectorRunService.start`) is released by
-`DumConnectorContextImpl.finishIndexing`. `DumAemPlugin.indexAll` is `@Async`, so the
-start cannot release it in a `finally`, and three of its paths never call
-`finishIndexing`:
-
-- the source is not found (`getDumAemSourceByName` empty): logged and returned;
-- `provider.enabledEnvironments` is empty: logged as "nothing to index" and returned;
-- `primary.discover()` throws: it sits before the `try`, so the exception leaves the async
-  method with no session finished.
-
-Each leaves the source locked until restart: every later `index/<source>/all` answers
-409, and since D128 every scheduled tick skips the source with "already running".
-
-Expected: an AEM run that ends without a session releases the lock. Either the plugin
-reaches the context on those paths (a `DumConnectorContext` method that ends a run with
-no session, which `DumConnectorContextImpl` maps to `finishProcessing`), or the
-discovery moves inside the `try` and the two early returns go through it. A test per
-path asserts `finishProcessing` is reached.

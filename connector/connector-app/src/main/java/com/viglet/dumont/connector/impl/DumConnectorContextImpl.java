@@ -182,6 +182,11 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     }
 
     @Override
+    public void endRunWithoutSession(String source) {
+        indexingService.finishProcessing(source);
+    }
+
+    @Override
     public void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes) {
         recordRunOutcome(session, partial, notes, List.of());
     }

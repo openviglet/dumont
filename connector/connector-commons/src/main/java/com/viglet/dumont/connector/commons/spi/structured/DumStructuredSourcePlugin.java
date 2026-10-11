@@ -329,7 +329,11 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             } catch (RuntimeException e) {
                 log.warn("Structured source '{}' failed to end its run: {}", source, e.getMessage());
             }
-        }, () -> log.error("Structured source '{}' not found", source));
+        }, () -> {
+            log.error("Structured source '{}' not found", source);
+            // D132: no session will finish this run, so it ends here.
+            dumConnectorContext.endRunWithoutSession(source);
+        });
     }
 
     /** One full run of {@code structuredSource}, finished on whichever path it takes. */

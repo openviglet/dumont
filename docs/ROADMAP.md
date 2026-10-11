@@ -107,7 +107,6 @@ This track has no remaining pending tasks.
 
 ## Track P — Connector run control
 
-- 📋 **D132** (deps: —) **An AEM run that never opens a session (no source, no enabled environment, discovery throws) keeps its run lock** — The source answers 409 to every later run and the scheduler skips it until restart. → §XLIII.9
 
 ## Non-goals (do NOT add as tasks)
 

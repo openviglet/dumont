@@ -580,3 +580,4 @@
 - **D129** — A scheduled crawl isolates each source and each plugin: one that throws outside extraction is logged with its name, its lock is released, and the crawl moves on.
 - **D130 (run warnings recorded and shown)** — A source can raise runWarnings(); a complete run carrying one is stored as warned, not partial, and the indexing stats table marks it with a Warning badge and its warnings.
 - **D131 (grounded list extraction)** — DumExtractionEnricher fills a multi-valued field from a DumExtractorFactory extractor; only items found in the text as whole words publish, cached and capped like classification.
+- **D132** — An AEM or structured run that ends with no session (source not found, no enabled environment) calls endRunWithoutSession, which releases its lock; a failed AEM discovery finishes standalone.

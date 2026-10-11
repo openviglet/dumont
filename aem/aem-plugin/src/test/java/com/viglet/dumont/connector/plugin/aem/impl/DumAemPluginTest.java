@@ -114,6 +114,8 @@ class DumAemPluginTest {
 
         verify(dumConnectorContext, never()).finishIndexing(org.mockito.ArgumentMatchers.any(
                 DumConnectorSession.class), org.mockito.ArgumentMatchers.anyBoolean());
+        // D132: the run still ends, so its lock is released.
+        verify(dumConnectorContext).endRunWithoutSession("missing");
     }
 
     @Test
@@ -127,6 +129,25 @@ class DumAemPluginTest {
 
         verify(dumConnectorContext, never()).finishIndexing(org.mockito.ArgumentMatchers.any(
                 DumConnectorSession.class), org.mockito.ArgumentMatchers.anyBoolean());
+        verify(dumConnectorContext).endRunWithoutSession("no-env");
+    }
+
+    @Test
+    @DisplayName("indexAll whose discovery throws finishes its session standalone (D132)")
+    void aDiscoveryThatThrowsStillFinishesTheRun() {
+        DumAemSource source = DumAemSource.builder().name("src").build();
+        when(dumAemSourceService.getDumAemSourceByName("src")).thenReturn(Optional.of(source));
+        when(provider.enabledEnvironments(source)).thenReturn(List.of(DumAemEnv.AUTHOR));
+        DumAemStructuredSource adapter = mock(DumAemStructuredSource.class);
+        when(adapter.schema()).thenReturn(com.viglet.dumont.connector.commons.spi.structured
+                .DumStructuredSchema.builder().text("title").build());
+        when(adapter.discover()).thenThrow(new IllegalStateException("QueryBuilder unreachable"));
+        when(provider.adapter(source, DumAemEnv.AUTHOR)).thenReturn(adapter);
+
+        dumAemPlugin.indexAll("src");
+
+        verify(dumConnectorContext).finishIndexing(any(DumConnectorSession.class), org.mockito
+                .ArgumentMatchers.eq(true));
     }
 
     @Test

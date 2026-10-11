@@ -172,6 +172,14 @@ class DumConnectorContextImplTest {
     }
 
     @Test
+    void aRunEndedWithoutASessionReleasesItsLock() {
+        // D132: an AEM run with no enabled environment must not leave the source "already running".
+        context.endRunWithoutSession("wknd");
+
+        verify(indexingService).finishProcessing("wknd");
+    }
+
+    @Test
     void aRunsWarningsReachTheIndexingService() {
         // D130: a complete run can warn without being partial.
         DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);

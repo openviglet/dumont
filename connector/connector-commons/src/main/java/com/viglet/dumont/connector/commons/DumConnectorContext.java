@@ -97,6 +97,17 @@ public interface DumConnectorContext {
         recordRunOutcome(session, partial, notes);
     }
 
+    /**
+     * Ends a run of {@code source} that never opened a session (roadmap <strong>D132</strong>): the
+     * source was not found, had nothing enabled to index, or failed before its first session. A run
+     * with a session ends through {@link #finishIndexing}; this is the other way out, and what it
+     * releases is the source's run lock, so a later run is not refused as already running. A no-op
+     * by default.
+     */
+    default void endRunWithoutSession(String source) {
+        // Nothing holds a run open.
+    }
+
     List<DumConnectorIndexing> getIndexingItem(String objectId, String source, String provider);
 
     List<String> getObjectIdByDependency(String source, String provider,
