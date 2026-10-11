@@ -258,13 +258,16 @@ class DumAdzunaAdapterTest {
     void aBudgetRefusalEndsTheRunCleanlyWithWhatWasFetched() {
         DumJobSource source = source(null);
         DumJobCallBudget budget = DumJobCallBudget.builder(clock).cap(Window.MINUTE, 2).build();
+        DumJobFetchContext context = new DumJobFetchContext(source, budget);
 
-        List<Map<String, Object>> jobs = adapter.fetch(new DumJobFetchContext(source, budget));
+        List<Map<String, Object>> jobs = adapter.fetch(context);
 
         assertThat(jobs).hasSize(7);
         assertThat(fetcher.pages()).containsExactly("newest:1", "newest:2");
         // No category query ran, so the rotation did not move.
         assertThat(source.getCursor()).isNull();
+        // D116: the stop reaches the run record, not only the log.
+        assertThat(context.notes()).containsExactly("call budget exhausted at newest page 3");
     }
 
     @Test

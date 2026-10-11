@@ -17,6 +17,8 @@
 package com.viglet.dumont.connector.plugin.jobs.source;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -35,9 +37,11 @@ import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
  *                  this source; it never reports ids this run fetched
  * @param firstSeen when a document id was first fetched by this source: an earlier run's time, or this
  *                  run's when the id is new; {@code null} when the caller keeps no history
+ * @param notes     where the adapter writes why its fetch stopped short (D116): a spent budget, a page
+ *                  that failed. They become the run's notes (D96); {@code null} starts an empty list
  */
 public record DumJobFetchContext(DumJobSource source, DumJobCallBudget budget, Predicate<String> seen,
-        Function<String, Instant> firstSeen) {
+        Function<String, Instant> firstSeen, List<String> notes) {
 
     public DumJobFetchContext {
         if (source == null) {
@@ -52,6 +56,15 @@ public record DumJobFetchContext(DumJobSource source, DumJobCallBudget budget, P
         if (firstSeen == null) {
             firstSeen = id -> null;
         }
+        if (notes == null) {
+            notes = new ArrayList<>();
+        }
+    }
+
+    /** A context that knows which ids earlier runs fetched and when, collecting its own notes. */
+    public DumJobFetchContext(DumJobSource source, DumJobCallBudget budget, Predicate<String> seen,
+            Function<String, Instant> firstSeen) {
+        this(source, budget, seen, firstSeen, null);
     }
 
     /** A context with no seen history: every id reads as new. */
@@ -75,5 +88,21 @@ public record DumJobFetchContext(DumJobSource source, DumJobCallBudget budget, P
      */
     public Instant firstSeenAt(String id) {
         return id == null ? null : firstSeen.apply(id);
+    }
+
+    /**
+     * Record why the fetch stopped short (trabalharei D116), in a sentence an operator reads in the
+     * run record: the adapter keeps logging it too.
+     */
+    public void note(String note) {
+        if (note != null && !note.isBlank()) {
+            notes.add(note);
+        }
+    }
+
+    /** What the fetch noted, in order. */
+    @Override
+    public List<String> notes() {
+        return List.copyOf(notes);
     }
 }

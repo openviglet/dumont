@@ -337,11 +337,13 @@ class DumJoobleAdapterTest {
     void aBudgetRefusalEndsTheRunWithWhatWasFetched() {
         DumJobSource source = source(null);
         DumJobCallBudget budget = DumJobCallBudget.builder(clock).cap(Window.MINUTE, 1).build();
+        DumJobFetchContext context = new DumJobFetchContext(source, budget);
 
-        List<Map<String, Object>> jobs = adapter.fetch(new DumJobFetchContext(source, budget));
+        List<Map<String, Object>> jobs = adapter.fetch(context);
 
         assertThat(jobs).hasSize(4);
         assertThat(fetcher.pages()).containsExactly("emprego:1");
+        assertThat(context.notes()).containsExactly("call budget exhausted at 'emprego' page 2");
         // A call was made, so the rotation moved.
         assertThat(source.getCursor()).isEqualTo("1");
     }

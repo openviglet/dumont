@@ -145,6 +145,8 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     private final DumJobTombstones tombstones;
 
     private Map<String, Map<String, Object>> records;
+    /** Why this run's fetch stopped short, as the adapter noted it (D116). */
+    private List<String> notes = List.of();
     /** Postings read before {@link #discover()} (indexById), kept so an enricher's annotate sticks. */
     private final Map<String, Map<String, Object>> adhoc = new LinkedHashMap<>();
 
@@ -214,6 +216,17 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     @Override
     public List<String> discover() {
         return new ArrayList<>(load().keySet());
+    }
+
+    /**
+     * Why this run's fetch stopped short (trabalharei, roadmap <strong>D116</strong>): a call budget
+     * refused, a page failed, a partner answered HTTP 429. The run record shows them (D96). The run is
+     * still complete: {@link #discover()} replays every stored open posting, so a fetch that stopped
+     * early lists fewer new postings but drops none, and the sweep that removes expired ones stays on.
+     */
+    @Override
+    public List<String> runNotes() {
+        return notes;
     }
 
     /**
@@ -329,6 +342,7 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             postings = adapter.fetch(context);
         } finally {
             saveCursor(cursorBefore);
+            notes = context.notes();
         }
         for (Map<String, Object> raw : postings) {
             ingest(raw, now, live, expiries, run);

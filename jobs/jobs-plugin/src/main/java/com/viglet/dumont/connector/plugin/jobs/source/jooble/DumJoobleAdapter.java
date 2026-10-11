@@ -158,6 +158,7 @@ public class DumJoobleAdapter implements DumJobSourceAdapter {
                 if (!context.budget().tryAcquire()) {
                     log.info("Jooble source '{}': call budget exhausted at '{}' page {}", name,
                             keywords, page);
+                    context.note("call budget exhausted at '%s' page %d".formatted(keywords, page));
                     return;
                 }
                 calls++;
@@ -170,6 +171,7 @@ public class DumJoobleAdapter implements DumJobSourceAdapter {
                     }
                     log.warn("Jooble source '{}': '{}' page {} failed ({}) — keeping the {} posting(s) "
                             + "already fetched", name, keywords, page, e.getMessage(), postings.size());
+                    context.note("'%s' page %d failed (%s)".formatted(keywords, page, e.getMessage()));
                     return;
                 }
                 if (jobs.isEmpty()) {

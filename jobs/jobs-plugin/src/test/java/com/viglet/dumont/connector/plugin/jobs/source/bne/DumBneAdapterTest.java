@@ -385,11 +385,13 @@ class DumBneAdapterTest {
         DumJobSource source = source(null);
         source.setCursor("5");
         DumJobCallBudget budget = DumJobCallBudget.builder(clock).cap(Window.MINUTE, 2).build();
+        DumJobFetchContext context = new DumJobFetchContext(source, budget);
 
-        List<Map<String, Object>> jobs = adapter.fetch(new DumJobFetchContext(source, budget));
+        List<Map<String, Object>> jobs = adapter.fetch(context);
 
         // Both calls went to the unfiltered list; the UF query never ran, so the rotation stays.
         assertThat(fetcher.pages()).containsExactly("all:1", "all:2");
+        assertThat(context.notes()).singleElement().asString().startsWith("call budget exhausted at ");
         assertThat(jobs).hasSize(6);
         assertThat(source.getCursor()).isEqualTo("5");
     }

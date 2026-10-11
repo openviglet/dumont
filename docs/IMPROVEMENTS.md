@@ -78,28 +78,6 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.24 Jobs runs report their stops (D116)
-
-Found while shipping D96. Structured sources can now return `runNotes()`
-(connector-commons `DumStructuredSource`), and the plugin loop records them, with the
-run's partial flag, on the run's indexing-stats row, which the console's Indexing Stats
-table shows.
-
-The `jobs` module predates that hook: when a paid-call budget is spent, or a partner
-answers HTTP 429, its adapters (Adzuna, Jooble, BNE, JSearch) still only log a WARN
-line. Its runs therefore still show up as complete runs with fewer documents, which is
-exactly what D96 set out to stop.
-
-Expected: `DumJobsStructuredSource` overrides `runNotes()` with one note per stop its
-adapters hit (the budget that was spent, the page and HTTP status that failed), and
-`discoveryComplete()` answers `false` for those runs so the loop finishes them
-standalone and marks them partial. The adapters already compute each case for their WARN
-lines, so the note is the same sentence, collected instead of only logged. With D100,
-the unresolved-location count moves from the `DumJobsPlugin.indexAll` override to the
-location enricher's `onRunEnd`, and the override goes away. With D104, still-open
-postings the quota did not reach are returned from `unchangedIds()`, so
-`DumJobSeen.payload` and its replay through `extract()` can go.
-
 ### XLI.25 Jobs enrichers read transients (D117)
 
 Found while shipping D97. A structured record now carries transient, never-indexed
@@ -209,5 +187,25 @@ whichever path D120 takes. Then `DumJobsPlugin` drops its `indexAll` override.
 
 The resets the override does before a run need no hook: an enricher that resets in
 `onRunEnd` starts every run clean, since `runEnd` is called once per run on every path.
+
+### XLI.30 Jobs replay versus unchanged ids (D122)
+
+Split out of D116's design. `DumJobsStructuredSource.discover()` reports this run's
+fetch plus every stored open posting, and `extract()` rebuilds each stored one from
+`DumJobSeen.payload`, so the sweep sees it again without a partner call. D104 added
+`DumStructuredSource.unchangedIds()`: ids still open at the source that the loop keeps
+alive without an extract.
+
+The idea: return the stored open postings that this run did not fetch from
+`unchangedIds()` instead of replaying them, and drop the payload replay through
+`extract()`.
+
+What has to be settled first, because the replay does more than keep ids alive:
+- Enrichment runs on every replayed posting each run, so a taxonomy or dictionary change reaches stored postings today; kept-alive ids would keep their last indexed values until the partner returns them again.
+- The deduplicator (`DumJobDeduplicator`, D120) reads the payloads to choose and publish a group's preferred member, and a group document can change when another source's member arrives, which a keep-alive cannot express.
+- Tombstones (TRA24) name the occupation and title of an expired posting from the stored payload.
+
+So the payload may stay even if the replay goes. This is a question for whoever owns the
+jobs module, not a ready design.
 
 ## XLII Web-crawler hardening (real-world sources)

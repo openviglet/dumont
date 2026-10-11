@@ -161,6 +161,7 @@ public class DumAdzunaAdapter implements DumJobSourceAdapter {
                 if (!context.budget().tryAcquire()) {
                     log.info("Adzuna source '{}': call budget exhausted at {} page {}",
                             context.source().getName(), label, page);
+                    context.note("call budget exhausted at %s page %d".formatted(label, page));
                     return true;
                 }
                 calls++;
@@ -174,6 +175,7 @@ public class DumAdzunaAdapter implements DumJobSourceAdapter {
                     log.warn("Adzuna source '{}': {} page {} failed ({}) — keeping the {} posting(s) "
                             + "already fetched", context.source().getName(), label, page,
                             e.getMessage(), postings.size());
+                    context.note("%s page %d failed (%s)".formatted(label, page, e.getMessage()));
                     return false;
                 }
                 if (results.isEmpty()) {

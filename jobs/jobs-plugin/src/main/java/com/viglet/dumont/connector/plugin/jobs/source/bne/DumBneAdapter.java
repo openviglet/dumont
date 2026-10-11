@@ -172,6 +172,7 @@ public class DumBneAdapter implements DumJobSourceAdapter {
             for (int page = 1; page <= settings.maxPages(); page++) {
                 if (!context.budget().tryAcquire()) {
                     log.info("BNE source '{}': call budget exhausted at {} page {}", name, label, page);
+                    context.note("call budget exhausted at %s page %d".formatted(label, page));
                     return true;
                 }
                 calls++;
@@ -184,6 +185,7 @@ public class DumBneAdapter implements DumJobSourceAdapter {
                     }
                     log.warn("BNE source '{}': {} page {} failed ({}) — keeping the {} posting(s) "
                             + "already fetched", name, label, page, e.getMessage(), postings.size());
+                    context.note("%s page %d failed (%s)".formatted(label, page, e.getMessage()));
                     return false;
                 }
                 if (result.vagas().isEmpty()) {

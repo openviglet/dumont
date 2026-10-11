@@ -436,11 +436,15 @@ class DumJSearchAdapterTest {
         // 500 calls 10 days ago: the day and week windows are free, the 30-day one is full.
         List<Instant> prior = Collections.nCopies(500, NOW.minus(Duration.ofDays(10)));
 
-        List<Map<String, Object>> jobs = adapter.fetch(new DumJobFetchContext(source, budget(source, prior)));
+        DumJobFetchContext context = new DumJobFetchContext(source, budget(source, prior));
+
+        List<Map<String, Object>> jobs = adapter.fetch(context);
 
         assertThat(jobs).isEmpty();
         assertThat(fetcher.requests).isEmpty();
         assertThat(source.getCursor()).isEqualTo("2");
+        assertThat(context.notes()).singleElement().asString()
+                .startsWith("monthly budget spent (500 calls in 30 days) before ");
         List<ILoggingEvent> monthly = appender.list.stream()
                 .filter(e -> e.getFormattedMessage().contains("monthly budget spent")).toList();
         assertThat(monthly).singleElement().satisfies(e -> {

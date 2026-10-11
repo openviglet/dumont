@@ -187,6 +187,7 @@ public class DumJSearchAdapter implements DumJobSourceAdapter {
                     log.warn("JSearch source '{}': '{}' page {} failed ({}) — not retried, keeping the {} "
                             + "posting(s) already fetched", name, query, page, e.getMessage(),
                             postings.size());
+                    context.note("'%s' page %d failed (%s)".formatted(query, page, e.getMessage()));
                     return;
                 }
                 if (data.isEmpty()) {
@@ -210,6 +211,8 @@ public class DumJSearchAdapter implements DumJobSourceAdapter {
                         + "is reached, so the run stopped before '{}' page {} with {} posting(s); no "
                         + "JSearch call is made until older calls age out", name, monthCap(), query, page,
                         postings.size());
+                context.note("monthly budget spent (%s calls in 30 days) before '%s' page %d".formatted(
+                        monthCap(), query, page));
                 return;
             }
             List<String> spent = new ArrayList<>();
@@ -219,9 +222,10 @@ public class DumJSearchAdapter implements DumJobSourceAdapter {
                     spent.add(window.name().toLowerCase(Locale.ROOT));
                 }
             }
+            String cap = spent.isEmpty() ? "a" : String.join("/", spent);
             log.info("JSearch source '{}': call budget exhausted ({} cap) before '{}' page {} — run "
-                    + "stopped with {} posting(s)", name, spent.isEmpty() ? "a" : String.join("/", spent),
-                    query, page, postings.size());
+                    + "stopped with {} posting(s)", name, cap, query, page, postings.size());
+            context.note("call budget exhausted (%s cap) before '%s' page %d".formatted(cap, query, page));
         }
 
         private Object monthCap() {
