@@ -234,6 +234,42 @@ class DumCrossSourceResolutionPluginTest {
         assertTrue(tokens.contains("title|catalog-b|css|h1"), "every field cites the one source kept");
     }
 
+    @Test
+    void everyContributingSourceFinishesItsOwnSweptRun() {
+        // D112: catalog-b's record merges into catalog-a's document, and catalog-b is still swept.
+        FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture("CS101", "Algorithms", null)));
+        FixtureSource catalogB = new FixtureSource("catalog-b", List.of("Sample-B"), Map.of(
+                "b-7", fixture("cs101", null, "60h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"), catalogA, catalogB);
+
+        plugin.crawl();
+
+        assertEquals(List.of("catalog-a:swept", "catalog-b:swept"), context.finished);
+    }
+
+    @Test
+    void aFailureWaveUnderResolutionFinishesStandaloneAndHoldsNothing() {
+        // D112: the failure-wave guard applies on the resolution path, and a run it stops is not
+        // read as the source no longer having its records.
+        FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture("CS101", "Algorithms", null)));
+        FixtureSource catalogB = new FixtureSource("catalog-b", List.of("Sample-B"), Map.of(
+                "b-7", fixture("CS101", null, "60h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"), catalogA, catalogB);
+        plugin.crawl();
+
+        catalogB.failing = true;
+        context.finished.clear();
+        plugin.indexAll("catalog-b");
+        assertEquals(List.of("catalog-b:standalone"), context.finished);
+
+        context.items.clear();
+        plugin.indexAll("catalog-a");
+        assertEquals("60h", context.last("cs101").getAttributes().get("workload"),
+                "catalog-b's member is still live after the stopped run");
+    }
+
     // --- Fixtures --------------------------------------------------------------------------------
 
     private static final DumStructuredSchema SCHEMA = DumStructuredSchema.builder()
@@ -254,6 +290,8 @@ class DumCrossSourceResolutionPluginTest {
         private final String name;
         private final Collection<String> sites;
         private final Map<String, Fixture> fixtures;
+        /** Every extract throws, as in a network blip. */
+        boolean failing;
 
         FixtureSource(String name, Collection<String> sites, Map<String, Fixture> fixtures) {
             this.name = name;
@@ -298,6 +336,9 @@ class DumCrossSourceResolutionPluginTest {
 
         @Override
         public Optional<DumStructuredRecord> extract(String contentId) {
+            if (failing) {
+                throw new IllegalStateException("fetch failed for " + contentId);
+            }
             Fixture fixture = fixtures.get(contentId);
             if (fixture == null) {
                 return Optional.empty();
@@ -374,9 +415,12 @@ class DumCrossSourceResolutionPluginTest {
             return items.add(dumJobItemWithSession);
         }
 
+        /** Each finished run, as {@code source:swept} or {@code source:standalone}. */
+        private final List<String> finished = new ArrayList<>();
+
         @Override
         public void finishIndexing(DumConnectorSession session, boolean standalone) {
-            // no-op for the test
+            finished.add(session.getSource() + (standalone ? ":standalone" : ":swept"));
         }
 
         @Override

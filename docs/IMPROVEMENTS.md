@@ -78,19 +78,6 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.20 Resolve path keeps the run lifecycle (D112)
-
-Found while reading the D18 path for trabalharei's job deduplication (TRA23).
-`resolveAndIndex` in `crawl()` skips the per-source safeguards that `indexAll` applies
-(the zero-yield and failure-wave guards, the incremental-run handling, manifest
-provisioning), and it finishes only the primary sources' sessions, so a source whose
-records all merged into another source's is never swept.
-
-Expected: the resolve path goes through the same per-source run lifecycle as `indexAll`
-(guards, provisioning, session finish and sweep for every contributing source).
-
-Workaround: none; the jobs module does not use the D18 path.
-
 ### XLI.24 Jobs runs report their stops (D116)
 
 Found while shipping D96. Structured sources can now return `runNotes()`
