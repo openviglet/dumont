@@ -29,6 +29,7 @@ roadmap = "docs/ROADMAP.md"
 changelog = "docs/CHANGELOG.md"
 improvements = "docs/IMPROVEMENTS.md"
 strategy = "docs/STRATEGY.md"
+deferred = "docs/DEFERRED.md"
 
 [ids]
 # The width every id here is zero-filled to: `D01`, never `D1`. Declared rather than
