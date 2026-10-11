@@ -78,23 +78,6 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.19 Reference-counted deindex for shared documents (D111)
-
-Found while deduplicating jobs across sources for trabalharei (TRA23). Dumont tracks
-what each run published per (objectId, source). When several sources of one provider
-publish the same document id, one source's run-end sweep sends a delete for an id it
-tracked but did not publish this time, and the delete removes the document from the
-index even though another source still tracks it. That source's next run sees an
-unchanged checksum and does not resend, so the document is gone silently until its
-content changes.
-
-Expected: a reference-counted delete (deindex only when no source of the provider still
-tracks the id) or an owner notion for shared documents.
-
-Workaround: in `jobs/jobs-plugin`, every source holding a row in a group republishes the
-group document while any member is open, keeping expired rows as placeholders; each
-shared document is therefore sent once per source.
-
 ### XLI.20 Resolve path keeps the run lifecycle (D112)
 
 Found while reading the D18 path for trabalharei's job deduplication (TRA23).
@@ -258,6 +241,8 @@ Open points the move has to settle: the document id is `job-<hash>` today, while
 commons canonical id is the key's own text, so either the key yields that id or the
 published URL rewrite moves with it. Vanished-group tombstones (TRA24) need to know when
 a canonical id is dropped, which is D113's hook. The per-pair duplicate rate has no
-counterpart in the commons run and stays a jobs summary.
+counterpart in the commons run and stays a jobs summary. Since D111 the run-end sweep no
+longer deletes a document another source of the provider still tracks, so held rows are
+no longer what keeps a shared group indexed.
 
 ## XLII Web-crawler hardening (real-world sources)

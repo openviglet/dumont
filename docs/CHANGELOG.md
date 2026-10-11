@@ -556,3 +556,4 @@
 - **D108** — DumTuringClassifier keys Turing's cache by the SHA-256 of prompt and input, so colliding inputs such as "Aa" and "BB" no longer share an answer.
 - **D109** — Resolution members persist in dum_resolution_member through DumRecordCodec, so a plugin built with the DumResolutionIndexFactory bean resolves across restarts.
 - **D110** — A provider declares DumSurvivorship by overriding survivorship(): the D18 field merge, a field merge with per-field member order, or one member kept whole by a comparator.
+- **D111** — The run-end sweep sends a delete only for the sites no other source of the provider still tracks the document on in that locale, so a shared document survives one source dropping it.

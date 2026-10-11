@@ -204,6 +204,57 @@ class DumConnectorContextImplTest {
         verify(indexingService).deleteContentsToBeDeIndexed(session);
     }
 
+    private static DumConnectorIndexingModel row(String source, Locale locale, String... sites) {
+        return DumConnectorIndexingModel.builder().objectId("job-1").provider("turing").source(source)
+                .locale(locale).sites(new java.util.ArrayList<>(List.of(sites))).build();
+    }
+
+    private List<DumJobItemWithSession> sweep(DumConnectorSession session, DumConnectorIndexingModel stale,
+            List<DumConnectorIndexingModel> others) {
+        when(indexingService.getShouldBeDeIndexedList(session)).thenReturn(List.of(stale));
+        when(indexingService.findAllByProviderAndObjectIdIn("turing", List.of("job-1"))).thenReturn(others);
+
+        context.finishIndexing(session, false);
+
+        ArgumentCaptor<DumJobItemWithSession> deferred = ArgumentCaptor.forClass(DumJobItemWithSession.class);
+        verify(batchProcessor, org.mockito.Mockito.atLeast(0)).addDeferred(deferred.capture());
+        verify(indexingService).deleteContentsToBeDeIndexed(session);
+        return deferred.getAllValues();
+    }
+
+    @Test
+    void aDocumentAnotherSourceStillTracksIsNotDeleted() {
+        // D111: adzuna stopped publishing job-1, jooble still tracks it on the same site and locale.
+        DumConnectorSession session = new DumConnectorSession("adzuna", "turing", Locale.US);
+
+        List<DumJobItemWithSession> deletes = sweep(session, row("adzuna", Locale.US, "Sample"),
+                List.of(row("adzuna", Locale.US, "Sample"), row("jooble", Locale.US, "Sample")));
+
+        assertThat(deletes).isEmpty();
+    }
+
+    @Test
+    void onlyTheSitesNoOtherSourceTracksAreDeleted() {
+        DumConnectorSession session = new DumConnectorSession("adzuna", "turing", Locale.US);
+
+        List<DumJobItemWithSession> deletes = sweep(session, row("adzuna", Locale.US, "Sample", "Other"),
+                List.of(row("jooble", Locale.US, "Sample")));
+
+        assertThat(deletes).hasSize(1);
+        assertThat(deletes.get(0).turSNJobItem().getSiteNames()).containsExactly("Other");
+    }
+
+    @Test
+    void anotherSourceInAnotherLocaleDoesNotKeepTheDocument() {
+        DumConnectorSession session = new DumConnectorSession("adzuna", "turing", Locale.US);
+
+        List<DumJobItemWithSession> deletes = sweep(session, row("adzuna", Locale.US, "Sample"),
+                List.of(row("jooble", Locale.of("pt", "BR"), "Sample")));
+
+        assertThat(deletes).hasSize(1);
+        assertThat(deletes.get(0).turSNJobItem().getSiteNames()).containsExactly("Sample");
+    }
+
     @Test
     void getIndexingItemDelegates() {
         when(indexingService.getIndexingItem("o", "s", "p")).thenReturn(List.of());

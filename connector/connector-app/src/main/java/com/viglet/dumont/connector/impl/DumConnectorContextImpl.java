@@ -20,13 +20,16 @@ import static com.viglet.turing.client.sn.TurSNConstants.ID_ATTR;
 import static com.viglet.turing.client.sn.TurSNConstants.SOURCE_APPS_ATTR;
 import static com.viglet.turing.client.sn.job.TurSNJobAction.DELETE;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -60,6 +63,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class DumConnectorContextImpl implements DumConnectorContext {
+
+    /** How many object ids one query for other sources' rows carries (D111). */
+    static final int TRACKED_QUERY_CHUNK = 500;
 
     private final DumConnectorIndexingService indexingService;
     private final JobItemBatchProcessor batchProcessor;
@@ -232,27 +238,70 @@ public class DumConnectorContextImpl implements DumConnectorContext {
             return;
         }
 
-        // Create delete jobs for each item to be deindexed
-        deindexedItems.forEach(deIndexedItem -> createDeleteJob(session, deIndexedItem));
+        // Create delete jobs for each item to be deindexed, minus the sites another source of the
+        // provider still tracks the same document on (D111)
+        Map<String, List<DumConnectorIndexingModel>> trackedElsewhere = trackedByOtherSources(session,
+                deindexedItems);
+        deindexedItems.forEach(deIndexedItem -> {
+            List<String> sites = sitesNoOtherSourceTracks(deIndexedItem,
+                    trackedElsewhere.getOrDefault(deIndexedItem.getObjectId(), List.of()));
+            if (sites.isEmpty()) {
+                log.info("Keep {} object ({} - {}: {}): another source of {} still tracks it",
+                        deIndexedItem.getObjectId(), deIndexedItem.getSource(), deIndexedItem.getLocale(),
+                        session.getTransactionId(), session.getProviderName());
+            } else {
+                createDeleteJob(session, deIndexedItem, sites);
+            }
+        });
 
-        // Remove from indexing database
+        // Remove from indexing database: this source no longer tracks any of them
         indexingService.deleteContentsToBeDeIndexed(session);
+    }
+
+    /**
+     * The rows other sources of the session's provider hold for the ids about to be deindexed, by
+     * object id (roadmap <strong>D111</strong>). Several sources of one provider can publish the same
+     * document, and a delete removes it from the index whoever else tracks it; the other source's
+     * next run would see an unchanged checksum and never send it again.
+     */
+    private Map<String, List<DumConnectorIndexingModel>> trackedByOtherSources(DumConnectorSession session,
+            List<DumConnectorIndexingModel> deindexedItems) {
+        List<String> ids = deindexedItems.stream().map(DumConnectorIndexingModel::getObjectId)
+                .filter(Objects::nonNull).distinct().toList();
+        Map<String, List<DumConnectorIndexingModel>> tracked = new HashMap<>();
+        for (int from = 0; from < ids.size(); from += TRACKED_QUERY_CHUNK) {
+            List<String> chunk = ids.subList(from, Math.min(ids.size(), from + TRACKED_QUERY_CHUNK));
+            indexingService.findAllByProviderAndObjectIdIn(session.getProviderName(), chunk).stream()
+                    .filter(row -> !session.getSource().equals(row.getSource()))
+                    .forEach(row -> tracked.computeIfAbsent(row.getObjectId(), id -> new ArrayList<>()).add(row));
+        }
+        return tracked;
+    }
+
+    /** The sites of {@code item} no other source tracks the same document on, in the same locale. */
+    private static List<String> sitesNoOtherSourceTracks(DumConnectorIndexingModel item,
+            List<DumConnectorIndexingModel> others) {
+        Set<String> kept = new HashSet<>();
+        others.stream().filter(other -> Objects.equals(other.getLocale(), item.getLocale()))
+                .forEach(other -> kept.addAll(other.getSites()));
+        return item.getSites().stream().filter(site -> !kept.contains(site)).toList();
     }
 
     /**
      * Creates a delete job for a specific indexing model.
      */
     private void createDeleteJob(DumConnectorSession session,
-            DumConnectorIndexingModel dumConnectorIndexing) {
-        log.info("DeIndex {} object ({} - {} - {}: {})",
+            DumConnectorIndexingModel dumConnectorIndexing, List<String> sites) {
+        log.info("DeIndex {} object ({} - {} - {} - {}: {})",
                 dumConnectorIndexing.getObjectId(),
                 dumConnectorIndexing.getSource(),
                 dumConnectorIndexing.getEnvironment(),
                 dumConnectorIndexing.getLocale(),
+                sites,
                 session.getTransactionId());
 
-        createDeleteJob(session, dumConnectorIndexing.getObjectId(),
-                dumConnectorIndexing.getSites(), dumConnectorIndexing.getLocale());
+        createDeleteJob(session, dumConnectorIndexing.getObjectId(), sites,
+                dumConnectorIndexing.getLocale());
     }
 
     /**
