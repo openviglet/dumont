@@ -132,6 +132,97 @@ Expected: Micrometer gauges and counters per connector source, exposed on
 == 0` or `time() - dumont_run_last_finished_seconds > 2*3600` pages on a broken or
 stalled schedule for any plugin, not only trabalharei's.
 
+### XLIII.11 Say what a dropped canonical document held (D137)
+
+Met in trabalharei (TRA70), moving the jobs plugin's own deduplication
+(`DumJobDeduplicator`, table `job_fingerprint`) onto D109/D110 resolution
+(`DumCanonicalKey`, `DumResolutionIndex`, `DumSurvivorship.wholeRecord`).
+
+The jobs plugin sends the site a tombstone when a group document leaves the index
+(TRA24), naming the title, company, city and occupation it held.
+
+Under resolution, `DumResolutionRun.closeComplete()` (and `expire()`) call
+`index.drop(canonicalId)`, which deletes every member row (`DumJpaResolutionIndex.drop`
+runs `deleteByProviderAndCanonicalId`), and only later does the session sweep call
+`DumStructuredSource.deindexed(String documentId)` (D113). By then nothing in Dumont
+holds what the document was: the hook carries only the id, the index has no members
+left, and Dumont keeps only a checksum per document. The D113 Javadoc says "a source
+that must say what the document held keeps that itself", which means a second store of
+every published record, the very copy the move is meant to remove.
+
+What came back: `deindexed("job-3f2a...")`, nothing else. Expected: the source learns
+what the dropped canonical document last published. Either `deindexed(String documentId,
+Optional<DumStructuredRecord> lastPublished)` (or a `DumDeindexed` record carrying it),
+filled from the members' merged record just before `drop`, or a
+`DumResolutionIndex.Listener` / `DumStructuredSource.canonicalDropped(id, List<Member>)`
+called by `DumResolutionRun` before the rows are deleted. Either way the record must be
+the survivorship result over the members as they were at their last live state, since by
+the drop every member is held.
+
+Workaround in trabalharei: none; TRA70 waits on this line, and the plugin keeps its own
+deduplicator (with its tombstones) until it ships.
+
+### XLIII.12 Failed deliveries stay pending until Turing accepts them (D138)
+
+Met in trabalharei (TRA25), with `PROOF_OUTAGE=1 node scripts/dumont-publish-proof.mjs`
+against the local stack (Dumont 2026.3 jars, Turing CE local).
+
+Steps: a structured source publishes 8 documents with parity. The fixtures then gain one
+new posting and the Turing container is stopped (`docker stop`) for one run. The run
+finishes "complete, 9 sent"; the connector queue then logs `ERROR
+c.v.turing.client.sn.job.TurSNJobUtils : No route to host` and drops the batch. Turing
+is started again and the next run finishes "complete, 9 sent, 9 recorded", but the site
+holds 8: `job-bd33f8...` is in Dumont's ledger and never in Turing. Every later run
+treats it as unchanged, so it is never sent again until its content changes.
+
+Expected: the ledger records a document only once Turing accepted it, or a failed
+delivery marks its ledger rows (checksum cleared, or a `pending` state) so the next run
+re-sends them; and the run whose batch failed is not recorded as complete. The queue's
+failure should also name the batch and source on the run record (D96), not only the log.
+
+Workaround in trabalharei: none; the proof's outage step fails until this ships, and
+TRA25 waits on it.
+
+### XLIII.13 Failed provisioning shows on the run (D139)
+
+Met in trabalharei (TRA25), running a structured source while the Turing container was
+paused. `DumTuringIndexingPlugin.provision` logged `ERROR Could not provision site
+'trabalharei-vagas': Could not reach the manifest endpoint at
+http://turing:2700/api/sn/manifest` (`SocketTimeoutException: Read timed out`, after
+about three minutes), and the run went on and was recorded "complete".
+
+A site whose fields were not provisioned can reject or mis-index what the run sends (a
+new field declared since the last provisioning never reaches Turing), and nothing on the
+run record says provisioning failed.
+
+Expected: a failed provisioning marks the run partial with the reason on its record
+(D96), or stops it before sending; and the manifest call uses a shorter read timeout
+than the three minutes seen, since the run waits on it.
+
+Workaround in trabalharei: none.
+
+### XLIII.14 Search weights in the structured schema (D140)
+
+Met in trabalharei (TRA79). The site's field contract weighs searches as title 10,
+company 3, abstract 2, text 1 (`JOB_FIELDS` in `src/lib/jobDoc.ts`), so a word in a
+job's title outranks the same word deep in its description. Turing applies a field's
+search weight since T1065, and its manifest declares one per field since T1072
+(`searchWeight`, 1 to 100, a non-breaking change for the planner).
+
+Dumont provisions the SN site from the structured schema (`DumTuringIndexingPlugin`
+through `TurSNManifestClient`), and `DumStructuredField.Builder` has `type`,
+`multiValued`, `facet`, `mandatory`, `description` and `embeddingRole`, but no search
+weight. The manifest Dumont sends carries none, so every field searches at weight 1 and
+a plugin cannot state its ranking; a weight set by hand in the console is the only way,
+and nothing keeps it in step with the plugin.
+
+Expected: `DumStructuredField.Builder.searchWeight(int)` (1 to 100), carried into the
+manifest field as `searchWeight`, with the schema helpers (`title`, `body`, `text`) left
+at the default. A test pins the manifest field.
+
+Workaround in trabalharei: none; the weights stay in the site's contract until this
+ships, and TRA79's remainder waits on it.
+
 ## XLIV Frontend build and lint gates
 
 ### XLIV.2 Unpatched xlsx through the design system (D134)
