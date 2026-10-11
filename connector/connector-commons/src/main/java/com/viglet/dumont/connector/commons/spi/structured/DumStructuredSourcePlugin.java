@@ -501,21 +501,42 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
      * {@link #finishPartialRunStandalone(DumConnectorSession, String, String, RuntimeException)},
      * with the source's own notes recorded after the reason (roadmap D96), so the run record says
      * both that the run stopped and what the source knows about why.
+     *
+     * <p>
+     * The cause is logged before the finish path runs and recorded as the note after the reason
+     * (D126): when finishing itself fails, that failure is logged on its own and carries the cause
+     * as suppressed, so it never hides what stopped the run.
      */
     protected void finishPartialRunStandalone(DumConnectorSession session, String source,
             String reason, RuntimeException cause, List<String> sourceNotes) {
         List<String> notes = new ArrayList<>();
         notes.add(reason);
-        notes.addAll(sourceNotes);
-        dumConnectorContext.recordRunOutcome(session, true, notes);
-        dumConnectorContext.finishIndexing(session, true);
         if (cause != null) {
-            log.error("Structured indexAll for source '{}' did not complete ({}) — finished standalone, "
+            log.error("Structured indexAll for source '{}' did not complete ({}) — finishing standalone, "
                     + "previously indexed documents preserved (no deindex)", source, reason, cause);
+            notes.add(causeNote(cause));
         } else {
-            log.warn("Structured indexAll for source '{}' did not complete ({}) — finished standalone, "
+            log.warn("Structured indexAll for source '{}' did not complete ({}) — finishing standalone, "
                     + "previously indexed documents preserved (no deindex)", source, reason);
         }
+        notes.addAll(sourceNotes);
+        try {
+            dumConnectorContext.recordRunOutcome(session, true, notes);
+            dumConnectorContext.finishIndexing(session, true);
+        } catch (RuntimeException finishFailure) {
+            log.error("Finishing the partial run of source '{}' failed as well", source, finishFailure);
+            if (cause != null) {
+                finishFailure.addSuppressed(cause);
+            }
+            throw finishFailure;
+        }
+    }
+
+    /** The run-record note naming what aborted a run: its class and message (D126). */
+    static String causeNote(Throwable cause) {
+        String message = cause.getMessage();
+        return "cause: " + cause.getClass().getSimpleName()
+                + (message == null || message.isBlank() ? "" : ": " + message);
     }
 
     @Override

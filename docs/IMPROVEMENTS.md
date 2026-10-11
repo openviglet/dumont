@@ -82,27 +82,6 @@ These constrain every task above:
 
 ## XLIII Connector run control
 
-### XLIII.3 Abort cause lost behind a failing finish (D126)
-
-Met in trabalharei (TRA25, Dumont-to-Turing publishing proof) on a local Dumont 2026.3
-built from `e7aeb581`.
-
-`DumStructuredSourcePlugin.run` catches a `RuntimeException` from the extraction loop
-and calls `finishPartialRunStandalone(session, source, "aborted by an exception", e,
-...)`. That method calls `recordRunOutcome` and `finishIndexing` first and logs the
-cause only afterwards. When `finishIndexing` itself throws (here the H2 tenant column
-failure filed beside this line), the log line carrying the cause is never reached. All
-the log and the run record show is `Run outcome for source 'proof-adzuna': partial
-(aborted by an exception)`, and the operator cannot tell what stopped the run: the job
-source never even called its partner API.
-
-Expected: the cause is logged (with its stack) before anything else in the finish path
-runs, and the run record's notes carry its class and message next to "aborted by an
-exception", so the console shows why without reading container logs. A failure inside
-the finish path is logged on its own and does not replace the first one.
-
-Workaround in trabalharei: none. The cause was found by removing the finish failure.
-
 ### XLIII.4 Structured job items carry no checksum (D127)
 
 Met in trabalharei (TRA25, Dumont-to-Turing publishing proof) on a local Dumont 2026.3
