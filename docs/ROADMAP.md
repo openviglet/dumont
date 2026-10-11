@@ -105,8 +105,8 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
-- 📋 **D101** (deps: —) **An incremental source cannot keep an unchanged id indexed without replaying its whole record through extract** — Quota-bound APIs fetch only new items, so every connector must store payloads just to stop the sweep deindexing them. → §XLI.4
-- 📋 **D102** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
+- 📋 **D104** (deps: —) **An incremental source cannot keep an unchanged id indexed without replaying its whole record through extract** — Quota-bound APIs fetch only new items, so every connector must store payloads just to stop the sweep deindexing them. → §XLI.4
+- 📋 **D105** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
 - 📋 **D96** (deps: —) **A structured source cannot report why a run ended early, so a budget stop looks like a successful smaller run** — Paid and rate-limited partners stop runs on purpose, and only the logs say so. → §XLI.6
 - 📋 **D97** (deps: —) **A structured record rejects any undeclared key, so a source cannot pass enrichers working data that must not be indexed** — Raw source text and enricher notes have to travel beside the record, and connectors now reach around the SPI to share them. → §XLI.7
 - 📋 **D98** (deps: —) **An enricher can add or overwrite a field but never clear a value the source supplied** — Canonicalizing means dropping wrong values too, such as a city that is not in the stated state. → §XLI.8

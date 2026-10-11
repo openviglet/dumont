@@ -79,7 +79,7 @@ These constrain every task above:
 ## XLI Structured sources over paged JSON APIs
 
 ## XLII Web-crawler hardening (real-world sources)
-### XLI.4 Keep-alive for incremental sources (D101)
+### XLI.4 Keep-alive for incremental sources (D104)
 
 Found while building the `jobs` module for trabalharei (TRA13). A job API bounded by a
 call quota (Adzuna's default is 250 calls a day) can only fetch the newest postings each
@@ -97,7 +97,7 @@ existing rows without an extract, so incremental sources need no payload store.
 
 Workaround: `DumJobSeen.payload` in `jobs/jobs-plugin`.
 
-### XLI.5 Build in a git worktree (D102)
+### XLI.5 Build in a git worktree (D105)
 
 Found while building the `jobs` module (trabalharei TRA13) in a git worktree of this
 repo (`git worktree add`). `./mvnw -pl jobs/jobs-plugin -am test` fails before
