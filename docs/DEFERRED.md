@@ -21,3 +21,4 @@
 ## Track P — Connector run control
 
 - ⏸ **D131** (deps: —) **A plugin's only LLM step answers one label of a closed set: no list extracted from the text, no grounded summary** — set aside (a product call: may a generated summary fill abstract under the no-fabrication non-goal): The grounded summary half is not built. → §XLIII.8
+- ⏸ **D140** (deps: —) **A structured field cannot declare a search weight, so the manifest Dumont sends gives every field weight 1** — set aside (Turing T1082: searchWeight on the SDK spec): A plugin cannot say that its title outranks its body text, and a weight set by hand drifts from the schema. → §XLIII.14

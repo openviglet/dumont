@@ -151,6 +151,11 @@ Expected: `DumStructuredField.Builder.searchWeight(int)` (1 to 100), carried int
 manifest field as `searchWeight`, with the schema helpers (`title`, `body`, `text`) left
 at the default. A test pins the manifest field.
 
+Blocked on the SDK (found 2026-10-11): `TurSNManifest.Builder.fields` takes
+`TurSNJobAttributeSpec`, which has no `searchWeight` in turing-java-sdk 2026.3.4, though
+the endpoint reads it from `VigletFieldSpec`. Filed in Turing as T1082. Once it ships,
+bump `turing.version` and carry the weight through `toAttributeSpecs()`.
+
 Workaround in trabalharei: none; the weights stay in the site's contract until this
 ships, and TRA79's remainder waits on it.
 
