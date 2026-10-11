@@ -110,21 +110,28 @@ and the summary wait on this line (TRA28's remainder).
 ### XLIV.2 Unpatched xlsx through the design system (D134)
 
 Found in the Dependabot alerts on `openviglet/dumont` (2026-10-11): four high alerts,
-prototype pollution and a ReDoS, on `xlsx` 0.18.5, with no fixed version on npm. SheetJS
-stopped publishing to the npm registry at 0.18.5; fixed releases (0.19.3 and later,
-0.20.3 today) are served only from `https://cdn.sheetjs.com`.
+prototype pollution and a ReDoS, on `xlsx` 0.18.5. SheetJS stopped publishing to npm at
+0.18.5; the fixed releases (0.20.3 today) are served only from
+`https://cdn.sheetjs.com`.
 
-`dumont-react/package.json` declares `xlsx` ^0.18.5 as a runtime dependency, but no
-source file imports it. What does is `@viglet/viglet-design-system`, whose own
-`dependencies` carry `xlsx` ^0.18.5 for its grid export. So the console ships the
-vulnerable parser through the package, and the direct declaration is dead weight that
-doubles the alerts.
+Landed: `dumont-react` no longer declares `xlsx`, which no source imported. What still
+pulls it is `@viglet/viglet-design-system`, whose `dependencies` carry `xlsx` ^0.18.5
+for `exportToXlsx`.
 
-Expected: `dumont-react` drops its unused `xlsx` dependency, and a root `pnpm.overrides`
-entry points `xlsx` at SheetJS's own 0.20.3 tarball, so the design system resolves the
-fixed parser here without waiting for its next release. The gates prove the grid still
-builds and its tests pass. The real fix belongs to the design system, which should
-depend on the CDN tarball itself; once it does, the override goes.
+What did not work: a `pnpm-workspace.yaml` override pointing `xlsx` at the CDN tarball.
+pnpm 11 refuses it with `ERR_PNPM_EXOTIC_SUBDEP`, since `blockExoticSubdeps` forbids a
+subdependency resolved by URL, and turning that policy off to silence an alert would be
+the worse trade. The same rule means the design system cannot fix it by depending on the
+tarball itself: every pnpm consumer would hit the refusal.
+
+The fix: the design system takes `xlsx` as a `peerDependency`, so each consumer declares
+the CDN tarball as its own direct dependency, which pnpm allows. Then `dumont-react`
+adds `"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"` and the alerts
+close.
+
+Exposure meanwhile is low: `exportToXlsx` only writes a workbook (`aoa_to_sheet`,
+`writeFile`), and both CVEs are in the parser. Nothing in the console reads a
+spreadsheet.
 
 ### XLIV.3 EDS sample app lockfile left behind (D135)
 

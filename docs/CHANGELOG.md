@@ -518,6 +518,7 @@
 - **D89** — Both halves of the census strip comments before reading era, so a file that quotes chrome="bento" or a bento import describes the layer rather than joining it.
 - **D90** — Twenty-seven files read as written, and a property check holds them there: four password masks and a coverage arrow were mangled on screen, not only in comments (design §XL.2 recorded in `agents.md`).
 - **D133** — pnpm-workspace.yaml overrides lift undici, adm-zip, postcss, nanoid, source-map-js, browserslist and baseline-browser-mapping above every alerted range.
+- **D134 (unused direct xlsx dropped)** — dumont-react no longer declares xlsx, which no source imported, so its manifest stops carrying the two direct-dependency alerts.
 
 ## Track L — Console build, lint and type gates
 

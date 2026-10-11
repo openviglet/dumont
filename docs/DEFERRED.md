@@ -14,6 +14,8 @@
 
 ## Track K — Frontend build and lint gates
 
+- ⏸ **D134** (deps: —) **The console ships xlsx 0.18.5, whose prototype pollution and ReDoS have no fixed release on npm** — set aside (a design system release that takes xlsx as a peer (VDS roadmap)): The design system still pulls xlsx 0.18.5. → §XLIV.2
+
 ## Track O — Structured sources over paged JSON APIs
 
 ## Track P — Connector run control
