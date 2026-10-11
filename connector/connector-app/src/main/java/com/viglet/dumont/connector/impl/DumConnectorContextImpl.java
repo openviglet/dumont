@@ -150,8 +150,9 @@ public class DumConnectorContextImpl implements DumConnectorContext {
             // Clear only the queue for this source
             queuesBySource.remove(source);
 
-            // Save indexing stats if tracked
-            if (!standalone) {
+            // Save indexing stats if tracked. A standalone finish that recorded an outcome (D96) is
+            // a tracked run that stopped short, and its row is what says so.
+            if (!standalone || indexingService.hasRunOutcome(source, session.getProviderName())) {
                 indexingService.completeIndexingStats(session.getSource(),
                         session.getProviderName());
             }
@@ -167,6 +168,17 @@ public class DumConnectorContextImpl implements DumConnectorContext {
         if (!standalone) {
             batchProcessor.flush();
         }
+    }
+
+    @Override
+    public void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes) {
+        if (partial || (notes != null && !notes.isEmpty())) {
+            log.info("Run outcome for source '{}': {}{}", session.getSource(),
+                    partial ? "partial" : "complete", notes == null || notes.isEmpty() ? ""
+                            : " (" + String.join("; ", notes) + ")");
+        }
+        indexingService.recordRunOutcome(session.getSource(), session.getProviderName(), partial,
+                notes);
     }
 
     @Override

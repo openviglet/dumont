@@ -270,6 +270,7 @@
       "documents": "Documents",
       "duration": "Duration",
       "docsPerMin": "Docs/min",
+      "partial": "Partial",
       "currentDocuments": "Current Documents",
       "lastReindex": "Last Reindex",
       "estimatedProgress": "estimated complete",

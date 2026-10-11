@@ -101,6 +101,32 @@ class DumConnectorIndexingServiceTest {
     }
 
     @Test
+    void aRecordedOutcomeIsWrittenOnTheRunsStatsRow() {
+        // D96: a budget stop shows in the run record, not only in the logs.
+        service.trackIndexingStart("source-1", "turing", OperationType.INDEX_ALL);
+        service.recordRunOutcome("source-1", "turing", true,
+                List.of("stopped: the day allowance of 250 calls is spent"));
+        assertThat(service.hasRunOutcome("source-1", "turing")).isTrue();
+
+        service.completeIndexingStats("source-1", "turing");
+
+        org.mockito.ArgumentCaptor<DumConnectorIndexingStatsModel> saved =
+                org.mockito.ArgumentCaptor.forClass(DumConnectorIndexingStatsModel.class);
+        verify(statsRepository).save(saved.capture());
+        assertThat(saved.getValue().isPartial()).isTrue();
+        assertThat(saved.getValue().getNotes())
+                .containsExactly("stopped: the day allowance of 250 calls is spent");
+        assertThat(service.hasRunOutcome("source-1", "turing")).isFalse();
+    }
+
+    @Test
+    void anOutcomeForAnUntrackedRunIsDropped() {
+        service.recordRunOutcome("source-1", "turing", true, List.of("interrupted"));
+
+        assertThat(service.hasRunOutcome("source-1", "turing")).isFalse();
+    }
+
+    @Test
     void completeIndexingStatsWithoutPendingIsNoOp() {
         service.completeIndexingStats("nope", "turing");
         verify(statsRepository, never()).save(any());

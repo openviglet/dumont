@@ -10,4 +10,8 @@ export interface TurIntegrationIndexingStats {
     environment: string | null;
     locale: string | null;
     sites: string[];
+    /** The run ended before reaching the whole source (a budget, a rate limit, an interruption). */
+    partial?: boolean;
+    /** Why the run ended as it did, as the source reported it (D96). */
+    notes?: string[];
 }

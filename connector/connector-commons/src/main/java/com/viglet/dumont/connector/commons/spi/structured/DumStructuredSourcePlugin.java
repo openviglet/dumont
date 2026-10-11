@@ -286,14 +286,16 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             } catch (RuntimeException e) {
                 // An exception escaped the extraction loop — finish standalone (D33) so the
                 // destructive deindex sweep is skipped and the prior index survives.
-                finishPartialRunStandalone(session, source, "aborted by an exception", e);
+                finishPartialRunStandalone(session, source, "aborted by an exception", e,
+                        structuredSource.runNotes());
                 return;
             }
             if (!outcome.completed()) {
                 // The run was interrupted before visiting every discovered id; finishing
                 // non-standalone would treat the rest of the catalog as removed (D33).
                 finishPartialRunStandalone(session, source, "interrupted after %d of %d ids"
-                        .formatted(outcome.processed(), outcome.discovered()), null);
+                        .formatted(outcome.processed(), outcome.discovered()), null,
+                        structuredSource.runNotes());
                 return;
             }
             if (structuredSource.incremental()) {
@@ -304,14 +306,20 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 // Discovery itself stopped short (a call budget, a page cap, a failed page), so the
                 // ids it never listed are not removals; finishing non-standalone would deindex them.
                 finishPartialRunStandalone(session, source, "discovery stopped before the end of the source",
-                        null);
+                        null, structuredSource.runNotes());
                 return;
             }
             if (isFailureWave(outcome)) {
                 // A wave of extraction failures (e.g. a network blip) would otherwise deindex every id
                 // it could not re-fetch; finish standalone so the prior index survives (D34).
-                finishPartialRunStandalone(session, source, failureWaveReason(outcome), null);
+                finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
+                        structuredSource.runNotes());
                 return;
+            }
+            // A complete run can still have something to say (D96); an empty note list records nothing.
+            List<String> notes = structuredSource.runNotes();
+            if (!notes.isEmpty()) {
+                dumConnectorContext.recordRunOutcome(session, false, notes);
             }
             dumConnectorContext.finishIndexing(session, false);
             DumPreviewSnapshot baseline = snapshot.build();
@@ -365,20 +373,39 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         // run missed is not a removal. Items leave by expiry instead — unless this run was a failure
         // wave, which says nothing about what is gone.
         if (isFailureWave(outcome)) {
-            finishPartialRunStandalone(session, source, failureWaveReason(outcome), null);
+            finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
+                    structuredSource.runNotes());
             return;
         }
+        List<String> notes = new ArrayList<>(structuredSource.runNotes());
         Collection<String> expired = structuredSource.expiredIds();
         if (!expired.isEmpty()) {
             int queued = dumConnectorContext.deIndexById(session, expired,
                     List.copyOf(structuredSource.getSiteNames()));
             log.info("Incremental source '{}' deindexed {} expired id(s)", source, queued);
+            notes.add("%d expired record(s) deindexed".formatted(queued));
         }
+        // An incremental run that stopped early is partial, but it is not a failure (D96).
+        dumConnectorContext.recordRunOutcome(session, !structuredSource.discoveryComplete(), notes);
         dumConnectorContext.finishIndexing(session, true);
     }
 
     protected void finishPartialRunStandalone(DumConnectorSession session, String source,
             String reason, RuntimeException cause) {
+        finishPartialRunStandalone(session, source, reason, cause, List.of());
+    }
+
+    /**
+     * {@link #finishPartialRunStandalone(DumConnectorSession, String, String, RuntimeException)},
+     * with the source's own notes recorded after the reason (roadmap D96), so the run record says
+     * both that the run stopped and what the source knows about why.
+     */
+    protected void finishPartialRunStandalone(DumConnectorSession session, String source,
+            String reason, RuntimeException cause, List<String> sourceNotes) {
+        List<String> notes = new ArrayList<>();
+        notes.add(reason);
+        notes.addAll(sourceNotes);
+        dumConnectorContext.recordRunOutcome(session, true, notes);
         dumConnectorContext.finishIndexing(session, true);
         if (cause != null) {
             log.error("Structured indexAll for source '{}' did not complete ({}) — finished standalone, "

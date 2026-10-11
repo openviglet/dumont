@@ -146,6 +146,7 @@ class DumJsonApiSourceTest {
         assertEquals(List.of("10", "20"), source.discover());
         assertFalse(source.discoveryComplete(), "a budget-bound run did not see the whole source");
         assertEquals(2, source.calls());
+        assertEquals(List.of("stopped at the call cap of 2 per run"), source.runNotes());
     }
 
     @Test
@@ -173,6 +174,7 @@ class DumJsonApiSourceTest {
 
         assertEquals(List.of("1"), source.discover());
         assertFalse(source.discoveryComplete());
+        assertEquals(List.of("stopped: call 2 failed (HTTP 503)"), source.runNotes());
     }
 
     @Test
@@ -263,6 +265,10 @@ class DumJsonApiSourceTest {
 
         assertEquals(2, context.items.size(), "what was fetched is still published");
         assertTrue(context.standalone, "an incomplete walk finishes standalone");
+        // D96: the run record says the run was partial, and why.
+        assertEquals(Boolean.TRUE, context.recordedPartial);
+        assertEquals(List.of("discovery stopped before the end of the source",
+                "stopped at the call cap of 1 per run"), context.recordedNotes);
     }
 
     @Test
@@ -276,6 +282,7 @@ class DumJsonApiSourceTest {
 
         assertEquals(2, context.items.size());
         assertFalse(context.standalone, "a complete walk lets the sweep remove what disappeared");
+        assertEquals(null, context.recordedPartial, "a complete run with nothing to say records nothing");
     }
 
     @Test
@@ -339,6 +346,8 @@ class DumJsonApiSourceTest {
         assertEquals(List.of("1"), day10.deindexed);
         assertEquals(List.of("site"), day10.deindexSites);
         assertTrue(day10.standalone);
+        assertEquals(Boolean.FALSE, day10.recordedPartial, "a complete incremental walk is not partial");
+        assertEquals(List.of("1 expired record(s) deindexed"), day10.recordedNotes);
     }
 
     @Test
@@ -458,6 +467,14 @@ class DumJsonApiSourceTest {
         private final List<String> deindexed = new ArrayList<>();
         private List<String> deindexSites = List.of();
         private boolean standalone;
+        private Boolean recordedPartial;
+        private List<String> recordedNotes = List.of();
+
+        @Override
+        public void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes) {
+            recordedPartial = partial;
+            recordedNotes = List.copyOf(notes);
+        }
 
         @Override
         public int deIndexById(DumConnectorSession session, Collection<String> objectIds,

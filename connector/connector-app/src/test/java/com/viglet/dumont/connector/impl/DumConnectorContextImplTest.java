@@ -157,6 +157,21 @@ class DumConnectorContextImplTest {
     }
 
     @Test
+    void aStandaloneFinishWithARecordedOutcomeStillWritesTheRunsStats() {
+        // D96: a tracked run that stopped short gets a stats row saying so, without the sweep.
+        DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
+        when(indexingService.hasRunOutcome("wknd", "turing")).thenReturn(true);
+
+        context.recordRunOutcome(session, true, List.of("stopped at the call cap of 20 per run"));
+        context.finishIndexing(session, true);
+
+        verify(indexingService).recordRunOutcome("wknd", "turing", true,
+                List.of("stopped at the call cap of 20 per run"));
+        verify(indexingService).completeIndexingStats("wknd", "turing");
+        verify(indexingService, never()).getShouldBeDeIndexedList(any());
+    }
+
+    @Test
     void finishIndexingNonStandaloneDeindexesAndRecordsStats() {
         DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
         when(indexingService.getShouldBeDeIndexedList(session)).thenReturn(List.of());

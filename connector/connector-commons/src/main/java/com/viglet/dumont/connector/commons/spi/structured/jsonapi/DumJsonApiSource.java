@@ -93,6 +93,7 @@ public final class DumJsonApiSource implements DumStructuredSource {
     private final DumJsonPath idPath;
     private final Map<String, DumJsonPath> fieldPaths = new LinkedHashMap<>();
 
+    private final List<String> notes = new ArrayList<>();
     private Map<String, JSONObject> recordsById;
     private boolean complete;
     private int calls;
@@ -152,6 +153,13 @@ public final class DumJsonApiSource implements DumStructuredSource {
     public synchronized boolean discoveryComplete() {
         records();
         return complete;
+    }
+
+    /** Why the walk stopped early, if it did (D96): the cap, window or failure that ended it. */
+    @Override
+    public synchronized List<String> runNotes() {
+        records();
+        return List.copyOf(notes);
     }
 
     /** How many calls the walk made. */
@@ -229,25 +237,19 @@ public final class DumJsonApiSource implements DumStructuredSource {
         String cursor = "";
         for (int step = 0;; step++) {
             if (maxCalls > 0 && calls >= maxCalls) {
-                log.info("JSON API source '{}' stopped at its call cap of {}", sourceName, maxCalls);
-                complete = false;
-                return found;
+                return stopped(found, "stopped at the call cap of %d per run".formatted(maxCalls));
             }
             DumJsonApiState.Window spent = spentWindow();
             if (spent != null) {
-                log.info("JSON API source '{}' stopped: its {} allowance of {} calls is spent", sourceName,
-                        spent.name().toLowerCase(Locale.ROOT), manifest.budget().windows().get(spent));
-                complete = false;
-                return found;
+                return stopped(found, "stopped: the %s allowance of %d calls is spent".formatted(
+                        spent.name().toLowerCase(Locale.ROOT), manifest.budget().windows().get(spent)));
             }
             if (paging.maxPages() > 0 && step >= paging.maxPages()) {
-                log.info("JSON API source '{}' stopped at its page cap of {}", sourceName,
-                        paging.maxPages());
-                complete = false;
-                return found;
+                return stopped(found, "stopped at the page cap of %d".formatted(paging.maxPages()));
             }
             Object response = call(step, cursor);
             if (response == null) {
+                // call() recorded why in the notes.
                 complete = false;
                 return found;
             }
@@ -309,6 +311,7 @@ public final class DumJsonApiSource implements DumStructuredSource {
             body = fetcher.fetch(request);
         } catch (IOException e) {
             log.warn("JSON API source '{}' call {} failed: {}", sourceName, calls, e.getMessage());
+            notes.add("stopped: call %d failed (%s)".formatted(calls, e.getMessage()));
             return null;
         }
         try {
@@ -316,8 +319,16 @@ public final class DumJsonApiSource implements DumStructuredSource {
         } catch (JSONException e) {
             log.warn("JSON API source '{}' call {} returned no JSON: {}", sourceName, calls,
                     e.getMessage());
+            notes.add("stopped: call %d returned no JSON".formatted(calls));
             return null;
         }
+    }
+
+    private Map<String, JSONObject> stopped(Map<String, JSONObject> found, String note) {
+        log.info("JSON API source '{}' {}", sourceName, note);
+        notes.add(note);
+        complete = false;
+        return found;
     }
 
     private List<JSONObject> recordsOf(Object response) {

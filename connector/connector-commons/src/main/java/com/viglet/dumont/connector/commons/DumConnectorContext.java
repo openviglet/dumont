@@ -58,6 +58,20 @@ public interface DumConnectorContext {
         return 0;
     }
 
+    /**
+     * Records how a run ended (roadmap <strong>D96</strong>), before its
+     * {@link #finishIndexing finish}: whether it stopped short of the whole source, and the
+     * notes that say why, so the run record shows a budget stop or a rate limit instead of a
+     * successful smaller run. A no-op by default.
+     *
+     * @param session the run
+     * @param partial whether the run ended before reaching everything the source holds
+     * @param notes   short human-readable notes, possibly empty
+     */
+    default void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes) {
+        // Nowhere to record it.
+    }
+
     List<DumConnectorIndexing> getIndexingItem(String objectId, String source, String provider);
 
     List<String> getObjectIdByDependency(String source, String provider,

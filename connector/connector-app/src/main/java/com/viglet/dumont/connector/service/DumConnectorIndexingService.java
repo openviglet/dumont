@@ -46,7 +46,12 @@ public class DumConnectorIndexingService {
         private final Map<String, PendingStats> pendingStatsMap = new ConcurrentHashMap<>();
         private final Set<String> processingSources = ConcurrentHashMap.newKeySet();
 
+        private final Map<String, RunOutcome> runOutcomes = new ConcurrentHashMap<>();
+
         public record PendingStats(Instant startTime, OperationType operationType) {}
+
+        /** How a run ended (D96), held until its stats are written. */
+        public record RunOutcome(boolean partial, List<String> notes) {}
 
         public DumConnectorIndexingService(
                         DumConnectorIndexingRepository dumConnectorIndexingRepository,
@@ -75,9 +80,29 @@ public class DumConnectorIndexingService {
                 pendingStatsMap.put(key, new PendingStats(Instant.now(), operationType));
         }
 
+        /**
+         * Records how the current run of a source ended (D96), for the stats row its finish
+         * writes. Only a run whose start was tracked gets a row; for any other run (a per-id
+         * update, a scheduled crawl) there is nothing to attach it to, so it is dropped.
+         */
+        public void recordRunOutcome(String source, String provider, boolean partial,
+                        List<String> notes) {
+                String key = source + "|" + provider;
+                if (pendingStatsMap.containsKey(key)) {
+                        runOutcomes.put(key, new RunOutcome(partial,
+                                        notes == null ? List.of() : List.copyOf(notes)));
+                }
+        }
+
+        /** Whether the current run of a source recorded an outcome its stats row should carry. */
+        public boolean hasRunOutcome(String source, String provider) {
+                return runOutcomes.containsKey(source + "|" + provider);
+        }
+
         public void completeIndexingStats(String source, String provider) {
                 String key = source + "|" + provider;
                 PendingStats pending = pendingStatsMap.remove(key);
+                RunOutcome outcome = runOutcomes.remove(key);
                 if (pending == null) {
                         log.warn("No pending stats found for key '{}'. Available keys: {}",
                                         key, pendingStatsMap.keySet());
@@ -107,6 +132,8 @@ public class DumConnectorIndexingService {
                                 .locale(locales.stream().filter(java.util.Objects::nonNull)
                                                 .findFirst().orElse(null))
                                 .sites(sites)
+                                .partial(outcome != null && outcome.partial())
+                                .notes(outcome == null ? new ArrayList<>() : new ArrayList<>(outcome.notes()))
                                 .build();
                 dumConnectorIndexingStatsRepository.save(stats);
                 log.info("Indexing stats for source '{}': {} documents in {}ms ({} docs/min)",

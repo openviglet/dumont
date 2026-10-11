@@ -91,4 +91,16 @@ public class DumConnectorIndexingStatsModel implements Serializable {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "dum_indexing_stats_sites", joinColumns = @JoinColumn(name = "stats_id"))
     private List<String> sites = new ArrayList<>();
+    /**
+     * Whether the run ended before reaching everything the source holds (D96): a call budget, a
+     * rate limit, an interruption or a failure wave. Such a run never deindexes what it missed.
+     */
+    @Column
+    private boolean partial;
+    /** Why the run ended as it did, as the source and the indexing loop reported it (D96). */
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "dum_indexing_stats_notes", joinColumns = @JoinColumn(name = "stats_id"))
+    @Column(name = "note", length = 1000)
+    private List<String> notes = new ArrayList<>();
 }

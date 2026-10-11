@@ -313,9 +313,25 @@ export default function IntegrationInstanceIndexingStatsPage() {
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell className="px-5 py-3">
-                                                            <span className="font-mono text-sm font-semibold">
-                                                                {stat.documentCount.toLocaleString()}
-                                                            </span>
+                                                            <div className="flex flex-col gap-1">
+                                                                <span className="flex items-center gap-2 font-mono text-sm font-semibold">
+                                                                    {stat.documentCount.toLocaleString()}
+                                                                    {stat.partial && (
+                                                                        <Badge
+                                                                            variant="outline"
+                                                                            className="bg-amber-500/10 text-amber-600 border-amber-500/20 px-1.5 py-0 text-[10px] font-bold uppercase"
+                                                                        >
+                                                                            {t("integration.indexingStats.partial")}
+                                                                        </Badge>
+                                                                    )}
+                                                                </span>
+                                                                {/* D96: why the run ended as it did, from the source itself. */}
+                                                                {stat.notes?.map((note) => (
+                                                                    <span key={note} className="max-w-xs text-xs text-muted-foreground">
+                                                                        {note}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
                                                         </TableCell>
                                                         <TableCell className="px-5 py-3">
                                                             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">

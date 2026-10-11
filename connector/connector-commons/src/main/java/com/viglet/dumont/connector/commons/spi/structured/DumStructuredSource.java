@@ -93,6 +93,15 @@ public interface DumStructuredSource {
         return List.of();
     }
 
+    /**
+     * Short notes on how the last run went, read once after extraction (roadmap D96): why a walk
+     * stopped early ("daily allowance of 250 calls spent", "partner answered HTTP 429") or anything
+     * else an operator should see in the run record rather than only in the logs. Defaults to none.
+     */
+    default List<String> runNotes() {
+        return List.of();
+    }
+
     /** The locale of the published documents; defaults to {@link Locale#US}. */
     default Locale getLocale() {
         return Locale.US;

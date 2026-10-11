@@ -107,7 +107,6 @@ This track has no remaining pending tasks.
 
 - 📋 **D104** (deps: —) **An incremental source cannot keep an unchanged id indexed without replaying its whole record through extract** — Quota-bound APIs fetch only new items, so every connector must store payloads just to stop the sweep deindexing them. → §XLI.4
 - 📋 **D105** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
-- 📋 **D96** (deps: —) **A structured source cannot report why a run ended early, so a budget stop looks like a successful smaller run** — Paid and rate-limited partners stop runs on purpose, and only the logs say so. → §XLI.6
 - 📋 **D97** (deps: —) **A structured record rejects any undeclared key, so a source cannot pass enrichers working data that must not be indexed** — Raw source text and enricher notes have to travel beside the record, and connectors now reach around the SPI to share them. → §XLI.7
 - 📋 **D98** (deps: —) **An enricher can add or overwrite a field but never clear a value the source supplied** — Canonicalizing means dropping wrong values too, such as a city that is not in the stated state. → §XLI.8
 - 📋 **D99** (deps: —) **A taxonomy is a flat string map with no resource loader, so a multi-column reference table cannot be one** — Reference data such as municipalities with their state needs several attributes per row and a versioned source. → §XLI.9
@@ -115,6 +114,7 @@ This track has no remaining pending tasks.
 - 📋 **D101** (deps: —) **Enricher contributions carry no selector or confidence, so provenance cannot say where an enriched value came from** — Grounding depends on knowing whether a value came from the partner, the title or the text. → §XLI.11
 - 📋 **D102** (deps: —) **One invalid enricher contribution discards every field that enricher wrote, with a log that names no field** — A multi-field step such as salary loses all four values over one bad number, silently. → §XLI.12
 - 📋 **D103** (deps: —) **No built-in enricher shape for an ordered fallback over inputs or for one input producing several fields** — Each connector writes the same fallback and parser plumbing by hand instead of declaring it in a recipe. → §XLI.13
+- 📋 **D106** (deps: D96 ✅) **The jobs adapters report budget stops and rate limits only in the logs, so their runs still read as complete** — D96 gave sources run notes, and the jobs module is the paid, rate-limited source they were built for. → §XLI.14
 
 ## Non-goals (do NOT add as tasks)
 
