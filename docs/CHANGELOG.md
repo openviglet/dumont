@@ -569,3 +569,6 @@
 - 🗑 **D120** — abandoned: The jobs module moved to the trabalharei repository on 2026-10-11, and this work continues there as TRA70.
 - 🗑 **D121** — abandoned: The jobs module moved to the trabalharei repository on 2026-10-11, and this work continues there as TRA71.
 - 🗑 **D122** — abandoned: The jobs module moved to the trabalharei repository on 2026-10-11, and this question continues there as TRA72.
+
+## Track P — Connector run control
+

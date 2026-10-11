@@ -105,6 +105,10 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
+## Track P — Connector run control
+
+- 📋 **D124** (deps: —) **Index-all on a source no plugin owns answers 500 and leaves that name locked as already running until restart** — A mistyped or not-yet-created source strands every later run of it behind a 409 nothing can clear but a restart. → §XLIII.1
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
