@@ -61,18 +61,42 @@ public final class DumStructuredRecord {
     private final String contentType;
     private final Map<String, Object> values;
     private final Map<String, DumFieldProvenance> provenance;
+    private final Map<String, Object> transients;
 
     private DumStructuredRecord(String id, DumStructuredSchema schema, String contentType,
-            Map<String, Object> values, Map<String, DumFieldProvenance> provenance) {
+            Map<String, Object> values, Map<String, DumFieldProvenance> provenance,
+            Map<String, Object> transients) {
         this.id = id;
         this.schema = schema;
         this.contentType = contentType;
         this.values = Collections.unmodifiableMap(values);
         this.provenance = Collections.unmodifiableMap(provenance);
+        this.transients = Collections.unmodifiableMap(transients);
     }
 
     public static Builder builder(String id, DumStructuredSchema schema) {
         return new Builder(id, schema);
+    }
+
+    /**
+     * A builder holding everything this record holds (values, provenance, content type and
+     * transients), for a step that adds to a record rather than building one from scratch.
+     */
+    public Builder toBuilder() {
+        Builder builder = new Builder(id, schema).contentType(contentType);
+        values.forEach((field, value) -> builder.set(field, value, provenance.get(field)));
+        transients.forEach(builder::transientValue);
+        return builder;
+    }
+
+    /**
+     * Working data that travels with the record but is never indexed (roadmap <strong>D97</strong>):
+     * a source's raw text an enricher normalizes, or an enricher's note to a later one. Keys are
+     * free, nothing is checked against the schema, and the publish step reads only
+     * {@link #values()}, so a transient never reaches a document.
+     */
+    public Map<String, Object> transients() {
+        return transients;
     }
 
     public String id() {
@@ -123,6 +147,7 @@ public final class DumStructuredRecord {
         private String contentType;
         private final Map<String, Object> values = new LinkedHashMap<>();
         private final Map<String, DumFieldProvenance> provenance = new LinkedHashMap<>();
+        private final Map<String, Object> transients = new LinkedHashMap<>();
 
         private Builder(String id, DumStructuredSchema schema) {
             if (id == null || id.isBlank()) {
@@ -157,6 +182,25 @@ public final class DumStructuredRecord {
          */
         public Builder set(String fieldName, Object value) {
             return set(fieldName, value, null);
+        }
+
+        /**
+         * Set a transient attribute (roadmap <strong>D97</strong>): working data for enrichers that
+         * is never indexed. Any key is accepted; a blank value removes the key, so an enricher can
+         * clear a note it no longer needs.
+         *
+         * @throws IllegalArgumentException if the key is blank
+         */
+        public Builder transientValue(String key, Object value) {
+            if (key == null || key.isBlank()) {
+                throw new IllegalArgumentException("A transient attribute needs a key");
+            }
+            if (isBlank(value)) {
+                transients.remove(key);
+            } else {
+                transients.put(key, value);
+            }
+            return this;
         }
 
         /**
@@ -253,7 +297,7 @@ public final class DumStructuredRecord {
         }
 
         public DumStructuredRecord build() {
-            return new DumStructuredRecord(id, schema, contentType, values, provenance);
+            return new DumStructuredRecord(id, schema, contentType, values, provenance, transients);
         }
     }
 }

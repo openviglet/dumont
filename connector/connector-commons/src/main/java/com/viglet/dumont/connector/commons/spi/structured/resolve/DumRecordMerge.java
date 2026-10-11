@@ -58,6 +58,7 @@ public final class DumRecordMerge {
                 DumStructuredRecord.builder(canonicalId, rec.schema());
         rec.values().forEach((field, value) ->
                 builder.set(field, value, stamp(rec.provenance().get(field), source)));
+        rec.transients().forEach(builder::transientValue);
         return builder.build();
     }
 
@@ -79,6 +80,9 @@ public final class DumRecordMerge {
             }
             builder.set(field, value, stamp(incoming.provenance().get(field), incomingSource));
         });
+        // Transients follow the fields' rule (D97): the base's win, the incoming fill the gaps.
+        incoming.transients().forEach(builder::transientValue);
+        base.transients().forEach(builder::transientValue);
         return builder.build();
     }
 

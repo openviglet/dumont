@@ -96,6 +96,24 @@ adapters hit (the budget that was spent, the page and HTTP status that failed), 
 standalone and marks them partial. The adapters already compute each case for their WARN
 lines, so the note is the same sentence, collected instead of only logged.
 
+### XLI.15 Jobs enrichers read transients (D107)
+
+Found while shipping D97. A structured record now carries transient, never-indexed
+attributes: `DumStructuredRecord.Builder.transientValue(key, value)`, read back through
+`transients()`. An enricher writes one by returning `DumTransient.of(value)` in its
+contribution map, and `DumTransient.of(null)` clears it. The enrichment chain and
+`toBuilder()` carry transients forward, and publishing reads only `values()`.
+
+The `jobs` module predates this: its location enricher reaches back into the source
+through `DumJobsStructuredSource.posting(id)` to read the adapters' raw location text,
+and the `locationUnresolved` note has no place on the record.
+
+Expected: the adapters set `locationRaw` (and any other raw text an enricher normalizes,
+such as the salary, contract and seniority inputs) as transients when they build each
+record. The enrichers read `rec.transients()` and write `locationUnresolved` as a
+`DumTransient`. `posting(id)` then goes away, and the enrichers no longer depend on the
+concrete source class.
+
 ## XLII Web-crawler hardening (real-world sources)
 ### XLI.4 Keep-alive for incremental sources (D104)
 
@@ -129,20 +147,6 @@ executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallb
 `agents.md` names the flag in the meantime.
 
 Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
-
-### XLI.7 Transient record attributes (D97)
-
-Found while adding location normalization to the `jobs` module (trabalharei TRA20).
-`DumStructuredRecord.Builder.set` rejects any key the schema does not declare, so a
-source cannot hand an enricher working data that must not be indexed: the jobs adapters'
-raw location text (`locationRaw`) and the enricher's `locationUnresolved` note. The
-enricher instead reaches back into the source through a module-specific
-`DumJobsStructuredSource.posting(id)` lookup, using the `source` argument of `enrich()`.
-
-Expected: a record carries transient, non-indexed attributes (a separate map, or fields
-the schema marks `indexed=false`) that enrichers read and the publish step drops.
-
-Workaround: `DumJobsStructuredSource.posting(id)` in `jobs/jobs-plugin`.
 
 ### XLI.8 Enrichers can clear fields (D98)
 

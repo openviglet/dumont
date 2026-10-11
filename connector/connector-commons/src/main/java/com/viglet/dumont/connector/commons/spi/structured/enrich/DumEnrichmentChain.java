@@ -121,16 +121,18 @@ public final class DumEnrichmentChain {
     private DumStructuredRecord merge(DumEnricher enricher, DumStructuredRecord rec,
             Map<String, Object> contributions) {
         try {
-            DumStructuredRecord.Builder builder =
-                    DumStructuredRecord.builder(rec.id(), rec.schema())
-                            .contentType(rec.contentType());
-            // Source values first, each keeping its origin (D16); a non-blank contribution then
-            // overrides — and re-tags the field's provenance to this enricher — while a blank one is
-            // dropped (the source value and its provenance survive).
+            // Source values first, each keeping its origin (D16), and the record's transients (D97);
+            // a non-blank contribution then overrides — and re-tags the field's provenance to this
+            // enricher — while a blank one is dropped (the source value and its provenance survive).
+            DumStructuredRecord.Builder builder = rec.toBuilder();
             DumFieldProvenance enriched = DumFieldProvenance.enrichment(enricher.name());
-            rec.values().forEach((field, value) ->
-                    builder.set(field, value, rec.provenance().get(field)));
-            contributions.forEach((field, value) -> builder.set(field, value, enriched));
+            contributions.forEach((field, value) -> {
+                if (value instanceof DumTransient working) {
+                    builder.transientValue(field, working.value());
+                } else {
+                    builder.set(field, value, enriched);
+                }
+            });
             return builder.build();
         } catch (RuntimeException e) {
             log.warn("Enricher '{}' produced an invalid contribution for record '{}' "
