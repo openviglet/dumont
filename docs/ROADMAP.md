@@ -103,11 +103,11 @@ This track has no remaining pending tasks.
 
 ## Track K — Frontend build and lint gates
 
-- 📋 **D135** (deps: —) **The EDS sample export app locks vulnerable axios, react-router and vite outside the workspace** — Its own npm lockfile never receives the workspace's updates, so 33 alerts accumulate there. → §XLIV.3
-
 ## Track O — Structured sources over paged JSON APIs
 
 ## Track P — Connector run control
+
+- 📋 **D136** (deps: —) **A connector run's outcome is not exposed as a metric, so a failed or stalled scheduled run alerts no one** — Operators learn about a broken ingestion from its downstream effect, hours late, and cannot tell it from a source that shrank. → §XLIII.10
 
 ## Non-goals (do NOT add as tasks)
 

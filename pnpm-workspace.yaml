@@ -3,6 +3,7 @@ packages:
   - "aem/aem-plugin-sample/turing-export/app"
   - "assets/assets-plugin-sample/turing-export/app"
   - "db/db-plugin-sample/turing-export/app"
+  - "eds/eds-plugin-sample/turing-export/app"
   - "web-crawler/wc-plugin-sample/turing-export/app"
 
 # Moved out of package.json's "pnpm" field — pnpm 11 reads build approvals here.
