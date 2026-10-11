@@ -78,20 +78,6 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.18 Pluggable survivorship (D110)
-
-Found while deduplicating jobs across sources for trabalharei (TRA23).
-`DumEntityResolver` / `DumRecordMerge` take no survivorship rule: the first contributor
-wins and later sources fill missing fields, with the primary fixed by provider order. A
-job site needs to keep one whole record chosen by a comparator (salary present, then the
-longer description, then the partner that pays per click), and field-by-field filling
-mixes one partner's apply link with another's text.
-
-Expected: a pluggable survivorship strategy (pick one whole record by a comparator, or
-merge field by field with per-field rules), declared per provider.
-
-Workaround: `DumJobPreference` in `jobs/jobs-plugin`.
-
 ### XLI.19 Reference-counted deindex for shared documents (D111)
 
 Found while deduplicating jobs across sources for trabalharei (TRA23). Dumont tracks
@@ -249,5 +235,29 @@ Open choice: whether to migrate the rows already in `job_occupation_cache` (answ
 for once) or let them expire and re-ask under the daily cap. Dropping
 `job_occupation_cache` and the `occupation-classifier` rows in `job_call` is part of the
 change either way.
+
+### XLI.28 Jobs deduplication on the commons resolution index (D120)
+
+`DumJobDeduplicator` in `jobs/jobs-plugin` was written because D18 resolution ran only
+in `crawl()`, in memory, with a field merge. D109 and D110 removed all three reasons.
+`DumStructuredSourcePlugin` now resolves on every `indexAll` through a persistent
+`DumResolutionIndex` (`DumResolutionIndexFactory`, table `dum_resolution_member`), holds
+a source's members it no longer sees and keeps publishing their documents while another
+member is live, and `survivorship()` can return `DumSurvivorship.wholeRecord(...)`.
+
+The jobs module still carries its own copy of each: the `job_fingerprint` table, expired
+rows kept so a source keeps publishing its group, and `DumJobPreference` as the
+whole-record rule. Two indexes now decide what a shared posting publishes as.
+
+Expected: the jobs plugin passes a `DumCanonicalKey` built from `DumJobFingerprint` and
+the factory's index to its constructor, overrides `survivorship()` with `wholeRecord`
+over `DumJobPreference.ORDER` adapted to `DumResolutionIndex.Member`, and drops
+`job_fingerprint`.
+
+Open points the move has to settle: the document id is `job-<hash>` today, while the
+commons canonical id is the key's own text, so either the key yields that id or the
+published URL rewrite moves with it. Vanished-group tombstones (TRA24) need to know when
+a canonical id is dropped, which is D113's hook. The per-pair duplicate rate has no
+counterpart in the commons run and stays a jobs summary.
 
 ## XLII Web-crawler hardening (real-world sources)

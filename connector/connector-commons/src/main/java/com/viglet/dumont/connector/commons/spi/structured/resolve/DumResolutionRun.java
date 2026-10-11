@@ -32,10 +32,10 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
  * of its records publishes as, and what it must still publish or let go when the run ends.
  *
  * <p>
- * {@link #resolve} files a record under its canonical id and answers the canonical document: the
- * grounding-safe {@link DumRecordMerge merge} of every live member, in the order they were first
- * filed, so the first contributor wins in every run of every source. A record with no canonical id is
- * answered unchanged, on its own id.
+ * {@link #resolve} files a record under its canonical id and answers the canonical document: what the
+ * {@link DumSurvivorship} makes of every live member, handed over in the order they were first filed,
+ * so the outcome is the same in every run of every source. A record with no canonical id is answered
+ * unchanged, on its own id.
  *
  * <p>
  * {@link #closeComplete} is for a run that saw the whole source: the members it did not see are held,
@@ -58,14 +58,23 @@ public final class DumResolutionRun {
     private final DumCanonicalKey canonicalKey;
     private final DumResolutionIndex index;
     private final DumStructuredSource source;
+    private final DumSurvivorship survivorship;
     private final Set<Seen> seen = new HashSet<>();
     private final Set<String> published = new HashSet<>();
 
+    /** A run whose documents follow {@link DumSurvivorship#fieldMerge()}. */
     public DumResolutionRun(DumCanonicalKey canonicalKey, DumResolutionIndex index,
             DumStructuredSource source) {
+        this(canonicalKey, index, source, DumSurvivorship.fieldMerge());
+    }
+
+    /** A run whose documents follow {@code survivorship} (D110). */
+    public DumResolutionRun(DumCanonicalKey canonicalKey, DumResolutionIndex index,
+            DumStructuredSource source, DumSurvivorship survivorship) {
         this.canonicalKey = canonicalKey;
         this.index = index;
         this.source = source;
+        this.survivorship = survivorship;
     }
 
     /** File {@code rec} and answer the document it publishes as. */
@@ -135,18 +144,14 @@ public final class DumResolutionRun {
         return new Expiry(deindex, republish);
     }
 
-    /** The canonical document of {@code canonicalId}, merged from its live members, if any is. */
+    /**
+     * The canonical document of {@code canonicalId}, as the survivorship rule makes it from the live
+     * members, if any is live.
+     */
     public Optional<DumStructuredRecord> merged(String canonicalId) {
-        DumStructuredRecord document = null;
-        for (DumResolutionIndex.Member member : index.members(canonicalId)) {
-            if (!member.live()) {
-                continue;
-            }
-            document = document == null
-                    ? DumRecordMerge.rekey(member.rec(), canonicalId, member.source())
-                    : DumRecordMerge.merge(document, member.rec(), member.source());
-        }
-        return Optional.ofNullable(document);
+        List<DumResolutionIndex.Member> live = index.members(canonicalId).stream()
+                .filter(DumResolutionIndex.Member::live).toList();
+        return live.isEmpty() ? Optional.empty() : Optional.of(survivorship.survive(canonicalId, live));
     }
 
     /**

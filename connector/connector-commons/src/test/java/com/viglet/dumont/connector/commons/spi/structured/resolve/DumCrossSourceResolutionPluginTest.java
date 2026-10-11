@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -211,6 +212,28 @@ class DumCrossSourceResolutionPluginTest {
                 "once catalog-a filed the title, catalog-b's run publishes the merged document too");
     }
 
+    @Test
+    void aProviderCanKeepOneRecordWholeInsteadOfMerging() {
+        // D110: the record with a workload wins whole; catalog-a's title is not mixed into it.
+        FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture("CS101", "Algorithms", null)));
+        FixtureSource catalogB = new FixtureSource("catalog-b", List.of("Sample-B"), Map.of(
+                "b-7", fixture("CS101", "Intro to Algorithms", "60h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"), catalogA, catalogB)
+                .withSurvivorship(DumSurvivorship.wholeRecord(Comparator.comparing(
+                        (DumResolutionIndex.Member member) -> !member.rec().has("workload"))));
+
+        plugin.crawl();
+        plugin.indexAll("catalog-a");
+
+        Map<String, Object> attributes = context.last("cs101").getAttributes();
+        assertEquals("Intro to Algorithms", attributes.get("title"));
+        assertEquals("60h", attributes.get("workload"));
+        @SuppressWarnings("unchecked")
+        List<String> tokens = (List<String>) attributes.get(DumProvenance.FIELD);
+        assertTrue(tokens.contains("title|catalog-b|css|h1"), "every field cites the one source kept");
+    }
+
     // --- Fixtures --------------------------------------------------------------------------------
 
     private static final DumStructuredSchema SCHEMA = DumStructuredSchema.builder()
@@ -290,6 +313,7 @@ class DumCrossSourceResolutionPluginTest {
     private static final class CatalogPlugin extends DumStructuredSourcePlugin
             implements DumStructuredSourceProvider {
         private final Map<String, DumStructuredSource> sources = new LinkedHashMap<>();
+        private DumSurvivorship survivorship = DumSurvivorship.fieldMerge();
 
         CatalogPlugin(DumConnectorContext context, DumCanonicalKey canonicalKey,
                 FixtureSource... sources) {
@@ -297,6 +321,16 @@ class DumCrossSourceResolutionPluginTest {
             for (FixtureSource source : sources) {
                 this.sources.put(source.getSourceName(), source);
             }
+        }
+
+        CatalogPlugin withSurvivorship(DumSurvivorship survivorship) {
+            this.survivorship = survivorship;
+            return this;
+        }
+
+        @Override
+        protected DumSurvivorship survivorship() {
+            return survivorship;
         }
 
         @Override

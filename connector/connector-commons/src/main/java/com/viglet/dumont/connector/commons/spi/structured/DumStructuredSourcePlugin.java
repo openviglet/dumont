@@ -38,6 +38,7 @@ import com.viglet.dumont.connector.commons.spi.structured.resolve.DumCanonicalKe
 import com.viglet.dumont.connector.commons.spi.structured.resolve.DumInMemoryResolutionIndex;
 import com.viglet.dumont.connector.commons.spi.structured.resolve.DumResolutionIndex;
 import com.viglet.dumont.connector.commons.spi.structured.resolve.DumResolutionRun;
+import com.viglet.dumont.connector.commons.spi.structured.resolve.DumSurvivorship;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumInMemoryProvenanceHistoryStore;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenance;
 import com.viglet.dumont.connector.commons.spi.structured.provenance.DumProvenanceHistoryStore;
@@ -84,7 +85,8 @@ import lombok.extern.slf4j.Slf4j;
  * <strong>Cross-source resolution (roadmap D18, D109).</strong> When a {@link DumCanonicalKey} is
  * configured, every {@link #indexAll(String)} run files its records in a {@link DumResolutionIndex}
  * shared by every source of the provider and across runs, and publishes each keyed record as the
- * canonical document merged — grounding-safe — from every live member any source has filed. Each
+ * canonical document its {@link #survivorship()} rule (D110) makes — grounding-safe — from every
+ * live member any source has filed. Each
  * source holding a member publishes the document under its own session, so no source's deindex sweep
  * removes a document another source still carries; it leaves the index once no member is live.
  * Because the merge can complete a mandatory field from a second source, the mandatory-field check
@@ -241,9 +243,19 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         provider().sourceNames().forEach(this::indexAll);
     }
 
+    /**
+     * How the live members of a canonical id become its document (roadmap <strong>D110</strong>). The
+     * default is {@link DumSurvivorship#fieldMerge()}, the D18 rule; a provider that must keep one
+     * partner's record whole overrides it with {@link DumSurvivorship#wholeRecord}.
+     */
+    protected DumSurvivorship survivorship() {
+        return DumSurvivorship.fieldMerge();
+    }
+
     /** A run of {@code source} against the resolution index, or {@code null} without a canonical key. */
     private DumResolutionRun resolutionRun(DumStructuredSource source) {
-        return canonicalKey == null ? null : new DumResolutionRun(canonicalKey, resolutionIndex, source);
+        return canonicalKey == null ? null
+                : new DumResolutionRun(canonicalKey, resolutionIndex, source, survivorship());
     }
 
     /** {@code rec} as it publishes: its canonical document when resolution is on (D109). */
