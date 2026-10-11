@@ -107,7 +107,6 @@ This track has no remaining pending tasks.
 
 ## Track P — Connector run control
 
-- 📋 **D125** (deps: —) **On embedded H2 every structured run fails at its finish: the tenant predicate reads TENANT_ID, the column is "tenant_id"** — A local Dumont on its default database cannot complete a single run, so nothing it ingests can be proven end to end. → §XLIII.2
 - 📋 **D126** (deps: —) **A run aborted by an exception logs no cause when finishing the run also fails** — The operator sees only 'aborted by an exception' and has to rebuild Dumont to learn what stopped the run. → §XLIII.3
 - 📋 **D127** (deps: —) **A structured source's second run aborts on a null checksum: toJobItem sets none and ReindexStrategy calls equals on it** — Every structured source fails each run after its first, and unchanged records cannot be told from changed ones. → §XLIII.4
 

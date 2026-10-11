@@ -82,35 +82,6 @@ These constrain every task above:
 
 ## XLIII Connector run control
 
-### XLIII.2 Unquoted tenant predicate on H2 (D125)
-
-Met in trabalharei (TRA25, Dumont-to-Turing publishing proof) on a local Dumont 2026.3
-built from `e7aeb581`, embedded H2 (`jdbc:h2:file:./store/db/dumontDB`),
-`DUMONT_MULTITENANT=false`.
-
-Every structured run ends in
-`DumConnectorIndexingService.countBySourceAndProviderSince`, from
-`completeIndexingStats` in `DumConnectorContextImpl.finishIndexing`. Hibernate renders
-the derived count as
-
-    select count(dcim1_0."id") from "dum_indexing" dcim1_0
-    where dcim1_0.tenant_id = ? and dcim1_0."source"=? ...
-
-and H2 answers `Column "DCIM1_0.TENANT_ID" not found` (42122). With
-`globally_quoted_identifiers: true` the column was created quoted, as lowercase
-`"tenant_id"`, but the `@TenantId` predicate Hibernate adds is not quoted, so H2 folds
-it to upper case. PostgreSQL folds unquoted names to lower case, which is why it only
-shows on H2. The exception escapes `finishIndexing`, so the request answers 500 and the
-run record is left half-written.
-
-Expected: the tenant predicate matches the column on every supported database. Either
-quote the `@TenantId` column name explicitly (`@Column(name = "\"tenant_id\"")`, the way
-the other columns come out) or open H2 with `DATABASE_TO_LOWER=TRUE` by default. An IT
-on the embedded H2 that finishes one structured run would have caught it.
-
-Workaround in trabalharei: `docker/docker-compose.turing.yml` opens Dumont's H2 with
-`;DATABASE_TO_LOWER=TRUE` through `SPRING_DATASOURCE_URL`, naming this id.
-
 ### XLIII.3 Abort cause lost behind a failing finish (D126)
 
 Met in trabalharei (TRA25, Dumont-to-Turing publishing proof) on a local Dumont 2026.3

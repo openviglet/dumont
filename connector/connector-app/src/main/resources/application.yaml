@@ -154,7 +154,12 @@ spring:
       settings:
         web-allow-others: true
   datasource:
-    url: jdbc:h2:file:./store/db/dumontDB
+    # CASE_INSENSITIVE_IDENTIFIERS (D125): the predicate Hibernate adds for @TenantId names
+    # tenant_id unquoted, while globally_quoted_identifiers creates the column as lowercase
+    # "tenant_id"; without it H2 folds the predicate to TENANT_ID and every tenant-scoped read
+    # fails. Not DATABASE_TO_LOWER: an existing file's schema is PUBLIC, which that setting
+    # then looks for as "public" and cannot open.
+    url: jdbc:h2:file:./store/db/dumontDB;CASE_INSENSITIVE_IDENTIFIERS=TRUE
     username: sa
     password: ""
     driver-class-name: org.h2.Driver
