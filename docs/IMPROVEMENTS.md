@@ -145,19 +145,6 @@ The UF is then read with `attribute(code, "uf")` instead of from the code prefix
 prefix table and the module's loader go away. The file's existing `uf`-versus-prefix
 check can stay as a test over the loaded taxonomy.
 
-### XLI.22 Explicit deindex on any source (D114)
-
-Found while expiring jobs with dead apply links in trabalharei's `jobs` module (TRA24).
-A source on the normal replay path cannot ask to deindex one id now (a posting found
-dead mid-cycle): only incremental sources get `expiredIds()`, and choosing that mode
-gives up the run-end sweep. The jobs module instead drops the id from `discover()` and
-waits for the sweep.
-
-Expected: any structured source can return explicit ids to deindex on this run,
-alongside the normal sweep.
-
-Workaround: the dead posting leaves `discover()` and the sweep removes it at run end.
-
 ### XLI.23 Source end-of-run hook (D115)
 
 Found while flushing expired-job tombstones in trabalharei's `jobs` module (TRA24).

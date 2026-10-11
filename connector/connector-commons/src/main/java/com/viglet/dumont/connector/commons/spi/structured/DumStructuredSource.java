@@ -94,6 +94,17 @@ public interface DumStructuredSource {
     }
 
     /**
+     * Ids the source found gone during this run (roadmap D114): a posting whose page answered 404,
+     * an item its API reported closed. Read once after extraction on every run that did not abort,
+     * whatever the run mode, and deindexed at once instead of waiting for a sweep. Unlike
+     * {@link #expiredIds()}, it needs no incremental mode and leaves the sweep in place. Defaults to
+     * none.
+     */
+    default Collection<String> goneIds() {
+        return List.of();
+    }
+
+    /**
      * Ids still present at the source but not re-extracted this run (roadmap D104), read once
      * after {@link #discover()}: a quota-bound API that fetches only new items knows the older
      * ones are still open. The indexing loop keeps them alive, so a sweeping finish does not

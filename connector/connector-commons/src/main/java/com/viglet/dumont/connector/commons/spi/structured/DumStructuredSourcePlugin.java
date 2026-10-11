@@ -341,6 +341,11 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // D104: ids the source reports unchanged and still present stay alive without an
             // extract, so whichever finish follows does not deindex them.
             keepUnchangedAlive(structuredSource, session, resolution);
+            // D114: what the source found gone leaves now, whichever way the run ends below.
+            int gone = deindexNow(structuredSource, session, resolution, structuredSource.goneIds());
+            if (gone > 0) {
+                log.info("Structured source '{}' deindexed {} id(s) it found gone", source, gone);
+            }
             if (!outcome.completed()) {
                 // The run was interrupted before visiting every discovered id; finishing
                 // non-standalone would treat the rest of the catalog as removed (D33).
@@ -441,22 +446,36 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             return;
         }
         List<String> notes = new ArrayList<>(runNotes(structuredSource));
-        Collection<String> expired = structuredSource.expiredIds();
-        if (resolution != null && !expired.isEmpty()) {
-            // An expired member leaves its canonical document only once no member of it is live (D109).
-            DumResolutionRun.Expiry expiry = resolution.expire(expired);
-            expiry.republish().forEach(kept -> publish(structuredSource, kept, session, null, null, null));
-            expired = expiry.deindex();
-        }
-        if (!expired.isEmpty()) {
-            int queued = dumConnectorContext.deIndexById(session, expired,
-                    List.copyOf(structuredSource.getSiteNames()));
+        int queued = deindexNow(structuredSource, session, resolution, structuredSource.expiredIds());
+        if (queued > 0) {
             log.info("Incremental source '{}' deindexed {} expired id(s)", source, queued);
             notes.add("%d expired record(s) deindexed".formatted(queued));
         }
         // An incremental run that stopped early is partial, but it is not a failure (D96).
         dumConnectorContext.recordRunOutcome(session, !structuredSource.discoveryComplete(), notes);
         dumConnectorContext.finishIndexing(session, true);
+    }
+
+    /**
+     * Deindex {@code ids} under {@code session} now: an incremental run's expired ids (D92) or what a
+     * source found gone (D114). Under resolution a member leaves its canonical document only once no
+     * member of it is live (D109); until then the document is published again without it.
+     *
+     * @return how many delete jobs were queued
+     */
+    private int deindexNow(DumStructuredSource structuredSource, DumConnectorSession session,
+            DumResolutionRun resolution, Collection<String> ids) {
+        if (ids.isEmpty()) {
+            return 0;
+        }
+        Collection<String> deindex = ids;
+        if (resolution != null) {
+            DumResolutionRun.Expiry expiry = resolution.expire(ids);
+            expiry.republish().forEach(kept -> publish(structuredSource, kept, session, null, null, null));
+            deindex = expiry.deindex();
+        }
+        return deindex.isEmpty() ? 0
+                : dumConnectorContext.deIndexById(session, deindex, List.copyOf(structuredSource.getSiteNames()));
     }
 
     protected void finishPartialRunStandalone(DumConnectorSession session, String source,
