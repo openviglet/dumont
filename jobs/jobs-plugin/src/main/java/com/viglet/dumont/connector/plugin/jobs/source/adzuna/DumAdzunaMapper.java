@@ -37,7 +37,8 @@ import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
  * the state; an unknown state leaves both out.</li>
  * <li>Salaries are stated only when {@code salary_is_predicted} is not {@code "1"} (Adzuna's own
  * estimate is not the employer's offer). Adzuna Brazil salaries are annual, so they are divided by 12
- * and published with {@code salaryPeriod = "mes"}; the band follows the monthly minimum.</li>
+ * and published with the original period, {@code salaryPeriod = "ano"}; the salary enricher (TRA21)
+ * fills the band from the monthly minimum.</li>
  * <li>{@code contract} maps {@code contract_type} only ({@code permanent} &rarr; {@code clt},
  * {@code contract} &rarr; {@code pj}). {@code contract_time} (full/part time) names no contract kind
  * in the site's vocabulary, so it never sets one.</li>
@@ -54,6 +55,9 @@ public final class DumAdzunaMapper {
 
     /** The {@code source} value and the id prefix. */
     public static final String SOURCE = "adzuna";
+
+    /** The {@code salaryPeriod} of every Adzuna salary: Adzuna Brazil quotes yearly amounts. */
+    static final String YEARLY = "ano";
 
     private DumAdzunaMapper() {
     }
@@ -130,8 +134,7 @@ public final class DumAdzunaMapper {
         Double monthlyMax = max == null ? null : DumJobNormalizer.annualToMonthly(max);
         put(job, DumJobsSchema.SALARY_MIN, monthlyMin);
         put(job, DumJobsSchema.SALARY_MAX, monthlyMax);
-        put(job, DumJobsSchema.SALARY_PERIOD, DumJobNormalizer.MONTHLY);
-        put(job, DumJobsSchema.SALARY_BAND, DumJobNormalizer.salaryBand(monthlyMin));
+        put(job, DumJobsSchema.SALARY_PERIOD, YEARLY);
     }
 
     private static Double positiveNumber(JSONObject result, String key) {

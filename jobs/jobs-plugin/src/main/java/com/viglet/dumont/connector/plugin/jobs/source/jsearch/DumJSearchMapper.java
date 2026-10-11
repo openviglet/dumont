@@ -52,7 +52,8 @@ import com.viglet.dumont.connector.plugin.jobs.source.DumJobSourceAdapter;
  * leave it out.</li>
  * <li>Salaries are stated only when {@code job_min_salary} or {@code job_max_salary} is present, the
  * period is {@code MONTH} (or {@code YEAR}, divided by 12) and {@code job_salary_currency}, when
- * sent, is {@code BRL}.</li>
+ * sent, is {@code BRL}. {@code salaryPeriod} is the original period ({@code mes} or {@code ano}); the
+ * salary enricher (TRA21) fills the band.</li>
  * <li>{@code applyUrl} is {@code job_apply_link} exactly as received.</li>
  * <li>{@code publishedAt} and {@code modificationDate} are both {@code job_posted_at_datetime_utc}
  * (else {@code job_posted_at_timestamp}): never the run's clock, so an unchanged re-fetch keeps its
@@ -192,8 +193,7 @@ public final class DumJSearchMapper {
         }
         put(job, DumJobsSchema.SALARY_MIN, min);
         put(job, DumJobsSchema.SALARY_MAX, max);
-        put(job, DumJobsSchema.SALARY_PERIOD, DumJobNormalizer.MONTHLY);
-        put(job, DumJobsSchema.SALARY_BAND, DumJobNormalizer.salaryBand(min));
+        put(job, DumJobsSchema.SALARY_PERIOD, yearly ? "ano" : DumJobNormalizer.MONTHLY);
     }
 
     /** The ISO-8601 text of {@code isoKey}, else the epoch-seconds {@code timestampKey} as an instant. */

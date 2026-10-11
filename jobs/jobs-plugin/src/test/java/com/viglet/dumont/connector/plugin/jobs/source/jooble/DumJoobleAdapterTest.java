@@ -82,8 +82,7 @@ class DumJoobleAdapterTest {
         Map<String, Object> job = all().get("jooble-7316540912345678901");
 
         assertThat(job).containsOnlyKeys("id", "title", "text", "company", "city", "state", "locationRaw", "remote",
-                "contract", "salaryMin", "salaryMax", "salaryPeriod", "salaryBand", "source", "url",
-                "applyUrl", "publishedAt", "modificationDate");
+                "contract", "salaryRaw", "source", "url", "applyUrl", "publishedAt", "modificationDate");
         assertThat(job)
                 .containsEntry("title", "Desenvolvedor Java Pleno")
                 .containsEntry("company", "Tech Brasil Ltda")
@@ -91,10 +90,8 @@ class DumJoobleAdapterTest {
                 .containsEntry("state", "SP")
                 .containsEntry("remote", "remoto")
                 .containsEntry("contract", "clt")
-                .containsEntry("salaryMin", 5000.0)
-                .containsEntry("salaryMax", 7000.0)
-                .containsEntry("salaryPeriod", "mes")
-                .containsEntry("salaryBand", "3k-5k")
+                // TRA21: the salary text as received, for the salary enricher.
+                .containsEntry("salaryRaw", "R$ 5.000 - R$ 7.000 por mês")
                 .containsEntry("source", "jooble")
                 .containsEntry("url", "https://trabalharei.com.br/vaga/"
                         + "desenvolvedor-java-pleno-jooble-7316540912345678901/")
@@ -108,7 +105,7 @@ class DumJoobleAdapterTest {
         // key, not a schema field.
         assertThat(job).containsEntry("locationRaw", "Campinas, SP");
         assertThat(DumJobsSchema.FIELDS).containsAll(job.keySet().stream()
-                .filter(key -> !key.equals("locationRaw")).toList());
+                .filter(key -> !key.equals("locationRaw") && !key.equals("salaryRaw")).toList());
     }
 
     @Test
@@ -136,8 +133,7 @@ class DumJoobleAdapterTest {
         assertThat(job).containsEntry("title", "Estagiário Administrativo")
                 .containsEntry("contract", "estagio").containsEntry("applyUrl", NO_ID_LINK)
                 // "Brasil" names no state; a null company and a blank salary stay absent.
-                .doesNotContainKeys("state", "city", "remote", "company", "salaryMin",
-                        "salaryBand");
+                .doesNotContainKeys("state", "city", "remote", "company", "salaryRaw");
         assertThat(all()).containsKey(expected);
     }
 
@@ -207,7 +203,9 @@ class DumJoobleAdapterTest {
         assertThat(DumJoobleMapper.contract("Tempo integral")).isNull();
         assertThat(DumJoobleMapper.contract("Meio período")).isNull();
         assertThat(DumJoobleMapper.contract("CLT ou PJ")).isNull();
-        assertThat(DumJoobleMapper.contract("Freelance")).isNull();
+        // TRA21: the shared vocabulary names freelancers too.
+        assertThat(DumJoobleMapper.contract("Freelance")).isEqualTo("freelancer");
+        assertThat(DumJoobleMapper.contract("Jovem Aprendiz")).isEqualTo("aprendiz");
         assertThat(DumJoobleMapper.contract(null)).isNull();
 
         Map<String, Map<String, Object>> jobs = all();
@@ -217,47 +215,14 @@ class DumJoobleAdapterTest {
     }
 
     @Test
-    void salaryOnlyWhenItClearlyStatesMonthlyBrl() {
-        assertThat(salary("R$ 2.500 - R$ 3.000 por mês")).containsEntry("salaryMin", 2500.0)
-                .containsEntry("salaryMax", 3000.0).containsEntry("salaryPeriod", "mes")
-                .containsEntry("salaryBand", "1.5k-3k");
-        assertThat(salary("R$ 3.000")).containsOnly(Map.entry("salaryMin", 3000.0),
-                Map.entry("salaryPeriod", "mes"), Map.entry("salaryBand", "1.5k-3k"));
-        assertThat(salary("R$ 1.412,00 mensal")).containsEntry("salaryMin", 1412.0)
-                .containsEntry("salaryBand", "ate-1.5k");
-        assertThat(salary("R$ 2.500,00 a R$ 3.000,00 /mês")).containsEntry("salaryMin", 2500.0)
-                .containsEntry("salaryMax", 3000.0);
-        assertThat(salary("R$4.000-R$6.000")).containsEntry("salaryMax", 6000.0);
-        // Other periods, other currencies, vague or implausible text: left for the salary parser.
-        assertThat(salary("R$ 18 por hora")).isEmpty();
-        assertThat(salary("R$ 60.000 por ano")).isEmpty();
-        assertThat(salary("R$ 150 por dia")).isEmpty();
-        assertThat(salary("US$ 3,000")).isEmpty();
-        assertThat(salary("3.000")).isEmpty();
-        assertThat(salary("A combinar")).isEmpty();
-        assertThat(salary("Até R$ 3.000")).isEmpty();
-        assertThat(salary("R$ 3.000 + comissão")).isEmpty();
-        assertThat(salary("R$ 25")).isEmpty();
-        assertThat(salary("R$ 5.000 - R$ 3.000")).isEmpty();
-        assertThat(salary("")).isEmpty();
-        assertThat(salary(null)).isEmpty();
-
+    void salaryTextIsKeptRawForTheSalaryEnricher() {
+        // TRA21: the mapper parses nothing; DumJobSalaryParser reads the text (DumJoobleEnrichmentTest).
         Map<String, Map<String, Object>> jobs = all();
-        assertThat(jobs.get("jooble--2208761450129834411")).containsEntry("salaryMin", 3000.0)
-                .doesNotContainKey("salaryMax");
-        assertThat(jobs.get("jooble-5521938827364019922")).containsEntry("salaryMin", 2500.0)
-                .containsEntry("salaryMax", 3000.0);
-        for (String id : List.of("jooble-4410982231774520113", "jooble-1093847561029384756",
-                "jooble-8837261540918273645")) {
-            assertThat(jobs.get(id)).doesNotContainKeys("salaryMin", "salaryMax", "salaryPeriod",
-                    "salaryBand");
-        }
-    }
-
-    private static Map<String, Object> salary(String text) {
-        Map<String, Object> job = new LinkedHashMap<>();
-        DumJoobleMapper.putSalary(job, text);
-        return job;
+        assertThat(jobs.get("jooble--2208761450129834411")).containsEntry("salaryRaw", "R$ 3.000");
+        assertThat(jobs.get("jooble-4410982231774520113")).containsEntry("salaryRaw", "R$ 18 por hora");
+        assertThat(jobs.get("jooble-1093847561029384756")).containsEntry("salaryRaw", "A combinar");
+        jobs.values().forEach(job -> assertThat(job).doesNotContainKeys("salaryMin", "salaryMax",
+                "salaryPeriod", "salaryBand"));
     }
 
     @Test

@@ -18,11 +18,9 @@ package com.viglet.dumont.connector.plugin.jobs.source.bne;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.json.JSONObject;
@@ -43,8 +41,9 @@ import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
  * is invented content and is not built).</li>
  * <li>{@code state} is {@code State} when it names one of the 27 UFs; {@code city} is
  * {@code City}.</li>
- * <li>{@code remote} only when the title or description says so; {@code contract} only when the
- * title names exactly one of estágio, aprendiz, temporário and no other contract kind.</li>
+ * <li>{@code remote} only when the title or description says so. BNE has no contract field, so
+ * {@code contract} is left to the contract enricher (TRA21), which reads the title and
+ * description.</li>
  * <li>{@code applyUrl} is the BNE job page built exactly as the {@code bne-vagas} plugin 1.0.0
  * builds it ({@link #applyUrl}); absent without an {@code Idf_Vaga}.</li>
  * <li>{@code publishedAt} and {@code modificationDate} are both the time the posting was first
@@ -61,23 +60,6 @@ public final class DumBneMapper {
     public static final String SOURCE = "bne";
 
     static final String APPLY_BASE = "https://www.bne.com.br/vaga-de-emprego-na-area-";
-
-    /** The contract kinds a BNE title can state; CLT and PJ only make a title ambiguous. */
-    enum Contract {
-        ESTAGIO("estagio", Pattern.compile("\\b(estagio|estagiari[oa])\\b")),
-        APRENDIZ("aprendiz", Pattern.compile("\\baprendiz\\b")),
-        TEMPORARIO("temporario", Pattern.compile("\\btemporari[oa]\\b")),
-        CLT(null, Pattern.compile("\\b(clt|efetiv[oa])\\b")),
-        PJ(null, Pattern.compile("\\b(pj|pessoa juridica)\\b"));
-
-        private final String value;
-        private final Pattern words;
-
-        Contract(String value, Pattern words) {
-            this.value = value;
-            this.words = words;
-        }
-    }
 
     /** The accents the plugin's {@code TirarAcentos} replaces, and nothing else (ç stays). */
     private static final String[][] PLUGIN_ACCENTS = {
@@ -119,7 +101,6 @@ public final class DumBneMapper {
         put(job, DumJobsSchema.CITY, text(vaga, "City"));
         put(job, DumJobsSchema.STATE, DumJobNormalizer.uf(text(vaga, "State")));
         put(job, DumJobsSchema.REMOTE, DumJobNormalizer.remote(title, description));
-        put(job, DumJobsSchema.CONTRACT, contract(title));
         put(job, DumJobsSchema.SOURCE, SOURCE);
         put(job, DumJobsSchema.URL, DumJobNormalizer.siteUrl(siteUrl, title, id));
         put(job, DumJobsSchema.APPLY_URL, applyUrl(vaga));
@@ -160,25 +141,6 @@ public final class DumBneMapper {
             }
         }
         return lower(SPACES_OR_HYPHENS.matcher(plain).replaceAll("-"));
-    }
-
-    /**
-     * The contract the title states: one of estágio, aprendiz, temporário when it is the only contract
-     * kind named; {@code null} otherwise (none, several, or CLT/PJ, which a title does not settle for
-     * this source).
-     */
-    static String contract(String title) {
-        String folded = DumJobNormalizer.fold(title);
-        if (folded.isEmpty()) {
-            return null;
-        }
-        Set<Contract> named = EnumSet.noneOf(Contract.class);
-        for (Contract contract : Contract.values()) {
-            if (contract.words.matcher(folded).find()) {
-                named.add(contract);
-            }
-        }
-        return named.size() == 1 ? named.iterator().next().value : null;
     }
 
     private static String lower(String text) {

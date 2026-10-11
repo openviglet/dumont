@@ -16,14 +16,11 @@
 
 package com.viglet.dumont.connector.plugin.jobs.source.jooble;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONObject;
@@ -31,6 +28,7 @@ import org.json.JSONObject;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobSourceAdapter;
+import com.viglet.dumont.connector.plugin.jobs.source.contract.DumJobContractParser;
 
 /**
  * Maps one Jooble search result to a job record keyed by {@link DumJobsSchema#FIELDS} (trabalharei
@@ -45,10 +43,10 @@ import com.viglet.dumont.connector.plugin.jobs.source.DumJobSourceAdapter;
  * ({@code "Remoto"}, {@code "Home office"}) sets neither. The text itself is kept, as received, under
  * {@code locationRaw} for the location enricher (TRA20), which writes the canonical city and UF.</li>
  * <li>{@code contract} maps {@code type} only when it names exactly one kind of the site's vocabulary
- * (CLT/efetivo, PJ, estágio, temporário); full-time/part-time never sets one.</li>
- * <li>Salaries are stated only when {@code salary} is a BRL amount or range that is monthly or names
- * no period ({@code "R$ 2.500 - R$ 3.000 por mês"}, {@code "R$ 3.000"}); anything else (hourly,
- * yearly, "a combinar", ...) is left for the salary parser of a later stage.</li>
+ * ({@link DumJobContractParser}); full-time/part-time never sets one. The contract enricher (TRA21)
+ * takes it as the partner's value and falls back to the title and snippet.</li>
+ * <li>{@code salary} is free text, so it is kept as received under {@code salaryRaw} for the salary
+ * enricher (TRA21), which parses it; the mapper sets no salary field.</li>
  * <li>{@code applyUrl} is Jooble's {@code link} exactly as received (Jooble pays per click on it).</li>
  * <li>{@code publishedAt} and {@code modificationDate} are both {@code updated} as Jooble sends it
  * (ISO-8601, usually without a zone — the structured source reads a zone-less time as UTC): never the
@@ -63,33 +61,8 @@ public final class DumJoobleMapper {
     /** The {@code source} value and the id prefix. */
     public static final String SOURCE = "jooble";
 
-    /** The contract kinds of the site's vocabulary a Jooble {@code type} can name. */
-    enum Contract {
-        CLT("clt", Pattern.compile("\\b(clt|efetiv[oa]s?)\\b")),
-        PJ("pj", Pattern.compile("\\b(pj|pessoa juridica)\\b")),
-        ESTAGIO("estagio", Pattern.compile("\\b(estagio|estagiari[oa]s?)\\b")),
-        TEMPORARIO("temporario", Pattern.compile("\\b(temporari[oa]s?)\\b"));
-
-        private final String value;
-        private final Pattern words;
-
-        Contract(String value, Pattern words) {
-            this.value = value;
-            this.words = words;
-        }
-    }
-
     private static final Pattern PLACE_SEPARATORS = Pattern.compile("\\s*[,/]\\s*|\\s+[-–]\\s+");
     private static final Set<String> COUNTRY = Set.of("brasil", "brazil", "br");
-
-    /** A BRL amount: {@code 2.500}, {@code 2.500,00}, {@code 2500}, {@code 2500,50}. */
-    private static final String AMOUNT = "(\\d{1,3}(?:\\.\\d{3})+(?:,\\d{1,2})?|\\d+(?:,\\d{1,2})?)";
-    /** The whole salary text, folded: one amount or a range, then at most a monthly marker. */
-    private static final Pattern MONTHLY_BRL = Pattern.compile("^r\\$\\s*" + AMOUNT
-            + "(?:\\s*(?:-|–|a|ate)\\s*(?:r\\$\\s*)?" + AMOUNT + ")?"
-            + "\\s*(?:(?:/|por|ao)\\s*mes|mensa(?:l|is))?\\.?$");
-    /** Below this a "monthly" amount is not credible (an hourly or daily rate without its period). */
-    static final double MIN_MONTHLY = 400;
 
     private static final Pattern SPACES = Pattern.compile("\\s+");
 
@@ -121,7 +94,8 @@ public final class DumJoobleMapper {
         put(job, DumJobSourceAdapter.LOCATION_RAW, location);
         put(job, DumJobsSchema.REMOTE, DumJobNormalizer.remote(title, snippet, location));
         put(job, DumJobsSchema.CONTRACT, contract(text(result, "type")));
-        putSalary(job, text(result, "salary"));
+        // The text as received, for the salary enricher (TRA21) — not a schema field.
+        put(job, DumJobSourceAdapter.SALARY_RAW, text(result, "salary"));
         put(job, DumJobsSchema.SOURCE, SOURCE);
         put(job, DumJobsSchema.URL, DumJobNormalizer.siteUrl(siteUrl, title, id));
         put(job, DumJobsSchema.APPLY_URL, link);
@@ -144,17 +118,7 @@ public final class DumJoobleMapper {
      * vocabulary; {@code null} for none, several, or only a working-time (full/part-time) value.
      */
     static String contract(String type) {
-        String folded = DumJobNormalizer.fold(type);
-        if (folded.isEmpty()) {
-            return null;
-        }
-        Set<Contract> named = EnumSet.noneOf(Contract.class);
-        for (Contract contract : Contract.values()) {
-            if (contract.words.matcher(folded).find()) {
-                named.add(contract);
-            }
-        }
-        return named.size() == 1 ? named.iterator().next().value : null;
+        return DumJobContractParser.parse(type).orElse(null);
     }
 
     /** Set {@code state} (and {@code city} when a part precedes the UF) from a free-text location. */
@@ -177,36 +141,6 @@ public final class DumJoobleMapper {
                 }
                 return;
             }
-        }
-    }
-
-    /** Monthly BRL salary fields when {@code salary} clearly states them; nothing otherwise. */
-    static void putSalary(Map<String, Object> job, String salary) {
-        String folded = DumJobNormalizer.fold(salary);
-        if (folded.isEmpty()) {
-            return;
-        }
-        Matcher matcher = MONTHLY_BRL.matcher(folded);
-        if (!matcher.matches()) {
-            return;
-        }
-        Double min = amount(matcher.group(1));
-        Double max = matcher.group(2) == null ? null : amount(matcher.group(2));
-        if (min == null || min < MIN_MONTHLY || (max != null && max < min)) {
-            return;
-        }
-        put(job, DumJobsSchema.SALARY_MIN, min);
-        put(job, DumJobsSchema.SALARY_MAX, max);
-        put(job, DumJobsSchema.SALARY_PERIOD, DumJobNormalizer.MONTHLY);
-        put(job, DumJobsSchema.SALARY_BAND, DumJobNormalizer.salaryBand(min));
-    }
-
-    /** {@code 2.500,50} &rarr; 2500.5. */
-    private static Double amount(String text) {
-        try {
-            return new BigDecimal(text.replace(".", "").replace(',', '.')).doubleValue();
-        } catch (NumberFormatException e) {
-            return null;
         }
     }
 

@@ -146,28 +146,11 @@ class DumBneAdapterTest {
     }
 
     @Test
-    void contractOnlyWhenTheTitleStatesOneUnambiguously() {
-        Map<String, Map<String, Object>> jobs = all();
-        assertThat(jobs.get("bne-4410002")).containsEntry("contract", "estagio");
-        assertThat(jobs.get("bne-4410003")).containsEntry("contract", "temporario");
-        assertThat(jobs.get("bne-4410004")).containsEntry("contract", "aprendiz");
-        assertThat(jobs.get("bne-4410005")).doesNotContainKey("contract");
-
-        assertThat(DumBneMapper.contract("Estagiária de Marketing")).isEqualTo("estagio");
-        assertThat(DumBneMapper.contract("Menor Aprendiz")).isEqualTo("aprendiz");
-        assertThat(DumBneMapper.contract("Promotor Temporário")).isEqualTo("temporario");
-        // Two kinds, or one with CLT/PJ beside it, is ambiguous; CLT/PJ alone is not taken from a title.
-        assertThat(DumBneMapper.contract("Estágio ou Temporário")).isNull();
-        assertThat(DumBneMapper.contract("Temporário com chance de efetivação CLT")).isNull();
-        assertThat(DumBneMapper.contract("Analista CLT")).isNull();
-        assertThat(DumBneMapper.contract("Analista PJ")).isNull();
-        // Plurals name the people managed, not the contract.
-        assertThat(DumBneMapper.contract("Supervisor de Estagiários")).isNull();
-        assertThat(DumBneMapper.contract("Instrutor de Aprendizes")).isNull();
-        assertThat(DumBneMapper.contract(null)).isNull();
+    void theMapperSetsNoContract() {
+        // TRA21: BNE has no contract field; the contract enricher reads title and description
+        // (DumBneEnrichmentTest), so the mapper never infers one.
+        all().values().forEach(job -> assertThat(job).doesNotContainKey("contract"));
     }
-
-    // --- the BNE apply link, byte for byte with the bne-vagas plugin --------------------------------
 
     @Test
     void applyLinksOfTheFixturesMatchThePlugin() {

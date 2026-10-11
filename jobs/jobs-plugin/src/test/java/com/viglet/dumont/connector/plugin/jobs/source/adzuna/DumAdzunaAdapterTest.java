@@ -80,7 +80,7 @@ class DumAdzunaAdapterTest {
         Map<String, Object> job = byId(fetch(source(NO_ROTATION), Set.of())).get("adzuna-4876543210");
 
         assertThat(job).containsOnlyKeys("id", "title", "text", "company", "city", "state", "remote",
-                "contract", "salaryMin", "salaryMax", "salaryPeriod", "salaryBand", "source", "url",
+                "contract", "salaryMin", "salaryMax", "salaryPeriod", "source", "url",
                 "applyUrl", "publishedAt", "modificationDate");
         assertThat(job)
                 .containsEntry("id", "adzuna-4876543210")
@@ -92,8 +92,9 @@ class DumAdzunaAdapterTest {
                 .containsEntry("contract", "clt")
                 .containsEntry("salaryMin", 5000.0)
                 .containsEntry("salaryMax", 7000.0)
-                .containsEntry("salaryPeriod", "mes")
-                .containsEntry("salaryBand", "3k-5k")
+                // TRA21: monthly amounts, the original (yearly) period; the band is the salary
+                // enricher's.
+                .containsEntry("salaryPeriod", "ano")
                 .containsEntry("source", "adzuna")
                 .containsEntry("url",
                         "https://trabalharei.com.br/vaga/desenvolvedor-java-pleno-adzuna-4876543210/")
@@ -102,7 +103,8 @@ class DumAdzunaAdapterTest {
         assertThat(job.get("text").toString()).startsWith("Buscamos Desenvolvedor Java Pleno")
                 .contains("100% remota");
         // Left for later stages, never invented here.
-        assertThat(job).doesNotContainKeys("abstract", "seniority", "occupation", "expiresAt");
+        assertThat(job).doesNotContainKeys("abstract", "seniority", "occupation", "expiresAt",
+                "salaryBand");
         // Every key is a schema field.
         assertThat(DumJobsSchema.FIELDS).containsAll(job.keySet());
     }
@@ -142,22 +144,22 @@ class DumAdzunaAdapterTest {
     }
 
     @Test
-    void annualSalariesBecomeMonthlyAndBandByTheMonthlyMinimum() {
+    void annualSalariesBecomeMonthlyWithTheYearlyPeriodKept() {
         Map<String, Map<String, Object>> jobs = byId(fetch(source(NO_ROTATION), Set.of()));
 
-        // 18,000/yr = 1,500/mo — the top of the first band; a minimum alone sets no maximum.
+        // 18,000/yr = 1,500/mo; a minimum alone sets no maximum.
         assertThat(jobs.get("adzuna-4876542987")).containsEntry("salaryMin", 1500.0)
-                .containsEntry("salaryBand", "ate-1.5k").containsEntry("salaryPeriod", "mes")
-                .doesNotContainKey("salaryMax");
+                .containsEntry("salaryPeriod", "ano").doesNotContainKey("salaryMax");
         // 19,800/yr = 1,650/mo; 21,600/yr = 1,800/mo.
         assertThat(jobs.get("adzuna-4876542777")).containsEntry("salaryMin", 1650.0)
-                .containsEntry("salaryMax", 1800.0).containsEntry("salaryBand", "1.5k-3k");
-        // 36,000/yr = 3,000/mo — the top of 1.5k-3k.
-        assertThat(jobs.get("adzuna-4876542650")).containsEntry("salaryMin", 3000.0)
-                .containsEntry("salaryBand", "1.5k-3k");
+                .containsEntry("salaryMax", 1800.0);
+        // 36,000/yr = 3,000/mo.
+        assertThat(jobs.get("adzuna-4876542650")).containsEntry("salaryMin", 3000.0);
         // 180,000/yr = 15,000/mo.
         assertThat(jobs.get("adzuna-4876542801")).containsEntry("salaryMin", 15000.0)
-                .containsEntry("salaryMax", 20000.0).containsEntry("salaryBand", "12k+");
+                .containsEntry("salaryMax", 20000.0);
+        // TRA21: the band is the salary enricher's (DumAdzunaEnrichmentTest), never the mapper's.
+        jobs.values().forEach(job -> assertThat(job).doesNotContainKey("salaryBand"));
     }
 
     @Test
@@ -341,7 +343,7 @@ class DumAdzunaAdapterTest {
                 "it-jobs:2");
         assertThat(jobs).hasSize(8);
         assertThat(byId(jobs).get("adzuna-4876531111")).containsEntry("state", "SC")
-                .containsEntry("city", "Florianópolis").containsEntry("salaryBand", "12k+");
+                .containsEntry("city", "Florianópolis").containsEntry("salaryMin", 18000.0);
     }
 
     @Test
