@@ -78,23 +78,4 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.31 AEM token service constructor for Spring (D123)
-
-Found on 2026-10-11 while booting a Dumont image built from the 2026.3 tree with every
-plugin on `loader.path` (`Dockerfile.local`). The context fails: `Error creating bean
-with name 'dumAemImsTokenService' ... No default constructor found`, so any Dumont that
-loads `aem-plugin.jar` does not start.
-
-`DumAemImsTokenService` (aem-plugin, added with D62's event-journal recovery in commit
-0030bd5a) has two constructors: the public
-`DumAemImsTokenService(DumAemJournalProperties)` and a package-private one that also
-takes a `RestClient` for tests. With two constructors and neither marked `@Autowired`,
-Spring looks for a no-argument one.
-
-Expected: the public constructor carries `@Autowired`, the way other multi-constructor
-beans in Dumont do. A test boots the AEM plugin's components in an application context
-(or the connector with `aem-plugin.jar` on the classpath), so a second constructor
-cannot break startup again without failing the build. The unit tests that construct the
-service directly did not catch it.
-
 ## XLII Web-crawler hardening (real-world sources)

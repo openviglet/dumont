@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -59,6 +60,8 @@ public class DumAemImsTokenService {
     private String cachedToken;
     private Instant cachedUntil = Instant.EPOCH;
 
+    /** The constructor Spring uses; with a second one present it must be named, or boot fails (D123). */
+    @Autowired
     public DumAemImsTokenService(DumAemJournalProperties properties) {
         this(properties, RestClient.create());
     }

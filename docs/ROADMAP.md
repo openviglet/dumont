@@ -99,8 +99,6 @@ This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
-- 📋 **D123** (deps: —) **Dumont does not start with the AEM plugin loaded: DumAemImsTokenService has no constructor Spring can pick** — Two constructors and no @Autowired make Spring look for a default one, so every image that ships aem-plugin.jar fails at boot. → §XLI.31
-
 ## Track J — Console surfaces move to bento chrome
 
 ## Track K — Frontend build and lint gates

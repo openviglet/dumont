@@ -486,6 +486,7 @@
 - **D60** — two routes added to the bento tree, the two editors moved to the adaptive chrome, and three cases in bento-tree that mount the real app at both addresses
 - **D61** — A per-source fetch strategy: DELIVERY discovers and reads via .model.json on the publish or delivery host, so a Cloud Service source needs no author credential; SLING keeps the author servlets.
 - **D67** — One delivery surface per content kind, routed from the source's own contentType and subType: pages via model.json, fragments via the Content Fragment API, assets via Assets Search.
+- **D123** — Dumont boots with aem-plugin.jar loaded: the IMS token and journal services mark their Spring constructor, and a test fails any AEM component Spring cannot construct.
 
 ## Track I — The console adopts the shared bento layer
 

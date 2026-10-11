@@ -19,6 +19,7 @@ package com.viglet.dumont.connector.plugin.aem.service;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,8 @@ public class DumAemJournalService {
     private final DumAemPluginSystemRepository systemRepository;
     private final RestClient restClient;
 
+    /** The constructor Spring uses; with a second one present it must be named, or boot fails (D123). */
+    @Autowired
     public DumAemJournalService(DumAemJournalProperties properties,
             DumAemImsTokenService tokenService, DumAemEventDispatcher eventDispatcher,
             DumAemPluginSystemRepository systemRepository) {
