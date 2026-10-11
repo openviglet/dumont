@@ -35,7 +35,9 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
  * id has no live member its rows are {@link #drop dropped} and the document leaves the index.
  *
  * <p>
- * {@link DumInMemoryResolutionIndex} keeps the index for the life of the plugin.
+ * {@link DumInMemoryResolutionIndex} keeps the index for the life of the plugin. The
+ * {@link DumResolutionIndexFactory} bean {@code connector-app} registers builds one in the database,
+ * which survives a restart; members are stored through {@link DumRecordCodec}.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.3

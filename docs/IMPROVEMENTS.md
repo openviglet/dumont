@@ -78,30 +78,6 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.17 Persistent cross-run resolution (D109)
-
-Found while deduplicating jobs across sources for trabalharei (TRA23). The D18 resolve
-stage used to run only inside `crawl()`, holding one call's records in memory.
-
-The first slice landed in connector-commons. `DumStructuredSourcePlugin.indexAll` files
-every keyed record in a `DumResolutionIndex` shared by the provider's sources, and
-publishes the merge of every live member (`DumResolutionRun`). `crawl()` is now
-`indexAll` per source. A complete run holds the members it no longer saw, and keeps
-publishing a canonical document while another source has a live member, so its own sweep
-cannot delete it. The plugin constructor takes the index; without one,
-`DumInMemoryResolutionIndex` is used.
-
-Left: a persistent `DumResolutionIndex` in connector-app (a members table keyed by
-canonical id, source and record id, with live flag and first-filed order), registered as
-a bean a plugin passes to the constructor. A member stores the record, so the table
-needs a codec for a `DumStructuredRecord`: values typed by the schema (dates and lists
-must round-trip), per-field `DumFieldProvenance`, and transients. Without that codec, a
-restart forgets every member.
-
-Workaround: `DumJobDeduplicator` with a `job_fingerprint` table in `jobs/jobs-plugin`.
-It publishes the preferred member whole rather than a field merge, so it is not a
-drop-in user of this index.
-
 ### XLI.18 Pluggable survivorship (D110)
 
 Found while deduplicating jobs across sources for trabalharei (TRA23).
