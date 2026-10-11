@@ -551,3 +551,4 @@
 - **D103** — DumFallbackEnricher declares an ordered fallback over inputs and DumSplitEnricher one input producing several fields, each value citing the input it came from.
 - **D104** — A source returns unchangedIds(), and the loop stamps the run's transaction on their tracking rows, so the sweep keeps them without a replayed extract.
 - **D105** — The Maven build works in a git worktree: git-commit-id-maven-plugin 9 reads HEAD through the worktree's .git file, and agents.md names the skip flag for tree without git.
+- **D106** — With dumont.enrichment.llm.enabled=true, plugins get a DumClassifierFactory bean that builds Turing-backed classifiers for their classification enrichers.

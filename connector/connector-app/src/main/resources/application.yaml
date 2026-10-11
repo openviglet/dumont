@@ -96,6 +96,11 @@ dumont:
   plugins:
     # PF4J plugins directory. Single-JAR plugins dropped here are loaded on startup.
     directory: ./plugins
+  enrichment:
+    llm:
+      # Expose an LLM classifier to plugins (DumClassifierFactory, backed by Turing's
+      # /api/v2/summary). Off by default: plugins then run their deterministic steps alone.
+      enabled: false
   indexing:
     # Indexing provider: turing, solr, or elasticsearch
     # Default is turing (if not specified)

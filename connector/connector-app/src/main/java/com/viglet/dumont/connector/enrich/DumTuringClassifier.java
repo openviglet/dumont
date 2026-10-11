@@ -46,7 +46,9 @@ import lombok.extern.slf4j.Slf4j;
  * classifier of <em>structure</em> (which category), never a producer of sourced content.
  *
  * <p>
- * It carries no Spring stereotype: a structured connector instantiates it (with the {@code Key}-
+ * Plugins reach it through the {@code DumClassifierFactory} bean {@link DumLlmClassifierConfig}
+ * registers when {@code dumont.enrichment.llm.enabled=true} (D106). The class itself carries no
+ * Spring stereotype: a structured connector instantiates it (with the {@code Key}-
  * bearing {@code RestClient} bean and a source-specific {@code systemPrompt}) and hands it to a
  * {@code DumClassificationEnricher}, which is itself gated by {@code dumont.enrichment.llm.enabled}.
  * This is the seam a native structured connector (D10/D11) and the index-time embedding path (D17)

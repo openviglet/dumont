@@ -180,7 +180,9 @@ instead of writing both fields itself. With D101, the contract, salary and senio
 enrichers return `DumSourced.of(value, selector, confidence)` naming whether they read
 the partner's field, the title or the text, and a partner value they only pass through
 keeps its own provenance. With D103, the contract and seniority enrichers become
-`DumFallbackEnricher` declarations and the salary enricher a `DumSplitEnricher`.
+`DumFallbackEnricher` declarations and the salary enricher a `DumSplitEnricher`. With
+D106, the occupation LLM fallback takes the optional `DumClassifierFactory` bean instead
+of a `jobsOccupationClassifier` nobody declares.
 
 ### XLI.23 Jobs loads IBGE through the taxonomy loader (D115)
 
@@ -202,21 +204,6 @@ prefix table and the module's loader go away. The file's existing `uf`-versus-pr
 check can stay as a test over the loaded taxonomy.
 
 ## XLII Web-crawler hardening (real-world sources)
-### XLI.14 LLM classifier for plugins (D106)
-
-Found while adding occupation classification to trabalharei's `jobs` module (TRA22). The
-only LLM classifier, `DumTuringClassifier`, lives in connector-app with no Spring bean
-and is not on a plugin's compile classpath, and the `dumont.enrichment.llm.enabled` flag
-the commons Javadoc names is wired nowhere. A plugin that wants an LLM fallback can only
-look up a `DumClassifier` bean that no code declares, so in production the jobs module
-classifies by its title dictionary alone.
-
-Expected: a `DumClassifier` bean exposed to plugins when an LLM is configured (backed by
-`DumTuringClassifier` or a provider), enabled by the documented flag.
-
-Workaround: the jobs module looks up an optional `jobsOccupationClassifier` bean and
-runs dictionary-only without it.
-
 ### XLI.15 Bounded closed-set classification (D107)
 
 Found while adding occupation classification to trabalharei's `jobs` module (TRA22).
