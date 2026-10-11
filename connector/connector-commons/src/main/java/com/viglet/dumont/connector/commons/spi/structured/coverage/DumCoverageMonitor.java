@@ -101,4 +101,24 @@ public final class DumCoverageMonitor {
         return new DumCoverageDrift(current.source(), hasDrift, threshold, previous.capturedAt(),
                 current.capturedAt(), fields);
     }
+
+    /**
+     * The run warnings a drift raises (roadmap <strong>D130</strong>): one per field whose coverage
+     * dropped by at least {@code dropThreshold} points between {@code previous}, the last complete run,
+     * and this run's {@code coverage}. None without a previous run, or with a threshold {@code <= 0},
+     * which is how a source turns the check off.
+     */
+    public static List<String> driftWarnings(DumCoverageSnapshot previous, String source,
+            int documentCount, List<DumFieldCoverage> coverage, int dropThreshold) {
+        if (previous == null || dropThreshold <= 0) {
+            return List.of();
+        }
+        DumCoverageSnapshot current = new DumCoverageSnapshot(source, System.currentTimeMillis(),
+                documentCount, coverage);
+        return drift(previous, current, dropThreshold).fields().stream()
+                .filter(FieldDrift::drift)
+                .map(field -> "coverage of field '%s' dropped from %d%% to %d%%".formatted(field.field(),
+                        field.previousPercent(), field.currentPercent()))
+                .toList();
+    }
 }

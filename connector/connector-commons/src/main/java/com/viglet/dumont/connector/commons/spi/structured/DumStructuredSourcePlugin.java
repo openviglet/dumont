@@ -228,6 +228,15 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         return threshold > 0 && outcome.failed() > 0 && outcome.failureRatio() >= threshold;
     }
 
+    /**
+     * The percentage-point drop in a field's coverage, from the last complete run to this one, that
+     * raises a warning on this run (roadmap <strong>D130</strong>): the sign of a layout or mapping
+     * break. Defaults to {@link DumCoverageMonitor#DEFAULT_DROP_THRESHOLD}; {@code <= 0} disables it.
+     */
+    protected int coverageDriftThreshold() {
+        return DumCoverageMonitor.DEFAULT_DROP_THRESHOLD;
+    }
+
     /** Human-readable reason for a failure-wave standalone finish (roadmap <strong>D34</strong>). */
     protected String failureWaveReason(DumExtractionOutcome outcome) {
         return "failure wave — %d of %d extractions failed (%.0f%% ≥ threshold %.0f%%)".formatted(
@@ -409,17 +418,21 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         // A complete run can still have something to say (D96) or warn of (D130); with neither it
         // records nothing.
         List<String> notes = runNotes(structuredSource);
-        List<String> warnings = structuredSource.runWarnings();
+        // Per-field coverage of this run, derived from the same fingerprint as the baseline, no extra
+        // pass over the source. Taken before the outcome is recorded, so a drift from the last run
+        // warns on this one (D130) instead of waiting for someone to ask (D15).
+        DumPreviewSnapshot baseline = snapshot.build();
+        var coverage = DumCoverageMonitor.coverage(structuredSource.schema(), baseline);
+        List<String> warnings = new ArrayList<>(structuredSource.runWarnings());
+        warnings.addAll(DumCoverageMonitor.driftWarnings(coverageHistoryStore.latest(source).orElse(null),
+                source, baseline.documents().size(), coverage, coverageDriftThreshold()));
         if (!notes.isEmpty() || !warnings.isEmpty()) {
             dumConnectorContext.recordRunOutcome(session, false, notes, warnings);
         }
         dumConnectorContext.finishIndexing(session, false);
-        DumPreviewSnapshot baseline = snapshot.build();
         previewSnapshotStore.save(source, baseline);
-        // Per-field coverage of this run, appended to the source's history so a later run can be
-        // checked for drift (D15) — derived from the same fingerprint, no extra pass over the source.
-        coverageHistoryStore.recordSnapshot(source, baseline.documents().size(),
-                DumCoverageMonitor.coverage(structuredSource.schema(), baseline));
+        // Appended to the source's history so the next run is checked against this one.
+        coverageHistoryStore.recordSnapshot(source, baseline.documents().size(), coverage);
         provenanceHistoryStore.recordSnapshot(source, provenance.documentCount(), provenance.fields());
         byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
         return DumRunEnd.complete();

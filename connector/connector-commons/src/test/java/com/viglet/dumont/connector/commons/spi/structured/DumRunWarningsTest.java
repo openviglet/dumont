@@ -58,6 +58,59 @@ class DumRunWarningsTest {
         assertTrue(context.outcomes.getFirst().endsWith(" " + List.of(WARNING)));
     }
 
+    @Test
+    void aFieldWhoseCoverageCollapsedSinceTheLastRunWarnsOnThisOne() {
+        Recording context = new Recording();
+        Drifting source = new Drifting();
+        Plugin plugin = new Plugin(context, source);
+
+        plugin.indexAll("jobs");
+        source.titled = false;
+        plugin.indexAll("jobs");
+
+        assertEquals(List.of("complete " + List.of() + " "
+                + List.of("coverage of field 'title' dropped from 100% to 0%")), context.outcomes);
+    }
+
+    /** A source whose records carry a title until a layout change drops it. */
+    private static final class Drifting implements DumStructuredSource {
+        private boolean titled = true;
+
+        @Override
+        public String getSourceName() {
+            return "jobs";
+        }
+
+        @Override
+        public String getProviderName() {
+            return "JOBS";
+        }
+
+        @Override
+        public Collection<String> getSiteNames() {
+            return List.of("Sample");
+        }
+
+        @Override
+        public DumStructuredSchema schema() {
+            return SCHEMA;
+        }
+
+        @Override
+        public List<String> discover() {
+            return List.of("job-1", "job-2");
+        }
+
+        @Override
+        public Optional<DumStructuredRecord> extract(String contentId) {
+            DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, SCHEMA);
+            if (titled) {
+                rec.set("title", "Analyst");
+            }
+            return Optional.of(rec.build());
+        }
+    }
+
     private record Source(boolean discoveryComplete) implements DumStructuredSource {
         @Override
         public String getSourceName() {
@@ -99,8 +152,12 @@ class DumRunWarningsTest {
         private final DumStructuredSource source;
 
         Plugin(DumConnectorContext context, boolean discoveryComplete) {
+            this(context, new Source(discoveryComplete));
+        }
+
+        Plugin(DumConnectorContext context, DumStructuredSource source) {
             super(context, DumEnrichmentChain.empty());
-            this.source = new Source(discoveryComplete);
+            this.source = source;
         }
 
         @Override
