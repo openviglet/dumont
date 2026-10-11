@@ -287,7 +287,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 // An exception escaped the extraction loop — finish standalone (D33) so the
                 // destructive deindex sweep is skipped and the prior index survives.
                 finishPartialRunStandalone(session, source, "aborted by an exception", e,
-                        structuredSource.runNotes());
+                        runNotes(structuredSource));
                 return;
             }
             if (!outcome.completed()) {
@@ -295,7 +295,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 // non-standalone would treat the rest of the catalog as removed (D33).
                 finishPartialRunStandalone(session, source, "interrupted after %d of %d ids"
                         .formatted(outcome.processed(), outcome.discovered()), null,
-                        structuredSource.runNotes());
+                        runNotes(structuredSource));
                 return;
             }
             if (structuredSource.incremental()) {
@@ -306,18 +306,18 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                 // Discovery itself stopped short (a call budget, a page cap, a failed page), so the
                 // ids it never listed are not removals; finishing non-standalone would deindex them.
                 finishPartialRunStandalone(session, source, "discovery stopped before the end of the source",
-                        null, structuredSource.runNotes());
+                        null, runNotes(structuredSource));
                 return;
             }
             if (isFailureWave(outcome)) {
                 // A wave of extraction failures (e.g. a network blip) would otherwise deindex every id
                 // it could not re-fetch; finish standalone so the prior index survives (D34).
                 finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
-                        structuredSource.runNotes());
+                        runNotes(structuredSource));
                 return;
             }
             // A complete run can still have something to say (D96); an empty note list records nothing.
-            List<String> notes = structuredSource.runNotes();
+            List<String> notes = runNotes(structuredSource);
             if (!notes.isEmpty()) {
                 dumConnectorContext.recordRunOutcome(session, false, notes);
             }
@@ -367,6 +367,17 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
      *
      * @param cause the exception that aborted the run, or {@code null} for a clean interrupt
      */
+    /**
+     * The notes a run records (D96): the source's own, then each enricher's end-of-run summary
+     * (D100). Called once per run, on whichever path ends it, since ending the enrichers' run
+     * also resets their per-run state.
+     */
+    private List<String> runNotes(DumStructuredSource structuredSource) {
+        List<String> notes = new ArrayList<>(structuredSource.runNotes());
+        notes.addAll(enrichmentChain.runEnd(structuredSource));
+        return notes;
+    }
+
     private void finishIncrementalRun(DumStructuredSource structuredSource, DumConnectorSession session,
             String source, DumExtractionOutcome outcome) {
         // An incremental source (D92) never sweeps: no run is expected to reach every item, so what a
@@ -374,10 +385,10 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         // wave, which says nothing about what is gone.
         if (isFailureWave(outcome)) {
             finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
-                    structuredSource.runNotes());
+                    runNotes(structuredSource));
             return;
         }
-        List<String> notes = new ArrayList<>(structuredSource.runNotes());
+        List<String> notes = new ArrayList<>(runNotes(structuredSource));
         Collection<String> expired = structuredSource.expiredIds();
         if (!expired.isEmpty()) {
             int queued = dumConnectorContext.deIndexById(session, expired,

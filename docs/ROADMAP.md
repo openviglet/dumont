@@ -107,7 +107,6 @@ This track has no remaining pending tasks.
 
 - 📋 **D104** (deps: —) **An incremental source cannot keep an unchanged id indexed without replaying its whole record through extract** — Quota-bound APIs fetch only new items, so every connector must store payloads just to stop the sweep deindexing them. → §XLI.4
 - 📋 **D105** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
-- 📋 **D100** (deps: —) **Enrichers have no end-of-run hook, so per-run summaries such as unresolved counts need a plugin override** — Every aggregating enricher would repeat the same indexAll override to report what it saw. → §XLI.10
 - 📋 **D101** (deps: —) **Enricher contributions carry no selector or confidence, so provenance cannot say where an enriched value came from** — Grounding depends on knowing whether a value came from the partner, the title or the text. → §XLI.11
 - 📋 **D102** (deps: —) **One invalid enricher contribution discards every field that enricher wrote, with a log that names no field** — A multi-field step such as salary loses all four values over one bad number, silently. → §XLI.12
 - 📋 **D103** (deps: —) **No built-in enricher shape for an ordered fallback over inputs or for one input producing several fields** — Each connector writes the same fallback and parser plumbing by hand instead of declaring it in a recipe. → §XLI.13

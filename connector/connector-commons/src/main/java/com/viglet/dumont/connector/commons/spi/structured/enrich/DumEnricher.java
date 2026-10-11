@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.commons.spi.structured.enrich;
 
+import java.util.List;
 import java.util.Map;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
@@ -65,6 +66,16 @@ public interface DumEnricher {
      * never a single point of failure for a run.
      */
     Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec);
+
+    /**
+     * Called once when a run of {@code source} ends (roadmap <strong>D100</strong>), whichever way
+     * it ended, so an enricher that aggregates over a run (unresolved values, rejected inputs) can
+     * report it. The returned notes join the run record (D96). An enricher keeping per-run counts
+     * resets them here, since the next call is the next run's. Defaults to nothing to report.
+     */
+    default List<String> onRunEnd(DumStructuredSource source) {
+        return List.of();
+    }
 
     /** Whether this enricher runs for the given source. Defaults to all sources. */
     default boolean appliesTo(DumStructuredSource source) {

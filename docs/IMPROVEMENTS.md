@@ -94,7 +94,9 @@ Expected: `DumJobsStructuredSource` overrides `runNotes()` with one note per sto
 adapters hit (the budget that was spent, the page and HTTP status that failed), and
 `discoveryComplete()` answers `false` for those runs so the loop finishes them
 standalone and marks them partial. The adapters already compute each case for their WARN
-lines, so the note is the same sentence, collected instead of only logged.
+lines, so the note is the same sentence, collected instead of only logged. With D100,
+the unresolved-location count moves from the `DumJobsPlugin.indexAll` override to the
+location enricher's `onRunEnd`, and the override goes away.
 
 ### XLI.15 Jobs enrichers read transients (D107)
 
@@ -168,19 +170,6 @@ executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallb
 `agents.md` names the flag in the meantime.
 
 Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
-
-### XLI.10 Enricher end-of-run hook (D100)
-
-Found while counting unresolved locations per source in trabalharei's `jobs` module
-(TRA20). `DumEnricher` is called per record and has no end-of-run hook, so an enricher
-that aggregates over a run (unresolved counts, coverage, rejected values) cannot emit
-its summary. The jobs plugin overrides `indexAll` to log one line per source after the
-run, which every enriching connector would have to repeat.
-
-Expected: an `onRunEnd(source, context)` callback on enrichers, whose output joins the
-run record once D96 gives runs a place for notes.
-
-Workaround: `DumJobsPlugin.indexAll` override in `jobs/jobs-plugin`.
 
 ### XLI.11 Provenance from enrichers (D101)
 

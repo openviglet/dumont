@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.commons.spi.structured.enrich;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -97,6 +98,31 @@ public final class DumEnrichmentChain {
             current = applyOne(enricher, source, current);
         }
         return current;
+    }
+
+    /**
+     * Ends a run for every applicable enricher (roadmap D100) and returns their notes, in chain
+     * order. An enricher whose hook throws is logged and skipped: a summary is never a reason to
+     * fail the run it summarizes.
+     */
+    public List<String> runEnd(DumStructuredSource source) {
+        List<String> notes = new ArrayList<>();
+        for (DumEnricher enricher : enrichers) {
+            if (!enricher.appliesTo(source)) {
+                continue;
+            }
+            try {
+                List<String> enricherNotes = enricher.onRunEnd(source);
+                if (enricherNotes != null) {
+                    enricherNotes.stream().filter(note -> note != null && !note.isBlank())
+                            .forEach(notes::add);
+                }
+            } catch (RuntimeException e) {
+                log.warn("Enricher '{}' failed to end its run for source '{}': {}", enricher.name(),
+                        source.getSourceName(), e.getMessage());
+            }
+        }
+        return notes;
     }
 
     private DumStructuredRecord applyOne(DumEnricher enricher, DumStructuredSource source,
