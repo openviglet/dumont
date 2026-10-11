@@ -99,17 +99,13 @@ This track has no remaining pending tasks.
 
 ## Track H — AEM extraction model redesign (component-oriented, per-type, recipe-driven)
 
+- 📋 **D123** (deps: —) **Dumont does not start with the AEM plugin loaded: DumAemImsTokenService has no constructor Spring can pick** — Two constructors and no @Autowired make Spring look for a default one, so every image that ships aem-plugin.jar fails at boot. → §XLI.31
+
 ## Track J — Console surfaces move to bento chrome
 
 ## Track K — Frontend build and lint gates
 
 ## Track O — Structured sources over paged JSON APIs
-
-- 📋 **D118** (deps: D99 ✅) **The jobs module loads the IBGE municipality list with its own code and derives the UF from a hand-kept prefix table** — D99 ships a taxonomy loader with row attributes, so the module's loader and prefix table are a second copy of it. → §XLI.26
-- 📋 **D119** (deps: D107 ✅) **The jobs occupation step keeps its own answer cache, call cap and label check beside the commons ones** — Two caches and two caps do one job, so a fix to the commons classifier path never reaches the occupation step. → §XLI.27
-- 📋 **D120** (deps: D110 ✅, D113 ✅) **The jobs deduplicator keeps its own fingerprint table and preference rule beside the commons resolution index** — Two indexes decide what a shared posting publishes as, so a fix to commons resolution never reaches jobs. → §XLI.28
-- 📋 **D121** (deps: D115 ✅) **The jobs plugin overrides indexAll to flush tombstones and log run summaries** — The source and enricher run-end hooks now carry that work, and the counts belong in the run record, not only the log. → §XLI.29
-- 💭 **D122** (deps: D116 ✅) **The jobs source replays every stored open posting through extract each run to keep it indexed** — D104's unchangedIds can keep ids alive without an extract, but the replay also re-enriches and feeds dedupe. → §XLI.30
 
 ## Non-goals (do NOT add as tasks)
 

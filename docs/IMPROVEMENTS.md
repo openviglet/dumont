@@ -78,110 +78,23 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.26 Jobs loads IBGE through the taxonomy loader (D118)
+### XLI.31 AEM token service constructor for Spring (D123)
 
-Found while shipping D99. `DumTaxonomyLoader.fromResource(loader, path)` in
-connector-commons now reads a versioned taxonomy from a JSON resource. Each row's `key`
-column maps to its `canonical` column, the other columns become attributes
-(`DumTaxonomy.attributes(raw)`, `attributeTable(name)`), and the file's `source`,
-`downloadedAt` and `count` are kept or checked. A taxonomy application can also write an
-attribute instead of the canonical value (`DumTabularRecipe.Builder.taxonomyAttribute`).
+Found on 2026-10-11 while booting a Dumont image built from the 2026.3 tree with every
+plugin on `loader.path` (`Dockerfile.local`). The context fails: `Error creating bean
+with name 'dumAemImsTokenService' ... No default constructor found`, so any Dumont that
+loads `aem-plugin.jar` does not start.
 
-The `jobs` module still loads the IBGE municipality list with its own code
-(`DumIbgeMunicipalities`). It maps code to name and derives the UF from the first two
-digits of the code, with a hand-kept prefix table.
+`DumAemImsTokenService` (aem-plugin, added with D62's event-journal recovery in commit
+0030bd5a) has two constructors: the public
+`DumAemImsTokenService(DumAemJournalProperties)` and a package-private one that also
+takes a `RestClient` for tests. With two constructors and neither marked `@Autowired`,
+Spring looks for a no-argument one.
 
-Expected: `jobs/ibge-municipios.json` declares `"key": "id"`, `"canonical": "nome"` and
-`"rows": "municipios"`, and the module registers `DumTaxonomyLoader.fromResource(...)`.
-The UF is then read with `attribute(code, "uf")` instead of from the code prefix, so the
-prefix table and the module's loader go away. The file's existing `uf`-versus-prefix
-check can stay as a test over the loaded taxonomy.
-
-### XLI.27 Occupation step on the commons classification store (D119)
-
-D107 gave `DumClassificationEnricher` a `DumClassificationStore` (in-memory
-`DumEnrichmentCache`, or the persistent `DumJpaClassificationStore` bean in
-connector-app), a rolling daily cap counted in that store, and
-`DumClassifier.classify(input, labels)` with `DumClassifier.match`.
-`DumJobOccupationEnricher` in `jobs/jobs-plugin` still carries the workaround it was
-built with: its own `job_occupation_cache` table, a cap counted in `job_call` under
-`occupation-classifier`, and `DumJobOccupationLabels.code` as its label check. Two
-caches and two caps now do one job, and a fix to either is not a fix to the other.
-
-Expected: the occupation step keeps its dictionary, its `known()` read for tombstones
-and its per-source counters, but asks the classifier through `classify(title, labels)`
-and keeps answers and calls in the injected `DumClassificationStore`, keyed with the
-taxonomy version so a newer CBO list is a miss. The label set stays the CBO codes; the
-slug mapping stays in `DumCboFamilies`. The classifier comes from the optional
-`DumClassifierFactory` bean (D106) rather than a `jobsOccupationClassifier` bean nobody
-declares.
-
-Open choice: whether to migrate the rows already in `job_occupation_cache` (answers paid
-for once) or let them expire and re-ask under the daily cap. Dropping
-`job_occupation_cache` and the `occupation-classifier` rows in `job_call` is part of the
-change either way.
-
-### XLI.28 Jobs deduplication on the commons resolution index (D120)
-
-`DumJobDeduplicator` in `jobs/jobs-plugin` was written because D18 resolution ran only
-in `crawl()`, in memory, with a field merge. D109 and D110 removed all three reasons.
-`DumStructuredSourcePlugin` now resolves on every `indexAll` through a persistent
-`DumResolutionIndex` (`DumResolutionIndexFactory`, table `dum_resolution_member`), holds
-a source's members it no longer sees and keeps publishing their documents while another
-member is live, and `survivorship()` can return `DumSurvivorship.wholeRecord(...)`.
-
-The jobs module still carries its own copy of each: the `job_fingerprint` table, expired
-rows kept so a source keeps publishing its group, and `DumJobPreference` as the
-whole-record rule. Two indexes now decide what a shared posting publishes as.
-
-Expected: the jobs plugin passes a `DumCanonicalKey` built from `DumJobFingerprint` and
-the factory's index to its constructor, overrides `survivorship()` with `wholeRecord`
-over `DumJobPreference.ORDER` adapted to `DumResolutionIndex.Member`, and drops
-`job_fingerprint`.
-
-Open points the move has to settle: the document id is `job-<hash>` today, while the
-commons canonical id is the key's own text, so either the key yields that id or the
-published URL rewrite moves with it. Vanished-group tombstones (TRA24) need to know when
-a canonical id is dropped, which is D113's hook. The per-pair duplicate rate has no
-counterpart in the commons run and stays a jobs summary. Since D111 the run-end sweep no
-longer deletes a document another source of the provider still tracks, so held rows are
-no longer what keeps a shared group indexed.
-
-### XLI.29 Jobs post-run work on the run-end hooks (D121)
-
-`DumJobsPlugin.indexAll` in `jobs/jobs-plugin` wraps `super.indexAll(source)` to reset
-per-run counters before the run and, in a `finally`, to log the location, salary,
-occupation and deduplication summaries and flush `DumJobTombstones`. It was written
-because sources had no end-of-run hook; D115 added
-`DumStructuredSource.onRunEnd(DumRunEnd)`, called after the sweep on every path, aborts
-included, and D100 already gives enrichers `onRunEnd`, whose notes join the run record.
-
-Expected: the jobs source flushes its tombstones from `onRunEnd`. The three enrichers
-report their summaries through `DumEnricher.onRunEnd` and reset there, so the counts
-reach the run record (D96) instead of only the log. The deduplicator's summary follows
-whichever path D120 takes. Then `DumJobsPlugin` drops its `indexAll` override.
-
-The resets the override does before a run need no hook: an enricher that resets in
-`onRunEnd` starts every run clean, since `runEnd` is called once per run on every path.
-
-### XLI.30 Jobs replay versus unchanged ids (D122)
-
-Split out of D116's design. `DumJobsStructuredSource.discover()` reports this run's
-fetch plus every stored open posting, and `extract()` rebuilds each stored one from
-`DumJobSeen.payload`, so the sweep sees it again without a partner call. D104 added
-`DumStructuredSource.unchangedIds()`: ids still open at the source that the loop keeps
-alive without an extract.
-
-The idea: return the stored open postings that this run did not fetch from
-`unchangedIds()` instead of replaying them, and drop the payload replay through
-`extract()`.
-
-What has to be settled first, because the replay does more than keep ids alive:
-- Enrichment runs on every replayed posting each run, so a taxonomy or dictionary change reaches stored postings today; kept-alive ids would keep their last indexed values until the partner returns them again.
-- The deduplicator (`DumJobDeduplicator`, D120) reads the payloads to choose and publish a group's preferred member, and a group document can change when another source's member arrives, which a keep-alive cannot express.
-- Tombstones (TRA24) name the occupation and title of an expired posting from the stored payload.
-
-So the payload may stay even if the replay goes. This is a question for whoever owns the
-jobs module, not a ready design.
+Expected: the public constructor carries `@Autowired`, the way other multi-constructor
+beans in Dumont do. A test boots the AEM plugin's components in an application context
+(or the connector with `aem-plugin.jar` on the classpath), so a second constructor
+cannot break startup again without failing the build. The unit tests that construct the
+service directly did not catch it.
 
 ## XLII Web-crawler hardening (real-world sources)

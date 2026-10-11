@@ -563,3 +563,8 @@
 - **D115** — DumStructuredSource.onRunEnd(DumRunEnd) is called once after every indexAll finishes, aborts included, saying whether the run was partial, swept, and why it stopped.
 - **D116** — Each jobs adapter notes its budget stops and failed pages on the fetch context, and the source returns them as run notes on a run that still sweeps.
 - **D117** — Contract and seniority are DumFallbackEnricher declarations, with a stopOn rule for ambiguous inputs, and every jobs enricher value cites the input it read.
+- 🗑 **D118** — abandoned: The jobs module moved to the trabalharei repository on 2026-10-11, and this work continues there as TRA68.
+- 🗑 **D119** — abandoned: The jobs module moved to the trabalharei repository on 2026-10-11, and this work continues there as TRA69.
+- 🗑 **D120** — abandoned: The jobs module moved to the trabalharei repository on 2026-10-11, and this work continues there as TRA70.
+- 🗑 **D121** — abandoned: The jobs module moved to the trabalharei repository on 2026-10-11, and this work continues there as TRA71.
+- 🗑 **D122** — abandoned: The jobs module moved to the trabalharei repository on 2026-10-11, and this question continues there as TRA72.

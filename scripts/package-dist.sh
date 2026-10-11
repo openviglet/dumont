@@ -44,7 +44,6 @@ mkdir -p "$STAGE/connector/libs/webcrawler"
 mkdir -p "$STAGE/connector/libs/assets"
 mkdir -p "$STAGE/connector/libs/catalog"
 mkdir -p "$STAGE/connector/libs/eds"
-mkdir -p "$STAGE/connector/libs/jobs"
 mkdir -p "$STAGE/connector/export"
 mkdir -p "$STAGE/bin"
 
@@ -77,9 +76,6 @@ cp "catalog/catalog-plugin/scripts/sample/export/cursarei.json" "$STAGE/connecto
 
 # Edge Delivery Services Plugin
 cp "eds/eds-plugin/target/eds-plugin.jar"                 "$STAGE/connector/libs/eds/"
-
-# Jobs Plugin
-cp "jobs/jobs-plugin/target/jobs-plugin.jar"              "$STAGE/connector/libs/jobs/"
 
 # Every connector plugin module must have reached libs/ (D94). The lists above are per
 # connector because each gets its own directory and launcher, so a new module is easy to
@@ -114,8 +110,6 @@ cp "$SCRIPT_DIR/bin/dumont-catalog.sh"      "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-catalog.bat"     "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-eds.sh"          "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-eds.bat"         "$STAGE/bin/"
-cp "$SCRIPT_DIR/bin/dumont-jobs.sh"         "$STAGE/bin/"
-cp "$SCRIPT_DIR/bin/dumont-jobs.bat"        "$STAGE/bin/"
 chmod +x "$STAGE/bin/"*.sh 2>/dev/null || true
 
 # Config and docs
