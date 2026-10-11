@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import org.springframework.web.client.RestClient;
 
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassificationStore;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassifier;
 import com.viglet.dumont.connector.config.DumTuringCsrfService;
 
@@ -37,8 +38,8 @@ import com.viglet.dumont.connector.config.DumTuringCsrfService;
  * ({@code TurLlmCacheService}) and the Global Settings. The classifier is constructed with a
  * classification {@code systemPrompt} (the instruction) and returns the model's answer trimmed to a
  * single label. {@link #classify(String, Collection)} appends the closed label set to that prompt and
- * accepts only a label of the set (D107). Turing's cache key covers the prompt as well as the input,
- * so a changed label set is a miss there too.
+ * accepts only a label of the set (D107). Turing's cache key is the SHA-256 of the prompt and the
+ * input (D108), so two inputs never share an answer and a changed label set is a miss.
  *
  * <p>
  * <strong>Grounding contract.</strong> An empty or {@code "NONE"} answer yields
@@ -98,7 +99,7 @@ public class DumTuringClassifier implements DumClassifier {
 
     private Optional<String> ask(String input, String prompt) {
         Map<String, Object> request = new LinkedHashMap<>();
-        request.put("cacheKey", cacheKeyPrefix + ":" + Integer.toHexString((prompt + '\n' + input).hashCode()));
+        request.put("cacheKey", cacheKey(prompt, input));
         request.put("data", input);
         request.put("systemPrompt", prompt);
 
@@ -116,6 +117,14 @@ public class DumTuringClassifier implements DumClassifier {
                     + (response == null ? "empty response" : response.error()));
         }
         return toLabel(response);
+    }
+
+    /**
+     * Turing's cache key for one question: the prefix and the SHA-256 of the prompt and the input
+     * (D108). A 32-bit {@code hashCode} let colliding inputs ("Aa" and "BB") read each other's answer.
+     */
+    String cacheKey(String prompt, String input) {
+        return cacheKeyPrefix + ":" + DumClassificationStore.hash(prompt + '\n' + input);
     }
 
     private Optional<String> toLabel(SummaryResponse response) {

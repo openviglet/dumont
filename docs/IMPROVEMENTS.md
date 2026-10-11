@@ -265,18 +265,3 @@ for once) or let them expire and re-ask under the daily cap. Dropping
 change either way.
 
 ## XLII Web-crawler hardening (real-world sources)
-### XLI.16 Collision-safe classifier cache key (D108)
-
-Found while reviewing the classifiers for trabalharei's `jobs` module (TRA22).
-`DumTuringClassifier` builds its Turing cache key as `prefix +
-Integer.toHexString(input.hashCode())`, a 32-bit hash. Two different inputs whose
-`String.hashCode()` collide share a key and get each other's cached answer, so a title
-can silently receive another title's label.
-
-Expected: a collision-resistant key (SHA-256 of the normalized input, plus the label set
-or taxonomy version), with a test that two known colliding strings get separate entries
-(for example "Aa" and "BB" share a Java hashCode).
-
-Workaround: none needed in trabalharei yet (the jobs module keys its own cache by
-SHA-256); filed because every other caller of the classifier is exposed.
-

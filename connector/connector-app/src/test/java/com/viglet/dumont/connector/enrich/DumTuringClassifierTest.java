@@ -17,7 +17,9 @@
 package com.viglet.dumont.connector.enrich;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
@@ -142,6 +144,35 @@ class DumTuringClassifierTest {
                 MediaType.APPLICATION_JSON));
 
         assertTrue(classifier.classify("horoscope", List.of("Exact Sciences", "Humanities")).isEmpty());
+    }
+
+    @Test
+    void inputsWhoseHashCodesCollideGetSeparateCacheKeys() {
+        assertEquals("Aa".hashCode(), "BB".hashCode(), "the fixture is a real String.hashCode collision");
+        String prompt = "Classify.";
+
+        assertNotEquals(classifier.cacheKey(prompt, "Aa"), classifier.cacheKey(prompt, "BB"));
+        assertTrue(classifier.cacheKey(prompt, "Aa").matches("dumont-area:[0-9a-f]{64}"));
+    }
+
+    @Test
+    void theCacheKeyChangesWithThePrompt() {
+        assertNotEquals(classifier.cacheKey("labels v1", "history"), classifier.cacheKey("labels v2", "history"),
+                "a changed label set is a different question");
+    }
+
+    @Test
+    void theCacheKeyIsSentToTuring() {
+        expectCsrf();
+        server.expect(requestTo("http://turing.test/api/v2/summary"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(jsonPath("$.cacheKey", matchesPattern("dumont-area:[0-9a-f]{64}")))
+                .andRespond(withSuccess(
+                        "{\"success\":true,\"error\":null,\"content\":\"Humanities\",\"canRegenerate\":true}",
+                        MediaType.APPLICATION_JSON));
+
+        classifier.classify("history survey");
+        server.verify();
     }
 
     @Test

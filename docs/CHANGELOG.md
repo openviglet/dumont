@@ -553,3 +553,4 @@
 - **D105** — The Maven build works in a git worktree: git-commit-id-maven-plugin 9 reads HEAD through the worktree's .git file, and agents.md names the skip flag for tree without git.
 - **D106** — With dumont.enrichment.llm.enabled=true, plugins get a DumClassifierFactory bean that builds Turing-backed classifiers for their classification enrichers.
 - **D107** — DumClassificationEnricher keeps answers in a SHA-256-keyed store (persistent in connector-app), caps calls per rolling day, and publishes only labels of a closed set.
+- **D108** — DumTuringClassifier keys Turing's cache by the SHA-256 of prompt and input, so colliding inputs such as "Aa" and "BB" no longer share an answer.
