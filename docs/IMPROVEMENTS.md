@@ -78,7 +78,7 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.14 Jobs runs report their stops (D106)
+### XLI.14 Jobs runs report their stops (D113)
 
 Found while shipping D96. Structured sources can now return `runNotes()`
 (connector-commons `DumStructuredSource`), and the plugin loop records them, with the
@@ -100,7 +100,7 @@ location enricher's `onRunEnd`, and the override goes away. With D104, still-ope
 postings the quota did not reach are returned from `unchangedIds()`, so
 `DumJobSeen.payload` and its replay through `extract()` can go.
 
-### XLI.15 Jobs enrichers read transients (D107)
+### XLI.15 Jobs enrichers read transients (D114)
 
 Found while shipping D97. A structured record now carries transient, never-indexed
 attributes: `DumStructuredRecord.Builder.transientValue(key, value)`, read back through
@@ -124,7 +124,7 @@ the partner's field, the title or the text, and a partner value they only pass t
 keeps its own provenance. With D103, the contract and seniority enrichers become
 `DumFallbackEnricher` declarations and the salary enricher a `DumSplitEnricher`.
 
-### XLI.16 Jobs loads IBGE through the taxonomy loader (D108)
+### XLI.16 Jobs loads IBGE through the taxonomy loader (D115)
 
 Found while shipping D99. `DumTaxonomyLoader.fromResource(loader, path)` in
 connector-commons now reads a versioned taxonomy from a JSON resource. Each row's `key`
