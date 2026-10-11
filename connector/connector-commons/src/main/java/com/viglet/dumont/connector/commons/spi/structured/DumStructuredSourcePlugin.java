@@ -109,6 +109,8 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     protected final DumEnrichmentChain enrichmentChain;
     protected final DumPreviewSnapshotStore previewSnapshotStore;
     protected final DumCoverageHistoryStore coverageHistoryStore;
+    /** Per source, why its current run's sites were not provisioned (D139); one run per source at a time. */
+    private final Map<String, List<String>> provisioningWarnings = new java.util.concurrent.ConcurrentHashMap<>();
     protected final DumProvenanceHistoryStore provenanceHistoryStore;
     /** Cross-source canonical key (D18); {@code null} disables resolution (per-source publish). */
     protected final DumCanonicalKey canonicalKey;
@@ -380,7 +382,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // An exception escaped the extraction loop — finish standalone (D33) so the
             // destructive deindex sweep is skipped and the prior index survives.
             finishPartialRunStandalone(session, source, "aborted by an exception", e,
-                    runNotes(structuredSource), structuredSource.runWarnings());
+                    runNotes(structuredSource), runWarnings(structuredSource));
             return DumRunEnd.stopped("aborted by an exception");
         }
         // D104: ids the source reports unchanged and still present stay alive without an
@@ -396,7 +398,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             // non-standalone would treat the rest of the catalog as removed (D33).
             String interrupted = "interrupted after %d of %d ids".formatted(outcome.processed(),
                     outcome.discovered());
-            finishPartialRunStandalone(session, source, interrupted, null, runNotes(structuredSource), structuredSource.runWarnings());
+            finishPartialRunStandalone(session, source, interrupted, null, runNotes(structuredSource), runWarnings(structuredSource));
             return DumRunEnd.stopped(interrupted);
         }
         if (structuredSource.incremental()) {
@@ -405,14 +407,14 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         if (!structuredSource.discoveryComplete()) {
             // Discovery itself stopped short (a call budget, a page cap, a failed page), so the
             // ids it never listed are not removals; finishing non-standalone would deindex them.
-            finishPartialRunStandalone(session, source, DISCOVERY_STOPPED, null, runNotes(structuredSource), structuredSource.runWarnings());
+            finishPartialRunStandalone(session, source, DISCOVERY_STOPPED, null, runNotes(structuredSource), runWarnings(structuredSource));
             return DumRunEnd.stopped(DISCOVERY_STOPPED);
         }
         if (isFailureWave(outcome)) {
             // A wave of extraction failures (e.g. a network blip) would otherwise deindex every id
             // it could not re-fetch; finish standalone so the prior index survives (D34).
             finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
-                    runNotes(structuredSource), structuredSource.runWarnings());
+                    runNotes(structuredSource), runWarnings(structuredSource));
             return DumRunEnd.stopped(failureWaveReason(outcome));
         }
         publishHeld(structuredSource, session, resolution, snapshot, provenance, byType);
@@ -424,7 +426,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         // warns on this one (D130) instead of waiting for someone to ask (D15).
         DumPreviewSnapshot baseline = snapshot.build();
         var coverage = DumCoverageMonitor.coverage(structuredSource.schema(), baseline);
-        List<String> warnings = new ArrayList<>(structuredSource.runWarnings());
+        List<String> warnings = runWarnings(structuredSource);
         warnings.addAll(DumCoverageMonitor.driftWarnings(coverageHistoryStore.latest(source).orElse(null),
                 source, baseline.documents().size(), coverage, coverageDriftThreshold()));
         if (!notes.isEmpty() || !warnings.isEmpty()) {
@@ -453,13 +455,27 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
      *
      * <p>
      * A source publishing to no site (no site names configured) has nothing to declare.
+     *
+     * <p>
+     * A site the backend did not provision does not stop the run, but it is not a clean run either
+     * (D139): each refusal becomes one of this run's warnings, beside the source's own.
      */
     private void provisionSchema(DumStructuredSource structuredSource) {
         List<TurSNJobAttributeSpec> fields = structuredSource.schema().toAttributeSpecs();
+        List<String> refused = new ArrayList<>();
         for (String siteName : structuredSource.getSiteNames()) {
             dumConnectorContext.provisionSchema(
-                    new DumIndexingSchema(siteName, structuredSource.getLocale(), fields));
+                    new DumIndexingSchema(siteName, structuredSource.getLocale(), fields))
+                    .ifPresent(refused::add);
         }
+        provisioningWarnings.put(structuredSource.getSourceName(), List.copyOf(refused));
+    }
+
+    /** The warnings this run records: the source's own, then any provisioning refusal (D130, D139). */
+    private List<String> runWarnings(DumStructuredSource structuredSource) {
+        List<String> warnings = new ArrayList<>(structuredSource.runWarnings());
+        warnings.addAll(provisioningWarnings.getOrDefault(structuredSource.getSourceName(), List.of()));
+        return warnings;
     }
 
     /**
@@ -491,7 +507,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         // wave, which says nothing about what is gone.
         if (isFailureWave(outcome)) {
             finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
-                    runNotes(structuredSource), structuredSource.runWarnings());
+                    runNotes(structuredSource), runWarnings(structuredSource));
             return DumRunEnd.stopped(failureWaveReason(outcome));
         }
         List<String> notes = new ArrayList<>(runNotes(structuredSource));
@@ -502,7 +518,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         }
         // An incremental run that stopped early is partial, but it is not a failure (D96).
         boolean partial = !structuredSource.discoveryComplete();
-        dumConnectorContext.recordRunOutcome(session, partial, notes, structuredSource.runWarnings());
+        dumConnectorContext.recordRunOutcome(session, partial, notes, runWarnings(structuredSource));
         dumConnectorContext.finishIndexing(session, true);
         return new DumRunEnd(partial, false, partial ? DISCOVERY_STOPPED : null);
     }

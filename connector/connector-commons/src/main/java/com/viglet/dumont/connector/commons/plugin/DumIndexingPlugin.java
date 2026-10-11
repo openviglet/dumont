@@ -56,9 +56,12 @@ public interface DumIndexingPlugin {
      * indexing keeps whatever inference it did before.
      *
      * @param schema the site, locale and declared fields
+     * @return why the backend did not take the schema, or empty when it did or had nothing to take
+     *         (D139): a failed provisioning never stops a run, so the run record is where it shows
      */
-    default void provision(DumIndexingSchema schema) {
+    default Optional<String> provision(DumIndexingSchema schema) {
         // Backends without a declarative schema endpoint have nothing to send.
+        return Optional.empty();
     }
 
     /**

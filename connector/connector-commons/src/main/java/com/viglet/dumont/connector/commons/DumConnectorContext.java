@@ -18,6 +18,7 @@ package com.viglet.dumont.connector.commons;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
@@ -34,9 +35,11 @@ public interface DumConnectorContext {
      * provisioning is unchanged.
      *
      * @param schema the site, locale and declared fields
+     * @return why the backend did not take the schema, or empty (D139)
      */
-    default void provisionSchema(DumIndexingSchema schema) {
+    default Optional<String> provisionSchema(DumIndexingSchema schema) {
         // No backend to declare to.
+        return Optional.empty();
     }
 
     /**

@@ -586,3 +586,4 @@
 - **D132** — An AEM or structured run that ends with no session (source not found, no enabled environment) calls endRunWithoutSession, which releases its lock; a failed AEM discovery finishes standalone.
 - **D137** — A source learns what a canonical document resolution dropped last published: DumResolutionRun keeps the survivorship result before the drop, and deindexed(id, lastPublished) receives it.
 - **D138** — A batch Turing refuses clears its documents' ledger checksums, so the next run resends them, and the run record turns partial with a note naming the source and count.
+- **D139** — A site the backend did not provision becomes a run warning naming the site and reason, so the run no longer reads clean; the timeout is Turing's T1081.

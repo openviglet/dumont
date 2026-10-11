@@ -18,9 +18,11 @@ package com.viglet.dumont.connector.indexing;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,5 +58,18 @@ class DumTuringIndexingPluginTest {
 
         assertDoesNotThrow(() -> plugin.provision(new DumIndexingSchema("Sample", Locale.US,
                 List.of(new TurSNJobAttributeSpec()))));
+    }
+
+    /** D139: the run is told why, so its record does not read clean. */
+    @Test
+    void provisionAnswersWhyWhenTuringIsUnreachable() {
+        DumTuringIndexingPlugin plugin =
+                new DumTuringIndexingPlugin("http://localhost:1/turing", "key");
+
+        Optional<String> refused = plugin.provision(new DumIndexingSchema("Sample", Locale.US,
+                List.of(new TurSNJobAttributeSpec())));
+
+        assertTrue(refused.isPresent());
+        assertTrue(refused.get().startsWith("site 'Sample' was not provisioned"), refused.get());
     }
 }

@@ -132,24 +132,6 @@ Expected: Micrometer gauges and counters per connector source, exposed on
 == 0` or `time() - dumont_run_last_finished_seconds > 2*3600` pages on a broken or
 stalled schedule for any plugin, not only trabalharei's.
 
-### XLIII.13 Failed provisioning shows on the run (D139)
-
-Met in trabalharei (TRA25), running a structured source while the Turing container was
-paused. `DumTuringIndexingPlugin.provision` logged `ERROR Could not provision site
-'trabalharei-vagas': Could not reach the manifest endpoint at
-http://turing:2700/api/sn/manifest` (`SocketTimeoutException: Read timed out`, after
-about three minutes), and the run went on and was recorded "complete".
-
-A site whose fields were not provisioned can reject or mis-index what the run sends (a
-new field declared since the last provisioning never reaches Turing), and nothing on the
-run record says provisioning failed.
-
-Expected: a failed provisioning marks the run partial with the reason on its record
-(D96), or stops it before sending; and the manifest call uses a shorter read timeout
-than the three minutes seen, since the run waits on it.
-
-Workaround in trabalharei: none.
-
 ### XLIII.14 Search weights in the structured schema (D140)
 
 Met in trabalharei (TRA79). The site's field contract weighs searches as title 10,

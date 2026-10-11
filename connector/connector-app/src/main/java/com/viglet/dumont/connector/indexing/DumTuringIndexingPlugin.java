@@ -93,7 +93,7 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
      * loudly, naming the fields that would have had to be rewritten, and the documents still flow.
      */
     @Override
-    public void provision(DumIndexingSchema schema) {
+    public Optional<String> provision(DumIndexingSchema schema) {
         TurSNManifest manifest = TurSNManifest.builder()
                 .name(schema.siteName())
                 .locale(schema.locale())
@@ -108,15 +108,19 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
                 log.info("Provisioned site '{}' (created={}) from {} declared field(s)",
                         result.siteName(), result.siteCreated(), schema.fields().size());
             }
+            return Optional.empty();
         } catch (TurSNManifestException e) {
             if (e.isMigrationRequired()) {
                 log.error("Site '{}' schema needs a declared migration — indexing continues with the "
                         + "site's current schema. Breaking change(s): {}", schema.siteName(),
                         e.getBreakingChanges());
-            } else {
-                log.error("Could not provision site '{}': {} — indexing continues with the site's "
-                        + "current schema", schema.siteName(), e.getMessage(), e);
+                return Optional.of("site '%s' kept its current schema: the declared one needs a migration (%s)"
+                        .formatted(schema.siteName(), e.getBreakingChanges()));
             }
+            log.error("Could not provision site '{}': {} — indexing continues with the site's "
+                    + "current schema", schema.siteName(), e.getMessage(), e);
+            return Optional.of("site '%s' was not provisioned: %s".formatted(schema.siteName(),
+                    e.getMessage()));
         }
     }
 

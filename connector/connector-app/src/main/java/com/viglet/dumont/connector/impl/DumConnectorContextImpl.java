@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -94,11 +95,11 @@ public class DumConnectorContextImpl implements DumConnectorContext {
      * declares no fields — provisioning an empty schema would say nothing and could only do harm.
      */
     @Override
-    public void provisionSchema(DumIndexingSchema schema) {
+    public Optional<String> provisionSchema(DumIndexingSchema schema) {
         if (!provisionEnabled || schema == null || schema.isEmpty()) {
-            return;
+            return Optional.empty();
         }
-        indexingPlugin.provision(schema);
+        return indexingPlugin.provision(schema);
     }
 
     @Override

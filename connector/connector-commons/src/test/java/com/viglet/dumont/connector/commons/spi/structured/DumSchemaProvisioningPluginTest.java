@@ -105,6 +105,30 @@ class DumSchemaProvisioningPluginTest {
     }
 
     @Test
+    @DisplayName("a site the backend did not provision warns on the run, which still publishes (D139)")
+    void aRefusedProvisioningWarnsOnTheRun() {
+        context.refusing.put("Publish", "site 'Publish' was not provisioned: Read timed out");
+
+        plugin.indexAll(SOURCE);
+
+        assertEquals(List.of("site 'Publish' was not provisioned: Read timed out"), context.warnings);
+        assertFalse(context.items.isEmpty(), "a failed provisioning never stops the run");
+    }
+
+    @Test
+    @DisplayName("a provisioning refusal does not outlive its run")
+    void aLaterCleanRunCarriesNoProvisioningWarning() {
+        context.refusing.put("Publish", "site 'Publish' was not provisioned: Read timed out");
+        plugin.indexAll(SOURCE);
+        context.refusing.clear();
+        context.warnings.clear();
+
+        plugin.indexAll(SOURCE);
+
+        assertTrue(context.warnings.isEmpty());
+    }
+
+    @Test
     @DisplayName("an empty schema is not a declaration")
     void anEmptySchemaIsNotADeclaration() {
         assertTrue(new DumIndexingSchema("Author", Locale.US, List.of()).isEmpty());
@@ -211,12 +235,23 @@ class DumSchemaProvisioningPluginTest {
             return items.add(dumJobItemWithSession);
         }
 
+        /** Sites the backend refuses, with the reason it gives (D139). */
+        private final Map<String, String> refusing = new LinkedHashMap<>();
+        private final List<String> warnings = new ArrayList<>();
+
         @Override
-        public void provisionSchema(DumIndexingSchema schema) {
+        public Optional<String> provisionSchema(DumIndexingSchema schema) {
             if (!items.isEmpty()) {
                 provisionedBeforeAnyDocument = false;
             }
             provisioned.add(schema);
+            return Optional.ofNullable(refusing.get(schema.siteName()));
+        }
+
+        @Override
+        public void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes,
+                List<String> runWarnings) {
+            warnings.addAll(runWarnings);
         }
 
         @Override
