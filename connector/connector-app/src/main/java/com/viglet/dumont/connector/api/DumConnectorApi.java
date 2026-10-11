@@ -19,6 +19,7 @@ package com.viglet.dumont.connector.api;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -110,16 +111,44 @@ public class DumConnectorApi {
                 : ResponseEntity.ok(indexingModelList);
     }
 
-    @GetMapping("index/{name}/all")
-    public ResponseEntity<Map<String, String>> indexAll(@PathVariable String name) {
+    private static Map<String, String> statusUnknownSource(String name) {
+        Map<String, String> status = new HashMap<>();
+        status.put(STATUS_KEY, "unknown source");
+        status.put("reason", "No connector plugin manages the source '" + name + "'");
+        return status;
+    }
+
+    /**
+     * Starts a whole-source run. The owner is resolved before the lock is taken, so a name no
+     * plugin manages answers 404 instead of locking itself; and a start that throws before the
+     * plugin hands the run off releases the lock, so a failed start never strands the source
+     * behind a 409 (D124).
+     */
+    private ResponseEntity<Map<String, String>> startRun(String name, OperationType operation) {
+        Optional<DumConnectorPlugin> owner = pluginRegistry.findBySource(name);
+        if (owner.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusUnknownSource(name));
+        }
         if (!indexingService.tryStartProcessing(name)) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(statusAlreadyRunning());
         }
-        DumConnectorPlugin plugin = pluginRegistry.resolveBySource(name);
-        indexingService.trackIndexingStart(name, plugin.getProviderName(),
-                OperationType.INDEX_ALL);
-        plugin.indexAll(name);
+        DumConnectorPlugin plugin = owner.get();
+        try {
+            if (operation == OperationType.REINDEX_ALL) {
+                indexingService.deleteByProviderAndSource(plugin.getProviderName(), name);
+            }
+            indexingService.trackIndexingStart(name, plugin.getProviderName(), operation);
+            plugin.indexAll(name);
+        } catch (RuntimeException e) {
+            indexingService.finishProcessing(name);
+            throw e;
+        }
         return ResponseEntity.ok(statusSent());
+    }
+
+    @GetMapping("index/{name}/all")
+    public ResponseEntity<Map<String, String>> indexAll(@PathVariable String name) {
+        return startRun(name, OperationType.INDEX_ALL);
     }
 
     @PostMapping("index/{name}")
@@ -138,15 +167,7 @@ public class DumConnectorApi {
 
     @GetMapping("reindex/{name}/all")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name) {
-        if (!indexingService.tryStartProcessing(name)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(statusAlreadyRunning());
-        }
-        DumConnectorPlugin plugin = pluginRegistry.resolveBySource(name);
-        indexingService.deleteByProviderAndSource(plugin.getProviderName(), name);
-        indexingService.trackIndexingStart(name, plugin.getProviderName(),
-                OperationType.REINDEX_ALL);
-        plugin.indexAll(name);
-        return ResponseEntity.ok(statusSent());
+        return startRun(name, OperationType.REINDEX_ALL);
     }
 
     @PostMapping("reindex/{name}")

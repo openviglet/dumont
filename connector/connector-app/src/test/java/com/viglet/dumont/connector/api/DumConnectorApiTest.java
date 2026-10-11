@@ -16,13 +16,16 @@
 package com.viglet.dumont.connector.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
@@ -104,21 +108,62 @@ class DumConnectorApiTest {
 
     @Test
     void indexAllReturnsConflictWhenAlreadyRunning() {
+        when(pluginRegistry.findBySource("name")).thenReturn(Optional.of(plugin));
         when(indexingService.tryStartProcessing("name")).thenReturn(false);
         assertThat(api.indexAll("name").getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        verify(pluginRegistry, never()).resolveBySource("name");
+        verify(plugin, never()).indexAll("name");
     }
 
     @Test
     void indexAllStartsPluginWhenFree() {
+        when(pluginRegistry.findBySource("name")).thenReturn(Optional.of(plugin));
         when(indexingService.tryStartProcessing("name")).thenReturn(true);
-        when(pluginRegistry.resolveBySource("name")).thenReturn(plugin);
         when(plugin.getProviderName()).thenReturn("turing");
 
         assertThat(api.indexAll("name").getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(plugin).indexAll("name");
         verify(indexingService).trackIndexingStart(eq("name"), eq("turing"),
                 org.mockito.ArgumentMatchers.any());
+        verify(indexingService, never()).finishProcessing("name");
+    }
+
+    @Test
+    void indexAllOnUnownedSourceAnswersNotFoundWithoutTakingTheLock() {
+        when(pluginRegistry.findBySource("ghost")).thenReturn(Optional.empty());
+
+        ResponseEntity<Map<String, String>> response = api.indexAll("ghost");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).containsEntry("status", "unknown source")
+                .containsKey("reason");
+        verify(indexingService, never()).tryStartProcessing("ghost");
+        assertThat(api.reindexAll("ghost").getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void indexAllReleasesTheLockWhenTheStartThrows() {
+        when(pluginRegistry.findBySource("name")).thenReturn(Optional.of(plugin));
+        when(indexingService.tryStartProcessing("name")).thenReturn(true);
+        when(plugin.getProviderName()).thenReturn("turing");
+        doThrow(new UnsupportedOperationException("boom")).when(plugin).indexAll("name");
+
+        assertThatThrownBy(() -> api.indexAll("name"))
+                .isInstanceOf(UnsupportedOperationException.class);
+        verify(indexingService).finishProcessing("name");
+    }
+
+    @Test
+    void reindexAllReleasesTheLockWhenTheStartThrows() {
+        when(pluginRegistry.findBySource("name")).thenReturn(Optional.of(plugin));
+        when(indexingService.tryStartProcessing("name")).thenReturn(true);
+        when(plugin.getProviderName()).thenReturn("turing");
+        doThrow(new IllegalStateException("boom")).when(indexingService)
+                .deleteByProviderAndSource("turing", "name");
+
+        assertThatThrownBy(() -> api.reindexAll("name"))
+                .isInstanceOf(IllegalStateException.class);
+        verify(indexingService).finishProcessing("name");
+        verify(plugin, never()).indexAll("name");
     }
 
     @Test
@@ -135,11 +180,12 @@ class DumConnectorApiTest {
 
     @Test
     void reindexAllConflictAndSuccess() {
+        when(pluginRegistry.findBySource("name")).thenReturn(Optional.of(plugin));
         when(indexingService.tryStartProcessing("name")).thenReturn(false);
         assertThat(api.reindexAll("name").getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
 
         when(indexingService.tryStartProcessing("free")).thenReturn(true);
-        when(pluginRegistry.resolveBySource("free")).thenReturn(plugin);
+        when(pluginRegistry.findBySource("free")).thenReturn(Optional.of(plugin));
         when(plugin.getProviderName()).thenReturn("turing");
         assertThat(api.reindexAll("free").getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(indexingService).deleteByProviderAndSource("turing", "free");

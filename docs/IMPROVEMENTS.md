@@ -82,28 +82,6 @@ These constrain every task above:
 
 ## XLIII Connector run control
 
-### XLIII.1 Failed run start strands the source lock (D124)
-
-Met in trabalharei (TRA25, the Dumont-to-Turing publishing proof) against a local Dumont
-2026.3 built from `e7aeb581`.
-
-`GET /api/v2/connector/index/proof-adzuna/all` was called before the `proof-adzuna` job
-source existed. `DumConnectorApi.indexAll` calls
-`indexingService.tryStartProcessing(name)` first, then
-`pluginRegistry.resolveBySource(name)`, which falls back to `DumDefaultPluginImpl`; its
-`indexAll` throws `UnsupportedOperationException("This method is only a placeholder")`
-and the request answers HTTP 500 with no reason in the body. Nothing calls
-`finishProcessing`, so once the source is created every later `index/<name>/all` answers
-`409 {"status":"already running"}` until the container restarts, because
-`processingSources` lives only in memory. `reindex/<name>/all` has the same order.
-
-Expected: a name no plugin owns answers 404 with the reason, before the lock is taken;
-and any exception between `tryStartProcessing` and the plugin handing the run off
-releases the lock (`try`/`finally`), so a failed start never strands a source.
-
-Workaround in trabalharei: none in code. The proof script creates its source before it
-starts a run; the one stuck lock was cleared by restarting the container.
-
 ### XLIII.2 Unquoted tenant predicate on H2 (D125)
 
 Met in trabalharei (TRA25, Dumont-to-Turing publishing proof) on a local Dumont 2026.3

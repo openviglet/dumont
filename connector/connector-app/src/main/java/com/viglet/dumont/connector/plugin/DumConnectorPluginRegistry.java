@@ -83,6 +83,16 @@ public class DumConnectorPluginRegistry {
                 .orElse(defaultPlugin);
     }
 
+    /**
+     * The active plugin that owns the given source, with no fallback: empty means no plugin
+     * manages it, which a run start must refuse rather than hand to the no-op plugin (D124).
+     */
+    public Optional<DumConnectorPlugin> findBySource(String source) {
+        return connectorPlugins.stream()
+                .filter(plugin -> plugin.ownsSource(source))
+                .findFirst();
+    }
+
     /** Provider name of the plugin owning the source (DEFAULT when unmatched). */
     public String resolveProviderBySource(String source) {
         DumConnectorPlugin plugin = resolveBySource(source);

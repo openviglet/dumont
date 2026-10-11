@@ -572,3 +572,4 @@
 
 ## Track P — Connector run control
 
+- **D124** — Index-all and reindex-all resolve the owning plugin before taking the run lock: an unowned name answers 404 with a reason, and a start that throws releases the lock (DumConnectorApi.startRun).
