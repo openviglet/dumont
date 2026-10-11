@@ -578,4 +578,4 @@
 - **D127** — Structured job items carry a SHA-256 of what they publish unless the plugin stamps its own, so an unchanged rerun is skipped; ReindexStrategy reads a null checksum as changed.
 - **D128** — A scheduled crawl starts each structured source through DumConnectorRunService, the API's start: under its run lock, tracked, and skipped with a log line while a run of it is in progress.
 - **D129** — A scheduled crawl isolates each source and each plugin: one that throws outside extraction is logged with its name, its lock is released, and the crawl moves on.
-- **D130 (run warnings recorded)** — A source can raise runWarnings(); a complete run carrying one is stored as warned, not partial, with its warnings on the stats row the monitoring API returns.
+- **D130 (run warnings recorded and shown)** — A source can raise runWarnings(); a complete run carrying one is stored as warned, not partial, and the indexing stats table marks it with a Warning badge and its warnings.

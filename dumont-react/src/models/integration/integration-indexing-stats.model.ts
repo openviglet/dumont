@@ -14,4 +14,8 @@ export interface TurIntegrationIndexingStats {
     partial?: boolean;
     /** Why the run ended as it did, as the source reported it (D96). */
     notes?: string[];
+    /** What the run warned an operator of, partial or not (D130). */
+    warnings?: string[];
+    /** Whether the run raised a warning (D130). */
+    warned?: boolean;
 }

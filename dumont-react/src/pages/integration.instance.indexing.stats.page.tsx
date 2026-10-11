@@ -18,7 +18,7 @@ import { TurIntegrationIndexingStatsService } from "@/services/integration/integ
 import { IconChartBar } from "@tabler/icons-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useDateLocale } from "@/hooks/use-date-locale";
-import { Clock, Database, RefreshCcw, Search, TrendingUp, Zap } from "lucide-react";
+import { AlertTriangle, Clock, Database, RefreshCcw, Search, TrendingUp, Zap } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -324,7 +324,22 @@ export default function IntegrationInstanceIndexingStatsPage() {
                                                                             {t("integration.indexingStats.partial")}
                                                                         </Badge>
                                                                     )}
+                                                                    {/* D130: a complete run can still be unhealthy. */}
+                                                                    {stat.warned && (
+                                                                        <Badge
+                                                                            variant="outline"
+                                                                            className="flex items-center gap-1 bg-rose-500/10 text-rose-600 border-rose-500/20 px-1.5 py-0 text-[10px] font-bold uppercase"
+                                                                        >
+                                                                            <AlertTriangle className="h-3 w-3" />
+                                                                            {t("integration.indexingStats.warned")}
+                                                                        </Badge>
+                                                                    )}
                                                                 </span>
+                                                                {stat.warnings?.map((warning) => (
+                                                                    <span key={warning} className="max-w-xs text-xs font-medium text-rose-600">
+                                                                        {warning}
+                                                                    </span>
+                                                                ))}
                                                                 {/* D96: why the run ended as it did, from the source itself. */}
                                                                 {stat.notes?.map((note) => (
                                                                     <span key={note} className="max-w-xs text-xs text-muted-foreground">
