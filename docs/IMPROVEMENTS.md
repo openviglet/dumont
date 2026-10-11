@@ -151,10 +151,10 @@ subdependency resolved by URL, and turning that policy off to silence an alert w
 the worse trade. The same rule means the design system cannot fix it by depending on the
 tarball itself: every pnpm consumer would hit the refusal.
 
-The fix: the design system takes `xlsx` as a `peerDependency`, so each consumer declares
-the CDN tarball as its own direct dependency, which pnpm allows. Then `dumont-react`
-adds `"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"` and the alerts
-close.
+The fix, filed as VDS211 in the design system's roadmap: it takes `xlsx` as a
+`peerDependency`, so each consumer declares the CDN tarball as its own direct
+dependency, which pnpm allows. Then `dumont-react` adds `"xlsx":
+"https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"` and the alerts close.
 
 Exposure meanwhile is low: `exportToXlsx` only writes a workbook (`aoa_to_sheet`,
 `writeFile`), and both CVEs are in the parser. Nothing in the console reads a
