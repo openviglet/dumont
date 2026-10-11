@@ -18,9 +18,11 @@ package com.viglet.dumont.connector.commons.spi.structured.resolve;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -61,6 +63,8 @@ public final class DumResolutionRun {
     private final DumSurvivorship survivorship;
     private final Set<Seen> seen = new HashSet<>();
     private final Set<String> published = new HashSet<>();
+    /** What each canonical id this run dropped last published, kept past the drop (D137). */
+    private final Map<String, DumStructuredRecord> dropped = new HashMap<>();
 
     /** A run whose documents follow {@link DumSurvivorship#fieldMerge()}. */
     public DumResolutionRun(DumCanonicalKey canonicalKey, DumResolutionIndex index,
@@ -155,6 +159,16 @@ public final class DumResolutionRun {
     }
 
     /**
+     * What the canonical document {@code canonicalId} last published, if this run dropped it
+     * (roadmap <strong>D137</strong>): the survivorship result over its members as they were last
+     * filed, taken just before the drop deleted them, so the source can say what left the index
+     * without keeping a copy of every record itself.
+     */
+    public Optional<DumStructuredRecord> lastPublished(String canonicalId) {
+        return Optional.ofNullable(dropped.get(canonicalId));
+    }
+
+    /**
      * For each canonical id this run did not publish: its document while a member is live, else the
      * id is dropped (and added to {@code gone}).
      */
@@ -163,6 +177,11 @@ public final class DumResolutionRun {
         for (String canonicalId : canonicalIds) {
             Optional<DumStructuredRecord> document = merged(canonicalId);
             if (document.isEmpty()) {
+                // Every member is held by now; each still carries the record it was last filed with.
+                List<DumResolutionIndex.Member> members = index.members(canonicalId);
+                if (!members.isEmpty()) {
+                    dropped.put(canonicalId, survivorship.survive(canonicalId, members));
+                }
                 index.drop(canonicalId);
                 gone.add(canonicalId);
             } else if (published.add(canonicalId)) {

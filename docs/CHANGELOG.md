@@ -584,3 +584,4 @@
 - **D130** — A run can warn without being partial: sources and coverage drift raise warnings, the console marks the run, and dumont.alerts.webhook-url hears when a source starts warning.
 - **D131 (grounded list extraction)** — DumExtractionEnricher fills a multi-valued field from a DumExtractorFactory extractor; only items found in the text as whole words publish, cached and capped like classification.
 - **D132** — An AEM or structured run that ends with no session (source not found, no enabled environment) calls endRunWithoutSession, which releases its lock; a failed AEM discovery finishes standalone.
+- **D137** — A source learns what a canonical document resolution dropped last published: DumResolutionRun keeps the survivorship result before the drop, and deindexed(id, lastPublished) receives it.

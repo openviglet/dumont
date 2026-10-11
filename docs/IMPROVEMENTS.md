@@ -132,36 +132,6 @@ Expected: Micrometer gauges and counters per connector source, exposed on
 == 0` or `time() - dumont_run_last_finished_seconds > 2*3600` pages on a broken or
 stalled schedule for any plugin, not only trabalharei's.
 
-### XLIII.11 Say what a dropped canonical document held (D137)
-
-Met in trabalharei (TRA70), moving the jobs plugin's own deduplication
-(`DumJobDeduplicator`, table `job_fingerprint`) onto D109/D110 resolution
-(`DumCanonicalKey`, `DumResolutionIndex`, `DumSurvivorship.wholeRecord`).
-
-The jobs plugin sends the site a tombstone when a group document leaves the index
-(TRA24), naming the title, company, city and occupation it held.
-
-Under resolution, `DumResolutionRun.closeComplete()` (and `expire()`) call
-`index.drop(canonicalId)`, which deletes every member row (`DumJpaResolutionIndex.drop`
-runs `deleteByProviderAndCanonicalId`), and only later does the session sweep call
-`DumStructuredSource.deindexed(String documentId)` (D113). By then nothing in Dumont
-holds what the document was: the hook carries only the id, the index has no members
-left, and Dumont keeps only a checksum per document. The D113 Javadoc says "a source
-that must say what the document held keeps that itself", which means a second store of
-every published record, the very copy the move is meant to remove.
-
-What came back: `deindexed("job-3f2a...")`, nothing else. Expected: the source learns
-what the dropped canonical document last published. Either `deindexed(String documentId,
-Optional<DumStructuredRecord> lastPublished)` (or a `DumDeindexed` record carrying it),
-filled from the members' merged record just before `drop`, or a
-`DumResolutionIndex.Listener` / `DumStructuredSource.canonicalDropped(id, List<Member>)`
-called by `DumResolutionRun` before the rows are deleted. Either way the record must be
-the survivorship result over the members as they were at their last live state, since by
-the drop every member is held.
-
-Workaround in trabalharei: none; TRA70 waits on this line, and the plugin keeps its own
-deduplicator (with its tombstones) until it ships.
-
 ### XLIII.12 Failed deliveries stay pending until Turing accepts them (D138)
 
 Met in trabalharei (TRA25), with `PROOF_OUTAGE=1 node scripts/dumont-publish-proof.mjs`

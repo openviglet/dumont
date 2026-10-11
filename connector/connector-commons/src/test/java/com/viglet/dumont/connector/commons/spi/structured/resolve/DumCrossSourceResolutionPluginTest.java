@@ -193,6 +193,41 @@ class DumCrossSourceResolutionPluginTest {
     }
 
     @Test
+    void aDroppedCanonicalDocumentReachesTheSourceWithWhatItLastPublished() {
+        // D137: by the sweep every member row is deleted, so the run keeps the document for the hook.
+        FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture("CS101", "Algorithms", null)));
+        FixtureSource catalogB = new FixtureSource("catalog-b", List.of("Sample-B"), Map.of(
+                "b-7", fixture("CS101", null, "60h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"),
+                catalogA, catalogB);
+        plugin.crawl();
+
+        catalogA.forget("a-1");
+        catalogB.forget("b-7");
+        plugin.indexAll("catalog-b");
+        context.sweep("cs101");
+        plugin.indexAll("catalog-a");
+
+        assertEquals(1, catalogA.deindexed.size());
+        DumStructuredRecord last = catalogA.deindexed.get("cs101").orElseThrow();
+        assertEquals("Algorithms", last.values().get("title"), "the merged document, not one member");
+        assertEquals("60h", last.values().get("workload"));
+    }
+
+    @Test
+    void aDocumentResolutionDidNotDropArrivesWithNothingToSay() {
+        FixtureSource catalog = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
+                "a-1", fixture(null, "Orphan course", "40h")));
+        CatalogPlugin plugin = new CatalogPlugin(context, DumCanonicalKey.field("code"), catalog);
+        context.sweep("a-1");
+
+        plugin.indexAll("catalog-a");
+
+        assertEquals(Map.of("a-1", Optional.empty()), catalog.deindexed);
+    }
+
+    @Test
     void aMergeCanCompleteAMandatoryFieldAcrossRuns() {
         // catalog-b's record has no title, which is mandatory: alone it is skipped, merged it publishes.
         FixtureSource catalogA = new FixtureSource("catalog-a", List.of("Sample-A"), Map.of(
@@ -292,6 +327,13 @@ class DumCrossSourceResolutionPluginTest {
         private final Map<String, Fixture> fixtures;
         /** Every extract throws, as in a network blip. */
         boolean failing;
+        /** What each deindexed document arrived with (D137). */
+        final Map<String, Optional<DumStructuredRecord>> deindexed = new LinkedHashMap<>();
+
+        @Override
+        public void deindexed(String documentId, Optional<DumStructuredRecord> lastPublished) {
+            deindexed.put(documentId, lastPublished);
+        }
 
         FixtureSource(String name, Collection<String> sites, Map<String, Fixture> fixtures) {
             this.name = name;
@@ -418,9 +460,20 @@ class DumCrossSourceResolutionPluginTest {
         /** Each finished run, as {@code source:swept} or {@code source:standalone}. */
         private final List<String> finished = new ArrayList<>();
 
+        /** Ids the next swept finish removes, as the real sweep would. */
+        private final List<String> toSweep = new ArrayList<>();
+
+        void sweep(String... ids) {
+            toSweep.addAll(List.of(ids));
+        }
+
         @Override
         public void finishIndexing(DumConnectorSession session, boolean standalone) {
             finished.add(session.getSource() + (standalone ? ":standalone" : ":swept"));
+            if (!standalone) {
+                toSweep.forEach(id -> session.deindexed(id, List.of(), Locale.US));
+                toSweep.clear();
+            }
         }
 
         @Override

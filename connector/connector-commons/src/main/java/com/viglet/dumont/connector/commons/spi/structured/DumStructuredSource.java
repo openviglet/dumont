@@ -146,6 +146,17 @@ public interface DumStructuredSource {
     }
 
     /**
+     * {@link #deindexed(String)} with what the document last published, when Dumont still knows it
+     * (roadmap <strong>D137</strong>): a canonical document resolution dropped arrives with the
+     * survivorship result over its members, taken before they were deleted, so a source that tells
+     * someone what left (a closed-job notice) needs no second store of its records. Empty for any
+     * other document, since Dumont keeps only a checksum. Defaults to the one-argument form.
+     */
+    default void deindexed(String documentId, Optional<DumStructuredRecord> lastPublished) {
+        deindexed(documentId);
+    }
+
+    /**
      * Called once a run of this source has finished (roadmap <strong>D115</strong>), after the sweep
      * and whichever way the run ended, aborted runs included: the place to flush what the run queued
      * (notifications, a summary) without overriding the plugin's {@code indexAll}. Defaults to

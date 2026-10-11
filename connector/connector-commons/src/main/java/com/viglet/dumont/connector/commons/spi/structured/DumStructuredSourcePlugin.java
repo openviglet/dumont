@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.viglet.dumont.connector.commons.DumConnectorContext;
@@ -350,7 +351,9 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         // Declare the schema before the first document (D63): the backend creates the fields as
         // declared instead of inferring each one from whichever value arrives first.
         provisionSchema(structuredSource);
-        DumConnectorSession session = newSession(structuredSource);
+        // Cross-source resolution (D109): each keyed record publishes as its canonical document.
+        DumResolutionRun resolution = resolutionRun(structuredSource);
+        DumConnectorSession session = newSession(structuredSource, resolution);
         // Capture a fingerprint of every published document so a later dry-run preview (D14) can
         // diff against the last full index. Only indexAll captures it — a partial indexById run
         // would otherwise mark the rest of the catalog as removed.
@@ -362,8 +365,6 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         // Per content-type coverage/provenance (D25): a typed source buckets each record by its
         // resolved content type so drift reads per type, additively to the source-level series.
         DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
-        // Cross-source resolution (D109): each keyed record publishes as its canonical document.
-        DumResolutionRun resolution = resolutionRun(structuredSource);
         // Bounded-concurrency extraction (roadmap D31): extract(id) may run on a small pool while
         // the consumer below — publish + snapshot/coverage/provenance capture — stays serial on
         // this thread, so capture remains single-threaded and order-independent. Default
@@ -588,8 +589,8 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     @Override
     public void indexById(String source, List<String> contentId) {
         provider().resolve(source).ifPresentOrElse(structuredSource -> {
-            DumConnectorSession session = newSession(structuredSource);
             DumResolutionRun resolution = resolutionRun(structuredSource);
+            DumConnectorSession session = newSession(structuredSource, resolution);
             contentId.forEach(id -> structuredSource.extract(id).ifPresentOrElse(
                     rec -> publish(structuredSource,
                             resolved(resolution, enrichmentChain.apply(structuredSource, rec)), session,
@@ -709,13 +710,15 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
 
     /**
      * A session for one run of {@code source}. Each document the connector deindexes under it is
-     * reported to the source and to the enrichers (roadmap <strong>D113</strong>).
+     * reported to the source and to the enrichers (roadmap <strong>D113</strong>), with what it last
+     * published when {@code resolution} dropped it this run (D137).
      */
-    private DumConnectorSession newSession(DumStructuredSource source) {
+    private DumConnectorSession newSession(DumStructuredSource source, DumResolutionRun resolution) {
         return new DumConnectorSession(source.getSourceName(), source.getProviderName(),
                 source.getLocale()).onDeindex((documentId, sites, locale) -> {
                     try {
-                        source.deindexed(documentId);
+                        source.deindexed(documentId, resolution == null ? Optional.empty()
+                                : resolution.lastPublished(documentId));
                     } catch (RuntimeException e) {
                         log.warn("Structured source '{}' failed on deindexed '{}': {}",
                                 source.getSourceName(), documentId, e.getMessage());
