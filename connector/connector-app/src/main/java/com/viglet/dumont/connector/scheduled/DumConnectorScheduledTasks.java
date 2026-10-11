@@ -52,7 +52,13 @@ public class DumConnectorScheduledTasks {
             log.info("This is the first time, waiting next schedule.");
         } else {
             for (DumConnectorPlugin plugin : pluginRegistry.connectorPlugins()) {
-                crawl(plugin);
+                // D129: one plugin failing never costs the plugins after it their run.
+                try {
+                    crawl(plugin);
+                } catch (RuntimeException e) {
+                    log.error("Scheduled crawl of plugin '{}' failed; continuing with the next plugin",
+                            plugin.getProviderName(), e);
+                }
             }
         }
     }
@@ -69,9 +75,16 @@ public class DumConnectorScheduledTasks {
             return;
         }
         for (String source : sources) {
-            if (runService.start(plugin, source, OperationType.INDEX_ALL) == RunStart.ALREADY_RUNNING) {
-                log.info("Scheduled crawl skipped source '{}': a run of it is already in progress",
-                        source);
+            // D129: a source throwing outside its extraction loop ends its own run, not the tick.
+            try {
+                if (runService.start(plugin, source,
+                        OperationType.INDEX_ALL) == RunStart.ALREADY_RUNNING) {
+                    log.info("Scheduled crawl skipped source '{}': a run of it is already in progress",
+                            source);
+                }
+            } catch (RuntimeException e) {
+                log.error("Scheduled run of source '{}' failed; continuing with the next source",
+                        source, e);
             }
         }
     }

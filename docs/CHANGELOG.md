@@ -577,3 +577,4 @@
 - **D126** — An aborted structured run logs its cause before finishing and records it as a note after the reason; a finish that also fails is logged apart and carries the cause as suppressed.
 - **D127** — Structured job items carry a SHA-256 of what they publish unless the plugin stamps its own, so an unchanged rerun is skipped; ReindexStrategy reads a null checksum as changed.
 - **D128** — A scheduled crawl starts each structured source through DumConnectorRunService, the API's start: under its run lock, tracked, and skipped with a log line while a run of it is in progress.
+- **D129** — A scheduled crawl isolates each source and each plugin: one that throws outside extraction is logged with its name, its lock is released, and the crawl moves on.

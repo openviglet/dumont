@@ -16,6 +16,7 @@
 package com.viglet.dumont.connector.scheduled;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,7 +36,7 @@ import com.viglet.dumont.connector.service.DumConnectorConfigVarService;
 import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.dumont.connector.service.DumConnectorRunService;
 
-/** A scheduled crawl starts each named source under its run lock (D128). */
+/** A scheduled crawl starts each named source under its run lock (D128), each one isolated (D129). */
 @ExtendWith(MockitoExtension.class)
 class DumConnectorScheduledCrawlTest {
 
@@ -73,6 +74,35 @@ class DumConnectorScheduledCrawlTest {
         verify(structured).indexAll("free");
         verify(structured, never()).indexAll("busy");
         verify(structured, never()).crawl();
+    }
+
+    @Test
+    void aSourceThatThrowsDoesNotStopTheNextOne() {
+        when(pluginRegistry.connectorPlugins()).thenReturn(List.of(structured));
+        when(structured.scheduledSources()).thenReturn(List.of("broken", "fine"));
+        when(structured.getProviderName()).thenReturn("JOBS");
+        when(indexingService.tryStartProcessing(anyString())).thenReturn(true);
+        doThrow(new IllegalStateException("finish failed")).when(structured).indexAll("broken");
+
+        tasks.executeWebCrawler();
+
+        verify(structured).indexAll("fine");
+        verify(indexingService).finishProcessing("broken");
+    }
+
+    @Test
+    void aPluginThatThrowsDoesNotStopTheNextOne() {
+        when(pluginRegistry.connectorPlugins()).thenReturn(List.of(selfCrawling, structured));
+        when(selfCrawling.scheduledSources()).thenReturn(List.of());
+        when(selfCrawling.getProviderName()).thenReturn("WEB-CRAWLER");
+        doThrow(new IllegalStateException("crawler down")).when(selfCrawling).crawl();
+        when(structured.scheduledSources()).thenReturn(List.of("fine"));
+        when(structured.getProviderName()).thenReturn("JOBS");
+        when(indexingService.tryStartProcessing("fine")).thenReturn(true);
+
+        tasks.executeWebCrawler();
+
+        verify(structured).indexAll("fine");
     }
 
     @Test

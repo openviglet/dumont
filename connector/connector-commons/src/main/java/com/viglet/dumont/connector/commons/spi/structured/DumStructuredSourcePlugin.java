@@ -245,9 +245,20 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         return provider().resolve(source).isPresent();
     }
 
+    /**
+     * Every source in turn, each isolated (D129): what a source throws outside its extraction loop
+     * (a failing finish, its resolution) ends that source's run, not the crawl.
+     */
     @Override
     public void crawl() {
-        provider().sourceNames().forEach(this::indexAll);
+        for (String source : provider().sourceNames()) {
+            try {
+                indexAll(source);
+            } catch (RuntimeException e) {
+                log.error("Crawl of structured source '{}' failed; continuing with the next source",
+                        source, e);
+            }
+        }
     }
 
     /** Every source this plugin serves, so the scheduler runs each under its run lock (D128). */
