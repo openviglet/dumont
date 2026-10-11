@@ -125,6 +125,22 @@ public final class DumEnrichmentChain {
         return notes;
     }
 
+    /**
+     * Whether a contribution only repeats the value the record already holds (D101). Such a
+     * pass-through keeps the field's existing provenance instead of being re-tagged to the
+     * enricher, since the enricher did not produce it.
+     */
+    private static boolean passesThrough(DumStructuredRecord rec, String field, Object contributed) {
+        Object current = rec.values().get(field);
+        if (current == null || contributed == null) {
+            return false;
+        }
+        if (current.equals(contributed)) {
+            return true;
+        }
+        return current instanceof List<?> list && list.size() == 1 && list.getFirst().equals(contributed);
+    }
+
     private DumStructuredRecord applyOne(DumEnricher enricher, DumStructuredSource source,
             DumStructuredRecord rec) {
         if (!enricher.appliesTo(source)) {
@@ -158,7 +174,13 @@ public final class DumEnrichmentChain {
                 } else if (value == DumClear.FIELD) {
                     // D98: an explicit clear removes the source's value; a blank one never does.
                     builder.clear(field);
-                } else {
+                } else if (value instanceof DumSourced sourced) {
+                    // D101: the enricher names where it read the value, and how sure it is.
+                    if (!passesThrough(rec, field, sourced.value())) {
+                        builder.set(field, sourced.value(), new DumFieldProvenance(enriched.strategy(),
+                                sourced.selector(), sourced.confidence(), null));
+                    }
+                } else if (!passesThrough(rec, field, value)) {
                     builder.set(field, value, enriched);
                 }
             });

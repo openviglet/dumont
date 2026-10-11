@@ -58,7 +58,9 @@ public interface DumEnricher {
      * <p>
      * Two values are not field values: {@link DumClear#field()} removes the field the source
      * supplied (D98), and {@link DumTransient#of(Object)} sets a transient, never-indexed
-     * attribute under the key (D97).
+     * attribute under the key (D97). {@link DumSourced#of(Object, String, Double)} wraps a field
+     * value with the selector and confidence its provenance records (D101), and a contribution
+     * equal to the value the record already holds keeps that value's own provenance.
      *
      * <p>
      * Implementations must not throw to signal "nothing to contribute" — return an empty map. A

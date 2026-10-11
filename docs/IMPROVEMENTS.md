@@ -116,7 +116,10 @@ record. The enrichers read `rec.transients()` and write `locationUnresolved` as 
 `DumTransient`. `posting(id)` then goes away, and the enrichers no longer depend on the
 concrete source class. With D98, `extract()` can also keep the adapter's city and state,
 and the location enricher removes a city outside the stated UF with `DumClear.field()`
-instead of writing both fields itself.
+instead of writing both fields itself. With D101, the contract, salary and seniority
+enrichers return `DumSourced.of(value, selector, confidence)` naming whether they read
+the partner's field, the title or the text, and a partner value they only pass through
+keeps its own provenance.
 
 ### XLI.16 Jobs loads IBGE through the taxonomy loader (D108)
 
@@ -170,20 +173,6 @@ executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallb
 `agents.md` names the flag in the meantime.
 
 Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
-
-### XLI.11 Provenance from enrichers (D101)
-
-Found while adding contract and salary enrichers to trabalharei's `jobs` module (TRA21).
-`DumEnrichmentChain.merge` tags every enricher contribution with
-`DumFieldProvenance.enrichment(name)` and leaves selector and confidence empty, though
-the record type has those slots. The contract step cannot record whether a value came
-from the partner's field, the title or the text, and a partner salary the enricher only
-passes through (because of the D98 workaround) loses its source provenance.
-
-Expected: `enrich()` returns a provenance per field (at least a selector and a
-confidence), and a pass-through keeps the source's own provenance.
-
-Workaround: none; provenance for enriched job fields names only the enricher.
 
 ### XLI.12 Drop only the invalid contribution (D102)
 
