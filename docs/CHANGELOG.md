@@ -560,3 +560,4 @@
 - **D112** — Resolution runs inside each source's indexAll since D109, so every contributing source gets its own guards, provisioning and swept finish; tests now pin both.
 - **D113** — Each delete the connector queues under a session reaches DumStructuredSource.deindexed and the enrichers' onDeindexed with the published id; values stay the source's to keep.
 - **D114** — Any structured source returns goneIds() and they are deindexed on every run that did not abort, beside the sweep, through the same path incremental expiry and resolution use.
+- **D115** — DumStructuredSource.onRunEnd(DumRunEnd) is called once after every indexAll finishes, aborts included, saying whether the run was partial, swept, and why it stopped.

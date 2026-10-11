@@ -111,6 +111,8 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     protected final DumProvenanceHistoryStore provenanceHistoryStore;
     /** Cross-source canonical key (D18); {@code null} disables resolution (per-source publish). */
     protected final DumCanonicalKey canonicalKey;
+    /** Why a run whose discovery was cut short stopped (D96, D115). */
+    private static final String DISCOVERY_STOPPED = "discovery stopped before the end of the source";
     /** The canonical-id index every run consults (D109); {@code null} without a canonical key. */
     protected final DumResolutionIndex resolutionIndex;
 
@@ -303,91 +305,101 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
     @Override
     public void indexAll(String source) {
         provider().resolve(source).ifPresentOrElse(structuredSource -> {
-            // Declare the schema before the first document (D63): the backend creates the fields as
-            // declared instead of inferring each one from whichever value arrives first.
-            provisionSchema(structuredSource);
-            DumConnectorSession session = newSession(structuredSource);
-            // Capture a fingerprint of every published document so a later dry-run preview (D14) can
-            // diff against the last full index. Only indexAll captures it — a partial indexById run
-            // would otherwise mark the rest of the catalog as removed.
-            DumPreviewSnapshot.Builder snapshot = DumPreviewSnapshot.builder(structuredSource.schema());
-            // Per-field provenance of this run (D16), accumulated alongside the fingerprint so a later
-            // run can answer "when was each field last seen" — no extra pass over the source.
-            DumProvenanceSnapshot.Builder provenance =
-                    DumProvenanceSnapshot.builder(structuredSource.schema());
-            // Per content-type coverage/provenance (D25): a typed source buckets each record by its
-            // resolved content type so drift reads per type, additively to the source-level series.
-            DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
-            // Cross-source resolution (D109): each keyed record publishes as its canonical document.
-            DumResolutionRun resolution = resolutionRun(structuredSource);
-            // Bounded-concurrency extraction (roadmap D31): extract(id) may run on a small pool while
-            // the consumer below — publish + snapshot/coverage/provenance capture — stays serial on
-            // this thread, so capture remains single-threaded and order-independent. Default
-            // extractionConcurrency() == 1 keeps every adapter sequential.
-            DumExtractionOutcome outcome;
+            DumRunEnd end = run(structuredSource, source);
+            // D115: the source hears how the run ended once it has finished, on every path.
             try {
-                outcome = DumBoundedExtraction.extractEach(structuredSource, structuredSource.discover(),
-                        extractionConcurrency(), extractionTimeoutMs(),
-                        rec -> publish(structuredSource,
-                                resolved(resolution, enrichmentChain.apply(structuredSource, rec)),
-                                session, snapshot, provenance, byType));
+                structuredSource.onRunEnd(end);
             } catch (RuntimeException e) {
-                // An exception escaped the extraction loop — finish standalone (D33) so the
-                // destructive deindex sweep is skipped and the prior index survives.
-                finishPartialRunStandalone(session, source, "aborted by an exception", e,
-                        runNotes(structuredSource));
-                return;
+                log.warn("Structured source '{}' failed to end its run: {}", source, e.getMessage());
             }
-            // D104: ids the source reports unchanged and still present stay alive without an
-            // extract, so whichever finish follows does not deindex them.
-            keepUnchangedAlive(structuredSource, session, resolution);
-            // D114: what the source found gone leaves now, whichever way the run ends below.
-            int gone = deindexNow(structuredSource, session, resolution, structuredSource.goneIds());
-            if (gone > 0) {
-                log.info("Structured source '{}' deindexed {} id(s) it found gone", source, gone);
-            }
-            if (!outcome.completed()) {
-                // The run was interrupted before visiting every discovered id; finishing
-                // non-standalone would treat the rest of the catalog as removed (D33).
-                finishPartialRunStandalone(session, source, "interrupted after %d of %d ids"
-                        .formatted(outcome.processed(), outcome.discovered()), null,
-                        runNotes(structuredSource));
-                return;
-            }
-            if (structuredSource.incremental()) {
-                finishIncrementalRun(structuredSource, session, source, outcome, resolution);
-                return;
-            }
-            if (!structuredSource.discoveryComplete()) {
-                // Discovery itself stopped short (a call budget, a page cap, a failed page), so the
-                // ids it never listed are not removals; finishing non-standalone would deindex them.
-                finishPartialRunStandalone(session, source, "discovery stopped before the end of the source",
-                        null, runNotes(structuredSource));
-                return;
-            }
-            if (isFailureWave(outcome)) {
-                // A wave of extraction failures (e.g. a network blip) would otherwise deindex every id
-                // it could not re-fetch; finish standalone so the prior index survives (D34).
-                finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
-                        runNotes(structuredSource));
-                return;
-            }
-            publishHeld(structuredSource, session, resolution, snapshot, provenance, byType);
-            // A complete run can still have something to say (D96); an empty note list records nothing.
-            List<String> notes = runNotes(structuredSource);
-            if (!notes.isEmpty()) {
-                dumConnectorContext.recordRunOutcome(session, false, notes);
-            }
-            dumConnectorContext.finishIndexing(session, false);
-            DumPreviewSnapshot baseline = snapshot.build();
-            previewSnapshotStore.save(source, baseline);
-            // Per-field coverage of this run, appended to the source's history so a later run can be
-            // checked for drift (D15) — derived from the same fingerprint, no extra pass over the source.
-            coverageHistoryStore.recordSnapshot(source, baseline.documents().size(),
-                    DumCoverageMonitor.coverage(structuredSource.schema(), baseline));
-            provenanceHistoryStore.recordSnapshot(source, provenance.documentCount(), provenance.fields());
-            byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
         }, () -> log.error("Structured source '{}' not found", source));
+    }
+
+    /** One full run of {@code structuredSource}, finished on whichever path it takes. */
+    private DumRunEnd run(DumStructuredSource structuredSource, String source) {
+        // Declare the schema before the first document (D63): the backend creates the fields as
+        // declared instead of inferring each one from whichever value arrives first.
+        provisionSchema(structuredSource);
+        DumConnectorSession session = newSession(structuredSource);
+        // Capture a fingerprint of every published document so a later dry-run preview (D14) can
+        // diff against the last full index. Only indexAll captures it — a partial indexById run
+        // would otherwise mark the rest of the catalog as removed.
+        DumPreviewSnapshot.Builder snapshot = DumPreviewSnapshot.builder(structuredSource.schema());
+        // Per-field provenance of this run (D16), accumulated alongside the fingerprint so a later
+        // run can answer "when was each field last seen" — no extra pass over the source.
+        DumProvenanceSnapshot.Builder provenance =
+                DumProvenanceSnapshot.builder(structuredSource.schema());
+        // Per content-type coverage/provenance (D25): a typed source buckets each record by its
+        // resolved content type so drift reads per type, additively to the source-level series.
+        DumContentTypeCoverageRecorder byType = new DumContentTypeCoverageRecorder();
+        // Cross-source resolution (D109): each keyed record publishes as its canonical document.
+        DumResolutionRun resolution = resolutionRun(structuredSource);
+        // Bounded-concurrency extraction (roadmap D31): extract(id) may run on a small pool while
+        // the consumer below — publish + snapshot/coverage/provenance capture — stays serial on
+        // this thread, so capture remains single-threaded and order-independent. Default
+        // extractionConcurrency() == 1 keeps every adapter sequential.
+        DumExtractionOutcome outcome;
+        try {
+            outcome = DumBoundedExtraction.extractEach(structuredSource, structuredSource.discover(),
+                    extractionConcurrency(), extractionTimeoutMs(),
+                    rec -> publish(structuredSource,
+                            resolved(resolution, enrichmentChain.apply(structuredSource, rec)),
+                            session, snapshot, provenance, byType));
+        } catch (RuntimeException e) {
+            // An exception escaped the extraction loop — finish standalone (D33) so the
+            // destructive deindex sweep is skipped and the prior index survives.
+            finishPartialRunStandalone(session, source, "aborted by an exception", e,
+                    runNotes(structuredSource));
+            return DumRunEnd.stopped("aborted by an exception");
+        }
+        // D104: ids the source reports unchanged and still present stay alive without an
+        // extract, so whichever finish follows does not deindex them.
+        keepUnchangedAlive(structuredSource, session, resolution);
+        // D114: what the source found gone leaves now, whichever way the run ends below.
+        int gone = deindexNow(structuredSource, session, resolution, structuredSource.goneIds());
+        if (gone > 0) {
+            log.info("Structured source '{}' deindexed {} id(s) it found gone", source, gone);
+        }
+        if (!outcome.completed()) {
+            // The run was interrupted before visiting every discovered id; finishing
+            // non-standalone would treat the rest of the catalog as removed (D33).
+            String interrupted = "interrupted after %d of %d ids".formatted(outcome.processed(),
+                    outcome.discovered());
+            finishPartialRunStandalone(session, source, interrupted, null, runNotes(structuredSource));
+            return DumRunEnd.stopped(interrupted);
+        }
+        if (structuredSource.incremental()) {
+            return finishIncrementalRun(structuredSource, session, source, outcome, resolution);
+        }
+        if (!structuredSource.discoveryComplete()) {
+            // Discovery itself stopped short (a call budget, a page cap, a failed page), so the
+            // ids it never listed are not removals; finishing non-standalone would deindex them.
+            finishPartialRunStandalone(session, source, DISCOVERY_STOPPED, null, runNotes(structuredSource));
+            return DumRunEnd.stopped(DISCOVERY_STOPPED);
+        }
+        if (isFailureWave(outcome)) {
+            // A wave of extraction failures (e.g. a network blip) would otherwise deindex every id
+            // it could not re-fetch; finish standalone so the prior index survives (D34).
+            finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
+                    runNotes(structuredSource));
+            return DumRunEnd.stopped(failureWaveReason(outcome));
+        }
+        publishHeld(structuredSource, session, resolution, snapshot, provenance, byType);
+        // A complete run can still have something to say (D96); an empty note list records nothing.
+        List<String> notes = runNotes(structuredSource);
+        if (!notes.isEmpty()) {
+            dumConnectorContext.recordRunOutcome(session, false, notes);
+        }
+        dumConnectorContext.finishIndexing(session, false);
+        DumPreviewSnapshot baseline = snapshot.build();
+        previewSnapshotStore.save(source, baseline);
+        // Per-field coverage of this run, appended to the source's history so a later run can be
+        // checked for drift (D15) — derived from the same fingerprint, no extra pass over the source.
+        coverageHistoryStore.recordSnapshot(source, baseline.documents().size(),
+                DumCoverageMonitor.coverage(structuredSource.schema(), baseline));
+        provenanceHistoryStore.recordSnapshot(source, provenance.documentCount(), provenance.fields());
+        byType.flush(source, coverageHistoryStore, provenanceHistoryStore);
+        return DumRunEnd.complete();
     }
 
     /**
@@ -435,7 +447,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         return notes;
     }
 
-    private void finishIncrementalRun(DumStructuredSource structuredSource, DumConnectorSession session,
+    private DumRunEnd finishIncrementalRun(DumStructuredSource structuredSource, DumConnectorSession session,
             String source, DumExtractionOutcome outcome, DumResolutionRun resolution) {
         // An incremental source (D92) never sweeps: no run is expected to reach every item, so what a
         // run missed is not a removal. Items leave by expiry instead — unless this run was a failure
@@ -443,7 +455,7 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         if (isFailureWave(outcome)) {
             finishPartialRunStandalone(session, source, failureWaveReason(outcome), null,
                     runNotes(structuredSource));
-            return;
+            return DumRunEnd.stopped(failureWaveReason(outcome));
         }
         List<String> notes = new ArrayList<>(runNotes(structuredSource));
         int queued = deindexNow(structuredSource, session, resolution, structuredSource.expiredIds());
@@ -452,8 +464,10 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
             notes.add("%d expired record(s) deindexed".formatted(queued));
         }
         // An incremental run that stopped early is partial, but it is not a failure (D96).
-        dumConnectorContext.recordRunOutcome(session, !structuredSource.discoveryComplete(), notes);
+        boolean partial = !structuredSource.discoveryComplete();
+        dumConnectorContext.recordRunOutcome(session, partial, notes);
         dumConnectorContext.finishIndexing(session, true);
+        return new DumRunEnd(partial, false, partial ? DISCOVERY_STOPPED : null);
     }
 
     /**

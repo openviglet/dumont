@@ -135,6 +135,16 @@ public interface DumStructuredSource {
         // nothing to record
     }
 
+    /**
+     * Called once a run of this source has finished (roadmap <strong>D115</strong>), after the sweep
+     * and whichever way the run ended, aborted runs included: the place to flush what the run queued
+     * (notifications, a summary) without overriding the plugin's {@code indexAll}. Defaults to
+     * nothing.
+     */
+    default void onRunEnd(DumRunEnd end) {
+        // nothing to flush
+    }
+
     /** The locale of the published documents; defaults to {@link Locale#US}. */
     default Locale getLocale() {
         return Locale.US;

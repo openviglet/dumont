@@ -145,19 +145,6 @@ The UF is then read with `attribute(code, "uf")` instead of from the code prefix
 prefix table and the module's loader go away. The file's existing `uf`-versus-prefix
 check can stay as a test over the loaded taxonomy.
 
-### XLI.23 Source end-of-run hook (D115)
-
-Found while flushing expired-job tombstones in trabalharei's `jobs` module (TRA24).
-`DumStructuredSource` has no end-of-run hook, so work that must happen once a source's
-run finished (flushing queued notifications, writing a run summary) goes into a plugin
-override of `indexAll`, which every connector repeats. Same shape as the enricher hook
-filed earlier, but for sources.
-
-Expected: an `onRunEnd(context)` on structured sources, called after the sweep with the
-run's outcome.
-
-Workaround: `DumJobsPlugin.indexAll` override in `jobs/jobs-plugin`.
-
 ### XLI.27 Occupation step on the commons classification store (D119)
 
 D107 gave `DumClassificationEnricher` a `DumClassificationStore` (in-memory
@@ -205,5 +192,22 @@ a canonical id is dropped, which is D113's hook. The per-pair duplicate rate has
 counterpart in the commons run and stays a jobs summary. Since D111 the run-end sweep no
 longer deletes a document another source of the provider still tracks, so held rows are
 no longer what keeps a shared group indexed.
+
+### XLI.29 Jobs post-run work on the run-end hooks (D121)
+
+`DumJobsPlugin.indexAll` in `jobs/jobs-plugin` wraps `super.indexAll(source)` to reset
+per-run counters before the run and, in a `finally`, to log the location, salary,
+occupation and deduplication summaries and flush `DumJobTombstones`. It was written
+because sources had no end-of-run hook; D115 added
+`DumStructuredSource.onRunEnd(DumRunEnd)`, called after the sweep on every path, aborts
+included, and D100 already gives enrichers `onRunEnd`, whose notes join the run record.
+
+Expected: the jobs source flushes its tombstones from `onRunEnd`. The three enrichers
+report their summaries through `DumEnricher.onRunEnd` and reset there, so the counts
+reach the run record (D96) instead of only the log. The deduplicator's summary follows
+whichever path D120 takes. Then `DumJobsPlugin` drops its `indexAll` override.
+
+The resets the override does before a run need no hook: an enricher that resets in
+`onRunEnd` starts every run clean, since `runEnd` is called once per run on every path.
 
 ## XLII Web-crawler hardening (real-world sources)
