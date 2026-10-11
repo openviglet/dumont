@@ -145,19 +145,6 @@ The UF is then read with `attribute(code, "uf")` instead of from the code prefix
 prefix table and the module's loader go away. The file's existing `uf`-versus-prefix
 check can stay as a test over the loaded taxonomy.
 
-### XLI.21 Deindex callback for sources (D113)
-
-Found while adding expired-job tombstones to trabalharei's `jobs` module (TRA24). When
-the run-end sweep deindexes a document, the structured source is not told. A connector
-that must react to a removal (here: telling the site the job ended, so its page can
-answer 410) has to reconstruct "this document disappeared" from its own seen store and
-dedupe rows, duplicating the sweep's decision and risking disagreement with it.
-
-Expected: a callback (or an event) per deindexed document, with its id and last
-published attributes, that sources and enrichers can subscribe to.
-
-Workaround: `DumJobTombstones` with a `job_tombstone` table in `jobs/jobs-plugin`.
-
 ### XLI.22 Explicit deindex on any source (D114)
 
 Found while expiring jobs with dead apply links in trabalharei's `jobs` module (TRA24).

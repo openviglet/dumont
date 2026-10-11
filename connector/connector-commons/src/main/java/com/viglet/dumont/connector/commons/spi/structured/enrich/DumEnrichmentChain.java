@@ -126,6 +126,24 @@ public final class DumEnrichmentChain {
     }
 
     /**
+     * Tells every applicable enricher that {@code documentId} of {@code source} left the index
+     * (roadmap D113). An enricher whose hook throws is logged and skipped.
+     */
+    public void deindexed(DumStructuredSource source, String documentId) {
+        for (DumEnricher enricher : enrichers) {
+            if (!enricher.appliesTo(source)) {
+                continue;
+            }
+            try {
+                enricher.onDeindexed(source, documentId);
+            } catch (RuntimeException e) {
+                log.warn("Enricher '{}' failed on deindexed '{}' of source '{}': {}", enricher.name(),
+                        documentId, source.getSourceName(), e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Whether a contribution only repeats the value the record already holds (D101). Such a
      * pass-through keeps the field's existing provenance instead of being re-tagged to the
      * enricher, since the enricher did not produce it.

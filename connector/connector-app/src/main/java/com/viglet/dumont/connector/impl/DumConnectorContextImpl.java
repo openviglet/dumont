@@ -323,6 +323,14 @@ public class DumConnectorContextImpl implements DumConnectorContext {
         // drain — whoever asks for it — files the row under this source.
         batchProcessor.addDeferred(new DumJobItemWithSession(deleteJobItem, session,
                 Collections.emptySet(), false));
+        // D113: the source that opened the session hears of the removal from the one place that
+        // decided it, instead of re-deriving the sweep's decision.
+        try {
+            session.deindexed(objectId, sites, locale);
+        } catch (RuntimeException e) {
+            log.warn("Deindex listener of source '{}' failed for {}: {}", session.getSource(), objectId,
+                    e.getMessage());
+        }
     }
 
     /**

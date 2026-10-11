@@ -82,6 +82,11 @@ import lombok.extern.slf4j.Slf4j;
  * document.
  *
  * <p>
+ * <strong>Removals (roadmap D113).</strong> Every session the plugin opens reports each document the
+ * connector deindexes under it to {@link DumStructuredSource#deindexed} and to the enrichers, so a
+ * source reacts to the sweep's decision instead of re-deriving it.
+ *
+ * <p>
  * <strong>Cross-source resolution (roadmap D18, D109).</strong> When a {@link DumCanonicalKey} is
  * configured, every {@link #indexAll(String)} run files its records in a {@link DumResolutionIndex}
  * shared by every source of the provider and across runs, and publishes each keyed record as the
@@ -596,8 +601,20 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         }
     }
 
+    /**
+     * A session for one run of {@code source}. Each document the connector deindexes under it is
+     * reported to the source and to the enrichers (roadmap <strong>D113</strong>).
+     */
     private DumConnectorSession newSession(DumStructuredSource source) {
         return new DumConnectorSession(source.getSourceName(), source.getProviderName(),
-                source.getLocale());
+                source.getLocale()).onDeindex((documentId, sites, locale) -> {
+                    try {
+                        source.deindexed(documentId);
+                    } catch (RuntimeException e) {
+                        log.warn("Structured source '{}' failed on deindexed '{}': {}",
+                                source.getSourceName(), documentId, e.getMessage());
+                    }
+                    enrichmentChain.deindexed(source, documentId);
+                });
     }
 }

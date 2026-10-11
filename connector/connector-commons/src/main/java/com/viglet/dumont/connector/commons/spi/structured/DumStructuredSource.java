@@ -113,6 +113,17 @@ public interface DumStructuredSource {
         return List.of();
     }
 
+    /**
+     * Called when a document this source published left the index (roadmap <strong>D113</strong>):
+     * the run-end sweep removed it, or the run deindexed an expired id. The id is the published one
+     * (a canonical id under resolution). Dumont keeps only a checksum per document, so a source that
+     * must say what the document held keeps that itself. Called while the run finishes, so it should
+     * only record; defaults to nothing.
+     */
+    default void deindexed(String documentId) {
+        // nothing to record
+    }
+
     /** The locale of the published documents; defaults to {@link Locale#US}. */
     default Locale getLocale() {
         return Locale.US;

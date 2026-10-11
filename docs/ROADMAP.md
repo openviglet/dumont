@@ -108,11 +108,10 @@ This track has no remaining pending tasks.
 - 📋 **D116** (deps: D96 ✅) **The jobs adapters report budget stops and rate limits only in the logs, so their runs still read as complete** — D96 gave sources run notes, and the jobs module is the paid, rate-limited source they were built for. → §XLI.24
 - 📋 **D117** (deps: D97 ✅) **The jobs enrichers reach into the source for raw location text instead of reading it from the record** — D97 gave records transient attributes, so the module-specific posting lookup is now a second path for the same data. → §XLI.25
 - 📋 **D118** (deps: D99 ✅) **The jobs module loads the IBGE municipality list with its own code and derives the UF from a hand-kept prefix table** — D99 ships a taxonomy loader with row attributes, so the module's loader and prefix table are a second copy of it. → §XLI.26
-- 📋 **D113** (deps: —) **A structured source is not told when the run-end sweep deindexes one of its documents** — Reacting to a removal, such as telling a site a job ended, means re-deriving the sweep's decision. → §XLI.21
 - 📋 **D114** (deps: —) **Only incremental sources can deindex a given id now, and choosing that mode gives up the sweep** — A posting found dead mid-cycle should leave the index at once without a source changing its run mode. → §XLI.22
 - 📋 **D115** (deps: —) **Structured sources have no end-of-run hook, so post-run work needs a plugin indexAll override** — Flushing notifications and writing summaries once per run is common, and every connector repeats the override. → §XLI.23
 - 📋 **D119** (deps: D107 ✅) **The jobs occupation step keeps its own answer cache, call cap and label check beside the commons ones** — Two caches and two caps do one job, so a fix to the commons classifier path never reaches the occupation step. → §XLI.27
-- 📋 **D120** (deps: D110 ✅, D113) **The jobs deduplicator keeps its own fingerprint table and preference rule beside the commons resolution index** — Two indexes decide what a shared posting publishes as, so a fix to commons resolution never reaches jobs. → §XLI.28
+- 📋 **D120** (deps: D110 ✅, D113 ✅) **The jobs deduplicator keeps its own fingerprint table and preference rule beside the commons resolution index** — Two indexes decide what a shared posting publishes as, so a fix to commons resolution never reaches jobs. → §XLI.28
 
 ## Non-goals (do NOT add as tasks)
 

@@ -79,6 +79,14 @@ public interface DumEnricher {
         return List.of();
     }
 
+    /**
+     * Called when a document {@code source} published left the index (roadmap <strong>D113</strong>),
+     * for an enricher that keeps state per document. Defaults to nothing.
+     */
+    default void onDeindexed(DumStructuredSource source, String documentId) {
+        // nothing to record
+    }
+
     /** Whether this enricher runs for the given source. Defaults to all sources. */
     default boolean appliesTo(DumStructuredSource source) {
         return true;

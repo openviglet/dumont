@@ -558,3 +558,4 @@
 - **D110** — A provider declares DumSurvivorship by overriding survivorship(): the D18 field merge, a field merge with per-field member order, or one member kept whole by a comparator.
 - **D111** — The run-end sweep sends a delete only for the sites no other source of the provider still tracks the document on in that locale, so a shared document survives one source dropping it.
 - **D112** — Resolution runs inside each source's indexAll since D109, so every contributing source gets its own guards, provisioning and swept finish; tests now pin both.
+- **D113** — Each delete the connector queues under a session reaches DumStructuredSource.deindexed and the enrichers' onDeindexed with the published id; values stay the source's to keep.

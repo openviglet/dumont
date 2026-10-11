@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.commons;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -29,11 +30,26 @@ public class DumConnectorSession {
     private String transactionId;
     private String providerName;
     private Locale locale;
+    /** Told of each document deindexed for this session (D113); none by default. */
+    private DumDeindexListener deindexListener;
 
     public DumConnectorSession(String source, String providerName, Locale locale) {
         this.source = source;
         this.transactionId = UUID.randomUUID().toString();
         this.providerName = providerName;
         this.locale = locale;
+    }
+
+    /** Tell {@code listener} of each document deindexed for this session (D113). */
+    public DumConnectorSession onDeindex(DumDeindexListener listener) {
+        this.deindexListener = listener;
+        return this;
+    }
+
+    /** Report one deindexed document to the session's listener, if it has one (D113). */
+    public void deindexed(String objectId, List<String> sites, Locale locale) {
+        if (deindexListener != null) {
+            deindexListener.deindexed(objectId, sites, locale);
+        }
     }
 }

@@ -256,6 +256,39 @@ class DumConnectorContextImplTest {
     }
 
     @Test
+    void theSessionHearsOfEachDocumentTheSweepDeletesAndNotOfOnesItKeeps() {
+        // D113
+        List<String> heard = new java.util.ArrayList<>();
+        DumConnectorSession session = new DumConnectorSession("adzuna", "turing", Locale.US)
+                .onDeindex((id, sites, locale) -> heard.add(id + " " + sites + " " + locale));
+        DumConnectorIndexingModel gone = DumConnectorIndexingModel.builder().objectId("job-2").provider("turing")
+                .source("adzuna").locale(Locale.US).sites(new java.util.ArrayList<>(List.of("Sample"))).build();
+        when(indexingService.getShouldBeDeIndexedList(session))
+                .thenReturn(List.of(row("adzuna", Locale.US, "Sample"), gone));
+        when(indexingService.findAllByProviderAndObjectIdIn("turing", List.of("job-1", "job-2")))
+                .thenReturn(List.of(row("jooble", Locale.US, "Sample")));
+
+        context.finishIndexing(session, false);
+
+        assertThat(heard).containsExactly("job-2 [Sample] en_US");
+    }
+
+    @Test
+    void aFailingListenerDoesNotStopTheSweep() {
+        DumConnectorSession session = new DumConnectorSession("adzuna", "turing", Locale.US)
+                .onDeindex((id, sites, locale) -> {
+                    throw new IllegalStateException("boom");
+                });
+        when(indexingService.getShouldBeDeIndexedList(session)).thenReturn(List.of(row("adzuna", Locale.US, "Sample")));
+
+        context.finishIndexing(session, false);
+
+        verify(batchProcessor).addDeferred(any());
+        verify(indexingService).deleteContentsToBeDeIndexed(session);
+        verify(indexingService).completeIndexingStats("adzuna", "turing");
+    }
+
+    @Test
     void getIndexingItemDelegates() {
         when(indexingService.getIndexingItem("o", "s", "p")).thenReturn(List.of());
         assertThat(context.getIndexingItem("o", "s", "p")).isEmpty();
