@@ -104,3 +104,66 @@ declarative.
 
 Workaround in trabalharei: none. Benefits ship from a deterministic dictionary; skills
 and the summary wait on this line (TRA28's remainder).
+
+## XLIV Frontend build and lint gates
+
+### XLIV.1 Vulnerable transitive build dependencies (D133)
+
+Found in the Dependabot alerts on `openviglet/dumont` (2026-10-11): 46 of the 69 open
+alerts are in the root `pnpm-lock.yaml`, all transitive and all build or test tooling of
+`dumont-react`:
+
+- `undici` 7.28.0 (via `@module-federation/dts-plugin` 2.6.0) and 8.11.2 (via `jsdom`): 15
+  alerts, fixed in 7.29.1 and the current 8.x;
+- `adm-zip` 0.5.10 (via `dts-plugin`): fixed in 0.6.1, the version `dumont-react` itself declares;
+- `postcss`, `nanoid`, `source-map-js`, `browserslist` and `baseline-browser-mapping` under
+  `vite`, `@tailwindcss/vite` and Babel: each fixed by a patch release.
+
+Expected: the lockfile resolves no version an alert names. Dependencies whose own range
+already admits the fix are refreshed in the lockfile; the two that pin an old line
+(`dts-plugin`'s `undici` and `adm-zip`) get a `pnpm.overrides` entry in the root
+`package.json`, each with a comment naming why, so it can be dropped when the parent
+catches up. The gates (vitest, lint, `compile:build`, the Maven build) prove the
+overrides changed nothing the build relies on.
+
+One `adm-zip` alert, destination symlinks followed on extract, has no fixed release.
+Dumont uses `adm-zip` only in `scripts/fix-mf-type-aliases.mjs` and
+`test/mf-type-aliases.test.ts`, to rewrite and read the archive its own build just
+produced, never an untrusted one, and never through `extractAllTo`. That alert stays
+open as an accepted build-time risk; dismissing it on GitHub is the maintainer's call.
+
+### XLIV.2 Unpatched xlsx through the design system (D134)
+
+Found in the Dependabot alerts on `openviglet/dumont` (2026-10-11): four high alerts,
+prototype pollution and a ReDoS, on `xlsx` 0.18.5, with no fixed version on npm. SheetJS
+stopped publishing to the npm registry at 0.18.5; fixed releases (0.19.3 and later,
+0.20.3 today) are served only from `https://cdn.sheetjs.com`.
+
+`dumont-react/package.json` declares `xlsx` ^0.18.5 as a runtime dependency, but no
+source file imports it. What does is `@viglet/viglet-design-system`, whose own
+`dependencies` carry `xlsx` ^0.18.5 for its grid export. So the console ships the
+vulnerable parser through the package, and the direct declaration is dead weight that
+doubles the alerts.
+
+Expected: `dumont-react` drops its unused `xlsx` dependency, and a root `pnpm.overrides`
+entry points `xlsx` at SheetJS's own 0.20.3 tarball, so the design system resolves the
+fixed parser here without waiting for its next release. The gates prove the grid still
+builds and its tests pass. The real fix belongs to the design system, which should
+depend on the CDN tarball itself; once it does, the override goes.
+
+### XLIV.3 EDS sample app lockfile left behind (D135)
+
+Found in the Dependabot alerts on `openviglet/dumont` (2026-10-11): 33 of the 69 open
+alerts are in `eds/eds-plugin-sample/turing-export/app/package-lock.json`, the EDS
+sample's export app. It is the one sample app outside the pnpm workspace
+(`pnpm-workspace.yaml` lists the AEM, assets, DB and web-crawler samples, not EDS), so
+it keeps its own npm lockfile and none of the workspace's updates ever reach it.
+
+The alerts: `axios` (21, fixed in 1.20.0), `react-router` (5, fixed in 7.18.2), `vite`
+(2, fixed in 8.0.16), and `postcss`, `nanoid`, `form-data` and `source-map-js` below
+them.
+
+Expected: the app's declared ranges move to the fixed versions where they do not already
+admit them, its lockfile is regenerated, and its build still passes. Whether the EDS
+sample should join the workspace like its siblings, which would let one lockfile keep
+all of them current, is a separate question this line does not answer.

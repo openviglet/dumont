@@ -103,6 +103,10 @@ This track has no remaining pending tasks.
 
 ## Track K — Frontend build and lint gates
 
+- 📋 **D133** (deps: —) **The workspace lockfile resolves vulnerable undici, adm-zip, postcss and other build-tool dependencies** — Dependabot reports 46 open alerts on build and test tooling, 15 of them high. → §XLIV.1
+- 📋 **D134** (deps: —) **The console ships xlsx 0.18.5, whose prototype pollution and ReDoS have no fixed release on npm** — Four high alerts stay open for as long as the parser resolves from the npm registry. → §XLIV.2
+- 📋 **D135** (deps: —) **The EDS sample export app locks vulnerable axios, react-router and vite outside the workspace** — Its own npm lockfile never receives the workspace's updates, so 33 alerts accumulate there. → §XLIV.3
+
 ## Track O — Structured sources over paged JSON APIs
 
 ## Track P — Connector run control
