@@ -547,3 +547,4 @@
 - **D99** — A taxonomy loads from a JSON resource with per-row attributes and its source and download date, and an application can write an attribute such as a municipality's UF.
 - **D100** — An enricher reports a per-run summary from onRunEnd, which also resets it, and its notes join the run outcome recorded on the stats row.
 - **D101** — An enricher's contribution can name its selector and confidence through DumSourced, and a value it only passes through keeps the source's provenance.
+- **D102** — An invalid enricher contribution drops only that field, the enricher's other fields still land, and the warning names the field and the reason.

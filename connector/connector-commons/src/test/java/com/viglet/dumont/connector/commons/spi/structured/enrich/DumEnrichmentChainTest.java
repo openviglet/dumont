@@ -76,6 +76,16 @@ class DumEnrichmentChainTest {
     }
 
     @Test
+    void oneInvalidContributionDropsOnlyItsOwnField() {
+        // D102: a multi-field enricher keeps its good fields when one of them is bad.
+        DumEnricher salary = enricher("salary", r -> Map.of("region", "Sudeste", "ghost", "x"));
+        DumStructuredRecord out = DumEnrichmentChain.of(salary).apply(source, baseRecord());
+        assertEquals("Sudeste", out.values().get("region"), "the valid contribution survives");
+        assertFalse(out.has("ghost"));
+        assertEquals("Algorithms", out.values().get("title"));
+    }
+
+    @Test
     void blankContributionCannotEraseASourcedValue() {
         DumEnricher blanker = enricher("blanker", r -> Map.of("area", "   "));
         DumStructuredRecord out = DumEnrichmentChain.of(blanker).apply(source, baseRecord());

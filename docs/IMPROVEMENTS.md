@@ -174,18 +174,6 @@ executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallb
 
 Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
 
-### XLI.12 Drop only the invalid contribution (D102)
-
-Found while adding the salary enricher to trabalharei's `jobs` module (TRA21), which
-writes four fields at once (min, max, period, band). When any one contribution is
-invalid, `DumEnrichmentChain.merge` keeps the record unchanged and drops every field
-that enricher produced, logging a WARN that does not name the offending field.
-
-Expected: an invalid contribution drops only that field, and the log names the field and
-the reason.
-
-Workaround: the salary enricher validates its own numbers before contributing.
-
 ### XLI.13 Fallback and one-to-many enricher shapes (D103)
 
 Found while adding contract, seniority and salary enrichers to trabalharei's `jobs`

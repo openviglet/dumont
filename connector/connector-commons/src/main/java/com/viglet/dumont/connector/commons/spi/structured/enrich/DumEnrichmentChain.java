@@ -169,27 +169,38 @@ public final class DumEnrichmentChain {
             DumStructuredRecord.Builder builder = rec.toBuilder();
             DumFieldProvenance enriched = DumFieldProvenance.enrichment(enricher.name());
             contributions.forEach((field, value) -> {
-                if (value instanceof DumTransient working) {
-                    builder.transientValue(field, working.value());
-                } else if (value == DumClear.FIELD) {
-                    // D98: an explicit clear removes the source's value; a blank one never does.
-                    builder.clear(field);
-                } else if (value instanceof DumSourced sourced) {
-                    // D101: the enricher names where it read the value, and how sure it is.
-                    if (!passesThrough(rec, field, sourced.value())) {
-                        builder.set(field, sourced.value(), new DumFieldProvenance(enriched.strategy(),
-                                sourced.selector(), sourced.confidence(), null));
-                    }
-                } else if (!passesThrough(rec, field, value)) {
-                    builder.set(field, value, enriched);
+                // D102: an invalid contribution drops that field alone. The builder validates before
+                // it writes, so a refused contribution leaves the rest of the record as it was.
+                try {
+                    mergeOne(builder, rec, enriched, field, value);
+                } catch (RuntimeException e) {
+                    log.warn("Enricher '{}' contribution to '{}' on record '{}' dropped: {}",
+                            enricher.name(), field, rec.id(), e.getMessage());
                 }
             });
             return builder.build();
         } catch (RuntimeException e) {
-            log.warn("Enricher '{}' produced an invalid contribution for record '{}' "
-                    + "(undeclared field or type mismatch) — record left unchanged: {}",
+            log.warn("Enricher '{}' could not be merged into record '{}', record left unchanged: {}",
                     enricher.name(), rec.id(), e.getMessage());
             return rec;
+        }
+    }
+
+    private static void mergeOne(DumStructuredRecord.Builder builder, DumStructuredRecord rec,
+            DumFieldProvenance enriched, String field, Object value) {
+        if (value instanceof DumTransient working) {
+            builder.transientValue(field, working.value());
+        } else if (value == DumClear.FIELD) {
+            // D98: an explicit clear removes the source's value; a blank one never does.
+            builder.clear(field);
+        } else if (value instanceof DumSourced sourced) {
+            // D101: the enricher names where it read the value, and how sure it is.
+            if (!passesThrough(rec, field, sourced.value())) {
+                builder.set(field, sourced.value(), new DumFieldProvenance(enriched.strategy(),
+                        sourced.selector(), sourced.confidence(), null));
+            }
+        } else if (!passesThrough(rec, field, value)) {
+            builder.set(field, value, enriched);
         }
     }
 }
