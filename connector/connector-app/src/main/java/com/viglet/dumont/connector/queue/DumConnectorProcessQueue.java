@@ -22,8 +22,10 @@ import static com.viglet.dumont.connector.commons.logging.DumConnectorLoggingUti
 import static com.viglet.dumont.connector.constant.DumConnectorConstants.CONNECTOR_INDEXING_QUEUE;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
@@ -32,7 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.viglet.dumont.commons.indexing.DumIndexingStatus;
 import com.viglet.dumont.connector.commons.ground.DumGrounding;
 import com.viglet.dumont.connector.commons.logging.DumJobTrail;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingDeliveryException;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
+import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
@@ -43,9 +47,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DumConnectorProcessQueue {
     private final DumIndexingPlugin indexingPlugin;
+    private final DumConnectorIndexingService indexingService;
 
-    public DumConnectorProcessQueue(DumIndexingPlugin indexingPlugin) {
+    public DumConnectorProcessQueue(DumIndexingPlugin indexingPlugin,
+            DumConnectorIndexingService indexingService) {
         this.indexingPlugin = indexingPlugin;
+        this.indexingService = indexingService;
         log.info("DumConnectorProcessQueue initialized with indexing provider: {}",
                 indexingPlugin.getProviderName());
     }
@@ -55,6 +62,8 @@ public class DumConnectorProcessQueue {
     public void receiveAndSendToDumont(TurSNJobItems turSNJobItems) {
         List<String> sites = new ArrayList<>();
         List<Locale> locales = new ArrayList<>();
+        // D138: what the batch publishes, per source, so a refused delivery can be resent.
+        Map<String, List<String>> createdBySource = new LinkedHashMap<>();
         if (turSNJobItems == null || turSNJobItems.getTuringDocuments().isEmpty()) {
             log.info("Job is empty, no action.");
             return;
@@ -65,6 +74,10 @@ public class DumConnectorProcessQueue {
             // this is the only way this row can name the same source the SENT_TO_QUEUE row did.
             String source = DumJobTrail.source(turSNJobItem);
             String transactionId = DumJobTrail.transactionId(turSNJobItem);
+            if (source != null && turSNJobItem.getTurSNJobAction() == TurSNJobAction.CREATE
+                    && turSNJobItem.getId() != null) {
+                createdBySource.computeIfAbsent(source, s -> new ArrayList<>()).add(turSNJobItem.getId());
+            }
             // Grounding contract, enforced end-to-end (roadmap D03): no matter how a connector
             // assembled its attributes, an absent field must not reach the backend as an empty
             // value and pollute facets. The structured SPI already grounds at record-build time;
@@ -91,6 +104,15 @@ public class DumConnectorProcessQueue {
         } else {
             locales.forEach(locale -> turSNJobItems.add(new TurSNJobItem(TurSNJobAction.COMMIT, sites, locale)));
         }
-        indexingPlugin.index(turSNJobItems);
+        try {
+            indexingPlugin.index(turSNJobItems);
+        } catch (DumIndexingDeliveryException e) {
+            // Not rethrown: the rollback would undo the very marks that make the next run resend.
+            createdBySource.forEach((source, ids) -> {
+                int marked = indexingService.recordDeliveryFailure(source, ids, e.getMessage());
+                log.error("Batch for source '{}' was not delivered to {} ({}): {} document(s) marked "
+                        + "for resending", source, indexingPlugin.getProviderName(), e.getMessage(), marked);
+            });
+        }
     }
 }

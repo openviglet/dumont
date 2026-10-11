@@ -161,6 +161,39 @@ class DumConnectorIndexingServiceTest {
         verify(notifier, never()).runStartedWarning(any(DumConnectorIndexingStatsModel.class));
     }
 
+    @Test
+    void aRefusedBatchDuringARunMarksItsDocumentsAndMakesTheRunPartial() {
+        // D138: the documents lose their checksum, so the next run sends them again.
+        when(repository.clearChecksums("source-1", List.of("job-1", "job-2"))).thenReturn(2);
+        service.trackIndexingStart("source-1", "turing", OperationType.INDEX_ALL);
+
+        assertThat(service.recordDeliveryFailure("source-1", List.of("job-1", "job-2"), "No route to host"))
+                .isEqualTo(2);
+        service.completeIndexingStats("source-1", "turing");
+
+        org.mockito.ArgumentCaptor<DumConnectorIndexingStatsModel> saved =
+                org.mockito.ArgumentCaptor.forClass(DumConnectorIndexingStatsModel.class);
+        verify(statsRepository).save(saved.capture());
+        assertThat(saved.getValue().isPartial()).isTrue();
+        assertThat(saved.getValue().getNotes()).singleElement().asString()
+                .contains("2 document(s) not delivered").contains("No route to host");
+    }
+
+    @Test
+    void aRefusedBatchAfterTheRunFinishedMarksTheLatestRunRecord() {
+        DumConnectorIndexingStatsModel latest = DumConnectorIndexingStatsModel.builder().source("source-1")
+                .build();
+        when(statsRepository.findFirstBySourceOrderByStartTimeDesc("source-1"))
+                .thenReturn(java.util.Optional.of(latest));
+
+        service.recordDeliveryFailure("source-1", List.of("job-1"), "No route to host");
+
+        verify(repository).clearChecksums("source-1", List.of("job-1"));
+        verify(statsRepository).save(latest);
+        assertThat(latest.isPartial()).isTrue();
+        assertThat(latest.getNotes()).hasSize(1);
+    }
+
     private void warnedRun() {
         service.trackIndexingStart("source-1", "turing", OperationType.INDEX_ALL);
         service.recordRunOutcome("source-1", "turing", false, List.of(), List.of("fell 92%"));

@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingDeliveryException;
 import com.viglet.turing.commons.exception.TurRuntimeException;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
@@ -119,7 +120,7 @@ public class DumElasticsearchIndexingPlugin implements DumIndexingPlugin {
 
         } catch (IOException e) {
             log.error("Error indexing to Elasticsearch: {}", e.getMessage(), e);
-            throw new TurRuntimeException("Failed to index items to Elasticsearch", e);
+            throw new DumIndexingDeliveryException("Failed to index items to Elasticsearch", e);
         }
     }
 

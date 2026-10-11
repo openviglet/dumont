@@ -17,6 +17,7 @@
 package com.viglet.dumont.connector.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,4 +31,7 @@ public interface DumConnectorIndexingStatsRepository
 
     List<DumConnectorIndexingStatsModel> findAllBySourceAndProviderOrderByStartTimeDesc(
             String source, String provider, Limit limit);
+
+    /** The source's most recent run record, whatever its provider (D138). */
+    Optional<DumConnectorIndexingStatsModel> findFirstBySourceOrderByStartTimeDesc(String source);
 }

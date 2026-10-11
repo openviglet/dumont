@@ -49,6 +49,8 @@ public class DumConnectorIndexingService {
 
         private static final int KEEP_ALIVE_CHUNK = 500;
         private final Map<String, RunOutcome> runOutcomes = new ConcurrentHashMap<>();
+        /** Per source, the notes of batches the backend refused while its run was open (D138). */
+        private final Map<String, List<String>> deliveryFailures = new ConcurrentHashMap<>();
 
         public record PendingStats(Instant startTime, OperationType operationType) {}
 
@@ -127,6 +129,48 @@ public class DumConnectorIndexingService {
                 return stamped;
         }
 
+        /**
+         * The search backend refused a batch carrying {@code objectIds} of {@code source} (D138).
+         * Their ledger rows lose their checksum, so the next run reads each as changed and sends it
+         * again, and the run record says what was not delivered: the open run's when one is still in
+         * progress, else the source's latest record, since the queue drains after a run finishes.
+         *
+         * @return how many ledger rows were marked for resending
+         */
+        public int recordDeliveryFailure(String source, Collection<String> objectIds, String reason) {
+                if (source == null || objectIds == null || objectIds.isEmpty()) {
+                        return 0;
+                }
+                List<String> ids = List.copyOf(objectIds);
+                int marked = 0;
+                for (int from = 0; from < ids.size(); from += KEEP_ALIVE_CHUNK) {
+                        marked += dumConnectorIndexingRepository.clearChecksums(source,
+                                        ids.subList(from, Math.min(ids.size(), from + KEEP_ALIVE_CHUNK)));
+                }
+                String note = deliveryNote(ids.size(), reason);
+                boolean runOpen = pendingStatsMap.keySet().stream().anyMatch(k -> k.startsWith(source + "|"));
+                if (runOpen) {
+                        deliveryFailures.merge(source, List.of(note), (a, b) -> {
+                                List<String> all = new ArrayList<>(a);
+                                all.addAll(b);
+                                return all;
+                        });
+                } else {
+                        dumConnectorIndexingStatsRepository.findFirstBySourceOrderByStartTimeDesc(source)
+                                        .ifPresent(latest -> {
+                                                latest.setPartial(true);
+                                                latest.getNotes().add(note);
+                                                dumConnectorIndexingStatsRepository.save(latest);
+                                        });
+                }
+                return marked;
+        }
+
+        private static String deliveryNote(int count, String reason) {
+                return "%d document(s) not delivered to the search backend (%s); resent on the next run"
+                                .formatted(count, reason == null ? "no reason given" : reason);
+        }
+
         /** Whether the current run of a source recorded an outcome its stats row should carry. */
         public boolean hasRunOutcome(String source, String provider) {
                 return runOutcomes.containsKey(source + "|" + provider);
@@ -170,6 +214,12 @@ public class DumConnectorIndexingService {
                                 .warnings(outcome == null ? new ArrayList<>()
                                                 : new ArrayList<>(outcome.warnings()))
                                 .build();
+                // D138: a batch the backend refused during the run makes the run partial.
+                List<String> undelivered = deliveryFailures.remove(source);
+                if (undelivered != null) {
+                        stats.setPartial(true);
+                        stats.getNotes().addAll(undelivered);
+                }
                 boolean wasWarned = stats.isWarned() && runWarningNotifier.enabled()
                                 && dumConnectorIndexingStatsRepository
                                                 .findAllBySourceAndProviderOrderByStartTimeDesc(source,

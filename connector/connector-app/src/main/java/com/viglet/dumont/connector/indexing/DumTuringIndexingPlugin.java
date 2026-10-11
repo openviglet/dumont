@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingDeliveryException;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.auth.credentials.TurApiKeyCredentials;
 import com.viglet.turing.client.sn.TurSNServer;
@@ -67,7 +68,12 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
     @Override
     public void index(TurSNJobItems turSNJobItems) {
         log.debug("Indexing {} items to Turing ES", turSNJobItems.getTuringDocuments().size());
-        TurSNJobUtils.importItems(turSNJobItems, getTurSNServer(), false);
+        // D138: importItems logs a failed delivery and answers false; ignoring that recorded the batch
+        // as indexed while Turing never received it.
+        if (!TurSNJobUtils.importItems(turSNJobItems, getTurSNServer(), false)) {
+            throw new DumIndexingDeliveryException("Turing did not accept a batch of %d item(s) at %s"
+                    .formatted(turSNJobItems.getTuringDocuments().size(), turingUrl));
+        }
     }
 
     @Override

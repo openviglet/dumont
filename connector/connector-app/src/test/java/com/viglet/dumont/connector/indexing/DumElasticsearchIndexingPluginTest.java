@@ -37,7 +37,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
-import com.viglet.turing.commons.exception.TurRuntimeException;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingDeliveryException;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
@@ -108,7 +108,7 @@ class DumElasticsearchIndexingPluginTest {
         attributes.put("id", "c1");
         var items = itemsWith(attributes);
 
-        assertThatThrownBy(() -> plugin.index(items)).isInstanceOf(TurRuntimeException.class);
+        assertThatThrownBy(() -> plugin.index(items)).isInstanceOf(DumIndexingDeliveryException.class);
     }
 
     @Test

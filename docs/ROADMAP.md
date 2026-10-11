@@ -108,7 +108,6 @@ This track has no remaining pending tasks.
 ## Track P — Connector run control
 
 - 🛠 **D136** (deps: —) **A connector run's outcome is not exposed as a metric, so a failed or stalled scheduled run alerts no one** — Operators learn about a broken ingestion from its downstream effect, hours late, and cannot tell it from a source that shrank. → §XLIII.10
-- 📋 **D138** (deps: —) **A batch the connector queue fails to deliver to Turing stays in the ledger as indexed, so no later run resends it** — One Turing outage leaves documents missing from search for good, while every run reports complete. → §XLIII.12
 - 📋 **D139** (deps: —) **A run whose site provisioning failed is still recorded complete, after a three-minute manifest timeout** — Fields a site never received go unnoticed, and the operator reads a clean run. → §XLIII.13
 - 📋 **D140** (deps: —) **A structured field cannot declare a search weight, so the manifest Dumont sends gives every field weight 1** — A plugin cannot say that its title outranks its body text, and a weight set by hand drifts from the schema. → §XLIII.14
 

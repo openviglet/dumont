@@ -39,7 +39,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
-import com.viglet.turing.commons.exception.TurRuntimeException;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingDeliveryException;
 
 class DumSolrIndexingPluginTest {
 
@@ -104,7 +104,7 @@ class DumSolrIndexingPluginTest {
                 .thenThrow(new SolrServerException("boom"));
         var items = itemsWith(attributes);
 
-        assertThatThrownBy(() -> plugin.index(items)).isInstanceOf(TurRuntimeException.class);
+        assertThatThrownBy(() -> plugin.index(items)).isInstanceOf(DumIndexingDeliveryException.class);
     }
 
     @Test

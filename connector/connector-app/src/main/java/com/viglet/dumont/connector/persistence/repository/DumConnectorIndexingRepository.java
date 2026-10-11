@@ -67,6 +67,15 @@ public interface DumConnectorIndexingRepository
                         @Param("transactionId") String transactionId,
                         @Param("ids") Collection<String> ids);
 
+        /**
+         * Forgets the checksum of the given documents of a source (D138), so the next run reads each
+         * as changed and sends it again: their last delivery to the search backend failed.
+         */
+        @Modifying
+        @Query("UPDATE DumConnectorIndexingModel i SET i.checksum = NULL "
+                        + "WHERE i.source = :source AND i.objectId IN :ids")
+        int clearChecksums(@Param("source") String source, @Param("ids") Collection<String> ids);
+
         List<DumConnectorIndexingModel> findByObjectIdAndSourceAndEnvironmentAndProvider(
                         String objectId, String source, String environment, String provider);
 

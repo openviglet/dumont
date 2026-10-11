@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
-import com.viglet.turing.commons.exception.TurRuntimeException;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingDeliveryException;
 
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -100,7 +100,7 @@ public class DumSolrIndexingPlugin implements DumIndexingPlugin {
 
         } catch (SolrServerException | IOException e) {
             log.error("Error indexing to Solr: {}", e.getMessage(), e);
-            throw new TurRuntimeException("Failed to index items to Solr", e);
+            throw new DumIndexingDeliveryException("Failed to index items to Solr", e);
         }
     }
 

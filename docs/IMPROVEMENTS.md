@@ -132,27 +132,6 @@ Expected: Micrometer gauges and counters per connector source, exposed on
 == 0` or `time() - dumont_run_last_finished_seconds > 2*3600` pages on a broken or
 stalled schedule for any plugin, not only trabalharei's.
 
-### XLIII.12 Failed deliveries stay pending until Turing accepts them (D138)
-
-Met in trabalharei (TRA25), with `PROOF_OUTAGE=1 node scripts/dumont-publish-proof.mjs`
-against the local stack (Dumont 2026.3 jars, Turing CE local).
-
-Steps: a structured source publishes 8 documents with parity. The fixtures then gain one
-new posting and the Turing container is stopped (`docker stop`) for one run. The run
-finishes "complete, 9 sent"; the connector queue then logs `ERROR
-c.v.turing.client.sn.job.TurSNJobUtils : No route to host` and drops the batch. Turing
-is started again and the next run finishes "complete, 9 sent, 9 recorded", but the site
-holds 8: `job-bd33f8...` is in Dumont's ledger and never in Turing. Every later run
-treats it as unchanged, so it is never sent again until its content changes.
-
-Expected: the ledger records a document only once Turing accepted it, or a failed
-delivery marks its ledger rows (checksum cleared, or a `pending` state) so the next run
-re-sends them; and the run whose batch failed is not recorded as complete. The queue's
-failure should also name the batch and source on the run record (D96), not only the log.
-
-Workaround in trabalharei: none; the proof's outage step fails until this ships, and
-TRA25 waits on it.
-
 ### XLIII.13 Failed provisioning shows on the run (D139)
 
 Met in trabalharei (TRA25), running a structured source while the Turing container was

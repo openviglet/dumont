@@ -22,7 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,12 +42,52 @@ import com.viglet.dumont.commons.logging.DumLoggingIndexingLog;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.logging.DumConnectorLoggingUtils;
 import com.viglet.dumont.connector.commons.logging.DumJobTrail;
+import com.viglet.dumont.connector.commons.plugin.DumIndexingDeliveryException;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
+import com.viglet.dumont.connector.service.DumConnectorIndexingService;
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 import com.viglet.turing.client.sn.job.TurSNJobItems;
 
 class DumConnectorProcessQueueTest {
+
+    private final DumConnectorIndexingService indexingService = mock(DumConnectorIndexingService.class);
+
+    @Test
+    @DisplayName("a batch the backend refuses is marked for resending under its source (D138)")
+    void aRefusedBatchIsMarkedForResendingInsteadOfLeftIndexed() {
+        DumIndexingPlugin refusing = new DumIndexingPlugin() {
+            @Override
+            public void index(TurSNJobItems turSNJobItems) {
+                throw new DumIndexingDeliveryException("No route to host");
+            }
+
+            @Override
+            public String getProviderName() {
+                return "TURING";
+            }
+        };
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(refusing, indexingService);
+        DumConnectorSession session = new DumConnectorSession("jobs", "turing", Locale.US);
+        TurSNJobItems items = new TurSNJobItems();
+        for (String id : List.of("job-1", "job-2")) {
+            Map<String, Object> attributes = new HashMap<>();
+            attributes.put("id", id);
+            TurSNJobItem jobItem = new TurSNJobItem(TurSNJobAction.CREATE, List.of("Sample"), Locale.US,
+                    attributes);
+            DumJobTrail.stamp(jobItem, session);
+            items.add(jobItem);
+        }
+        Map<String, Object> gone = new HashMap<>();
+        gone.put("id", "job-0");
+        TurSNJobItem delete = new TurSNJobItem(TurSNJobAction.DELETE, List.of("Sample"), Locale.US, gone);
+        DumJobTrail.stamp(delete, session);
+        items.add(delete);
+
+        rowFiledBy(() -> queue.receiveAndSendToDumont(items));
+
+        verify(indexingService).recordDeliveryFailure("jobs", List.of("job-1", "job-2"), "No route to host");
+    }
 
     /** Captures the job items the queue hands to the configured indexing backend. */
     private static final class CapturingPlugin implements DumIndexingPlugin {
@@ -74,7 +116,7 @@ class DumConnectorProcessQueueTest {
     @Test
     void groundsEmptyAttributesBeforeIndexingRegardlessOfConnector() {
         CapturingPlugin plugin = new CapturingPlugin();
-        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin);
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService);
 
         // A loose-map job item, as a non-structured connector (web crawler / AEM) would build it.
         Map<String, Object> attributes = new HashMap<>();
@@ -104,7 +146,7 @@ class DumConnectorProcessQueueTest {
     @DisplayName("a document's log names the same source at every status it passes through (D71)")
     void theTrailSurvivesTheQueueAndComesOffBeforeIndexing() {
         CapturingPlugin plugin = new CapturingPlugin();
-        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin);
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService);
         DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
 
         Map<String, Object> attributes = new HashMap<>();
@@ -151,7 +193,7 @@ class DumConnectorProcessQueueTest {
     @Test
     void emptyJobIsIgnored() {
         CapturingPlugin plugin = new CapturingPlugin();
-        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin);
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService);
 
         queue.receiveAndSendToDumont(new TurSNJobItems());
 
