@@ -43,6 +43,7 @@ public class DumConnectorIndexingService {
         private final DumConnectorIndexingRepository dumConnectorIndexingRepository;
         private final DumConnectorIndexingStatsRepository dumConnectorIndexingStatsRepository;
         private final boolean connectorDependencies;
+        private final DumRunWarningNotifier runWarningNotifier;
         private final Map<String, PendingStats> pendingStatsMap = new ConcurrentHashMap<>();
         private final Set<String> processingSources = ConcurrentHashMap.newKeySet();
 
@@ -57,10 +58,12 @@ public class DumConnectorIndexingService {
         public DumConnectorIndexingService(
                         DumConnectorIndexingRepository dumConnectorIndexingRepository,
                         DumConnectorIndexingStatsRepository dumConnectorIndexingStatsRepository,
-                        @Value("${dumont.dependencies.enabled:true}") boolean connectorDependencies) {
+                        @Value("${dumont.dependencies.enabled:true}") boolean connectorDependencies,
+                        DumRunWarningNotifier runWarningNotifier) {
                 this.dumConnectorIndexingRepository = dumConnectorIndexingRepository;
                 this.dumConnectorIndexingStatsRepository = dumConnectorIndexingStatsRepository;
                 this.connectorDependencies = connectorDependencies;
+                this.runWarningNotifier = runWarningNotifier;
         }
 
         public boolean tryStartProcessing(String source) {
@@ -167,7 +170,16 @@ public class DumConnectorIndexingService {
                                 .warnings(outcome == null ? new ArrayList<>()
                                                 : new ArrayList<>(outcome.warnings()))
                                 .build();
+                boolean wasWarned = stats.isWarned() && runWarningNotifier.enabled()
+                                && dumConnectorIndexingStatsRepository
+                                                .findAllBySourceAndProviderOrderByStartTimeDesc(source,
+                                                                provider, Limit.of(1))
+                                                .stream().anyMatch(DumConnectorIndexingStatsModel::isWarned);
                 dumConnectorIndexingStatsRepository.save(stats);
+                // D130: an operator hears when a source starts warning, not on every run it stays so.
+                if (stats.isWarned() && !wasWarned) {
+                        runWarningNotifier.runStartedWarning(stats);
+                }
                 log.info("Indexing stats for source '{}': {} documents in {}ms ({} docs/min)",
                                 source, documentCount, durationMs,
                                 String.format("%.2f", documentsPerMinute));

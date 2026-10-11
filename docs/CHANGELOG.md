@@ -578,6 +578,6 @@
 - **D127** — Structured job items carry a SHA-256 of what they publish unless the plugin stamps its own, so an unchanged rerun is skipped; ReindexStrategy reads a null checksum as changed.
 - **D128** — A scheduled crawl starts each structured source through DumConnectorRunService, the API's start: under its run lock, tracked, and skipped with a log line while a run of it is in progress.
 - **D129** — A scheduled crawl isolates each source and each plugin: one that throws outside extraction is logged with its name, its lock is released, and the crawl moves on.
-- **D130 (warnings recorded, shown, drift-raised)** — A source can raise runWarnings() and coverage drift past coverageDriftThreshold() raises one; a warned complete run is not partial, and the stats table marks it.
+- **D130** — A run can warn without being partial: sources and coverage drift raise warnings, the console marks the run, and dumont.alerts.webhook-url hears when a source starts warning.
 - **D131 (grounded list extraction)** — DumExtractionEnricher fills a multi-valued field from a DumExtractorFactory extractor; only items found in the text as whole words publish, cached and capped like classification.
 - **D132** — An AEM or structured run that ends with no session (source not found, no enabled environment) calls endRunWithoutSession, which releases its lock; a failed AEM discovery finishes standalone.

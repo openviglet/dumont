@@ -60,12 +60,14 @@ class DumConnectorIndexingServiceTest {
     private DumConnectorIndexingRepository repository;
     @Mock
     private DumConnectorIndexingStatsRepository statsRepository;
+    @Mock
+    private DumRunWarningNotifier notifier;
 
     private DumConnectorIndexingService service;
 
     @BeforeEach
     void setUp() {
-        service = new DumConnectorIndexingService(repository, statsRepository, true);
+        service = new DumConnectorIndexingService(repository, statsRepository, true, notifier);
     }
 
     private static DumJobItemWithSession jobItem() {
@@ -137,6 +139,32 @@ class DumConnectorIndexingServiceTest {
         assertThat(saved.getValue().getWarnings())
                 .containsExactly("new postings fell 92% under the 7-day median");
         assertThat(saved.getValue().getNotes()).containsExactly("12 records");
+    }
+
+    @Test
+    void theNotifierHearsWhenASourceStartsWarningButNotWhileItStaysSo() {
+        // D130: one message per incident, not one per run.
+        when(notifier.enabled()).thenReturn(true);
+        DumConnectorIndexingStatsModel healthy = DumConnectorIndexingStatsModel.builder().build();
+        DumConnectorIndexingStatsModel warned = DumConnectorIndexingStatsModel.builder()
+                .warnings(new java.util.ArrayList<>(List.of("fell 92%"))).build();
+
+        when(statsRepository.findAllBySourceAndProviderOrderByStartTimeDesc(eq("source-1"), eq("turing"),
+                any(Limit.class))).thenReturn(List.of(healthy));
+        warnedRun();
+        verify(notifier).runStartedWarning(any(DumConnectorIndexingStatsModel.class));
+
+        org.mockito.Mockito.clearInvocations(notifier);
+        when(statsRepository.findAllBySourceAndProviderOrderByStartTimeDesc(eq("source-1"), eq("turing"),
+                any(Limit.class))).thenReturn(List.of(warned));
+        warnedRun();
+        verify(notifier, never()).runStartedWarning(any(DumConnectorIndexingStatsModel.class));
+    }
+
+    private void warnedRun() {
+        service.trackIndexingStart("source-1", "turing", OperationType.INDEX_ALL);
+        service.recordRunOutcome("source-1", "turing", false, List.of(), List.of("fell 92%"));
+        service.completeIndexingStats("source-1", "turing");
     }
 
     @Test

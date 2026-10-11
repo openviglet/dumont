@@ -82,3 +82,25 @@ These constrain every task above:
 
 ## XLIII Connector run control
 
+### XLIII.8 No grounded LLM extraction or summary (D131)
+
+Met in trabalharei (TRA28, job description enrichment) against Dumont 2026.3.
+
+trabalharei wants, for each job with a full description, the required skills (an open
+list), and a two-line summary for its job page and abstract, both grounded in the text.
+The only LLM surface a plugin can reach is `DumClassifierFactory` (D106): it builds a
+`DumClassifier` that answers one label of a closed set (D107), cached per input. That
+cannot express a list of values, an open vocabulary drawn from the text, or a generated
+summary, so the plugin has no grounded LLM step for either.
+
+Expected: a second factory method, or an `DumExtractor` beside `DumClassifier`, that
+takes a task prompt and answers a typed result: a list of strings each of which must
+occur in the input (checked after the model answers, so an invented skill is dropped),
+or a short text with a length cap. Same contract as the classifier: empty when nothing
+is grounded, a thrown error not cached, answers cached by input hash under the task's
+prefix, and a per-day call cap the plugin sets. A `DumExtractionEnricher` writing a
+multi-valued field (skills) and a text field (the summary into `abstract`) would make it
+declarative.
+
+Workaround in trabalharei: none. Benefits ship from a deterministic dictionary; skills
+and the summary wait on this line (TRA28's remainder).

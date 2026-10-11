@@ -107,7 +107,6 @@ This track has no remaining pending tasks.
 
 ## Track P — Connector run control
 
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
