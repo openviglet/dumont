@@ -129,6 +129,9 @@ public final class DumEnrichmentChain {
             contributions.forEach((field, value) -> {
                 if (value instanceof DumTransient working) {
                     builder.transientValue(field, working.value());
+                } else if (value == DumClear.FIELD) {
+                    // D98: an explicit clear removes the source's value; a blank one never does.
+                    builder.clear(field);
                 } else {
                     builder.set(field, value, enriched);
                 }

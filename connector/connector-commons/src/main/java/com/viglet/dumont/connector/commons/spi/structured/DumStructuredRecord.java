@@ -185,6 +185,22 @@ public final class DumStructuredRecord {
         }
 
         /**
+         * Remove a field and its provenance (roadmap <strong>D98</strong>), leaving it absent as
+         * if the source had never supplied it. Used by the enrichment chain when an enricher
+         * returns {@code DumClear.field()}.
+         *
+         * @throws IllegalArgumentException if the field is not declared by the schema
+         */
+        public Builder clear(String fieldName) {
+            if (!schema.hasField(fieldName)) {
+                throw new IllegalArgumentException("Field not declared in schema: " + fieldName);
+            }
+            values.remove(fieldName);
+            provenance.remove(fieldName);
+            return this;
+        }
+
+        /**
          * Set a transient attribute (roadmap <strong>D97</strong>): working data for enrichers that
          * is never indexed. Any key is accepted; a blank value removes the key, so an enricher can
          * clear a note it no longer needs.

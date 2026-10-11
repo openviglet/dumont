@@ -112,7 +112,9 @@ Expected: the adapters set `locationRaw` (and any other raw text an enricher nor
 such as the salary, contract and seniority inputs) as transients when they build each
 record. The enrichers read `rec.transients()` and write `locationUnresolved` as a
 `DumTransient`. `posting(id)` then goes away, and the enrichers no longer depend on the
-concrete source class.
+concrete source class. With D98, `extract()` can also keep the adapter's city and state,
+and the location enricher removes a city outside the stated UF with `DumClear.field()`
+instead of writing both fields itself.
 
 ## XLII Web-crawler hardening (real-world sources)
 ### XLI.4 Keep-alive for incremental sources (D104)
@@ -147,21 +149,6 @@ executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallb
 `agents.md` names the flag in the meantime.
 
 Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
-
-### XLI.8 Enrichers can clear fields (D98)
-
-Found while adding location normalization to the `jobs` module (trabalharei TRA20).
-`DumEnrichmentChain.merge` applies the source's values first and ignores blank
-contributions, so an enricher can add or overwrite a field but never remove one. A
-canonicalizer must sometimes drop a value the source sent: a city that does not exist in
-the stated UF keeps the UF and loses the city, and a remote posting has no city.
-
-Expected: an enricher can clear a field explicitly (a tombstone value, or a
-`remove(field)` on its contribution), applied by the merge.
-
-Workaround: the jobs module's `extract()` leaves city and state off the record entirely
-and lets the enricher write them, falling back to the adapter's values when the taxonomy
-is missing.
 
 ### XLI.9 Tabular taxonomies from resources (D99)
 

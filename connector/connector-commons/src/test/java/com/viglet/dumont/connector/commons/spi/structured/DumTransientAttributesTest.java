@@ -33,6 +33,7 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClear;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnricher;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnrichmentChain;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumTransient;
@@ -105,6 +106,26 @@ class DumTransientAttributesTest {
         assertEquals("Atlantis", unresolved.transients().get("locationRaw"));
         assertEquals(List.of(Map.of(), Map.of("locationRaw", "Atlantis", "locationUnresolved", "Atlantis")),
                 seen);
+    }
+
+    @Test
+    void anExplicitClearRemovesASourceValueAndABlankOneDoesNot() {
+        // D98: a city outside the stated state is dropped, not left beside the canonical state.
+        DumStructuredRecord rec = DumStructuredRecord.builder("1", SCHEMA).set("title", "Engineer")
+                .set("city", "Atlantis", DumFieldProvenance.css(".city")).build();
+        java.util.Map<String, Object> blank = new java.util.HashMap<>();
+        blank.put("city", "  ");
+
+        DumStructuredRecord kept = DumEnrichmentChain.of(enricher("blank", r -> blank)).apply(null, rec);
+        DumStructuredRecord cleared = DumEnrichmentChain.of(
+                enricher("canonical", r -> Map.of("city", DumClear.field()))).apply(null, rec);
+
+        assertEquals("Atlantis", kept.values().get("city"), "a blank contribution changes nothing");
+        assertFalse(cleared.has("city"));
+        assertFalse(cleared.provenance().containsKey("city"));
+        assertEquals("Engineer", cleared.values().get("title"));
+        assertThrows(IllegalArgumentException.class,
+                () -> DumStructuredRecord.builder("1", SCHEMA).clear("undeclared"));
     }
 
     @Test

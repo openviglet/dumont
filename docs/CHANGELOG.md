@@ -543,3 +543,4 @@
 - **D94** — The zip, installer and AppImage carry the EDS plugin with launchers, staging fails when a plugin module is left out, and releases upload every plugin jar.
 - **D96** — A structured source returns run notes, and a run that stopped short is marked partial with its reasons on the stats row the console's Indexing Stats table shows.
 - **D97** — A structured record carries transient attributes that enrichers read and write through DumTransient, and publishing never indexes them.
+- **D98** — An enricher removes a field the source supplied by returning DumClear.field(), while a blank contribution still changes nothing.

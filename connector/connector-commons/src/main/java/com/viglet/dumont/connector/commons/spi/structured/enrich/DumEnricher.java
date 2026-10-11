@@ -31,8 +31,8 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
  * The {@link DumEnrichmentChain} merges those contributions back into the record <em>through the
  * schema-bound {@link DumStructuredRecord.Builder}</em>, so the grounding contract is enforced for
  * free: a contribution to a field the schema does not declare is rejected, a blank or empty value is
- * dropped (the field stays absent), and an enricher can never blank-out a value the source already
- * supplied.
+ * dropped (the field stays absent), and a blank contribution can never blank-out a value the source
+ * already supplied; removing one takes the explicit {@link DumClear#field()} (D98).
  *
  * <p>
  * <strong>Grounding contract.</strong> Enrichment may normalize, classify or derive — it must
@@ -53,6 +53,11 @@ public interface DumEnricher {
      * value is merged into the record via {@link DumStructuredRecord.Builder#set(String, Object)},
      * which validates the field against the schema and grounds the value. Return an empty map (never
      * {@code null} is required, but it is tolerated) when this enricher has nothing to add.
+     *
+     * <p>
+     * Two values are not field values: {@link DumClear#field()} removes the field the source
+     * supplied (D98), and {@link DumTransient#of(Object)} sets a transient, never-indexed
+     * attribute under the key (D97).
      *
      * <p>
      * Implementations must not throw to signal "nothing to contribute" — return an empty map. A
