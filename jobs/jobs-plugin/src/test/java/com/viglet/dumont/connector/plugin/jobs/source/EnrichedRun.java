@@ -58,6 +58,27 @@ public final class EnrichedRun {
         return run;
     }
 
+    /**
+     * Each published title and the occupation published with it ({@code "-"} when none), in record
+     * order; repeated titles appear once.
+     */
+    public Map<String, String> occupationsByTitle() {
+        Map<String, String> occupations = new LinkedHashMap<>();
+        for (DumStructuredRecord rec : records.values()) {
+            Object occupation = first(rec.values().get(DumJobsSchema.OCCUPATION));
+            occupations.putIfAbsent(String.valueOf(first(rec.values().get(DumJobsSchema.TITLE))),
+                    occupation == null ? "-" : occupation.toString());
+        }
+        return occupations;
+    }
+
+    private static Object first(Object value) {
+        if (value instanceof java.util.Collection<?> values) {
+            return values.isEmpty() ? null : values.iterator().next();
+        }
+        return value;
+    }
+
     /** The published values of {@code id}. */
     public Map<String, Object> values(String id) {
         DumStructuredRecord rec = records.get(id);

@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.viglet.dumont.connector.plugin.jobs.api.dto.DumJobSourceRequest;
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobCallRepository;
+import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobFingerprintRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
 
@@ -55,12 +57,25 @@ public class DumJobSourceApi {
     private final DumJobSourceRepository sourceRepository;
     private final DumJobSeenRepository seenRepository;
     private final DumJobCallRepository callRepository;
+    private final DumJobFingerprintRepository fingerprintRepository;
 
     public DumJobSourceApi(DumJobSourceRepository sourceRepository,
             DumJobSeenRepository seenRepository, DumJobCallRepository callRepository) {
+        this(sourceRepository, seenRepository, callRepository, null);
+    }
+
+    /**
+     * Deleting a source also drops its rows from the duplicate index (trabalharei TRA23), so its
+     * postings stop being the preferred member other sources publish.
+     */
+    @Autowired
+    public DumJobSourceApi(DumJobSourceRepository sourceRepository,
+            DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
+            DumJobFingerprintRepository fingerprintRepository) {
         this.sourceRepository = sourceRepository;
         this.seenRepository = seenRepository;
         this.callRepository = callRepository;
+        this.fingerprintRepository = fingerprintRepository;
     }
 
     @GetMapping
@@ -104,6 +119,9 @@ public class DumJobSourceApi {
         return sourceRepository.findById(id).map(source -> {
             seenRepository.deleteBySourceId(source.getId());
             callRepository.deleteBySourceId(source.getId());
+            if (fingerprintRepository != null) {
+                fingerprintRepository.deleteBySourceId(source.getId());
+            }
             sourceRepository.delete(source);
             return true;
         }).orElse(false);

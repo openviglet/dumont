@@ -36,6 +36,7 @@ import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobCallRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
+import com.viglet.dumont.connector.plugin.jobs.source.dedupe.DumJobDeduplicator;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,6 +46,10 @@ import lombok.extern.slf4j.Slf4j;
  * {@link DumJobSourceAdapter} whose {@link DumJobSourceAdapter#id() id} matches its
  * {@code sourceType}. A source whose type has no adapter (unknown, or not implemented yet) is skipped
  * with a log line — never a failed run.
+ *
+ * <p>
+ * The Spring-built provider hands every source the {@link DumJobDeduplicator} (trabalharei
+ * <strong>TRA23</strong>), so the same opening reached through several sources is published once.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -58,18 +63,27 @@ public class DumJobsSourceProvider implements DumStructuredSourceProvider {
     private final DumJobCallRepository callRepository;
     private final Map<String, DumJobSourceAdapter> adapters;
     private final Clock clock;
+    private final DumJobDeduplicator deduplicator;
 
     @Autowired
     public DumJobsSourceProvider(DumJobSourceRepository sourceRepository,
             DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
-            ObjectProvider<DumJobSourceAdapter> adapters) {
+            ObjectProvider<DumJobSourceAdapter> adapters, DumJobDeduplicator deduplicator) {
         this(sourceRepository, seenRepository, callRepository, adapters.orderedStream().toList(),
-                Clock.systemUTC());
+                Clock.systemUTC(), deduplicator);
+    }
+
+    /** A provider whose sources publish every posting on its own id (no deduplication). */
+    public DumJobsSourceProvider(DumJobSourceRepository sourceRepository,
+            DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
+            List<DumJobSourceAdapter> adapters, Clock clock) {
+        this(sourceRepository, seenRepository, callRepository, adapters, clock, null);
     }
 
     public DumJobsSourceProvider(DumJobSourceRepository sourceRepository,
             DumJobSeenRepository seenRepository, DumJobCallRepository callRepository,
-            List<DumJobSourceAdapter> adapters, Clock clock) {
+            List<DumJobSourceAdapter> adapters, Clock clock, DumJobDeduplicator deduplicator) {
+        this.deduplicator = deduplicator;
         this.sourceRepository = sourceRepository;
         this.seenRepository = seenRepository;
         this.callRepository = callRepository;
@@ -107,7 +121,12 @@ public class DumJobsSourceProvider implements DumStructuredSourceProvider {
     public Optional<DumStructuredSource> resolve(DumJobSource source) {
         return adapterFor(source).map(adapter -> new DumJobsStructuredSource(source,
                 DumJobsSchema.schema(), adapter, seenRepository, callRepository, sourceRepository,
-                clock));
+                clock, deduplicator));
+    }
+
+    /** The deduplicator every source of this provider runs through, or empty when there is none. */
+    public Optional<DumJobDeduplicator> deduplicator() {
+        return Optional.ofNullable(deduplicator);
     }
 
     private Optional<DumJobSourceAdapter> adapterFor(DumJobSource source) {

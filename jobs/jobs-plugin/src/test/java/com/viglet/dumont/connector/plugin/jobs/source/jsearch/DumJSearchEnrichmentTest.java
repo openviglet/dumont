@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -68,5 +69,16 @@ class DumJSearchEnrichmentTest {
         // "estágio ou PJ" in the text: two kinds, never guessed.
         assertThat(run.values(id(DumJSearchAdapterTest.FRONT))).doesNotContainKey("contract")
                 .containsEntry("seniority", List.of("junior"));
+    }
+
+    @Test
+    void occupationIsTheCboFamilyOfTheTitleAndAbsentWhenTheTitleNamesNoRole() {
+        assertThat(run().occupationsByTitle()).isEqualTo(Map.of(
+                "Desenvolvedor Java Pleno", "analistas-de-tecnologia-da-informacao",
+                "Engenheiro de Dados Sênior (PJ)", "engenheiros-em-computacao",
+                "Estágio em Administração", "-",
+                "Atendente de Loja - Meio Período", "operadores-do-comercio-em-lojas-e-mercados",
+                "Analista de Suporte", "analistas-de-tecnologia-da-informacao",
+                "Desenvolvedor Front-end Júnior", "analistas-de-tecnologia-da-informacao"));
     }
 }

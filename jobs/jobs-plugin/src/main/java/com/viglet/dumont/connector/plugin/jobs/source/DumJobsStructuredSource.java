@@ -48,6 +48,8 @@ import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobCallRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeenRepository;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
+import com.viglet.dumont.connector.plugin.jobs.source.dedupe.DumJobDeduplicator;
+import com.viglet.dumont.connector.plugin.jobs.source.dedupe.DumJobFingerprint;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,6 +76,14 @@ import lombok.extern.slf4j.Slf4j;
  * {@code cursor} it leaves on the source is saved after the fetch.
  *
  * <p>
+ * <strong>Cross-source deduplication (trabalharei TRA23).</strong> With a {@link DumJobDeduplicator}
+ * the run does not publish its postings under their own ids: {@link #discover()} hands the open
+ * postings to the deduplicator, which records them in the fingerprint index and answers one
+ * {@code job-<hash>} document per group of duplicates &mdash; across every source and every run &mdash;
+ * carrying the preferred member's posting. {@link #posting(String)} and {@link #extract(String)} then
+ * answer those document ids. Without one (the constructors tests use) postings keep their own ids.
+ *
+ * <p>
  * The fetched set is memoized on the instance: the indexing loop resolves a source once, then calls
  * {@code discover()} followed by many {@code extract()} calls on the same instance.
  *
@@ -87,12 +97,13 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     public static final Duration DEFAULT_TTL = Duration.ofDays(30);
 
     /**
-     * Fields {@link #extract} leaves to their canonical enricher: place (trabalharei TRA20), and
-     * salary, contract and seniority (TRA21).
+     * Fields {@link #extract} leaves to their canonical enricher: place (trabalharei TRA20), salary,
+     * contract and seniority (TRA21), and occupation (TRA22).
      */
     static final Set<String> ENRICHED_FIELDS = Set.of(DumJobsSchema.CITY, DumJobsSchema.STATE,
             DumJobsSchema.CONTRACT, DumJobsSchema.SENIORITY, DumJobsSchema.SALARY_MIN,
-            DumJobsSchema.SALARY_MAX, DumJobsSchema.SALARY_PERIOD, DumJobsSchema.SALARY_BAND);
+            DumJobsSchema.SALARY_MAX, DumJobsSchema.SALARY_PERIOD, DumJobsSchema.SALARY_BAND,
+            DumJobsSchema.OCCUPATION);
 
     private final DumJobSource source;
     private final DumStructuredSchema schema;
@@ -101,12 +112,27 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     private final DumJobCallRepository callRepository;
     private final DumJobSourceRepository sourceRepository;
     private final Clock clock;
+    private final DumJobDeduplicator deduplicator;
 
     private Map<String, Map<String, Object>> records;
+    /** Postings read before {@link #discover()} (indexById), kept so an enricher's annotate sticks. */
+    private final Map<String, Map<String, Object>> adhoc = new LinkedHashMap<>();
 
     public DumJobsStructuredSource(DumJobSource source, DumStructuredSchema schema,
             DumJobSourceAdapter adapter, DumJobSeenRepository seenRepository,
             DumJobCallRepository callRepository, DumJobSourceRepository sourceRepository, Clock clock) {
+        this(source, schema, adapter, seenRepository, callRepository, sourceRepository, clock, null);
+    }
+
+    /**
+     * A source whose run publishes one document per group of duplicates (trabalharei
+     * <strong>TRA23</strong>); a {@code null} deduplicator publishes every posting on its own id.
+     */
+    public DumJobsStructuredSource(DumJobSource source, DumStructuredSchema schema,
+            DumJobSourceAdapter adapter, DumJobSeenRepository seenRepository,
+            DumJobCallRepository callRepository, DumJobSourceRepository sourceRepository, Clock clock,
+            DumJobDeduplicator deduplicator) {
+        this.deduplicator = deduplicator;
         this.source = source;
         this.schema = schema;
         this.adapter = adapter;
@@ -148,18 +174,20 @@ public class DumJobsStructuredSource implements DumStructuredSource {
 
     /**
      * Extract one posting. The {@link #ENRICHED_FIELDS} are left to their enrichers — place
-     * (trabalharei <strong>TRA20</strong>), salary, contract and seniority (<strong>TRA21</strong>) —
+     * (trabalharei <strong>TRA20</strong>), salary, contract and seniority (<strong>TRA21</strong>),
+     * occupation (<strong>TRA22</strong>) —
      * which read the adapter's values from {@link #posting(String)}: a D04 enricher can override a
      * record value but never remove one (D98), and each canonical step must be able to drop a value,
      * such as a city that is not in its UF or a contract value that names two kinds.
      */
     @Override
     public Optional<DumStructuredRecord> extract(String contentId) {
-        Map<String, Object> values = posting(contentId);
+        String id = documentId(contentId);
+        Map<String, Object> values = posting(id);
         if (values == null) {
             return Optional.empty();
         }
-        DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, schema);
+        DumStructuredRecord.Builder rec = DumStructuredRecord.builder(id, schema);
         for (String field : DumJobsSchema.FIELDS) {
             Object value = values.get(field);
             if (value == null || !schema.hasField(field) || ENRICHED_FIELDS.contains(field)) {
@@ -181,18 +209,36 @@ public class DumJobsStructuredSource implements DumStructuredSource {
      * are not schema fields ({@link DumJobSourceAdapter#LOCATION_RAW},
      * {@link DumJobSourceAdapter#SALARY_RAW}) — or {@code null} when it is
      * neither in this run nor in the store. After {@link #discover()} it is this run's live map, so an
-     * {@link #annotate} shows up here; before it, a fresh copy is read from the store.
+     * {@link #annotate} shows up here; before it, a copy is read once from the store &mdash; for a
+     * group id ({@code job-<hash>}, TRA23) from the fingerprint index &mdash; and kept for the
+     * instance, so an annotate on it shows up too.
      */
     public Map<String, Object> posting(String contentId) {
-        return records != null ? records.get(contentId) : storedPosting(contentId);
+        if (records != null) {
+            return records.get(contentId);
+        }
+        return adhoc.computeIfAbsent(contentId, id -> deduplicator != null && DumJobFingerprint.isGroupId(id)
+                ? deduplicator.groupPosting(id, clock.instant()).orElse(null)
+                : storedPosting(id));
+    }
+
+    /**
+     * The document an id is published under: itself, except a posting id asked before
+     * {@link #discover()} (indexById) whose posting belongs to a group, which answers the group id.
+     */
+    private String documentId(String contentId) {
+        if (records != null || deduplicator == null || DumJobFingerprint.isGroupId(contentId)) {
+            return contentId;
+        }
+        return deduplicator.groupIdOf(source.getId(), contentId).orElse(contentId);
     }
 
     /**
      * Attach a record key that is not a schema field (e.g. {@link DumJobSourceAdapter#LOCATION_UNRESOLVED})
-     * to a posting of this run. Never published; a no-op before {@link #discover()} or for an unknown id.
+     * to a posting this instance has answered. Never published; a no-op for an unknown id.
      */
     public void annotate(String contentId, String key, Object value) {
-        Map<String, Object> posting = records != null ? records.get(contentId) : null;
+        Map<String, Object> posting = records != null ? records.get(contentId) : adhoc.get(contentId);
         if (posting != null) {
             posting.put(key, value);
         }
@@ -205,6 +251,7 @@ public class DumJobsStructuredSource implements DumStructuredSource {
         }
         Instant now = clock.instant();
         Map<String, Map<String, Object>> live = new LinkedHashMap<>();
+        Map<String, Instant> expiries = new LinkedHashMap<>();
         int fetched = 0;
         DumJobFetchContext context = new DumJobFetchContext(source, budget(now), this::seenBefore,
                 jobId -> firstSeen(jobId, now));
@@ -216,7 +263,7 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             saveCursor(cursorBefore);
         }
         for (Map<String, Object> raw : postings) {
-            if (ingest(raw, now, live)) {
+            if (ingest(raw, now, live, expiries)) {
                 fetched++;
             }
         }
@@ -225,13 +272,23 @@ public class DumJobsStructuredSource implements DumStructuredSource {
         for (DumJobSeen seen : seenRepository.findBySourceIdAndExpiresAtAfter(source.getId(), now)) {
             if (!live.containsKey(seen.getJobId()) && seen.getPayload() != null) {
                 live.put(seen.getJobId(), new JSONObject(seen.getPayload()).toMap());
+                expiries.put(seen.getJobId(), seen.getExpiresAt());
                 kept++;
             }
         }
         log.info("Job source '{}' discovered {} posting(s): {} fetched, {} kept from earlier runs",
                 source.getName(), live.size(), fetched, kept);
-        records = live;
+        records = deduplicator == null ? live : deduplicate(live, expiries, now);
         return records;
+    }
+
+    /** The run's documents: one per group of duplicates, across sources and runs (TRA23). */
+    private Map<String, Map<String, Object>> deduplicate(Map<String, Map<String, Object>> live,
+            Map<String, Instant> expiries, Instant now) {
+        Map<String, DumJobDeduplicator.Posting> postings = new LinkedHashMap<>();
+        live.forEach((id, payload) -> postings.put(id, new DumJobDeduplicator.Posting(payload,
+                expiries.getOrDefault(id, now.plus(DEFAULT_TTL)))));
+        return deduplicator.dedupe(source, adapter.id(), postings, now).documents();
     }
 
     /**
@@ -291,7 +348,8 @@ public class DumJobsStructuredSource implements DumStructuredSource {
      * {@code live}. Even an already-expired posting is remembered: its row then carries the past
      * expiry, so the prune drops it instead of an older copy republishing it.
      */
-    private boolean ingest(Map<String, Object> raw, Instant now, Map<String, Map<String, Object>> live) {
+    private boolean ingest(Map<String, Object> raw, Instant now, Map<String, Map<String, Object>> live,
+            Map<String, Instant> expiries) {
         String id = idOf(raw);
         if (id == null) {
             log.warn("Job source '{}' returned a posting without an id — skipped", source.getName());
@@ -304,6 +362,7 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             return false;
         }
         live.put(id, payload.toMap());
+        expiries.put(id, expiresAt);
         return true;
     }
 
@@ -351,7 +410,7 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     }
 
     /** Read a date value as an instant: a {@code java.time} value or ISO-8601 text. */
-    static Instant toInstant(Object value) {
+    public static Instant toInstant(Object value) {
         return switch (value) {
             case null -> null;
             case Instant instant -> instant;

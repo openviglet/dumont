@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -53,5 +54,16 @@ class DumBneEnrichmentTest {
         // BNE states no salary; nothing is invented.
         run.records.values().forEach(rec -> assertThat(rec.values()).doesNotContainKeys("salaryMin",
                 "salaryMax", "salaryPeriod", "salaryBand"));
+    }
+
+    @Test
+    void occupationIsTheCboFamilyOfTheTitleAndAbsentWhenTheTitleNamesNoRole() {
+        assertThat(run().occupationsByTitle()).isEqualTo(Map.of(
+                "Desenvolvedor Java Pleno", "analistas-de-tecnologia-da-informacao",
+                "Estágio em Administração", "-",
+                "Auxiliar de Produção - Temporário", "alimentadores-de-linhas-de-producao",
+                "Jovem APRENDIZ", "-",
+                "Vendedor Externo", "especialistas-em-promocao-de-produtos-e-vendas",
+                "Analista de Suporte Híbrido", "analistas-de-tecnologia-da-informacao"));
     }
 }

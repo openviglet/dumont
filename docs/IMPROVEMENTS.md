@@ -78,7 +78,65 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.14 Jobs runs report their stops (D113)
+### XLI.17 Persistent cross-run resolution (D109)
+
+Found while deduplicating jobs across sources for trabalharei (TRA23). The D18
+cross-source resolve stage runs only inside `crawl()` and holds one call's records in
+memory, so it never sees another run, and the per-source `indexAll` path the API uses
+never reaches it. Sources that publish the same entity on different schedules (four job
+APIs with their own quotas) cannot be resolved against each other at all.
+
+Expected: resolution backed by a persistent canonical-id index (fingerprint to member
+ids) that every run of every source of a provider consults, on both `crawl()` and
+`indexAll`.
+
+Workaround: `DumJobDeduplicator` with a `job_fingerprint` table in `jobs/jobs-plugin`.
+
+### XLI.18 Pluggable survivorship (D110)
+
+Found while deduplicating jobs across sources for trabalharei (TRA23).
+`DumEntityResolver` / `DumRecordMerge` take no survivorship rule: the first contributor
+wins and later sources fill missing fields, with the primary fixed by provider order. A
+job site needs to keep one whole record chosen by a comparator (salary present, then the
+longer description, then the partner that pays per click), and field-by-field filling
+mixes one partner's apply link with another's text.
+
+Expected: a pluggable survivorship strategy (pick one whole record by a comparator, or
+merge field by field with per-field rules), declared per provider.
+
+Workaround: `DumJobPreference` in `jobs/jobs-plugin`.
+
+### XLI.19 Reference-counted deindex for shared documents (D111)
+
+Found while deduplicating jobs across sources for trabalharei (TRA23). Dumont tracks
+what each run published per (objectId, source). When several sources of one provider
+publish the same document id, one source's run-end sweep sends a delete for an id it
+tracked but did not publish this time, and the delete removes the document from the
+index even though another source still tracks it. That source's next run sees an
+unchanged checksum and does not resend, so the document is gone silently until its
+content changes.
+
+Expected: a reference-counted delete (deindex only when no source of the provider still
+tracks the id) or an owner notion for shared documents.
+
+Workaround: in `jobs/jobs-plugin`, every source holding a row in a group republishes the
+group document while any member is open, keeping expired rows as placeholders; each
+shared document is therefore sent once per source.
+
+### XLI.20 Resolve path keeps the run lifecycle (D112)
+
+Found while reading the D18 path for trabalharei's job deduplication (TRA23).
+`resolveAndIndex` in `crawl()` skips the per-source safeguards that `indexAll` applies
+(the zero-yield and failure-wave guards, the incremental-run handling, manifest
+provisioning), and it finishes only the primary sources' sessions, so a source whose
+records all merged into another source's is never swept.
+
+Expected: the resolve path goes through the same per-source run lifecycle as `indexAll`
+(guards, provisioning, session finish and sweep for every contributing source).
+
+Workaround: none; the jobs module does not use the D18 path.
+
+### XLI.21 Jobs runs report their stops (D113)
 
 Found while shipping D96. Structured sources can now return `runNotes()`
 (connector-commons `DumStructuredSource`), and the plugin loop records them, with the
@@ -100,7 +158,7 @@ location enricher's `onRunEnd`, and the override goes away. With D104, still-ope
 postings the quota did not reach are returned from `unchangedIds()`, so
 `DumJobSeen.payload` and its replay through `extract()` can go.
 
-### XLI.15 Jobs enrichers read transients (D114)
+### XLI.22 Jobs enrichers read transients (D114)
 
 Found while shipping D97. A structured record now carries transient, never-indexed
 attributes: `DumStructuredRecord.Builder.transientValue(key, value)`, read back through
@@ -124,7 +182,7 @@ the partner's field, the title or the text, and a partner value they only pass t
 keeps its own provenance. With D103, the contract and seniority enrichers become
 `DumFallbackEnricher` declarations and the salary enricher a `DumSplitEnricher`.
 
-### XLI.16 Jobs loads IBGE through the taxonomy loader (D115)
+### XLI.23 Jobs loads IBGE through the taxonomy loader (D115)
 
 Found while shipping D99. `DumTaxonomyLoader.fromResource(loader, path)` in
 connector-commons now reads a versioned taxonomy from a JSON resource. Each row's `key`
@@ -144,3 +202,51 @@ prefix table and the module's loader go away. The file's existing `uf`-versus-pr
 check can stay as a test over the loaded taxonomy.
 
 ## XLII Web-crawler hardening (real-world sources)
+### XLI.14 LLM classifier for plugins (D106)
+
+Found while adding occupation classification to trabalharei's `jobs` module (TRA22). The
+only LLM classifier, `DumTuringClassifier`, lives in connector-app with no Spring bean
+and is not on a plugin's compile classpath, and the `dumont.enrichment.llm.enabled` flag
+the commons Javadoc names is wired nowhere. A plugin that wants an LLM fallback can only
+look up a `DumClassifier` bean that no code declares, so in production the jobs module
+classifies by its title dictionary alone.
+
+Expected: a `DumClassifier` bean exposed to plugins when an LLM is configured (backed by
+`DumTuringClassifier` or a provider), enabled by the documented flag.
+
+Workaround: the jobs module looks up an optional `jobsOccupationClassifier` bean and
+runs dictionary-only without it.
+
+### XLI.15 Bounded closed-set classification (D107)
+
+Found while adding occupation classification to trabalharei's `jobs` module (TRA22).
+`DumClassificationEnricher` cannot classify into a fixed taxonomy at a bounded cost: its
+cache is in memory only and keeps every empty result for the process lifetime (a call
+refused by a cap would read as "no label"), it has no call or cost cap, and it publishes
+whatever label comes back without checking it against a list. `DumClassifier.classify`
+takes only the input string, so there is no closed-label contract: each caller rebuilds
+the prompt with the whole label set (617 CBO families is about 10k tokens per call) and
+validates the answer itself.
+
+Expected: a classification enricher with a persistent cache keyed by a strong hash and
+the taxonomy version, a daily call or cost cap that does not cache refusals, and a
+`classify(input, labels)` contract that rejects answers outside the set.
+
+Workaround: `DumJobOccupationEnricher` with `job_occupation_cache` and the cap in
+`job_call`, in `jobs/jobs-plugin`.
+
+### XLI.16 Collision-safe classifier cache key (D108)
+
+Found while reviewing the classifiers for trabalharei's `jobs` module (TRA22).
+`DumTuringClassifier` builds its Turing cache key as `prefix +
+Integer.toHexString(input.hashCode())`, a 32-bit hash. Two different inputs whose
+`String.hashCode()` collide share a key and get each other's cached answer, so a title
+can silently receive another title's label.
+
+Expected: a collision-resistant key (SHA-256 of the normalized input, plus the label set
+or taxonomy version), with a test that two known colliding strings get separate entries
+(for example "Aa" and "BB" share a Java hashCode).
+
+Workaround: none needed in trabalharei yet (the jobs module keys its own cache by
+SHA-256); filed because every other caller of the classifier is exposed.
+

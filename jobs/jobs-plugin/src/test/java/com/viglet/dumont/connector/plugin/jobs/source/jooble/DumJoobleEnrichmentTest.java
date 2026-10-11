@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -83,5 +84,17 @@ class DumJoobleEnrichmentTest {
                 .containsEntry("seniority", List.of("estagio"));
         // "Full-time" names no kind, and neither do the title and snippet.
         assertThat(run.values("jooble-1093847561029384756")).doesNotContainKeys("contract", "seniority");
+    }
+
+    @Test
+    void occupationIsTheCboFamilyOfTheTitleAndAbsentWhenTheTitleNamesNoRole() {
+        assertThat(run().occupationsByTitle()).isEqualTo(Map.of(
+                "Desenvolvedor Java Pleno", "analistas-de-tecnologia-da-informacao",
+                "Vendedor Externo", "especialistas-em-promocao-de-produtos-e-vendas",
+                "Atendente de Suporte", "tecnicos-em-operacao-e-monitoracao-de-computadores",
+                "Estagiário Administrativo", "-",
+                "Motorista Entregador", "motoristas-de-veiculos-de-cargas-em-geral",
+                "Auxiliar de Limpeza", "trabalhadores-nos-servicos-de-manutencao-de-edificacoes",
+                "Analista de Dados", "analistas-de-tecnologia-da-informacao"));
     }
 }
