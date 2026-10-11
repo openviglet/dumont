@@ -57,6 +57,7 @@ mkdir "%STAGE%\connector\libs\webcrawler"
 mkdir "%STAGE%\connector\libs\assets"
 mkdir "%STAGE%\connector\libs\catalog"
 mkdir "%STAGE%\connector\libs\eds"
+mkdir "%STAGE%\connector\libs\jobs"
 mkdir "%STAGE%\connector\export"
 mkdir "%STAGE%\bin"
 
@@ -90,9 +91,12 @@ copy "catalog\catalog-plugin\scripts\sample\export\cursarei.json" "%STAGE%\conne
 rem Edge Delivery Services Plugin
 copy "eds\eds-plugin\target\eds-plugin.jar"                 "%STAGE%\connector\libs\eds\" >nul
 
+rem Jobs Plugin
+copy "jobs\jobs-plugin\target\jobs-plugin.jar"              "%STAGE%\connector\libs\jobs\" >nul
+
 rem Every connector plugin module must have reached libs\ (D94): fail rather than ship a
 rem package that silently lacks one.
-"!PS!" -NoProfile -Command "$missing = @(Get-ChildItem -Directory -Path '*\*-plugin' | Where-Object { Test-Path (Join-Path $_.FullName 'pom.xml') } | ForEach-Object { $jar = Get-ChildItem (Join-Path $_.FullName 'target\*-plugin.jar') -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not $jar) { $_.Name + ' (no jar built)' } elseif (-not (Get-ChildItem -Recurse -Path '%STAGE%\connector\libs' -Filter $jar.Name)) { $_.Name + ' (' + $jar.Name + ' not staged)' } }); if ($missing) { Write-Host 'Error: connector plugin(s) missing from the package:'; $missing | ForEach-Object { Write-Host ('  ' + $_) }; exit 1 }"
+"!PS!" -NoProfile -Command "$missing = @(Get-ChildItem -Directory -Path '*\*-plugin' | Where-Object { Test-Path (Join-Path $_.FullName 'pom.xml') } | ForEach-Object { $jar = Get-ChildItem (Join-Path $_.FullName 'target\*-plugin.jar') -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike 'original-*' } | Select-Object -First 1; if (-not $jar) { $_.Name + ' (no jar built)' } elseif (-not (Get-ChildItem -Recurse -Path '%STAGE%\connector\libs' -Filter $jar.Name)) { $_.Name + ' (' + $jar.Name + ' not staged)' } }); if ($missing) { Write-Host 'Error: connector plugin(s) missing from the package:'; $missing | ForEach-Object { Write-Host ('  ' + $_) }; exit 1 }"
 if errorlevel 1 (
     popd
     exit /b 1
@@ -109,6 +113,8 @@ copy "%SCRIPT_DIR%bin\dumont-catalog.sh"     "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-catalog.bat"    "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-eds.sh"         "%STAGE%\bin\" >nul
 copy "%SCRIPT_DIR%bin\dumont-eds.bat"        "%STAGE%\bin\" >nul
+copy "%SCRIPT_DIR%bin\dumont-jobs.sh"        "%STAGE%\bin\" >nul
+copy "%SCRIPT_DIR%bin\dumont-jobs.bat"       "%STAGE%\bin\" >nul
 
 rem Config and docs
 copy "%SCRIPT_DIR%config\dumont-connector.properties" "%STAGE%\connector\" >nul

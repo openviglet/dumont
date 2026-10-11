@@ -25,11 +25,12 @@ RUN --mount=type=cache,target=/root/.m2 \
 # Stage every connector plugin into one directory (D91). A plugin is any `<connector>/*-plugin`
 # module, so a new connector reaches the image without a line here — catalog-plugin was once
 # built and never copied. The loop fails the build when a plugin module produced no jar,
-# rather than shipping an image that silently lacks it.
+# rather than shipping an image that silently lacks it. maven-shade leaves the unshaded jar
+# beside it as original-<name>-plugin.jar, which the glob also matches, so it is skipped.
 RUN mkdir -p /plugins \
     && for module in /src/*/*-plugin; do \
          [ -f "$module/pom.xml" ] || continue; \
-         jar=$(ls "$module"/target/*-plugin.jar 2>/dev/null | head -n 1); \
+         jar=$(ls "$module"/target/*-plugin.jar 2>/dev/null | grep -v '/original-' | head -n 1); \
          if [ -z "$jar" ]; then echo "No plugin jar built for $module" >&2; exit 1; fi; \
          cp "$jar" /plugins/; \
        done \

@@ -44,6 +44,7 @@ mkdir -p "$STAGE/connector/libs/webcrawler"
 mkdir -p "$STAGE/connector/libs/assets"
 mkdir -p "$STAGE/connector/libs/catalog"
 mkdir -p "$STAGE/connector/libs/eds"
+mkdir -p "$STAGE/connector/libs/jobs"
 mkdir -p "$STAGE/connector/export"
 mkdir -p "$STAGE/bin"
 
@@ -77,6 +78,9 @@ cp "catalog/catalog-plugin/scripts/sample/export/cursarei.json" "$STAGE/connecto
 # Edge Delivery Services Plugin
 cp "eds/eds-plugin/target/eds-plugin.jar"                 "$STAGE/connector/libs/eds/"
 
+# Jobs Plugin
+cp "jobs/jobs-plugin/target/jobs-plugin.jar"              "$STAGE/connector/libs/jobs/"
+
 # Every connector plugin module must have reached libs/ (D94). The lists above are per
 # connector because each gets its own directory and launcher, so a new module is easy to
 # forget: fail here rather than ship a package that silently lacks it.
@@ -84,6 +88,8 @@ MISSING=()
 for module in */*-plugin; do
     [ -f "$module/pom.xml" ] || continue
     for jar in "$module"/target/*-plugin.jar; do
+        # maven-shade's unshaded leftover (original-*.jar) is not a plugin to ship.
+        case "$(basename "$jar")" in original-*) continue ;; esac
         if [ ! -f "$jar" ]; then
             MISSING+=("$module (no jar built)")
         elif [ -z "$(find "$STAGE/connector/libs" -name "$(basename "$jar")" -print -quit)" ]; then
@@ -108,6 +114,8 @@ cp "$SCRIPT_DIR/bin/dumont-catalog.sh"      "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-catalog.bat"     "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-eds.sh"          "$STAGE/bin/"
 cp "$SCRIPT_DIR/bin/dumont-eds.bat"         "$STAGE/bin/"
+cp "$SCRIPT_DIR/bin/dumont-jobs.sh"         "$STAGE/bin/"
+cp "$SCRIPT_DIR/bin/dumont-jobs.bat"        "$STAGE/bin/"
 chmod +x "$STAGE/bin/"*.sh 2>/dev/null || true
 
 # Config and docs

@@ -10,6 +10,7 @@
 #   ./Dumont-DEP.AppImage --connector assets
 #   ./Dumont-DEP.AppImage --connector catalog
 #   ./Dumont-DEP.AppImage --connector eds
+#   ./Dumont-DEP.AppImage --connector jobs
 # --------------------------------------------------------------------------
 set -euo pipefail
 
@@ -58,9 +59,10 @@ case "$CONNECTOR" in
   assets)     start_connector "$CONNECTOR_DIR/libs/assets"     "Assets" ;;
   catalog)    start_connector "$CONNECTOR_DIR/libs/catalog"    "Catalog Bridge" ;;
   eds)        start_connector "$CONNECTOR_DIR/libs/eds"        "EDS" ;;
+  jobs)       start_connector "$CONNECTOR_DIR/libs/jobs"       "Jobs" ;;
   *)
     echo "Unknown connector: $CONNECTOR"
-    echo "Available: aem, webcrawler, db, assets, catalog, eds"
+    echo "Available: aem, webcrawler, db, assets, catalog, eds, jobs"
     exit 1
     ;;
 esac

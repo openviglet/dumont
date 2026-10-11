@@ -132,6 +132,8 @@ LangString DESC_SecCatalogSample ${LANG_ENGLISH} "Catalog bridge sample: source 
 LangString DESC_SecCatalogSample ${LANG_PORTUGUESE} "Exemplo catalog bridge: configuração de exportação de fonte."
 LangString DESC_SecEDS         ${LANG_ENGLISH} "Edge Delivery Services plugin: indexes sites published with Adobe Edge Delivery Services."
 LangString DESC_SecEDS         ${LANG_PORTUGUESE} "Plugin Edge Delivery Services: indexa sites publicados com o Adobe Edge Delivery Services."
+LangString DESC_SecJobs        ${LANG_ENGLISH} "Jobs plugin: indexes job postings from partner job-board APIs."
+LangString DESC_SecJobs        ${LANG_PORTUGUESE} "Plugin de vagas: indexa vagas de emprego das APIs de portais parceiros."
 
 ; --------------------------------------------------------------------------
 ; Java Page - Auto-detect and allow user to browse
@@ -658,6 +660,22 @@ SectionGroup "Connectors" SecConnectors
             "$INSTDIR\bin\dumont-eds.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
     SectionEnd
 
+    ; ------------------------------------------------------------------
+    ; Jobs Plugin
+    ; ------------------------------------------------------------------
+    Section "Jobs" SecJobs
+        SetOutPath "$INSTDIR\connector\libs\jobs"
+        File "${STAGE}\connector\libs\jobs\jobs-plugin.jar"
+
+        SetOutPath "$INSTDIR\bin"
+        File "${STAGE}\bin\dumont-jobs.sh"
+        File "${STAGE}\bin\dumont-jobs.bat"
+
+        ; Start Menu shortcut
+        CreateShortcut "$SMPROGRAMS\Viglet Dumont\Dumont Jobs.lnk" \
+            "$INSTDIR\bin\dumont-jobs.bat" "" "$INSTDIR\dumont.ico" "" SW_SHOWMINIMIZED
+    SectionEnd
+
 SectionGroupEnd
 
 ; --------------------------------------------------------------------------
@@ -677,6 +695,7 @@ SectionGroupEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecCatalog}       $(DESC_SecCatalog)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecCatalogSample} $(DESC_SecCatalogSample)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecEDS}           $(DESC_SecEDS)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecJobs}          $(DESC_SecJobs)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ; --------------------------------------------------------------------------

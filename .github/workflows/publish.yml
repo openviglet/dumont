@@ -83,6 +83,7 @@ jobs:
           gh release upload ${TAG_NAME} connector/connector-app/target/dumont-connector.jar --repo ${RELEASE_REPO} --clobber
           # Every connector plugin as a loose asset (D94), by shape rather than by name.
           for jar in */*-plugin/target/*-plugin.jar; do
+            case "$jar" in */original-*) continue ;; esac
             gh release upload ${TAG_NAME} "$jar" --repo ${RELEASE_REPO} --clobber
           done
           gh release upload ${TAG_NAME} target/dumont-install.zip --repo ${RELEASE_REPO} --clobber

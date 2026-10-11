@@ -105,11 +105,8 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
-- 📋 **D91** (deps: —) **The dumont-ce image ships without the catalog plugin, so the D10 connector cannot run on dumont.viglet.cloud** — A connector that builds but never reaches the image is invisible to every tenant, and the next module would be dropped the same way. → §XLI.2
-- 📋 **D92** (deps: —) **A paged JSON API cannot be a source without a Java plugin: no manifest declares its request, paging, budget or mapping** — Job boards, catalogs and most partner feeds are paged JSON APIs, and each one now costs a Java module instead of a recipe. → §XLI.1
-- 📋 **D93** (deps: —) **Dumont has no admin-password variable, so a compose or CI start needs a scripted call to the first-access setup** — Turing already reads TURING_ADMIN_PASSWORD at boot, and the two products should start configured the same way. → §XLI.3
-- 📋 **D94** (deps: —) **An incremental source cannot keep an unchanged id indexed without replaying its whole record through extract** — Quota-bound APIs fetch only new items, so every connector must store payloads just to stop the sweep deindexing them. → §XLI.4
-- 📋 **D95** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
+- 📋 **D101** (deps: —) **An incremental source cannot keep an unchanged id indexed without replaying its whole record through extract** — Quota-bound APIs fetch only new items, so every connector must store payloads just to stop the sweep deindexing them. → §XLI.4
+- 📋 **D102** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
 - 📋 **D96** (deps: —) **A structured source cannot report why a run ended early, so a budget stop looks like a successful smaller run** — Paid and rate-limited partners stop runs on purpose, and only the logs say so. → §XLI.6
 - 📋 **D97** (deps: —) **A structured record rejects any undeclared key, so a source cannot pass enrichers working data that must not be indexed** — Raw source text and enricher notes have to travel beside the record, and connectors now reach around the SPI to share them. → §XLI.7
 - 📋 **D98** (deps: —) **An enricher can add or overwrite a field but never clear a value the source supplied** — Canonicalizing means dropping wrong values too, such as a city that is not in the stated state. → §XLI.8
