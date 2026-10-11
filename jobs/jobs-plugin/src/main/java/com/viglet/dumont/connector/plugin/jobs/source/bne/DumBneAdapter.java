@@ -114,6 +114,15 @@ public class DumBneAdapter implements DumJobSourceAdapter {
         return DEFAULT_CAPS;
     }
 
+    /**
+     * BNE sends no dates: {@code publishedAt} is when this source first fetched the posting, so a
+     * posting expires 30 days after the run that last fetched it (trabalharei <strong>TRA24</strong>).
+     */
+    @Override
+    public boolean datedPostings() {
+        return false;
+    }
+
     @Override
     public List<Map<String, Object>> fetch(DumJobFetchContext context) {
         DumJobSource source = context.source();

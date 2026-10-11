@@ -239,6 +239,31 @@ public final class DumJobOccupationEnricher implements DumEnricher {
         return code;
     }
 
+    /**
+     * The occupation slug this step already knows for {@code title} &mdash; the dictionary's, else a
+     * cached classifier answer &mdash; without calling the classifier and without counting
+     * (trabalharei <strong>TRA24</strong>: a tombstone names the occupation the document carried).
+     */
+    public Optional<String> known(String title) {
+        DumTaxonomy taxonomy = library.taxonomy(taxonomyRef).orElse(null);
+        if (title == null || title.isBlank() || taxonomy == null) {
+            return Optional.empty();
+        }
+        String code = DumJobOccupationDictionary.classify(title)
+                .filter(known -> taxonomy.table().containsKey(known))
+                .orElse(null);
+        if (code == null) {
+            String normalized = DumJobOccupationDictionary.normalize(title);
+            code = normalized.isEmpty() ? null
+                    : cached(hash(normalized))
+                            .filter(entry -> entry.getTaxonomyVersion() == taxonomy.version())
+                            .map(DumJobOccupationCacheEntry::getCode)
+                            .filter(cachedCode -> taxonomy.table().containsKey(cachedCode))
+                            .orElse(null);
+        }
+        return code == null ? Optional.empty() : Optional.of(DumCboFamilies.slugOf(taxonomy, code));
+    }
+
     /** This source's counts since the last {@link #logSummary} / {@link #reset}, without clearing them. */
     public Summary summary(String sourceName) {
         Counter counter = counters.get(sourceName);

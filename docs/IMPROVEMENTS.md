@@ -203,6 +203,45 @@ The UF is then read with `attribute(code, "uf")` instead of from the code prefix
 prefix table and the module's loader go away. The file's existing `uf`-versus-prefix
 check can stay as a test over the loaded taxonomy.
 
+### XLI.21 Deindex callback for sources (D113)
+
+Found while adding expired-job tombstones to trabalharei's `jobs` module (TRA24). When
+the run-end sweep deindexes a document, the structured source is not told. A connector
+that must react to a removal (here: telling the site the job ended, so its page can
+answer 410) has to reconstruct "this document disappeared" from its own seen store and
+dedupe rows, duplicating the sweep's decision and risking disagreement with it.
+
+Expected: a callback (or an event) per deindexed document, with its id and last
+published attributes, that sources and enrichers can subscribe to.
+
+Workaround: `DumJobTombstones` with a `job_tombstone` table in `jobs/jobs-plugin`.
+
+### XLI.22 Explicit deindex on any source (D114)
+
+Found while expiring jobs with dead apply links in trabalharei's `jobs` module (TRA24).
+A source on the normal replay path cannot ask to deindex one id now (a posting found
+dead mid-cycle): only incremental sources get `expiredIds()`, and choosing that mode
+gives up the run-end sweep. The jobs module instead drops the id from `discover()` and
+waits for the sweep.
+
+Expected: any structured source can return explicit ids to deindex on this run,
+alongside the normal sweep.
+
+Workaround: the dead posting leaves `discover()` and the sweep removes it at run end.
+
+### XLI.23 Source end-of-run hook (D115)
+
+Found while flushing expired-job tombstones in trabalharei's `jobs` module (TRA24).
+`DumStructuredSource` has no end-of-run hook, so work that must happen once a source's
+run finished (flushing queued notifications, writing a run summary) goes into a plugin
+override of `indexAll`, which every connector repeats. Same shape as the enricher hook
+filed earlier, but for sources.
+
+Expected: an `onRunEnd(context)` on structured sources, called after the sweep with the
+run's outcome.
+
+Workaround: `DumJobsPlugin.indexAll` override in `jobs/jobs-plugin`.
+
 ## XLII Web-crawler hardening (real-world sources)
 ### XLI.15 Bounded closed-set classification (D107)
 

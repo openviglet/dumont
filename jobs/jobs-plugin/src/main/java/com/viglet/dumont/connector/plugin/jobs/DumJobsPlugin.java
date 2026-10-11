@@ -62,6 +62,11 @@ import com.viglet.dumont.connector.plugin.jobs.source.seniority.DumJobSeniorityE
  * duplicates across all sources, and the run ends with one duplicate-rate line per source pair.
  *
  * <p>
+ * <strong>Tombstones (trabalharei TRA24).</strong> The run queues a tombstone for every document that
+ * left the index; {@link #indexAll(String)} sends the queue (this run's and any earlier run's failures)
+ * once indexing is over, so a slow or failing job site never holds indexing up.
+ *
+ * <p>
  * <strong>Occupation fallback.</strong> The occupation step asks a commons {@link DumClassifier} for
  * the titles its dictionary does not read when a bean named
  * {@value DumJobOccupationEnricher#CLASSIFIER_BEAN} exists, at most
@@ -163,6 +168,7 @@ public class DumJobsPlugin extends DumStructuredSourcePlugin {
             salaryEnricher.logSummary(source);
             occupationEnricher.logSummary(source);
             provider.deduplicator().ifPresent(deduplicator -> deduplicator.logSummary(source));
+            provider.tombstones().ifPresent(tombstones -> tombstones.flush(source));
         }
     }
 

@@ -78,6 +78,11 @@ import lombok.extern.slf4j.Slf4j;
  * checksum makes a no-op when unchanged.
  *
  * <p>
+ * <strong>Vanished groups (trabalharei TRA24).</strong> The run that finds a group with no open member
+ * left deletes its rows and reports it in {@link Result#vanished()}, so the group document's tombstone
+ * is sent exactly once &mdash; never for a member that merely lost to, or expired before, another.
+ *
+ * <p>
  * <strong>Duplicate rate.</strong> Each {@link #dedupe} records, per source run, how many of its open
  * postings share a group with an open posting of each other source; {@link #logSummary} prints it as
  * one line (the run record cannot carry it: D96, D100).
@@ -101,7 +106,24 @@ public class DumJobDeduplicator {
      * document's posting is a copy of the preferred member's, with {@code id} and the site
      * {@code url} rewritten to the group id. Postings without a fingerprint keep their own id.
      */
-    public record Result(Map<String, Map<String, Object>> documents, Summary summary) {
+    public record Result(Map<String, Map<String, Object>> documents, Summary summary,
+            List<Vanished> vanished) {
+
+        public Result(Map<String, Map<String, Object>> documents, Summary summary) {
+            this(documents, summary, List.of());
+        }
+    }
+
+    /**
+     * A group document that left the index in this run: its last open member expired, so no source
+     * publishes it again (trabalharei <strong>TRA24</strong>). Reported once, by the run that deleted
+     * the group's rows.
+     *
+     * @param documentId the group id, {@code job-<hash>}
+     * @param posting    the posting of the group's preferred member, as last stored
+     * @param expiredAt  when the last member expired
+     */
+    public record Vanished(String documentId, Map<String, Object> posting, Instant expiredAt) {
     }
 
     /**
@@ -171,7 +193,7 @@ public class DumJobDeduplicator {
         Summary summary = new Summary(live.size(), run.documents.size(), run.unfingerprinted,
                 run.withinSource, run.held, run.sharedWith);
         summaries.put(source.getName(), summary);
-        return new Result(run.documents, summary);
+        return new Result(run.documents, summary, List.copyOf(run.vanished));
     }
 
     /** One source run being deduplicated. */
@@ -183,6 +205,7 @@ public class DumJobDeduplicator {
         final Map<String, Map<String, Object>> documents = new LinkedHashMap<>();
         final Set<String> published = new LinkedHashSet<>();
         final Map<String, Integer> sharedWith = new TreeMap<>();
+        final List<Vanished> vanished = new ArrayList<>();
         int unfingerprinted;
         int withinSource;
         int held;
@@ -269,6 +292,7 @@ public class DumJobDeduplicator {
             List<DumJobFingerprintEntry> members = open(rows, run.now);
             if (members.isEmpty()) {
                 dead.addAll(rows);
+                vanished(hash, rows).ifPresent(run.vanished::add);
             } else if (run.published.add(hash)) {
                 run.documents.put(DumJobFingerprint.GROUP_PREFIX + hash, groupPosting(hash, members, run.live));
                 run.held++;
@@ -277,6 +301,19 @@ public class DumJobDeduplicator {
         if (!dead.isEmpty()) {
             repository.deleteAll(dead);
         }
+    }
+
+    /** The vanished group {@code hash}: its best member's posting, expired when its last member did. */
+    private static Optional<Vanished> vanished(String hash, List<DumJobFingerprintEntry> rows) {
+        if (rows.isEmpty()) {
+            return Optional.empty();
+        }
+        DumJobFingerprintEntry best = rows.stream().sorted(DumJobPreference.ORDER).toList().getFirst();
+        Instant expiredAt = rows.stream().map(DumJobFingerprintEntry::getExpiresAt)
+                .max(Instant::compareTo).orElse(null);
+        Map<String, Object> posting = best.getPayload() == null ? Map.of()
+                : new JSONObject(best.getPayload()).toMap();
+        return Optional.of(new Vanished(DumJobFingerprint.GROUP_PREFIX + hash, posting, expiredAt));
     }
 
     /**

@@ -92,6 +92,24 @@ public class DumJobSeen implements Serializable {
     @Column(name = "first_seen_at")
     private Instant firstSeenAt;
 
+    /**
+     * When a run last HEAD-checked the posting's apply link and got an answer (trabalharei
+     * <strong>TRA24</strong>); {@code null} = never. The run samples the least recently checked
+     * postings first. A check that hit a network error or a 5xx leaves it unchanged, so the posting
+     * is retried on the next run.
+     */
+    @Column(name = "link_checked_at")
+    private Instant linkCheckedAt;
+
+    /**
+     * When a run found the apply link dead (404/410) and expired the posting early (trabalharei
+     * <strong>TRA24</strong>). The row is kept with {@link #expiresAt} at that instant, so the partner
+     * returning the posting again does not revive it, and pruned 30 days after the partner last
+     * returned it ({@link #lastSeenAt}).
+     */
+    @Column(name = "link_dead_at")
+    private Instant linkDeadAt;
+
     /** The record (JSON object keyed by schema field names) as the adapter last returned it. */
     @Lob
     @Column(name = "payload")

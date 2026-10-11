@@ -27,6 +27,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -50,6 +53,8 @@ import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSeen
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
 import com.viglet.dumont.connector.plugin.jobs.source.dedupe.DumJobDeduplicator;
 import com.viglet.dumont.connector.plugin.jobs.source.dedupe.DumJobFingerprint;
+import com.viglet.dumont.connector.plugin.jobs.source.expiry.DumJobLinkChecker;
+import com.viglet.dumont.connector.plugin.jobs.source.expiry.DumJobTombstones;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,9 +70,32 @@ import lombok.extern.slf4j.Slf4j;
  * (an unchanged posting is not re-sent to Turing — the indexing chain skips it by checksum).
  *
  * <p>
- * A posting expires at its own {@code expiresAt} when the partner gives one, else 30 days after its
- * {@code publishedAt}, else 30 days after the run that last saw it. Expired rows are pruned on each
- * discover, so the next full run deindexes them.
+ * <strong>Expiry (trabalharei TRA24).</strong> A posting expires at its own {@code expiresAt} when the
+ * partner gives one. Otherwise a dated partner's posting expires 30 days after its {@code publishedAt};
+ * an undated partner's ({@link DumJobSourceAdapter#datedPostings()} {@code false}: BNE, whose
+ * {@code publishedAt} is only the first fetch) 30 days after the run that last fetched it, so a
+ * posting the partner keeps listing keeps living. Every fetch refreshes {@code lastSeenAt}. Expired
+ * rows are pruned on each discover, so the next full run deindexes them.
+ *
+ * <p>
+ * <strong>Dead apply links.</strong> With a {@link DumJobLinkChecker}, each run HEAD-checks the apply
+ * links of a sample of the source's open postings, least recently checked first, unless the adapter
+ * opts out ({@link DumJobSourceAdapter#checkApplyLinks()}, Jooble). A 404/410 expires the posting at
+ * once: its row is kept, marked {@code linkDeadAt}, so the partner returning it again does not revive
+ * it, and pruned 30 days after the partner last returned it. A network error or a 5xx changes
+ * nothing, so the posting is checked again next run. The checks never touch the call budget.
+ *
+ * <p>
+ * <strong>Tombstones.</strong> With {@link DumJobTombstones}, a document that leaves the index in this
+ * run is queued for the job site: a posting published on its own id when it expires (by date, by dead
+ * link, or by a partner date that moved into the past), a group document when the deduplicator
+ * reports its last member gone. A member of a live group expiring sends nothing. A document published
+ * again has its pending tombstone cancelled. The plugin sends the queue at the end of the run.
+ *
+ * <p>
+ * <strong>Run summary.</strong> Each discover logs one line per source: active, new and expired
+ * postings, how many expired by a dead link, and the link check's counts (the run record cannot carry
+ * them: D96).
  *
  * <p>
  * Each run's call budget is seeded with the calls earlier runs made ({@link DumJobCall}), and every
@@ -113,6 +141,8 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     private final DumJobSourceRepository sourceRepository;
     private final Clock clock;
     private final DumJobDeduplicator deduplicator;
+    private final DumJobLinkChecker linkChecker;
+    private final DumJobTombstones tombstones;
 
     private Map<String, Map<String, Object>> records;
     /** Postings read before {@link #discover()} (indexById), kept so an enricher's annotate sticks. */
@@ -132,7 +162,21 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             DumJobSourceAdapter adapter, DumJobSeenRepository seenRepository,
             DumJobCallRepository callRepository, DumJobSourceRepository sourceRepository, Clock clock,
             DumJobDeduplicator deduplicator) {
+        this(source, schema, adapter, seenRepository, callRepository, sourceRepository, clock, deduplicator,
+                null, null);
+    }
+
+    /**
+     * A source that also checks apply links and queues tombstones (trabalharei <strong>TRA24</strong>);
+     * either may be {@code null} to leave that step out.
+     */
+    public DumJobsStructuredSource(DumJobSource source, DumStructuredSchema schema,
+            DumJobSourceAdapter adapter, DumJobSeenRepository seenRepository,
+            DumJobCallRepository callRepository, DumJobSourceRepository sourceRepository, Clock clock,
+            DumJobDeduplicator deduplicator, DumJobLinkChecker linkChecker, DumJobTombstones tombstones) {
         this.deduplicator = deduplicator;
+        this.linkChecker = linkChecker;
+        this.tombstones = tombstones;
         this.source = source;
         this.schema = schema;
         this.adapter = adapter;
@@ -244,15 +288,39 @@ public class DumJobsStructuredSource implements DumStructuredSource {
         }
     }
 
+    /** What this run saw of each posting, for the expiry, link check, tombstones and summary. */
+    private static final class Run {
+        /** Postings open (published) after the last run: payload and expiry, by id. */
+        final Map<String, Prior> openBefore = new HashMap<>();
+        /** Every id with a row before this run, dead-linked ones included. */
+        final Set<String> known = new HashSet<>();
+        /** The row behind every open posting of this run, by id. */
+        final Map<String, DumJobSeen> rows = new HashMap<>();
+        /** The latest payload and expiry of every posting this run touched. */
+        final Map<String, Prior> latest = new HashMap<>();
+        int fetched;
+        int fresh;
+        int kept;
+        int checked;
+        int dead;
+        int retry;
+        int queued;
+    }
+
+    /** A posting as a run left it: its payload and expiry. */
+    private record Prior(String payload, Instant expiresAt) {
+    }
+
     /** Fetch once, record what was fetched, and merge in every stored posting still open. */
     private synchronized Map<String, Map<String, Object>> load() {
         if (records != null) {
             return records;
         }
         Instant now = clock.instant();
+        Run run = new Run();
+        snapshot(run);
         Map<String, Map<String, Object>> live = new LinkedHashMap<>();
         Map<String, Instant> expiries = new LinkedHashMap<>();
-        int fetched = 0;
         DumJobFetchContext context = new DumJobFetchContext(source, budget(now), this::seenBefore,
                 jobId -> firstSeen(jobId, now));
         String cursorBefore = source.getCursor();
@@ -263,32 +331,168 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             saveCursor(cursorBefore);
         }
         for (Map<String, Object> raw : postings) {
-            if (ingest(raw, now, live, expiries)) {
-                fetched++;
-            }
+            ingest(raw, now, live, expiries, run);
         }
-        seenRepository.deleteBySourceIdAndExpiresAtLessThanEqual(source.getId(), now);
-        int kept = 0;
+        prune(now);
         for (DumJobSeen seen : seenRepository.findBySourceIdAndExpiresAtAfter(source.getId(), now)) {
             if (!live.containsKey(seen.getJobId()) && seen.getPayload() != null) {
                 live.put(seen.getJobId(), new JSONObject(seen.getPayload()).toMap());
                 expiries.put(seen.getJobId(), seen.getExpiresAt());
-                kept++;
+                run.rows.put(seen.getJobId(), seen);
+                run.kept++;
             }
         }
-        log.info("Job source '{}' discovered {} posting(s): {} fetched, {} kept from earlier runs",
-                source.getName(), live.size(), fetched, kept);
-        records = deduplicator == null ? live : deduplicate(live, expiries, now);
+        checkLinks(live, expiries, run, now);
+        List<String> expired = run.openBefore.keySet().stream().filter(id -> !live.containsKey(id)).sorted()
+                .toList();
+        queuePostingTombstones(expired, run, now);
+        if (deduplicator == null) {
+            records = live;
+        } else {
+            DumJobDeduplicator.Result result = deduplicate(live, expiries, now);
+            records = result.documents();
+            if (tombstones != null) {
+                for (DumJobDeduplicator.Vanished gone : result.vanished()) {
+                    tombstones.queue(gone.documentId(), gone.posting(), gone.expiredAt());
+                    run.queued++;
+                }
+            }
+        }
+        if (tombstones != null) {
+            tombstones.cancel(records.keySet());
+        }
+        logRun(run, live.size(), expired.size());
         return records;
     }
 
+    /** Which postings were open after the last run; for an undated source, re-date stored expiries. */
+    private void snapshot(Run run) {
+        for (DumJobSeen seen : seenRepository.findBySourceId(source.getId())) {
+            run.known.add(seen.getJobId());
+            if (seen.getLinkDeadAt() != null) {
+                continue;
+            }
+            if (!adapter.datedPostings() && seen.getPayload() != null && seen.getLastSeenAt() != null) {
+                // Rows stored before TRA24 counted an undated posting from its first fetch.
+                Instant rule = expiresAt(new JSONObject(seen.getPayload()), seen.getLastSeenAt(), false);
+                if (!rule.equals(seen.getExpiresAt())) {
+                    seen.setExpiresAt(rule);
+                    seenRepository.save(seen);
+                }
+            }
+            run.openBefore.put(seen.getJobId(), new Prior(seen.getPayload(), seen.getExpiresAt()));
+        }
+    }
+
+    /**
+     * Delete the expired rows: at once for an ordinary row, and 30 days after the partner last returned
+     * it for a dead-linked one (kept until then so a re-fetch does not revive it).
+     */
+    private void prune(Instant now) {
+        List<DumJobSeen> gone = seenRepository
+                .findBySourceIdAndExpiresAtLessThanEqual(source.getId(), now).stream()
+                .filter(seen -> seen.getLinkDeadAt() == null || seen.getLastSeenAt() == null
+                        || !seen.getLastSeenAt().plus(DEFAULT_TTL).isAfter(now))
+                .toList();
+        if (!gone.isEmpty()) {
+            seenRepository.deleteAll(gone);
+        }
+    }
+
+    /**
+     * HEAD-check a sample of the open postings' apply links, least recently checked first; a dead one
+     * leaves {@code live} and its row is expired now. A RETRY leaves the row as it was.
+     */
+    private void checkLinks(Map<String, Map<String, Object>> live, Map<String, Instant> expiries, Run run,
+            Instant now) {
+        if (linkChecker == null || !adapter.checkApplyLinks()) {
+            return;
+        }
+        List<DumJobSeen> sample = run.rows.entrySet().stream()
+                .filter(row -> live.containsKey(row.getKey()) && applyUrl(live.get(row.getKey())) != null)
+                .map(Map.Entry::getValue)
+                .sorted(Comparator.comparing(DumJobSeen::getLinkCheckedAt,
+                        Comparator.nullsFirst(Comparator.naturalOrder()))
+                        .thenComparing(DumJobSeen::getJobId))
+                .limit(linkChecker.sampleSize(source))
+                .toList();
+        for (DumJobSeen seen : sample) {
+            String id = seen.getJobId();
+            DumJobLinkChecker.Verdict verdict = linkChecker.check(applyUrl(live.get(id)));
+            run.checked++;
+            switch (verdict) {
+                case RETRY -> run.retry++;
+                case ALIVE -> {
+                    seen.setLinkCheckedAt(now);
+                    seenRepository.save(seen);
+                }
+                case DEAD -> {
+                    run.dead++;
+                    seen.setLinkCheckedAt(now);
+                    seen.setLinkDeadAt(now);
+                    seen.setExpiresAt(now);
+                    seenRepository.save(seen);
+                    run.latest.put(id, new Prior(seen.getPayload(), now));
+                    live.remove(id);
+                    expiries.remove(id);
+                    log.info("Job source '{}': the apply link of '{}' is gone — posting expired",
+                            source.getName(), id);
+                }
+            }
+        }
+    }
+
+    /**
+     * Queue a tombstone for each expired posting that was published on its own id: every one without a
+     * deduplicator, else only one without a fingerprint (a fingerprinted posting belonged to a group,
+     * whose document the deduplicator tracks).
+     */
+    private void queuePostingTombstones(List<String> expired, Run run, Instant now) {
+        if (tombstones == null) {
+            return;
+        }
+        for (String id : expired) {
+            Prior prior = run.latest.getOrDefault(id, run.openBefore.get(id));
+            Map<String, Object> payload = prior.payload() == null ? Map.of()
+                    : new JSONObject(prior.payload()).toMap();
+            if (deduplicator != null && deduplicator.fingerprint(payload).isPresent()) {
+                continue;
+            }
+            Instant at = prior.expiresAt() == null || prior.expiresAt().isAfter(now) ? now : prior.expiresAt();
+            tombstones.queue(id, payload, at);
+            run.queued++;
+        }
+    }
+
+    private void logRun(Run run, int active, int expired) {
+        String links;
+        if (linkChecker == null) {
+            links = "link check off";
+        } else if (!adapter.checkApplyLinks()) {
+            links = "link check off for " + adapter.id() + " links";
+        } else {
+            links = "%d link(s) checked, %d dead, %d to retry".formatted(run.checked, run.dead, run.retry);
+        }
+        log.info("Job source '{}' run: {} active, {} new, {} expired ({} by dead link); {} fetched, {} kept "
+                + "from earlier runs; {}; {} tombstone(s) queued", source.getName(), active, run.fresh, expired,
+                run.dead, run.fetched, run.kept, links, run.queued);
+    }
+
+    private static String applyUrl(Map<String, Object> posting) {
+        Object value = posting == null ? null : posting.get(DumJobsSchema.APPLY_URL);
+        if (value instanceof Collection<?> values) {
+            value = values.isEmpty() ? null : values.iterator().next();
+        }
+        return value == null || value.toString().isBlank() ? null : value.toString();
+    }
+
     /** The run's documents: one per group of duplicates, across sources and runs (TRA23). */
-    private Map<String, Map<String, Object>> deduplicate(Map<String, Map<String, Object>> live,
+    private DumJobDeduplicator.Result deduplicate(Map<String, Map<String, Object>> live,
             Map<String, Instant> expiries, Instant now) {
         Map<String, DumJobDeduplicator.Posting> postings = new LinkedHashMap<>();
         live.forEach((id, payload) -> postings.put(id, new DumJobDeduplicator.Posting(payload,
                 expiries.getOrDefault(id, now.plus(DEFAULT_TTL)))));
-        return deduplicator.dedupe(source, adapter.id(), postings, now).documents();
+        return deduplicator.dedupe(source, adapter.id(), postings, now);
     }
 
     /**
@@ -346,24 +550,29 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     /**
      * Record one fetched posting in the seen-id store and, when it is still open, add it to
      * {@code live}. Even an already-expired posting is remembered: its row then carries the past
-     * expiry, so the prune drops it instead of an older copy republishing it.
+     * expiry, so the prune drops it instead of an older copy republishing it. A posting whose apply
+     * link was found dead stays expired whatever the partner says.
      */
-    private boolean ingest(Map<String, Object> raw, Instant now, Map<String, Map<String, Object>> live,
-            Map<String, Instant> expiries) {
+    private void ingest(Map<String, Object> raw, Instant now, Map<String, Map<String, Object>> live,
+            Map<String, Instant> expiries, Run run) {
         String id = idOf(raw);
         if (id == null) {
             log.warn("Job source '{}' returned a posting without an id — skipped", source.getName());
-            return false;
+            return;
         }
         JSONObject payload = new JSONObject(raw);
-        Instant expiresAt = expiresAt(payload, now);
-        remember(id, payload, expiresAt, now);
-        if (!expiresAt.isAfter(now)) {
-            return false;
+        DumJobSeen seen = remember(id, payload, expiresAt(payload, now, adapter.datedPostings()), now);
+        run.latest.put(id, new Prior(seen.getPayload(), seen.getExpiresAt()));
+        if (!seen.getExpiresAt().isAfter(now)) {
+            return;
         }
         live.put(id, payload.toMap());
-        expiries.put(id, expiresAt);
-        return true;
+        expiries.put(id, seen.getExpiresAt());
+        run.rows.put(id, seen);
+        run.fetched++;
+        if (!run.known.contains(id)) {
+            run.fresh++;
+        }
     }
 
     /** An {@code extract} without a prior {@code discover} (indexById): read the store, never the API. */
@@ -375,7 +584,7 @@ public class DumJobsStructuredSource implements DumStructuredSource {
                 .orElse(null);
     }
 
-    private void remember(String id, JSONObject payload, Instant expiresAt, Instant now) {
+    private DumJobSeen remember(String id, JSONObject payload, Instant expiresAt, Instant now) {
         DumJobSeen seen = seenRepository.findBySourceIdAndJobId(source.getId(), id)
                 .orElseGet(() -> DumJobSeen.builder().sourceId(source.getId()).jobId(id).build());
         if (seen.getFirstSeenAt() == null) {
@@ -383,9 +592,10 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             seen.setFirstSeenAt(first != null ? first : now);
         }
         seen.setPayload(payload.toString());
-        seen.setExpiresAt(expiresAt);
+        seen.setExpiresAt(seen.getLinkDeadAt() != null ? seen.getLinkDeadAt() : expiresAt);
         seen.setLastSeenAt(now);
         seenRepository.save(seen);
+        return seen;
     }
 
     private static String idOf(Map<String, Object> raw) {
@@ -397,16 +607,18 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     }
 
     /**
-     * The posting's own {@code expiresAt} when given and parsable; else {@code publishedAt} plus
-     * {@link #DEFAULT_TTL}; else {@code now} plus the TTL.
+     * The posting's own {@code expiresAt} when given and parsable; else, for a dated partner,
+     * {@code publishedAt} plus {@link #DEFAULT_TTL}; else {@code lastSeen} (the run that last fetched
+     * it) plus the TTL &mdash; always so for an undated partner, whose {@code publishedAt} is only the
+     * first fetch.
      */
-    static Instant expiresAt(JSONObject payload, Instant now) {
+    static Instant expiresAt(JSONObject payload, Instant lastSeen, boolean dated) {
         Instant explicit = toInstant(payload.opt(DumJobsSchema.EXPIRES_AT));
         if (explicit != null) {
             return explicit;
         }
-        Instant published = toInstant(payload.opt(DumJobsSchema.PUBLISHED_AT));
-        return (published != null ? published : now).plus(DEFAULT_TTL);
+        Instant published = dated ? toInstant(payload.opt(DumJobsSchema.PUBLISHED_AT)) : null;
+        return (published != null ? published : lastSeen).plus(DEFAULT_TTL);
     }
 
     /** Read a date value as an instant: a {@code java.time} value or ISO-8601 text. */

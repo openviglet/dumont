@@ -108,6 +108,17 @@ public class DumJoobleAdapter implements DumJobSourceAdapter {
         return DEFAULT_CAPS;
     }
 
+    /**
+     * Never HEAD-check a Jooble apply link (trabalharei <strong>TRA24</strong>). Jooble pays per click
+     * and its apply links are tracking redirects through {@code jooble.org}: a HEAD request is a hit on
+     * that redirect and may be counted as a click, which would bill (or flag) traffic nobody sent. A
+     * Jooble posting therefore only expires by its date or when Jooble stops returning it.
+     */
+    @Override
+    public boolean checkApplyLinks() {
+        return false;
+    }
+
     @Override
     public List<Map<String, Object>> fetch(DumJobFetchContext context) {
         DumJobSource source = context.source();
