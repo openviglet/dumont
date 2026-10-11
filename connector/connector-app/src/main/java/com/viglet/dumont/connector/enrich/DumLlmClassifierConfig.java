@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassifierFactory;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumExtractorFactory;
 import com.viglet.dumont.connector.config.DumTuringCsrfService;
 
 /**
@@ -42,5 +43,13 @@ public class DumLlmClassifierConfig {
     DumClassifierFactory dumClassifierFactory(RestClient restClient, DumTuringCsrfService csrfService) {
         return (systemPrompt, cacheKeyPrefix) ->
                 new DumTuringClassifier(restClient, csrfService, systemPrompt, cacheKeyPrefix);
+    }
+
+    /** The open-vocabulary sibling (D131), under the same flag: grounded lists, not one label. */
+    @Bean
+    @ConditionalOnProperty(name = "dumont.enrichment.llm.enabled", havingValue = "true")
+    DumExtractorFactory dumExtractorFactory(RestClient restClient, DumTuringCsrfService csrfService) {
+        return (systemPrompt, cacheKeyPrefix) ->
+                new DumTuringExtractor(restClient, csrfService, systemPrompt, cacheKeyPrefix);
     }
 }

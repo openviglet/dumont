@@ -579,3 +579,4 @@
 - **D128** — A scheduled crawl starts each structured source through DumConnectorRunService, the API's start: under its run lock, tracked, and skipped with a log line while a run of it is in progress.
 - **D129** — A scheduled crawl isolates each source and each plugin: one that throws outside extraction is logged with its name, its lock is released, and the crawl moves on.
 - **D130 (run warnings recorded and shown)** — A source can raise runWarnings(); a complete run carrying one is stored as warned, not partial, and the indexing stats table marks it with a Warning badge and its warnings.
+- **D131 (grounded list extraction)** — DumExtractionEnricher fills a multi-valued field from a DumExtractorFactory extractor; only items found in the text as whole words publish, cached and capped like classification.

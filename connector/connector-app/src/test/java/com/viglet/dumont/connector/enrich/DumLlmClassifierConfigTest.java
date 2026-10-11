@@ -25,6 +25,7 @@ import org.springframework.web.client.RestClient;
 
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassifier;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassifierFactory;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumExtractorFactory;
 import com.viglet.dumont.connector.config.DumTuringCsrfService;
 
 /** The LLM classifier reaches plugins only when the documented flag turns it on (roadmap D106). */
@@ -46,9 +47,22 @@ class DumLlmClassifierConfigTest {
     }
 
     @Test
+    void theFlagOnAlsoExposesAFactoryBuildingTuringExtractors() {
+        // D131: the open-vocabulary sibling rides on the same flag.
+        runner.withPropertyValues("dumont.enrichment.llm.enabled=true").run(context -> {
+            assertThat(context).hasSingleBean(DumExtractorFactory.class);
+            assertThat(context.getBean(DumExtractorFactory.class)
+                    .create("List the skills this job requires.", "jobs-skills"))
+                    .isInstanceOf(DumTuringExtractor.class);
+        });
+    }
+
+    @Test
     void theFlagOffOrUnsetExposesNothing() {
-        runner.run(context -> assertThat(context).doesNotHaveBean(DumClassifierFactory.class));
+        runner.run(context -> assertThat(context).doesNotHaveBean(DumClassifierFactory.class)
+                .doesNotHaveBean(DumExtractorFactory.class));
         runner.withPropertyValues("dumont.enrichment.llm.enabled=false")
-                .run(context -> assertThat(context).doesNotHaveBean(DumClassifierFactory.class));
+                .run(context -> assertThat(context).doesNotHaveBean(DumClassifierFactory.class)
+                        .doesNotHaveBean(DumExtractorFactory.class));
     }
 }
