@@ -242,3 +242,43 @@ Expected: an `onRunEnd(source, context)` callback on enrichers, whose output joi
 run record once D96 gives runs a place for notes.
 
 Workaround: `DumJobsPlugin.indexAll` override in `jobs/jobs-plugin`.
+
+### XLI.11 Provenance from enrichers (D101)
+
+Found while adding contract and salary enrichers to trabalharei's `jobs` module (TRA21).
+`DumEnrichmentChain.merge` tags every enricher contribution with
+`DumFieldProvenance.enrichment(name)` and leaves selector and confidence empty, though
+the record type has those slots. The contract step cannot record whether a value came
+from the partner's field, the title or the text, and a partner salary the enricher only
+passes through (because of the D98 workaround) loses its source provenance.
+
+Expected: `enrich()` returns a provenance per field (at least a selector and a
+confidence), and a pass-through keeps the source's own provenance.
+
+Workaround: none; provenance for enriched job fields names only the enricher.
+
+### XLI.12 Drop only the invalid contribution (D102)
+
+Found while adding the salary enricher to trabalharei's `jobs` module (TRA21), which
+writes four fields at once (min, max, period, band). When any one contribution is
+invalid, `DumEnrichmentChain.merge` keeps the record unchanged and drops every field
+that enricher produced, logging a WARN that does not name the offending field.
+
+Expected: an invalid contribution drops only that field, and the log names the field and
+the reason.
+
+Workaround: the salary enricher validates its own numbers before contributing.
+
+### XLI.13 Fallback and one-to-many enricher shapes (D103)
+
+Found while adding contract, seniority and salary enrichers to trabalharei's `jobs`
+module (TRA21). `DumNormalizationEnricher` maps one field to one field. Two common
+shapes need a hand-written enricher class each: an ordered fallback ("the partner's
+field, else the title, else the text; the first input that decides wins") and one input
+producing several output fields (salary text to min, max, period and band).
+
+Expected: built-in enricher shapes for an ordered fallback over inputs and for a
+one-to-many parser, configured by a recipe, so connectors declare them.
+
+Workaround: `DumJobContractEnricher`, `DumJobSeniorityEnricher` and
+`DumJobSalaryEnricher` in `jobs/jobs-plugin`.

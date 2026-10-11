@@ -115,6 +115,9 @@ This track has no remaining pending tasks.
 - 📋 **D98** (deps: —) **An enricher can add or overwrite a field but never clear a value the source supplied** — Canonicalizing means dropping wrong values too, such as a city that is not in the stated state. → §XLI.8
 - 📋 **D99** (deps: —) **A taxonomy is a flat string map with no resource loader, so a multi-column reference table cannot be one** — Reference data such as municipalities with their state needs several attributes per row and a versioned source. → §XLI.9
 - 📋 **D100** (deps: —) **Enrichers have no end-of-run hook, so per-run summaries such as unresolved counts need a plugin override** — Every aggregating enricher would repeat the same indexAll override to report what it saw. → §XLI.10
+- 📋 **D101** (deps: —) **Enricher contributions carry no selector or confidence, so provenance cannot say where an enriched value came from** — Grounding depends on knowing whether a value came from the partner, the title or the text. → §XLI.11
+- 📋 **D102** (deps: —) **One invalid enricher contribution discards every field that enricher wrote, with a log that names no field** — A multi-field step such as salary loses all four values over one bad number, silently. → §XLI.12
+- 📋 **D103** (deps: —) **No built-in enricher shape for an ordered fallback over inputs or for one input producing several fields** — Each connector writes the same fallback and parser plumbing by hand instead of declaring it in a recipe. → §XLI.13
 
 ## Non-goals (do NOT add as tasks)
 

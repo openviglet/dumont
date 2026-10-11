@@ -199,14 +199,36 @@ class DumJobsStructuredSourceTest {
     @Test
     void malformedValueDropsTheFieldNotThePosting() {
         Map<String, Object> job = job("a", NOW);
-        job.put("salaryMin", "a combinar");
-        job.put("salaryMax", 5000.5);
+        // Two values for a single-valued field.
+        job.put("company", List.of("Tech Brasil", "Outra"));
+        job.put("text", "Descrição");
         DumJobsStructuredSource source = source(List.of(job));
         source.discover();
 
         DumStructuredRecord rec = source.extract("a").orElseThrow();
-        assertThat(rec.has("salaryMin")).isFalse();
-        assertThat(rec.has("salaryMax")).isTrue();
+        assertThat(rec.has("company")).isFalse();
+        assertThat(rec.has("text")).isTrue();
+    }
+
+    @Test
+    void extractLeavesTheEnrichedFieldsToTheirEnrichers() {
+        Map<String, Object> job = job("a", NOW);
+        job.put("contract", "clt");
+        job.put("seniority", "pleno");
+        job.put("salaryMin", 5000.5);
+        job.put("salaryMax", 7000);
+        job.put("salaryPeriod", "mes");
+        job.put("salaryBand", "5k-8k");
+        job.put("salaryRaw", "R$ 5.000");
+        DumJobsStructuredSource source = source(List.of(job));
+        source.discover();
+
+        // TRA21: salary, contract and seniority are the enrichers' to write, read from the posting.
+        DumStructuredRecord rec = source.extract("a").orElseThrow();
+        assertThat(rec.values()).doesNotContainKeys("contract", "seniority", "salaryMin", "salaryMax",
+                "salaryPeriod", "salaryBand", "salaryRaw");
+        assertThat(source.posting("a")).containsEntry("contract", "clt")
+                .containsEntry("salaryRaw", "R$ 5.000");
     }
 
     @Test

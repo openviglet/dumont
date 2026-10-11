@@ -136,7 +136,7 @@ class DumJSearchAdapterTest {
         Map<String, Object> job = all().get(id);
 
         assertThat(job).containsOnlyKeys("id", "title", "text", "company", "city", "state", "locationRaw", "remote",
-                "salaryMin", "salaryMax", "salaryPeriod", "salaryBand", "source", "url", "applyUrl",
+                "salaryMin", "salaryMax", "salaryPeriod", "source", "url", "applyUrl",
                 "publishedAt", "modificationDate", "expiresAt");
         assertThat(job)
                 .containsEntry("title", "Desenvolvedor Java Pleno")
@@ -149,14 +149,15 @@ class DumJSearchAdapterTest {
                 .containsEntry("salaryMin", 5000.0)
                 .containsEntry("salaryMax", 7000.0)
                 .containsEntry("salaryPeriod", "mes")
-                .containsEntry("salaryBand", "3k-5k")
                 .containsEntry("source", "jsearch")
                 .containsEntry("url", "https://trabalharei.com.br/vaga/desenvolvedor-java-pleno-" + id + "/")
                 .containsEntry("publishedAt", "2026-10-08T12:00:00.000Z")
                 .containsEntry("modificationDate", "2026-10-08T12:00:00.000Z")
                 .containsEntry("expiresAt", "2026-11-07T12:00:00.000Z");
         // FULLTIME is working time: no contract.
-        assertThat(job).doesNotContainKeys("contract", "abstract", "seniority", "occupation");
+        // TRA21: the band and the seniority are the enrichers', never the mapper's.
+        assertThat(job).doesNotContainKeys("contract", "abstract", "seniority", "occupation",
+                "salaryBand");
         // TRA20: the partner's place text rides along for the location enricher; it is a record
         // key, not a schema field.
         assertThat(job).containsEntry("locationRaw", "São Paulo, SP");
@@ -244,14 +245,14 @@ class DumJSearchAdapterTest {
     @Test
     void salaryOnlyForMonthlyOrYearlyBrl() throws Exception {
         Map<String, Map<String, Object>> jobs = all();
-        // YEAR, BRL: divided by 12.
+        // YEAR, BRL: divided by 12, the original period kept (TRA21).
         assertThat(jobs.get(id(DADOS))).containsEntry("salaryMin", 10000.0)
-                .containsEntry("salaryMax", 15000.0).containsEntry("salaryPeriod", "mes")
-                .containsEntry("salaryBand", "8k-12k");
+                .containsEntry("salaryMax", 15000.0).containsEntry("salaryPeriod", "ano");
         // MONTH with no currency stated, minimum only.
         assertThat(jobs.get(id(SUPORTE))).containsEntry("salaryMin", 3000.0)
-                .containsEntry("salaryPeriod", "mes").containsEntry("salaryBand", "1.5k-3k")
-                .doesNotContainKey("salaryMax");
+                .containsEntry("salaryPeriod", "mes").doesNotContainKey("salaryMax");
+        // TRA21: the band is the salary enricher's (DumJSearchEnrichmentTest).
+        jobs.values().forEach(job -> assertThat(job).doesNotContainKey("salaryBand"));
         // HOUR; USD; nothing stated.
         for (String jobId : List.of(ESTAGIO, ATENDENTE, FRONT)) {
             assertThat(jobs.get(id(jobId))).doesNotContainKeys("salaryMin", "salaryMax",
@@ -261,8 +262,8 @@ class DumJSearchAdapterTest {
         assertThat(salary(5000, 7000, "MONTH", "brl")).containsEntry("salaryMin", 5000.0);
         assertThat(salary(null, 4000, "MONTH", null)).containsOnly(Map.entry("salaryMax", 4000.0),
                 Map.entry("salaryPeriod", "mes"));
-        assertThat(salary(36000, null, "YEAR", "BRL")).containsEntry("salaryMin", 3000.0)
-                .containsEntry("salaryBand", "1.5k-3k");
+        assertThat(salary(36000, null, "YEAR", "BRL")).containsOnly(Map.entry("salaryMin", 3000.0),
+                Map.entry("salaryPeriod", "ano"));
         assertThat(salary(1000, 1200, "WEEK", "BRL")).isEmpty();
         assertThat(salary(150, 200, "DAY", "BRL")).isEmpty();
         assertThat(salary(5000, 7000, null, "BRL")).isEmpty();

@@ -38,6 +38,12 @@ import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
  * the location enricher turns them into the canonical IBGE city and UF (trabalharei
  * <strong>TRA20</strong>). An adapter whose partner sends one free-text place also puts it, as
  * received, under {@link #LOCATION_RAW} — a record key the enricher reads, not a schema field.</li>
+ * <li>Salary, contract and seniority have one canonical step each (trabalharei <strong>TRA21</strong>).
+ * An adapter sets {@code salaryMin}/{@code salaryMax} (monthly BRL) and {@code salaryPeriod} only
+ * when the partner sends numbers, and otherwise puts the partner's salary text under
+ * {@link #SALARY_RAW}; it never computes {@code salaryBand}. It sets {@code contract} only from a
+ * partner field that names the contract kind, never from the title or description, and never sets
+ * {@code seniority}: the enrichers read title and text.</li>
  * <li>Every map carries {@link DumJobsSchema#ID}, unique across every source publishing to the same
  * site — conventionally {@code <id()>-<partner id>} (e.g. {@code adzuna-4512}).</li>
  * <li>Before each partner request it calls {@link DumJobFetchContext#budget()}{@code .tryAcquire()},
@@ -62,6 +68,19 @@ public interface DumJobSourceAdapter {
      * field, never indexed.
      */
     String LOCATION_UNRESOLVED = "locationUnresolved";
+
+    /**
+     * Record key for the partner's salary as free text ({@code "R$ 2.500 a R$ 3.000 por mês"}), set by
+     * an adapter whose partner sends no numbers. Read by the salary enricher (trabalharei
+     * <strong>TRA21</strong>); never a schema field, never indexed.
+     */
+    String SALARY_RAW = "salaryRaw";
+
+    /**
+     * Record key the salary enricher sets to the {@link #SALARY_RAW} text it could not read. Never a
+     * schema field, never indexed.
+     */
+    String SALARY_UNPARSED = "salaryUnparsed";
 
     /** The source type this adapter serves: {@code adzuna}, {@code jooble}, {@code bne} or {@code jsearch}. */
     String id();
