@@ -63,6 +63,10 @@ cd dumont-react && npm run dev
 ```
 > **Windows PowerShell**: quote `-D` flags, e.g. `"-DskipTests"`
 
+> **Git worktrees** build like a normal clone: `git-commit-id-maven-plugin` reads HEAD through
+> the worktree's `.git` file. Where no git metadata exists at all (a source tarball), skip it with
+> `-Dmaven.gitcommitid.skip=true`.
+
 ### Code Quality (SonarQube)
 Dumont **reuses the SonarQube Docker stack that lives in the Turing repo** — there is
 no separate stack here. Local analysis runs against `http://localhost:9100` under the

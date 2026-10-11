@@ -105,7 +105,6 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
-- 📋 **D105** (deps: —) **The Maven build fails in a git worktree: git-commit-id cannot resolve HEAD, and no doc names the skip flag** — Parallel sessions work in worktrees, and a red build before compiling hides whether the change itself is green. → §XLI.5
 - 📋 **D106** (deps: D96 ✅) **The jobs adapters report budget stops and rate limits only in the logs, so their runs still read as complete** — D96 gave sources run notes, and the jobs module is the paid, rate-limited source they were built for. → §XLI.14
 - 📋 **D107** (deps: D97 ✅) **The jobs enrichers reach into the source for raw location text instead of reading it from the record** — D97 gave records transient attributes, so the module-specific posting lookup is now a second path for the same data. → §XLI.15
 - 📋 **D108** (deps: D99 ✅) **The jobs module loads the IBGE municipality list with its own code and derives the UF from a hand-kept prefix table** — D99 ships a taxonomy loader with row attributes, so the module's loader and prefix table are a second copy of it. → §XLI.16

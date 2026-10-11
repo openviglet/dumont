@@ -144,17 +144,3 @@ prefix table and the module's loader go away. The file's existing `uf`-versus-pr
 check can stay as a test over the loaded taxonomy.
 
 ## XLII Web-crawler hardening (real-world sources)
-### XLI.5 Build in a git worktree (D105)
-
-Found while building the `jobs` module (trabalharei TRA13) in a git worktree of this
-repo (`git worktree add`). `./mvnw -pl jobs/jobs-plugin -am test` fails before
-compiling: `git-commit-id-plugin` on `dumont-commons` reports "Missing unknown <sha>",
-because JGit cannot resolve HEAD through a worktree's `.git` file. Passing
-`-Dmaven.gitcommitid.skip=true` makes the build green, and nothing in `agents.md` says
-so.
-
-Expected: the build works in a worktree, by switching the plugin to the native git
-executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallback, and
-`agents.md` names the flag in the meantime.
-
-Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
