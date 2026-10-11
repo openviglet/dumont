@@ -16,12 +16,12 @@
 
 package com.viglet.dumont.connector.plugin.jobs.source.seniority;
 
-import java.util.Collection;
 import java.util.Map;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnricher;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumFallbackEnricher;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 
 /**
@@ -38,22 +38,18 @@ public final class DumJobSeniorityEnricher implements DumEnricher {
     /** The enricher name, also the provenance tag of the field it writes. */
     public static final String NAME = "job-seniority";
 
+    /** The declaration (D103): the title, read by {@link DumJobSeniorityParser}. */
+    private final DumEnricher fallback = DumFallbackEnricher.builder(NAME, DumJobsSchema.SENIORITY)
+            .input(DumJobsSchema.TITLE).parser(DumJobSeniorityParser::parse).build();
+
     @Override
     public String name() {
         return NAME;
     }
 
+    /** The level the title names, with provenance naming the title as its input (D101). */
     @Override
     public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
-        Object title = rec.values().get(DumJobsSchema.TITLE);
-        if (title instanceof Collection<?> values) {
-            title = values.isEmpty() ? null : values.iterator().next();
-        }
-        if (title == null) {
-            return Map.of();
-        }
-        return DumJobSeniorityParser.parse(title.toString())
-                .<Map<String, Object>>map(level -> Map.of(DumJobsSchema.SENIORITY, level))
-                .orElseGet(Map::of);
+        return fallback.enrich(source, rec);
     }
 }

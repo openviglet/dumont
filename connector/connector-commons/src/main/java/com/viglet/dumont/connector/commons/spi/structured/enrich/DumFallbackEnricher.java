@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
@@ -49,12 +50,14 @@ public final class DumFallbackEnricher implements DumEnricher {
     private final String targetField;
     private final List<Input> inputs;
     private final Function<String, Optional<?>> parser;
+    private final Predicate<String> stop;
 
     private DumFallbackEnricher(Builder builder) {
         this.name = builder.name;
         this.targetField = builder.targetField;
         this.inputs = List.copyOf(builder.inputs);
         this.parser = builder.parser;
+        this.stop = builder.stop;
     }
 
     public static Builder builder(String name, String targetField) {
@@ -70,6 +73,9 @@ public final class DumFallbackEnricher implements DumEnricher {
     public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
         for (Input input : inputs) {
             for (String text : texts(rec, input.key())) {
+                if (stop.test(text)) {
+                    return Map.of();
+                }
                 Optional<?> decided = parser.apply(text);
                 if (decided.isPresent() && !String.valueOf(decided.get()).isBlank()) {
                     return Map.of(targetField, DumSourced.of(decided.get(), input.key(), input.confidence()));
@@ -100,6 +106,7 @@ public final class DumFallbackEnricher implements DumEnricher {
         private final String targetField;
         private final List<Input> inputs = new ArrayList<>();
         private Function<String, Optional<?>> parser;
+        private Predicate<String> stop = text -> false;
 
         private Builder(String name, String targetField) {
             if (name == null || name.isBlank()) {
@@ -129,6 +136,16 @@ public final class DumFallbackEnricher implements DumEnricher {
         /** Decides a value from one input's text, or answers empty to pass to the next input. */
         public Builder parser(Function<String, Optional<?>> parser) {
             this.parser = parser;
+            return this;
+        }
+
+        /**
+         * An input whose text {@code stop} accepts ends the fallback with no contribution, instead of
+         * passing to the next input (roadmap D117): a title naming two contract kinds settles that
+         * the contract is unknown, and the description is not read to guess one.
+         */
+        public Builder stopOn(Predicate<String> stop) {
+            this.stop = stop == null ? text -> false : stop;
             return this;
         }
 

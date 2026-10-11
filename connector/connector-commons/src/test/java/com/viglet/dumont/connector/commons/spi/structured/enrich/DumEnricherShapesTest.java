@@ -73,6 +73,23 @@ class DumEnricherShapesTest {
     }
 
     @Test
+    void anInputTheStopRuleAcceptsEndsTheFallbackWithNothing() {
+        // D117: "CLT ou PJ" settles that the contract is unknown; the description is not read to guess.
+        DumFallbackEnricher stopping = DumFallbackEnricher.builder("contract", "contract")
+                .input("title", 0.8).input("description", 0.6)
+                .parser(DumEnricherShapesTest::contract)
+                .stopOn(text -> text.contains(" ou "))
+                .build();
+        DumStructuredRecord ambiguous = DumStructuredRecord.builder("1", SCHEMA)
+                .set("title", "Analista CLT ou PJ").set("description", "Vaga CLT").build();
+        DumStructuredRecord clear = DumStructuredRecord.builder("2", SCHEMA)
+                .set("title", "Analista").set("description", "Vaga CLT").build();
+
+        assertFalse(DumEnrichmentChain.of(stopping).apply(null, ambiguous).has("contract"));
+        assertEquals("CLT", DumEnrichmentChain.of(stopping).apply(null, clear).values().get("contract"));
+    }
+
+    @Test
     void oneInputSplitsIntoSeveralFieldsAndABadOneStaysAlone() {
         DumSplitEnricher salary = DumSplitEnricher.of("salary", "salaryText", text -> {
             Map<String, Object> parsed = new HashMap<>();

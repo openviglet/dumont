@@ -562,4 +562,4 @@
 - **D114** — Any structured source returns goneIds() and they are deindexed on every run that did not abort, beside the sweep, through the same path incremental expiry and resolution use.
 - **D115** — DumStructuredSource.onRunEnd(DumRunEnd) is called once after every indexAll finishes, aborts included, saying whether the run was partial, swept, and why it stopped.
 - **D116** — Each jobs adapter notes its budget stops and failed pages on the fetch context, and the source returns them as run notes on a run that still sweeps.
-- **D117 (enrichers read transients)** — extract() hands the adapter's raw and enriched-field values to the jobs enrichers as transients; they write their notes as DumTransient, and annotate() is gone.
+- **D117** — Contract and seniority are DumFallbackEnricher declarations, with a stopOn rule for ambiguous inputs, and every jobs enricher value cites the input it read.

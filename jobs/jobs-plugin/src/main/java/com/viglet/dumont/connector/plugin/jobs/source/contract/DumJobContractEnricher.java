@@ -16,18 +16,17 @@
 
 package com.viglet.dumont.connector.plugin.jobs.source.contract;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnricher;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumFallbackEnricher;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
 import com.viglet.dumont.connector.plugin.jobs.source.contract.DumJobContractParser.Contract;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * The single canonical contract step of every job record (trabalharei <strong>TRA21</strong>): a D04
@@ -42,42 +41,41 @@ import lombok.extern.slf4j.Slf4j;
  * {@link DumJobContractParser}'s.
  *
  * <p>
- * The partner's value is read from the record transients (D117) and
+ * It is a {@link DumFallbackEnricher} declaration (D103) whose stop rule keeps the two-kinds case
+ * from falling through. The partner's value is read from the record transients (D117) and
  * {@code extract} leaves {@code contract} off the record (D98), so this step is the only writer and
  * can drop a partner value that names no kind or two.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
-@Slf4j
 public final class DumJobContractEnricher implements DumEnricher {
 
     /** The enricher name, also the provenance tag of the field it writes. */
     public static final String NAME = "job-contract";
+
+    /** The declaration (D103): the inputs in order, read for kinds, an ambiguous one stopping it. */
+    private final DumEnricher fallback = DumFallbackEnricher.builder(NAME, DumJobsSchema.CONTRACT)
+            .input(DumJobsSchema.CONTRACT, 1.0).input(DumJobsSchema.TITLE, 0.8).input(DumJobsSchema.TEXT, 0.6)
+            .parser(text -> {
+                Set<Contract> kinds = kinds(text);
+                return kinds.size() == 1 ? Optional.of(kinds.iterator().next().value()) : Optional.empty();
+            })
+            .stopOn(text -> kinds(text).size() > 1)
+            .build();
 
     @Override
     public String name() {
         return NAME;
     }
 
+    /**
+     * The contract the first deciding input names, with provenance naming that input (D101): the
+     * partner's field, the title or the text.
+     */
     @Override
     public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
-        Object partner = rec.transients().get(DumJobsSchema.CONTRACT);
-        String[] inputs = { text(partner != null ? partner : rec.values().get(DumJobsSchema.CONTRACT)),
-                text(rec.values().get(DumJobsSchema.TITLE)),
-                text(rec.values().get(DumJobsSchema.TEXT)) };
-        for (String input : inputs) {
-            Set<Contract> kinds = kinds(input);
-            if (kinds.size() == 1) {
-                return Map.of(DumJobsSchema.CONTRACT, kinds.iterator().next().value());
-            }
-            if (kinds.size() > 1) {
-                log.debug("Job '{}' in source '{}': '{}' names {} contract kinds — left absent", rec.id(),
-                        source.getSourceName(), input, kinds);
-                return Map.of();
-            }
-        }
-        return Map.of();
+        return fallback.enrich(source, rec);
     }
 
     /** A value already in the vocabulary is itself; anything else is read for keywords. */
@@ -92,16 +90,5 @@ public final class DumJobContractEnricher implements DumEnricher {
             }
         }
         return DumJobContractParser.kinds(input);
-    }
-
-    private static String text(Object value) {
-        if (value instanceof Collection<?> values) {
-            value = values.isEmpty() ? null : values.iterator().next();
-        }
-        if (value == null) {
-            return null;
-        }
-        String text = value.toString().trim();
-        return text.isEmpty() ? null : text;
     }
 }

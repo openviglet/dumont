@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnricher;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumSourced;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumTransient;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
@@ -102,13 +103,17 @@ public final class DumJobSalaryEnricher implements DumEnricher {
         Double max = positive(values.get(DumJobsSchema.SALARY_MAX));
         if (min != null || max != null) {
             counter.structured.incrementAndGet();
-            put(contributions, DumJobsSchema.SALARY_MIN, min);
-            put(contributions, DumJobsSchema.SALARY_MAX, max);
+            // D101: each value names the partner field it came from; a band the partner did not send
+            // is derived from the minimum.
+            put(contributions, DumJobsSchema.SALARY_MIN, min, DumJobsSchema.SALARY_MIN);
+            put(contributions, DumJobsSchema.SALARY_MAX, max, DumJobsSchema.SALARY_MAX);
             put(contributions, DumJobsSchema.SALARY_PERIOD,
-                    DumJobSalaryParser.periodValue(single(values.get(DumJobsSchema.SALARY_PERIOD))));
+                    DumJobSalaryParser.periodValue(single(values.get(DumJobsSchema.SALARY_PERIOD))),
+                    DumJobsSchema.SALARY_PERIOD);
             String band = band(single(values.get(DumJobsSchema.SALARY_BAND)));
             put(contributions, DumJobsSchema.SALARY_BAND,
-                    band != null ? band : DumJobNormalizer.salaryBand(min));
+                    band != null ? band : DumJobNormalizer.salaryBand(min),
+                    band != null ? DumJobsSchema.SALARY_BAND : DumJobsSchema.SALARY_MIN);
             return contributions;
         }
         String raw = text(values.get(DumJobSourceAdapter.SALARY_RAW));
@@ -126,10 +131,10 @@ public final class DumJobSalaryEnricher implements DumEnricher {
         if (result.status() == Status.PARSED) {
             counter.parsed.incrementAndGet();
             DumJobSalaryParser.Salary salary = result.salary();
-            put(contributions, DumJobsSchema.SALARY_MIN, salary.min());
-            put(contributions, DumJobsSchema.SALARY_MAX, salary.max());
-            put(contributions, DumJobsSchema.SALARY_PERIOD, salary.period());
-            put(contributions, DumJobsSchema.SALARY_BAND, salary.band());
+            put(contributions, DumJobsSchema.SALARY_MIN, salary.min(), DumJobSourceAdapter.SALARY_RAW);
+            put(contributions, DumJobsSchema.SALARY_MAX, salary.max(), DumJobSourceAdapter.SALARY_RAW);
+            put(contributions, DumJobsSchema.SALARY_PERIOD, salary.period(), DumJobSourceAdapter.SALARY_RAW);
+            put(contributions, DumJobsSchema.SALARY_BAND, salary.band(), DumJobSourceAdapter.SALARY_RAW);
         }
         return contributions;
     }
@@ -226,9 +231,10 @@ public final class DumJobSalaryEnricher implements DumEnricher {
         return text.isEmpty() ? null : text;
     }
 
-    private static void put(Map<String, Object> contributions, String field, Object value) {
+    /** {@code value} for {@code field}, citing the input it was read from (D101). */
+    private static void put(Map<String, Object> contributions, String field, Object value, String input) {
         if (value != null) {
-            contributions.put(field, value);
+            contributions.put(field, DumSourced.of(value, input));
         }
     }
 }

@@ -78,23 +78,6 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
-### XLI.25 Jobs enrichers read transients (D117)
-
-Found while shipping D97. The first slice landed: `DumJobsStructuredSource.extract()`
-puts the adapter's values for the enriched fields and its raw place and salary text on
-the record as transients (`ENRICHER_INPUTS`), the location, salary and contract
-enrichers read `rec.transients()`, `locationUnresolved` and `salaryUnparsed` are
-`DumTransient` contributions, and `annotate()` is gone. `posting(id)` is now
-package-private, the source's own view.
-
-Left, each on a commons feature the module predates:
-- D98: `extract()` can keep the adapter's city and state, and the location enricher removes a city outside the stated UF with `DumClear.field()` instead of being the only writer of both fields.
-- D101: the contract, salary and seniority enrichers return `DumSourced.of(value, selector, confidence)` naming whether they read the partner's field, the title or the text, so a partner value they only pass through keeps its own provenance.
-- D103: the contract and seniority enrichers become `DumFallbackEnricher` declarations and the salary enricher a `DumSplitEnricher`.
-
-The D106 point (the occupation fallback taking the optional `DumClassifierFactory` bean)
-moved to D119, which already reworks that step.
-
 ### XLI.26 Jobs loads IBGE through the taxonomy loader (D118)
 
 Found while shipping D99. `DumTaxonomyLoader.fromResource(loader, path)` in
