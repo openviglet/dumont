@@ -80,29 +80,20 @@ These constrain every task above:
 
 ### XLI.25 Jobs enrichers read transients (D117)
 
-Found while shipping D97. A structured record now carries transient, never-indexed
-attributes: `DumStructuredRecord.Builder.transientValue(key, value)`, read back through
-`transients()`. An enricher writes one by returning `DumTransient.of(value)` in its
-contribution map, and `DumTransient.of(null)` clears it. The enrichment chain and
-`toBuilder()` carry transients forward, and publishing reads only `values()`.
+Found while shipping D97. The first slice landed: `DumJobsStructuredSource.extract()`
+puts the adapter's values for the enriched fields and its raw place and salary text on
+the record as transients (`ENRICHER_INPUTS`), the location, salary and contract
+enrichers read `rec.transients()`, `locationUnresolved` and `salaryUnparsed` are
+`DumTransient` contributions, and `annotate()` is gone. `posting(id)` is now
+package-private, the source's own view.
 
-The `jobs` module predates this: its location enricher reaches back into the source
-through `DumJobsStructuredSource.posting(id)` to read the adapters' raw location text,
-and the `locationUnresolved` note has no place on the record.
+Left, each on a commons feature the module predates:
+- D98: `extract()` can keep the adapter's city and state, and the location enricher removes a city outside the stated UF with `DumClear.field()` instead of being the only writer of both fields.
+- D101: the contract, salary and seniority enrichers return `DumSourced.of(value, selector, confidence)` naming whether they read the partner's field, the title or the text, so a partner value they only pass through keeps its own provenance.
+- D103: the contract and seniority enrichers become `DumFallbackEnricher` declarations and the salary enricher a `DumSplitEnricher`.
 
-Expected: the adapters set `locationRaw` (and any other raw text an enricher normalizes,
-such as the salary, contract and seniority inputs) as transients when they build each
-record. The enrichers read `rec.transients()` and write `locationUnresolved` as a
-`DumTransient`. `posting(id)` then goes away, and the enrichers no longer depend on the
-concrete source class. With D98, `extract()` can also keep the adapter's city and state,
-and the location enricher removes a city outside the stated UF with `DumClear.field()`
-instead of writing both fields itself. With D101, the contract, salary and seniority
-enrichers return `DumSourced.of(value, selector, confidence)` naming whether they read
-the partner's field, the title or the text, and a partner value they only pass through
-keeps its own provenance. With D103, the contract and seniority enrichers become
-`DumFallbackEnricher` declarations and the salary enricher a `DumSplitEnricher`. With
-D106, the occupation LLM fallback takes the optional `DumClassifierFactory` bean instead
-of a `jobsOccupationClassifier` nobody declares.
+The D106 point (the occupation fallback taking the optional `DumClassifierFactory` bean)
+moved to D119, which already reworks that step.
 
 ### XLI.26 Jobs loads IBGE through the taxonomy loader (D118)
 
@@ -138,7 +129,9 @@ Expected: the occupation step keeps its dictionary, its `known()` read for tombs
 and its per-source counters, but asks the classifier through `classify(title, labels)`
 and keeps answers and calls in the injected `DumClassificationStore`, keyed with the
 taxonomy version so a newer CBO list is a miss. The label set stays the CBO codes; the
-slug mapping stays in `DumCboFamilies`.
+slug mapping stays in `DumCboFamilies`. The classifier comes from the optional
+`DumClassifierFactory` bean (D106) rather than a `jobsOccupationClassifier` bean nobody
+declares.
 
 Open choice: whether to migrate the rows already in `job_occupation_cache` (answers paid
 for once) or let them expire and re-ask under the daily cap. Dropping

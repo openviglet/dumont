@@ -17,6 +17,7 @@
 package com.viglet.dumont.connector.plugin.jobs.source.salary;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,10 +27,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnricher;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumTransient;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobSourceAdapter;
-import com.viglet.dumont.connector.plugin.jobs.source.DumJobsStructuredSource;
 import com.viglet.dumont.connector.plugin.jobs.source.salary.DumJobSalaryParser.Result;
 import com.viglet.dumont.connector.plugin.jobs.source.salary.DumJobSalaryParser.Status;
 
@@ -46,14 +47,14 @@ import lombok.extern.slf4j.Slf4j;
  * with the adapter's period, and the band is filled from the minimum when the posting has none.</li>
  * <li><strong>Text</strong> an adapter keeps under {@link DumJobSourceAdapter#SALARY_RAW} (Jooble) is
  * read by {@link DumJobSalaryParser}. Text that states no amount ("a combinar") yields nothing; text
- * with an amount the parser cannot read is kept raw under {@link DumJobSourceAdapter#SALARY_UNPARSED}
- * on the posting (never indexed) and counted per source.</li>
+ * with an amount the parser cannot read is kept raw in the record transient
+ * {@link DumJobSourceAdapter#SALARY_UNPARSED} (never indexed) and counted per source.</li>
  * </ul>
  *
  * <p>
- * Like the location step it reads the posting through {@link DumJobsStructuredSource#posting(String)}
- * (D97: a record cannot carry {@code salaryRaw}), and {@code extract} leaves the four salary fields
- * off the record (D98: an enricher cannot clear a value), so this step is the only writer.
+ * Like the location step it reads the adapter's salary values and {@code salaryRaw} from the record
+ * transients (D97, D117), and {@code extract} leaves the four salary fields off the record (D98: an
+ * enricher cannot clear a value), so this step is the only writer.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -92,10 +93,7 @@ public final class DumJobSalaryEnricher implements DumEnricher {
 
     @Override
     public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
-        Map<String, Object> posting = source instanceof DumJobsStructuredSource jobs
-                ? jobs.posting(rec.id())
-                : null;
-        Map<String, Object> values = posting != null ? posting : rec.values();
+        Map<String, Object> values = inputs(rec);
         Counter counter = counters.computeIfAbsent(source.getSourceName(), name -> new Counter());
         counter.records.incrementAndGet();
         Map<String, Object> contributions = new LinkedHashMap<>();
@@ -113,16 +111,14 @@ public final class DumJobSalaryEnricher implements DumEnricher {
                     band != null ? band : DumJobNormalizer.salaryBand(min));
             return contributions;
         }
-        String raw = posting == null ? null : text(posting.get(DumJobSourceAdapter.SALARY_RAW));
+        String raw = text(values.get(DumJobSourceAdapter.SALARY_RAW));
         if (raw == null) {
             return contributions;
         }
         Result result = DumJobSalaryParser.parse(raw);
         if (result.status() == Status.UNPARSED) {
             counter.unparsed.incrementAndGet();
-            if (source instanceof DumJobsStructuredSource jobs) {
-                jobs.annotate(rec.id(), DumJobSourceAdapter.SALARY_UNPARSED, raw);
-            }
+            contributions.put(DumJobSourceAdapter.SALARY_UNPARSED, DumTransient.of(raw));
             log.debug("Job '{}' in source '{}': salary '{}' not parsed", rec.id(), source.getSourceName(),
                     raw);
             return contributions;
@@ -136,6 +132,13 @@ public final class DumJobSalaryEnricher implements DumEnricher {
             put(contributions, DumJobsSchema.SALARY_BAND, salary.band());
         }
         return contributions;
+    }
+
+    /** The record's values with the adapter's own (its transients, D117) over them. */
+    private static Map<String, Object> inputs(DumStructuredRecord rec) {
+        Map<String, Object> values = new HashMap<>(rec.values());
+        values.putAll(rec.transients());
+        return values;
     }
 
     /**

@@ -120,7 +120,8 @@ class DumJobLocationEnricherTest {
         DumStructuredRecord raw = source.extract("a").orElseThrow();
         assertThat(raw.has("city")).isFalse();
         assertThat(raw.has("state")).isFalse();
-        assertThat(source.posting("a")).containsEntry("city", "São Paulo")
+        // D117: the adapter's place travels as transients, never as values.
+        assertThat(raw.transients()).containsEntry("city", "São Paulo")
                 .containsEntry("locationRaw", "São Paulo - SP");
     }
 
@@ -148,15 +149,15 @@ class DumJobLocationEnricherTest {
     }
 
     @Test
-    void unresolvedPlacesAreKeptRawOnThePostingAndCountedPerSource() {
+    void unresolvedPlacesAreKeptRawOnTheRecordAndCountedPerSource() {
         DumJobsStructuredSource source = source(FETCHED);
         DumJobLocationEnricher enricher = DumJobLocationEnricher.standard();
-        enrichAll(source, enricher);
+        Map<String, DumStructuredRecord> records = enrichAll(source, enricher);
 
-        assertThat(source.posting("c")).containsEntry("locationUnresolved", "Recife, SP");
-        assertThat(source.posting("e")).containsEntry("locationUnresolved", "Xyzlândia");
-        assertThat(source.posting("a")).doesNotContainKey("locationUnresolved");
-        assertThat(source.posting("f")).doesNotContainKey("locationUnresolved");
+        assertThat(records.get("c").transients()).containsEntry("locationUnresolved", "Recife, SP");
+        assertThat(records.get("e").transients()).containsEntry("locationUnresolved", "Xyzlândia");
+        assertThat(records.get("a").transients()).doesNotContainKey("locationUnresolved");
+        assertThat(records.get("f").transients()).doesNotContainKey("locationUnresolved");
 
         assertThat(enricher.summary("jooble-br")).isEqualTo(new Summary(6, 3, 2));
         assertThat(enricher.summary("other")).isEqualTo(new Summary(0, 0, 0));

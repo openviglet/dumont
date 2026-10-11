@@ -25,7 +25,6 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnricher;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
-import com.viglet.dumont.connector.plugin.jobs.source.DumJobsStructuredSource;
 import com.viglet.dumont.connector.plugin.jobs.source.contract.DumJobContractParser.Contract;
 
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * {@link DumJobContractParser}'s.
  *
  * <p>
- * The partner's value is read from {@link DumJobsStructuredSource#posting(String)} and
+ * The partner's value is read from the record transients (D117) and
  * {@code extract} leaves {@code contract} off the record (D98), so this step is the only writer and
  * can drop a partner value that names no kind or two.
  *
@@ -63,11 +62,9 @@ public final class DumJobContractEnricher implements DumEnricher {
 
     @Override
     public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
-        Map<String, Object> posting = source instanceof DumJobsStructuredSource jobs
-                ? jobs.posting(rec.id())
-                : null;
-        Map<String, Object> values = posting != null ? posting : rec.values();
-        String[] inputs = { text(values.get(DumJobsSchema.CONTRACT)), text(rec.values().get(DumJobsSchema.TITLE)),
+        Object partner = rec.transients().get(DumJobsSchema.CONTRACT);
+        String[] inputs = { text(partner != null ? partner : rec.values().get(DumJobsSchema.CONTRACT)),
+                text(rec.values().get(DumJobsSchema.TITLE)),
                 text(rec.values().get(DumJobsSchema.TEXT)) };
         for (String input : inputs) {
             Set<Contract> kinds = kinds(input);

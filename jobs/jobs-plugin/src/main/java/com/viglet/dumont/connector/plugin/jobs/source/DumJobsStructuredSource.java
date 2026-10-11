@@ -133,6 +133,19 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             DumJobsSchema.SALARY_MAX, DumJobsSchema.SALARY_PERIOD, DumJobsSchema.SALARY_BAND,
             DumJobsSchema.OCCUPATION);
 
+    /**
+     * What {@link #extract} hands the enrichers as record transients (roadmap <strong>D117</strong>):
+     * the adapter's values for the {@link #ENRICHED_FIELDS} and the partner's raw place and salary text.
+     */
+    static final Set<String> ENRICHER_INPUTS = union(ENRICHED_FIELDS,
+            Set.of(DumJobSourceAdapter.LOCATION_RAW, DumJobSourceAdapter.SALARY_RAW));
+
+    private static Set<String> union(Set<String> first, Set<String> second) {
+        Set<String> all = new HashSet<>(first);
+        all.addAll(second);
+        return Set.copyOf(all);
+    }
+
     private final DumJobSource source;
     private final DumStructuredSchema schema;
     private final DumJobSourceAdapter adapter;
@@ -147,7 +160,7 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     private Map<String, Map<String, Object>> records;
     /** Why this run's fetch stopped short, as the adapter noted it (D116). */
     private List<String> notes = List.of();
-    /** Postings read before {@link #discover()} (indexById), kept so an enricher's annotate sticks. */
+    /** Postings read before {@link #discover()} (indexById), read once from the store. */
     private final Map<String, Map<String, Object>> adhoc = new LinkedHashMap<>();
 
     public DumJobsStructuredSource(DumJobSource source, DumStructuredSchema schema,
@@ -233,9 +246,10 @@ public class DumJobsStructuredSource implements DumStructuredSource {
      * Extract one posting. The {@link #ENRICHED_FIELDS} are left to their enrichers — place
      * (trabalharei <strong>TRA20</strong>), salary, contract and seniority (<strong>TRA21</strong>),
      * occupation (<strong>TRA22</strong>) —
-     * which read the adapter's values from {@link #posting(String)}: a D04 enricher can override a
-     * record value but never remove one (D98), and each canonical step must be able to drop a value,
-     * such as a city that is not in its UF or a contract value that names two kinds.
+     * which read the adapter's values from the record's transients ({@link #ENRICHER_INPUTS}, D117): a
+     * D04 enricher can override a record value but never remove one (D98), and each canonical step must
+     * be able to drop a value, such as a city that is not in its UF or a contract value that names two
+     * kinds.
      */
     @Override
     public Optional<DumStructuredRecord> extract(String contentId) {
@@ -258,6 +272,13 @@ public class DumJobsStructuredSource implements DumStructuredSource {
                         e.getMessage());
             }
         }
+        // D117: what the canonical steps read travels on the record as transients, never indexed.
+        for (String key : ENRICHER_INPUTS) {
+            Object value = values.get(key);
+            if (value != null) {
+                rec.transientValue(key, value);
+            }
+        }
         return Optional.of(rec.build());
     }
 
@@ -265,12 +286,12 @@ public class DumJobsStructuredSource implements DumStructuredSource {
      * The posting {@code contentId} as the adapter returned it — every key, including record keys that
      * are not schema fields ({@link DumJobSourceAdapter#LOCATION_RAW},
      * {@link DumJobSourceAdapter#SALARY_RAW}) — or {@code null} when it is
-     * neither in this run nor in the store. After {@link #discover()} it is this run's live map, so an
-     * {@link #annotate} shows up here; before it, a copy is read once from the store &mdash; for a
-     * group id ({@code job-<hash>}, TRA23) from the fingerprint index &mdash; and kept for the
-     * instance, so an annotate on it shows up too.
+     * neither in this run nor in the store. After {@link #discover()} it is this run's live map; before
+     * it, a copy is read once from the store &mdash; for a group id ({@code job-<hash>}, TRA23) from the
+     * fingerprint index &mdash; and kept for the instance. The enrichers read the record's transients
+     * instead (D117); this is the source's own view.
      */
-    public Map<String, Object> posting(String contentId) {
+    Map<String, Object> posting(String contentId) {
         if (records != null) {
             return records.get(contentId);
         }
@@ -288,17 +309,6 @@ public class DumJobsStructuredSource implements DumStructuredSource {
             return contentId;
         }
         return deduplicator.groupIdOf(source.getId(), contentId).orElse(contentId);
-    }
-
-    /**
-     * Attach a record key that is not a schema field (e.g. {@link DumJobSourceAdapter#LOCATION_UNRESOLVED})
-     * to a posting this instance has answered. Never published; a no-op for an unknown id.
-     */
-    public void annotate(String contentId, String key, Object value) {
-        Map<String, Object> posting = records != null ? records.get(contentId) : adhoc.get(contentId);
-        if (posting != null) {
-            posting.put(key, value);
-        }
     }
 
     /** What this run saw of each posting, for the expiry, link check, tombstones and summary. */

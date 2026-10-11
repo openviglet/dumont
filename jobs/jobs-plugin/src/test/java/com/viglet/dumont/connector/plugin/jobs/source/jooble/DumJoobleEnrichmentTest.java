@@ -61,7 +61,7 @@ class DumJoobleEnrichmentTest {
         for (String id : List.of("jooble-1093847561029384756", NO_ID)) {
             assertThat(run.values(id)).doesNotContainKeys("salaryMin", "salaryMax", "salaryPeriod",
                     "salaryBand");
-            assertThat(run.source.posting(id)).doesNotContainKey("salaryUnparsed");
+            assertThat(run.records.get(id).transients()).doesNotContainKey("salaryUnparsed");
         }
         // The raw text is working data: never published.
         run.records.values().forEach(rec -> assertThat(rec.values())

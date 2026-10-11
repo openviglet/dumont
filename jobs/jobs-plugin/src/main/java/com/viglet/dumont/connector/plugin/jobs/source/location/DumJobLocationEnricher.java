@@ -24,13 +24,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumEnricher;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumTransient;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeRef;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumTaxonomy;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsSchema;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobNormalizer;
 import com.viglet.dumont.connector.plugin.jobs.source.DumJobSourceAdapter;
-import com.viglet.dumont.connector.plugin.jobs.source.DumJobsStructuredSource;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,17 +46,14 @@ import lombok.extern.slf4j.Slf4j;
  * the next record without rebuilding the chain (the resolver is rebuilt once per version).
  *
  * <p>
- * <strong>Inputs.</strong> A {@link DumStructuredRecord} only holds schema fields, so the raw text an
- * adapter keeps under {@link DumJobSourceAdapter#LOCATION_RAW} cannot travel on it; the enricher reads
- * {@code city}, {@code state} and that key from the posting through
- * {@link DumJobsStructuredSource#posting(String)}. {@code extract} leaves {@code city} and
- * {@code state} off the record for the same reason the other way round: an enricher cannot remove a
- * value, and this one must be able to drop a city.
+ * <strong>Inputs.</strong> {@code extract} leaves {@code city} and {@code state} off the record, since
+ * an enricher cannot remove a value and this one must be able to drop a city. The adapter's
+ * {@code city}, {@code state} and raw text ({@link DumJobSourceAdapter#LOCATION_RAW}) travel as record
+ * transients (D97, D117); a record from another source is read from its values.
  *
  * <p>
- * <strong>Unresolved places</strong> are kept as raw text under
- * {@link DumJobSourceAdapter#LOCATION_UNRESOLVED} on the posting (not a schema field, not indexed) and
- * counted per source; {@link #logSummary(String)} writes one line per source per run.
+ * <strong>Unresolved places</strong> are kept as raw text in the record transient
+ * {@link DumJobSourceAdapter#LOCATION_UNRESOLVED} (never indexed) and counted per source; {@link #logSummary(String)} writes one line per source per run.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -112,12 +109,9 @@ public final class DumJobLocationEnricher implements DumEnricher {
 
     @Override
     public Map<String, Object> enrich(DumStructuredSource source, DumStructuredRecord rec) {
-        Map<String, Object> posting = source instanceof DumJobsStructuredSource jobs
-                ? jobs.posting(rec.id())
-                : null;
-        String city = text(posting, rec, DumJobsSchema.CITY);
-        String state = text(posting, rec, DumJobsSchema.STATE);
-        String raw = posting == null ? null : asText(posting.get(DumJobSourceAdapter.LOCATION_RAW));
+        String city = input(rec, DumJobsSchema.CITY);
+        String state = input(rec, DumJobsSchema.STATE);
+        String raw = asText(rec.transients().get(DumJobSourceAdapter.LOCATION_RAW));
         Counter counter = counters.computeIfAbsent(source.getSourceName(), name -> new Counter());
         counter.records.incrementAndGet();
         DumJobLocationResolver resolver = resolver();
@@ -135,9 +129,7 @@ public final class DumJobLocationEnricher implements DumEnricher {
         }
         if (place.unresolved() != null) {
             counter.unresolved.incrementAndGet();
-            if (source instanceof DumJobsStructuredSource jobs) {
-                jobs.annotate(rec.id(), DumJobSourceAdapter.LOCATION_UNRESOLVED, place.unresolved());
-            }
+            contributions.put(DumJobSourceAdapter.LOCATION_UNRESOLVED, DumTransient.of(place.unresolved()));
             log.debug("Job '{}' in source '{}': place '{}' not resolved", rec.id(),
                     source.getSourceName(), place.unresolved());
         } else if (!contributions.isEmpty()) {
@@ -217,10 +209,10 @@ public final class DumJobLocationEnricher implements DumEnricher {
         return contributions;
     }
 
-    /** The posting's value for {@code field}, else the record's (a source that is not a job source). */
-    private static String text(Map<String, Object> posting, DumStructuredRecord rec, String field) {
-        Object value = posting != null ? posting.get(field) : rec.values().get(field);
-        return asText(value);
+    /** The adapter's value for {@code field} from the record transients, else the record's own. */
+    private static String input(DumStructuredRecord rec, String field) {
+        Object value = rec.transients().get(field);
+        return asText(value != null ? value : rec.values().get(field));
     }
 
     private static String asText(Object value) {

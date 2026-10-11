@@ -90,14 +90,15 @@ class DumJobEnrichersTest {
     // --- salary --------------------------------------------------------------------------------
 
     @Test
-    void unparsedSalaryTextIsKeptRawOnThePostingAndCounted() {
+    void unparsedSalaryTextIsKeptRawOnTheRecordAndCounted() {
         EnrichedRun run = run(job("a", "salaryRaw", "R$ 25"), job("b", "salaryRaw", "US$ 3,000"),
                 job("c", "salaryRaw", "A combinar"), job("d", "salaryRaw", "R$ 15/hora"), job("e"));
 
-        assertThat(run.source.posting("a")).containsEntry("salaryUnparsed", "R$ 25");
-        assertThat(run.source.posting("b")).containsEntry("salaryUnparsed", "US$ 3,000");
-        assertThat(run.source.posting("c")).doesNotContainKey("salaryUnparsed");
-        assertThat(run.source.posting("e")).doesNotContainKey("salaryUnparsed");
+        // D117: the note is a transient on the enriched record, not a key written back to the source.
+        assertThat(run.records.get("a").transients()).containsEntry("salaryUnparsed", "R$ 25");
+        assertThat(run.records.get("b").transients()).containsEntry("salaryUnparsed", "US$ 3,000");
+        assertThat(run.records.get("c").transients()).doesNotContainKey("salaryUnparsed");
+        assertThat(run.records.get("e").transients()).doesNotContainKey("salaryUnparsed");
         for (String id : List.of("a", "b", "c", "e")) {
             assertThat(run.values(id)).doesNotContainKeys("salaryMin", "salaryMax", "salaryPeriod",
                     "salaryBand", "salaryRaw", "salaryUnparsed");

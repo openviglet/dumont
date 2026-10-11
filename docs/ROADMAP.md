@@ -105,12 +105,20 @@ This track has no remaining pending tasks.
 
 ## Track O — Structured sources over paged JSON APIs
 
-- 📋 **D117** (deps: D97 ✅) **The jobs enrichers reach into the source for raw location text instead of reading it from the record** — D97 gave records transient attributes, so the module-specific posting lookup is now a second path for the same data. → §XLI.25
+- ⏳ **D117** (deps: D97 ✅) **The jobs enrichers reach into the source for raw location text instead of reading it from the record** — The jobs enrichers still clear a bad city by omission, tag no partner provenance and are hand-written where D98, D101 and D103 offer declarations. → §XLI.25
 - 📋 **D118** (deps: D99 ✅) **The jobs module loads the IBGE municipality list with its own code and derives the UF from a hand-kept prefix table** — D99 ships a taxonomy loader with row attributes, so the module's loader and prefix table are a second copy of it. → §XLI.26
 - 📋 **D119** (deps: D107 ✅) **The jobs occupation step keeps its own answer cache, call cap and label check beside the commons ones** — Two caches and two caps do one job, so a fix to the commons classifier path never reaches the occupation step. → §XLI.27
 - 📋 **D120** (deps: D110 ✅, D113 ✅) **The jobs deduplicator keeps its own fingerprint table and preference rule beside the commons resolution index** — Two indexes decide what a shared posting publishes as, so a fix to commons resolution never reaches jobs. → §XLI.28
 - 📋 **D121** (deps: D115 ✅) **The jobs plugin overrides indexAll to flush tombstones and log run summaries** — The source and enricher run-end hooks now carry that work, and the counts belong in the run record, not only the log. → §XLI.29
 - 💭 **D122** (deps: D116 ✅) **The jobs source replays every stored open posting through extract each run to keep it indexed** — D104's unchangedIds can keep ids alive without an extract, but the replay also re-enriches and feeds dedupe. → §XLI.30
+
+## Done when — D117
+
+- **Jobs enrichers use DumClear, DumSourced and the declarative enrichers** The location
+  enricher clears a city outside its UF with DumClear while extract keeps the adapter's
+  place, contract, salary and seniority cite their input through DumSourced, and
+  contract, seniority and salary are DumFallbackEnricher or DumSplitEnricher
+  declarations.
 
 ## Non-goals (do NOT add as tasks)
 
