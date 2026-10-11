@@ -84,6 +84,19 @@ public interface DumConnectorContext {
         // Nowhere to record it.
     }
 
+    /**
+     * {@link #recordRunOutcome(DumConnectorSession, boolean, List)} with the run's warnings
+     * (roadmap <strong>D130</strong>): what the source says an operator must act on, which marks
+     * the run as warned whether or not it is partial. A context that keeps no warnings records the
+     * rest, so this defaults to dropping them.
+     *
+     * @param warnings short human-readable warnings, possibly empty
+     */
+    default void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes,
+            List<String> warnings) {
+        recordRunOutcome(session, partial, notes);
+    }
+
     List<DumConnectorIndexing> getIndexingItem(String objectId, String source, String provider);
 
     List<String> getObjectIdByDependency(String source, String provider,

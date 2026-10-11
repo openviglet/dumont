@@ -51,8 +51,8 @@ public class DumConnectorIndexingService {
 
         public record PendingStats(Instant startTime, OperationType operationType) {}
 
-        /** How a run ended (D96), held until its stats are written. */
-        public record RunOutcome(boolean partial, List<String> notes) {}
+        /** How a run ended (D96) and what it warned of (D130), held until its stats are written. */
+        public record RunOutcome(boolean partial, List<String> notes, List<String> warnings) {}
 
         public DumConnectorIndexingService(
                         DumConnectorIndexingRepository dumConnectorIndexingRepository,
@@ -84,14 +84,21 @@ public class DumConnectorIndexingService {
         /**
          * Records how the current run of a source ended (D96), for the stats row its finish
          * writes. Only a run whose start was tracked gets a row; for any other run (a per-id
-         * update, a scheduled crawl) there is nothing to attach it to, so it is dropped.
+         * update) there is nothing to attach it to, so it is dropped.
          */
         public void recordRunOutcome(String source, String provider, boolean partial,
                         List<String> notes) {
+                recordRunOutcome(source, provider, partial, notes, List.of());
+        }
+
+        /** {@link #recordRunOutcome(String, String, boolean, List)} with the run's warnings (D130). */
+        public void recordRunOutcome(String source, String provider, boolean partial,
+                        List<String> notes, List<String> warnings) {
                 String key = source + "|" + provider;
                 if (pendingStatsMap.containsKey(key)) {
                         runOutcomes.put(key, new RunOutcome(partial,
-                                        notes == null ? List.of() : List.copyOf(notes)));
+                                        notes == null ? List.of() : List.copyOf(notes),
+                                        warnings == null ? List.of() : List.copyOf(warnings)));
                 }
         }
 
@@ -157,6 +164,8 @@ public class DumConnectorIndexingService {
                                 .sites(sites)
                                 .partial(outcome != null && outcome.partial())
                                 .notes(outcome == null ? new ArrayList<>() : new ArrayList<>(outcome.notes()))
+                                .warnings(outcome == null ? new ArrayList<>()
+                                                : new ArrayList<>(outcome.warnings()))
                                 .build();
                 dumConnectorIndexingStatsRepository.save(stats);
                 log.info("Indexing stats for source '{}': {} documents in {}ms ({} docs/min)",

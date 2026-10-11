@@ -121,6 +121,25 @@ class DumConnectorIndexingServiceTest {
     }
 
     @Test
+    void aCompleteRunsWarningMarksItsStatsRowWarnedButNotPartial() {
+        // D130: a partner that quietly stopped returning items is not a healthy run.
+        service.trackIndexingStart("source-1", "turing", OperationType.INDEX_ALL);
+        service.recordRunOutcome("source-1", "turing", false, List.of("12 records"),
+                List.of("new postings fell 92% under the 7-day median"));
+
+        service.completeIndexingStats("source-1", "turing");
+
+        org.mockito.ArgumentCaptor<DumConnectorIndexingStatsModel> saved =
+                org.mockito.ArgumentCaptor.forClass(DumConnectorIndexingStatsModel.class);
+        verify(statsRepository).save(saved.capture());
+        assertThat(saved.getValue().isPartial()).isFalse();
+        assertThat(saved.getValue().isWarned()).isTrue();
+        assertThat(saved.getValue().getWarnings())
+                .containsExactly("new postings fell 92% under the 7-day median");
+        assertThat(saved.getValue().getNotes()).containsExactly("12 records");
+    }
+
+    @Test
     void keepAliveStampsTheSessionsTransactionInChunks() {
         // D104: 1,200 unchanged ids reach the database as three bounded updates.
         DumConnectorSession session = new DumConnectorSession("source-1", "turing", Locale.US);

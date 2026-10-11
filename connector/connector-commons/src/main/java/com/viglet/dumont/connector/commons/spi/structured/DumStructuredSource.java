@@ -125,6 +125,16 @@ public interface DumStructuredSource {
     }
 
     /**
+     * Warnings on the last run, read once after extraction beside {@link #runNotes()} (roadmap
+     * D130): something an operator must act on even though the run completed, such as a partner
+     * that suddenly returned far fewer items than usual. A run carrying one is recorded as warned,
+     * not as partial, so it neither stops a sweep nor reads like a healthy run. Defaults to none.
+     */
+    default List<String> runWarnings() {
+        return List.of();
+    }
+
+    /**
      * Called when a document this source published left the index (roadmap <strong>D113</strong>):
      * the run-end sweep removed it, or the run deindexed an expired id. The id is the published one
      * (a canonical id under resolution). Dumont keeps only a checksum per document, so a source that

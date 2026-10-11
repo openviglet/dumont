@@ -103,4 +103,18 @@ public class DumConnectorIndexingStatsModel implements Serializable {
     @CollectionTable(name = "dum_indexing_stats_notes", joinColumns = @JoinColumn(name = "stats_id"))
     @Column(name = "note", length = 1000)
     private List<String> notes = new ArrayList<>();
+    /**
+     * What the run warned an operator of (D130), whether or not it was partial: a complete run
+     * carrying one is not healthy. Empty for a run with nothing to say.
+     */
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "dum_indexing_stats_warnings", joinColumns = @JoinColumn(name = "stats_id"))
+    @Column(name = "warning", length = 1000)
+    private List<String> warnings = new ArrayList<>();
+
+    /** Whether the run raised a warning (D130), read by the console beside the source. */
+    public boolean isWarned() {
+        return warnings != null && !warnings.isEmpty();
+    }
 }

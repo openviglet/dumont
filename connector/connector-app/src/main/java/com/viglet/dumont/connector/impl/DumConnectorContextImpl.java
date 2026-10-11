@@ -183,13 +183,23 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
     @Override
     public void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes) {
+        recordRunOutcome(session, partial, notes, List.of());
+    }
+
+    @Override
+    public void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes,
+            List<String> warnings) {
         if (partial || (notes != null && !notes.isEmpty())) {
             log.info("Run outcome for source '{}': {}{}", session.getSource(),
                     partial ? "partial" : "complete", notes == null || notes.isEmpty() ? ""
                             : " (" + String.join("; ", notes) + ")");
         }
+        if (warnings != null && !warnings.isEmpty()) {
+            log.warn("Run of source '{}' raised {} warning(s): {}", session.getSource(),
+                    warnings.size(), String.join("; ", warnings));
+        }
         indexingService.recordRunOutcome(session.getSource(), session.getProviderName(), partial,
-                notes);
+                notes, warnings);
     }
 
     @Override

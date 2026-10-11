@@ -166,9 +166,21 @@ class DumConnectorContextImplTest {
         context.finishIndexing(session, true);
 
         verify(indexingService).recordRunOutcome("wknd", "turing", true,
-                List.of("stopped at the call cap of 20 per run"));
+                List.of("stopped at the call cap of 20 per run"), List.of());
         verify(indexingService).completeIndexingStats("wknd", "turing");
         verify(indexingService, never()).getShouldBeDeIndexedList(any());
+    }
+
+    @Test
+    void aRunsWarningsReachTheIndexingService() {
+        // D130: a complete run can warn without being partial.
+        DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
+
+        context.recordRunOutcome(session, false, List.of(),
+                List.of("new postings fell 92% under the 7-day median"));
+
+        verify(indexingService).recordRunOutcome("wknd", "turing", false, List.of(),
+                List.of("new postings fell 92% under the 7-day median"));
     }
 
     @Test
