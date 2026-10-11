@@ -56,6 +56,12 @@ import com.viglet.dumont.connector.plugin.jobs.source.seniority.DumJobSeniorityE
  * and occupation counts are logged once at the end of each {@link #indexAll(String)} run.
  *
  * <p>
+ * <strong>Duplicates (trabalharei TRA23).</strong> When the provider carries a
+ * {@link com.viglet.dumont.connector.plugin.jobs.source.dedupe.DumJobDeduplicator} (always, when
+ * Spring builds it), each source's run publishes one {@code job-<hash>} document per group of
+ * duplicates across all sources, and the run ends with one duplicate-rate line per source pair.
+ *
+ * <p>
  * <strong>Occupation fallback.</strong> The occupation step asks a commons {@link DumClassifier} for
  * the titles its dictionary does not read when a bean named
  * {@value DumJobOccupationEnricher#CLASSIFIER_BEAN} exists, at most
@@ -141,20 +147,22 @@ public class DumJobsPlugin extends DumStructuredSourcePlugin {
     }
 
     /**
-     * The structured run, then one location, one salary and one occupation summary line for the
-     * source. DumEnricher has no end-of-run hook (D100), so the plugin closes the counts here.
+     * The structured run, then one location, one salary, one occupation and one duplicate summary
+     * line for the source. DumEnricher has no end-of-run hook (D100), so the plugin closes the counts here.
      */
     @Override
     public void indexAll(String source) {
         locationEnricher.reset(source);
         salaryEnricher.reset(source);
         occupationEnricher.reset(source);
+        provider.deduplicator().ifPresent(deduplicator -> deduplicator.reset(source));
         try {
             super.indexAll(source);
         } finally {
             locationEnricher.logSummary(source);
             salaryEnricher.logSummary(source);
             occupationEnricher.logSummary(source);
+            provider.deduplicator().ifPresent(deduplicator -> deduplicator.logSummary(source));
         }
     }
 

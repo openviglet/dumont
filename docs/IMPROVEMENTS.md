@@ -78,6 +78,64 @@ These constrain every task above:
 
 ## XLI Structured sources over paged JSON APIs
 
+### XLI.17 Persistent cross-run resolution (D109)
+
+Found while deduplicating jobs across sources for trabalharei (TRA23). The D18
+cross-source resolve stage runs only inside `crawl()` and holds one call's records in
+memory, so it never sees another run, and the per-source `indexAll` path the API uses
+never reaches it. Sources that publish the same entity on different schedules (four job
+APIs with their own quotas) cannot be resolved against each other at all.
+
+Expected: resolution backed by a persistent canonical-id index (fingerprint to member
+ids) that every run of every source of a provider consults, on both `crawl()` and
+`indexAll`.
+
+Workaround: `DumJobDeduplicator` with a `job_fingerprint` table in `jobs/jobs-plugin`.
+
+### XLI.18 Pluggable survivorship (D110)
+
+Found while deduplicating jobs across sources for trabalharei (TRA23).
+`DumEntityResolver` / `DumRecordMerge` take no survivorship rule: the first contributor
+wins and later sources fill missing fields, with the primary fixed by provider order. A
+job site needs to keep one whole record chosen by a comparator (salary present, then the
+longer description, then the partner that pays per click), and field-by-field filling
+mixes one partner's apply link with another's text.
+
+Expected: a pluggable survivorship strategy (pick one whole record by a comparator, or
+merge field by field with per-field rules), declared per provider.
+
+Workaround: `DumJobPreference` in `jobs/jobs-plugin`.
+
+### XLI.19 Reference-counted deindex for shared documents (D111)
+
+Found while deduplicating jobs across sources for trabalharei (TRA23). Dumont tracks
+what each run published per (objectId, source). When several sources of one provider
+publish the same document id, one source's run-end sweep sends a delete for an id it
+tracked but did not publish this time, and the delete removes the document from the
+index even though another source still tracks it. That source's next run sees an
+unchanged checksum and does not resend, so the document is gone silently until its
+content changes.
+
+Expected: a reference-counted delete (deindex only when no source of the provider still
+tracks the id) or an owner notion for shared documents.
+
+Workaround: in `jobs/jobs-plugin`, every source holding a row in a group republishes the
+group document while any member is open, keeping expired rows as placeholders; each
+shared document is therefore sent once per source.
+
+### XLI.20 Resolve path keeps the run lifecycle (D112)
+
+Found while reading the D18 path for trabalharei's job deduplication (TRA23).
+`resolveAndIndex` in `crawl()` skips the per-source safeguards that `indexAll` applies
+(the zero-yield and failure-wave guards, the incremental-run handling, manifest
+provisioning), and it finishes only the primary sources' sessions, so a source whose
+records all merged into another source's is never swept.
+
+Expected: the resolve path goes through the same per-source run lifecycle as `indexAll`
+(guards, provisioning, session finish and sweep for every contributing source).
+
+Workaround: none; the jobs module does not use the D18 path.
+
 ## XLII Web-crawler hardening (real-world sources)
 ### XLI.4 Keep-alive for incremental sources (D104)
 

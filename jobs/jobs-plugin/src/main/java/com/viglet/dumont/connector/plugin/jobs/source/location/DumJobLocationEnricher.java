@@ -146,6 +146,23 @@ public final class DumJobLocationEnricher implements DumEnricher {
         return contributions;
     }
 
+    /**
+     * The canonical place {@link #enrich} would publish for an adapter posting, without counting it or
+     * annotating anything (trabalharei <strong>TRA23</strong>: the cross-source fingerprint keys on the
+     * canonical city, and it is computed before the chain runs). When the library does not hold the
+     * taxonomy, the adapter's own city and UF are answered, as {@link #enrich} would pass them through.
+     */
+    public DumJobLocationResolver.Resolution place(Map<String, Object> posting) {
+        String city = posting == null ? null : asText(posting.get(DumJobsSchema.CITY));
+        String state = posting == null ? null : asText(posting.get(DumJobsSchema.STATE));
+        String raw = posting == null ? null : asText(posting.get(DumJobSourceAdapter.LOCATION_RAW));
+        DumJobLocationResolver resolver = resolver();
+        if (resolver == null) {
+            return new DumJobLocationResolver.Resolution(city, DumJobNormalizer.uf(state), false, null);
+        }
+        return resolver.resolve(city, state, raw);
+    }
+
     /** This source's counts since the last {@link #logSummary} / {@link #reset}, without clearing them. */
     public Summary summary(String sourceName) {
         Counter counter = counters.get(sourceName);

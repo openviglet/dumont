@@ -118,6 +118,10 @@ This track has no remaining pending tasks.
 - 📋 **D106** (deps: —) **No LLM classifier is reachable from a plugin, so an LLM fallback in a connector never runs in production** — Long-tail classification needs the LLM, and the documented enable flag is wired to nothing. → §XLI.14
 - 📋 **D107** (deps: —) **The classification enricher has no persistent cache, no call cap and no closed label set** — Classifying into a fixed taxonomy at a bounded cost forces every connector to rebuild cache, cap and validation. → §XLI.15
 - 📋 **D108** (deps: —) **DumTuringClassifier keys its cache by a 32-bit String hashCode, so colliding inputs share each other's answers** — A collision silently gives one title another title's label, and nothing detects it. → §XLI.16
+- 📋 **D109** (deps: —) **Cross-source resolution runs only in memory inside crawl, so sources on separate runs or indexAll never resolve** — Partners publish the same entity on their own schedules, and one call's memory cannot match them. → §XLI.17
+- 📋 **D110** (deps: —) **Entity resolution has no survivorship rule: the first source wins and later ones fill fields** — Keeping one whole record by a comparator is the common need, and field filling mixes partners' data. → §XLI.18
+- 📋 **D111** (deps: —) **One source's run-end sweep deindexes a document another source of the same provider still tracks** — The other source's unchanged checksum stops it resending, so a shared document vanishes silently. → §XLI.19
+- 📋 **D112** (deps: —) **The crawl resolve path skips the per-source guards and never sweeps a source whose records all merged** — A run through resolution loses the zero-yield and failure-wave protections that indexAll applies. → §XLI.20
 
 ## Non-goals (do NOT add as tasks)
 

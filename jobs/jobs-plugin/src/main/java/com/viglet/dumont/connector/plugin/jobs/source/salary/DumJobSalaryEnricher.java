@@ -138,6 +138,23 @@ public final class DumJobSalaryEnricher implements DumEnricher {
         return contributions;
     }
 
+    /**
+     * Whether {@link #enrich} would publish a salary for this adapter posting — partner numbers, or a
+     * {@link DumJobSourceAdapter#SALARY_RAW} text the parser reads — without counting or annotating it
+     * (trabalharei <strong>TRA23</strong>: the duplicate a run keeps is the one with a salary).
+     */
+    public static boolean hasSalary(Map<String, Object> posting) {
+        if (posting == null) {
+            return false;
+        }
+        if (positive(posting.get(DumJobsSchema.SALARY_MIN)) != null
+                || positive(posting.get(DumJobsSchema.SALARY_MAX)) != null) {
+            return true;
+        }
+        String raw = text(posting.get(DumJobSourceAdapter.SALARY_RAW));
+        return raw != null && DumJobSalaryParser.parse(raw).status() == Status.PARSED;
+    }
+
     /** This source's counts since the last {@link #logSummary} / {@link #reset}, without clearing them. */
     public Summary summary(String sourceName) {
         Counter counter = counters.get(sourceName);
