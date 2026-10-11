@@ -26,6 +26,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +54,18 @@ public interface DumConnectorIndexingRepository
 
         List<DumConnectorIndexingModel> findBySourceAndProviderAndTransactionIdNotAndStandalone(
                         String source, String provider, String transactionId, boolean standalone);
+
+        /**
+         * Stamps a run's transaction on rows the source reports unchanged (D104), so the run-end
+         * sweep keeps them without the document passing through the pipeline again.
+         */
+        @Transactional
+        @Modifying
+        @Query("UPDATE DumConnectorIndexingModel i SET i.transactionId = :transactionId "
+                        + "WHERE i.source = :source AND i.provider = :provider AND i.objectId IN :ids")
+        int keepAlive(@Param("source") String source, @Param("provider") String provider,
+                        @Param("transactionId") String transactionId,
+                        @Param("ids") Collection<String> ids);
 
         List<DumConnectorIndexingModel> findByObjectIdAndSourceAndEnvironmentAndProvider(
                         String objectId, String source, String environment, String provider);

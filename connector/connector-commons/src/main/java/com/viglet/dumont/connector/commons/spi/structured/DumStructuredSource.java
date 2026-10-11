@@ -94,6 +94,17 @@ public interface DumStructuredSource {
     }
 
     /**
+     * Ids still present at the source but not re-extracted this run (roadmap D104), read once
+     * after {@link #discover()}: a quota-bound API that fetches only new items knows the older
+     * ones are still open. The indexing loop keeps them alive, so a sweeping finish does not
+     * deindex them and the source needs no stored payload to replay. They must not also be in
+     * {@link #discover()}. Defaults to none.
+     */
+    default Collection<String> unchangedIds() {
+        return List.of();
+    }
+
+    /**
      * Short notes on how the last run went, read once after extraction (roadmap D96): why a walk
      * stopped early ("daily allowance of 250 calls spent", "partner answered HTTP 429") or anything
      * else an operator should see in the run record rather than only in the logs. Defaults to none.

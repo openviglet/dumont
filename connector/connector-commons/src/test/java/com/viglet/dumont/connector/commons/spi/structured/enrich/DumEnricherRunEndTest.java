@@ -70,6 +70,55 @@ class DumEnricherRunEndTest {
         assertEquals(List.of("2 location(s) unresolved"), context.notes, "the count restarts each run");
     }
 
+    @Test
+    void unchangedIdsAreKeptAliveBeforeTheSweepingFinish() {
+        // D104: a quota-bound source lists only new items and names the older ones as unchanged.
+        CapturingContext context = new CapturingContext();
+        DumStructuredSource base = source(List.of(rec("9", "Recife")));
+        DumStructuredSource withUnchanged = new DumStructuredSource() {
+            @Override
+            public String getSourceName() {
+                return base.getSourceName();
+            }
+
+            @Override
+            public String getProviderName() {
+                return base.getProviderName();
+            }
+
+            @Override
+            public Collection<String> getSiteNames() {
+                return base.getSiteNames();
+            }
+
+            @Override
+            public DumStructuredSchema schema() {
+                return base.schema();
+            }
+
+            @Override
+            public List<String> discover() {
+                return base.discover();
+            }
+
+            @Override
+            public Optional<DumStructuredRecord> extract(String contentId) {
+                return base.extract(contentId);
+            }
+
+            @Override
+            public Collection<String> unchangedIds() {
+                return List.of("1", "2");
+            }
+        };
+
+        new Plugin(context, DumEnrichmentChain.empty(), withUnchanged).indexAll("jobs");
+
+        assertEquals(List.of("1", "2"), context.keptAlive);
+        assertEquals(List.of("before-finish", "finish"), context.order, "kept alive before the sweep runs");
+        assertEquals(1, context.items.size(), "only the new item was extracted and published");
+    }
+
     // --- helpers -------------------------------------------------------------------------------
 
     /** Counts records whose city it cannot resolve, and reports the count once per run. */
@@ -186,8 +235,17 @@ class DumEnricherRunEndTest {
 
     private static final class CapturingContext implements DumConnectorContext {
         private final List<DumJobItemWithSession> items = new ArrayList<>();
+        private final List<String> order = new ArrayList<>();
+        private List<String> keptAlive = List.of();
         private List<String> notes;
         private Boolean partial;
+
+        @Override
+        public int keepAlive(DumConnectorSession session, Collection<String> objectIds) {
+            keptAlive = List.copyOf(objectIds);
+            order.add("before-finish");
+            return objectIds.size();
+        }
 
         @Override
         public void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes) {
@@ -202,7 +260,7 @@ class DumEnricherRunEndTest {
 
         @Override
         public void finishIndexing(DumConnectorSession session, boolean standalone) {
-            // nothing to finish
+            order.add("finish");
         }
 
         @Override

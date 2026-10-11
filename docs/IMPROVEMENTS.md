@@ -96,7 +96,9 @@ adapters hit (the budget that was spent, the page and HTTP status that failed), 
 standalone and marks them partial. The adapters already compute each case for their WARN
 lines, so the note is the same sentence, collected instead of only logged. With D100,
 the unresolved-location count moves from the `DumJobsPlugin.indexAll` override to the
-location enricher's `onRunEnd`, and the override goes away.
+location enricher's `onRunEnd`, and the override goes away. With D104, still-open
+postings the quota did not reach are returned from `unchangedIds()`, so
+`DumJobSeen.payload` and its replay through `extract()` can go.
 
 ### XLI.15 Jobs enrichers read transients (D107)
 
@@ -142,24 +144,6 @@ prefix table and the module's loader go away. The file's existing `uf`-versus-pr
 check can stay as a test over the loaded taxonomy.
 
 ## XLII Web-crawler hardening (real-world sources)
-### XLI.4 Keep-alive for incremental sources (D104)
-
-Found while building the `jobs` module for trabalharei (TRA13). A job API bounded by a
-call quota (Adzuna's default is 250 calls a day) can only fetch the newest postings each
-run, while older postings stay open for weeks. The run-end sweep in
-`DumConnectorContextImpl` deindexes every tracking row whose `transactionId` differs
-from the session's, and a row only takes the new id when its document passes through
-`addJobItem`. Returning an id from `discover()` is not enough: `extract()` must hand
-back a full record for every still-open posting, so the module keeps each posting's last
-payload in its own `job_seen` table only to replay it, and normalizes every record
-through JSON so a replay and a fresh fetch produce the same checksum.
-
-Expected: a keep-alive primitive on the structured-source path, for example `discover()`
-returning ids marked "unchanged, keep" that stamp the session's transactionId on the
-existing rows without an extract, so incremental sources need no payload store.
-
-Workaround: `DumJobSeen.payload` in `jobs/jobs-plugin`.
-
 ### XLI.5 Build in a git worktree (D105)
 
 Found while building the `jobs` module (trabalharei TRA13) in a git worktree of this

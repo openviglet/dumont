@@ -549,3 +549,4 @@
 - **D101** — An enricher's contribution can name its selector and confidence through DumSourced, and a value it only passes through keeps the source's provenance.
 - **D102** — An invalid enricher contribution drops only that field, the enricher's other fields still land, and the warning names the field and the reason.
 - **D103** — DumFallbackEnricher declares an ordered fallback over inputs and DumSplitEnricher one input producing several fields, each value citing the input it came from.
+- **D104** — A source returns unchangedIds(), and the loop stamps the run's transaction on their tracking rows, so the sweep keeps them without a replayed extract.

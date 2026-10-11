@@ -290,6 +290,13 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                         runNotes(structuredSource));
                 return;
             }
+            // D104: ids the source reports unchanged and still present stay alive without an
+            // extract, so whichever finish follows does not deindex them.
+            Collection<String> unchanged = structuredSource.unchangedIds();
+            if (!unchanged.isEmpty()) {
+                int kept = dumConnectorContext.keepAlive(session, unchanged);
+                log.debug("Structured source '{}' kept {} unchanged id(s) alive", source, kept);
+            }
             if (!outcome.completed()) {
                 // The run was interrupted before visiting every discovered id; finishing
                 // non-standalone would treat the rest of the catalog as removed (D33).

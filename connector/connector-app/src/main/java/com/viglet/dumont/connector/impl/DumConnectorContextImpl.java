@@ -171,6 +171,11 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     }
 
     @Override
+    public int keepAlive(DumConnectorSession session, Collection<String> objectIds) {
+        return indexingService.keepAlive(session, objectIds);
+    }
+
+    @Override
     public void recordRunOutcome(DumConnectorSession session, boolean partial, List<String> notes) {
         if (partial || (notes != null && !notes.isEmpty())) {
             log.info("Run outcome for source '{}': {}{}", session.getSource(),

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -117,6 +118,20 @@ class DumConnectorIndexingServiceTest {
         assertThat(saved.getValue().getNotes())
                 .containsExactly("stopped: the day allowance of 250 calls is spent");
         assertThat(service.hasRunOutcome("source-1", "turing")).isFalse();
+    }
+
+    @Test
+    void keepAliveStampsTheSessionsTransactionInChunks() {
+        // D104: 1,200 unchanged ids reach the database as three bounded updates.
+        DumConnectorSession session = new DumConnectorSession("source-1", "turing", Locale.US);
+        List<String> ids = java.util.stream.IntStream.range(0, 1200).mapToObj(i -> "id-" + i).toList();
+        when(repository.keepAlive(eq("source-1"), eq("turing"), eq(session.getTransactionId()), any()))
+                .thenAnswer(inv -> inv.<Collection<String>>getArgument(3).size());
+
+        assertThat(service.keepAlive(session, ids)).isEqualTo(1200);
+        verify(repository, org.mockito.Mockito.times(3))
+                .keepAlive(eq("source-1"), eq("turing"), eq(session.getTransactionId()), any());
+        assertThat(service.keepAlive(session, List.of())).isZero();
     }
 
     @Test

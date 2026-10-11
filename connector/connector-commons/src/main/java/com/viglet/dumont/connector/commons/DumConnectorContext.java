@@ -59,6 +59,18 @@ public interface DumConnectorContext {
     }
 
     /**
+     * Keeps ids alive in the current run without re-sending them (roadmap <strong>D104</strong>):
+     * their tracking rows take the session's transaction, so a sweeping finish does not deindex
+     * them. For a source that knows an item is unchanged and still present but did not fetch it
+     * again. A no-op by default.
+     *
+     * @return how many tracked ids were kept
+     */
+    default int keepAlive(DumConnectorSession session, Collection<String> objectIds) {
+        return 0;
+    }
+
+    /**
      * Records how a run ended (roadmap <strong>D96</strong>), before its
      * {@link #finishIndexing finish}: whether it stopped short of the whole source, and the
      * notes that say why, so the run record shows a budget stop or a rate limit instead of a

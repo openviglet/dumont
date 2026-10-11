@@ -46,6 +46,7 @@ public class DumConnectorIndexingService {
         private final Map<String, PendingStats> pendingStatsMap = new ConcurrentHashMap<>();
         private final Set<String> processingSources = ConcurrentHashMap.newKeySet();
 
+        private static final int KEEP_ALIVE_CHUNK = 500;
         private final Map<String, RunOutcome> runOutcomes = new ConcurrentHashMap<>();
 
         public record PendingStats(Instant startTime, OperationType operationType) {}
@@ -92,6 +93,28 @@ public class DumConnectorIndexingService {
                         runOutcomes.put(key, new RunOutcome(partial,
                                         notes == null ? List.of() : List.copyOf(notes)));
                 }
+        }
+
+        /**
+         * Keeps the given ids of a source alive in the current run (D104): their tracking rows
+         * take the session's transaction, so the run-end sweep does not deindex them although
+         * they were not re-extracted. Ids the source never indexed are ignored.
+         *
+         * @return how many tracking rows were stamped
+         */
+        public int keepAlive(DumConnectorSession session, Collection<String> objectIds) {
+                if (objectIds == null || objectIds.isEmpty()) {
+                        return 0;
+                }
+                List<String> ids = List.copyOf(objectIds);
+                int stamped = 0;
+                // Chunked so a large source stays under the database's bind-parameter limit.
+                for (int from = 0; from < ids.size(); from += KEEP_ALIVE_CHUNK) {
+                        stamped += dumConnectorIndexingRepository.keepAlive(session.getSource(),
+                                        session.getProviderName(), session.getTransactionId(),
+                                        ids.subList(from, Math.min(ids.size(), from + KEEP_ALIVE_CHUNK)));
+                }
+                return stamped;
         }
 
         /** Whether the current run of a source recorded an outcome its stats row should carry. */
