@@ -119,7 +119,8 @@ and the location enricher removes a city outside the stated UF with `DumClear.fi
 instead of writing both fields itself. With D101, the contract, salary and seniority
 enrichers return `DumSourced.of(value, selector, confidence)` naming whether they read
 the partner's field, the title or the text, and a partner value they only pass through
-keeps its own provenance.
+keeps its own provenance. With D103, the contract and seniority enrichers become
+`DumFallbackEnricher` declarations and the salary enricher a `DumSplitEnricher`.
 
 ### XLI.16 Jobs loads IBGE through the taxonomy loader (D108)
 
@@ -173,18 +174,3 @@ executable (`useNativeGit`) or setting `failOnNoGitDirectory=false` with a fallb
 `agents.md` names the flag in the meantime.
 
 Workaround: the jobs module was built with `-Dmaven.gitcommitid.skip=true`.
-
-### XLI.13 Fallback and one-to-many enricher shapes (D103)
-
-Found while adding contract, seniority and salary enrichers to trabalharei's `jobs`
-module (TRA21). `DumNormalizationEnricher` maps one field to one field. Two common
-shapes need a hand-written enricher class each: an ordered fallback ("the partner's
-field, else the title, else the text; the first input that decides wins") and one input
-producing several output fields (salary text to min, max, period and band).
-
-Expected: built-in enricher shapes for an ordered fallback over inputs and for a
-one-to-many parser, configured by a recipe, so connectors declare them.
-
-Workaround: `DumJobContractEnricher`, `DumJobSeniorityEnricher` and
-`DumJobSalaryEnricher` in `jobs/jobs-plugin`.
-
