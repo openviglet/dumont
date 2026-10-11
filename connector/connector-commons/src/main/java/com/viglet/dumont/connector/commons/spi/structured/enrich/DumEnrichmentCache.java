@@ -16,9 +16,13 @@
 
 package com.viglet.dumont.connector.commons.spi.structured.enrich;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -33,15 +37,24 @@ import java.util.function.Supplier;
  * A {@code ttlMillis <= 0} means entries never expire (cache for the process lifetime). The clock is
  * injectable for deterministic tests.
  *
+ * <p>
+ * It is also the in-memory {@link DumClassificationStore} (D107), the default a
+ * {@link DumClassificationEnricher} uses when no persistent store is wired: answers and calls last as
+ * long as the process.
+ *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
-public final class DumEnrichmentCache {
+public final class DumEnrichmentCache implements DumClassificationStore {
 
     /** A cached entry; a {@code null} label is a cached "no label" (negative) result. */
-    private record Entry(String label, long expiresAt) {}
+    private record Entry(String label, long classifiedAt, long expiresAt) {}
+
+    /** Calls older than this are dropped when a new one is recorded: no cap looks further back. */
+    private static final Duration CALL_RETENTION = Duration.ofDays(2);
 
     private final Map<String, Entry> store = new ConcurrentHashMap<>();
+    private final Map<String, Queue<Instant>> calls = new ConcurrentHashMap<>();
     private final long ttlMillis;
     private final LongSupplier clock;
 
@@ -64,12 +77,42 @@ public final class DumEnrichmentCache {
             return Optional.ofNullable(cached.label());
         }
         Optional<String> loaded = loader.get();
-        store.put(key, new Entry(loaded.orElse(null), expiry()));
+        long now = clock.getAsLong();
+        store.put(key, new Entry(loaded.orElse(null), now, expiry(now)));
         return loaded;
+    }
+
+    @Override
+    public Optional<Answer> find(String key) {
+        Entry cached = valid(key);
+        return cached == null ? Optional.empty()
+                : Optional.of(new Answer(cached.label(), Instant.ofEpochMilli(cached.classifiedAt())));
+    }
+
+    @Override
+    public void put(String key, Answer answer) {
+        long now = clock.getAsLong();
+        long classifiedAt = answer.classifiedAt() != null ? answer.classifiedAt().toEpochMilli() : now;
+        store.put(key, new Entry(answer.label(), classifiedAt, expiry(now)));
+    }
+
+    @Override
+    public long callsSince(String scope, Instant since) {
+        Queue<Instant> made = calls.get(scope);
+        return made == null ? 0 : made.stream().filter(at -> at.isAfter(since)).count();
+    }
+
+    @Override
+    public void recordCall(String scope, Instant at) {
+        Queue<Instant> made = calls.computeIfAbsent(scope, s -> new ConcurrentLinkedQueue<>());
+        Instant oldest = at.minus(CALL_RETENTION);
+        made.removeIf(call -> call.isBefore(oldest));
+        made.add(at);
     }
 
     public void clear() {
         store.clear();
+        calls.clear();
     }
 
     private Entry valid(String key) {
@@ -84,7 +127,7 @@ public final class DumEnrichmentCache {
         return entry;
     }
 
-    private long expiry() {
-        return ttlMillis > 0 ? clock.getAsLong() + ttlMillis : Long.MAX_VALUE;
+    private long expiry(long now) {
+        return ttlMillis > 0 ? now + ttlMillis : Long.MAX_VALUE;
     }
 }

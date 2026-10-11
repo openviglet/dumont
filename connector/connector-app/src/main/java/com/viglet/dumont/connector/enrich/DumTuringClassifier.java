@@ -16,6 +16,7 @@
 
 package com.viglet.dumont.connector.enrich;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,8 +25,6 @@ import org.springframework.web.client.RestClient;
 
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassifier;
 import com.viglet.dumont.connector.config.DumTuringCsrfService;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * The production {@link DumClassifier} for the D04 LLM enrichment path: a thin adapter over Turing's
@@ -36,13 +35,16 @@ import lombok.extern.slf4j.Slf4j;
  * over the shared {@code RestClient} (base URL + {@code Key} header) with a CSRF token — so there is
  * <strong>no new model wiring in Dumont</strong>: Turing owns the model, the prompt cache
  * ({@code TurLlmCacheService}) and the Global Settings. The classifier is constructed with a
- * classification {@code systemPrompt} (the instruction + the allowed label set) and returns the
- * model's answer trimmed to a single label.
+ * classification {@code systemPrompt} (the instruction) and returns the model's answer trimmed to a
+ * single label. {@link #classify(String, Collection)} appends the closed label set to that prompt and
+ * accepts only a label of the set (D107). Turing's cache key covers the prompt as well as the input,
+ * so a changed label set is a miss there too.
  *
  * <p>
- * <strong>Grounding contract.</strong> Any failure — an unreachable Turing, a non-success response,
- * an empty or {@code "NONE"} answer — yields {@link Optional#empty()}, so the
- * {@code DumClassificationEnricher} omits the field rather than fabricating a label. This is a
+ * <strong>Grounding contract.</strong> An empty or {@code "NONE"} answer yields
+ * {@link Optional#empty()}, so the {@code DumClassificationEnricher} omits the field rather than
+ * fabricating a label. A call that fails — an unreachable Turing, a non-success response — throws
+ * (D107): the enricher still omits the field, but does not cache the failure as "no label". This is a
  * classifier of <em>structure</em> (which category), never a producer of sourced content.
  *
  * <p>
@@ -57,7 +59,6 @@ import lombok.extern.slf4j.Slf4j;
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
-@Slf4j
 public class DumTuringClassifier implements DumClassifier {
 
     private static final String NO_LABEL = "NONE";
@@ -80,31 +81,45 @@ public class DumTuringClassifier implements DumClassifier {
         if (input == null || input.isBlank()) {
             return Optional.empty();
         }
-        try {
-            Map<String, Object> request = new LinkedHashMap<>();
-            request.put("cacheKey", cacheKeyPrefix + ":" + Integer.toHexString(input.hashCode()));
-            request.put("data", input);
-            request.put("systemPrompt", systemPrompt);
+        return ask(input, systemPrompt);
+    }
 
-            var csrf = csrfService.fetch();
-
-            SummaryResponse response = restClient.post()
-                    .uri("/api/v2/summary")
-                    .header(csrf.headerName(), csrf.token())
-                    .body(request)
-                    .retrieve()
-                    .body(SummaryResponse.class);
-
-            return toLabel(response);
-        } catch (RuntimeException e) {
-            log.warn("LLM classification call to Turing failed — omitting the field: {}",
-                    e.getMessage());
+    @Override
+    public Optional<String> classify(String input, Collection<String> labels) {
+        if (input == null || input.isBlank()) {
             return Optional.empty();
         }
+        StringBuilder prompt = new StringBuilder(systemPrompt == null ? "" : systemPrompt)
+                .append("\n\nAnswer with exactly one label of this list, written as listed, or ")
+                .append(NO_LABEL).append(" when none applies:\n");
+        labels.forEach(label -> prompt.append(label).append('\n'));
+        return ask(input, prompt.toString()).flatMap(answer -> DumClassifier.match(answer, labels));
+    }
+
+    private Optional<String> ask(String input, String prompt) {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("cacheKey", cacheKeyPrefix + ":" + Integer.toHexString((prompt + '\n' + input).hashCode()));
+        request.put("data", input);
+        request.put("systemPrompt", prompt);
+
+        var csrf = csrfService.fetch();
+
+        SummaryResponse response = restClient.post()
+                .uri("/api/v2/summary")
+                .header(csrf.headerName(), csrf.token())
+                .body(request)
+                .retrieve()
+                .body(SummaryResponse.class);
+
+        if (response == null || !response.success()) {
+            throw new IllegalStateException("Turing could not classify: "
+                    + (response == null ? "empty response" : response.error()));
+        }
+        return toLabel(response);
     }
 
     private Optional<String> toLabel(SummaryResponse response) {
-        if (response == null || !response.success() || response.content() == null) {
+        if (response.content() == null) {
             return Optional.empty();
         }
         String label = response.content().strip();

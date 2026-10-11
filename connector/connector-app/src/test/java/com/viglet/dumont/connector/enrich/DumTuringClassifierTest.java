@@ -16,13 +16,17 @@
 
 package com.viglet.dumont.connector.enrich;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -97,22 +101,47 @@ class DumTuringClassifierTest {
     }
 
     @Test
-    void unsuccessfulResponseYieldsNoLabel() {
+    void unsuccessfulResponseThrowsSoTheFailureIsNotCached() {
         expectCsrf();
         expectSummary(withSuccess(
                 "{\"success\":false,\"error\":\"no LLM configured\",\"content\":null,\"canRegenerate\":false}",
                 MediaType.APPLICATION_JSON));
 
-        assertTrue(classifier.classify("intro calculus").isEmpty());
+        assertThrows(IllegalStateException.class, () -> classifier.classify("intro calculus"),
+                "a failed call is not an answer: the enricher omits the field without caching it");
     }
 
     @Test
-    void transportFailureYieldsNoLabel() {
+    void transportFailureThrowsSoTheFailureIsNotCached() {
         expectCsrf();
         expectSummary(withServerError());
 
-        assertTrue(classifier.classify("intro calculus").isEmpty(),
-                "an unreachable Turing degrades to omission, not an exception");
+        assertThrows(RuntimeException.class, () -> classifier.classify("intro calculus"));
+    }
+
+    @Test
+    void theClosedSetTravelsInThePromptAndBoundsTheAnswer() {
+        expectCsrf();
+        server.expect(requestTo("http://turing.test/api/v2/summary"))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(jsonPath("$.systemPrompt", containsString("Exact Sciences\nHumanities\n")))
+                .andRespond(withSuccess(
+                        "{\"success\":true,\"error\":null,\"content\":\"humanities\",\"canRegenerate\":true}",
+                        MediaType.APPLICATION_JSON));
+
+        assertEquals(Optional.of("Humanities"),
+                classifier.classify("history survey", List.of("Exact Sciences", "Humanities")));
+        server.verify();
+    }
+
+    @Test
+    void anAnswerOutsideTheClosedSetIsNoLabel() {
+        expectCsrf();
+        expectSummary(withSuccess(
+                "{\"success\":true,\"error\":null,\"content\":\"Astrology\",\"canRegenerate\":true}",
+                MediaType.APPLICATION_JSON));
+
+        assertTrue(classifier.classify("horoscope", List.of("Exact Sciences", "Humanities")).isEmpty());
     }
 
     @Test

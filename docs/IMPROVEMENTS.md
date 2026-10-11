@@ -242,25 +242,29 @@ run's outcome.
 
 Workaround: `DumJobsPlugin.indexAll` override in `jobs/jobs-plugin`.
 
+### XLI.27 Occupation step on the commons classification store (D119)
+
+D107 gave `DumClassificationEnricher` a `DumClassificationStore` (in-memory
+`DumEnrichmentCache`, or the persistent `DumJpaClassificationStore` bean in
+connector-app), a rolling daily cap counted in that store, and
+`DumClassifier.classify(input, labels)` with `DumClassifier.match`.
+`DumJobOccupationEnricher` in `jobs/jobs-plugin` still carries the workaround it was
+built with: its own `job_occupation_cache` table, a cap counted in `job_call` under
+`occupation-classifier`, and `DumJobOccupationLabels.code` as its label check. Two
+caches and two caps now do one job, and a fix to either is not a fix to the other.
+
+Expected: the occupation step keeps its dictionary, its `known()` read for tombstones
+and its per-source counters, but asks the classifier through `classify(title, labels)`
+and keeps answers and calls in the injected `DumClassificationStore`, keyed with the
+taxonomy version so a newer CBO list is a miss. The label set stays the CBO codes; the
+slug mapping stays in `DumCboFamilies`.
+
+Open choice: whether to migrate the rows already in `job_occupation_cache` (answers paid
+for once) or let them expire and re-ask under the daily cap. Dropping
+`job_occupation_cache` and the `occupation-classifier` rows in `job_call` is part of the
+change either way.
+
 ## XLII Web-crawler hardening (real-world sources)
-### XLI.15 Bounded closed-set classification (D107)
-
-Found while adding occupation classification to trabalharei's `jobs` module (TRA22).
-`DumClassificationEnricher` cannot classify into a fixed taxonomy at a bounded cost: its
-cache is in memory only and keeps every empty result for the process lifetime (a call
-refused by a cap would read as "no label"), it has no call or cost cap, and it publishes
-whatever label comes back without checking it against a list. `DumClassifier.classify`
-takes only the input string, so there is no closed-label contract: each caller rebuilds
-the prompt with the whole label set (617 CBO families is about 10k tokens per call) and
-validates the answer itself.
-
-Expected: a classification enricher with a persistent cache keyed by a strong hash and
-the taxonomy version, a daily call or cost cap that does not cache refusals, and a
-`classify(input, labels)` contract that rejects answers outside the set.
-
-Workaround: `DumJobOccupationEnricher` with `job_occupation_cache` and the cap in
-`job_call`, in `jobs/jobs-plugin`.
-
 ### XLI.16 Collision-safe classifier cache key (D108)
 
 Found while reviewing the classifiers for trabalharei's `jobs` module (TRA22).

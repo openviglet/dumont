@@ -16,8 +16,14 @@
 
 package com.viglet.dumont.connector.commons.spi.structured.enrich;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
@@ -36,8 +42,17 @@ import lombok.extern.slf4j.Slf4j;
  * <li><strong>Config.</strong> When {@code enabled} is {@code false} the enricher is an immediate
  * no-op — the classifier is never called. The flag is wired from {@code dumont.enrichment.llm.*}
  * configuration in {@code connector-app}.</li>
- * <li><strong>Cache.</strong> Inputs are de-duplicated through a {@link DumEnrichmentCache}; an
- * identical description is classified once per TTL, and a "no label" outcome is cached too.</li>
+ * <li><strong>Cache.</strong> Inputs are de-duplicated through a {@link DumClassificationStore}, keyed
+ * by the SHA-256 of the enricher's name, its label set and the input (D107). An identical input is
+ * classified once, and a "no label" answer is cached too. A failed call (the classifier threw) and a
+ * call the cap refused are <em>not</em> cached, so they are asked again later rather than read as
+ * "no label". The default store is an in-memory {@link DumEnrichmentCache}; the persistent one
+ * {@code connector-app} registers survives a restart.</li>
+ * <li><strong>Cap.</strong> With {@link Builder#dailyCap}, at most that many calls are made in any
+ * rolling 24 hours, counted in the store so the cap holds across runs (D107).</li>
+ * <li><strong>Closed label set.</strong> With {@link Builder#labels}, the classifier is asked through
+ * {@link DumClassifier#classify(String, Collection)} and an answer outside the set is "no label"
+ * (D107).</li>
  * </ul>
  *
  * <p>
@@ -53,13 +68,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class DumClassificationEnricher implements DumEnricher {
 
+    /** The window {@link Builder#dailyCap} counts calls over. */
+    public static final Duration CAP_WINDOW = Duration.ofDays(1);
+
+    private static final int UNCAPPED = -1;
+
     private final String name;
     private final boolean enabled;
     private final String targetField;
     private final Function<DumStructuredRecord, String> inputBuilder;
     private final DumClassifier classifier;
-    private final DumEnrichmentCache cache;
+    private final DumClassificationStore store;
     private final boolean overwriteSourced;
+    private final List<String> labels;
+    private final String keyPrefix;
+    private final int dailyCap;
+    private final Clock clock;
 
     private DumClassificationEnricher(Builder builder) {
         this.name = builder.name;
@@ -67,8 +91,13 @@ public final class DumClassificationEnricher implements DumEnricher {
         this.targetField = builder.targetField;
         this.inputBuilder = builder.inputBuilder;
         this.classifier = builder.classifier;
-        this.cache = builder.cache != null ? builder.cache : new DumEnrichmentCache(0);
+        this.store = builder.store != null ? builder.store : new DumEnrichmentCache(0);
         this.overwriteSourced = builder.overwriteSourced;
+        this.labels = builder.labels;
+        this.keyPrefix = name + '\n'
+                + (labels == null ? "" : String.join("\n", new TreeSet<>(labels))) + '\n';
+        this.dailyCap = builder.dailyCap;
+        this.clock = builder.clock;
     }
 
     public static Builder builder(String name) {
@@ -92,20 +121,52 @@ public final class DumClassificationEnricher implements DumEnricher {
         if (input == null || input.isBlank()) {
             return Map.of();
         }
-        Optional<String> label = cache.resolve(input, () -> safeClassify(input));
-        return label.filter(value -> !value.isBlank())
+        return label(input).filter(value -> !value.isBlank())
                 .<Map<String, Object>>map(value -> Map.of(targetField, value))
                 .orElseGet(Map::of);
     }
 
-    private Optional<String> safeClassify(String input) {
+    /** The stored answer for {@code input}, else the classifier's when the cap grants a call. */
+    private Optional<String> label(String input) {
+        String key = DumClassificationStore.hash(keyPrefix + input);
+        Optional<DumClassificationStore.Answer> cached = store.find(key);
+        if (cached.isPresent()) {
+            return cached.get().asOptional().flatMap(this::checked);
+        }
+        if (!acquire()) {
+            log.debug("Classifier '{}' reached its daily cap of {}: field '{}' omitted, not cached",
+                    name, dailyCap, targetField);
+            return Optional.empty();
+        }
+        Optional<String> label;
         try {
-            return classifier.classify(input);
+            label = (labels == null ? classifier.classify(input) : classifier.classify(input, labels))
+                    .flatMap(this::checked);
         } catch (RuntimeException e) {
             log.warn("Classifier '{}' failed — field '{}' will be omitted for this record: {}",
                     name, targetField, e.getMessage());
             return Optional.empty();
         }
+        store.put(key, new DumClassificationStore.Answer(label.orElse(null), clock.instant()));
+        return label;
+    }
+
+    /** {@code label} itself, or its spelling in the label set; empty when the set does not hold it. */
+    private Optional<String> checked(String label) {
+        return labels == null ? Optional.of(label) : DumClassifier.match(label, labels);
+    }
+
+    /** Whether the cap grants one more call now, recording the call when it does. */
+    private synchronized boolean acquire() {
+        if (dailyCap == UNCAPPED) {
+            return true;
+        }
+        Instant now = clock.instant();
+        if (store.callsSince(name, now.minus(CAP_WINDOW)) >= dailyCap) {
+            return false;
+        }
+        store.recordCall(name, now);
+        return true;
     }
 
     public static final class Builder {
@@ -114,8 +175,11 @@ public final class DumClassificationEnricher implements DumEnricher {
         private String targetField;
         private Function<DumStructuredRecord, String> inputBuilder;
         private DumClassifier classifier;
-        private DumEnrichmentCache cache;
+        private DumClassificationStore store;
         private boolean overwriteSourced;
+        private List<String> labels;
+        private int dailyCap = UNCAPPED;
+        private Clock clock = Clock.systemUTC();
 
         private Builder(String name) {
             this.name = name;
@@ -153,8 +217,39 @@ public final class DumClassificationEnricher implements DumEnricher {
             return this;
         }
 
+        /** An in-memory cache: the same as {@link #store} given a {@link DumEnrichmentCache}. */
         public Builder cache(DumEnrichmentCache cache) {
-            this.cache = cache;
+            this.store = cache;
+            return this;
+        }
+
+        /** Where answers and calls are kept; the default is an in-memory {@link DumEnrichmentCache}. */
+        public Builder store(DumClassificationStore store) {
+            this.store = store;
+            return this;
+        }
+
+        /**
+         * The closed label set: only one of these is ever published, and a change to the set makes
+         * every cached answer a miss. Unset, any label the classifier returns is published.
+         */
+        public Builder labels(Collection<String> labels) {
+            this.labels = labels == null ? null : List.copyOf(labels);
+            return this;
+        }
+
+        /** At most this many classifier calls in any rolling 24 hours; {@code 0} allows none. */
+        public Builder dailyCap(int dailyCap) {
+            if (dailyCap < 0) {
+                throw new IllegalArgumentException("dailyCap must be zero or more");
+            }
+            this.dailyCap = dailyCap;
+            return this;
+        }
+
+        /** The clock answers are dated and calls counted by; injectable for tests. */
+        public Builder clock(Clock clock) {
+            this.clock = clock;
             return this;
         }
 
@@ -173,6 +268,9 @@ public final class DumClassificationEnricher implements DumEnricher {
             }
             if (classifier == null) {
                 throw new IllegalArgumentException("classifier is required");
+            }
+            if (labels != null && labels.isEmpty()) {
+                throw new IllegalArgumentException("labels, when given, must not be empty");
             }
             return new DumClassificationEnricher(this);
         }

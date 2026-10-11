@@ -19,6 +19,8 @@ package com.viglet.dumont.connector.commons.spi.structured.enrich;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -105,5 +107,35 @@ class DumEnrichmentCacheTest {
             return Optional.of("v");
         });
         assertEquals(2, calls.get());
+    }
+
+    @Test
+    void asAStoreItKeepsAnswersIncludingNoLabel() {
+        DumEnrichmentCache cache = new DumEnrichmentCache(0);
+        Instant at = Instant.parse("2026-10-11T10:00:00Z");
+
+        cache.put("yes", new DumClassificationStore.Answer("label", at));
+        cache.put("no", new DumClassificationStore.Answer(null, at));
+
+        assertEquals(Optional.of("label"), cache.find("yes").flatMap(DumClassificationStore.Answer::asOptional));
+        assertEquals(at, cache.find("yes").orElseThrow().classifiedAt());
+        assertTrue(cache.find("no").isPresent(), "a cached no-label is a hit");
+        assertTrue(cache.find("no").orElseThrow().asOptional().isEmpty());
+        assertTrue(cache.find("missing").isEmpty());
+    }
+
+    @Test
+    void asAStoreItCountsCallsPerScopeInAWindow() {
+        DumEnrichmentCache cache = new DumEnrichmentCache(0);
+        Instant now = Instant.parse("2026-10-11T10:00:00Z");
+
+        cache.recordCall("a", now.minus(Duration.ofHours(30)));
+        cache.recordCall("a", now.minus(Duration.ofHours(2)));
+        cache.recordCall("a", now);
+        cache.recordCall("b", now);
+
+        assertEquals(2, cache.callsSince("a", now.minus(Duration.ofDays(1))));
+        assertEquals(1, cache.callsSince("b", now.minus(Duration.ofDays(1))));
+        assertEquals(0, cache.callsSince("c", now.minus(Duration.ofDays(1))));
     }
 }

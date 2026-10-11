@@ -108,7 +108,6 @@ This track has no remaining pending tasks.
 - 📋 **D116** (deps: D96 ✅) **The jobs adapters report budget stops and rate limits only in the logs, so their runs still read as complete** — D96 gave sources run notes, and the jobs module is the paid, rate-limited source they were built for. → §XLI.24
 - 📋 **D117** (deps: D97 ✅) **The jobs enrichers reach into the source for raw location text instead of reading it from the record** — D97 gave records transient attributes, so the module-specific posting lookup is now a second path for the same data. → §XLI.25
 - 📋 **D118** (deps: D99 ✅) **The jobs module loads the IBGE municipality list with its own code and derives the UF from a hand-kept prefix table** — D99 ships a taxonomy loader with row attributes, so the module's loader and prefix table are a second copy of it. → §XLI.26
-- 📋 **D107** (deps: —) **The classification enricher has no persistent cache, no call cap and no closed label set** — Classifying into a fixed taxonomy at a bounded cost forces every connector to rebuild cache, cap and validation. → §XLI.15
 - 📋 **D108** (deps: —) **DumTuringClassifier keys its cache by a 32-bit String hashCode, so colliding inputs share each other's answers** — A collision silently gives one title another title's label, and nothing detects it. → §XLI.16
 - 📋 **D109** (deps: —) **Cross-source resolution runs only in memory inside crawl, so sources on separate runs or indexAll never resolve** — Partners publish the same entity on their own schedules, and one call's memory cannot match them. → §XLI.17
 - 📋 **D110** (deps: —) **Entity resolution has no survivorship rule: the first source wins and later ones fill fields** — Keeping one whole record by a comparator is the common need, and field filling mixes partners' data. → §XLI.18
@@ -117,6 +116,7 @@ This track has no remaining pending tasks.
 - 📋 **D113** (deps: —) **A structured source is not told when the run-end sweep deindexes one of its documents** — Reacting to a removal, such as telling a site a job ended, means re-deriving the sweep's decision. → §XLI.21
 - 📋 **D114** (deps: —) **Only incremental sources can deindex a given id now, and choosing that mode gives up the sweep** — A posting found dead mid-cycle should leave the index at once without a source changing its run mode. → §XLI.22
 - 📋 **D115** (deps: —) **Structured sources have no end-of-run hook, so post-run work needs a plugin indexAll override** — Flushing notifications and writing summaries once per run is common, and every connector repeats the override. → §XLI.23
+- 📋 **D119** (deps: D107 ✅) **The jobs occupation step keeps its own answer cache, call cap and label check beside the commons ones** — Two caches and two caps do one job, so a fix to the commons classifier path never reaches the occupation step. → §XLI.27
 
 ## Non-goals (do NOT add as tasks)
 
