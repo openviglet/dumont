@@ -87,9 +87,11 @@ public class ReindexStrategy implements JobProcessingStrategy {
             return false;
         }
 
+        // A missing checksum on either side says nothing about the content, so it reads as
+        // changed rather than throwing (D127).
+        String checksum = jobItem.turSNJobItem().getChecksum();
         boolean checksumChanged = list.stream()
-                .anyMatch(indexing -> !jobItem.turSNJobItem().getChecksum()
-                        .equals(indexing.getChecksum()));
+                .anyMatch(indexing -> checksum == null || !checksum.equals(indexing.getChecksum()));
         boolean ignoredStatus = list.stream()
                 .anyMatch(indexing -> IGNORED.equals(indexing.getStatus()));
 

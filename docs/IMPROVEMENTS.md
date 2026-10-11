@@ -82,29 +82,3 @@ These constrain every task above:
 
 ## XLIII Connector run control
 
-### XLIII.4 Structured job items carry no checksum (D127)
-
-Met in trabalharei (TRA25, Dumont-to-Turing publishing proof) on a local Dumont 2026.3
-built from `e7aeb581`, Turing built from `0256a122dd`.
-
-The first `index/proof-adzuna/all` of a structured source publishes its 7 records and
-Turing imports them. The second run, with nothing changed at the partner, aborts:
-
-    NullPointerException: Cannot invoke "String.equals(Object)" because the return value
-    of "TurSNJobItem.getChecksum()" is null
-      at ReindexStrategy.lambda$canHandle$1(ReindexStrategy.java:92)
-      at JobProcessingChain.process(JobProcessingChain.java:70)
-
-`DumStructuredSourcePlugin.toJobItem` builds `new TurSNJobItem(CREATE, sites, locale,
-attributes, specs)`, the constructor that leaves `checksum` null, so every ledger row of
-a structured source holds `checksum: null` (visible in `monitoring/index/<source>`) and
-the first run that finds a row calls `.equals` on null. Every structured source
-therefore fails its second run, and nothing decides unchanged versus changed.
-
-Expected: `toJobItem` stamps a checksum computed from what is published (attributes and
-specs, in a stable order), so an unchanged record is skipped, a changed one is
-reindexed, and `ReindexStrategy` treats a null on either side as changed instead of
-throwing. An IT that runs one structured source twice would cover it.
-
-Workaround in trabalharei: none. The jobs extension could override `toJobItem`, but the
-fix belongs to every structured source; trabalharei's TRA25 waits on this line.

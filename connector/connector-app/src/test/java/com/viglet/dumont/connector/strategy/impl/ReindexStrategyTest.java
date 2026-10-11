@@ -100,6 +100,24 @@ class ReindexStrategyTest {
     }
 
     @Test
+    void doesNotHandleAnUnchangedChecksum() {
+        DumJobItemWithSession jobItem = jobItem("v1", false);
+        when(indexingService.getList(jobItem)).thenReturn(List.of(indexed("v1", PREPARE_REINDEX)));
+        assertThat(strategy.canHandle(jobItem)).isFalse();
+    }
+
+    @Test
+    void aMissingChecksumOnEitherSideReadsAsChangedInsteadOfThrowing() {
+        DumJobItemWithSession noChecksum = jobItem(null, false);
+        when(indexingService.getList(noChecksum)).thenReturn(List.of(indexed("v1", PREPARE_REINDEX)));
+        assertThat(strategy.canHandle(noChecksum)).isTrue();
+
+        DumJobItemWithSession againstNull = jobItem("v1", false);
+        when(indexingService.getList(againstNull)).thenReturn(List.of(indexed(null, PREPARE_REINDEX)));
+        assertThat(strategy.canHandle(againstNull)).isTrue();
+    }
+
+    @Test
     void handlesWhenPreviouslyIgnored() {
         DumJobItemWithSession jobItem = jobItem("v1", false);
         when(indexingService.getList(jobItem)).thenReturn(List.of(indexed("v1", IGNORED)));

@@ -107,7 +107,6 @@ This track has no remaining pending tasks.
 
 ## Track P — Connector run control
 
-- 📋 **D127** (deps: —) **A structured source's second run aborts on a null checksum: toJobItem sets none and ReindexStrategy calls equals on it** — Every structured source fails each run after its first, and unchanged records cannot be told from changed ones. → §XLIII.4
 
 ## Non-goals (do NOT add as tasks)
 

@@ -589,8 +589,14 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
                     rec.id(), source.getSourceName(), missing);
             return;
         }
-        dumConnectorContext.addJobItem(new DumJobItemWithSession(
-                toJobItem(source, rec), session, Set.of(), false));
+        TurSNJobItem item = toJobItem(source, rec);
+        // D127: the reindex strategy compares checksums, so an item must carry one. A plugin that
+        // stamps its own (AEM's delta date) keeps it; otherwise it is the hash of what is published,
+        // taken after toJobItem so a subclass's added attributes count too.
+        if (item.getChecksum() == null) {
+            item.setChecksum(DumJobItemChecksum.of(item));
+        }
+        dumConnectorContext.addJobItem(new DumJobItemWithSession(item, session, Set.of(), false));
         if (snapshot != null) {
             snapshot.add(rec.id(), rec.values());
         }

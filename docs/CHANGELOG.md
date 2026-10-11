@@ -575,3 +575,4 @@
 - **D124** — Index-all and reindex-all resolve the owning plugin before taking the run lock: an unowned name answers 404 with a reason, and a start that throws releases the lock (DumConnectorApi.startRun).
 - **D125** — The default H2 URL opens with CASE_INSENSITIVE_IDENTIFIERS, so tenant-scoped reads find "tenant_id" on new and existing H2 files (DumTenantPredicateH2Test).
 - **D126** — An aborted structured run logs its cause before finishing and records it as a note after the reason; a finish that also fails is logged apart and carries the cause as suppressed.
+- **D127** — Structured job items carry a SHA-256 of what they publish unless the plugin stamps its own, so an unchanged rerun is skipped; ReindexStrategy reads a null checksum as changed.
