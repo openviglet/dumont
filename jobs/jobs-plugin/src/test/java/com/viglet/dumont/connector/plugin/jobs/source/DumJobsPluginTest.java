@@ -33,9 +33,14 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeRef;
 import com.viglet.dumont.connector.plugin.jobs.DumJobsPlugin;
 import com.viglet.dumont.connector.plugin.jobs.persistence.model.DumJobSource;
 import com.viglet.dumont.connector.plugin.jobs.persistence.repository.DumJobSourceRepository;
+import com.viglet.dumont.connector.plugin.jobs.source.location.DumJobLocationEnricher;
+import com.viglet.dumont.connector.plugin.jobs.source.occupation.DumCboFamilies;
+import com.viglet.dumont.connector.plugin.jobs.source.occupation.DumJobOccupationEnricher;
+import com.viglet.dumont.connector.plugin.jobs.source.salary.DumJobSalaryEnricher;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
 
 /** End-to-end: fetch &rarr; remember &rarr; extract &rarr; ground &rarr; publish through the structured loop. */
@@ -115,5 +120,61 @@ class DumJobsPluginTest {
                 .containsEntry("city", List.of("São Paulo"))
                 .doesNotContainKey("salaryMin");
         assertThat(context.finishedStandalone).containsExactly(false);
+    }
+
+    @Test
+    void indexAllPublishesTheOccupationFromTheDictionaryOrTheCappedCachedClassifier() {
+        DumJobSource entity = DumJobSource.builder().id("s2").name("jooble-br").sourceType("jooble")
+                .turSNSites(Set.of("trabalharei")).build();
+        DumJobSourceRepository repository = mock(DumJobSourceRepository.class);
+        when(repository.findByName("jooble-br")).thenReturn(Optional.of(entity));
+        DumJobSourceAdapter adapter = new DumJobSourceAdapter() {
+            @Override
+            public String id() {
+                return "jooble";
+            }
+
+            @Override
+            public List<Map<String, Object>> fetch(DumJobFetchContext context) {
+                return List.of(posting("j-1", "Motorista Carreteiro"), posting("j-2", "Projetista de Moldes"),
+                        posting("j-3", "Projetista de Moldes Sênior"), posting("j-4", "Jovem Aprendiz"),
+                        posting("j-5", "Modelista de Calçados"));
+            }
+        };
+        MutableClock clock = new MutableClock(NOW);
+        InMemoryCallRepository calls = new InMemoryCallRepository();
+        DumJobsSourceProvider provider = new DumJobsSourceProvider(repository,
+                new InMemorySeenRepository().repository, calls.repository, List.of(adapter), clock);
+        List<String> asked = new ArrayList<>();
+        // A daily cap of one: the first unknown title is classified, the second is refused.
+        DumJobOccupationEnricher occupation = new DumJobOccupationEnricher(DumJobOccupationEnricher.library(),
+                DumRecipeRef.latest(DumCboFamilies.TAXONOMY), title -> {
+                    asked.add(title);
+                    return Optional.of("3188");
+                }, null, calls.repository, 1, clock);
+        CapturingContext context = new CapturingContext();
+
+        new DumJobsPlugin(context, provider, DumJobLocationEnricher.standard(), new DumJobSalaryEnricher(),
+                occupation).indexAll("jooble-br");
+
+        Map<String, Object> byId = new java.util.HashMap<>();
+        context.published.forEach(item -> byId.put(item.getId(), item.getAttributes().get("occupation")));
+        assertThat(byId).containsEntry("j-1", List.of("motoristas-de-veiculos-de-cargas-em-geral"))
+                .containsEntry("j-2",
+                        List.of("desenhistas-projetistas-e-modelistas-de-produtos-e-servicos-diversos"))
+                .containsEntry("j-3",
+                        List.of("desenhistas-projetistas-e-modelistas-de-produtos-e-servicos-diversos"));
+        assertThat(byId.get("j-4")).isNull();
+        assertThat(byId.get("j-5")).isNull();
+        assertThat(asked).containsExactly("Projetista de Moldes");
+        assertThat(calls.calls(DumJobOccupationEnricher.LLM_CALLS_ID)).containsExactly(NOW);
+        // The run's counts were logged and cleared.
+        assertThat(occupation.summary("jooble-br"))
+                .isEqualTo(new DumJobOccupationEnricher.Summary(0, 0, 0, 0, 0, 0));
+    }
+
+    private static Map<String, Object> posting(String id, String title) {
+        return Map.of("id", id, "title", title, "source", "jooble", "url", "https://x/" + id,
+                "applyUrl", "https://x/" + id + "/apply", "publishedAt", NOW, "modificationDate", NOW);
     }
 }

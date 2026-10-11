@@ -227,3 +227,51 @@ one-to-many parser, configured by a recipe, so connectors declare them.
 Workaround: `DumJobContractEnricher`, `DumJobSeniorityEnricher` and
 `DumJobSalaryEnricher` in `jobs/jobs-plugin`.
 
+### XLI.14 LLM classifier for plugins (D106)
+
+Found while adding occupation classification to trabalharei's `jobs` module (TRA22). The
+only LLM classifier, `DumTuringClassifier`, lives in connector-app with no Spring bean
+and is not on a plugin's compile classpath, and the `dumont.enrichment.llm.enabled` flag
+the commons Javadoc names is wired nowhere. A plugin that wants an LLM fallback can only
+look up a `DumClassifier` bean that no code declares, so in production the jobs module
+classifies by its title dictionary alone.
+
+Expected: a `DumClassifier` bean exposed to plugins when an LLM is configured (backed by
+`DumTuringClassifier` or a provider), enabled by the documented flag.
+
+Workaround: the jobs module looks up an optional `jobsOccupationClassifier` bean and
+runs dictionary-only without it.
+
+### XLI.15 Bounded closed-set classification (D107)
+
+Found while adding occupation classification to trabalharei's `jobs` module (TRA22).
+`DumClassificationEnricher` cannot classify into a fixed taxonomy at a bounded cost: its
+cache is in memory only and keeps every empty result for the process lifetime (a call
+refused by a cap would read as "no label"), it has no call or cost cap, and it publishes
+whatever label comes back without checking it against a list. `DumClassifier.classify`
+takes only the input string, so there is no closed-label contract: each caller rebuilds
+the prompt with the whole label set (617 CBO families is about 10k tokens per call) and
+validates the answer itself.
+
+Expected: a classification enricher with a persistent cache keyed by a strong hash and
+the taxonomy version, a daily call or cost cap that does not cache refusals, and a
+`classify(input, labels)` contract that rejects answers outside the set.
+
+Workaround: `DumJobOccupationEnricher` with `job_occupation_cache` and the cap in
+`job_call`, in `jobs/jobs-plugin`.
+
+### XLI.16 Collision-safe classifier cache key (D108)
+
+Found while reviewing the classifiers for trabalharei's `jobs` module (TRA22).
+`DumTuringClassifier` builds its Turing cache key as `prefix +
+Integer.toHexString(input.hashCode())`, a 32-bit hash. Two different inputs whose
+`String.hashCode()` collide share a key and get each other's cached answer, so a title
+can silently receive another title's label.
+
+Expected: a collision-resistant key (SHA-256 of the normalized input, plus the label set
+or taxonomy version), with a test that two known colliding strings get separate entries
+(for example "Aa" and "BB" share a Java hashCode).
+
+Workaround: none needed in trabalharei yet (the jobs module keys its own cache by
+SHA-256); filed because every other caller of the classifier is exposed.
+

@@ -115,6 +115,9 @@ This track has no remaining pending tasks.
 - 📋 **D101** (deps: —) **Enricher contributions carry no selector or confidence, so provenance cannot say where an enriched value came from** — Grounding depends on knowing whether a value came from the partner, the title or the text. → §XLI.11
 - 📋 **D102** (deps: —) **One invalid enricher contribution discards every field that enricher wrote, with a log that names no field** — A multi-field step such as salary loses all four values over one bad number, silently. → §XLI.12
 - 📋 **D103** (deps: —) **No built-in enricher shape for an ordered fallback over inputs or for one input producing several fields** — Each connector writes the same fallback and parser plumbing by hand instead of declaring it in a recipe. → §XLI.13
+- 📋 **D106** (deps: —) **No LLM classifier is reachable from a plugin, so an LLM fallback in a connector never runs in production** — Long-tail classification needs the LLM, and the documented enable flag is wired to nothing. → §XLI.14
+- 📋 **D107** (deps: —) **The classification enricher has no persistent cache, no call cap and no closed label set** — Classifying into a fixed taxonomy at a bounded cost forces every connector to rebuild cache, cap and validation. → §XLI.15
+- 📋 **D108** (deps: —) **DumTuringClassifier keys its cache by a 32-bit String hashCode, so colliding inputs share each other's answers** — A collision silently gives one title another title's label, and nothing detects it. → §XLI.16
 
 ## Non-goals (do NOT add as tasks)
 

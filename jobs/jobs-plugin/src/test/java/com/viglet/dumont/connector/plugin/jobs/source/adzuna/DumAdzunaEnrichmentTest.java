@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -77,5 +78,17 @@ class DumAdzunaEnrichmentTest {
         // No contract_type, and neither the title nor the description names a kind.
         assertThat(run.values("adzuna-4876543099")).doesNotContainKeys("contract", "seniority");
         assertThat(run.values("adzuna-4876542777")).doesNotContainKey("contract");
+    }
+
+    @Test
+    void occupationIsTheCboFamilyOfTheTitleAndAbsentWhenTheTitleNamesNoRole() {
+        assertThat(run().occupationsByTitle()).isEqualTo(Map.of(
+                "Desenvolvedor Java Pleno", "analistas-de-tecnologia-da-informacao",
+                "Auxiliar Administrativo", "agentes-assistentes-e-auxiliares-administrativos",
+                "Analista de Dados", "analistas-de-tecnologia-da-informacao",
+                "Técnico(a) de Enfermagem – Plantão Noturno", "tecnicos-e-auxiliares-de-enfermagem",
+                "Gerente de Vendas – Modelo Híbrido", "gerentes-de-comercializacao-marketing-e-comunicacao",
+                "Atendente de Telemarketing Home Office", "operadores-de-telemarketing",
+                "Motorista Entregador", "motoristas-de-veiculos-de-cargas-em-geral"));
     }
 }

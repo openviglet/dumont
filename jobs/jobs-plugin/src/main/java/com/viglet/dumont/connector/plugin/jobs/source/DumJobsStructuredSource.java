@@ -87,12 +87,13 @@ public class DumJobsStructuredSource implements DumStructuredSource {
     public static final Duration DEFAULT_TTL = Duration.ofDays(30);
 
     /**
-     * Fields {@link #extract} leaves to their canonical enricher: place (trabalharei TRA20), and
-     * salary, contract and seniority (TRA21).
+     * Fields {@link #extract} leaves to their canonical enricher: place (trabalharei TRA20), salary,
+     * contract and seniority (TRA21), and occupation (TRA22).
      */
     static final Set<String> ENRICHED_FIELDS = Set.of(DumJobsSchema.CITY, DumJobsSchema.STATE,
             DumJobsSchema.CONTRACT, DumJobsSchema.SENIORITY, DumJobsSchema.SALARY_MIN,
-            DumJobsSchema.SALARY_MAX, DumJobsSchema.SALARY_PERIOD, DumJobsSchema.SALARY_BAND);
+            DumJobsSchema.SALARY_MAX, DumJobsSchema.SALARY_PERIOD, DumJobsSchema.SALARY_BAND,
+            DumJobsSchema.OCCUPATION);
 
     private final DumJobSource source;
     private final DumStructuredSchema schema;
@@ -148,7 +149,8 @@ public class DumJobsStructuredSource implements DumStructuredSource {
 
     /**
      * Extract one posting. The {@link #ENRICHED_FIELDS} are left to their enrichers — place
-     * (trabalharei <strong>TRA20</strong>), salary, contract and seniority (<strong>TRA21</strong>) —
+     * (trabalharei <strong>TRA20</strong>), salary, contract and seniority (<strong>TRA21</strong>),
+     * occupation (<strong>TRA22</strong>) —
      * which read the adapter's values from {@link #posting(String)}: a D04 enricher can override a
      * record value but never remove one (D98), and each canonical step must be able to drop a value,
      * such as a city that is not in its UF or a contract value that names two kinds.
