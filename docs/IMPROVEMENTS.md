@@ -105,33 +105,6 @@ declarative.
 Workaround in trabalharei: none. Benefits ship from a deterministic dictionary; skills
 and the summary wait on this line (TRA28's remainder).
 
-### XLIII.14 Search weights in the structured schema (D140)
-
-Met in trabalharei (TRA79). The site's field contract weighs searches as title 10,
-company 3, abstract 2, text 1 (`JOB_FIELDS` in `src/lib/jobDoc.ts`), so a word in a
-job's title outranks the same word deep in its description. Turing applies a field's
-search weight since T1065, and its manifest declares one per field since T1072
-(`searchWeight`, 1 to 100, a non-breaking change for the planner).
-
-Dumont provisions the SN site from the structured schema (`DumTuringIndexingPlugin`
-through `TurSNManifestClient`), and `DumStructuredField.Builder` has `type`,
-`multiValued`, `facet`, `mandatory`, `description` and `embeddingRole`, but no search
-weight. The manifest Dumont sends carries none, so every field searches at weight 1 and
-a plugin cannot state its ranking; a weight set by hand in the console is the only way,
-and nothing keeps it in step with the plugin.
-
-Expected: `DumStructuredField.Builder.searchWeight(int)` (1 to 100), carried into the
-manifest field as `searchWeight`, with the schema helpers (`title`, `body`, `text`) left
-at the default. A test pins the manifest field.
-
-Blocked on the SDK (found 2026-10-11): `TurSNManifest.Builder.fields` takes
-`TurSNJobAttributeSpec`, which has no `searchWeight` in turing-java-sdk 2026.3.4, though
-the endpoint reads it from `VigletFieldSpec`. Filed in Turing as T1082. Once it ships,
-bump `turing.version` and carry the weight through `toAttributeSpecs()`.
-
-Workaround in trabalharei: none; the weights stay in the site's contract until this
-ships, and TRA79's remainder waits on it.
-
 ## XLIV Frontend build and lint gates
 
 ### XLIV.2 Unpatched xlsx through the design system (D134)

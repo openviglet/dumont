@@ -588,3 +588,4 @@
 - **D138** — A batch Turing refuses clears its documents' ledger checksums, so the next run resends them, and the run record turns partial with a note naming the source and count.
 - **D139** — A site the backend did not provision becomes a run warning naming the site and reason, so the run no longer reads clean; the timeout is Turing's T1081.
 - **D136** — Each source's last run is scraped as dumont_run_* from /actuator/prometheus on the management port, seeded at startup, so a failed or stalled run can page.
+- **D140** — A structured field declares a search weight from 1 to 100, and the site manifest Dumont sends carries it to Turing.

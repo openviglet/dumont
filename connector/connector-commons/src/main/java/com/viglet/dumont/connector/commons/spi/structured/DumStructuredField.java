@@ -37,12 +37,20 @@ import com.viglet.turing.commons.se.field.TurSEFieldType;
  * @param embeddingRole the field's role in Turing's index-time embedding (defaults to
  *                      {@link DumEmbeddingRole#NONE}); a non-{@code NONE} role projects the field's
  *                      value onto the canonical key Turing's RAG partitioner reads
+ * @param searchWeight  how much a match in this field counts in search, 1 to 100 as in the
+ *                      Turing console, or {@code null} for Turing's default of 1 (roadmap
+ *                      <strong>D140</strong>, sent in the site manifest since Turing T1082)
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
 public record DumStructuredField(String name, TurSEFieldType type, boolean multiValued,
-        boolean facet, boolean mandatory, String description, DumEmbeddingRole embeddingRole) {
+        boolean facet, boolean mandatory, String description, DumEmbeddingRole embeddingRole,
+        Integer searchWeight) {
+
+    /** The lowest and highest search weight Turing accepts. */
+    public static final int MIN_SEARCH_WEIGHT = 1;
+    public static final int MAX_SEARCH_WEIGHT = 100;
 
     public DumStructuredField {
         if (name == null || name.isBlank()) {
@@ -54,6 +62,16 @@ public record DumStructuredField(String name, TurSEFieldType type, boolean multi
         if (embeddingRole == null) {
             embeddingRole = DumEmbeddingRole.NONE;
         }
+        if (searchWeight != null && (searchWeight < MIN_SEARCH_WEIGHT || searchWeight > MAX_SEARCH_WEIGHT)) {
+            throw new IllegalArgumentException("Structured field '%s' search weight must be %d to %d, not %d"
+                    .formatted(name, MIN_SEARCH_WEIGHT, MAX_SEARCH_WEIGHT, searchWeight));
+        }
+    }
+
+    /** A field at Turing's default search weight, as declared before D140. */
+    public DumStructuredField(String name, TurSEFieldType type, boolean multiValued, boolean facet,
+            boolean mandatory, String description, DumEmbeddingRole embeddingRole) {
+        this(name, type, multiValued, facet, mandatory, description, embeddingRole, null);
     }
 
     /** A single-valued, non-facet, optional {@link TurSEFieldType#STRING} field. */
@@ -102,6 +120,7 @@ public record DumStructuredField(String name, TurSEFieldType type, boolean multi
                 .facet(facet)
                 .mandatory(mandatory)
                 .description(description)
+                .searchWeight(searchWeight == null ? null : searchWeight.floatValue())
                 .build();
     }
 
@@ -113,6 +132,7 @@ public record DumStructuredField(String name, TurSEFieldType type, boolean multi
         private boolean mandatory;
         private String description;
         private DumEmbeddingRole embeddingRole = DumEmbeddingRole.NONE;
+        private Integer searchWeight;
 
         private Builder(String name) {
             this.name = name;
@@ -148,9 +168,18 @@ public record DumStructuredField(String name, TurSEFieldType type, boolean multi
             return this;
         }
 
+        /**
+         * How much a match in this field counts in search (D140): 1 to 100 as in the Turing
+         * console, where 1 is the default every undeclared field gets.
+         */
+        public Builder searchWeight(int searchWeight) {
+            this.searchWeight = searchWeight;
+            return this;
+        }
+
         public DumStructuredField build() {
             return new DumStructuredField(name, type, multiValued, facet, mandatory, description,
-                    embeddingRole);
+                    embeddingRole, searchWeight);
         }
     }
 }
