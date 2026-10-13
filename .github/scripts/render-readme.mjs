@@ -325,6 +325,9 @@ const html = `<!doctype html>
       footer a { color: var(--teal); text-decoration: none; }
       footer a:hover { text-decoration: underline; }
     </style>
+    <!-- Google Analytics: page views, counted in the Viglet property beside viglet.org -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SMSL7R3897"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-SMSL7R3897");</script>
   </head>
   <body>
     <section class="hero">
