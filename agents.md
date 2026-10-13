@@ -138,6 +138,7 @@ All implement `DumIndexingPlugin` interface, loaded via `@ConditionalOnProperty`
 | `dumont.cron` | - | Scheduled job cron |
 | `dumont.scheduler.enabled` | false | Enable scheduler |
 | `dumont.reactive.indexing` | false | Enable reactive indexing |
+| `management.server.port` | 30131 | Serves `/actuator/prometheus` only (run outcomes as `dumont_run_*` metrics, D136); never the public port |
 
 ### System Info Endpoint
 - `GET /api/v2/connector/system-info` — returns app version, Java, OS, memory, disk, indexing config

@@ -44,6 +44,7 @@ public class DumConnectorIndexingService {
         private final DumConnectorIndexingStatsRepository dumConnectorIndexingStatsRepository;
         private final boolean connectorDependencies;
         private final DumRunWarningNotifier runWarningNotifier;
+        private final DumRunMetrics runMetrics;
         private final Map<String, PendingStats> pendingStatsMap = new ConcurrentHashMap<>();
         private final Set<String> processingSources = ConcurrentHashMap.newKeySet();
 
@@ -61,11 +62,13 @@ public class DumConnectorIndexingService {
                         DumConnectorIndexingRepository dumConnectorIndexingRepository,
                         DumConnectorIndexingStatsRepository dumConnectorIndexingStatsRepository,
                         @Value("${dumont.dependencies.enabled:true}") boolean connectorDependencies,
-                        DumRunWarningNotifier runWarningNotifier) {
+                        DumRunWarningNotifier runWarningNotifier,
+                        DumRunMetrics runMetrics) {
                 this.dumConnectorIndexingRepository = dumConnectorIndexingRepository;
                 this.dumConnectorIndexingStatsRepository = dumConnectorIndexingStatsRepository;
                 this.connectorDependencies = connectorDependencies;
                 this.runWarningNotifier = runWarningNotifier;
+                this.runMetrics = runMetrics;
         }
 
         public boolean tryStartProcessing(String source) {
@@ -226,6 +229,8 @@ public class DumConnectorIndexingService {
                                                                 provider, Limit.of(1))
                                                 .stream().anyMatch(DumConnectorIndexingStatsModel::isWarned);
                 dumConnectorIndexingStatsRepository.save(stats);
+                // D136: the run's outcome is what an alert outside the console reads.
+                runMetrics.recordRun(stats);
                 // D130: an operator hears when a source starts warning, not on every run it stays so.
                 if (stats.isWarned() && !wasWarned) {
                         runWarningNotifier.runStartedWarning(stats);

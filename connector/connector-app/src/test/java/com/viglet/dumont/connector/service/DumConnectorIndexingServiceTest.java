@@ -62,12 +62,14 @@ class DumConnectorIndexingServiceTest {
     private DumConnectorIndexingStatsRepository statsRepository;
     @Mock
     private DumRunWarningNotifier notifier;
+    @Mock
+    private DumRunMetrics runMetrics;
 
     private DumConnectorIndexingService service;
 
     @BeforeEach
     void setUp() {
-        service = new DumConnectorIndexingService(repository, statsRepository, true, notifier);
+        service = new DumConnectorIndexingService(repository, statsRepository, true, notifier, runMetrics);
     }
 
     private static DumJobItemWithSession jobItem() {
@@ -101,6 +103,9 @@ class DumConnectorIndexingServiceTest {
         service.completeIndexingStats("source-1", "turing");
 
         verify(statsRepository).save(any(DumConnectorIndexingStatsModel.class));
+        // D136: the written run is what the metrics report.
+        verify(runMetrics).recordRun(org.mockito.ArgumentMatchers.argThat(
+                run -> "source-1".equals(run.getSource()) && run.getDocumentCount() == 10L));
     }
 
     @Test

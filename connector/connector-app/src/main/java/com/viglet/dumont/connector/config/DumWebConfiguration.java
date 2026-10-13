@@ -74,6 +74,9 @@ public class DumWebConfiguration {
         private static final String BACK_CHANNEL_LOGOUT_PATH = "/logout/connect/back-channel/**";
         private static final String SETUP_PATH = "/api/setup";
         public static final String ERROR_PATH = "/error/**";
+        // D136: the scrape target. It is served on management.server.port, never the public one,
+        // and a Prometheus scraper carries no session.
+        private static final String PROMETHEUS_PATH = "/actuator/prometheus";
 
         private final DumApiKeyFilter apiKeyFilter;
         private final UserDetailsService userDetailsService;
@@ -170,6 +173,7 @@ public class DumWebConfiguration {
                                         mvc.matcher("/api/v2/ping"),
                                         mvc.matcher("/api/v2/discovery"),
                                         mvc.matcher("/api/v2/connector/status"),
+                                        mvc.matcher(PROMETHEUS_PATH),
                                         mvc.matcher("/api/v2/user/current"),
                                         mvc.matcher("/api/v2/aem/index/**"),
                                         mvc.matcher("/api/v2/aem/webhook/**"),
@@ -203,6 +207,7 @@ public class DumWebConfiguration {
                                                         mvc.matcher("/api/v2/aem/index/**"),
                                                         mvc.matcher("/api/v2/aem/webhook/**"),
                                                         mvc.matcher("/api/v2/connector/status"),
+                                                        mvc.matcher(PROMETHEUS_PATH),
                                                         mvc.matcher("/api/v2/user/current"),
                                                         mvc.matcher("/api/csrf"),
                                                         mvc.matcher(LOGOUT_PATH),

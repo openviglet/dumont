@@ -105,33 +105,6 @@ declarative.
 Workaround in trabalharei: none. Benefits ship from a deterministic dictionary; skills
 and the summary wait on this line (TRA28's remainder).
 
-### XLIII.10 Run outcomes as Prometheus metrics (D136)
-
-Met in trabalharei (TRA62, monitoring) while wiring viglet/cloud's Prometheus and
-Alertmanager for the trabalharei jobs source.
-
-viglet/cloud alerts on everything through Prometheus (`docker/observability`), and
-trabalharei wanted one alert: "the last ingestion run of a source failed, or no run
-finished in the last N hours". Dumont keeps run records (the console shows them, and the
-jobs extension writes its own `DumJobRun` notes), but nothing outside the console can
-read a run's outcome: there is no `/actuator/prometheus` (viglet/cloud's C086 is still a
-commented-out scrape job waiting on it), and no documented JSON endpoint for "last run
-per source, status, finished at, items indexed / failed".
-
-What came back: nothing to scrape. Workaround in trabalharei: none for run failures; it
-alerts only on the visible effect (open jobs under 20% of the past week's peak, from the
-site's own /api/metrics/), which fires late and cannot tell a failed run from a source
-that legitimately shrank.
-
-Expected: Micrometer gauges and counters per connector source, exposed on
-`/actuator/prometheus` (behind the management port, not the public one):
-`dumont_run_last_status{source}` (1 ok, 0 failed),
-`dumont_run_last_finished_seconds{source}`,
-`dumont_run_items_total{source,outcome="indexed|deleted|failed"}`, and
-`dumont_run_duration_seconds{source}`. Then a cloud rule such as `dumont_run_last_status
-== 0` or `time() - dumont_run_last_finished_seconds > 2*3600` pages on a broken or
-stalled schedule for any plugin, not only trabalharei's.
-
 ### XLIII.14 Search weights in the structured schema (D140)
 
 Met in trabalharei (TRA79). The site's field contract weighs searches as title 10,

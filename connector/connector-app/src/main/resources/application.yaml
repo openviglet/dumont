@@ -197,6 +197,16 @@ spring:
   jms:
     template:
       default-destination: connector-indexing.queue
+# D136: run outcomes for Prometheus (dumont_run_last_status, dumont_run_last_finished_seconds,
+# dumont_run_last_duration_seconds, dumont_run_last_documents, dumont_runs_total), on a port of
+# their own so the scrape target is never the public one. Only the prometheus endpoint is exposed.
+management:
+  server:
+    port: 30131
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
 logging:
   # No `config` here on purpose (D85): it is derived from dumont.logging.engine by
   # DumLoggingConfigEnvironmentPostProcessor, which contributes it as the lowest-precedence
