@@ -21,3 +21,6 @@
 ## Track P — Connector run control
 
 - ⏸ **D131** (deps: —) **A plugin's only LLM step answers one label of a closed set: no list extracted from the text, no grounded summary** — set aside (a product call: may a generated summary fill abstract under the no-fabrication non-goal): The grounded summary half is not built. → §XLIII.8
+
+## Track Q — Builds from released dependencies
+

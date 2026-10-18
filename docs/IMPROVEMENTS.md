@@ -132,3 +132,40 @@ dependency, which pnpm allows. Then `dumont-react` adds `"xlsx":
 Exposure meanwhile is low: `exportToXlsx` only writes a workbook (`aoa_to_sheet`,
 `writeFile`), and both CVEs are in the parser. Nothing in the console reads a
 spreadsheet.
+
+## XLV Builds from released dependencies
+
+A clean checkout of any Dumont branch must compile from the versions its pom names, as
+released on Maven Central, with no sibling Turing checkout or locally installed
+snapshot. Downstream images (dumont-ce, viglet.cloud's per-tenant Dumonts) build exactly
+that way.
+
+### XLV.1 Pin the Turing SDK to a release that has the API Dumont calls (D141)
+
+**Where.** viglet/cloud's `docker/Dockerfile.dumont-trabalharei` clones
+openviglet/dumont at `2026.3` and runs `mvn install -pl
+spring,connector/connector-commons -am`. On 2026-10-17:
+
+```
+DumStructuredField.java:[123,17] cannot find symbol
+  symbol: method searchWeight(java.lang.Float)
+  location: class TurSNJobAttributeSpec.TurSNJobAttributeSpecBuilder
+```
+
+**Why.** D140 (`d4afcaea`) calls `TurSNJobAttributeSpec.builder().searchWeight(...)`,
+added by Turing T1082 (`e62acf82ae`, 2026-10-11). The pom pins `turing.version`
+2026.3.4, whose Central jar dates from June 2026, before T1082. Turing still carries
+2026.3.4 with the new API on top, so one version names two jars. It only builds where
+`~/.m2` holds a locally installed Turing SDK.
+
+**Workaround.** viglet/cloud `29dfb7b`: the build stage installs `turing-java-sdk` from
+openviglet/turing at `TURING_REF=2026.3` first (~70 s per build). Remove it once this
+ships.
+
+**What to do.**
+1. Release `turing-java-sdk` with T1082 (2026.3.5) to Central and bump `turing.version`.
+   A change using new SDK API bumps to a released version in the same commit.
+2. CI builds with an isolated local repository (`-Dmaven.repo.local=<tmp>`), so unreleased
+   SDK API fails the PR, not a downstream image.
+3. Check the `dumont-ce` image CI: unless it builds the SDK from source, it fails the same
+   way since D140 and `dumont-ce:latest` is stale.
