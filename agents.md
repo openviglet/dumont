@@ -378,7 +378,7 @@ meaningful and a case that blows its budget is one that earned it.
 code: it has printed `#TYPE-001` and exited 0, and written the wrong layout and exited 0. The
 check inspects the artefact.
 
-CI: `validate.yml` (Maven build every push and PR, Sonar on pushes) and `design-system.yml`
+CI: `validate.yml` (Maven build every push and PR; no SonarCloud — quality runs locally, see Code Quality) and `design-system.yml`
 (duplicates + ESLint, no build — the Maven one already covers it).
 
 **Effects.** `react-hooks/set-state-in-effect` is an error, and the rule cannot see through a

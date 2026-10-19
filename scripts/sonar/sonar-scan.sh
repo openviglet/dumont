@@ -69,8 +69,7 @@ printf '%s' "$TOKEN" > "$TOKEN_FILE"
 echo "    Token cached in scripts/sonar/.sonar-token"
 
 # 3) Run the analysis against the LOCAL instance from the multi-module reactor root.
-#    Skip the pnpm/Node frontend build (Java analysis only) to keep it fast, and
-#    blank out sonar.organization (a SonarCloud-only concept).
+#    Skip the pnpm/Node frontend build (Java analysis only) to keep it fast.
 echo "==> Running Maven analysis ($GOAL sonar:sonar) ..."
 cd "$REPO_ROOT"
 mvn $GOAL org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -78,8 +77,7 @@ mvn $GOAL org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
   -Dskip.pnpm=true \
   -Dsonar.host.url="$SONAR_URL" \
   -Dsonar.token="$TOKEN" \
-  -Dsonar.projectKey="$PROJECT_KEY" \
-  -Dsonar.organization=
+  -Dsonar.projectKey="$PROJECT_KEY"
 
 echo
 echo "==> Done. Open $SONAR_URL/dashboard?id=$PROJECT_KEY"

@@ -44,9 +44,10 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <mongodb.version>5.13.0</mongodb.version>
         <pf4j.version>3.16.0</pf4j.version>
-        <sonar.organization>viglet</sonar.organization>
+        <!-- Local SonarQube only (the stack in the Turing repo, see scripts/sonar/); there is no
+             SonarCloud analysis. -->
         <sonar.projectKey>viglet_dumont</sonar.projectKey>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.host.url>http://localhost:9100</sonar.host.url>
         <!-- Entity models/DTOs are structurally similar by design; exclude from
              copy-paste detection to cut noise (mirrors the Turing setup). -->
         <sonar.cpd.exclusions>**/persistence/dto/**,**/persistence/model/**</sonar.cpd.exclusions>
