@@ -1,11 +1,31 @@
-# Viglet Dumont
+# Viglet Dumont: the open source Data Exchange Platform
+
+![Viglet Dumont, Data Exchange Platform](.github/banner.png)
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![GitHub release](https://img.shields.io/github/release/openviglet/dumont.svg)](https://github.com/openviglet/dumont/releases)
 [![Java 21+](https://img.shields.io/badge/Java-21%2B-orange)](https://openjdk.org/)
 [![Spring Boot 4.x](https://img.shields.io/badge/Spring%20Boot-4.x-green)](https://spring.io/projects/spring-boot)
 
-**Viglet Dumont** is a powerful Data Exchange Platform (DEP) that enables seamless content indexing and search integration across multiple data sources and search engines. Built with Java and Spring Boot, Dumont provides a flexible, plugin-based architecture for enterprise content management and search solutions.
+**Viglet Dumont** is an open source **Data Exchange Platform**: it connects your content
+sources (Adobe Experience Manager, WordPress, databases, file systems and web sites) and
+delivers their content to [Viglet Turing](https://github.com/openviglet/turing), Apache
+Solr or Elasticsearch. It runs on your own servers, is built with Java 21 and Spring Boot,
+and is extended through plugins.
+
+> 🌐 **Product page:** [viglet.org/dumont](https://www.viglet.org/dumont/) ·
+> 📚 **Documentation:** [docs.viglet.org/dumont](https://docs.viglet.org/dumont/) ·
+> 🔎 **Search on top:** [Viglet Turing](https://github.com/openviglet/turing)
+
+## Who it is for
+
+Teams that need the content of a CMS, a database or a set of sites in a search index, and
+kept there: new pages indexed, changed pages updated, removed pages taken out. If you are
+adding search to an **Adobe AEM** site (on-premise, AMS or AEM as a Cloud Service) or to
+**WordPress**, Dumont is the part that reads the content and keeps the index in step with it.
+
+Dumont is the way in; [Viglet Turing](https://github.com/openviglet/turing) is the search
+and AI chat on top. You can also use Dumont alone, with your own Solr or Elasticsearch.
 
 ## 🚀 Features 
 
@@ -17,7 +37,7 @@
   - WordPress
   
 - **Flexible Search Engine Support**: Index content to your preferred search platform
-  - Viglet Turing ES (default)
+  - Viglet Turing (default)
   - Apache Solr
   - Elasticsearch
   
@@ -48,7 +68,7 @@
   accept is reported rather than dropped in silence.
 
 - **Web Console**: Configure sources, launch indexing and watch it run, in English or Portuguese.
-  Built from the same component library as Viglet Turing ES and Viglet Shio, and mountable inside
+  Built from the same component library as Viglet Turing and Viglet Shio, and mountable inside
   Turing as well as standalone.
   - Every screen that configures or monitors a connector is served in the *bento* interface — a
     fixed nav rail, section hubs and a `⌘K` command palette that reaches all of them. Sources and
@@ -127,7 +147,7 @@ dumont:
     provider: turing  # Options: turing (default), solr, elasticsearch
 ```
 
-#### Viglet Turing ES (Default)
+#### Viglet Turing (Default)
 ```yaml
 turing:
   url: http://localhost:2700
@@ -230,31 +250,53 @@ cd web-crawler/wc-sample
       ┌─────────────────────────┼─────────────────────────┐
       │                         │                         │
 ┌─────▼─────┐           ┌───────▼───────┐         ┌──────▼──────┐
-│  Turing   │           │    Solr       │         │Elasticsearch│
-│    ES     │           │               │         │             │
+│  Viglet   │           │    Solr       │         │Elasticsearch│
+│  Turing   │           │               │         │             │
 └───────────┘           └───────────────┘         └─────────────┘
 ```
 
+## ❓ FAQ
+
+**Does Dumont work with AEM as a Cloud Service?**
+Yes. Each source picks the tier it reads: the author servlets for on-premise and AMS, or the
+publish delivery APIs (`model.json`) for AEM as a Cloud Service.
+
+**Do I need Viglet Turing to use Dumont?**
+No. Turing is the default target, but Dumont also indexes into Apache Solr and
+Elasticsearch. Set `dumont.indexing.provider`, as shown under Configuration above.
+
+**What happens when a page is removed from the source?**
+Dumont does not de-index on a single pass that failed to see it. A scheduled audit compares
+the source, the connector's ledger and the index, and writes what is still indexed after
+leaving the source into a dated report that you review and apply.
+
+**Is it free?**
+Yes. Apache License 2.0, self-hosted.
+
+## 🧩 Part of the Viglet suite
+
+![The Viglet suite: Dumont, Turing and Shio](.github/viglet-suite.png)
+
+Three open source products that work together, or each on its own:
+
+| Product | What it does |
+|---|---|
+| **Viglet Dumont** · Data Exchange Platform | This repository: connects your sources and delivers their content to a search engine |
+| [**Viglet Turing**](https://github.com/openviglet/turing) · Enterprise Search | Search, semantic navigation, RAG chat with citations and AI agents over that content, self-hosted |
+| [**Viglet Shio**](https://github.com/openviglet/shio) · Agent-ready CMS | A CMS that people run from the console and AI agents run over MCP; it renders pages or delivers them over REST and GraphQL |
+
+More at [viglet.org](https://www.viglet.org).
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome: open an [issue](https://github.com/openviglet/dumont/issues) for
+bugs and requests, or fork the repository and open a pull request.
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+Apache License 2.0: see the [LICENSE](LICENSE) file.
 
-## 👨‍💻 Author
+---
 
-**Viglet Team** - [Viglet](https://viglet.org)
-
-## 🔗 Links
-
-- [GitHub Repository](https://github.com/openviglet/dumont)
-- [Viglet Website](https://viglet.com)
-- [Issue Tracker](https://github.com/openviglet/dumont/issues)
+Built by the [Viglet](https://www.viglet.org) Team ·
+**[viglet.org/dumont](https://www.viglet.org/dumont/)**
