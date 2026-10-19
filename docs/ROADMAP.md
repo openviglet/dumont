@@ -113,6 +113,10 @@ This track has no remaining pending tasks.
 
 ## Track R — API access and credential handling
 
+## Track D — Adoption & authoring
+
+- 📋 **D143** (deps: —) **dumont.viglet.org publishes no changelog.json** — www.viglet.org reads Dumont's release notes from a hand-kept copy that drifts; Turing already serves its own at turing.viglet.org/changelog.json. → §XLVII.1
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
