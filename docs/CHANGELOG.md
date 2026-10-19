@@ -592,3 +592,5 @@
 
 ## Track Q — Builds from released dependencies
 
+## Track R — API access and credential handling
+

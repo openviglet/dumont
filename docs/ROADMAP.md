@@ -111,6 +111,10 @@ This track has no remaining pending tasks.
 
 - 📋 **D141** (deps: —) **Dumont fails to compile from Maven Central: it pins turing-java-sdk 2026.3.4, but calls API added after that release** — Every image build without a locally installed Turing SDK fails, so dumont-trabalharei (and likely dumont-ce) cannot ship. → §XLV.1
 
+## Track R — API access and credential handling
+
+- 📋 **D142** (deps: —) **GET /api/v2/connector/status skips the key filter and returns turing.apiKey in its body** — Anyone who can reach port 30130 reads the key that authorises every API call and Dumont's writes into Turing. → §XLVI.1
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
