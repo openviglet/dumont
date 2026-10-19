@@ -1,3 +1,20 @@
+# dumont.viglet.org, built and published by CI.
+#
+# Two things go into the published tree:
+#   * the site itself, `dumont-site/` (Vite + React, prerendered to one static
+#     index.html per route plus a Markdown twin), at the root;
+#   * the marketplace, one folder per `*-plugin-sample/turing-export/app`, under
+#     /marketplace/<slug>/ with the importable zip and its README rendered as the
+#     folder's index.
+#
+# `workflow_dispatch` only: the site is the one artefact where a defect is public
+# immediately, so a publish is a decision rather than a side effect of a push.
+#
+# Published from this repository with the native Pages deploy, so it needs no
+# secret: the job's GITHUB_TOKEN carries `pages: write`. One-time repository
+# setting: Settings → Pages → Source = "GitHub Actions", custom domain
+# dumont.viglet.org. With an Actions deploy the domain lives in that setting; the
+# CNAME in the artefact is kept only so a local `dist/` says where it belongs.
 name: Publish GitHub Pages
 
 on:
@@ -14,6 +31,7 @@ concurrency:
 
 jobs:
   deploy:
+    name: Build and publish dumont.viglet.org
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -22,30 +40,46 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
           node-version: 26.3.1
+          cache: "pnpm"
 
-      # ── Marketplace ──
+      # The site, the samples and the README renderer's `marked` all come from the
+      # workspace lockfile.
+      - name: Install workspace deps
+        run: pnpm install --frozen-lockfile
+
+      # tsc -b → vite build → vite build --ssr → prerender → og-image.
+      - name: Build the site
+        run: pnpm run build:site
+
+      # Each sample's `package` script starts with an `npm install`, which a pnpm
+      # workspace member refuses; the workspace install above already did it, so
+      # only the build and the zip run here.
       - name: Build Marketplace examples
         run: |
           for dir in */*-plugin-sample/turing-export/app; do
             [ -d "$dir" ] || continue
             project=$(basename "$(dirname "$(dirname "$dir")")")
             echo "::group::Building $project"
-            (cd "$dir" && npm run package)
+            (cd "$dir" && pnpm run compile:build && pnpm run zip)
             echo "::endgroup::"
           done
 
-      # ── Install README renderer deps ──
-      - name: Install render dependencies
-        run: npm install --no-save --no-audit --no-fund marked@14
-
-      # ── Assemble site ──
-      - name: Prepare Pages artifact
+      - name: Assemble _site
         run: |
+          # The prerendered site at the root: index.html per route, hashed assets,
+          # and the static files from dumont-site/public (robots.txt, sitemap.xml,
+          # llms.txt, favicon, og image). `dist-ssr/` is a build input and stays out.
           mkdir -p _site/marketplace
+          cp -r dumont-site/dist/* _site/
 
           for dir in */*-plugin-sample/turing-export/app; do
             [ -d "$dir" ] || continue
@@ -58,7 +92,7 @@ jobs:
             if [ -f "$dir/README.md" ]; then
               cp "$dir/README.md" "_site/marketplace/$site/README.md"
               zip_name=$(basename "$(ls "$dir"/*.zip 2>/dev/null | head -n1)" 2>/dev/null || true)
-              node .github/scripts/render-readme.mjs \
+              node dumont-site/scripts/render-readme.mjs \
                 "$dir/README.md" \
                 "_site/marketplace/$site/index.html" \
                 "$site" \
@@ -66,13 +100,14 @@ jobs:
             fi
           done
 
-      - name: Copy static pages assets
-        run: cp -r .github/pages/* _site/
+          # The landing page links every sample by slug; a sample that failed to
+          # build would otherwise publish a link to a 404.
+          for slug in wknd wknd-eds celestial-gallery retro-arcade wikipedia; do
+            test -f "_site/marketplace/$slug/index.html" || { echo "marketplace/$slug has no index.html"; exit 1; }
+          done
+          test -f _site/index.html || { echo "no index.html in the assembled site"; exit 1; }
 
-      # The custom domain (dumont.viglet.org) is set in Settings → Pages; an Actions
-      # deployment ignores a CNAME file in the artifact.
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+          find _site -name index.html | sort
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

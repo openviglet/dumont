@@ -1,0 +1,36 @@
+# Viglet Dumont
+
+> Open-source, self-hosted connectors that move content from Adobe Experience Manager, Edge Delivery Services, JDBC databases, file shares, web sites and paged JSON APIs into Turing ES, Solr or Elasticsearch, and keep the index true to the source: checksummed incremental runs, a nightly audit against the index, deletions that wait for a person, and per-field coverage and drift. Spring Boot 4 on Java 21, Apache 2.0.
+
+Every page of this site has a Markdown twin at `<path>.md` (the home page at `/index.md`); across its routes that is 0 KB of Markdown against 0 KB of HTML. `/manifest.json` lists them.
+
+## Pages
+
+- [Home](https://dumont.viglet.org/index.md): what Dumont does, the four ways an index drifts, connectors, trust, AI, samples, self-hosting
+- [Dumont for AEM](https://dumont.viglet.org/aem.md): on-prem, AMS, AEM as a Cloud Service and Edge Delivery Services; fragments; Adobe I/O Events, OSGi bundle, journal poller
+- [Connectors](https://dumont.viglet.org/connectors.md): every source and target, source inference, the plugin SPI
+- [An index you can trust](https://dumont.viglet.org/trust.md): safe finish, audit, orphan reports, coverage and drift, provenance, Prometheus metrics
+
+## Facts
+
+- Sources: AEM (on-prem, AMS, Cloud Service), Edge Delivery Services, JDBC databases, web crawler, files via Apache Tika, catalog JSON and paged JSON APIs.
+- Targets: `dumont.indexing.provider` = `turing` (default), `solr`, `elasticsearch`. Schema provisioning and the index audit need Turing.
+- Run: `docker run -p 30130:30130 ghcr.io/openviglet/dumont-ce:latest`, console at http://localhost:30130. Prometheus on management port 30131.
+- AI features (source inference, coverage summaries, LLM classification) call the LLM configured in Turing; Dumont holds no model or provider keys. Classification is off by default.
+- Not a crawler farm, not a warehouse ETL, and no AI that publishes on its own.
+
+## Marketplace
+
+- [WKND (AEM)](https://dumont.viglet.org/marketplace/wknd/): Adobe's WKND reference site indexed from AEM
+- [WKND EDS (Edge Delivery Services)](https://dumont.viglet.org/marketplace/wknd-eds/): the same site read from aem.live
+- [Celestial Gallery (Files)](https://dumont.viglet.org/marketplace/celestial-gallery/): a folder of astrophotography
+- [Retro Arcade (Database)](https://dumont.viglet.org/marketplace/retro-arcade/): a SQL catalogue of arcade games
+- [Wikipedia Explorer (Web crawler)](https://dumont.viglet.org/marketplace/wikipedia/): Wikipedia crawled politely
+
+## Links
+
+- [Documentation](https://docs.viglet.org/dumont/)
+- [Installation guide](https://docs.viglet.org/dumont/installation-guide)
+- [Source](https://github.com/openviglet/dumont)
+- [Viglet Turing ES](https://turing.viglet.org)
+- [Viglet Shio](https://shio.viglet.org)

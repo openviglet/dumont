@@ -7,6 +7,8 @@
   "scripts": {
     "build:app": "pnpm --filter dumont-react run compile:build",
     "dev:app": "pnpm --filter dumont-react run dev",
+    "build:site": "pnpm --filter dumont-site run build",
+    "dev:site": "pnpm --filter dumont-site run dev",
     "lint": "pnpm -r run lint",
     "clean": "rimraf \"**/node_modules\" \"**/dist\" \"**/build\""
   },
