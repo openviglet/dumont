@@ -66,16 +66,22 @@ class DumConnectorApiTest {
     @BeforeEach
     void setUp() {
         api = new DumConnectorApi(indexingService, dumConnectorSolr, pluginRegistry, auditTask,
-                indexAllByTabService, new DumConnectorRunService(indexingService), "secret-key");
+                indexAllByTabService, new DumConnectorRunService(indexingService));
     }
 
     @Test
-    void statusReportsProvidersAndApiKey() {
+    void statusReportsProviders() {
         when(pluginRegistry.providerNames()).thenReturn(List.of("turing", "solr"));
         Map<String, Object> status = api.status();
         assertThat(status).containsEntry("status", "ok").containsEntry("provider", "turing")
-                .containsEntry("apiKey", "secret-key")
                 .containsEntry("providers", List.of("turing", "solr"));
+    }
+
+    /** D142: the probe needs no credential, so it must carry none. */
+    @Test
+    void statusCarriesNoCredential() {
+        when(pluginRegistry.providerNames()).thenReturn(List.of("turing"));
+        assertThat(api.status()).containsOnlyKeys("status", "provider", "providers");
     }
 
     @Test

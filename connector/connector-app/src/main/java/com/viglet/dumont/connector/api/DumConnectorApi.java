@@ -31,8 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.plugin.DumConnectorPluginRegistry;
 import com.viglet.dumont.connector.domain.DumConnectorValidateDifference;
@@ -60,23 +58,27 @@ public class DumConnectorApi {
     private final DumConnectorContentAuditTask auditTask;
     private final DumConnectorIndexAllByTabService indexAllByTabService;
     private final DumConnectorRunService runService;
-    private final String apiKey;
 
     public DumConnectorApi(DumConnectorIndexingService indexingService,
             DumConnectorSolrService dumConnectorSolr, DumConnectorPluginRegistry pluginRegistry,
             DumConnectorContentAuditTask auditTask,
             DumConnectorIndexAllByTabService indexAllByTabService,
-            DumConnectorRunService runService,
-            @Value("${turing.apiKey}") String apiKey) {
+            DumConnectorRunService runService) {
         this.indexingService = indexingService;
         this.dumConnectorSolr = dumConnectorSolr;
         this.pluginRegistry = pluginRegistry;
         this.auditTask = auditTask;
         this.indexAllByTabService = indexAllByTabService;
         this.runService = runService;
-        this.apiKey = apiKey;
     }
 
+    /**
+     * The unauthenticated probe: the key filter and the security chain both let it through, so it
+     * answers liveness and the active providers and nothing a caller could act as Dumont with (D142).
+     * It used to carry {@code turing.apiKey}, read by the console to set a {@code Key} header it
+     * never needed — the console authenticates by session, and Turing's integration proxy sets its
+     * own key.
+     */
     @GetMapping("status")
     public Map<String, Object> status() {
         List<String> providers = pluginRegistry.providerNames();
@@ -85,7 +87,6 @@ public class DumConnectorApi {
         // Backward-compatible single value: first active provider (null when none active).
         status.put("provider", providers.isEmpty() ? null : providers.getFirst());
         status.put("providers", providers);
-        status.put("apiKey", apiKey);
         return status;
     }
 

@@ -23,17 +23,11 @@ export function PluginProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     axios
-      .get<{ status: string; provider?: string; providers?: string[]; apiKey?: string }>(
-        "/v2/connector/status"
-      )
+      .get<{ status: string; provider?: string; providers?: string[] }>("/v2/connector/status")
       .then(({ data }) => {
         // Prefer the multi-provider list; fall back to the legacy single `provider`.
         const list = data.providers ?? (data.provider ? [data.provider] : []);
         setProviders(list);
-        // In standalone mode, set the API key for all subsequent requests
-        if (data.apiKey) {
-          axios.defaults.headers.common["Key"] = data.apiKey;
-        }
       })
       .catch(() => setProviders([]))
       .finally(() => setLoading(false));

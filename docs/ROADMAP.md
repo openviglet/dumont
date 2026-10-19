@@ -113,8 +113,6 @@ This track has no remaining pending tasks.
 
 ## Track R — API access and credential handling
 
-- 📋 **D142** (deps: —) **GET /api/v2/connector/status skips the key filter and returns turing.apiKey in its body** — Anyone who can reach port 30130 reads the key that authorises every API call and Dumont's writes into Turing. → §XLVI.1
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

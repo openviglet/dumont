@@ -175,15 +175,3 @@ ships.
 Who can call the connector API, and what it hands back. The key filter and the security
 chain both exempt a small set of probe routes; each exemption is a promise that the
 route returns nothing a caller could use to act as Dumont.
-
-### XLVI.1 Status probe leaks the API key (D142)
-
-`DumConnectorApi.status()` puts `apiKey` into the map it returns, and
-`/api/v2/connector/status` is exempt from both `DumApiKeyFilter` and the
-`DumWebConfiguration` chain, so the probe is unauthenticated and the key is the same one
-that guards `/api/**` and that Dumont sends to Turing. The install guide uses this very
-route as the health check, which means every first-time operator is shown it. Done when
-the status body carries no credential (the probe keeps `status`, `provider`,
-`providers`), any caller that read `apiKey` from it is moved to configuration, and a
-test asserts the unauthenticated response has no key field. The `/api/v2/aem/status`
-exemption gets the same check.
