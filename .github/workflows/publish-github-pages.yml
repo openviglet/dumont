@@ -5,6 +5,8 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages
@@ -13,6 +15,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v7
@@ -64,13 +69,16 @@ jobs:
       - name: Copy static pages assets
         run: cp -r .github/pages/* _site/
 
-      - name: Add CNAME
-        run: echo "dumont.viglet.org" > _site/CNAME
+      # The custom domain (dumont.viglet.org) is set in Settings → Pages; an Actions
+      # deployment ignores a CNAME file in the artifact.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
 
-      - name: Deploy to openviglet/dumont-ce (github-pages branch)
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
-          personal_token: ${{ secrets.GH_PKG_TOKEN }}
-          external_repository: openviglet/dumont-ce
-          publish_branch: github-pages
-          publish_dir: ./_site
+          path: ./_site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
