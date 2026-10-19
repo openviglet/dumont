@@ -109,8 +109,6 @@ This track has no remaining pending tasks.
 
 ## Track Q — Builds from released dependencies
 
-- 📋 **D141** (deps: —) **Dumont fails to compile from Maven Central: it pins turing-java-sdk 2026.3.4, but calls API added after that release** — Every image build without a locally installed Turing SDK fails, so dumont-trabalharei (and likely dumont-ce) cannot ship. → §XLV.1
-
 ## Track R — API access and credential handling
 
 ## Track D — Adoption & authoring

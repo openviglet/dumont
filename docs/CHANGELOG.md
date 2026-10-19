@@ -592,6 +592,8 @@
 
 ## Track Q — Builds from released dependencies
 
+- **D141** — Dumont pins turing-java-sdk 2026.3.6, the first Central release carrying searchWeight (T1082), so it compiles without a locally installed Turing SDK.
+
 ## Track R — API access and credential handling
 
 - **D142** — The unauthenticated status probe answers status and providers only; the console stopped reading a key from it, since session auth and Turing's proxy already supply one.
