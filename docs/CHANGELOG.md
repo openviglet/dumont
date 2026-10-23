@@ -597,3 +597,6 @@
 ## Track R — API access and credential handling
 
 - **D142** — The unauthenticated status probe answers status and providers only; the console stopped reading a key from it, since session auth and Turing's proxy already supply one.
+
+## Track S — The WordPress connector plugin
+

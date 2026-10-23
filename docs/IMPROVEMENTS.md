@@ -198,3 +198,238 @@ What Dumont should do:
 
 Done when the jobs schema declares "closing soonest" and a run against a fresh site
 leaves the sort on it, and a second run reports nothing changed.
+
+## XLIX The WordPress connector plugin
+
+### XLIX.1 Packaging, CI and release of the WordPress plugin (D145)
+
+**Found in.** fespsp-institucional (FESPSP), which wants one indexing plugin shared by
+three WordPress sites (institucional, projetos, IWL). Each site is a container image
+built in CI that pulls its dependencies with Composer (path repo in dev, vcs + semver
+tag in CI) and runs with `DISALLOW_FILE_MODS`.
+
+**What is there.** `wordpress/src/` holds plugin `viglet-dumont` 1.0.0, untouched since
+the initial commit (`a1f004e4`). It has no `composer.json`, no tests, no lint, no CI job
+and no release artefact. It also declares `Requires PHP: 7.4` and `Requires at least:
+5.8`, while the code it ships uses typed properties.
+
+**What it should do.**
+- Ship a `composer.json` of `"type": "wordpress-plugin"`. Composer cannot install from a
+  subfolder of a monorepo, so the release must publish an installable artefact. Two
+  options: a zip attached to the GitHub release plus a `package` entry, or a split
+  read-only mirror repo. Pick one and document it.
+- Add a CI job running PHPCS (WPCS), PHPStan (`szepeviktor/phpstan-wordpress`) and
+  PHPUnit on `wp-env` or the WordPress test suite. It must cover at least the
+  document builder, the import payload shape and the delete paths.
+- Set honest requirements (PHP 8.1+, WordPress 6.5+ for the block and Interactivity
+  APIs) and bump the plugin to 2.0.0, since the settings and payload change.
+- Produce a `readme.txt` and CHANGELOG in the format WordPress expects.
+
+Every other Track S line builds on this one.
+
+### XLIX.2 A queue between the WordPress editor and Turing (D146)
+
+**What happens.** `viglet-dumont.php` hooks three handlers on `init`:
+`viglet_dumont_handle_publish` on `publish_post` and `publish_page`, then
+`viglet_dumont_handle_save` and `viglet_dumont_handle_status_transition`. One publish
+therefore sends up to three `/api/sn/import` calls for the same post. Each call is a
+blocking `wp_remote_request` with `timeout => 30`, made inside the editor's save
+request. If Turing is slow, the Gutenberg save spins. If Turing is down, the error is
+dropped (the return value of `import()` is never read) and the post stays out of date in
+the index. Nothing records that it happened.
+
+**What it should do.**
+- Make a save only enqueue: one de-duplicated job per post id, with the last action
+  winning (index or delete).
+- Have a worker send the jobs in batches through `/api/sn/import`, with retry and
+  backoff. That worker is WP-Cron, plus a WP-CLI runner for hosts that disable it.
+- Use no third-party dependency: a custom table or a post-meta state per post is
+  enough. Action Scheduler is an option only if it is bundled.
+- Store per post: last indexed at, last error, attempts. The admin shows that state
+  and the WP-CLI runner replays failures.
+- Read the import response, since Turing now answers 400 on a malformed body (T1062),
+  and treat non-2xx as a failure to retry, not as success.
+
+**Cost today.** An editor at FESPSP saving a page while turing.viglet.cloud is degraded
+would wait up to 90 s and get no error.
+
+### XLIX.3 Per-type field mapping and manifest provisioning (D147)
+
+**What happens.** `Viglet_Dumont_Indexer::build_attributes` sends a fixed set of fields:
+- id, title, text, abstract, url, type, author, publication_date, modification_date, site, image;
+- categories and tags, when their options are on;
+- a comma-separated list of meta keys, sent as strings.
+
+Custom taxonomies are never read. A meta value keeps no type: a date becomes a string, a
+number becomes text, a multi-valued field becomes one value. The plugin never tells
+Turing what the fields are, so a facet must be declared by hand in the console, field by
+field, per SN site.
+
+**The consuming case.** FESPSP indexes several kinds of content:
+- `evento`: start date, type taxonomy, place;
+- `vaga`: area, contract, location, open or closed;
+- `livro`: authors, `editora` taxonomy, year.
+
+**What it should do.**
+- Keep a per-post-type mapping, edited in the admin (the admin line) and exportable as JSON.
+  Each source (core field, taxonomy, meta key, featured image) maps to a Turing field
+  with a type (STRING, TEXT, INT, FLOAT, DATE, BOOL), multi-valued or not, facet or
+  not, a facet label, a search weight and an "exclude this type" switch.
+- Provision those fields with `POST /api/sn/manifest`, the way Dumont's
+  `DumTuringIndexingPlugin` does (D63), so the console step disappears.
+- Add a `viglet_dumont_document` filter (post, attributes) and a
+  `viglet_dumont_mapping` filter, so a theme can map in code what the UI cannot.
+- Add an "exclude from search" switch per post (meta).
+- Strip non-content markup from rendered blocks: hidden UI text, scripts and styles.
+
+### XLIX.4 A site key in every WordPress document id (D148)
+
+**What happens.** `Viglet_Dumont_Indexer::build_doc_id` returns `wp-<post ID>` on a
+single site (and `<blog id>-<post ID>` on multisite). Post 42 on site A and post 42 on
+site B are the same Turing document, so the second import replaces the first.
+`source_app` is configurable, but it is not part of the id. `delete_all` sends a DELETE
+with `id: '*'`, `type: '*'` plus `source_apps`. Whether Turing scopes that to the source
+app is not stated anywhere the plugin user can see.
+
+**The consuming case.** FESPSP runs three WordPress sites (institucional, projetos,
+IWL). A unified "search all of FESPSP" is a natural product step: one SN site, with a
+facet by site.
+
+**What it should do.**
+- Build the id from a site key that is stable and configurable, defaulting to the host
+  name of `home_url()` (for example `fes-inst.sumware.com.br:post:42`).
+- Send the site key as a STRING field (facet-ready).
+- Scope delete-all and sweeps (the WP-CLI line) to that key only, and prove it with a test that
+  indexes two keys and deletes one.
+- Migrate an index that still holds `wp-<ID>` documents. The simplest path is a
+  reindex followed by a sweep of the old ids.
+
+### XLIX.5 WP-CLI commands and an orphan sweep (D149)
+
+**What happens.** The only bulk path is `POST viglet-dumont/v1/index-batch`, driven by
+admin JS one batch at a time while the browser tab stays open. There is no `wp` command.
+Nothing compares what Turing holds with what WordPress publishes. A post deleted while
+the plugin was inactive, or while Turing was down (the queue line), stays searchable and
+points at a 404.
+
+**The consuming case.** FESPSP deploys container images. Its first boot seeds content
+with WP-CLI, and its dev stack is reset and re-seeded many times a day. It needs to load
+the index from a script, not from a click.
+
+**What it should do.**
+- `wp dumont status`: connection, SN site, documents per type in WordPress versus in
+  Turing, and queued and failed jobs.
+- `wp dumont index [--type=<pt>] [--ids=<list>] [--since=<date>]`: synchronous, with a
+  progress bar and a non-zero exit code on failure.
+- `wp dumont reindex`: everything, after a mapping change; it provisions the fields
+  first (the mapping line).
+- `wp dumont sweep [--dry-run]`: removes from Turing the ids of this site key (the site-key line) that
+  are not published in WordPress. This needs a way to list ids per site key, either
+  through search with `fq` on the site key or through an export endpoint. If Turing has
+  none, file it as a T line.
+- `wp dumont queue run`: drains the queue.
+
+Expose the same operations through the REST namespace so the admin (the admin line) uses
+them.
+
+### XLIX.6 An admin people can run without a search engineer (D150)
+
+**What is there.** `admin/views/settings-page.php` is one long form with these sections:
+Server Connection (URL, site name, key, locale, source app, ping), Content Indexing
+(post types, categories, tags, comments, comma-separated custom fields, comma-separated
+excluded ids, batch size) and Search Settings. A second tab has the Indexing Actions
+buttons. Nothing tells an editor whether a given page is in the index.
+
+**The consuming case.** At FESPSP the people who touch this are communications and IT
+staff, not search engineers. The owner asked for a friendly interface to configure and
+tune the plugin.
+
+**What it should do.**
+- **First-run setup:** server URL, key, then a "test" step that names what failed (DNS,
+  TLS, 401, unknown SN site, CORS for the front end). Then pick or create the SN site,
+  then the first index with live progress.
+- **Content and fields:** the per-type mapping as a table per post type, with a preview of
+  the document a real post produces (the JSON sent) and a provisioning status per field.
+- **Health:** documents in WordPress versus in Turing per type, the last run, queued and
+  failed jobs (the queue line) with retry, and the last 50 events.
+- **Per post:** a column in the list ("Indexed 2 min ago", "Failed: 401", "Excluded")
+  and a panel in the Gutenberg sidebar with "Reindex now" and "Exclude from search".
+- **Search:** the front-end settings of the search-blocks line.
+- Built with `@wordpress/components` (React, the admin's own look), translatable, with
+  pt_BR shipped, and usable with keyboard and screen reader.
+
+### XLIX.7 Configuration from the environment (D151)
+
+**What happens.** `viglet_dumont_get_settings()` reads everything from the
+`viglet_dumont_settings` option, so the API key lives in plain text in `wp_options`. The
+settings page is the only way to set it.
+
+**The consuming case.** The FESPSP sites run as images on Japode/cloud. Their whole
+configuration comes from environment variables declared in `japode.yml` (secrets
+included), and the database is in every backup. A deploy has to come up already
+configured, with no wp-admin step. The dev stack also needs the plugin configured by a
+setup script.
+
+**What it should do.**
+- Accept constants that override the option, each shown as read-only in the admin with
+  "set by the environment": `VIGLET_DUMONT_URL`, `VIGLET_DUMONT_SITE`,
+  `VIGLET_DUMONT_API_KEY`, `VIGLET_DUMONT_LOCALE`, `VIGLET_DUMONT_SITE_KEY`, and a public
+  search URL for the search blocks when the browser reaches Turing on a different origin than PHP
+  does.
+- When the key does come from the option, mask it in the UI and never echo it back.
+- Keep the indexing key server-side only; the browser search never needs it.
+- Have `wp dumont status` (the WP-CLI line) say where each value came from.
+
+### XLIX.8 Search through blocks and the JS SDK (D152)
+
+**What happens.** With `search_enabled`, `viglet_dumont_search_redirect` hooks
+`template_redirect` on `is_search()`. It calls `get_header()`, includes
+`templates/search-results.php` and exits. On a block theme (FSE) `get_header()` is a
+classic-theme call, so the page loses the theme's header part, footer and styles. The
+server-side search uses the legacy GET `/api/sn/{site}/search`, and there is no
+autocomplete, no "did you mean" UI, no analytics and no generated answer, though
+`@viglet/turing-sdk` ships all of them.
+
+**The consuming case.** The FESPSP sites are block themes with their own design system.
+They will build their search screens as theme blocks on `@viglet/turing-sdk` and need
+the plugin to provide configuration, not markup.
+
+**What it should do.**
+- Expose a public, cache-safe config: Turing public URL, SN site, locale, and the
+  mapping's facet labels and types. Provide it as a `viglet_dumont_public_config()`
+  function, a REST route and a registered script module that ships the SDK bundle, so a
+  theme imports one module and does not vendor the SDK.
+- Ship generic, theme-neutral blocks as the default (search box with autocomplete,
+  results with facets, spell-check, pagination), built with the Interactivity API. A
+  site with its own blocks turns them off.
+- Make the override opt-in and keep `?s=` working, so a site without Turing falls back
+  to WordPress search.
+- Document the CORS origin the SN site must allow.
+
+### XLIX.9 WordPress connector docs match the plugin (D153)
+
+**What happens.** `docs-dumont/connectors/wordpress.md` and the blog post
+`2026-06-22-enterprise-search-for-wordpress` (vigletdocs) both describe settings the
+plugin no longer has:
+- Host, Port and Path (`/dumont`) fields;
+- `viglet-turing-for-wordpress` as the folder name;
+- a `DumontPhpClient/` tree;
+- `Optimize` and `Index all Pages` buttons;
+- batches of 250.
+
+The code has a single Server URL field, the `viglet-dumont` folder and slug,
+`includes/class-dumont-*.php`, and a batch size of 50 by default. Someone following the
+guide cannot find what it names.
+
+**What it should do.** Rewrite both after the rest of Track S land, from the shipped plugin and not
+from memory:
+- install with Composer and with a zip;
+- the environment constants (the environment line);
+- the mapping and provisioning (the mapping line);
+- the WP-CLI commands (the WP-CLI line);
+- the queue and its failure states (the queue line);
+- the site key and unified search (the site-key line);
+- the search blocks and the SDK config (the search-blocks line).
+
+Keep one screenshot per admin screen. Until then, add a short "outdated" note at the top
+of the page.
