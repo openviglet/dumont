@@ -52,6 +52,7 @@ import com.viglet.dumont.connector.commons.spi.structured.preview.DumStructuredP
 import com.viglet.turing.client.sn.job.TurSNJobAction;
 import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 import com.viglet.turing.client.sn.job.TurSNJobItem;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacet;
 import com.viglet.turing.commons.sn.field.TurSNFieldName;
 
 import lombok.extern.slf4j.Slf4j;
@@ -462,10 +463,11 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
      */
     private void provisionSchema(DumStructuredSource structuredSource) {
         List<TurSNJobAttributeSpec> fields = structuredSource.schema().toAttributeSpecs();
+        List<TurSNManifestCustomFacet> customFacets = structuredSource.schema().customFacets();
         List<String> refused = new ArrayList<>();
         for (String siteName : structuredSource.getSiteNames()) {
-            dumConnectorContext.provisionSchema(
-                    new DumIndexingSchema(siteName, structuredSource.getLocale(), fields))
+            dumConnectorContext.provisionSchema(new DumIndexingSchema(siteName,
+                    structuredSource.getLocale(), fields, customFacets))
                     .ifPresent(refused::add);
         }
         provisioningWarnings.put(structuredSource.getSourceName(), List.copyOf(refused));

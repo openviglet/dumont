@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacet;
 
 /**
  * What a source declares about one site's field schema, sent ahead of its documents (roadmap
@@ -31,20 +32,31 @@ import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
  * no second schema language to keep in step: whatever the source declares is what gets provisioned
  * and what gets indexed.
  *
- * @param siteName the site the documents will be published to
- * @param locale   the locale the source publishes in
- * @param fields   the declared fields, in the order they should exist
+ * <p>
+ * Custom facets (D144) ride the same manifest, so one idempotent call converges them with the
+ * fields. None declared leaves whatever the site already has untouched.
+ *
+ * @param siteName     the site the documents will be published to
+ * @param locale       the locale the source publishes in
+ * @param fields       the declared fields, in the order they should exist
+ * @param customFacets the declared custom facets, in the SDK's own type
  *
  * @author Alexandre Oliveira
  * @since 2026.3.6
  */
 public record DumIndexingSchema(String siteName, Locale locale,
-        List<TurSNJobAttributeSpec> fields) {
+        List<TurSNJobAttributeSpec> fields, List<TurSNManifestCustomFacet> customFacets) {
 
-    public DumIndexingSchema(String siteName, Locale locale, List<TurSNJobAttributeSpec> fields) {
+    public DumIndexingSchema(String siteName, Locale locale, List<TurSNJobAttributeSpec> fields,
+            List<TurSNManifestCustomFacet> customFacets) {
         this.siteName = Objects.requireNonNull(siteName, "siteName");
         this.locale = locale;
         this.fields = fields != null ? List.copyOf(fields) : List.of();
+        this.customFacets = customFacets != null ? List.copyOf(customFacets) : List.of();
+    }
+
+    public DumIndexingSchema(String siteName, Locale locale, List<TurSNJobAttributeSpec> fields) {
+        this(siteName, locale, fields, List.of());
     }
 
     /** Nothing to declare — a source with no field specs must not provision an empty schema. */

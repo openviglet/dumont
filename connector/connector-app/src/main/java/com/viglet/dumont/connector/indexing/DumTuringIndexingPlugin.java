@@ -94,19 +94,17 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
      */
     @Override
     public Optional<String> provision(DumIndexingSchema schema) {
-        TurSNManifest manifest = TurSNManifest.builder()
-                .name(schema.siteName())
-                .locale(schema.locale())
-                .fields(schema.fields())
-                .build();
+        TurSNManifest manifest = manifest(schema);
         try {
             TurSNManifestResult result = getTurSNServer().provision(manifest);
             if (result.isNoOp()) {
-                log.debug("Site '{}' schema already matches the {} declared field(s)",
-                        schema.siteName(), schema.fields().size());
+                log.debug("Site '{}' schema already matches the {} declared field(s) and {} custom "
+                        + "facet(s)", schema.siteName(), schema.fields().size(),
+                        schema.customFacets().size());
             } else {
-                log.info("Provisioned site '{}' (created={}) from {} declared field(s)",
-                        result.siteName(), result.siteCreated(), schema.fields().size());
+                log.info("Provisioned site '{}' (created={}) from {} declared field(s); custom facets "
+                        + "changed: {}", result.siteName(), result.siteCreated(),
+                        schema.fields().size(), result.customFacetsChanged());
             }
             return Optional.empty();
         } catch (TurSNManifestException e) {
@@ -122,6 +120,19 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
             return Optional.of("site '%s' was not provisioned: %s".formatted(schema.siteName(),
                     e.getMessage()));
         }
+    }
+
+    /**
+     * The manifest a schema converges to. Custom facets (D144) go on the same call as the fields;
+     * the builder sends none when none is declared, which leaves the site's own untouched.
+     */
+    static TurSNManifest manifest(DumIndexingSchema schema) {
+        TurSNManifest.Builder builder = TurSNManifest.builder()
+                .name(schema.siteName())
+                .locale(schema.locale())
+                .fields(schema.fields());
+        schema.customFacets().forEach(builder::customFacet);
+        return builder.build();
     }
 
     /**

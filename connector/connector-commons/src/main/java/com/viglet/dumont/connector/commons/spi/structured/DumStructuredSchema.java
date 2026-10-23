@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacet;
 
 /**
  * The declared field set of a structured source — its <em>schema-as-code</em>.
@@ -40,9 +41,12 @@ import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 public final class DumStructuredSchema {
 
     private final Map<String, DumStructuredField> fields;
+    private final List<TurSNManifestCustomFacet> customFacets;
 
-    private DumStructuredSchema(Map<String, DumStructuredField> fields) {
+    private DumStructuredSchema(Map<String, DumStructuredField> fields,
+            List<TurSNManifestCustomFacet> customFacets) {
         this.fields = Collections.unmodifiableMap(fields);
+        this.customFacets = List.copyOf(customFacets);
     }
 
     public static Builder builder() {
@@ -77,8 +81,17 @@ public final class DumStructuredSchema {
                 .toList();
     }
 
+    /**
+     * The custom facets provisioned with the site (D144): named buckets over a declared field, such
+     * as "posted in the last 7 days". Empty unless the source declares one.
+     */
+    public List<TurSNManifestCustomFacet> customFacets() {
+        return customFacets;
+    }
+
     public static final class Builder {
         private final Map<String, DumStructuredField> fields = new LinkedHashMap<>();
+        private final Map<String, TurSNManifestCustomFacet> customFacets = new LinkedHashMap<>();
 
         public Builder field(DumStructuredField field) {
             if (fields.putIfAbsent(field.name(), field) != null) {
@@ -109,11 +122,26 @@ public final class DumStructuredSchema {
             return field(DumStructuredField.body(name));
         }
 
+        /** A custom facet over a field this schema declares, provisioned with the site (D144). */
+        public Builder customFacet(TurSNManifestCustomFacet customFacet) {
+            if (customFacets.putIfAbsent(customFacet.name(), customFacet) != null) {
+                throw new IllegalArgumentException("Duplicate custom facet declared: " + customFacet.name());
+            }
+            return this;
+        }
+
         public DumStructuredSchema build() {
             if (fields.isEmpty()) {
                 throw new IllegalStateException("A structured schema must declare at least one field");
             }
-            return new DumStructuredSchema(fields);
+            customFacets.values().stream()
+                    .filter(facet -> !fields.containsKey(facet.field()))
+                    .findFirst()
+                    .ifPresent(facet -> {
+                        throw new IllegalStateException("Custom facet '" + facet.name()
+                                + "' is over undeclared field '" + facet.field() + "'");
+                    });
+            return new DumStructuredSchema(fields, new ArrayList<>(customFacets.values()));
         }
     }
 }

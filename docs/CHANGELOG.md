@@ -46,6 +46,7 @@
   `DumStructuredEnrichmentPluginTest` + the per-component tests and `DumTuringClassifierTest`.
   Enables D17/D18/D19.
 - **D63** — indexAll now posts the source's declared TurSNJobAttributeSpecs to Turing's manifest endpoint, once per site, before the first document, so fields exist as declared.
+- **D144 (custom facets)** — A structured schema declares custom facets beside its fields, and provision posts them on the same manifest, so a posting-date facet needs no console step.
 
 ## Track B — Web-crawler hardening (real-world sources)
 

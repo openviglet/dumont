@@ -17,7 +17,9 @@
 package com.viglet.dumont.connector.indexing;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -29,6 +31,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
+import com.viglet.turing.client.sn.manifest.TurSNManifest;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacet;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacetItem;
 
 @SpringBootTest
 class DumTuringIndexingPluginTest {
@@ -71,5 +76,26 @@ class DumTuringIndexingPluginTest {
 
         assertTrue(refused.isPresent());
         assertTrue(refused.get().startsWith("site 'Sample' was not provisioned"), refused.get());
+    }
+
+    /** D144: the declared custom facets ride the manifest beside the fields. */
+    @Test
+    void manifestCarriesTheDeclaredCustomFacets() {
+        TurSNManifestCustomFacet recent = TurSNManifestCustomFacet.of("postedAt", "postedRecently",
+                "Posted", List.of(TurSNManifestCustomFacetItem.since("Last 7 days", "NOW-7DAYS")));
+
+        TurSNManifest manifest = DumTuringIndexingPlugin.manifest(new DumIndexingSchema("Sample",
+                Locale.US, List.of(new TurSNJobAttributeSpec()), List.of(recent)));
+
+        assertEquals(List.of(recent), manifest.customFacets());
+    }
+
+    /** D144: none declared sends none, so the site keeps the facets its console configured. */
+    @Test
+    void manifestLeavesTheSiteFacetsAloneWhenNoneIsDeclared() {
+        TurSNManifest manifest = DumTuringIndexingPlugin.manifest(new DumIndexingSchema("Sample",
+                Locale.US, List.of(new TurSNJobAttributeSpec())));
+
+        assertNull(manifest.customFacets());
     }
 }

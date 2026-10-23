@@ -115,7 +115,7 @@ This track has no remaining pending tasks.
 
 ## Track A — Structured-source connector framework
 
-- 📋 **D144** (deps: —) **A structured schema cannot declare custom facets or sorts, so the Turing manifest Dumont posts never carries them** — A connector that needs a posting-date filter or a closing-soonest sort still needs a console step in every environment. → §XLVIII
+- ⏳ **D144** (deps: SDK custom-sort release) **A structured schema cannot declare custom facets or sorts, so the Turing manifest Dumont posts never carries them** — Custom sorts need a turing-java-sdk release with TurSNManifestCustomSort; 2026.3.6 has facets only. → §XLVIII
 
 ## Track S — The WordPress connector plugin
 
@@ -128,6 +128,12 @@ This track has no remaining pending tasks.
 - 📋 **D151** (deps: D145) **The Turing URL and API key can only be set in wp-admin, and the key is stored in plain text in wp_options** — A containerised site configured from its environment cannot set the plugin up at deploy, and the secret lands in every database backup. → §XLIX.7
 - 📋 **D152** (deps: D147, D151) **The search side is a PHP template that hijacks template_redirect and ignores block themes and the JS SDK** — A block theme loses its header, footer and styles on the results page, and no SDK feature (autocomplete, spell-check, answers) reaches the visitor. → §XLIX.8
 - 📋 **D153** (deps: D149, D150, D152) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
+
+## Done when — D144
+
+- **A declared custom sort converges on the site with the fields** The jobs schema
+  declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
+  second run logs no customSortsChanged.
 
 ## Non-goals (do NOT add as tasks)
 

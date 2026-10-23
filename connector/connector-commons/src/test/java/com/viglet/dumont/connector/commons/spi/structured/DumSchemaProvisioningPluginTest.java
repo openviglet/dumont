@@ -18,6 +18,7 @@ package com.viglet.dumont.connector.commons.spi.structured;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacet;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacetItem;
 import com.viglet.turing.commons.se.field.TurSEFieldType;
 
 /** The schema reaches the backend ahead of the documents (roadmap D63). */
@@ -129,6 +132,30 @@ class DumSchemaProvisioningPluginTest {
     }
 
     @Test
+    @DisplayName("a declared custom facet is provisioned with the fields (D144)")
+    void customFacetsReachTheProvisionedSchema() {
+        plugin.indexAll(SOURCE);
+
+        assertEquals(List.of(RECENT), context.provisioned.getFirst().customFacets());
+    }
+
+    @Test
+    @DisplayName("a schema declares no custom facet unless asked (D144)")
+    void aSchemaDeclaresNoCustomFacetByDefault() {
+        assertTrue(DumStructuredSchema.builder().text("title").build().customFacets().isEmpty());
+        assertTrue(new DumIndexingSchema("Author", Locale.US, List.of()).customFacets().isEmpty());
+    }
+
+    @Test
+    @DisplayName("a custom facet over an undeclared field is refused (D144)")
+    void aCustomFacetOverAnUndeclaredFieldIsRefused() {
+        DumStructuredSchema.Builder builder = DumStructuredSchema.builder().text("title")
+                .customFacet(RECENT);
+
+        assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
     @DisplayName("an empty schema is not a declaration")
     void anEmptySchemaIsNotADeclaration() {
         assertTrue(new DumIndexingSchema("Author", Locale.US, List.of()).isEmpty());
@@ -138,12 +165,18 @@ class DumSchemaProvisioningPluginTest {
 
     // --- Fixture --------------------------------------------------------------------------------
 
+    private static final TurSNManifestCustomFacet RECENT = TurSNManifestCustomFacet.of("postedAt",
+            "postedRecently", "Posted", List.of(TurSNManifestCustomFacetItem.since("Last 7 days",
+                    "NOW-7DAYS")));
+
     private static final class Catalog implements DumStructuredSource {
         private final DumStructuredSchema schema = DumStructuredSchema.builder()
                 .field(DumStructuredField.builder("title").type(TurSEFieldType.TEXT)
                         .mandatory(true).build())
                 .field(DumStructuredField.builder("workload").type(TurSEFieldType.STRING)
                         .multiValued(true).facet(true).build())
+                .field(DumStructuredField.builder("postedAt").type(TurSEFieldType.DATE).build())
+                .customFacet(RECENT)
                 .build();
         private final Map<String, String> titles = new LinkedHashMap<>(Map.of(
                 "c1", "Algorithms", "c2", "Calculus"));

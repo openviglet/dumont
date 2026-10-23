@@ -150,33 +150,33 @@ route returns nothing a caller could use to act as Dumont.
 
 ## XLVIII Structured schemas declare custom facets and sorts (D144)
 
-Turing's SN site manifest declares more than fields: custom facets since Turing T1084
-(named buckets over a field, such as "posted in the last 7 days") and custom sorts since
-Turing T1104 (named, multi-level sorts with a placement for documents missing the field,
-such as "closing soonest": `expiresAt` ascending, undated jobs last). The Java SDK
-carries both on `TurSNManifest.builder()`: `.customFacet(TurSNManifestCustomFacet...)`
-and `.customSort(new TurSNManifestCustomSort(name, description, items))` with
-`TurSNManifestCustomSortItem.asc("expiresAt").missingLast()`.
+Turing's SN site manifest declares custom facets (Turing T1084) and custom sorts (Turing
+T1104: named, multi-level sorts with a placement for documents missing the field, such
+as "closing soonest": `expiresAt` ascending, undated jobs last).
 
-Dumont posts that manifest before the first document (D63,
-`DumTuringIndexingPlugin.provision`), but builds it from `DumIndexingSchema` with only
-the site name, locale and fields. A structured schema (`DumStructuredSchema`, e.g. the
-jobs extension's `DumJobsSchema` that trabalharei uses for TRA125) has nowhere to
-declare a facet or a sort, so a connector that needs "closing soonest" or a posting-date
-filter still needs a console step per environment, and a site rebuilt from the connector
-loses them.
+Custom facets shipped:
+`DumStructuredSchema.Builder.customFacet(TurSNManifestCustomFacet)` declares one over a
+declared field, `DumIndexingSchema.customFacets()` carries it, and
+`DumTuringIndexingPlugin.manifest` adds it to the one idempotent manifest call
+(`provision`, D63). None declared sends none, so console-made facets survive.
 
-What Dumont should do:
+What is left is the same path for sorts. The SDK source already has `.customSort(new
+TurSNManifestCustomSort(name, description, items))` with
+`TurSNManifestCustomSortItem.asc("expiresAt").missingLast()` and
+`TurSNManifestResult.customSortsChanged()`, but turing-java-sdk 2026.3.6, the pinned
+release, does not; Track Q builds only from released dependencies.
 
-- Let `DumStructuredSchema` declare custom facets and custom sorts beside its fields, in
-  the SDK's own types, defaulting to none.
-- Carry them on `DumIndexingSchema` and pass them to the builder in `provision`, so the
-  one idempotent manifest call converges them with the fields.
-- Log `customFacetsChanged` / `customSortsChanged` with the fields, and keep the existing
-  rule that a refused manifest never stops indexing.
+Once a release carries it:
 
-Done when the jobs schema declares "closing soonest" and a run against a fresh site
-leaves the sort on it, and a second run reports nothing changed.
+- Bump `turing.version`.
+- Add `customSort(...)` to `DumStructuredSchema.Builder` (unique by name, items over
+  declared fields), carry it on `DumIndexingSchema`, and add it in
+  `DumTuringIndexingPlugin.manifest` beside the facets.
+- Log `customSortsChanged` with the facets; a refused manifest still never stops indexing.
+
+Done when the jobs schema (trabalharei's `DumJobsSchema`, TRA125) declares "closing
+soonest" and a run against a fresh site leaves the sort on it, and a second run reports
+nothing changed.
 
 ## XLIX The WordPress connector plugin
 
