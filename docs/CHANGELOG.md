@@ -181,6 +181,7 @@
   coverage metric with D15. Proven by `DumStructuredPreviewerTest`,
   `DumStructuredPreviewPluginTest`.
 - **D65** — One MapStruct mapper now declares the exported field list for both directions with unmappedTargetPolicy=ERROR, so an unmapped field fails the build instead of vanishing from the export.
+- **D143** — dumont.viglet.org/changelog.json now serves Dumont's releases through 2026.2.16, and www.viglet.org reads it in place of its hand-kept copy.
 
 ## Track E — Data quality & trust
 

@@ -148,27 +148,6 @@ route returns nothing a caller could use to act as Dumont.
 
 ## XLVII Adoption & authoring
 
-### XLVII.1 Publish the release notes as changelog.json (D143)
-
-www.viglet.org/dumont/release-notes/ renders a copy of Dumont's releases that the
-openviglet/site repo curates by hand (`public/static_files/json/dumont/changelog.json`),
-so it drifts from what Dumont actually ships. Turing already owns its list: the Turing
-site serves `frontend/apps/site/public/changelog.json` at
-turing.viglet.org/changelog.json, and www.viglet.org reads it cross-origin.
-
-Build: `dumont-site/public/changelog.json`, served at dumont.viglet.org/changelog.json.
-GitHub Pages already sends `Access-Control-Allow-Origin: *`, which the cross-origin read
-needs. The shape is the one Turing and www.viglet.org already agree on: a JSON array,
-newest release first, of `{ "version": string, "pub_date": ISO date or null, "notes":
-string[] }`. Each note starts with `[new]`, `[added]`, `[improved]`, `[fixed]` or
-`[removed]` (anything else renders as a plain bullet; `[pretext]` lines are skipped),
-and `#123` becomes a link to the issue. Seed it from the copy in openviglet/site and add
-the releases since 2026.2.16.
-
-On ship: in openviglet/site, set `changelogUrl:
-'https://dumont.viglet.org/changelog.json'` on Dumont in `src/data/solutions.ts` and
-delete the curated copy there.
-
 ## XLVIII Structured schemas declare custom facets and sorts (D144)
 
 Turing's SN site manifest declares more than fields: custom facets since Turing T1084
