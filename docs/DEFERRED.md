@@ -28,3 +28,5 @@
 
 ## Track D — Adoption & authoring
 
+## Track A — Structured-source connector framework
+

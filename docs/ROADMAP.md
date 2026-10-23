@@ -115,6 +115,10 @@ This track has no remaining pending tasks.
 
 - 📋 **D143** (deps: —) **dumont.viglet.org publishes no changelog.json** — www.viglet.org reads Dumont's release notes from a hand-kept copy that drifts; Turing already serves its own at turing.viglet.org/changelog.json. → §XLVII.1
 
+## Track A — Structured-source connector framework
+
+- 📋 **D144** (deps: —) **A structured schema cannot declare custom facets or sorts, so the Turing manifest Dumont posts never carries them** — A connector that needs a posting-date filter or a closing-soonest sort still needs a console step in every environment. → §XLVIII
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

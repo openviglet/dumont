@@ -168,3 +168,33 @@ the releases since 2026.2.16.
 On ship: in openviglet/site, set `changelogUrl:
 'https://dumont.viglet.org/changelog.json'` on Dumont in `src/data/solutions.ts` and
 delete the curated copy there.
+
+## XLVIII Structured schemas declare custom facets and sorts (D144)
+
+Turing's SN site manifest declares more than fields: custom facets since Turing T1084
+(named buckets over a field, such as "posted in the last 7 days") and custom sorts since
+Turing T1104 (named, multi-level sorts with a placement for documents missing the field,
+such as "closing soonest": `expiresAt` ascending, undated jobs last). The Java SDK
+carries both on `TurSNManifest.builder()`: `.customFacet(TurSNManifestCustomFacet...)`
+and `.customSort(new TurSNManifestCustomSort(name, description, items))` with
+`TurSNManifestCustomSortItem.asc("expiresAt").missingLast()`.
+
+Dumont posts that manifest before the first document (D63,
+`DumTuringIndexingPlugin.provision`), but builds it from `DumIndexingSchema` with only
+the site name, locale and fields. A structured schema (`DumStructuredSchema`, e.g. the
+jobs extension's `DumJobsSchema` that trabalharei uses for TRA125) has nowhere to
+declare a facet or a sort, so a connector that needs "closing soonest" or a posting-date
+filter still needs a console step per environment, and a site rebuilt from the connector
+loses them.
+
+What Dumont should do:
+
+- Let `DumStructuredSchema` declare custom facets and custom sorts beside its fields, in
+  the SDK's own types, defaulting to none.
+- Carry them on `DumIndexingSchema` and pass them to the builder in `provision`, so the
+  one idempotent manifest call converges them with the fields.
+- Log `customFacetsChanged` / `customSortsChanged` with the fields, and keep the existing
+  rule that a refused manifest never stops indexing.
+
+Done when the jobs schema declares "closing soonest" and a run against a fresh site
+leaves the sort on it, and a second run reports nothing changed.
