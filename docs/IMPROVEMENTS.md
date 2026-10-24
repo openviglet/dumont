@@ -180,32 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.2 A queue between the WordPress editor and Turing (D146)
-
-**What happens.** `viglet-dumont.php` hooks three handlers on `init`:
-`viglet_dumont_handle_publish` on `publish_post` and `publish_page`, then
-`viglet_dumont_handle_save` and `viglet_dumont_handle_status_transition`. One publish
-therefore sends up to three `/api/sn/import` calls for the same post. Each call is a
-blocking `wp_remote_request` with `timeout => 30`, made inside the editor's save
-request. If Turing is slow, the Gutenberg save spins. If Turing is down, the error is
-dropped (the return value of `import()` is never read) and the post stays out of date in
-the index. Nothing records that it happened.
-
-**What it should do.**
-- Make a save only enqueue: one de-duplicated job per post id, with the last action
-  winning (index or delete).
-- Have a worker send the jobs in batches through `/api/sn/import`, with retry and
-  backoff. That worker is WP-Cron, plus a WP-CLI runner for hosts that disable it.
-- Use no third-party dependency: a custom table or a post-meta state per post is
-  enough. Action Scheduler is an option only if it is bundled.
-- Store per post: last indexed at, last error, attempts. The admin shows that state
-  and the WP-CLI runner replays failures.
-- Read the import response, since Turing now answers 400 on a malformed body (T1062),
-  and treat non-2xx as a failure to retry, not as success.
-
-**Cost today.** An editor at FESPSP saving a page while turing.viglet.cloud is degraded
-would wait up to 90 s and get no error.
-
 ### XLIX.3 Per-type field mapping and manifest provisioning (D147)
 
 **What happens.** `Viglet_Dumont_Indexer::build_attributes` sends a fixed set of fields:
@@ -280,7 +254,7 @@ the index from a script, not from a click.
   are not published in WordPress. This needs a way to list ids per site key, either
   through search with `fq` on the site key or through an export endpoint. If Turing has
   none, file it as a T line.
-- `wp dumont queue run`: drains the queue.
+- `wp dumont queue run` and `queue status` exist (D146); add the rest beside them.
 
 Expose the same operations through the REST namespace so the admin (the admin line) uses
 them.
