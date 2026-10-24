@@ -180,32 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.1 Packaging, CI and release of the WordPress plugin (D145)
-
-**Found in.** fespsp-institucional (FESPSP), which wants one indexing plugin shared by
-three WordPress sites (institucional, projetos, IWL). Each site is a container image
-built in CI that pulls its dependencies with Composer (path repo in dev, vcs + semver
-tag in CI) and runs with `DISALLOW_FILE_MODS`.
-
-**What is there.** `wordpress/src/` holds plugin `viglet-dumont` 1.0.0, untouched since
-the initial commit (`a1f004e4`). It has no `composer.json`, no tests, no lint, no CI job
-and no release artefact. It also declares `Requires PHP: 7.4` and `Requires at least:
-5.8`, while the code it ships uses typed properties.
-
-**What it should do.**
-- Ship a `composer.json` of `"type": "wordpress-plugin"`. Composer cannot install from a
-  subfolder of a monorepo, so the release must publish an installable artefact. Two
-  options: a zip attached to the GitHub release plus a `package` entry, or a split
-  read-only mirror repo. Pick one and document it.
-- Add a CI job running PHPCS (WPCS), PHPStan (`szepeviktor/phpstan-wordpress`) and
-  PHPUnit on `wp-env` or the WordPress test suite. It must cover at least the
-  document builder, the import payload shape and the delete paths.
-- Set honest requirements (PHP 8.1+, WordPress 6.5+ for the block and Interactivity
-  APIs) and bump the plugin to 2.0.0, since the settings and payload change.
-- Produce a `readme.txt` and CHANGELOG in the format WordPress expects.
-
-Every other Track S line builds on this one.
-
 ### XLIX.2 A queue between the WordPress editor and Turing (D146)
 
 **What happens.** `viglet-dumont.php` hooks three handlers on `init`:

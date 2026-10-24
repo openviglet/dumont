@@ -602,3 +602,4 @@
 
 ## Track S — The WordPress connector plugin
 
+- **D145** — WordPress plugin 2.0.0 ships composer.json, readme.txt, PHPCS/PHPStan/PHPUnit CI and a release zip per wordpress-v* tag, Composer-installable.
