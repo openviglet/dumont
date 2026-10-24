@@ -180,35 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.3 Per-type field mapping and manifest provisioning (D147)
-
-**What happens.** `Viglet_Dumont_Indexer::build_attributes` sends a fixed set of fields:
-- id, title, text, abstract, url, type, author, publication_date, modification_date, site, image;
-- categories and tags, when their options are on;
-- a comma-separated list of meta keys, sent as strings.
-
-Custom taxonomies are never read. A meta value keeps no type: a date becomes a string, a
-number becomes text, a multi-valued field becomes one value. The plugin never tells
-Turing what the fields are, so a facet must be declared by hand in the console, field by
-field, per SN site.
-
-**The consuming case.** FESPSP indexes several kinds of content:
-- `evento`: start date, type taxonomy, place;
-- `vaga`: area, contract, location, open or closed;
-- `livro`: authors, `editora` taxonomy, year.
-
-**What it should do.**
-- Keep a per-post-type mapping, edited in the admin (the admin line) and exportable as JSON.
-  Each source (core field, taxonomy, meta key, featured image) maps to a Turing field
-  with a type (STRING, TEXT, INT, FLOAT, DATE, BOOL), multi-valued or not, facet or
-  not, a facet label, a search weight and an "exclude this type" switch.
-- Provision those fields with `POST /api/sn/manifest`, the way Dumont's
-  `DumTuringIndexingPlugin` does (D63), so the console step disappears.
-- Add a `viglet_dumont_document` filter (post, attributes) and a
-  `viglet_dumont_mapping` filter, so a theme can map in code what the UI cannot.
-- Add an "exclude from search" switch per post (meta).
-- Strip non-content markup from rendered blocks: hidden UI text, scripts and styles.
-
 ### XLIX.4 A site key in every WordPress document id (D148)
 
 **What happens.** `Viglet_Dumont_Indexer::build_doc_id` returns `wp-<post ID>` on a
