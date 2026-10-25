@@ -179,3 +179,36 @@ soonest" and a run against a fresh site leaves the sort on it, and a second run 
 nothing changed.
 
 ## XLIX The WordPress connector plugin
+
+### XLIX.14 Content Overview counts post types only (D158)
+
+**What happens.** Settings → Actions → Content Overview shows "NaN" as the total and a
+fourth card reading "undefined". `loadStats()` in `src/admin/js/admin.js` treats every
+key of `GET viglet-dumont/v1/stats` as a post type except `batch_size`. D146 added a
+`queue` key (`{pending, failed}`) to that response. It has no `total`, so the sum turns
+into `NaN` and the card prints `undefined`. The "Total" label is also untranslated.
+
+**What it should do.** Count only entries shaped like a post type (`{total, label}`),
+translate the label, and cover it in the browser tests (the Playwright line), which
+would have caught it.
+
+### XLIX.15 Browser tests for the admin and the site (D159)
+
+**What happens.** The plugin's tests are PHPUnit on Brain Monkey: no WordPress, no
+browser. Every screen check this track made was by hand: headless Edge dumps, curl with
+a cookie jar, throwaway mu-plugins. The Content Overview showed "NaN" and "undefined"
+for twelve tasks and nothing noticed.
+
+**What it should do.**
+- Add `@playwright/test` to `wordpress/package.json`, with specs under `tests/e2e/` that
+  run against the `run-docker.cmd` stack (WordPress at `localhost:8080`, local Turing).
+- Log in once through `wp-login.php` and reuse the stored state.
+- Cover every admin screen: Settings with its four tabs (including the Actions overview
+  numbers), Setup with its connection test, Fields with the state column and preview,
+  Health with its counts and events, the post list's Search column, and the block editor's
+  Search panel.
+- Cover the site: the theme's own search page with Turing on, and the Turing search block
+  (results, a facet click, a suggestion, did-you-mean, pages).
+- Fail any test that logs a console error or a failed request on the page.
+- Run with `npm run test:e2e`, documented in `wordpress/README.md`. It is not in CI, which
+  has no Turing.

@@ -29,3 +29,6 @@
 ## Track D — Adoption & authoring
 
 ## Track A — Structured-source connector framework
+
+## Track S — The WordPress connector plugin
+
