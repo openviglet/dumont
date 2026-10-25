@@ -393,26 +393,6 @@ weight. It also lands in Turing's search log, so synonym mining proposes `work* 
 keyboard spec `results follow the typing without a submit, a half-typed word included`
 already asserts the behaviour, so it stays as the check that nothing regressed.
 
-### XLIX.41 The search block's parts as inner blocks (D185)
-
-**What happens.** The Turing search block (D162 to D168) is one block: its box, filters,
-results and pages are fixed in `src/blocks/search/render.php`, in that order. Settings
-choose where the filters sit and which parts of a result show, but a theme cannot put
-the pages above the results, move the box into a header row, or swap the results list
-for its own.
-
-**What it should do.**
-- Inner blocks for the parts: `viglet-dumont/search-box`, `-filters`, `-results`,
-  `-pages`, each a child block whose render is the current markup for that part, with
-  `parent: ["viglet-dumont/search"]`. The parent keeps `data-wp-interactive`, the store
-  and the state; the children only read it, so the Interactivity context is unchanged.
-- The parent's default template is today's order, so an existing block renders as it does
-  now; a block saved before this (no inner blocks) renders the default template.
-- The editor preview (D168's server render) keeps working: the children render on the
-  server like the parent.
-- Specs: a page whose parts are reordered (pages above results) renders them in that
-  order, and the existing site specs pass unchanged on the default template.
-
 ### XLIX.42 Generative AI declared in the manifest the plugin posts (D186)
 
 **What happens.** Health's AI card and `wp dumont ai status` (D169) show that answers
