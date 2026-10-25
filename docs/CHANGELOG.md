@@ -634,3 +634,4 @@
 - **D177** — A server-drawn Related content block, also placed after chosen post types, lists this site's similar posts, never itself, with clicks reported (design §XLIX.28 recorded in `wordpress/README.md`).
 - **D180** — Events store a message key with its arguments and Health translates it when read, so a pt_BR admin reads events WP-CLI wrote in English in Portuguese.
 - **D181** — The block's text buttons, chips and clear button keep their link and outline look under Twenty Twenty-One, with a focus ring of their own.
+- **D184** — Counts carry their singular and plural forms and the page's plural rule picks one, so a single match reads 1 result, or 1 resultado in pt_BR.

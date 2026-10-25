@@ -393,23 +393,6 @@ weight. It also lands in Turing's search log, so synonym mining proposes `work* 
 keyboard spec `results follow the typing without a submit, a half-typed word included`
 already asserts the behaviour, so it stays as the check that nothing regressed.
 
-### XLIX.40 Plural forms for the search block's counts (D184)
-
-**What happens.** The block's summary is one label, `__( '%d results' )`, handed to the
-browser in `render.php` and filled in `state.summary` (`src/public/search-block.js`). A
-search that finds one document reads "1 results", in English and in pt_BR ("1
-resultados"). The same holds for "%d suggestions" (the combobox's live announcement) and
-"Show %d more" never reaches one, but "Filters (%d)" does not need a plural.
-
-**What it should do.**
-- Hand the browser the plural forms rather than one string: either both of
-  `_n( '%d result', '%d results', ... )` for the two forms English and Portuguese need, or,
-  better, the script module's own translations through `wp_set_script_translations` and
-  `_n()` from `@wordpress/i18n`, which carries every language's plural rule.
-- The same for the suggestion count.
-- A spec that filters to a single result and reads "1 result" (Seats 20 under
-  `q=workshop` gives one).
-
 ### XLIX.41 The search block's parts as inner blocks (D185)
 
 **What happens.** The Turing search block (D162 to D168) is one block: its box, filters,
