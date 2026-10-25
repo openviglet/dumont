@@ -96,7 +96,7 @@ and AI chat on top. You can also use Dumont alone, with your own Solr or Elastic
 | `db` | Database (JDBC) connector |
 | `filesystem` | File system connector |
 | `web-crawler` | Web crawler connector |
-| `wordpress` | WordPress plugin for content indexing |
+| `wordpress` | WordPress plugin: queued indexing into Turing, typed facets, WP-CLI, admin screens and a search block ([`wordpress/README.md`](wordpress/README.md)) |
 | `dumont-react` | Web console (React + Vite), built into the connector's static resources |
 
 ## 🛠️ Prerequisites

@@ -117,8 +117,6 @@ This track has no remaining pending tasks.
 
 - ⏳ **D144** (deps: SDK custom-sort release) **A structured schema cannot declare custom facets or sorts, so the Turing manifest Dumont posts never carries them** — Custom sorts need a turing-java-sdk release with TurSNManifestCustomSort; 2026.3.6 has facets only. → §XLVIII
 
-## Track S — The WordPress connector plugin
-
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema
