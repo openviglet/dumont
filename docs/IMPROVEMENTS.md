@@ -200,8 +200,8 @@ tune the plugin.
   the document a real post produces (the JSON sent) and a provisioning status per field.
 - **Health:** documents in WordPress versus in Turing per type, the last run, queued and
   failed jobs (the queue line) with retry, and the last 50 events.
-- **Per post:** a column in the list ("Indexed 2 min ago", "Failed: 401", "Excluded")
-  and a panel in the Gutenberg sidebar with "Reindex now" and "Exclude from search".
+- **Per post:** landed (list column and editor panel, `class-viglet-dumont-post-state.php`,
+  `admin/js/editor-panel.js`, plain `wp.*` globals). Port the panel when the build exists.
 - **Search:** the front-end settings of the search-blocks line.
 - Built with `@wordpress/components` (React, the admin's own look), translatable, with
   pt_BR shipped, and usable with keyboard and screen reader.

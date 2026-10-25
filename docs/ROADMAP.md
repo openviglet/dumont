@@ -119,10 +119,10 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D150** (deps: D146 ✅, D147 ✅) **The settings page is a flat form with no setup flow, mapping view, index health or per-post index state** — An editor cannot tell whether a page is in the index, why it is not, or whether the connection works, so every doubt becomes a support call. → §XLIX.6
+- ⏳ **D150** (deps: D146 ✅, D147 ✅) **The settings page is a flat form with no setup flow, mapping view, index health or per-post index state** — Setup flow, mapping table with preview, health page and pt_BR in @wordpress/components remain. → §XLIX.6
 - 📋 **D151** (deps: D145 ✅) **The Turing URL and API key can only be set in wp-admin, and the key is stored in plain text in wp_options** — A containerised site configured from its environment cannot set the plugin up at deploy, and the secret lands in every database backup. → §XLIX.7
 - 📋 **D152** (deps: D147 ✅, D151) **The search side is a PHP template that hijacks template_redirect and ignores block themes and the JS SDK** — A block theme loses its header, footer and styles on the results page, and no SDK feature (autocomplete, spell-check, answers) reaches the visitor. → §XLIX.8
-- 📋 **D153** (deps: D149 ✅, D150, D152) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
+- 📋 **D153** (deps: D149 ✅, D150 ⏳, D152) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
 
 ## Done when — D144
 
