@@ -608,3 +608,4 @@
 - **D148** — Ids carry a site key, so sites share one SN site; delete-all removes only that key, checked on a local Turing (design §XLIX.4 recorded in `wordpress/src/includes/class-viglet-dumont-indexer.php`).
 - **D149** — wp dumont status, index, reindex and sweep (and REST) run the index from a script; checked on Turing (design §XLIX.5 recorded in `wordpress/src/includes/class-viglet-dumont-operations.php`).
 - **D150 (per-post index state)** — A Search column and an editor panel show each post's index state, with Exclude and Reindex now.
+- **D154** — A Health page built with wp-scripts shows connection, counts per type and the queue, with retry and send now (design §XLIX.10 recorded in `wordpress/README.md`).

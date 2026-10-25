@@ -54,14 +54,39 @@ jobs:
       - name: PHPCS, PHPStan and PHPUnit
         run: composer check
 
+  admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: wordpress/package-lock.json
+
+      - name: Install, lint and build the admin screens
+        run: |
+          npm ci
+          npm run lint:js
+          npm run build
+
   release:
     if: startsWith(github.ref, 'refs/tags/wordpress-v')
-    needs: check
+    needs: [check, admin]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build the admin screens
+        working-directory: wordpress
+        run: npm ci && npm run build
 
       - name: Build the plugin zip
         id: zip
