@@ -605,3 +605,4 @@
 - **D145** — WordPress plugin 2.0.0 ships composer.json, readme.txt, PHPCS/PHPStan/PHPUnit CI and a release zip per wordpress-v* tag, Composer-installable.
 - **D146** — A save only queues the post; WP-Cron or `wp dumont queue run` sends it with retry and backoff (design §XLIX.2 recorded in `wordpress/src/includes/class-viglet-dumont-queue.php`).
 - **D147** — Taxonomies, meta and core fields map per type to typed Turing fields and facets, provisioned via the manifest (design §XLIX.3 recorded in `wordpress/src/includes/class-viglet-dumont-mapping.php`).
+- **D148** — Ids carry a site key, so sites share one SN site; delete-all removes only that key, checked on a local Turing (design §XLIX.4 recorded in `wordpress/src/includes/class-viglet-dumont-indexer.php`).

@@ -180,28 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.4 A site key in every WordPress document id (D148)
-
-**What happens.** `Viglet_Dumont_Indexer::build_doc_id` returns `wp-<post ID>` on a
-single site (and `<blog id>-<post ID>` on multisite). Post 42 on site A and post 42 on
-site B are the same Turing document, so the second import replaces the first.
-`source_app` is configurable, but it is not part of the id. `delete_all` sends a DELETE
-with `id: '*'`, `type: '*'` plus `source_apps`. Whether Turing scopes that to the source
-app is not stated anywhere the plugin user can see.
-
-**The consuming case.** FESPSP runs three WordPress sites (institucional, projetos,
-IWL). A unified "search all of FESPSP" is a natural product step: one SN site, with a
-facet by site.
-
-**What it should do.**
-- Build the id from a site key that is stable and configurable, defaulting to the host
-  name of `home_url()` (for example `fes-inst.sumware.com.br:post:42`).
-- Send the site key as a STRING field (facet-ready).
-- Scope delete-all and sweeps (the WP-CLI line) to that key only, and prove it with a test that
-  indexes two keys and deletes one.
-- Migrate an index that still holds `wp-<ID>` documents. The simplest path is a
-  reindex followed by a sweep of the old ids.
-
 ### XLIX.5 WP-CLI commands and an orphan sweep (D149)
 
 **What happens.** The only bulk path is `POST viglet-dumont/v1/index-batch`, driven by
@@ -223,8 +201,7 @@ the index from a script, not from a click.
   first (the mapping line).
 - `wp dumont sweep [--dry-run]`: removes from Turing the ids of this site key (the site-key line) that
   are not published in WordPress. This needs a way to list ids per site key, either
-  through search with `fq` on the site key or through an export endpoint. If Turing has
-  none, file it as a T line.
+  through search with `fq` on the site key or through an export endpoint. Turing has none yet (T1112); D148's delete-all lists ids by search.
 - `wp dumont queue run` and `queue status` exist (D146); add the rest beside them.
 
 Expose the same operations through the REST namespace so the admin (the admin line) uses
