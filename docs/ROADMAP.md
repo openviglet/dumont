@@ -119,16 +119,16 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D164** (deps: D160 ✅) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Visitors lose the facet they used, scroll past filters on a phone, and cannot ask for "last month" or "20 to 50". → §XLIX.20
+- ⏳ **D164** (deps: D160 ✅) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Date and number fields still filter by exact value only: no range facets (last 7 days, 20 to 50) declared as Turing custom facets. → §XLIX.20
 - 📋 **D165** (deps: D160 ✅) **The search URL keeps only the query, so filters, pages and sort are lost and Back undoes nothing** — A filtered search cannot be shared or reloaded, and there is no newest-first for events or news. → §XLIX.21
 - 📋 **D166** (deps: D162 ✅, D169) **A question typed into search gets ten links and never Turing's cited answer** — Turing can answer from the site's own content with citations, and the block leaves that unused. → §XLIX.22
 - 📋 **D167** (deps: D163 ✅) **The header's search still submits to WordPress search; Turing search is one page away** — Visitors start searching in the header, and get the slow page load instead of instant, faceted results. → §XLIX.23
 - 📋 **D168** (deps: D162 ✅) **In the editor the search block is a grey placeholder with two settings and no layout or styles** — Editors cannot see what visitors get or shape it to the site, so the block looks foreign on most designs. → §XLIX.24
 - 📋 **D169** (deps: —) **The plugin cannot tell which of Turing's AI features the site can use, nor turn them on** — Chat works while answers fail on the same site, and an AI block shipped blind shows visitors a broken widget. → §XLIX.25
-- 📋 **D170** (deps: D164, D165, Turing T1117) **A sentence typed into search is read as keywords, never as the type and date filters it names** — "Seminars about php from last year" returns everything mentioning those words instead of last year's seminars. → §XLIX.29
+- 📋 **D170** (deps: D164 ⏳, D165, Turing T1117) **A sentence typed into search is read as keywords, never as the type and date filters it names** — "Seminars about php from last year" returns everything mentioning those words instead of last year's seminars. → §XLIX.29
 - 📋 **D171** (deps: D169) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — Authors repeat what the site already says and link by memory, while Turing knows the whole site. → §XLIX.30
 - 📋 **D172** (deps: —) **Synonyms, promoted results and boosts can only be set in Turing's console, not from wp-admin** — A WordPress owner who sees a bad result has no way to fix it without a second login and a second tool. → §XLIX.33
-- 📋 **D173** (deps: D162 ✅, D164) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — A shop cannot filter by price or stock, and Turing's catalog copilot and add-to-cart action go unused. → §XLIX.34
+- 📋 **D173** (deps: D162 ✅, D164 ⏳) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — A shop cannot filter by price or stock, and Turing's catalog copilot and add-to-cart action go unused. → §XLIX.34
 - 📋 **D174** (deps: D169) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — An answer can invent a fact, follow a planted instruction or cost ten times more, and every test still passes. → §XLIX.26
 - 📋 **D175** (deps: D169, D174) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D176** (deps: D162 ✅) **The search block never reports which result a visitor opened, to Turing or to Google Analytics** — The site has no click-through rate or abandonment signal, and Turing cannot learn from what visitors choose. → §XLIX.31
@@ -139,12 +139,19 @@ This track has no remaining pending tasks.
 - 📋 **D181** (deps: —) **Under a classic theme the search block's text buttons render as dark boxes, not links** — Twenty Twenty-One's button styles beat the block's reset, so "Clear all filters" looks like a stray black button. → §XLIX.37
 - 📋 **D182** (deps: D161 ✅, Turing T1113) **No CI job opens the plugin's screens: the browser suite runs only on a laptop** — A regression in the block, an admin screen, a theme or the pt_BR strings lands unseen until someone runs D161's suite by hand. → §XLIX.38
 - 📋 **D183** (deps: D163 ✅, Turing T1120) **The search block guesses a wildcard into instant searches, since Turing matches whole words only** — A phrase or field query typed into the box gets a stray asterisk, and wildcard terms lose stemming and highlight weight. → §XLIX.39
+- 📋 **D184** (deps: —) **The search block's counts have no singular: one match reads "1 results"** — The summary and the suggestion count are a single translated string, so every language gets the plural for one. → §XLIX.40
 
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
+
+## Done when — D164
+
+- **A mapped DATE or INT field offers range facets in the block** The manifest the
+  plugin posts declares Turing custom facets for those fields, the block lists their
+  ranges (last 7 days, this year; 0-20, 20-50), and a spec filters by one.
 
 ## Non-goals (do NOT add as tasks)
 

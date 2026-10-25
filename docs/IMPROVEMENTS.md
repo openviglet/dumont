@@ -182,23 +182,20 @@ nothing changed.
 
 ### XLIX.20 Facet groups, a mobile drawer and range facets (D164)
 
-**What happens.** Facets are checkboxes under a plain legend. Picking a value hides the
-whole facet, because Turing's structured response stops describing it (T1115); the block
-shows an applied-filter chip instead. Every value is listed however many there are. On a
-phone the facets sit above the results and push them out of sight. Date and number
-fields can only be filtered by exact value.
+**What happens.** Facet groups, the kept filtered facet and the phone drawer landed
+(`facets()` in `src/public/search-block.js` rebuilds a filtered facet from the last
+answer that described it, until T1115 ships). Date and number fields can still only be
+filtered by exact value: a visitor cannot ask for "last month" or "20 to 50".
 
 **What it should do.**
-- Collapsible facet groups with a count badge, the first five values and "Show more".
-- Keep a filtered facet visible with its value selected and the other values reachable.
-  Once T1115 ships this comes from Turing; until then, keep the last unfiltered answer's
-  values for that field.
-- On narrow screens, a "Filters (n)" button opening a drawer, with Apply and Clear, the
-  results visible behind it.
-- Range facets for the mapped DATE and INT/FLOAT fields (last 7 days, this year; 0–20,
-  20–50), declared as Turing custom facets through the manifest (Dumont D144 has the
-  structured-schema half).
-- Specs: a value toggled on and off, the drawer on `--mobile`, and a range facet.
+- Range facets for the mapped DATE and INT/FLOAT fields (last 7 days, this year; 0-20,
+  20-50), declared as Turing custom facets in the manifest the plugin posts. D144's
+  custom-facet half (the structured schema's) has landed and shows the manifest shape.
+- The Fields screen lets a mapped DATE or number field opt into ranges, with editable
+  bounds for numbers and a fixed set for dates.
+- The block lists a range facet like any other group; its filter query is the range Turing
+  answers with, and the applied chip reads the range's label.
+- A spec that filters by a range and removes it.
 
 ### XLIX.21 Search state in the URL, and sort (D165)
 
@@ -555,9 +552,10 @@ two admins with different languages see one log in one language. The pt-br brows
 **What happens.** Under Twenty Twenty-One (the `site-classic` project, D161), "Clear all
 filters" renders as white text on a dark box: the theme's own `button` rules win over
 `.viglet-dumont-search__link`, whose reset sets `background: none` and nothing for the
-theme's hover, focus and padding states. The same rule set styles "Did you mean" and the
-suggestion buttons, so they are exposed the same way. The baseline
-`tests/e2e/snapshots/win32/site-classic/search-block-facet.png` holds the wrong look.
+theme's hover, focus and padding states. The same rule set styles "Did you mean", and
+the search box's × clear button (D163) shows the same dark box inside the field. The
+baseline `tests/e2e/snapshots/win32/site-classic/search-block-facet.png` holds the wrong
+look.
 
 **What it should do.**
 - Reset the text buttons for every state a classic theme styles (`:hover`, `:focus`,
@@ -600,3 +598,20 @@ weight.
 `searchQuery` passes it), the block sends that flag instead and drops the `*`. The
 keyboard spec `results follow the typing without a submit, a half-typed word included`
 already asserts the behaviour, so it stays as the check that nothing regressed.
+
+### XLIX.40 Plural forms for the search block's counts (D184)
+
+**What happens.** The block's summary is one label, `__( '%d results' )`, handed to the
+browser in `render.php` and filled in `state.summary` (`src/public/search-block.js`). A
+search that finds one document reads "1 results", in English and in pt_BR ("1
+resultados"). The same holds for "%d suggestions" (the combobox's live announcement) and
+"Show %d more" never reaches one, but "Filters (%d)" does not need a plural.
+
+**What it should do.**
+- Hand the browser the plural forms rather than one string: either both of
+  `_n( '%d result', '%d results', ... )` for the two forms English and Portuguese need, or,
+  better, the script module's own translations through `wp_set_script_translations` and
+  `_n()` from `@wordpress/i18n`, which carries every language's plural rule.
+- The same for the suggestion count.
+- A spec that filters to a single result and reads "1 result" (Seats 20 under
+  `q=workshop` gives one).

@@ -621,3 +621,4 @@
 - **D161** — Site specs run under classic and third-party themes, pt-br fails on English leaks, a multisite network checks per-site search; CI moved to D182 (design §XLIX.17 recorded in `wordpress/README.md`).
 - **D162** — Results are cards (type, locale date, address, marked snippet, image), with skeleton, empty-with-latest-posts and retry-or-WordPress error states.
 - **D163** — The search box is a WAI-ARIA combobox with instant prefix results, a clear button, focus kept in the box and removable recent searches, all keyboard-tested.
+- **D164 (groups, kept filters, phone drawer)** — Facets are collapsible groups with an applied-count badge and Show more; a filtered facet stays with its other values; phones get a Filters drawer.
