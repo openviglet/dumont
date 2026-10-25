@@ -321,7 +321,10 @@ answer.
   the answer is generated.
 - Respect the SN site's LLM settings and cache. The plugin sends no key: the answer
   endpoint is public in the same way search is.
-- A spec against the local Turing with an LLM configured, skipped when none is.
+- A spec in the live-LLM `ai` project (D174), skipped when D169's probe reports no LLM.
+- On the local stack with an OpenAI key, `/answer` still says "AI is not enabled for site"
+  while chat answers: the site needs its GenAI config, which only the console sets today
+  (Turing T1116, surfaced by D169).
 
 ### XLIX.23 An instant-search overlay from the header (D167)
 
@@ -359,3 +362,256 @@ get, cannot choose a layout, and cannot style it beyond the core supports.
   replace one with its own.
 - Specs: insert the block in the editor, change a setting, and see the published page
   follow.
+
+### XLIX.25 The admin shows and enables the site's AI features (D169)
+
+**What happens.** Booted with `OPENAI_API_KEY`, the local Turing creates an LLM, a
+default agent and an embedding store (commit 97c5e3db). The plugin cannot see any of it.
+Chat on the SN site answers, `/answer` says "AI is not enabled for site" (T1116), and
+the admin has no screen that says which AI features this site can use.
+
+**What it should do.**
+- An "AI" section on the Health screen: one row per feature (answer, chat, similar by
+  vector, natural-language filters, copilot), each read from Turing's own probe
+  (`/chat/enabled`, `/copilot/available`, `nl-filters` `available`, discovery) and
+  showing its reason when off.
+- Provisioning turns the site's GenAI on through the manifest once T1116 ships. Until
+  then, the row names the console step and links to it, rather than working around it.
+- A `wp dumont ai status` command that prints the same rows, for scripts and CI.
+- Every visitor-side AI block from this track reads this probe and stays hidden when its
+  feature is off, so no visitor meets a broken widget.
+- Specs: the rows on a stack with a key, and on one without (every row off, with a
+  reason).
+
+Depends on Turing T1116 for the provisioning half.
+
+### XLIX.29 Natural-language filters offered as chips (D170)
+
+**What happens.** A visitor types "seminars about php from last year", and search treats
+all six words as keywords. Turing's public `POST /api/sn/{site}/nl-filters` turns that
+text into a query (`php`) plus checked filter queries on the site's own fields. On the
+local stack it worked, but resolved "last year" to 2022 (Turing T1117).
+
+**What it should do.**
+- In the search block, when a query reads as a sentence (several words, or a date or
+  type word), call `nl-filters` once alongside the search and offer its reading as
+  removable chips ("Type: post", "Published: 2025"), applied with one click. It is never
+  applied silently.
+- Show only filters Turing marks `grounded`, and only on fields the plugin mapped
+  (Fields screen), so a chip always matches a facet the visitor can see.
+- Once applied, the chips are the ordinary applied filters of D164 and live in the URL
+  of D165.
+- Hidden when D169's probe reports no LLM. A slow call never delays the results, which
+  render first.
+- Specs in the `ai` project: a type word and a date phrase become the two chips; a
+  keyword-only query gets none.
+
+Waits on T1117: shipped before it, a relative date would filter out what was asked for.
+
+### XLIX.30 An Assist section in the editor panel (D171)
+
+**What happens.** The editor's Turing panel shows a post's index state and a Reindex
+button (D152). Turing can do more for an author: summarise (`/api/v2/summary`), find
+near duplicates (`/search/duplicates`) and similar posts, and score content against a
+persona (`/persona/{id}/content-fit`). None of it reaches the editor.
+
+**What it should do.** Add an "Assist" section to the panel, with every result a draft the
+author accepts, edits or ignores. Nothing is written on its own, and nothing is
+published (the D13 non-goal).
+- "Draft an excerpt": a summary of the saved content through the plugin's REST route,
+  which calls Turing with the stored key (never the browser). "Use" fills the excerpt
+  field.
+- "Already covered?": near duplicates of this post above a threshold, with links, before
+  the author publishes a second copy.
+- "Link ideas": similar published posts, each with "Insert link" at the cursor.
+- "Fits the audience?": when the SN site has personas, a content-fit score per persona
+  with its reasons.
+- Each action shows its cost from Turing's token count, and is hidden when D169's probe
+  says the feature is off. Capability `edit_post` only.
+- Specs: draft and accept an excerpt; a seeded duplicate is flagged; an inserted link
+  points at the suggested post.
+
+### XLIX.33 A search tuning screen in wp-admin (D172)
+
+**What happens.** Improving results needs Turing's console: synonyms, spotlights (pinned
+results for a query), ranking expressions (boosts and recency) and search rules. A
+WordPress owner works in wp-admin, and does not have, or want, a second login for this.
+
+**What it should do.** A "Search tuning" admin screen, writing through the plugin's REST
+routes with the stored key to Turing's own APIs:
+- Synonyms: list, add and remove; "Suggest" runs Turing's synonym mining (an LLM over the
+  search logs) and offers each pair to accept, never applying one on its own.
+- Promoted results: pick a query and one to three posts from a post search, stored as
+  a Turing spotlight. A post-edit sidebar action "Promote for a search…" reaches the same
+  form.
+- Boosts: switches the plugin owns, as ranking expressions: newer first (recency decay
+  on the publication date), sticky posts up, chosen post types up or down.
+- A "Try it" preview: the same query before and after the change, side by side, through
+  the public search.
+- Each item records that the plugin made it, so the screen never edits what an operator
+  set in the console, and lists those separately as read-only.
+- Specs: add a synonym and the search finds through it; promote a post and it heads the
+  results; a recency boost reorders the seeded dates.
+
+### XLIX.34 WooCommerce products as a searchable catalog (D173)
+
+**What happens.** With WooCommerce active, a product is indexed as a plain post. Price,
+stock, SKU, attributes and product categories never reach Turing, so a shop's search
+cannot filter by price or show what is in stock. Turing has a catalog copilot (`POST
+/api/sn/{site}/copilot`) and an `add_to_cart` host action that no WordPress shop can
+use.
+
+**What it should do.**
+- When WooCommerce is active, the mapping (Fields screen) offers product fields:
+  price (float), sale price, stock status, SKU, rating, product categories and tags,
+  and each global attribute. They are declared in the manifest and indexed on product
+  save and on stock change.
+- Range facets on price (D164) and a stock facet, with result cards showing price, image
+  and an "Add to cart" button (D162's card slots).
+- The catalog copilot as a block, when D169 reports it available: "a waterproof jacket
+  under 200". It answers with products, and its `add_to_cart` host action calls
+  WooCommerce's Store API, so the cart updates with no reload.
+- A WooCommerce seed for the browser tests (products with prices, stock and
+  attributes).
+- Specs: a price range filters products; out-of-stock is a facet value; the copilot
+  adds a seeded product to the cart (the live-LLM `ai` project, D174).
+
+### XLIX.26 A live-LLM browser suite for the AI features (D174)
+
+**What happens.** The Playwright suite (D159) covers search, which is deterministic.
+Turing's generative features (answers, chat, natural-language filters, summaries) call a
+real LLM through the stack's `OPENAI_API_KEY`, and nothing checks them: neither that
+they are grounded, nor that they are fast, nor what they cost.
+
+**What it should do.**
+- An `ai` Playwright project, run by `npm run test:e2e:ai` and skipped (with a printed
+  reason) when D169's probe reports no LLM. It is never part of the default run, which
+  must stay free and deterministic.
+- A seed of its own with known facts (a grant's deadline, an event's venue, a product's
+  price), so a test asserts an answer contains the fact and cites the post holding it.
+- Grounding checks: every citation links to a seeded post; a question the content cannot
+  answer gets no answer, never an invented one (the project's no-fabrication non-goal);
+  English and pt_BR questions.
+- Robustness: a prompt-injection post in the seed ("ignore your instructions") must not
+  change an answer; a slow or failed LLM shows the block's error state.
+- Cost and time: each run reports tokens, dollars and the p50/p95 time to first token,
+  read from Turing's token usage, and fails above a budget set in the config.
+- The answers are saved beside the screens, so a reviewer reads what the model said.
+
+Uses each feature as it lands: the answer panel (D166), natural-language filters (D170),
+the editor assist (D171), the shop copilot (D173) and the site assistant.
+
+### XLIX.27 A site assistant block on Turing's chat (D175)
+
+**What happens.** Turing runs a RAG chat over the site's own content: `GET
+/api/sn/{site}/chat` answered from the seeded WordPress posts on the local stack. The
+SDK has `createChatController` (SSE conversation, session cookie, citations, intents,
+slots and host actions). A WordPress visitor has no way to reach it.
+
+**What it should do.**
+- A "Site assistant" block, also placeable site-wide by a setting (a launcher button in
+  a corner), opening a chat panel built on `createChatController` against the public
+  `/chat/conversation`. It streams tokens and lists the posts it used as cards.
+- Conversation memory per visitor through the SDK's `TUR_SESSION` cookie, with a
+  "New conversation" button that clears it.
+- Host actions limited to what is safe on a content site: `navigate` to a cited post,
+  with `allowNavigate` restricted to the site's own origin.
+- Suggested first questions, set in the block and defaulting to the top search terms
+  once the insights screen reads them.
+- A clear "generated" label and "Was this helpful?" signals. Hidden when D169's probe
+  says chat is off.
+- Accessible: a focus-trapped dialog, `aria-live` for the streamed answer, Escape to
+  close.
+- Specs in the `ai` project (D174): a question about a seeded post gets that post as a
+  citation, a follow-up keeps context, and navigation stays on the site.
+
+### XLIX.31 Click and search analytics from the blocks (D176)
+
+**What happens.** Turing records each search as a metric, but the search block never
+tells it which result was opened. So the site has no click-through rate, no "searched
+and left" signal, and Turing's ranking learns nothing from use.
+
+**What it should do.**
+- The search block, the overlay (D167), the assistant's citations (D175) and related
+  content call the SDK's `trackResultClick` / `postClick` (public `POST
+  /api/sn/{site}/click`) with term, document id and position. They use `sendBeacon`, so
+  the navigation is never delayed.
+- `createTuringAnalytics` with an optional GA4 / GTM sink, so a site already measuring in
+  Google Analytics gets `search`, `select_content` and abandonment events with no code.
+  A setting turns the sink on and names the measurement.
+- Respect consent: no tracking until the WP Consent API (or a filter) reports the
+  statistics category, and no personal data in any event.
+- Specs: a click sends one beacon with the right position; with consent off, none is
+  sent; the GA sink receives the events in debug mode.
+
+The data the search insights screen reads.
+
+### XLIX.28 A related-content block on Turing's similar search (D177)
+
+**What happens.** Turing answers `GET /api/sn/{site}/search/similar?id=&mode=MLT|VECTOR`
+anonymously. On the local stack, a seminar post returned the two other seminars.
+WordPress sites use a separate plugin (or a tag query) for "related posts", which knows
+nothing of the index and picks by tag overlap.
+
+**What it should do.**
+- A "Related content" block, and an optional automatic placement after the post content
+  on chosen post types. It is built on the SDK's `createSimilarController`, with the
+  current post's Turing id (`<site_key>:post:<id>`).
+- Settings: mode (keyword `MLT`, or `VECTOR` when D169 reports embeddings, else falls
+  back to MLT), how many, same post type only, and the card fields (image, date,
+  excerpt).
+- Server-side render of the first results (the block's `render.php` calls the API
+  client), so related links are in the HTML for crawlers and no-JS visitors, then
+  hydrated.
+- Clicks recorded through D176's tracking, so related links show in the insights.
+- Specs: a seeded post shows its seeded siblings, never itself, and a post with no
+  neighbours renders nothing rather than an empty box.
+
+Needs no LLM: a showcase piece that works on every Turing.
+
+### XLIX.32 A search insights screen in wp-admin (D178)
+
+**What happens.** A site owner cannot see what visitors search for, what they fail to
+find, or what they click. Turing keeps the metrics (top terms by period, live accesses,
+and click-through from D176), but only its own console and its MCP tools read them.
+
+**What it should do.** A "Search insights" admin screen in the plugin:
+- Top terms today, this week, this month and all time, with counts and CTR.
+- Zero-result queries, each with "Add a synonym" (D172) and "Write about this" (a new
+  draft titled with the query): the content gaps a site owner can act on.
+- A trend sparkline per term, and the live count.
+- An AI summary of the period ("visitors look for X, find nothing for Y, click Z most")
+  through Turing's summary endpoint, which is cached and regenerable as Dumont's own
+  insights page is. Hidden when D169 says off.
+- A dashboard widget with the week's top five and zero-result five.
+- Read through the plugin's REST routes with the stored key, capability
+  `manage_options`.
+- Specs: seeded searches and clicks appear in the tables; an empty site shows an empty
+  state, not zeros.
+
+Zero-result queries and content gaps are MCP tools only (`top_failed_searches`,
+`content_gaps`), so their two tables wait on Turing T1119. Top terms are REST today, and
+the rest of the screen can ship first.
+
+### XLIX.35 A showcase site, admin tab and recorded tour (D179)
+
+**What happens.** Each Turing feature the plugin brings to WordPress lands as its own
+block or screen. Nobody can see them together: the Docker stack starts with a test seed,
+the docs have one screenshot per screen, and a prospect cannot try any of it.
+
+**What it should do.**
+- `run-docker.cmd demo`: the stack with a realistic content seed (an institution's
+  news, events, courses and FAQ, in English and pt_BR, plus a WooCommerce catalog when
+  D173 is in), and a "Showcase" page holding every block. The page has a short label per
+  block naming the Turing feature behind it.
+- An admin "Showcase" tab listing each feature: on or off (from D169), the block that
+  shows it, and a link to the page section.
+- A guided tour, `npm run e2e:tour`, that drives the showcase and records a video and
+  screenshots per feature. It is the source for the docs and the site's visuals.
+- vigletdocs: a "Turing on WordPress" page with the feature matrix and those
+  screenshots, and the site copy claims only what the tour shows working
+  (`dumont-site` rule).
+- Specs: the tour runs green on the stack with a key, and the keyless parts run without
+  one.
+
+Last in the track's AI series: it gathers what the others built.
