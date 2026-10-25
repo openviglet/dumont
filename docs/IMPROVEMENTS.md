@@ -310,29 +310,6 @@ slots and host actions). A WordPress visitor has no way to reach it.
 - Specs in the `ai` project (D174): a question about a seeded post gets that post as a
   citation, a follow-up keeps context, and navigation stays on the site.
 
-### XLIX.28 A related-content block on Turing's similar search (D177)
-
-**What happens.** Turing answers `GET /api/sn/{site}/search/similar?id=&mode=MLT|VECTOR`
-anonymously. On the local stack, a seminar post returned the two other seminars.
-WordPress sites use a separate plugin (or a tag query) for "related posts", which knows
-nothing of the index and picks by tag overlap.
-
-**What it should do.**
-- A "Related content" block, and an optional automatic placement after the post content
-  on chosen post types. It is built on the SDK's `createSimilarController`, with the
-  current post's Turing id (`<site_key>:post:<id>`).
-- Settings: mode (keyword `MLT`, or `VECTOR` when D169 reports embeddings, else falls
-  back to MLT), how many, same post type only, and the card fields (image, date,
-  excerpt).
-- Server-side render of the first results (the block's `render.php` calls the API
-  client), so related links are in the HTML for crawlers and no-JS visitors, then
-  hydrated.
-- Clicks recorded through D176's tracking, so related links show in the insights.
-- Specs: a seeded post shows its seeded siblings, never itself, and a post with no
-  neighbours renders nothing rather than an empty box.
-
-Needs no LLM: a showcase piece that works on every Turing.
-
 ### XLIX.32 A search insights screen in wp-admin (D178)
 
 **What happens.** A site owner cannot see what visitors search for, what they fail to

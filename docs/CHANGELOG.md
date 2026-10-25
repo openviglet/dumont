@@ -631,3 +631,4 @@
 - **D172** — Search tuning manages synonyms (with filtered suggestions) and promoted results, previews a search before and after, and the editor promotes a post; boosts moved to D187.
 - **D174 (the live-LLM harness)** — npm run test:e2e:ai seeds known facts and an injection post, checks grounding, pt_BR, injection, no invented figure and p95 time, and skips off features with the probe's reason.
 - **D176** — The search block and overlay report opened results to Turing and settled searches and clicks to the site's Google tag, opt-in and gated by consent (design §XLIX.31 recorded in `wordpress/README.md`).
+- **D177** — A server-drawn Related content block, also placed after chosen post types, lists this site's similar posts, never itself, with clicks reported (design §XLIX.28 recorded in `wordpress/README.md`).
