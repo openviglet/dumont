@@ -180,32 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.8 Search through blocks and the JS SDK (D152)
-
-**What happens.** With `search_enabled`, `viglet_dumont_search_redirect` hooks
-`template_redirect` on `is_search()`. It calls `get_header()`, includes
-`templates/search-results.php` and exits. On a block theme (FSE) `get_header()` is a
-classic-theme call, so the page loses the theme's header part, footer and styles. The
-server-side search uses the legacy GET `/api/sn/{site}/search`, and there is no
-autocomplete, no "did you mean" UI, no analytics and no generated answer, though
-`@viglet/turing-sdk` ships all of them.
-
-**The consuming case.** The FESPSP sites are block themes with their own design system.
-They will build their search screens as theme blocks on `@viglet/turing-sdk` and need
-the plugin to provide configuration, not markup.
-
-**What it should do.**
-- Expose a public, cache-safe config: Turing public URL, SN site, locale, and the
-  mapping's facet labels and types. Provide it as a `viglet_dumont_public_config()`
-  function, a REST route and a registered script module that ships the SDK bundle, so a
-  theme imports one module and does not vendor the SDK.
-- Ship generic, theme-neutral blocks as the default (search box with autocomplete,
-  results with facets, spell-check, pagination), built with the Interactivity API. A
-  site with its own blocks turns them off.
-- Make the override opt-in and keep `?s=` working, so a site without Turing falls back
-  to WordPress search.
-- Document the CORS origin the SN site must allow.
-
 ### XLIX.9 WordPress connector docs match the plugin (D153)
 
 **What happens.** `docs-dumont/connectors/wordpress.md` and the blog post
