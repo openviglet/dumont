@@ -132,7 +132,6 @@ This track has no remaining pending tasks.
 - 📋 **D186** (deps: D169 ✅, Turing T1116) **Provisioning cannot turn a site's generative AI on, so answers stay off until a console visit** — A fresh install has chat but no cited answers, and the admin must find a setting in another product. → §XLIX.42
 - 📋 **D187** (deps: D172 ✅, Turing T1126) **Search tuning has no boosts: newer, sticky or chosen post types cannot be ranked up from wp-admin** — An events or news site cannot put recent posts first without Turing's console. → §XLIX.43
 - 📋 **D188** (deps: D176 ✅, Turing T1130) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
-- 📋 **D189** (deps: —) **Health shows its dates in the browser's locale and time zone, not the site's** — A pt_BR admin reads US-style dates in a Portuguese screen, and two admins see one event at different times. → §XLIX.45
 
 ## Done when — D144
 
