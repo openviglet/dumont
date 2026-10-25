@@ -130,6 +130,21 @@ This track has no remaining pending tasks.
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
 
+## Done when — D150
+
+- **First-run setup names what failed** A wrong URL, a bad key and an unknown SN site
+  each show their own message in the settings page, checked against the run-docker.cmd
+  stack.
+- **Mapping table with a document preview per post type** The admin edits the D147
+  mapping per type, shows the JSON a real post produces and each field's provisioning
+  status, with no REST call by hand.
+- **Health page with counts and failed-job retry** Published versus indexed per type
+  (the D149 status), queued and failed jobs with a retry button, and the last events,
+  readable without WP-CLI.
+- **Admin built with @wordpress/components and shipped in pt_BR** The settings app
+  builds in CI and lands in the release zip; every string resolves in pt_BR, and the
+  pages work by keyboard alone.
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
