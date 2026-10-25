@@ -199,28 +199,6 @@ filtered by exact value: a visitor cannot ask for "last month" or "20 to 50".
   answers with, and the applied chip reads the range's label.
 - A spec that filters by a range and removes it.
 
-### XLIX.22 A grounded answer panel above the results (D166)
-
-**What happens.** Turing can answer a question from the site's own content with
-citations (RAG; the SDK's `createAnswerController` and `postAnswer`). The block never
-asks it, so a visitor who types "how do I apply for the grant" gets ten links and no
-answer.
-
-**What it should do.**
-- An opt-in "Answer" panel above the results (a block setting, off by default). For a
-  query that reads as a question, it streams Turing's answer with numbered citations
-  linking to the posts it used.
-- Show it only when Turing returns citations. With none, show nothing rather than an
-  ungrounded text (the project's no-fabrication non-goal).
-- "Was this helpful?" buttons recording the SDK's answer signal, and a clear label that
-  the answer is generated.
-- Respect the SN site's LLM settings and cache. The plugin sends no key: the answer
-  endpoint is public in the same way search is.
-- A spec in the live-LLM `ai` project (D174), skipped when D169's probe reports no LLM.
-- On the local stack with an OpenAI key, `/answer` still says "AI is not enabled for site"
-  while chat answers: the site needs its GenAI config, which only the console sets today
-  (Turing T1116, surfaced by D169).
-
 ### XLIX.29 Natural-language filters offered as chips (D170)
 
 **What happens.** A visitor types "seminars about php from last year", and search treats
