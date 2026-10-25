@@ -119,11 +119,10 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D163** (deps: D160 ✅) **The search box's suggestions cannot be used from the keyboard, and results wait for a submit** — Keyboard and screen-reader users cannot pick a suggestion, and everyone waits a round trip to see anything. → §XLIX.19
 - 📋 **D164** (deps: D160 ✅) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Visitors lose the facet they used, scroll past filters on a phone, and cannot ask for "last month" or "20 to 50". → §XLIX.20
 - 📋 **D165** (deps: D160 ✅) **The search URL keeps only the query, so filters, pages and sort are lost and Back undoes nothing** — A filtered search cannot be shared or reloaded, and there is no newest-first for events or news. → §XLIX.21
 - 📋 **D166** (deps: D162 ✅, D169) **A question typed into search gets ten links and never Turing's cited answer** — Turing can answer from the site's own content with citations, and the block leaves that unused. → §XLIX.22
-- 📋 **D167** (deps: D163) **The header's search still submits to WordPress search; Turing search is one page away** — Visitors start searching in the header, and get the slow page load instead of instant, faceted results. → §XLIX.23
+- 📋 **D167** (deps: D163 ✅) **The header's search still submits to WordPress search; Turing search is one page away** — Visitors start searching in the header, and get the slow page load instead of instant, faceted results. → §XLIX.23
 - 📋 **D168** (deps: D162 ✅) **In the editor the search block is a grey placeholder with two settings and no layout or styles** — Editors cannot see what visitors get or shape it to the site, so the block looks foreign on most designs. → §XLIX.24
 - 📋 **D169** (deps: —) **The plugin cannot tell which of Turing's AI features the site can use, nor turn them on** — Chat works while answers fail on the same site, and an AI block shipped blind shows visitors a broken widget. → §XLIX.25
 - 📋 **D170** (deps: D164, D165, Turing T1117) **A sentence typed into search is read as keywords, never as the type and date filters it names** — "Seminars about php from last year" returns everything mentioning those words instead of last year's seminars. → §XLIX.29
@@ -139,6 +138,7 @@ This track has no remaining pending tasks.
 - 📋 **D180** (deps: —) **Health's event log shows each result in the language it was written in, not the reader's** — A pt_BR admin reads "Fields provisioned" in English for any event a WP-CLI run or an English session wrote. → §XLIX.36
 - 📋 **D181** (deps: —) **Under a classic theme the search block's text buttons render as dark boxes, not links** — Twenty Twenty-One's button styles beat the block's reset, so "Clear all filters" looks like a stray black button. → §XLIX.37
 - 📋 **D182** (deps: D161 ✅, Turing T1113) **No CI job opens the plugin's screens: the browser suite runs only on a laptop** — A regression in the block, an admin screen, a theme or the pt_BR strings lands unseen until someone runs D161's suite by hand. → §XLIX.38
+- 📋 **D183** (deps: D163 ✅, Turing T1120) **The search block guesses a wildcard into instant searches, since Turing matches whole words only** — A phrase or field query typed into the box gets a stray asterisk, and wildcard terms lose stemming and highlight weight. → §XLIX.39
 
 ## Done when — D144
 

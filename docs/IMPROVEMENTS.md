@@ -180,29 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.19 An accessible combobox with instant results (D163)
-
-**What happens.** The block's search box shows suggestions as a plain list of buttons.
-Arrow keys do nothing, Enter searches what was typed and not the highlighted suggestion,
-and a screen reader is not told how many suggestions there are or which one is active. A
-search runs only on submit, and there is no clear button.
-
-**What it should do.**
-- A proper combobox (WAI-ARIA 1.2): `role="combobox"` on the input, `aria-expanded`,
-  `aria-activedescendant` moving with Up and Down, Enter taking the active suggestion,
-  Escape closing the list, and the typed prefix shown in bold in each suggestion.
-- Instant results: after a short pause (about 300 ms), update the results while the
-  visitor types, cancelling the request in flight. Keep submit for screen readers and
-  slow networks.
-- A clear (×) button inside the field, and focus returned to the input after a facet or
-  page click.
-- Recent searches (stored in the browser only, never sent anywhere) shown when the empty
-  box is focused, each removable.
-- A Playwright spec that drives the whole thing from the keyboard alone and checks the
-  ARIA attributes. D160 dropped the list's `listbox`/`option` roles, which wrapped a button
-  in each option and failed axe (`nested-interactive`); the options must be the focusable
-  items themselves, and the open list stays under the axe gate in `site/search.spec.mjs`.
-
 ### XLIX.20 Facet groups, a mobile drawer and range facets (D164)
 
 **What happens.** Facets are checkboxes under a plain legend. Picking a value hides the
@@ -609,3 +586,17 @@ strings lands unseen until the next local run.
   on a visual change.
 - Speed budgets on a shared runner are noisier than on a laptop; keep them, and read a
   budget failure against the timing annotations before raising a bound.
+
+### XLIX.39 Drop the instant-search wildcard once Turing matches prefixes (D183)
+
+**What happens.** Turing matches whole words only, so an instant search for "work" finds
+nothing (Turing T1120). D163's search block works around it: `run( query, prefix )` in
+`wordpress/src/public/search-block.js` appends `*` to the last word of an instant
+search. That is a guess at Turing's query syntax: a quoted phrase or a field query typed
+into the box gets a stray wildcard, and a wildcard term loses stemming and highlighting
+weight.
+
+**What it should do.** Once Turing ships T1120's as-you-type parameter (and the SDK's
+`searchQuery` passes it), the block sends that flag instead and drops the `*`. The
+keyboard spec `results follow the typing without a submit, a half-typed word included`
+already asserts the behaviour, so it stays as the check that nothing regressed.

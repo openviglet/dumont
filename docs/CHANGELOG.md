@@ -620,3 +620,4 @@
 - **D160** — The browser suite runs axe on every screen, the site at three viewports, screenshot baselines, speed budgets and keyboard paths; look gains --a11y (design §XLIX.16 recorded in `wordpress/README.md`).
 - **D161** — Site specs run under classic and third-party themes, pt-br fails on English leaks, a multisite network checks per-site search; CI moved to D182 (design §XLIX.17 recorded in `wordpress/README.md`).
 - **D162** — Results are cards (type, locale date, address, marked snippet, image), with skeleton, empty-with-latest-posts and retry-or-WordPress error states.
+- **D163** — The search box is a WAI-ARIA combobox with instant prefix results, a clear button, focus kept in the box and removable recent searches, all keyboard-tested.
