@@ -358,24 +358,6 @@ the docs have one screenshot per screen, and a prospect cannot try any of it.
 
 Last in the track's AI series: it gathers what the others built.
 
-### XLIX.37 Text buttons that hold their look under a classic theme (D181)
-
-**What happens.** Under Twenty Twenty-One (the `site-classic` project, D161), "Clear all
-filters" renders as white text on a dark box: the theme's own `button` rules win over
-`.viglet-dumont-search__link`, whose reset sets `background: none` and nothing for the
-theme's hover, focus and padding states. The same rule set styles "Did you mean", and
-the search box's × clear button (D163) shows the same dark box inside the field. The
-baseline `tests/e2e/snapshots/win32/site-classic/search-block-facet.png` holds the wrong
-look.
-
-**What it should do.**
-- Reset the text buttons for every state a classic theme styles (`:hover`, `:focus`,
-  `:active`): background, colour, border, padding and box shadow, scoped under
-  `.viglet-dumont-search` so the specificity beats a theme's bare `button` rule.
-- Keep a visible focus ring of the block's own (the D160 keyboard checks assert it).
-- Refresh the `site-classic` baselines with `npm run test:e2e -- --update-snapshots` and
-  check the new PNGs show a link-styled control.
-
 ### XLIX.38 The browser suite in CI (D182)
 
 **What happens.** The browser suite (D159, D160, D161) runs only where someone starts
