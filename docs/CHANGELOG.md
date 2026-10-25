@@ -628,4 +628,4 @@
 - **D169** — Health and wp dumont ai status show answer, chat, NL filters and copilot as on or off with Turing's reason; provisioning GenAI moved to D186 behind T1116.
 - **D166** — An opt-in panel streams Turing's answer to a question with numbered sources and a helpful verdict, drawn only when sources are cited; the live-LLM run is D174's.
 - **D171 (already covered and link ideas)** — The editor's Assist section lists posts that may already cover this one and related posts with Add a link, from Turing's similar and duplicate searches.
-- **D172 (synonyms and promoted results)** — A Search tuning screen adds and removes synonyms and promoted posts on the SN site, leaving console-made ones read-only; promoted posts head the block's results.
+- **D172** — Search tuning manages synonyms (with filtered suggestions) and promoted results, previews a search before and after, and the editor promotes a post; boosts moved to D187.

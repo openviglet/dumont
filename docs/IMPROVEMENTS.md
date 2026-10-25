@@ -242,27 +242,6 @@ have.
 - Hide each action when D169's probe says its feature is off.
 - Specs: draft and accept an excerpt; a persona score shows on a site with one.
 
-### XLIX.33 A search tuning screen in wp-admin (D172)
-
-**What happens.** The Search tuning screen landed with synonyms and promoted results
-(`Viglet_Dumont_Tuning`, `viglet-dumont/v1/tuning`, `assets/admin/tuning.js`): items the
-plugin makes are named "WordPress: …", and an operator's are listed read-only. Promoted
-results show as "Featured" above the block's results. Boosts, a preview and suggestions
-are still console-only.
-
-**What it should do.**
-- Boosts: switches the plugin owns, as Turing ranking expressions
-  (`/api/sn/{id}/ranking-expression`): newer first (recency decay on the publication
-  date), sticky posts up, chosen post types up or down. Named with the same prefix.
-- A "Try it" preview: the same query before and after the change, side by side, through
-  the public search.
-- "Suggest" for synonyms: Turing's synonym mining over the search logs, each pair offered
-  to accept one by one, never applied on its own.
-- A post-edit sidebar action "Promote for a search…" that opens the same form with the
-  post chosen.
-- Specs: a recency boost reorders the seeded January dates; a suggested pair, accepted,
-  finds through.
-
 ### XLIX.34 WooCommerce products as a searchable catalog (D173)
 
 **What happens.** With WooCommerce active, a product is indexed as a plain post. Price,
@@ -489,7 +468,8 @@ nothing (Turing T1120). D163's search block works around it: `run( query, prefix
 `wordpress/src/public/search-block.js` appends `*` to the last word of an instant
 search. That is a guess at Turing's query syntax: a quoted phrase or a field query typed
 into the box gets a stray wildcard, and a wildcard term loses stemming and highlighting
-weight.
+weight. It also lands in Turing's search log, so synonym mining proposes `work* = work`
+(Turing T1125; D172 filters those out).
 
 **What it should do.** Once Turing ships T1120's as-you-type parameter (and the SDK's
 `searchQuery` passes it), the block sends that flag instead and drops the `*`. The
@@ -549,3 +529,23 @@ site's generative AI on (Turing T1116), so a fresh install needs that console st
   when the manifest did it, and keep the reason Turing gives otherwise.
 - A spec on the stack started with `OPENAI_API_KEY`: provision, then the answer row reads
   On.
+
+### XLIX.43 Boosts on the Search tuning screen (D187)
+
+**What happens.** The Search tuning screen (D172) has synonyms, promoted results,
+suggestions and a Try it preview, but no boosts. The server half is written:
+`Viglet_Dumont_Tuning::set_boosts()` and `boosts()` keep the plugin's ranking
+expressions (named "WordPress: …"): newer first is Turing's recency form
+(`publication_date` = `asc`), sticky posts first matches the `sticky` field every
+document now carries, and a post type "down" is `type IS NOT` (Turing boosts, it never
+sinks). `POST viglet-dumont/v1/tuning/boosts` calls it, and `TuningTest` covers the
+payloads. Live, Turing answers 500: saving a ranking expression over the API key fails
+in its auditor (Turing T1126).
+
+**What it should do.**
+- Once T1126 ships, a Boosts card on the screen: "Newer first", "Sticky posts first", and
+  per post type Up, Normal or Down, saved together, read back from `boosts()`.
+- The Try it preview shows the change, as it does for synonyms.
+- Specs: newer first puts Workshop on testing (10 January) ahead of Workshop on search
+  (1 January) for `workshop`; sticky moves a seeded sticky post up; switching both off
+  restores relevance order.
