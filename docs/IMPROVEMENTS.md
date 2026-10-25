@@ -244,25 +244,24 @@ have.
 
 ### XLIX.33 A search tuning screen in wp-admin (D172)
 
-**What happens.** Improving results needs Turing's console: synonyms, spotlights (pinned
-results for a query), ranking expressions (boosts and recency) and search rules. A
-WordPress owner works in wp-admin, and does not have, or want, a second login for this.
+**What happens.** The Search tuning screen landed with synonyms and promoted results
+(`Viglet_Dumont_Tuning`, `viglet-dumont/v1/tuning`, `assets/admin/tuning.js`): items the
+plugin makes are named "WordPress: …", and an operator's are listed read-only. Promoted
+results show as "Featured" above the block's results. Boosts, a preview and suggestions
+are still console-only.
 
-**What it should do.** A "Search tuning" admin screen, writing through the plugin's REST
-routes with the stored key to Turing's own APIs:
-- Synonyms: list, add and remove; "Suggest" runs Turing's synonym mining (an LLM over the
-  search logs) and offers each pair to accept, never applying one on its own.
-- Promoted results: pick a query and one to three posts from a post search, stored as
-  a Turing spotlight. A post-edit sidebar action "Promote for a search…" reaches the same
-  form.
-- Boosts: switches the plugin owns, as ranking expressions: newer first (recency decay
-  on the publication date), sticky posts up, chosen post types up or down.
+**What it should do.**
+- Boosts: switches the plugin owns, as Turing ranking expressions
+  (`/api/sn/{id}/ranking-expression`): newer first (recency decay on the publication
+  date), sticky posts up, chosen post types up or down. Named with the same prefix.
 - A "Try it" preview: the same query before and after the change, side by side, through
   the public search.
-- Each item records that the plugin made it, so the screen never edits what an operator
-  set in the console, and lists those separately as read-only.
-- Specs: add a synonym and the search finds through it; promote a post and it heads the
-  results; a recency boost reorders the seeded dates.
+- "Suggest" for synonyms: Turing's synonym mining over the search logs, each pair offered
+  to accept one by one, never applied on its own.
+- A post-edit sidebar action "Promote for a search…" that opens the same form with the
+  post chosen.
+- Specs: a recency boost reorders the seeded January dates; a suggested pair, accepted,
+  finds through.
 
 ### XLIX.34 WooCommerce products as a searchable catalog (D173)
 

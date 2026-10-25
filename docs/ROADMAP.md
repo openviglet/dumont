@@ -122,14 +122,14 @@ This track has no remaining pending tasks.
 - 🛠 **D164** (deps: D160 ✅, Turing T1122) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Date and number fields still filter by exact value only: no range facets (last 7 days, 20 to 50) declared as Turing custom facets. → §XLIX.20
 - 📋 **D170** (deps: D164 🛠, D165 ✅, Turing T1117) **A sentence typed into search is read as keywords, never as the type and date filters it names** — "Seminars about php from last year" returns everything mentioning those words instead of last year's seminars. → §XLIX.29
 - ⏳ **D171** (deps: D169 ✅, Turing T1124) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — No excerpt draft yet (Turing's summary endpoint refuses Key calls, T1124) and no persona content-fit score. → §XLIX.30
-- 📋 **D172** (deps: —) **Synonyms, promoted results and boosts can only be set in Turing's console, not from wp-admin** — A WordPress owner who sees a bad result has no way to fix it without a second login and a second tool. → §XLIX.33
+- ⏳ **D172** (deps: —) **Synonyms, promoted results and boosts can only be set in Turing's console, not from wp-admin** — No boosts (recency, sticky, post type), no before-and-after preview, no suggested synonyms and no promote action in the editor. → §XLIX.33
 - 📋 **D173** (deps: D162 ✅, D164 🛠) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — A shop cannot filter by price or stock, and Turing's catalog copilot and add-to-cart action go unused. → §XLIX.34
 - 📋 **D174** (deps: D169 ✅) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — An answer can invent a fact, follow a planted instruction or cost ten times more, and every test still passes. → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D176** (deps: D162 ✅) **The search block never reports which result a visitor opened, to Turing or to Google Analytics** — The site has no click-through rate or abandonment signal, and Turing cannot learn from what visitors choose. → §XLIX.31
 - 📋 **D177** (deps: D162 ✅) **Related posts come from tag overlap or another plugin, never from Turing's similar-documents search** — Readers get weak next reads, and the index that already knows which posts are alike goes unused. → §XLIX.28
 - 📋 **D178** (deps: D176, Turing T1119) **A site owner cannot see top searches, zero-result queries or clicks from wp-admin** — The content gaps visitors reveal every day stay invisible, so nobody writes what they were looking for. → §XLIX.32
-- 📋 **D179** (deps: D166 ✅, D170, D171 ⏳, D172, D175, D177, D178) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
+- 📋 **D179** (deps: D166 ✅, D170, D171 ⏳, D172 ⏳, D175, D177, D178) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 📋 **D180** (deps: —) **Health's event log shows each result in the language it was written in, not the reader's** — A pt_BR admin reads "Fields provisioned" in English for any event a WP-CLI run or an English session wrote. → §XLIX.36
 - 📋 **D181** (deps: —) **Under a classic theme the search block's text buttons render as dark boxes, not links** — Twenty Twenty-One's button styles beat the block's reset, so "Clear all filters" looks like a stray black button. → §XLIX.37
 - 📋 **D182** (deps: D161 ✅, Turing T1113) **No CI job opens the plugin's screens: the browser suite runs only on a laptop** — A regression in the block, an admin screen, a theme or the pt_BR strings lands unseen until someone runs D161's suite by hand. → §XLIX.38
@@ -158,6 +158,15 @@ This track has no remaining pending tasks.
 - **A site with personas shows each one's content-fit** When the SN site has personas,
   Assist shows a content-fit score per persona with its reasons, hidden when there are
   none.
+
+## Done when — D172
+
+- **Boosts the plugin owns reorder the results** Newer first, sticky posts up and chosen
+  post types up or down are ranking expressions the screen switches on and off, and a
+  spec sees a recency boost reorder the seeded January dates.
+- **An owner sees a change before and after, and accepts suggested synonyms** A Try it
+  preview runs one query before and after a change side by side, Suggest offers mined
+  synonym pairs to accept one by one, and the editor has Promote for a search.
 
 ## Non-goals (do NOT add as tasks)
 
