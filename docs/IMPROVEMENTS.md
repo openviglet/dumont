@@ -180,18 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.14 Content Overview counts post types only (D158)
-
-**What happens.** Settings → Actions → Content Overview shows "NaN" as the total and a
-fourth card reading "undefined". `loadStats()` in `src/admin/js/admin.js` treats every
-key of `GET viglet-dumont/v1/stats` as a post type except `batch_size`. D146 added a
-`queue` key (`{pending, failed}`) to that response. It has no `total`, so the sum turns
-into `NaN` and the card prints `undefined`. The "Total" label is also untranslated.
-
-**What it should do.** Count only entries shaped like a post type (`{total, label}`),
-translate the label, and cover it in the browser tests (the Playwright line), which
-would have caught it.
-
 ### XLIX.15 Browser tests for the admin and the site (D159)
 
 **What happens.** The plugin's tests are PHPUnit on Brain Monkey: no WordPress, no

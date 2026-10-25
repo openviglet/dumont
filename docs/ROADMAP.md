@@ -119,7 +119,6 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D158** (deps: —) **The Actions tab's Content Overview shows NaN as the total and a card reading undefined** — The stats endpoint gained a queue entry, and the overview counts every key as a post type. → §XLIX.14
 - 📋 **D159** (deps: —) **No test opens the plugin's admin screens or the site in a browser, so a broken screen ships unnoticed** — Every screen check was by hand, and the Content Overview showed NaN for a dozen tasks without anything failing. → §XLIX.15
 
 ## Done when — D144
