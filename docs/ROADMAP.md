@@ -119,12 +119,11 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D160** (deps: D159 ✅) **The browser tests never measure accessibility, phones, visual changes or speed** — A screen that fails a screen reader, breaks on a phone or slows down still passes every test. → §XLIX.16
-- 📋 **D161** (deps: D160) **The browser tests run on one block theme, in English, on a laptop only** — A classic theme, a pt_BR site or a multisite network can break unseen, and no CI run guards the screens. → §XLIX.17
-- 📋 **D162** (deps: D160) **Search results are a bare list of links and long text, with no loading, empty or error design** — Visitors cannot scan what a result is or when it is from, and a slow, empty or failed search gives them nowhere to go. → §XLIX.18
-- 📋 **D163** (deps: D160) **The search box's suggestions cannot be used from the keyboard, and results wait for a submit** — Keyboard and screen-reader users cannot pick a suggestion, and everyone waits a round trip to see anything. → §XLIX.19
-- 📋 **D164** (deps: D160) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Visitors lose the facet they used, scroll past filters on a phone, and cannot ask for "last month" or "20 to 50". → §XLIX.20
-- 📋 **D165** (deps: D160) **The search URL keeps only the query, so filters, pages and sort are lost and Back undoes nothing** — A filtered search cannot be shared or reloaded, and there is no newest-first for events or news. → §XLIX.21
+- 📋 **D161** (deps: D160 ✅) **The browser tests run on one block theme, in English, on a laptop only** — A classic theme, a pt_BR site or a multisite network can break unseen, and no CI run guards the screens. → §XLIX.17
+- 📋 **D162** (deps: D160 ✅) **Search results are a bare list of links and long text, with no loading, empty or error design** — Visitors cannot scan what a result is or when it is from, and a slow, empty or failed search gives them nowhere to go. → §XLIX.18
+- 📋 **D163** (deps: D160 ✅) **The search box's suggestions cannot be used from the keyboard, and results wait for a submit** — Keyboard and screen-reader users cannot pick a suggestion, and everyone waits a round trip to see anything. → §XLIX.19
+- 📋 **D164** (deps: D160 ✅) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Visitors lose the facet they used, scroll past filters on a phone, and cannot ask for "last month" or "20 to 50". → §XLIX.20
+- 📋 **D165** (deps: D160 ✅) **The search URL keeps only the query, so filters, pages and sort are lost and Back undoes nothing** — A filtered search cannot be shared or reloaded, and there is no newest-first for events or news. → §XLIX.21
 - 📋 **D166** (deps: D162, D169) **A question typed into search gets ten links and never Turing's cited answer** — Turing can answer from the site's own content with citations, and the block leaves that unused. → §XLIX.22
 - 📋 **D167** (deps: D163) **The header's search still submits to WordPress search; Turing search is one page away** — Visitors start searching in the header, and get the slow page load instead of instant, faceted results. → §XLIX.23
 - 📋 **D168** (deps: D162) **In the editor the search block is a grey placeholder with two settings and no layout or styles** — Editors cannot see what visitors get or shape it to the site, so the block looks foreign on most designs. → §XLIX.24

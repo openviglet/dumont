@@ -180,27 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.16 Accessibility, viewports, visual regression and timing in the browser tests (D160)
-
-**What happens.** The Playwright suite (D159) checks behaviour and console errors on one
-desktop viewport. Accessibility is never measured. Phones and tablets are never opened.
-Nothing notices a screen that changed its look, and nothing times the search.
-
-**What it should do.**
-- Run axe (`@axe-core/playwright`) on every screen the suite visits, failing on serious
-  or critical violations: Setup, Fields, Health, Settings, the editor panel, the search
-  block in every state, and the theme search page.
-- Run the site specs at three viewports (phone 390, tablet 820, desktop 1280) and save
-  the screens for each.
-- Visual regression on the search block and the admin screens
-  (`toHaveScreenshot`, with stored baselines and a small tolerance), refreshed by
-  `npm run test:e2e -- --update-snapshots`.
-- Budgets: the first results under 1.5 s and a suggestion under 500 ms on the local stack,
-  measured from the browser.
-- Keyboard-only paths: every admin action and the search block, with focus always
-  visible.
-- `npm run e2e:look` gains `--a11y`, printing the axe findings for any one page.
-
 ### XLIX.17 A theme, language and multisite matrix for the browser tests, in CI (D161)
 
 **What happens.** Every browser check so far ran on Twenty Twenty-Five, one block theme,
@@ -262,7 +241,9 @@ search runs only on submit, and there is no clear button.
 - Recent searches (stored in the browser only, never sent anywhere) shown when the empty
   box is focused, each removable.
 - A Playwright spec that drives the whole thing from the keyboard alone and checks the
-  ARIA attributes.
+  ARIA attributes. D160 dropped the list's `listbox`/`option` roles, which wrapped a button
+  in each option and failed axe (`nested-interactive`); the options must be the focusable
+  items themselves, and the open list stays under the axe gate in `site/search.spec.mjs`.
 
 ### XLIX.20 Facet groups, a mobile drawer and range facets (D164)
 
