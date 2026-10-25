@@ -632,3 +632,4 @@
 - **D174 (the live-LLM harness)** — npm run test:e2e:ai seeds known facts and an injection post, checks grounding, pt_BR, injection, no invented figure and p95 time, and skips off features with the probe's reason.
 - **D176** — The search block and overlay report opened results to Turing and settled searches and clicks to the site's Google tag, opt-in and gated by consent (design §XLIX.31 recorded in `wordpress/README.md`).
 - **D177** — A server-drawn Related content block, also placed after chosen post types, lists this site's similar posts, never itself, with clicks reported (design §XLIX.28 recorded in `wordpress/README.md`).
+- **D180** — Events store a message key with its arguments and Health translates it when read, so a pt_BR admin reads events WP-CLI wrote in English in Portuguese.

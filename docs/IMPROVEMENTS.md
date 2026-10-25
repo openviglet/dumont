@@ -358,24 +358,6 @@ the docs have one screenshot per screen, and a prospect cannot try any of it.
 
 Last in the track's AI series: it gathers what the others built.
 
-### XLIX.36 Event messages translated when read, not when written (D180)
-
-**What happens.** `Viglet_Dumont_Events::record()` stores the message already
-translated, in the language of the request that wrote it: "Fields provisioned", "Bulk:
-16 sent, 0 failed". The Health page prints the stored string, so a pt_BR reader sees
-English for every event written while the site, the writer or WP-CLI ran in English, and
-two admins with different languages see one log in one language. The pt-br browser spec
-(D161) found it and leaves the events table out of its leak check until this ships.
-
-**What it should do.**
-- Store a message key and its arguments (`provisioned`, `bulk` with `sent` and
-  `failed`, ...) instead of the sentence; Turing's own error text stays as it came.
-- Translate when Health renders, in the reader's language: one `__()` per key on the
-  server, or the keys handed to the React screen with its own strings.
-- Events already stored as sentences keep showing as they are.
-- Drop the events exclusion from `tests/e2e/i18n/pt-br.spec.mjs`, and add a PHPUnit case
-  that records under `en_US` and reads under `pt_BR`.
-
 ### XLIX.37 Text buttons that hold their look under a classic theme (D181)
 
 **What happens.** Under Twenty Twenty-One (the `site-classic` project, D161), "Clear all
@@ -525,3 +507,21 @@ sends only the `turing_*` names (Turing T1130).
   - a result click sends none;
   - without statistics consent, nothing is sent;
   - the stubbed gtag receives `search` with `search_term`.
+
+### XLIX.45 Dates in the site's language and time zone (D189)
+
+**What happens.** The Health screen (`assets/admin/health.js`) formats each event's time
+and the queue's last run with `new Date(timestamp * 1000).toLocaleString()`. That uses
+the browser's locale and time zone, not the site's. A pt_BR admin whose browser is in
+English sees "10/25/2026, 4:40:15 PM", where the rest of the screen reads "25/10/2026
+16:40". Two admins see the same event at different times when their machines' zones
+differ from the site's. D180's pt-br screenshot shows it. The leak check does not catch
+it, because a date is not in the `.po`.
+
+**What it should do.**
+- Format on the server with `wp_date()` in the site's date and time formats and its
+  timezone, and send the string beside the timestamp. Or hand the screen the site's locale
+  (`get_user_locale()`, as BCP 47) and `wp_timezone_string()` for `Intl.DateTimeFormat`.
+- The same for every date the admin screens print: Health's events and last run, the
+  editor panel's "Indexed …" line, and the Search column.
+- The pt-br spec asserts a day-first date on Health.

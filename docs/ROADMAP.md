@@ -127,7 +127,6 @@ This track has no remaining pending tasks.
 - 📋 **D175** (deps: D169 ✅, D174 ⏳) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D178** (deps: D176 ✅, Turing T1119) **A site owner cannot see top searches, zero-result queries or clicks from wp-admin** — The content gaps visitors reveal every day stay invisible, so nobody writes what they were looking for. → §XLIX.32
 - 📋 **D179** (deps: D166 ✅, D170, D171 ⏳, D172 ✅, D175, D177 ✅, D178) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
-- 📋 **D180** (deps: —) **Health's event log shows each result in the language it was written in, not the reader's** — A pt_BR admin reads "Fields provisioned" in English for any event a WP-CLI run or an English session wrote. → §XLIX.36
 - 📋 **D181** (deps: —) **Under a classic theme the search block's text buttons render as dark boxes, not links** — Twenty Twenty-One's button styles beat the block's reset, so "Clear all filters" looks like a stray black button. → §XLIX.37
 - 📋 **D182** (deps: D161 ✅, Turing T1113) **No CI job opens the plugin's screens: the browser suite runs only on a laptop** — A regression in the block, an admin screen, a theme or the pt_BR strings lands unseen until someone runs D161's suite by hand. → §XLIX.38
 - 📋 **D183** (deps: D163 ✅, Turing T1120) **The search block guesses a wildcard into instant searches, since Turing matches whole words only** — A phrase or field query typed into the box gets a stray asterisk, and wildcard terms lose stemming and highlight weight. → §XLIX.39
@@ -136,6 +135,7 @@ This track has no remaining pending tasks.
 - 📋 **D186** (deps: D169 ✅, Turing T1116) **Provisioning cannot turn a site's generative AI on, so answers stay off until a console visit** — A fresh install has chat but no cited answers, and the admin must find a setting in another product. → §XLIX.42
 - 📋 **D187** (deps: D172 ✅, Turing T1126) **Search tuning has no boosts: newer, sticky or chosen post types cannot be ranked up from wp-admin** — An events or news site cannot put recent posts first without Turing's console. → §XLIX.43
 - 📋 **D188** (deps: D176 ✅, Turing T1130) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
+- 📋 **D189** (deps: —) **Health shows its dates in the browser's locale and time zone, not the site's** — A pt_BR admin reads US-style dates in a Portuguese screen, and two admins see one event at different times. → §XLIX.45
 
 ## Done when — D144
 
