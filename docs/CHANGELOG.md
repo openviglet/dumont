@@ -607,7 +607,7 @@
 - **D147** — Taxonomies, meta and core fields map per type to typed Turing fields and facets, provisioned via the manifest (design §XLIX.3 recorded in `wordpress/src/includes/class-viglet-dumont-mapping.php`).
 - **D148** — Ids carry a site key, so sites share one SN site; delete-all removes only that key, checked on a local Turing (design §XLIX.4 recorded in `wordpress/src/includes/class-viglet-dumont-indexer.php`).
 - **D149** — wp dumont status, index, reindex and sweep (and REST) run the index from a script; checked on Turing (design §XLIX.5 recorded in `wordpress/src/includes/class-viglet-dumont-operations.php`).
-- **D150 (per-post index state)** — A Search column and an editor panel show each post's index state, with Exclude and Reindex now.
+- **D150** — The admin runs without a search engineer: setup, fields, health with events, per-post state, in pt_BR (design §XLIX.6 recorded in `wordpress/README.md`).
 - **D154** — A Health page built with wp-scripts shows connection, counts per type and the queue, with retry and send now (design §XLIX.10 recorded in `wordpress/README.md`).
 - **D155** — A Fields page edits the mapping per type, shows each field's state in Turing and previews a real document (design §XLIX.11 recorded in `wordpress/assets/admin/mapping.js`).
 - **D156** — A Setup page tests the connection step by step, names what failed, creates the SN site and runs the index (design §XLIX.12 recorded in `wordpress/src/includes/class-viglet-dumont-diagnostics.php`).

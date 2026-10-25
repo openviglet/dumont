@@ -119,31 +119,15 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- ⏳ **D150** (deps: D146 ✅, D147 ✅, D154 ✅, D155 ✅, D156 ✅) **The settings page is a flat form with no setup flow, mapping view, index health or per-post index state** — A last-events log and pt_BR translations remain; health, fields and setup shipped as D154 to D156. → §XLIX.6
 - 📋 **D151** (deps: D145 ✅) **The Turing URL and API key can only be set in wp-admin, and the key is stored in plain text in wp_options** — A containerised site configured from its environment cannot set the plugin up at deploy, and the secret lands in every database backup. → §XLIX.7
 - 📋 **D152** (deps: D147 ✅, D151) **The search side is a PHP template that hijacks template_redirect and ignores block themes and the JS SDK** — A block theme loses its header, footer and styles on the results page, and no SDK feature (autocomplete, spell-check, answers) reaches the visitor. → §XLIX.8
-- 📋 **D153** (deps: D149 ✅, D150 ⏳, D152) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
+- 📋 **D153** (deps: D149 ✅, D150 ✅, D152) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
 
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
-
-## Done when — D150
-
-- **First-run setup names what failed** A wrong URL, a bad key and an unknown SN site
-  each show their own message in the settings page, checked against the run-docker.cmd
-  stack.
-- **Mapping table with a document preview per post type** The admin edits the D147
-  mapping per type, shows the JSON a real post produces and each field's provisioning
-  status, with no REST call by hand.
-- **Health page with counts and failed-job retry** Published versus indexed per type
-  (the D149 status), queued and failed jobs with a retry button, and the last events,
-  readable without WP-CLI.
-- **Admin built with @wordpress/components and shipped in pt_BR** The settings app
-  builds in CI and lands in the release zip; every string resolves in pt_BR, and the
-  pages work by keyboard alone.
 
 ## Non-goals (do NOT add as tasks)
 

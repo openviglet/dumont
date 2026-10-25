@@ -180,32 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.6 An admin people can run without a search engineer (D150)
-
-**What is there.** `admin/views/settings-page.php` is one long form with these sections:
-Server Connection (URL, site name, key, locale, source app, ping), Content Indexing
-(post types, categories, tags, comments, comma-separated custom fields, comma-separated
-excluded ids, batch size) and Search Settings. A second tab has the Indexing Actions
-buttons. Nothing tells an editor whether a given page is in the index.
-
-**The consuming case.** At FESPSP the people who touch this are communications and IT
-staff, not search engineers. The owner asked for a friendly interface to configure and
-tune the plugin.
-
-**What it should do.**
-- **First-run setup:** server URL, key, then a "test" step that names what failed (DNS,
-  TLS, 401, unknown SN site, CORS for the front end). Then pick or create the SN site,
-  then the first index with live progress.
-- **Content and fields:** the per-type mapping as a table per post type, with a preview of
-  the document a real post produces (the JSON sent) and a provisioning status per field.
-- **Health:** documents in WordPress versus in Turing per type, the last run, queued and
-  failed jobs (the queue line) with retry, and the last 50 events.
-- **Per post:** landed (list column and editor panel, `class-viglet-dumont-post-state.php`,
-  `admin/js/editor-panel.js`, plain `wp.*` globals). Port the panel when the build exists.
-- **Search:** the front-end settings of the search-blocks line.
-- Built with `@wordpress/components` (React, the admin's own look), translatable, with
-  pt_BR shipped, and usable with keyboard and screen reader.
-
 ### XLIX.7 Configuration from the environment (D151)
 
 **What happens.** `viglet_dumont_get_settings()` reads everything from the
