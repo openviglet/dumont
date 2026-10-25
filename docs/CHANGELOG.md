@@ -610,3 +610,4 @@
 - **D150 (per-post index state)** — A Search column and an editor panel show each post's index state, with Exclude and Reindex now.
 - **D154** — A Health page built with wp-scripts shows connection, counts per type and the queue, with retry and send now (design §XLIX.10 recorded in `wordpress/README.md`).
 - **D155** — A Fields page edits the mapping per type, shows each field's state in Turing and previews a real document (design §XLIX.11 recorded in `wordpress/assets/admin/mapping.js`).
+- **D156** — A Setup page tests the connection step by step, names what failed, creates the SN site and runs the index (design §XLIX.12 recorded in `wordpress/src/includes/class-viglet-dumont-diagnostics.php`).
