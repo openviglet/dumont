@@ -180,28 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.7 Configuration from the environment (D151)
-
-**What happens.** `viglet_dumont_get_settings()` reads everything from the
-`viglet_dumont_settings` option, so the API key lives in plain text in `wp_options`. The
-settings page is the only way to set it.
-
-**The consuming case.** The FESPSP sites run as images on Japode/cloud. Their whole
-configuration comes from environment variables declared in `japode.yml` (secrets
-included), and the database is in every backup. A deploy has to come up already
-configured, with no wp-admin step. The dev stack also needs the plugin configured by a
-setup script.
-
-**What it should do.**
-- Accept constants that override the option, each shown as read-only in the admin with
-  "set by the environment": `VIGLET_DUMONT_URL`, `VIGLET_DUMONT_SITE`,
-  `VIGLET_DUMONT_API_KEY`, `VIGLET_DUMONT_LOCALE`, `VIGLET_DUMONT_SITE_KEY`, and a public
-  search URL for the search blocks when the browser reaches Turing on a different origin than PHP
-  does.
-- When the key does come from the option, mask it in the UI and never echo it back.
-- Keep the indexing key server-side only; the browser search never needs it.
-- Have `wp dumont status` (the WP-CLI line) say where each value came from.
-
 ### XLIX.8 Search through blocks and the JS SDK (D152)
 
 **What happens.** With `search_enabled`, `viglet_dumont_search_redirect` hooks
