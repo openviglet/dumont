@@ -119,7 +119,6 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- ⏳ **D161** (deps: D160 ✅) **The browser tests run on one block theme, in English, on a laptop only** — No multisite variant of the stack exists, and no CI job starts it and runs the browser suite. → §XLIX.17
 - 📋 **D162** (deps: D160 ✅) **Search results are a bare list of links and long text, with no loading, empty or error design** — Visitors cannot scan what a result is or when it is from, and a slow, empty or failed search gives them nowhere to go. → §XLIX.18
 - 📋 **D163** (deps: D160 ✅) **The search box's suggestions cannot be used from the keyboard, and results wait for a submit** — Keyboard and screen-reader users cannot pick a suggestion, and everyone waits a round trip to see anything. → §XLIX.19
 - 📋 **D164** (deps: D160 ✅) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Visitors lose the facet they used, scroll past filters on a phone, and cannot ask for "last month" or "20 to 50". → §XLIX.20
@@ -140,21 +139,13 @@ This track has no remaining pending tasks.
 - 📋 **D179** (deps: D166, D170, D171, D172, D175, D177, D178) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 📋 **D180** (deps: —) **Health's event log shows each result in the language it was written in, not the reader's** — A pt_BR admin reads "Fields provisioned" in English for any event a WP-CLI run or an English session wrote. → §XLIX.36
 - 📋 **D181** (deps: —) **Under a classic theme the search block's text buttons render as dark boxes, not links** — Twenty Twenty-One's button styles beat the block's reset, so "Clear all filters" looks like a stray black button. → §XLIX.37
+- 📋 **D182** (deps: D161 ✅, Turing T1113) **No CI job opens the plugin's screens: the browser suite runs only on a laptop** — A regression in the block, an admin screen, a theme or the pt_BR strings lands unseen until someone runs D161's suite by hand. → §XLIX.38
 
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
-
-## Done when — D161
-
-- **A multisite stack runs the site specs on two sites** With E2E_MULTISITE=1 the suite
-  opens two sites of one network sharing one SN site, and each site's search returns
-  only documents carrying its own site key.
-- **CI runs the browser suite on every push** A workflow starts the Docker stack, runs
-  npm run test:e2e against committed linux baselines, and uploads the report and screens
-  as artefacts.
 
 ## Non-goals (do NOT add as tasks)
 

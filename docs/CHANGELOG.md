@@ -618,4 +618,4 @@
 - **D158** — Content Overview counts only post types, so the total is right and no undefined card shows.
 - **D159** — Playwright drives every admin screen and the site search against the stack, and found a lost facet bug (design §XLIX.15 recorded in `wordpress/README.md`).
 - **D160** — The browser suite runs axe on every screen, the site at three viewports, screenshot baselines, speed budgets and keyboard paths; look gains --a11y (design §XLIX.16 recorded in `wordpress/README.md`).
-- **D161 (theme matrix and pt_BR run)** — The site specs also run under a classic and a third-party block theme, and a pt-br project fails on any English string the .po translates.
+- **D161** — Site specs run under classic and third-party themes, pt-br fails on English leaks, a multisite network checks per-site search; CI moved to D182 (design §XLIX.17 recorded in `wordpress/README.md`).

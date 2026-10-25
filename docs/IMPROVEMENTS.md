@@ -180,22 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.17 A theme, language and multisite matrix for the browser tests, in CI (D161)
-
-**What happens.** The theme matrix (Twenty Twenty-One, Ollie) and the pt_BR run landed
-as `switch:` projects in `playwright.config.mjs` (see `wordpress/README.md`). A
-multisite network was still never opened, and the suite runs only on a laptop.
-
-**What it should do.**
-- A multisite variant of the stack: two sites, one SN site, each search returning only its
-  own key. It is a different WordPress install, not a switch of the running one, so it is
-  a second compose profile (or `run-docker.cmd multisite`) and a project set that runs only
-  when `E2E_MULTISITE=1`.
-- A CI job that starts the stack (`docker compose`, `turing-ce` once T1113 publishes a
-  current image) and runs `npm run test:e2e`, uploading the report and screens as
-  artefacts. The baselines are per platform (`tests/e2e/snapshots/{platform}/`), so the
-  first CI run has to write and commit the `linux` set.
-
 ### XLIX.18 Result cards and the loading, empty and error states (D162)
 
 **What happens.** The Turing search block (`src/blocks/search`,
@@ -629,3 +613,23 @@ suggestion buttons, so they are exposed the same way. The baseline
 - Keep a visible focus ring of the block's own (the D160 keyboard checks assert it).
 - Refresh the `site-classic` baselines with `npm run test:e2e -- --update-snapshots` and
   check the new PNGs show a link-styled control.
+
+### XLIX.38 The browser suite in CI (D182)
+
+**What happens.** The browser suite (D159, D160, D161) runs only where someone starts
+`run-docker.cmd` by hand. CI (`validate.yml`) builds and unit-tests the plugin but never
+opens a screen, so a regression in the block, an admin screen, a theme or the pt_BR
+strings lands unseen until the next local run.
+
+**What it should do.**
+- A workflow (on push and PR touching `wordpress/`) that starts the stack with
+  `docker compose` and `run-docker.cmd`'s steps written for a Linux runner, runs
+  `npm run test:e2e` (and `E2E_MULTISITE=1` on a schedule, since it doubles the setup),
+  and uploads `tests/e2e/artifacts/` as an artefact.
+- It needs a `turing-ce` image current enough for the plugin's calls, which T1113
+  publishes; the published `latest` lags the local build `run-docker.cmd` prefers.
+- The baselines are per platform (`tests/e2e/snapshots/{platform}/`): the first run
+  writes the `linux` set, which is reviewed by eye and committed before the job can fail
+  on a visual change.
+- Speed budgets on a shared runner are noisier than on a laptop; keep them, and read a
+  budget failure against the timing annotations before raising a bound.
