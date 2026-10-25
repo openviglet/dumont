@@ -119,14 +119,24 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D152** (deps: D147 ✅, D151 ✅) **The search side is a PHP template that hijacks template_redirect and ignores block themes and the JS SDK** — A block theme loses its header, footer and styles on the results page, and no SDK feature (autocomplete, spell-check, answers) reaches the visitor. → §XLIX.8
-- 📋 **D153** (deps: D149 ✅, D150 ✅, D152) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
+- ⏳ **D152** (deps: D147 ✅, D151 ✅) **The search side is a PHP template that hijacks template_redirect and ignores block themes and the JS SDK** — An SDK script module and Interactivity API search blocks with autocomplete and facets remain. → §XLIX.8
+- 📋 **D153** (deps: D149 ✅, D150 ✅, D152 ⏳) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
 
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
+
+## Done when — D152
+
+- **A theme imports one script module that ships the SDK and the config** A registered
+  script module exposes @viglet/turing-sdk configured from viglet_dumont_public_config,
+  so a block theme searches from the browser without vendoring the SDK.
+- **Theme-neutral search blocks with autocomplete, facets and spell-check**
+  Interactivity API blocks (search box, results, facets, pagination) render on a block
+  theme against the run-docker.cmd Turing, and a site with its own blocks turns them
+  off.
 
 ## Non-goals (do NOT add as tasks)
 
