@@ -189,8 +189,10 @@ filtered by exact value: a visitor cannot ask for "last month" or "20 to 50".
 
 **What it should do.**
 - Range facets for the mapped DATE and INT/FLOAT fields (last 7 days, this year; 0-20,
-  20-50), declared as Turing custom facets in the manifest the plugin posts. D144's
-  custom-facet half (the structured schema's) has landed and shows the manifest shape.
+  20-50), declared as Turing custom facets in the manifest the plugin posts. The shape
+  is `customFacets: [{field, name, label, items: [{label, rangeStart, rangeEnd}]}]`, dates
+  with `rangeStartDate: "NOW-7DAYS"`. Tried on 2026-10-25: Turing stores the facet but never
+  answers with it (Turing T1122), so this waits on that fix.
 - The Fields screen lets a mapped DATE or number field opt into ranges, with editable
   bounds for numbers and a fixed set for dates.
 - The block lists a range facet like any other group; its filter query is the range Turing
