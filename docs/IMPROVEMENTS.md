@@ -388,10 +388,12 @@ into the box gets a stray wildcard, and a wildcard term loses stemming and highl
 weight. It also lands in Turing's search log, so synonym mining proposes `work* = work`
 (Turing T1125; D172 filters those out).
 
-**What it should do.** Once Turing ships T1120's as-you-type parameter (and the SDK's
+**What it should do.** Once Turing ships T1120's `mode: "instant"` (and the SDK's
 `searchQuery` passes it), the block sends that flag instead and drops the `*`. The
 keyboard spec `results follow the typing without a submit, a half-typed word included`
-already asserts the behaviour, so it stays as the check that nothing regressed.
+already asserts the behaviour, so it stays as the check that nothing regressed. The same
+flag makes the SDK abort a superseded search (T1121) and leave instant searches out of
+its analytics (T1129).
 
 ### XLIX.42 Generative AI declared in the manifest the plugin posts (D186)
 
@@ -452,3 +454,19 @@ sends only the `turing_*` names (Turing T1130).
   - a result click sends none;
   - without statistics consent, nothing is sent;
   - the stubbed gtag receives `search` with `search_term`.
+
+### XLIX.46 Partitioned API keys in place of client-side site filters (D190)
+
+**What happens.** Several WordPress sites share one SN site, told apart by `site_key`
+(D148). The plugin keeps them apart itself: every visitor search sends
+`fq=site_key:<key>`, `Viglet_Dumont_Indexer::delete_all` pages through a filtered search
+and deletes one id at a time, D149's orphan sweep lists ids the same way, and
+`Viglet_Dumont_Related::neighbours()` asks for 50 similar documents and drops the other
+sites' ones. The stored API key is not bound to the site key, so it can read and delete
+every other site's documents.
+
+**What it should do.** Once Turing ships T1133 (an API key bound to a partition field and value, enforced by the server on every call):
+- Provisioning creates or asks for one partitioned key per site key, and stores it in place of the shared one.
+- Delete-all becomes one field delete (Turing T1112), and the sweep and Related drop their client-side filtering (Turing T1132).
+- The visitor-side `fq=site_key:` stays only where a call is keyless; a keyed call relies on the partition.
+- Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or deletes a site B document.
