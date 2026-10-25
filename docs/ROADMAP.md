@@ -123,8 +123,8 @@ This track has no remaining pending tasks.
 - 📋 **D170** (deps: D164 🛠, D165 ✅, Turing T1117) **A sentence typed into search is read as keywords, never as the type and date filters it names** — "Seminars about php from last year" returns everything mentioning those words instead of last year's seminars. → §XLIX.29
 - ⏳ **D171** (deps: D169 ✅, Turing T1124) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — No excerpt draft yet (Turing's summary endpoint refuses Key calls, T1124) and no persona content-fit score. → §XLIX.30
 - 📋 **D173** (deps: D162 ✅, D164 🛠) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — A shop cannot filter by price or stock, and Turing's catalog copilot and add-to-cart action go unused. → §XLIX.34
-- 📋 **D174** (deps: D169 ✅) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — An answer can invent a fact, follow a planted instruction or cost ten times more, and every test still passes. → §XLIX.26
-- 📋 **D175** (deps: D169 ✅, D174) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
+- ⏳ **D174** (deps: D169 ✅, Turing T1116, Turing T1127) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Its checks skip where chat cannot read the site's posts (T1116), and it reports no tokens or dollars (T1127). → §XLIX.26
+- 📋 **D175** (deps: D169 ✅, D174 ⏳) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D176** (deps: D162 ✅) **The search block never reports which result a visitor opened, to Turing or to Google Analytics** — The site has no click-through rate or abandonment signal, and Turing cannot learn from what visitors choose. → §XLIX.31
 - 📋 **D177** (deps: D162 ✅) **Related posts come from tag overlap or another plugin, never from Turing's similar-documents search** — Readers get weak next reads, and the index that already knows which posts are alike goes unused. → §XLIX.28
 - 📋 **D178** (deps: D176, Turing T1119) **A site owner cannot see top searches, zero-result queries or clicks from wp-admin** — The content gaps visitors reveal every day stay invisible, so nobody writes what they were looking for. → §XLIX.32
@@ -158,6 +158,15 @@ This track has no remaining pending tasks.
 - **A site with personas shows each one's content-fit** When the SN site has personas,
   Assist shows a content-fit score per persona with its reasons, hidden when there are
   none.
+
+## Done when — D174
+
+- **The live suite's checks run and pass on a site with GenAI** On a stack whose SN site
+  has its GenAI config, npm run test:e2e:ai runs the chat and answer specs rather than
+  skipping them, and they pass.
+- **Each run reports its tokens and dollars and holds a budget** The suite reads
+  Turing's cost ledger before and after, reports tokens and dollars with p50 and p95
+  time, and fails above a cost budget set in the config.
 
 ## Non-goals (do NOT add as tasks)
 

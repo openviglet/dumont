@@ -267,28 +267,24 @@ use.
 
 ### XLIX.26 A live-LLM browser suite for the AI features (D174)
 
-**What happens.** The Playwright suite (D159) covers search, which is deterministic.
-Turing's generative features (answers, chat, natural-language filters, summaries) call a
-real LLM through the stack's `OPENAI_API_KEY`, and nothing checks them: neither that
-they are grounded, nor that they are fast, nor what they cost.
+**What happens.** The live-LLM harness landed (`playwright.ai.config.mjs`, `npm run
+test:e2e:ai`, `tests/e2e/ai/`): a seed of known facts in English and Portuguese and a
+prompt-injection post, deleted again by the teardown; chat specs for grounding, pt_BR,
+injection, no invented figure and a p95 time budget; answer-panel specs; answers saved
+to `tests/e2e/artifacts/ai/answers.json`. On the local stack every spec skips. The SN
+site has no GenAI config, so `/answer` refuses, and chat, though enabled, never
+retrieves the posts: asked when the seeded grant closes, it says the information is not
+available (Turing T1116). Turing's cost ledger does not record the site's LLM calls
+(Turing T1127).
 
 **What it should do.**
-- An `ai` Playwright project, run by `npm run test:e2e:ai` and skipped (with a printed
-  reason) when D169's probe reports no LLM. It is never part of the default run, which
-  must stay free and deterministic.
-- A seed of its own with known facts (a grant's deadline, an event's venue, a product's
-  price), so a test asserts an answer contains the fact and cites the post holding it.
-- Grounding checks: every citation links to a seeded post; a question the content cannot
-  answer gets no answer, never an invented one (the project's no-fabrication non-goal);
-  English and pt_BR questions.
-- Robustness: a prompt-injection post in the seed ("ignore your instructions") must not
-  change an answer; a slow or failed LLM shows the block's error state.
-- Cost and time: each run reports tokens, dollars and the p50/p95 time to first token,
-  read from Turing's token usage, and fails above a budget set in the config.
-- The answers are saved beside the screens, so a reviewer reads what the model said.
-
-Uses each feature as it lands: the answer panel (D166), natural-language filters (D170),
-the editor assist (D171), the shop copilot (D173) and the site assistant.
+- Once T1116 lets the plugin turn the site's GenAI on (D186), the chat and answer specs
+  run and pass on the stack started with `OPENAI_API_KEY`.
+- Once T1127 records the site's calls, each run reads `/api/v2/llm/cost/summary` before
+  and after, reports tokens and dollars beside the p50/p95 times, and fails above a cost
+  budget set in the config.
+- Natural-language filters (D170), the shop copilot (D173) and the site assistant (D175)
+  join the suite as each lands.
 
 ### XLIX.27 A site assistant block on Turing's chat (D175)
 
