@@ -627,3 +627,4 @@
 - **D168** — The block sets filter place, list or grid, result parts and a style, and the editor previews Turing's real answer through the block's own markup; inner blocks moved to D185.
 - **D169** — Health and wp dumont ai status show answer, chat, NL filters and copilot as on or off with Turing's reason; provisioning GenAI moved to D186 behind T1116.
 - **D166** — An opt-in panel streams Turing's answer to a question with numbered sources and a helpful verdict, drawn only when sources are cited; the live-LLM run is D174's.
+- **D171 (already covered and link ideas)** — The editor's Assist section lists posts that may already cover this one and related posts with Add a link, from Turing's similar and duplicate searches.

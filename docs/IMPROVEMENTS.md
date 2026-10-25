@@ -224,26 +224,23 @@ Waits on T1117: shipped before it, a relative date would filter out what was ask
 
 ### XLIX.30 An Assist section in the editor panel (D171)
 
-**What happens.** The editor's Turing panel shows a post's index state and a Reindex
-button (D152). Turing can do more for an author: summarise (`/api/v2/summary`), find
-near duplicates (`/search/duplicates`) and similar posts, and score content against a
-persona (`/persona/{id}/content-fit`). None of it reaches the editor.
+**What happens.** The editor panel's Assist section landed with "Already covered?" and
+"Link ideas" (`GET viglet-dumont/v1/post/<id>/assist`,
+`Viglet_Dumont_Post_State::assist()`: Turing's similar and duplicate searches for an
+indexed post, a title search for a draft). Two actions are still missing. Drafting an
+excerpt needs Turing's `POST /api/v2/summary`, which answers 403 to a Key-authenticated
+server call (Turing T1124). Audience fit needs personas, which the local stack does not
+have.
 
-**What it should do.** Add an "Assist" section to the panel, with every result a draft the
-author accepts, edits or ignores. Nothing is written on its own, and nothing is
-published (the D13 non-goal).
-- "Draft an excerpt": a summary of the saved content through the plugin's REST route,
-  which calls Turing with the stored key (never the browser). "Use" fills the excerpt
-  field.
-- "Already covered?": near duplicates of this post above a threshold, with links, before
-  the author publishes a second copy.
-- "Link ideas": similar published posts, each with "Insert link" at the cursor.
-- "Fits the audience?": when the SN site has personas, a content-fit score per persona
-  with its reasons.
-- Each action shows its cost from Turing's token count, and is hidden when D169's probe
-  says the feature is off. Capability `edit_post` only.
-- Specs: draft and accept an excerpt; a seeded duplicate is flagged; an inserted link
-  points at the suggested post.
+**What it should do.**
+- "Draft an excerpt": a REST route that sends the saved content to `/api/v2/summary` with
+  the stored key (never the browser) once T1124 ships; "Use" fills the excerpt field, and
+  nothing is saved unasked (the D13 non-goal). Show the call's token count when Turing
+  reports it.
+- "Fits the audience?": when the SN site has personas (`/api/sn/{site}/persona/{id}/content-fit`),
+  a score per persona with its reasons; hidden when there are none.
+- Hide each action when D169's probe says its feature is off.
+- Specs: draft and accept an excerpt; a persona score shows on a site with one.
 
 ### XLIX.33 A search tuning screen in wp-admin (D172)
 
