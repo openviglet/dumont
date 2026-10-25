@@ -180,30 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.18 Result cards and the loading, empty and error states (D162)
-
-**What happens.** The Turing search block (`src/blocks/search`,
-`src/public/search-block.js`) lists results as a bare numbered list: a title link and
-the whole description, which on a long page runs for a screen. There is no post type,
-date, image or URL, and the matched words are stripped rather than shown. While a search
-runs nothing changes. A query with no match says only "No results found". An error says
-"Search is unavailable" with no way forward.
-
-**What it should do.**
-- A result card: type badge (Post, Page, Event...), title, a two-or-three-line snippet
-  with the matched terms highlighted safely (Turing's `<mark>` kept, every other tag
-  dropped), the date in the site's format, a breadcrumb of the URL, and the featured
-  image when there is one (`image` is already indexed).
-- A loading state: skeleton cards and `aria-busy` while a query runs, with the previous
-  results dimmed rather than removed.
-- An empty state that offers the did-you-mean, the active filters to clear, and the
-  site's most recent posts as a fallback.
-- An error state with "Try again", and a link to WordPress search (`?s=`).
-- Use the theme's tokens (`--wp--preset--*`, `wp-element-button`) so it looks native on
-  any block theme. Check Twenty Twenty-Five and a classic theme with `npm run e2e:look`,
-  desktop and `--mobile`.
-- Extend `tests/e2e/site/search.spec.mjs` for each state.
-
 ### XLIX.19 An accessible combobox with instant results (D163)
 
 **What happens.** The block's search box shows suggestions as a plain list of buttons.
