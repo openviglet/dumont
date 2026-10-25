@@ -119,8 +119,6 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D153** (deps: D149 ✅, D150 ✅, D152 ✅) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
-
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema

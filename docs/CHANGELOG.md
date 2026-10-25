@@ -614,3 +614,4 @@
 - **D151** — Constants or env vars set the connection, read-only in the admin and never stored; the key is never echoed (design §XLIX.7 recorded in `wordpress/README.md`).
 - **D152** — Search fits block themes: theme-native results, SDK modules, and a Turing search block with facets (design §XLIX.8 recorded in `wordpress/README.md`).
 - **D157** — viglet-dumont/search ships the SDK configured for the site; a browser module searched Turing with it (design §XLIX.13 recorded in `wordpress/src/public/search.js`).
+- **D153** — The WordPress guide and blog post describe the shipped plugin, with a screenshot per screen (vigletdocs 72e2d2e).

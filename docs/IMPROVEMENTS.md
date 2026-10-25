@@ -179,31 +179,3 @@ soonest" and a run against a fresh site leaves the sort on it, and a second run 
 nothing changed.
 
 ## XLIX The WordPress connector plugin
-
-### XLIX.9 WordPress connector docs match the plugin (D153)
-
-**What happens.** `docs-dumont/connectors/wordpress.md` and the blog post
-`2026-06-22-enterprise-search-for-wordpress` (vigletdocs) both describe settings the
-plugin no longer has:
-- Host, Port and Path (`/dumont`) fields;
-- `viglet-turing-for-wordpress` as the folder name;
-- a `DumontPhpClient/` tree;
-- `Optimize` and `Index all Pages` buttons;
-- batches of 250.
-
-The code has a single Server URL field, the `viglet-dumont` folder and slug,
-`includes/class-dumont-*.php`, and a batch size of 50 by default. Someone following the
-guide cannot find what it names.
-
-**What it should do.** Rewrite both after the rest of Track S land, from the shipped plugin and not
-from memory:
-- install with Composer and with a zip;
-- the environment constants (the environment line);
-- the mapping and provisioning (the mapping line);
-- the WP-CLI commands (the WP-CLI line);
-- the queue and its failure states (the queue line);
-- the site key and unified search (the site-key line);
-- the search blocks and the SDK config (the search-blocks line).
-
-Keep one screenshot per admin screen. Until then, add a short "outdated" note at the top
-of the page.
