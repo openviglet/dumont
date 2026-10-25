@@ -625,3 +625,4 @@
 - **D165** — The URL holds query, filters, page (pg) and sort, Back and reload restore them, a sort and page-size setting exist, and refined URLs are noindex.
 - **D167** — Ctrl/Cmd+K and the theme's Search block open an instant-search dialog with keyboard-chosen results; Enter goes to the full search page, a setting or found automatically.
 - **D168** — The block sets filter place, list or grid, result parts and a style, and the editor previews Turing's real answer through the block's own markup; inner blocks moved to D185.
+- **D169** — Health and wp dumont ai status show answer, chat, NL filters and copilot as on or off with Turing's reason; provisioning GenAI moved to D186 behind T1116.

@@ -221,28 +221,6 @@ answer.
   while chat answers: the site needs its GenAI config, which only the console sets today
   (Turing T1116, surfaced by D169).
 
-### XLIX.25 The admin shows and enables the site's AI features (D169)
-
-**What happens.** Booted with `OPENAI_API_KEY`, the local Turing creates an LLM, a
-default agent and an embedding store (commit 97c5e3db). The plugin cannot see any of it.
-Chat on the SN site answers, `/answer` says "AI is not enabled for site" (T1116), and
-the admin has no screen that says which AI features this site can use.
-
-**What it should do.**
-- An "AI" section on the Health screen: one row per feature (answer, chat, similar by
-  vector, natural-language filters, copilot), each read from Turing's own probe
-  (`/chat/enabled`, `/copilot/available`, `nl-filters` `available`, discovery) and
-  showing its reason when off.
-- Provisioning turns the site's GenAI on through the manifest once T1116 ships. Until
-  then, the row names the console step and links to it, rather than working around it.
-- A `wp dumont ai status` command that prints the same rows, for scripts and CI.
-- Every visitor-side AI block from this track reads this probe and stays hidden when its
-  feature is off, so no visitor meets a broken widget.
-- Specs: the rows on a stack with a key, and on one without (every row off, with a
-  reason).
-
-Depends on Turing T1116 for the provisioning half.
-
 ### XLIX.29 Natural-language filters offered as chips (D170)
 
 **What happens.** A visitor types "seminars about php from last year", and search treats
@@ -580,3 +558,20 @@ for its own.
   server like the parent.
 - Specs: a page whose parts are reordered (pages above results) renders them in that
   order, and the existing site specs pass unchanged on the default template.
+
+### XLIX.42 Generative AI declared in the manifest the plugin posts (D186)
+
+**What happens.** Health's AI card and `wp dumont ai status` (D169) show that answers
+are off on a site whose chat works ("AI is not enabled for site"), and tell the admin to
+turn generative AI on in Turing's console. The plugin provisions its fields through the
+manifest (`Viglet_Dumont_Mapping::manifest()`), but the manifest has no way to turn a
+site's generative AI on (Turing T1116), so a fresh install needs that console step.
+
+**What it should do.**
+- Once T1116 ships, declare the site's generative AI in the manifest the plugin posts
+  (behind a setting, off by default: it spends the owner's LLM budget), so a provisioned
+  site answers with no console visit.
+- Drop the console instruction from the answer row's `fix` in `viglet_dumont_ai_status()`
+  when the manifest did it, and keep the reason Turing gives otherwise.
+- A spec on the stack started with `OPENAI_API_KEY`: provision, then the answer row reads
+  On.
