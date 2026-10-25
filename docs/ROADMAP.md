@@ -119,8 +119,6 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D159** (deps: —) **No test opens the plugin's admin screens or the site in a browser, so a broken screen ships unnoticed** — Every screen check was by hand, and the Content Overview showed NaN for a dozen tasks without anything failing. → §XLIX.15
-
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema

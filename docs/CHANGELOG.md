@@ -616,3 +616,4 @@
 - **D157** — viglet-dumont/search ships the SDK configured for the site; a browser module searched Turing with it (design §XLIX.13 recorded in `wordpress/src/public/search.js`).
 - **D153** — The WordPress guide and blog post describe the shipped plugin, with a screenshot per screen (vigletdocs 72e2d2e).
 - **D158** — Content Overview counts only post types, so the total is right and no undefined card shows.
+- **D159** — Playwright drives every admin screen and the site search against the stack, and found a lost facet bug (design §XLIX.15 recorded in `wordpress/README.md`).
