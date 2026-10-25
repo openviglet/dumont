@@ -606,3 +606,4 @@
 - **D146** — A save only queues the post; WP-Cron or `wp dumont queue run` sends it with retry and backoff (design §XLIX.2 recorded in `wordpress/src/includes/class-viglet-dumont-queue.php`).
 - **D147** — Taxonomies, meta and core fields map per type to typed Turing fields and facets, provisioned via the manifest (design §XLIX.3 recorded in `wordpress/src/includes/class-viglet-dumont-mapping.php`).
 - **D148** — Ids carry a site key, so sites share one SN site; delete-all removes only that key, checked on a local Turing (design §XLIX.4 recorded in `wordpress/src/includes/class-viglet-dumont-indexer.php`).
+- **D149** — wp dumont status, index, reindex and sweep (and REST) run the index from a script; checked on Turing (design §XLIX.5 recorded in `wordpress/src/includes/class-viglet-dumont-operations.php`).

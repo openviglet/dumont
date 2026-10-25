@@ -180,33 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.5 WP-CLI commands and an orphan sweep (D149)
-
-**What happens.** The only bulk path is `POST viglet-dumont/v1/index-batch`, driven by
-admin JS one batch at a time while the browser tab stays open. There is no `wp` command.
-Nothing compares what Turing holds with what WordPress publishes. A post deleted while
-the plugin was inactive, or while Turing was down (the queue line), stays searchable and
-points at a 404.
-
-**The consuming case.** FESPSP deploys container images. Its first boot seeds content
-with WP-CLI, and its dev stack is reset and re-seeded many times a day. It needs to load
-the index from a script, not from a click.
-
-**What it should do.**
-- `wp dumont status`: connection, SN site, documents per type in WordPress versus in
-  Turing, and queued and failed jobs.
-- `wp dumont index [--type=<pt>] [--ids=<list>] [--since=<date>]`: synchronous, with a
-  progress bar and a non-zero exit code on failure.
-- `wp dumont reindex`: everything, after a mapping change; it provisions the fields
-  first (the mapping line).
-- `wp dumont sweep [--dry-run]`: removes from Turing the ids of this site key (the site-key line) that
-  are not published in WordPress. This needs a way to list ids per site key, either
-  through search with `fq` on the site key or through an export endpoint. Turing has none yet (T1112); D148's delete-all lists ids by search.
-- `wp dumont queue run` and `queue status` exist (D146); add the rest beside them.
-
-Expose the same operations through the REST namespace so the admin (the admin line) uses
-them.
-
 ### XLIX.6 An admin people can run without a search engineer (D150)
 
 **What is there.** `admin/views/settings-page.php` is one long form with these sections:
