@@ -121,7 +121,7 @@ This track has no remaining pending tasks.
 
 - 🛠 **D164** (deps: D160 ✅, Turing T1122) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Date and number fields still filter by exact value only: no range facets (last 7 days, 20 to 50) declared as Turing custom facets. → §XLIX.20
 - 📋 **D166** (deps: D162 ✅, D169) **A question typed into search gets ten links and never Turing's cited answer** — Turing can answer from the site's own content with citations, and the block leaves that unused. → §XLIX.22
-- 📋 **D168** (deps: D162 ✅) **In the editor the search block is a grey placeholder with two settings and no layout or styles** — Editors cannot see what visitors get or shape it to the site, so the block looks foreign on most designs. → §XLIX.24
+- ⏳ **D168** (deps: D162 ✅) **In the editor the search block is a grey placeholder with two settings and no layout or styles** — The editor still shows a placeholder, not the live search, and the block's parts cannot be rearranged as inner blocks. → §XLIX.24
 - 📋 **D169** (deps: —) **The plugin cannot tell which of Turing's AI features the site can use, nor turn them on** — Chat works while answers fail on the same site, and an AI block shipped blind shows visitors a broken widget. → §XLIX.25
 - 📋 **D170** (deps: D164 🛠, D165 ✅, Turing T1117) **A sentence typed into search is read as keywords, never as the type and date filters it names** — "Seminars about php from last year" returns everything mentioning those words instead of last year's seminars. → §XLIX.29
 - 📋 **D171** (deps: D169) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — Authors repeat what the site already says and link by memory, while Turing knows the whole site. → §XLIX.30
@@ -150,6 +150,15 @@ This track has no remaining pending tasks.
 - **A mapped DATE or INT field offers range facets in the block** The manifest the
   plugin posts declares Turing custom facets for those fields, the block lists their
   ranges (last 7 days, this year; 0-20, 20-50), and a spec filters by one.
+
+## Done when — D168
+
+- **The editor previews the real search** Inserted in the editor, the block shows
+  results for a sample query from Turing in the chosen layout and style, and a spec sees
+  a result card there.
+- **A theme can rearrange the block's parts** Box, filters, results and pages are inner
+  blocks a theme or editor can reorder or replace, and the published page follows the
+  arrangement.
 
 ## Non-goals (do NOT add as tasks)
 

@@ -223,21 +223,24 @@ answer.
 
 ### XLIX.24 Live preview, layouts and styles for the search block (D168)
 
-**What happens.** In the block editor the Turing search block is a grey placeholder with
-two settings (placeholder text, show facets). An editor cannot see what visitors will
-get, cannot choose a layout, and cannot style it beyond the core supports.
+**What happens.** Layouts, parts, styles and border supports landed (`facetsPosition`,
+`resultsLayout`, `show*` attributes, `is-style-minimal` and `is-style-cards`; the spec
+is `admin/block-editor.spec.mjs`). In the editor the block is still a placeholder: an
+editor does not see the results a visitor gets, and a theme cannot rearrange the block's
+parts.
 
 **What it should do.**
-- A live preview in the editor: the real search running against Turing with a sample
-  query, through the same view module, so what the editor sees is what ships.
-- Layout settings: facets left, right or above; results as a list or a grid of cards;
-  show or hide image, date, type and snippet.
-- Block style variations ("Minimal", "Cards") and `theme.json` hooks (`styles.blocks
-  ["viglet-dumont/search"]`) so a theme restyles it without CSS overrides.
-- Inner blocks, so a theme can rearrange the parts (box, filters, results, pages) or
-  replace one with its own.
-- Specs: insert the block in the editor, change a setting, and see the published page
-  follow.
+- A live preview in the editor: the real search for a sample query (the block's
+  placeholder text, or `*`), drawn in the chosen layout and style. The Interactivity view
+  module does not run in the editor canvas, so either render the preview on the server
+  (render.php fetching through the plugin's PHP search client when `context=edit`) or give
+  the editor its own small React preview over `viglet-dumont/search`. The server route
+  keeps one markup.
+- Inner blocks for the parts (box, filters, results, pages), each a child block with the
+  current markup as its render, so a theme or editor can reorder them or replace one. The
+  parent keeps the store and the state; the children carry no logic of their own.
+- Specs: the editor shows a result card; a page whose parts are reordered renders them in
+  that order.
 
 ### XLIX.25 The admin shows and enables the site's AI features (D169)
 
