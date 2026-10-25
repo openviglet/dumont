@@ -613,3 +613,4 @@
 - **D156** — A Setup page tests the connection step by step, names what failed, creates the SN site and runs the index (design §XLIX.12 recorded in `wordpress/src/includes/class-viglet-dumont-diagnostics.php`).
 - **D151** — Constants or env vars set the connection, read-only in the admin and never stored; the key is never echoed (design §XLIX.7 recorded in `wordpress/README.md`).
 - **D152 (theme-native search and public config)** — Turing answers the theme's own search query, block themes keep their chrome, and a public config feeds SDK search.
+- **D157** — viglet-dumont/search ships the SDK configured for the site; a browser module searched Turing with it (design §XLIX.13 recorded in `wordpress/src/public/search.js`).

@@ -119,7 +119,7 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- ⏳ **D152** (deps: D147 ✅, D151 ✅) **The search side is a PHP template that hijacks template_redirect and ignores block themes and the JS SDK** — An SDK script module and Interactivity API search blocks with autocomplete and facets remain. → §XLIX.8
+- ⏳ **D152** (deps: D147 ✅, D151 ✅, D157 ✅) **The search side is a PHP template that hijacks template_redirect and ignores block themes and the JS SDK** — Interactivity API search blocks with autocomplete, facets and spell-check remain; the SDK modules shipped as D157. → §XLIX.8
 - 📋 **D153** (deps: D149 ✅, D150 ✅, D152 ⏳) **The WordPress connector docs describe Host, Port and Path settings and buttons the plugin does not have** — Someone following docs.viglet.org looks for fields that are not on the screen, the first page a WordPress adopter reads. → §XLIX.9
 
 ## Done when — D144
