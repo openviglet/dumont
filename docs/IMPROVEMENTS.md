@@ -310,27 +310,6 @@ slots and host actions). A WordPress visitor has no way to reach it.
 - Specs in the `ai` project (D174): a question about a seeded post gets that post as a
   citation, a follow-up keeps context, and navigation stays on the site.
 
-### XLIX.31 Click and search analytics from the blocks (D176)
-
-**What happens.** Turing records each search as a metric, but the search block never
-tells it which result was opened. So the site has no click-through rate, no "searched
-and left" signal, and Turing's ranking learns nothing from use.
-
-**What it should do.**
-- The search block, the overlay (D167), the assistant's citations (D175) and related
-  content call the SDK's `trackResultClick` / `postClick` (public `POST
-  /api/sn/{site}/click`) with term, document id and position. They use `sendBeacon`, so
-  the navigation is never delayed.
-- `createTuringAnalytics` with an optional GA4 / GTM sink, so a site already measuring in
-  Google Analytics gets `search`, `select_content` and abandonment events with no code.
-  A setting turns the sink on and names the measurement.
-- Respect consent: no tracking until the WP Consent API (or a filter) reports the
-  statistics category, and no personal data in any event.
-- Specs: a click sends one beacon with the right position; with consent off, none is
-  sent; the GA sink receives the events in debug mode.
-
-The data the search insights screen reads.
-
 ### XLIX.28 A related-content block on Turing's similar search (D177)
 
 **What happens.** Turing answers `GET /api/sn/{site}/search/similar?id=&mode=MLT|VECTOR`
@@ -375,8 +354,9 @@ and click-through from D176), but only its own console and its MCP tools read th
   state, not zeros.
 
 Zero-result queries and content gaps are MCP tools only (`top_failed_searches`,
-`content_gaps`), so their two tables wait on Turing T1119. Top terms are REST today, and
-the rest of the screen can ship first.
+`content_gaps`), so their two tables wait on Turing T1119. CTR waits on Turing T1131:
+D176's clicks are stored, but nothing reads them back. Top terms are REST today, and the
+rest can ship first.
 
 ### XLIX.35 A showcase site, admin tab and recorded tour (D179)
 
@@ -545,3 +525,26 @@ in its auditor (Turing T1126).
 - Specs: newer first puts Workshop on testing (10 January) ahead of Workshop on search
   (1 January) for `workshop`; sticky moves a seeded sticky post up; switching both off
   restores relevance order.
+
+### XLIX.44 Search abandonment and GA4's recommended events (D188)
+
+**What happens.** The search block and the instant search report searches and result
+clicks (D176). They go to Google Analytics as the SDK's `turing_search` and
+`turing_search_result_click`. GA4's own site-search reports read `search` and
+`select_content`, so they stay empty until the site owner writes custom definitions. No
+event says "searched, saw results, opened none and left", which is the abandonment the
+design asked for. The SDK has no canonical search abandonment event, and its GA sink
+sends only the `turing_*` names (Turing T1130).
+
+**What it should do.**
+- Once T1130 lands, turn on the sink's recommended mode, so `search { search_term }` and
+  `select_content` reach GA4 beside the canonical events.
+- Arm the SDK's abandonment helper after each search the visitor settled on, in both the
+  block and the overlay. Disarm it on a result click, a new search or a facet change. On
+  tab hide or page leave it emits `turing_search_abandoned { query, results }` with no
+  personal data, gated by `trackingAllowed()` like the rest.
+- Specs in `tests/e2e/site/analytics.spec.mjs`:
+  - leaving after a search sends one abandonment;
+  - a result click sends none;
+  - without statistics consent, nothing is sent;
+  - the stubbed gtag receives `search` with `search_term`.
