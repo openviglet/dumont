@@ -199,26 +199,6 @@ filtered by exact value: a visitor cannot ask for "last month" or "20 to 50".
   answers with, and the applied chip reads the range's label.
 - A spec that filters by a range and removes it.
 
-### XLIX.21 Search state in the URL, and sort (D165)
-
-**What happens.** The block keeps only `q` in the address bar. A filter, a page or a
-sort is lost on reload, cannot be shared, and the Back button does not undo it. There is
-no sort: results come by relevance only, and an events or news site cannot list the
-newest first.
-
-**What it should do.**
-- Put the whole search state in the URL: `q`, `fq[]` (minus the site filter), `page` and
-  `sort`. Use `pushState` on a deliberate change and `replaceState` while typing, restore
-  the state on `popstate`, and start the block from the URL.
-- A sort control: Relevance, plus Newest and Oldest on `publication_date`. It is
-  configurable per block, using the SDK's `changeSort` and Turing's sort options
-  (`fetchSortOptions`).
-- A results-per-page block setting.
-- The page title reflecting the query ("workshop – Search – Site"), and `noindex` on
-  filtered result URLs.
-- Specs: reload keeps filter, page and sort; Back undoes a facet; a shared URL opens the
-  same results.
-
 ### XLIX.22 A grounded answer panel above the results (D166)
 
 **What happens.** Turing can answer a question from the site's own content with

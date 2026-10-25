@@ -622,3 +622,4 @@
 - **D162** — Results are cards (type, locale date, address, marked snippet, image), with skeleton, empty-with-latest-posts and retry-or-WordPress error states.
 - **D163** — The search box is a WAI-ARIA combobox with instant prefix results, a clear button, focus kept in the box and removable recent searches, all keyboard-tested.
 - **D164 (groups, kept filters, phone drawer)** — Facets are collapsible groups with an applied-count badge and Show more; a filtered facet stays with its other values; phones get a Filters drawer.
+- **D165** — The URL holds query, filters, page (pg) and sort, Back and reload restore them, a sort and page-size setting exist, and refined URLs are noindex.
