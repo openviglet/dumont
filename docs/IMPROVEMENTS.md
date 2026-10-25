@@ -182,21 +182,19 @@ nothing changed.
 
 ### XLIX.17 A theme, language and multisite matrix for the browser tests, in CI (D161)
 
-**What happens.** Every browser check so far ran on Twenty Twenty-Five, one block theme,
-in English, on a stack whose Turing image is built by hand. A classic theme, a pt_BR
-site or a multisite network was never opened, and the suite runs only on a laptop.
+**What happens.** The theme matrix (Twenty Twenty-One, Ollie) and the pt_BR run landed
+as `switch:` projects in `playwright.config.mjs` (see `wordpress/README.md`). A
+multisite network was still never opened, and the suite runs only on a laptop.
 
 **What it should do.**
-- A theme matrix in the Playwright config: Twenty Twenty-Five (block), Twenty
-  Twenty-One (classic) and one third-party block theme. The seed activates each in turn,
-  and the site specs run against all three.
-- A pt_BR run: `WPLANG=pt_BR` in the seed, checking that admin screens and the block show
-  Portuguese and that no English string leaks.
 - A multisite variant of the stack: two sites, one SN site, each search returning only its
-  own key.
+  own key. It is a different WordPress install, not a switch of the running one, so it is
+  a second compose profile (or `run-docker.cmd multisite`) and a project set that runs only
+  when `E2E_MULTISITE=1`.
 - A CI job that starts the stack (`docker compose`, `turing-ce` once T1113 publishes a
   current image) and runs `npm run test:e2e`, uploading the report and screens as
-  artefacts.
+  artefacts. The baselines are per platform (`tests/e2e/snapshots/{platform}/`), so the
+  first CI run has to write and commit the `linux` set.
 
 ### XLIX.18 Result cards and the loading, empty and error states (D162)
 
@@ -596,3 +594,38 @@ the docs have one screenshot per screen, and a prospect cannot try any of it.
   one.
 
 Last in the track's AI series: it gathers what the others built.
+
+### XLIX.36 Event messages translated when read, not when written (D180)
+
+**What happens.** `Viglet_Dumont_Events::record()` stores the message already
+translated, in the language of the request that wrote it: "Fields provisioned", "Bulk:
+16 sent, 0 failed". The Health page prints the stored string, so a pt_BR reader sees
+English for every event written while the site, the writer or WP-CLI ran in English, and
+two admins with different languages see one log in one language. The pt-br browser spec
+(D161) found it and leaves the events table out of its leak check until this ships.
+
+**What it should do.**
+- Store a message key and its arguments (`provisioned`, `bulk` with `sent` and
+  `failed`, ...) instead of the sentence; Turing's own error text stays as it came.
+- Translate when Health renders, in the reader's language: one `__()` per key on the
+  server, or the keys handed to the React screen with its own strings.
+- Events already stored as sentences keep showing as they are.
+- Drop the events exclusion from `tests/e2e/i18n/pt-br.spec.mjs`, and add a PHPUnit case
+  that records under `en_US` and reads under `pt_BR`.
+
+### XLIX.37 Text buttons that hold their look under a classic theme (D181)
+
+**What happens.** Under Twenty Twenty-One (the `site-classic` project, D161), "Clear all
+filters" renders as white text on a dark box: the theme's own `button` rules win over
+`.viglet-dumont-search__link`, whose reset sets `background: none` and nothing for the
+theme's hover, focus and padding states. The same rule set styles "Did you mean" and the
+suggestion buttons, so they are exposed the same way. The baseline
+`tests/e2e/snapshots/win32/site-classic/search-block-facet.png` holds the wrong look.
+
+**What it should do.**
+- Reset the text buttons for every state a classic theme styles (`:hover`, `:focus`,
+  `:active`): background, colour, border, padding and box shadow, scoped under
+  `.viglet-dumont-search` so the specificity beats a theme's bare `button` rule.
+- Keep a visible focus ring of the block's own (the D160 keyboard checks assert it).
+- Refresh the `site-classic` baselines with `npm run test:e2e -- --update-snapshots` and
+  check the new PNGs show a link-styled control.
