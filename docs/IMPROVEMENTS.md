@@ -221,27 +221,6 @@ answer.
   while chat answers: the site needs its GenAI config, which only the console sets today
   (Turing T1116, surfaced by D169).
 
-### XLIX.24 Live preview, layouts and styles for the search block (D168)
-
-**What happens.** Layouts, parts, styles and border supports landed (`facetsPosition`,
-`resultsLayout`, `show*` attributes, `is-style-minimal` and `is-style-cards`; the spec
-is `admin/block-editor.spec.mjs`). In the editor the block is still a placeholder: an
-editor does not see the results a visitor gets, and a theme cannot rearrange the block's
-parts.
-
-**What it should do.**
-- A live preview in the editor: the real search for a sample query (the block's
-  placeholder text, or `*`), drawn in the chosen layout and style. The Interactivity view
-  module does not run in the editor canvas, so either render the preview on the server
-  (render.php fetching through the plugin's PHP search client when `context=edit`) or give
-  the editor its own small React preview over `viglet-dumont/search`. The server route
-  keeps one markup.
-- Inner blocks for the parts (box, filters, results, pages), each a child block with the
-  current markup as its render, so a theme or editor can reorder them or replace one. The
-  parent keeps the store and the state; the children carry no logic of their own.
-- Specs: the editor shows a result card; a page whose parts are reordered renders them in
-  that order.
-
 ### XLIX.25 The admin shows and enables the site's AI features (D169)
 
 **What happens.** Booted with `OPENAI_API_KEY`, the local Turing creates an LLM, a
@@ -581,3 +560,23 @@ resultados"). The same holds for "%d suggestions" (the combobox's live announcem
 - The same for the suggestion count.
 - A spec that filters to a single result and reads "1 result" (Seats 20 under
   `q=workshop` gives one).
+
+### XLIX.41 The search block's parts as inner blocks (D185)
+
+**What happens.** The Turing search block (D162 to D168) is one block: its box, filters,
+results and pages are fixed in `src/blocks/search/render.php`, in that order. Settings
+choose where the filters sit and which parts of a result show, but a theme cannot put
+the pages above the results, move the box into a header row, or swap the results list
+for its own.
+
+**What it should do.**
+- Inner blocks for the parts: `viglet-dumont/search-box`, `-filters`, `-results`,
+  `-pages`, each a child block whose render is the current markup for that part, with
+  `parent: ["viglet-dumont/search"]`. The parent keeps `data-wp-interactive`, the store
+  and the state; the children only read it, so the Interactivity context is unchanged.
+- The parent's default template is today's order, so an existing block renders as it does
+  now; a block saved before this (no inner blocks) renders the default template.
+- The editor preview (D168's server render) keeps working: the children render on the
+  server like the parent.
+- Specs: a page whose parts are reordered (pages above results) renders them in that
+  order, and the existing site specs pass unchanged on the default template.

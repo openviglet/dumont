@@ -624,4 +624,4 @@
 - **D164 (groups, kept filters, phone drawer)** — Facets are collapsible groups with an applied-count badge and Show more; a filtered facet stays with its other values; phones get a Filters drawer.
 - **D165** — The URL holds query, filters, page (pg) and sort, Back and reload restore them, a sort and page-size setting exist, and refined URLs are noindex.
 - **D167** — Ctrl/Cmd+K and the theme's Search block open an instant-search dialog with keyboard-chosen results; Enter goes to the full search page, a setting or found automatically.
-- **D168 (layouts, parts, styles)** — The block sets where filters sit, list or grid, which result parts show, Minimal and Cards styles and border supports; an editor spec checks the page follows.
+- **D168** — The block sets filter place, list or grid, result parts and a style, and the editor previews Turing's real answer through the block's own markup; inner blocks moved to D185.
