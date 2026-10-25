@@ -221,25 +221,6 @@ answer.
   while chat answers: the site needs its GenAI config, which only the console sets today
   (Turing T1116, surfaced by D169).
 
-### XLIX.23 An instant-search overlay from the header (D167)
-
-**What happens.** A visitor meets search in the header first: the theme's core Search
-block, or a search icon. Those still submit to `?s=` and load a page. The Turing block
-lives only on a page someone placed it on, so the fast, faceted search is one page away
-from where people start.
-
-**What it should do.**
-- An "instant search" overlay: Ctrl/⌘+K or the header's search opens a dialog with the
-  combobox, top results and suggestions as you type. Enter goes to the full search page
-  with the same query. It is a focus-trapped `dialog` that returns focus where it came
-  from.
-- A block-variation or render filter so the core Search block (`core/search`) opens the
-  overlay when Turing search is on, with no theme edit.
-- A setting for which page is the full search page (default: the page holding the
-  Turing search block, else `?s=`).
-- Specs: open with the shortcut and with a click, navigate by keyboard, and Escape
-  closes with focus restored.
-
 ### XLIX.24 Live preview, layouts and styles for the search block (D168)
 
 **What happens.** In the block editor the Turing search block is a grey placeholder with

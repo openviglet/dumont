@@ -623,3 +623,4 @@
 - **D163** — The search box is a WAI-ARIA combobox with instant prefix results, a clear button, focus kept in the box and removable recent searches, all keyboard-tested.
 - **D164 (groups, kept filters, phone drawer)** — Facets are collapsible groups with an applied-count badge and Show more; a filtered facet stays with its other values; phones get a Filters drawer.
 - **D165** — The URL holds query, filters, page (pg) and sort, Back and reload restore them, a sort and page-size setting exist, and refined URLs are noindex.
+- **D167** — Ctrl/Cmd+K and the theme's Search block open an instant-search dialog with keyboard-chosen results; Enter goes to the full search page, a setting or found automatically.
