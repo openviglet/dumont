@@ -35,7 +35,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-boot.version>4.1.1</spring-boot.version>
+        <spring-boot.version>4.1.2</spring-boot.version>
         <turing.version>2026.3.6</turing.version>
         <!-- Shared backend platform — external project (github.com/openviglet/viglet-core),
              published to GitHub Packages and versioned independently. -->
