@@ -119,7 +119,7 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 🛠 **D171** (deps: D169 ✅) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft shipped; audience fit is still missing: no per-persona content-fit score shows for a post on a site whose agent has personas. → §XLIX.30
+- 🛠 **D171** (deps: D169 ✅, Turing T1143) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft shipped; audience fit is still missing: no per-persona content-fit score shows for a post on a site whose agent has personas. → §XLIX.30
 - ⏳ **D173** (deps: D162 ✅, D164 ✅) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — Result cards still show no price or Add to cart, and the catalog copilot with its add_to_cart action has no block. → §XLIX.34
 - ⏳ **D174** (deps: D169 ✅) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Its chat and answer checks and the cost report can now run: Turing turns a site's GenAI on (T1116) and records its LLM cost (T1127). → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174 ⏳) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27

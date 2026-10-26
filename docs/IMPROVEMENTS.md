@@ -193,8 +193,9 @@ left: the local stack has no persona, so nothing tests it yet.
   persona with its reasons, from Turing's anonymous
   `/api/sn/{site}/persona/{personaId}/content-fit` (T634), called from the plugin's server
   like the excerpt. Hidden when the site has none.
-- Find how a site lists its catalog personas without a console session; if Turing has no
-  such read, file it there and wait on it rather than storing persona ids in the plugin.
+- List the site's audience personas through Turing T1143, which is filed because no read
+  answers it today: the plugin's key opens `/api/persona` and `/api/ai-agent`, but
+  resolving the site's effective agent there would copy Turing's logic into the plugin.
 - The spec provisions one audience persona on the local Turing (`/api/persona`) in
   global-setup, so a site with personas exists to test against.
 - Specs: a persona score shows on a site with one; the action is hidden on a site with
