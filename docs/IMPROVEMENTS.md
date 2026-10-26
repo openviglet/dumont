@@ -209,8 +209,10 @@ by the teardown; chat, answer, natural-language filter (D170) and excerpt-draft 
 specs; answers saved to `tests/e2e/artifacts/ai/answers.json`. Each run reads Turing's
 `cost/summary?site=` before and after (`ai/cost.mjs`), writes `cost.json`, prints the
 tokens and dollars, and fails over `AI_TOKEN_BUDGET` or `AI_COST_BUDGET`. Dollars read
-$0 on the stack until Turing prices its default model (T1144), so the token budget is
-the one that holds today.
+$0 on the stack although Turing holds the price: its catalog price row is keyed by the
+plugin slug (`openai`) and the ledger looks it up by vendor id (`OPENAI`), which only
+MySQL's case-insensitive collation matches (Turing T1144). The token budget is the one
+that holds until then.
 
 On the stack started with `OPENAI_API_KEY` the chat and answer specs now run, against
 Turing's Default Agent, and fail: "the information is not available in the website's
@@ -312,26 +314,6 @@ strings lands unseen until the next local run.
 - Speed budgets on a shared runner are noisier than on a laptop; keep them, and read a
   budget failure against the timing annotations before raising a bound.
 
-### XLIX.42 Generative AI declared in the manifest the plugin posts (D186)
-
-**What happens.** Health's AI card and `wp dumont ai status` (D169) show that answers
-are off on a site whose chat works ("AI is not enabled for site"), and tell the admin to
-turn generative AI on in Turing's console. The plugin provisions its fields through the
-manifest (`Viglet_Dumont_Mapping::manifest()`). Turing T1116 shipped: a manifest `genAi`
-block creates or updates the site's GenAI binding (an agent id or the Default AI Agent,
-plus the knowledge-base mode), reported as `genAiChanged` and `genAiToChange`. Declaring
-the block is what turns GenAI on.
-
-**What it should do.**
-- Declare the site's GenAI in the manifest the plugin posts, behind a setting that is off
-  by default, since it spends the owner's LLM budget. A provisioned site then answers
-  with no console visit. Show the plan's `genAiToChange` on the Fields screen before it
-  is applied.
-- Drop the console instruction from the answer row's `fix` in `viglet_dumont_ai_status()`
-  when the manifest did it, and keep the reason Turing gives otherwise.
-- A spec on the stack started with `OPENAI_API_KEY`: provision, then the answer row reads
-  On.
-
 ### XLIX.43 Boosts on the Search tuning screen (D187)
 
 **What happens.** The Search tuning screen (D172) has synonyms, promoted results,
@@ -386,17 +368,21 @@ and the controller's opt-in abandonment emits `turing_search_abandoned` (T1130).
   sites' ones.
 
 The stored API key is not bound to the site key, so it can read and delete every other
-site's documents. Turing has shipped what replaces this. An API key can be bound to a
-partition: its searches see only that partition, its imports are stamped and refused
-outside it, and endpoints that do not enforce partitions refuse it (T1133). An import
-DELETE can name shared fields (T1112). `/search/similar` takes `fq[]` (T1132).
+site's documents. Turing now binds a key to a partition: searches see only it, imports
+are stamped and refused outside it (T1133). An import DELETE can name shared fields
+(T1112); `/search/similar` takes `fq[]` (T1132).
 
 **What it should do.**
-- Provisioning creates or asks for one partitioned key per site key, and stores it in
-  place of the shared one. Health reports an endpoint the key is refused at.
+- Provisioning creates or asks for one partitioned key per site key, stored in place of
+  the shared one.
 - Delete-all becomes one field delete. The sweep and Related drop their client-side
   filtering, and Related asks for exactly the count it shows.
 - The visitor-side `fq=site_key:` stays only where a call is keyless.
+- Turing answers a partitioned key 403 outside its enforced routes: today `nl-filters`
+  (D170), `ai/capabilities`, chat and answer (D174, D175), `/api/v2/summary` and
+  content-fit (D171; T1143 opens content-fit). Chat, answer and nl-filters wait on the
+  vector partition Turing deferred under T1133. Those features turn off on such a key,
+  Health names each, and none falls back to an unbound key.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
 
@@ -415,7 +401,7 @@ The state persists in the `turing` volume: unsetting the key later does not turn
   route theirs, or global-setup switches the site's generative AI off (and the live-LLM
   suite, `playwright.ai.config.mjs`, switches it back on for itself).
 - Prefer the route: it keeps the default suite independent of Turing's AI settings, which
-  D186 is about to let the manifest change.
+  the manifest now changes: since D186 the live-LLM suite's seed sets `generative_ai`, its reindex binds the site's GenAI in Turing, and the default seed's `generative_ai = 0` only stops the plugin declaring it, never turning Turing's binding off.
 - Done when `npm run test:e2e` passes on a stack started with `OPENAI_API_KEY` set.
 
 ### XLIX.48 Selects keep room for their arrow (D192)
