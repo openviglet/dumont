@@ -641,3 +641,4 @@
 - **D173 (fields, facets and product cards)** — Products send price, stock, SKU, rating and attributes; the block filters them by price range, stock and color, and a product card shows its price and adds it to the cart.
 - **D178 (screen, synonyms and widget)** — Search insights lists a period's top searches with CTR, searches that found nothing and results never opened, with Write about this and Add a synonym, and a dashboard widget shows the week.
 - **D182 (CI job and Linux launcher)** — The WordPress workflow gains an e2e job that starts WordPress and Turing with bin/run-docker.sh, logs the Turing it ran against, runs the browser suite and keeps its artifacts.
+- **D183** — The block and the overlay send as-you-type searches as typed, in Turing's instant mode: the last word matches as a prefix with no wildcard guessed, and half-typed words stay out of the search log.

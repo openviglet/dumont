@@ -277,8 +277,8 @@ searches that found nothing and the ones that found results nobody opened, from 
 `metrics/clicks` and `metrics/failed-searches`. A gap row offers "Write about this" (a
 new draft titled with the search) and "Add a synonym" (Tuning, D172, opened with
 `?synonym=`). A dashboard widget shows the week's top five and no-result five, cached
-for ten minutes. Searches made while typing end in the block's `*` and are left out
-until a search can keep itself out of the metrics (Turing T1145).
+for ten minutes. Searches made while typing go in Turing's instant mode (D183) and stay
+out of the metrics; the `*` prefixes logged before it are left out.
 
 **What it should do next.**
 - An AI summary of the period through Turing's summary endpoint, cached and regenerable
@@ -333,24 +333,6 @@ strings lands unseen until the next local run.
   on a visual change.
 - Speed budgets on a shared runner are noisier than on a laptop; keep them, and read a
   budget failure against the timing annotations before raising a bound.
-
-### XLIX.39 Drop the instant-search wildcard once Turing matches prefixes (D183)
-
-**What happens.** D163's search block works around whole-word matching: `run( query,
-prefix )` in `wordpress/src/public/search-block.js` (and `update()` in
-`src/public/overlay.js`) appends `*` to the last word of an instant search. That is a
-guess at Turing's query syntax: a quoted phrase or a field query typed into the box gets
-a stray wildcard, and a wildcard term loses stemming and highlighting weight. Turing
-T1120 shipped the fix. A POST search with `mode: "instant"` runs its last plain term as
-a prefix on every engine, echoes the typed `q`, and stays out of the search log, so
-synonym mining no longer sees `work*` (T1125). The SDK's `searchQuery` sends it.
-
-**What it should do.** The block and the overlay send `mode: "instant"` for as-you-type
-searches instead of the `*`. The keyboard spec `results follow the typing without a
-submit, a half-typed word included` already asserts the behaviour, so it stays as the
-check that nothing regressed. The same mode makes the SDK abort a superseded search
-(T1121) and leave instant searches out of its analytics (T1129). Drop the wildcard
-filter D172's suggestions apply, once the stack's log holds no `*` terms.
 
 ### XLIX.42 Generative AI declared in the manifest the plugin posts (D186)
 
