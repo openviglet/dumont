@@ -59,7 +59,7 @@ jobs:
           git commit -m "Updated version in dumont pom.xml" -a
           git push
       - name: Configure Maven Settings
-        uses: s4u/maven-settings-action@v4.0.0
+        uses: s4u/maven-settings-action@v4.1.0
         with:
           servers: |
             [{
