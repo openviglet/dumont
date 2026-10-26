@@ -638,4 +638,4 @@
 - **D185** — The search block's box, filters, results and pages can become inner blocks a theme reorders, on one store; unarranged blocks keep the default order (design §XLIX.41 recorded in `wordpress/README.md`).
 - **D189** — Health's event times and last run are formatted on the server in the site's formats and time zone and the reader's language.
 - **D170** — With Suggest filters on, a sentence typed into the search block offers Turing's grounded nl-filters reading as chips; one click applies a filter and drops its words from the query.
-- **D173 (product fields and facets)** — With WooCommerce active, products send price, stock, SKU, rating and attributes; Fields maps them by default, and the block filters by price range, stock and color.
+- **D173 (fields, facets and product cards)** — Products send price, stock, SKU, rating and attributes; the block filters them by price range, stock and color, and a product card shows its price and adds it to the cart.

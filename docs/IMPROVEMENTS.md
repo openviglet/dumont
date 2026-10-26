@@ -204,23 +204,24 @@ left: the local stack has no persona, so nothing tests it yet.
 ### XLIX.34 WooCommerce products as a searchable catalog (D173)
 
 **What happens.** With WooCommerce active, products are a mapped type
-(`Viglet_Dumont_WooCommerce`): `woo:price`, `regular_price`, `sale_price`,
-`stock_status` (sent as the shop's words, "In stock"), `sku` and `average_rating`, with
-price, a Stock facet, product categories and tags and each global attribute mapped by
-default, and a stock change from an order queueing the product again. The `woo`
-Playwright project activates WooCommerce, seeds three jackets (`fixtures/woo-seed.php`)
-and filters them by a price range, stock and color. Two things are still missing.
+(`Viglet_Dumont_WooCommerce`): price, regular and sale price, stock status (in the
+shop's words), SKU, rating, categories, tags and global attributes, re-sent when stock
+changes. The block filters them by a price range, stock and color, and a product card
+shows its price (the regular price struck through on sale) and an "Add to cart" button
+that posts to WooCommerce's Store API (`config.shop`: currency, Store API URL and nonce)
+and shows WooCommerce's answer. The `woo` Playwright project covers all of it. The
+catalog copilot is what is left.
 
 **What it should do.**
-- Result cards for a product show its price (and the regular price struck through when
-  on sale), its image and an "Add to cart" button that posts to WooCommerce's Store API
-  (`/wp-json/wc/store/v1/cart/add-item`, with its nonce) and says when it worked. D162's
-  card has the slots; a product result needs its id and price in the indexed document.
-- The catalog copilot as a block, when D169 reports it available: "a waterproof jacket
-  under 200". It answers with products, and its `add_to_cart` host action calls the same
-  Store API, so the cart updates with no reload.
-- Specs: a card adds a seeded product to the cart (`woo` project); the copilot adds one
-  (the live-LLM `ai` project, D174).
+- The catalog copilot as a block, when D169 reports it available (`GET
+  /api/sn/{site}/copilot/available`): "a waterproof jacket under 200" answered with
+  products from `POST /api/sn/{site}/copilot`, each a card like the search block's.
+- Its `add_to_cart` host action calls the same Store API (the card's `addToCart`), so
+  the cart updates with no reload and the copilot says what happened.
+- An out-of-stock product could hide "Add to cart" rather than let WooCommerce refuse:
+  that needs the raw stock code in the document beside the label the facet reads.
+- Spec: the copilot adds a seeded product to the cart (the live-LLM `ai` project with the
+  `woo` seed, D174), skipped with the reason while the copilot is off.
 
 ### XLIX.26 A live-LLM browser suite for the AI features (D174)
 
