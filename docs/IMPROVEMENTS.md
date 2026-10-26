@@ -182,22 +182,23 @@ nothing changed.
 
 ### XLIX.30 An Assist section in the editor panel (D171)
 
-**What happens.** The editor panel's Assist section landed with "Already covered?" and
-"Link ideas" (`GET viglet-dumont/v1/post/<id>/assist`,
-`Viglet_Dumont_Post_State::assist()`: Turing's similar and duplicate searches for an
-indexed post, a title search for a draft). Two actions are still missing. Drafting an
-excerpt can now be built: Turing T1124 shipped, so a request with a usable Key skips
-CSRF and the plugin's server can `POST /api/v2/summary`. Audience fit needs personas,
-which the local stack does not have.
+**What happens.** The editor panel's Assist section has "Already covered?" and "Link
+ideas" (`GET viglet-dumont/v1/post/<id>/assist`) and "Draft an excerpt" (`POST
+viglet-dumont/v1/post/<id>/excerpt`, `Viglet_Dumont_Post_State::draft_excerpt()`, which
+calls Turing's `/api/v2/summary` with the stored key). Audience fit is the one action
+left: the local stack has no persona, so nothing tests it yet.
 
 **What it should do.**
-- "Draft an excerpt": a REST route that sends the saved content to `/api/v2/summary` with
-  the stored key (never the browser); "Use" fills the excerpt field, and nothing is saved
-  unasked (the D13 non-goal). Show the call's token count when Turing reports it.
-- "Fits the audience?": when the SN site has personas (`/api/sn/{site}/persona/{id}/content-fit`),
-  a score per persona with its reasons; hidden when there are none.
-- Hide each action when D169's probe says its feature is off.
-- Specs: draft and accept an excerpt; a persona score shows on a site with one.
+- "Fits the audience?": when the SN site's agent has audience personas, a score per
+  persona with its reasons, from Turing's anonymous
+  `/api/sn/{site}/persona/{personaId}/content-fit` (T634), called from the plugin's server
+  like the excerpt. Hidden when the site has none.
+- Find how a site lists its catalog personas without a console session; if Turing has no
+  such read, file it there and wait on it rather than storing persona ids in the plugin.
+- The spec provisions one audience persona on the local Turing (`/api/persona`) in
+  global-setup, so a site with personas exists to test against.
+- Specs: a persona score shows on a site with one; the action is hidden on a site with
+  none.
 
 ### XLIX.34 WooCommerce products as a searchable catalog (D173)
 

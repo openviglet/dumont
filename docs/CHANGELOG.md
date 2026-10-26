@@ -627,7 +627,7 @@
 - **D168** — The block sets filter place, list or grid, result parts and a style, and the editor previews Turing's real answer through the block's own markup; inner blocks moved to D185.
 - **D169** — Health and wp dumont ai status show answer, chat, NL filters and copilot as on or off with Turing's reason; provisioning GenAI moved to D186 behind T1116.
 - **D166** — An opt-in panel streams Turing's answer to a question with numbered sources and a helpful verdict, drawn only when sources are cited; the live-LLM run is D174's.
-- **D171 (already covered and link ideas)** — The editor's Assist section lists posts that may already cover this one and related posts with Add a link, from Turing's similar and duplicate searches.
+- **D171 (related posts and excerpt draft)** — The editor's Assist section lists posts that may already cover this one and related posts to link, and drafts an excerpt through Turing's summary API that Use puts in the field.
 - **D172** — Search tuning manages synonyms (with filtered suggestions) and promoted results, previews a search before and after, and the editor promotes a post; boosts moved to D187.
 - **D174 (the live-LLM harness)** — npm run test:e2e:ai seeds known facts and an injection post, checks grounding, pt_BR, injection, no invented figure and p95 time, and skips off features with the probe's reason.
 - **D176** — The search block and overlay report opened results to Turing and settled searches and clicks to the site's Google tag, opt-in and gated by consent (design §XLIX.31 recorded in `wordpress/README.md`).
