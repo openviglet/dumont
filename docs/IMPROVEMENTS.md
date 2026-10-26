@@ -201,28 +201,6 @@ left: the local stack has no persona, so nothing tests it yet.
 - Specs: a persona score shows on a site with one; the action is hidden on a site with
   none.
 
-### XLIX.34 WooCommerce products as a searchable catalog (D173)
-
-**What happens.** With WooCommerce active, products are a mapped type
-(`Viglet_Dumont_WooCommerce`): price, regular and sale price, stock status (in the
-shop's words), SKU, rating, categories, tags and global attributes, re-sent when stock
-changes. The block filters them by a price range, stock and color, and a product card
-shows its price (the regular price struck through on sale) and an "Add to cart" button
-that posts to WooCommerce's Store API (`config.shop`: currency, Store API URL and nonce)
-and shows WooCommerce's answer. The `woo` Playwright project covers all of it. The
-catalog copilot is what is left.
-
-**What it should do.**
-- The catalog copilot as a block, when D169 reports it available (`GET
-  /api/sn/{site}/copilot/available`): "a waterproof jacket under 200" answered with
-  products from `POST /api/sn/{site}/copilot`, each a card like the search block's.
-- Its `add_to_cart` host action calls the same Store API (the card's `addToCart`), so
-  the cart updates with no reload and the copilot says what happened.
-- An out-of-stock product could hide "Add to cart" rather than let WooCommerce refuse:
-  that needs the raw stock code in the document beside the label the facet reads.
-- Spec: the copilot adds a seeded product to the cart (the live-LLM `ai` project with the
-  `woo` seed, D174), skipped with the reason while the copilot is off.
-
 ### XLIX.26 A live-LLM browser suite for the AI features (D174)
 
 **What happens.** The live-LLM suite runs (`npm run test:e2e:ai`, `tests/e2e/ai/`): a
@@ -295,14 +273,14 @@ block or screen. Nobody can see them together: the Docker stack starts with a te
 the docs have one screenshot per screen, and a prospect cannot try any of it.
 
 **What it should do.**
-- `run-docker.cmd demo`: the stack with a realistic content seed (an institution's
-  news, events, courses and FAQ, in English and pt_BR, plus a WooCommerce catalog when
-  D173 is in), and a "Showcase" page holding every block. The page has a short label per
+- `run-docker.cmd demo`: the stack on the demo store's theme, catalog and
+  journal (D193, D194), and a "Showcase" page holding every block. The page has a short label per
   block naming the Turing feature behind it.
 - An admin "Showcase" tab listing each feature: on or off (from D169), the block that
   shows it, and a link to the page section.
 - A guided tour, `npm run e2e:tour`, that drives the showcase and records a video and
-  screenshots per feature. It is the source for the docs and the site's visuals.
+  screenshots per feature. It is the source for the docs' per-feature screenshots;
+  the site and the demo video follow the shopper's story instead (D203, D204).
 - vigletdocs: a "Turing on WordPress" page with the feature matrix and those
   screenshots, and the site copy claims only what the tour shows working
   (`dumont-site` rule).
@@ -463,3 +441,294 @@ taller than the select in the screenshot) so the row lines up.
 Done when the browser suite opens the Actions tab and the Connection tab and asserts
 each select's text box ends left of its arrow (the select's scrollWidth fits its
 clientWidth less the right padding), in pt_BR too, where "Todo o conteúdo" is longer.
+
+### XLIX.49 A branded demo storefront theme (D193)
+
+**What happens.** Every screen the plugin has ever been shown on is the stock Twenty
+Twenty-Five with a test seed. The blocks work, but the page around them reads as a
+fixture, and a marketing screenshot of it sells nothing.
+
+**What it should do.**
+- A block theme under `wordpress/demo/theme/`, outside the plugin zip, for an original
+  fictional brand (an outdoor and sports gear store; name and logo chosen in the task and
+  checked against existing trademarks). Its own palette, type scale and fonts bundled
+  locally, no third-party CDN.
+- Templates built on the plugin's blocks, never around them: a home page whose hero is the
+  search block with typed suggestions, category tiles and featured products; a results
+  page from the search parts with facets, product cards and the answer slot; a product
+  page with Related and the shopping copilot; a journal (blog) template.
+- Responsive from 360 px, WCAG AA contrast, full keyboard path from search to cart.
+- `run-docker.cmd demo` activates it; the default stack keeps Twenty Twenty-Five, so the
+  existing screenshots and specs do not move.
+- Gate: `npm run e2e:look` captures home, results, product and journal at desktop and phone
+  width, before and after each change, and a Lighthouse run on home and results stays at
+  90 or above for performance and accessibility.
+
+**Not in it.** The catalog content and the guided layer are their own tasks: the theme
+must look right with any catalog.
+
+### XLIX.50 A realistic demo catalog and journal (D194)
+
+**What happens.** `woo-seed.php` exists to make specs pass: a few products, one
+attribute, no images worth looking at. On it, a facet has one value, a synonym has
+nothing to join and the copilot has nothing to recommend.
+
+**What it should do.**
+- A demo seed under `wordpress/demo/seed/`, loaded by `run-docker.cmd demo` and idempotent
+  on re-run: about 150 products across six to eight categories, with variations, size,
+  colour, material and use attributes, prices, sale prices, stock levels including
+  out-of-stock, and long descriptions that answer real questions (waterproofing, weight,
+  care).
+- A journal of 20 to 30 buying guides and how-tos that name products, so one query returns
+  both a guide and the items it recommends, which is the case native search cannot serve.
+- Everything in English and pt_BR, so the language switch is part of the demo.
+- Images whose licence allows redistribution in the repo (public domain, or generated for
+  the brand), with the source of each recorded in a `CREDITS` file. No photo of a real
+  person or a real brand's product.
+- Seeded synonyms and a few curated queries that each show one feature: a misspelling, a
+  need described in words ("light jacket for rain"), a filter by attribute, a question the
+  answer slot replies to.
+- No reviews or ratings: invented ones would read as genuine.
+
+**Gate.** A spec asserts every curated query returns its intended first result on a
+fresh stack, so the demo cannot rot silently.
+
+### XLIX.51 Native-versus-Turing compare and a guided layer (D195)
+
+**What happens.** On the demo, Turing's results simply appear. A visitor who has never
+used WordPress's built-in search has no baseline, so a typo forgiven or a guide found
+from a vague need looks ordinary.
+
+**What it should do.**
+- A "Compare" page in the demo theme: one search box, two columns, WordPress's native
+  `WP_Query` search on the left and the plugin's Turing search on the right, run on the
+  same query and the same catalog. The native column is the real core search, never a
+  weakened copy, so the comparison is honest.
+- One-click example queries above the box, taken from the seed's curated list, each
+  labelled with the feature it shows (typo tolerance, synonyms, semantic match, facets,
+  cited answer); a question shows the AI answer native search has no slot for.
+- A guided layer on the storefront, off by default and on with `?tour=1` or a "How it
+  works" toggle: small numbered markers on the search box, facets, answer slot, Related
+  and copilot, each opening a two-line note on the Turing feature behind it and a link to
+  its docs page.
+- Both live in the demo theme, not the plugin: no production site ships a compare page.
+- Notes in English and pt_BR, keyboard reachable and dismissable, and they never cover the
+  element they describe at phone width.
+
+**Gate.** A spec runs every example query on both columns and asserts Turing's column
+holds the intended result while the native one is checked, not assumed, to differ.
+
+### XLIX.52 A public hosted demo store (D196)
+
+**What happens.** The demo store runs only from `run-docker.cmd demo` on a developer's
+machine. A sales pitch, a post or the site can show a video of it, never the thing.
+
+**What it should do.**
+- One public URL serving the demo stack (WordPress, WooCommerce, Turing, the theme and
+  seed), deployed from the repo by a workflow, not by hand. Host and domain are decided in
+  the task; an idea until they are.
+- Reset to the seed nightly and on every deploy, so a visitor's cart or a vandal's edit
+  never lasts.
+- Visitors browse, search, chat and add to cart, or follow the shopper's story
+  with the guided layer on (D203); checkout runs in WooCommerce's test mode
+  with a banner saying no order is real and no payment is taken, and asks for no card.
+  wp-admin is closed to the public; a read-only demo login, if any, is a later decision.
+- The LLM spend has a hard daily cap from Turing's cost ledger (D174's reading of it):
+  past the cap the chat and answers turn off with a visible note, while search keeps
+  working. Per-IP rate limits on search, chat and copilot.
+- A health check and an uptime alert, and the Turing and plugin versions it runs shown in
+  the footer.
+
+**Why an idea.** It is the one task in the series that costs money every day and has an
+outside attack surface, so its host, budget and owner are decided before it is designed.
+
+### XLIX.53 A WordPress and WooCommerce page on the site (D197)
+
+**What happens.** `dumont-site` has a landing page, a connectors page and an AEM page
+(`src/pages/aem.tsx`). The WordPress plugin, which now carries search, facets, answers,
+chat, a shopping copilot and insights, has no page, and nothing links to a demo.
+
+**What it should do.**
+- `src/pages/wordpress.tsx`, routed and prerendered like `aem.tsx`, with its copy in
+  `site-content.ts`: a hero naming the outcome for a store owner with the
+  30-second cut of the demo video (D204), then the page told as the story's chapters
+  (D203): one section per chapter, its still or clip taken from the story recording, the
+  generative ones (answer, kit, chat) shown with their sources, ending on the
+  native-versus-Turing compare and the full video.
+- Calls to action: try the live demo store (once the hosted demo exists; until then the
+  video and the Docker one-liner), install the plugin, read the docs page.
+- English and pt_BR, matching how the rest of the site handles languages.
+- A WordPress tile on the landing and connectors pages pointing at it.
+- The `dumont-site` rule binds: every claim is something the story spec shows
+  working. A capability it cannot film is not on the page.
+
+**Gate.** The site's build and prerender pass, the page's images come from the story
+recording rather than hand-made mock-ups, and a link check covers the new calls to
+action.
+
+### XLIX.54 Turing's generative AI on the demo store (D198)
+
+**What happens.** The plugin carries Turing's generative features as blocks (the answer
+slot on results, the shopping copilot, the RAG chat once D175 lands), but the demo tasks
+treat them as one marker among many. On a store, they are the headline.
+
+**What it should do.**
+- `run-docker.cmd demo` turns the SN site's GenAI on through provisioning (D186), so a
+  fresh demo stack answers without a console visit when a key is given, and says plainly
+  on the page when none is.
+- Results: the cited answer above the products for a question-shaped query ("what do I
+  need for a winter hike?"), its citations linking the guides and products it read.
+- A site-wide chat launcher in the theme answering from the catalog and the journal, with
+  sources under every reply; on a product page it opens scoped to that product.
+- The shopping copilot on product and results pages: a need described in words becomes a
+  short list of products with reasons, and its add-to-cart action fills the real cart.
+- Curated prompts in the seed, in English and pt_BR, each with the sources its answer must
+  cite, plus one off-catalog question the assistant must decline rather than invent.
+- Every generative element is labelled as AI and shows its sources; none answers without
+  one.
+
+**Gate.** The live-LLM suite (D174) runs the curated prompts on the demo seed and
+asserts grounding, the declined question and the cost per run; the keyless suite asserts
+the no-key notice.
+
+### XLIX.55 Text to filters on the search block (D199)
+
+**What happens.** The search block sends the whole sentence as the query. Price, colour
+and size words compete as keywords, and the facets a shopper would have clicked stay
+untouched.
+
+**What it should do.** An option on the search block, on by default where the SN site has
+GenAI:
+- The query and the SN site's facet vocabulary, as closed lists, go to Turing, which
+  returns the chosen values. A value outside the lists is dropped; nothing is invented.
+- A parser in code recovers price ranges and sizes the model left out, and runs alone when
+  there is no LLM, so the feature degrades instead of failing.
+- The facets are set visibly and a line says "Understood: rain jackets, blue, up to R$400",
+  built in code from the chosen values, never from model prose. One click undoes it.
+- Answers cached by query and vocabulary version, with a daily cap.
+
+**Turing side.** If no Turing call takes a closed vocabulary and returns choices (its
+roadmap rules out free-form JSON output in favour of tool-calling schemas), the Turing
+task is filed first through the friction skill and named in this line's deps.
+
+Seen in cursarei's `nlFilters`, which proved the pattern on courses.
+
+**Gate.** Specs on the demo seed: each curated sentence sets its expected facets, an
+off-vocabulary word sets none, and the keyless path still parses price and size.
+
+### XLIX.56 Product comparison with a neutral summary (D200)
+
+**What happens.** WooCommerce has no comparison, and the plugin's product cards end at
+add-to-cart. A shopper with three candidates opens three tabs.
+
+**What it should do.**
+- A "Compare" checkbox on the plugin's product cards (results, Related, copilot lists),
+  up to four items, and a compare block rendering a table of the attributes the products
+  share, with differences highlighted.
+- Above the table, two to four sentences on what the items share and where they differ,
+  naming no winner. The facts (price gaps, which ones are waterproof, weights) are
+  computed in code and passed to Turing's `POST /api/v2/summary`; the model writes only
+  from them, and every number shown comes from the table, not the prose.
+- Without GenAI, the table alone, which is still the feature.
+- Labelled as AI, cached by the set of product ids and their modified dates.
+
+Seen in cursarei's `compareSummary`, which keeps the model to code-computed facts.
+
+**Gate.** A spec compares two seeded products whose differences are known, and asserts
+the summary names no attribute absent from the table and no number absent from it.
+
+### XLIX.57 A kit builder from a described plan (D201)
+
+**What happens.** The shopping copilot turns a need into a short list, one need at a
+time. "Two days crossing the mountains in July, first time" is several needs, and the
+shopper has to know them all to ask.
+
+**What it should do.** A "Build my kit" mode of the copilot block:
+- The plan goes to Turing, which retrieves candidates from the SN site and returns a
+  summary, the gaps the plan implies (shelter, layers, water), and stages of products,
+  each with a one-line reason drawn from its attributes.
+- Product ids are checked against the retrieved candidates; an id the model invents is
+  dropped, and an out-of-stock item is replaced or marked. A guide from the journal that
+  covers the plan is cited.
+- "Add the kit to cart" adds every staged item through the copilot's add-to-cart action,
+  and the shopper can remove items first.
+- Without GenAI, the mode is hidden rather than faked.
+- Prices and totals come from WooCommerce, never from the model.
+
+Seen in cursarei's profile analysis, which returns a staged path of real courses with
+the same id check.
+
+**Gate.** Live-LLM specs on the demo seed: each curated plan returns only seeded,
+in-stock ids, covers its listed gaps, and the cart total equals WooCommerce's.
+
+### XLIX.58 Trending search chips grouped by meaning (D202)
+
+**What happens.** Before a visitor types, the search block is an empty box. The site's
+search metrics (D176) know the week's searches, but only wp-admin sees them.
+
+**What it should do.**
+- An option on the search block: up to eight chips under the box, from the period's top
+  searches in Turing's metrics, above a minimum count.
+- A chip is shown only if its query returns results now, checked when the list is built,
+  so no chip leads to an empty page.
+- Variants of one search ("raincoat", "rain jacket", a typo of either) collapse into one
+  chip under the most-searched spelling. The grouping runs on a schedule through Turing's
+  `POST /api/v2/summary`, never on page load; without GenAI, exact matches only.
+- A blocklist in settings, and queries that look like personal data (an email, a
+  document number) never become chips.
+- On a fresh site with no history, chips from a list the admin types.
+
+Seen in cursarei's trending chips, where every chip is guaranteed to return results.
+
+**Gate.** Specs: a seeded query with no results never becomes a chip, two variants show
+as one, and the empty-history fallback renders the typed list.
+
+### XLIX.59 One shopper's story through the demo store (D203)
+
+**What happens.** Each demo task delivers a feature, and the guided layer names them one
+by one. Nothing orders them into a journey, so the tour, the site and the docs would
+each pick a different sequence.
+
+**What it should do.** One scripted journey, the spine every other surface follows. A
+fictional shopper preparing her first winter mountain crossing:
+
+1. **Arrives** — trending chips show the catalog at a glance (D202).
+2. **Says what she needs** — "light rain jacket under R$400"; the facets set themselves
+   and say what they understood (D199), and a misspelling still finds the jacket.
+3. **Asks** — "what do I need for two days in the cold?"; a cited answer quotes a guide
+   and its products (D198).
+4. **Compares** — three jackets side by side, with a neutral summary (D200).
+5. **Builds the kit** — the plan becomes a staged kit of in-stock items (D201).
+6. **Checks one item** — the product page, Related and the chat scoped to it (D198).
+7. **Buys** — the kit lands in the cart, checkout in test mode.
+8. **Backstage** — the same query natively versus Turing (D195), then wp-admin's insights
+   with her searches and a failed one turned into a synonym (D178).
+
+Delivered as `wordpress/demo/story.md` (script, queries, expected results, English and
+pt_BR), an `npm run e2e:story` spec playing it end to end, and the guided layer's
+markers renumbered to these chapters.
+
+**Gate.** The story spec runs green on a fresh demo stack with a key.
+
+### XLIX.60 A narrated demo video of the story (D204)
+
+**What happens.** The plugin has screenshots per screen and, once D179 lands, a raw
+recording per feature. Neither is something to put at the top of a landing page or send
+to a prospect.
+
+**What it should do.**
+- A two-to-three-minute video following the story's chapters in order, ending on the
+  backstage chapter and a call to action (try the demo, install the plugin).
+- Recorded, not mocked: `npm run e2e:story -- --record` plays the story at a human pace on
+  the demo stack at 1920×1080, with cursor highlight and typing visible, and writes one
+  clip per chapter. Every frame is the product running.
+- An assembly script (ffmpeg) joins the clips with chapter titles, captions and an intro
+  and outro card in the demo brand, so a re-record after a UI change is one command, not
+  an editing session.
+- English and pt_BR: captions in both, narration recorded or synthesised (decided in the
+  task, with the voice's licence recorded). A 30-second cut for social posts.
+- Output under `wordpress/demo/video/` (sources and script in the repo, rendered files as
+  release assets, not committed), embedded on the site's WordPress page and the docs.
+
+**Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
+when a chapter clip is missing or older than the story spec it was recorded from.

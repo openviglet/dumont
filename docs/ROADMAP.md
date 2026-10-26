@@ -120,17 +120,28 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 🛠 **D171** (deps: D169 ✅, Turing T1143) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft shipped; audience fit is still missing: no per-persona content-fit score shows for a post on a site whose agent has personas. → §XLIX.30
-- 🛠 **D173** (deps: D162 ✅, D164 ✅) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — Product cards sell from the results now; the catalog copilot and its add_to_cart action still have no block. → §XLIX.34
 - 🛠 **D174** (deps: D169 ✅, D186) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — The chat and answer checks run but find no source: retrieval misses the seeded posts until the manifest turns the site's GenAI on (D186). → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174 🛠) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 🛠 **D178** (deps: D176 ✅) **A site owner cannot see top searches, zero-result queries or clicks from wp-admin** — The screen and widget shipped; the period's AI summary is missing, and nothing says when Turing's metrics are off. → §XLIX.32
-- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 🛠, D172 ✅, D175, D177 ✅, D178 🛠) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
+- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 🛠, D172 ✅, D175, D177 ✅, D178 🛠, D194) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 📋 **D186** (deps: D169 ✅) **Provisioning cannot turn a site's generative AI on, so answers stay off until a console visit** — A fresh install has chat but no cited answers, and the admin must find a setting in another product. → §XLIX.42
 - 📋 **D187** (deps: D172 ✅) **Search tuning has no boosts: newer, sticky or chosen post types cannot be ranked up from wp-admin** — An events or news site cannot put recent posts first without Turing's console. → §XLIX.43
 - 📋 **D188** (deps: D176 ✅) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
 - 📋 **D190** (deps: D148 ✅, D177 ✅) **Each site of a shared SN site is kept apart by the plugin's own filters, and its key can still reach the other sites** — A filter the plugin forgets leaks another site's posts, and delete-all and Related page and over-fetch to filter by hand. → §XLIX.46
 - 📋 **D191** (deps: —) **The default e2e suite fails on a stack started with an OpenAI key, since its AI-off answer spec finds AI on** — The spec inherits the site's AI state from the developer's shell and the Turing volume, so a green run depends on an unset key. → §XLIX.47
 - 📋 **D192** (deps: —) **The settings page's selects draw their text under the dropdown arrow, so All Content on the Actions tab reads cut** — The plugin's own CSS overrides the right padding WordPress keeps for the arrow, on every select of the settings page. → §XLIX.48
+- 📋 **D193** (deps: D173 ✅) **The demo stack runs on stock Twenty Twenty-Five, so nothing it shows looks like a store a buyer would trust** — A prospect judges the search by the site around it, and a bare theme makes Turing's results look like a test page. → §XLIX.49
+- 📋 **D194** (deps: D173 ✅, D193) **The Woo seed holds a handful of test products, too few for facets, synonyms or a copilot to show anything** — Search only impresses over a catalog large and varied enough for a typo, a vague need or a filter to matter. → §XLIX.50
+- 📋 **D195** (deps: D193, D194) **A visitor to the demo cannot tell what Turing adds, since nothing compares it with WordPress's own search** — The difference sells only when seen: the same query, native results beside Turing's, with each feature named where it acts. → §XLIX.51
+- 💭 **D196** (deps: D203) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
+- 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
+- 📋 **D198** (deps: D173 ✅, D175, D186, D194) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
+- 📋 **D199** (deps: D173 ✅, Turing: a query-to-facets call) **A shopper who types "light rain jacket under R$400, blue" gets keyword results, and the facets beside them stay unset** — People describe a need in a sentence; turning it into the site's own filters, and saying so, is search that understands. → §XLIX.55
+- 📋 **D200** (deps: D173 ✅) **A shopper choosing between three jackets reads three product pages, and nothing lays them side by side** — Comparing is the step before buying, and a neutral summary of real differences is AI a shopper can trust. → §XLIX.56
+- 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
+- 📋 **D202** (deps: D176 ✅) **The search block's empty state offers nothing to click, though the site knows what its visitors search for** — Chips built from real searches show the catalog's breadth in one glance, provided each one returns results. → §XLIX.58
+- 📋 **D203** (deps: D195, D198, D199, D200, D201, D202, D178 🛠) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
+- 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
 
 ## Done when — D144
 
@@ -155,16 +166,6 @@ This track has no remaining pending tasks.
 - **Each run reports its tokens and dollars and holds a budget** The suite reads
   Turing's cost ledger before and after, reports tokens and dollars with p50 and p95
   time, and fails above a cost budget set in the config.
-
-## Done when — D173
-
-- **A product card shows its price and adds it to the cart** A woo-project spec searches
-  the seeded jackets, reads the sale price on Rain jacket's card, presses Add to cart,
-  and finds the product in WooCommerce's cart through the Store API.
-- **The catalog copilot block puts a product it found in the cart** A live-LLM spec asks
-  the copilot block for a jacket under a price, and its add_to_cart action leaves that
-  product in the cart without a reload; skipped with the reason while D169 reports the
-  copilot off.
 
 ## Done when — D178
 
