@@ -180,29 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.29 Natural-language filters offered as chips (D170)
-
-**What happens.** A visitor types "seminars about php from last year", and search treats
-all six words as keywords. Turing's public `POST /api/sn/{site}/nl-filters` turns that
-text into a query (`php`) plus checked filter queries on the site's own fields. Turing
-T1117 shipped: relative dates ("last year", "this month", "since March") now resolve in
-code against the server's date, and a date range nothing grounds is dropped as
-`UNGROUNDED_DATE`.
-
-**What it should do.**
-- In the search block, when a query reads as a sentence (several words, or a date or
-  type word), call `nl-filters` once alongside the search and offer its reading as
-  removable chips ("Type: post", "Published: 2025"), applied with one click. It is never
-  applied silently.
-- Show only filters Turing marks `grounded`, and only on fields the plugin mapped
-  (Fields screen), so a chip always matches a facet the visitor can see.
-- Once applied, the chips are the ordinary applied filters of D164 and live in the URL
-  of D165.
-- Hidden when D169's probe reports no LLM. A slow call never delays the results, which
-  render first.
-- Specs in the `ai` project: a type word and a date phrase become the two chips; a
-  keyword-only query gets none.
-
 ### XLIX.30 An Assist section in the editor panel (D171)
 
 **What happens.** The editor panel's Assist section landed with "Already covered?" and

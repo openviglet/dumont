@@ -637,3 +637,4 @@
 - **D184** — Counts carry their singular and plural forms and the page's plural rule picks one, so a single match reads 1 result, or 1 resultado in pt_BR.
 - **D185** — The search block's box, filters, results and pages can become inner blocks a theme reorders, on one store; unarranged blocks keep the default order (design §XLIX.41 recorded in `wordpress/README.md`).
 - **D189** — Health's event times and last run are formatted on the server in the site's formats and time zone and the reader's language.
+- **D170** — With Suggest filters on, a sentence typed into the search block offers Turing's grounded nl-filters reading as chips; one click applies a filter and drops its words from the query.
