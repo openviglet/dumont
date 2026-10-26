@@ -209,19 +209,17 @@ by the teardown; chat, answer, natural-language filter (D170) and excerpt-draft 
 specs; answers saved to `tests/e2e/artifacts/ai/answers.json`. Each run reads Turing's
 `cost/summary?site=` before and after (`ai/cost.mjs`), writes `cost.json`, prints the
 tokens and dollars, and fails over `AI_TOKEN_BUDGET` or `AI_COST_BUDGET`. Dollars read
-$0 on the stack although Turing holds the price: its catalog price row is keyed by the
-plugin slug (`openai`) and the ledger looks it up by vendor id (`OPENAI`), which only
-MySQL's case-insensitive collation matches (Turing T1144). The token budget is the one
-that holds until then.
+$0 on the stack although Turing holds the price (Turing T1144); the token budget is the
+one that holds until then.
 
-On the stack started with `OPENAI_API_KEY` the chat and answer specs now run, against
-Turing's Default Agent, and fail: "the information is not available in the website's
-content". Retrieval does not find the seeded posts, because the SN site has no GenAI
-binding of its own.
+With the site's GenAI declared in the manifest (D186) the chat and answer specs still
+fail: "the information is not available in the website's content", while search finds
+the seeded post. The binding D186 makes has no agent of its own (the Default AI Agent),
+and Turing's import embeds only a site whose own agent is RAG-enabled, so nothing
+reaches the vector store (Turing T1147).
 
 **What it should do.**
-- Once the plugin declares the site's GenAI in its manifest (D186), the chat and answer
-  specs pass on that stack.
+- Once Turing T1147 ships and the stack runs that image, the chat and answer specs pass.
 - The shop copilot (D173) and the site assistant (D175) join the suite as each lands.
 
 ### XLIX.27 A site assistant block on Turing's chat (D175)
