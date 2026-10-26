@@ -462,3 +462,27 @@ The state persists in the `turing` volume: unsetting the key later does not turn
 - Prefer the route: it keeps the default suite independent of Turing's AI settings, which
   D186 is about to let the manifest change.
 - Done when `npm run test:e2e` passes on a stack started with `OPENAI_API_KEY` set.
+
+### XLIX.48 Selects keep room for their arrow (D192)
+
+Seen by the owner on the plugin's settings page, Actions tab (2026-10-26): the "Index
+All Content" row's content select (`#viglet-dumont-index-type`, "All Content" / "Posts
+Only" / "Pages Only") draws its text under its own dropdown arrow, so "All Content"
+reads cut and overlapped by the chevron.
+
+Cause: WordPress core styles every admin `select` with the arrow as a background image
+on the right and a right padding that keeps the text clear of it.
+wordpress/src/admin/css/admin.css overrides that padding on all four sides:
+
+- line 340, `.viglet-dumont-action-buttons select { padding: 6px 10px; ... }` (the Actions tab);
+- line 184, `.viglet-dumont-field select { padding: 8px 12px; ... }` (every select in the
+  Connection, Indexing and Search tabs), the same flaw wherever a value is long enough.
+
+Build: keep core's right padding by setting only the other sides, or give the right side
+room for the arrow, e.g. `padding: 6px 28px 6px 10px` and `padding: 8px 32px 8px 12px`.
+Give the action select the button's height beside it (the Start Indexing button is
+taller than the select in the screenshot) so the row lines up.
+
+Done when the browser suite opens the Actions tab and the Connection tab and asserts
+each select's text box ends left of its arrow (the select's scrollWidth fits its
+clientWidth less the right padding), in pt_BR too, where "Todo o conteúdo" is longer.
