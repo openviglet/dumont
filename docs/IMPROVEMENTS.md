@@ -191,8 +191,9 @@ filtered by exact value: a visitor cannot ask for "last month" or "20 to 50".
 - Range facets for the mapped DATE and INT/FLOAT fields (last 7 days, this year; 0-20,
   20-50), declared as Turing custom facets in the manifest the plugin posts. The shape
   is `customFacets: [{field, name, label, items: [{label, rangeStart, rangeEnd}]}]`, dates
-  with `rangeStartDate: "NOW-7DAYS"`. Tried on 2026-10-25: Turing stores the facet but never
-  answers with it (Turing T1122), so this waits on that fix.
+  with `rangeStartDate: "NOW-7DAYS"`. Turing T1122 shipped: stored bounds of integer
+  facets no longer break the range parse, so a manifest-provisioned range facet now
+  counts and reaches the answer. T1135 also lets the manifest set a facet's behaviour.
 - The Fields screen lets a mapped DATE or number field opt into ranges, with editable
   bounds for numbers and a fixed set for dates.
 - The block lists a range facet like any other group; its filter query is the range Turing
@@ -203,8 +204,10 @@ filtered by exact value: a visitor cannot ask for "last month" or "20 to 50".
 
 **What happens.** A visitor types "seminars about php from last year", and search treats
 all six words as keywords. Turing's public `POST /api/sn/{site}/nl-filters` turns that
-text into a query (`php`) plus checked filter queries on the site's own fields. On the
-local stack it worked, but resolved "last year" to 2022 (Turing T1117).
+text into a query (`php`) plus checked filter queries on the site's own fields. Turing
+T1117 shipped: relative dates ("last year", "this month", "since March") now resolve in
+code against the server's date, and a date range nothing grounds is dropped as
+`UNGROUNDED_DATE`.
 
 **What it should do.**
 - In the search block, when a query reads as a sentence (several words, or a date or
@@ -220,23 +223,20 @@ local stack it worked, but resolved "last year" to 2022 (Turing T1117).
 - Specs in the `ai` project: a type word and a date phrase become the two chips; a
   keyword-only query gets none.
 
-Waits on T1117: shipped before it, a relative date would filter out what was asked for.
-
 ### XLIX.30 An Assist section in the editor panel (D171)
 
 **What happens.** The editor panel's Assist section landed with "Already covered?" and
 "Link ideas" (`GET viglet-dumont/v1/post/<id>/assist`,
 `Viglet_Dumont_Post_State::assist()`: Turing's similar and duplicate searches for an
 indexed post, a title search for a draft). Two actions are still missing. Drafting an
-excerpt needs Turing's `POST /api/v2/summary`, which answers 403 to a Key-authenticated
-server call (Turing T1124). Audience fit needs personas, which the local stack does not
-have.
+excerpt can now be built: Turing T1124 shipped, so a request with a usable Key skips
+CSRF and the plugin's server can `POST /api/v2/summary`. Audience fit needs personas,
+which the local stack does not have.
 
 **What it should do.**
 - "Draft an excerpt": a REST route that sends the saved content to `/api/v2/summary` with
-  the stored key (never the browser) once T1124 ships; "Use" fills the excerpt field, and
-  nothing is saved unasked (the D13 non-goal). Show the call's token count when Turing
-  reports it.
+  the stored key (never the browser); "Use" fills the excerpt field, and nothing is saved
+  unasked (the D13 non-goal). Show the call's token count when Turing reports it.
 - "Fits the audience?": when the SN site has personas (`/api/sn/{site}/persona/{id}/content-fit`),
   a score per persona with its reasons; hidden when there are none.
 - Hide each action when D169's probe says its feature is off.
@@ -271,18 +271,18 @@ use.
 test:e2e:ai`, `tests/e2e/ai/`): a seed of known facts in English and Portuguese and a
 prompt-injection post, deleted again by the teardown; chat specs for grounding, pt_BR,
 injection, no invented figure and a p95 time budget; answer-panel specs; answers saved
-to `tests/e2e/artifacts/ai/answers.json`. On the local stack every spec skips. The SN
-site has no GenAI config, so `/answer` refuses, and chat, though enabled, never
-retrieves the posts: asked when the seeded grant closes, it says the information is not
-available (Turing T1116). Turing's cost ledger does not record the site's LLM calls
-(Turing T1127).
+to `tests/e2e/artifacts/ai/answers.json`. On the local stack every spec still skips: the
+SN site has no GenAI binding. Turing has shipped both fixes the suite waited on: a
+manifest `genAi` block now creates the site's GenAI binding (T1116), and every SN call,
+chat included, records its site in the cost ledger, which `cost/summary?site=` narrows
+to (T1127).
 
 **What it should do.**
-- Once T1116 lets the plugin turn the site's GenAI on (D186), the chat and answer specs
-  run and pass on the stack started with `OPENAI_API_KEY`.
-- Once T1127 records the site's calls, each run reads `/api/v2/llm/cost/summary` before
-  and after, reports tokens and dollars beside the p50/p95 times, and fails above a cost
-  budget set in the config.
+- Once the plugin declares the site's GenAI in its manifest (D186), the chat and answer
+  specs run and pass on the stack started with `OPENAI_API_KEY`.
+- Each run reads `/api/v2/llm/cost/summary?site=<SN site>` before and after, reports
+  tokens and dollars beside the p50/p95 times, and fails above a cost budget set in the
+  config.
 - Natural-language filters (D170), the shop copilot (D173) and the site assistant (D175)
   join the suite as each lands.
 
@@ -314,26 +314,26 @@ slots and host actions). A WordPress visitor has no way to reach it.
 
 **What happens.** A site owner cannot see what visitors search for, what they fail to
 find, or what they click. Turing keeps the metrics (top terms by period, live accesses,
-and click-through from D176), but only its own console and its MCP tools read them.
+and the clicks D176 reports), but the plugin reads none of them.
 
 **What it should do.** A "Search insights" admin screen in the plugin:
 - Top terms today, this week, this month and all time, with counts and CTR.
 - Zero-result queries, each with "Add a synonym" (D172) and "Write about this" (a new
   draft titled with the query): the content gaps a site owner can act on.
 - A trend sparkline per term, and the live count.
-- An AI summary of the period ("visitors look for X, find nothing for Y, click Z most")
-  through Turing's summary endpoint, which is cached and regenerable as Dumont's own
-  insights page is. Hidden when D169 says off.
+- An AI summary of the period through Turing's summary endpoint, cached and regenerable
+  as Dumont's own insights page is. Hidden when D169 says off.
 - A dashboard widget with the week's top five and zero-result five.
 - Read through the plugin's REST routes with the stored key, capability
   `manage_options`.
 - Specs: seeded searches and clicks appear in the tables; an empty site shows an empty
   state, not zeros.
 
-Zero-result queries and content gaps are MCP tools only (`top_failed_searches`,
-`content_gaps`), so their two tables wait on Turing T1119. CTR waits on Turing T1131:
-D176's clicks are stored, but nothing reads them back. Top terms are REST today, and the
-rest can ship first.
+Everything it reads is now REST in Turing. Failed searches and content gaps take a
+from/to/period/rows window (T1119). `GET /api/sn/{siteId}/metrics/clicks` reports
+searches, clicks, CTR and mean clicked position per term, plus the terms found but never
+opened (T1131). The SDK reads that as `fetchClickThrough`. When metrics are off,
+`/click` answers 204 with `X-Turing-Metrics: disabled`, which the screen should explain.
 
 ### XLIX.35 A showcase site, admin tab and recorded tour (D179)
 
@@ -370,8 +370,11 @@ strings lands unseen until the next local run.
   `docker compose` and `run-docker.cmd`'s steps written for a Linux runner, runs
   `npm run test:e2e` (and `E2E_MULTISITE=1` on a schedule, since it doubles the setup),
   and uploads `tests/e2e/artifacts/` as an artefact.
-- It needs a `turing-ce` image current enough for the plugin's calls, which T1113
-  publishes; the published `latest` lags the local build `run-docker.cmd` prefers.
+- Turing T1113 shipped: every release pushes `turing-ce` at its version and moves
+  `latest`, a branch dispatch publishes `<branch>-snapshot`, and `/api/discovery` names
+  the build's version and commit. The workflow pins a version (or the snapshot of the
+  branch it pairs with) and logs `/api/discovery`, so a failure names the Turing it ran
+  against.
 - The baselines are per platform (`tests/e2e/snapshots/{platform}/`): the first run
   writes the `linux` set, which is reviewed by eye and committed before the job can fail
   on a visual change.
@@ -380,33 +383,37 @@ strings lands unseen until the next local run.
 
 ### XLIX.39 Drop the instant-search wildcard once Turing matches prefixes (D183)
 
-**What happens.** Turing matches whole words only, so an instant search for "work" finds
-nothing (Turing T1120). D163's search block works around it: `run( query, prefix )` in
-`wordpress/src/public/search-block.js` appends `*` to the last word of an instant
-search. That is a guess at Turing's query syntax: a quoted phrase or a field query typed
-into the box gets a stray wildcard, and a wildcard term loses stemming and highlighting
-weight. It also lands in Turing's search log, so synonym mining proposes `work* = work`
-(Turing T1125; D172 filters those out).
+**What happens.** D163's search block works around whole-word matching: `run( query,
+prefix )` in `wordpress/src/public/search-block.js` (and `update()` in
+`src/public/overlay.js`) appends `*` to the last word of an instant search. That is a
+guess at Turing's query syntax: a quoted phrase or a field query typed into the box gets
+a stray wildcard, and a wildcard term loses stemming and highlighting weight. Turing
+T1120 shipped the fix. A POST search with `mode: "instant"` runs its last plain term as
+a prefix on every engine, echoes the typed `q`, and stays out of the search log, so
+synonym mining no longer sees `work*` (T1125). The SDK's `searchQuery` sends it.
 
-**What it should do.** Once Turing ships T1120's `mode: "instant"` (and the SDK's
-`searchQuery` passes it), the block sends that flag instead and drops the `*`. The
-keyboard spec `results follow the typing without a submit, a half-typed word included`
-already asserts the behaviour, so it stays as the check that nothing regressed. The same
-flag makes the SDK abort a superseded search (T1121) and leave instant searches out of
-its analytics (T1129).
+**What it should do.** The block and the overlay send `mode: "instant"` for as-you-type
+searches instead of the `*`. The keyboard spec `results follow the typing without a
+submit, a half-typed word included` already asserts the behaviour, so it stays as the
+check that nothing regressed. The same mode makes the SDK abort a superseded search
+(T1121) and leave instant searches out of its analytics (T1129). Drop the wildcard
+filter D172's suggestions apply, once the stack's log holds no `*` terms.
 
 ### XLIX.42 Generative AI declared in the manifest the plugin posts (D186)
 
 **What happens.** Health's AI card and `wp dumont ai status` (D169) show that answers
 are off on a site whose chat works ("AI is not enabled for site"), and tell the admin to
 turn generative AI on in Turing's console. The plugin provisions its fields through the
-manifest (`Viglet_Dumont_Mapping::manifest()`), but the manifest has no way to turn a
-site's generative AI on (Turing T1116), so a fresh install needs that console step.
+manifest (`Viglet_Dumont_Mapping::manifest()`). Turing T1116 shipped: a manifest `genAi`
+block creates or updates the site's GenAI binding (an agent id or the Default AI Agent,
+plus the knowledge-base mode), reported as `genAiChanged` and `genAiToChange`. Declaring
+the block is what turns GenAI on.
 
 **What it should do.**
-- Once T1116 ships, declare the site's generative AI in the manifest the plugin posts
-  (behind a setting, off by default: it spends the owner's LLM budget), so a provisioned
-  site answers with no console visit.
+- Declare the site's GenAI in the manifest the plugin posts, behind a setting that is off
+  by default, since it spends the owner's LLM budget. A provisioned site then answers
+  with no console visit. Show the plan's `genAiToChange` on the Fields screen before it
+  is applied.
 - Drop the console instruction from the answer row's `fix` in `viglet_dumont_ai_status()`
   when the manifest did it, and keep the reason Turing gives otherwise.
 - A spec on the stack started with `OPENAI_API_KEY`: provision, then the answer row reads
@@ -417,16 +424,17 @@ site's generative AI on (Turing T1116), so a fresh install needs that console st
 **What happens.** The Search tuning screen (D172) has synonyms, promoted results,
 suggestions and a Try it preview, but no boosts. The server half is written:
 `Viglet_Dumont_Tuning::set_boosts()` and `boosts()` keep the plugin's ranking
-expressions (named "WordPress: …"): newer first is Turing's recency form
-(`publication_date` = `asc`), sticky posts first matches the `sticky` field every
-document now carries, and a post type "down" is `type IS NOT` (Turing boosts, it never
-sinks). `POST viglet-dumont/v1/tuning/boosts` calls it, and `TuningTest` covers the
-payloads. Live, Turing answers 500: saving a ranking expression over the API key fails
-in its auditor (Turing T1126).
+expressions (named "WordPress: …"). Newer first is Turing's recency form
+(`publication_date` = `asc`). Sticky posts first matches the `sticky` field every
+document now carries. A post type "down" is `type IS NOT`, since Turing boosts and never
+sinks. `POST viglet-dumont/v1/tuning/boosts` calls it, and `TuningTest` covers the
+payloads. Saving a ranking expression over the API key used to answer 500 in Turing's
+auditor. Turing T1126 shipped: an API-key request now audits as the key's owner.
 
 **What it should do.**
-- Once T1126 ships, a Boosts card on the screen: "Newer first", "Sticky posts first", and
-  per post type Up, Normal or Down, saved together, read back from `boosts()`.
+- Check `set_boosts()` live against the stack, then add a Boosts card to the screen:
+  "Newer first", "Sticky posts first", and Up, Normal or Down per post type, saved
+  together and read back from `boosts()`.
 - The Try it preview shows the change, as it does for synonyms.
 - Specs: newer first puts Workshop on testing (10 January) ahead of Workshop on search
   (1 January) for `workshop`; sticky moves a seeded sticky post up; switching both off
@@ -435,38 +443,46 @@ in its auditor (Turing T1126).
 ### XLIX.44 Search abandonment and GA4's recommended events (D188)
 
 **What happens.** The search block and the instant search report searches and result
-clicks (D176). They go to Google Analytics as the SDK's `turing_search` and
-`turing_search_result_click`. GA4's own site-search reports read `search` and
-`select_content`, so they stay empty until the site owner writes custom definitions. No
-event says "searched, saw results, opened none and left", which is the abandonment the
-design asked for. The SDK has no canonical search abandonment event, and its GA sink
-sends only the `turing_*` names (Turing T1130).
+clicks (D176) through workarounds in `src/public/search.js`. Clicks go out through a
+hand `fetchRaw` with `keepalive`. Search events are re-emitted by `trackSearch()`,
+because the controller's analytics option wrote a cookie before consent. GA gets only
+the `turing_*` names, and no event says "searched and left". Turing has shipped all of
+it. The SDK's clicks are `keepalive` with no CSRF prime (T1128). The controller takes a
+`consent` function and `sessionCookie: false`, and skips instant-mode searches (T1129).
+`googleAnalyticsSink({ recommended: true })` also sends `search` and `select_content`,
+and the controller's opt-in abandonment emits `turing_search_abandoned` (T1130).
 
 **What it should do.**
-- Once T1130 lands, turn on the sink's recommended mode, so `search { search_term }` and
-  `select_content` reach GA4 beside the canonical events.
-- Arm the SDK's abandonment helper after each search the visitor settled on, in both the
-  block and the overlay. Disarm it on a result click, a new search or a facet change. On
-  tab hide or page leave it emits `turing_search_abandoned { query, results }` with no
-  personal data, gated by `trackingAllowed()` like the rest.
-- Specs in `tests/e2e/site/analytics.spec.mjs`:
+- Hand the analytics bus to the search controllers, with `consent: trackingAllowed`,
+  `sessionCookie: false` and abandonment on. Then drop `trackSearch()` and the hand click
+  call for the SDK's `trackResultClick`.
+- Turn on the sink's recommended mode.
+- Specs in `tests/e2e/site/analytics.spec.mjs`, kept as they are, plus:
   - leaving after a search sends one abandonment;
   - a result click sends none;
-  - without statistics consent, nothing is sent;
   - the stubbed gtag receives `search` with `search_term`.
 
 ### XLIX.46 Partitioned API keys in place of client-side site filters (D190)
 
 **What happens.** Several WordPress sites share one SN site, told apart by `site_key`
-(D148). The plugin keeps them apart itself: every visitor search sends
-`fq=site_key:<key>`, `Viglet_Dumont_Indexer::delete_all` pages through a filtered search
-and deletes one id at a time, D149's orphan sweep lists ids the same way, and
-`Viglet_Dumont_Related::neighbours()` asks for 50 similar documents and drops the other
-sites' ones. The stored API key is not bound to the site key, so it can read and delete
-every other site's documents.
+(D148). The plugin keeps them apart itself:
+- every visitor search sends `fq=site_key:<key>`;
+- `Viglet_Dumont_Indexer::delete_all` pages through a filtered search and deletes one id
+  at a time, and D149's orphan sweep lists ids the same way;
+- `Viglet_Dumont_Related::neighbours()` asks for 50 similar documents and drops the other
+  sites' ones.
 
-**What it should do.** Once Turing ships T1133 (an API key bound to a partition field and value, enforced by the server on every call):
-- Provisioning creates or asks for one partitioned key per site key, and stores it in place of the shared one.
-- Delete-all becomes one field delete (Turing T1112), and the sweep and Related drop their client-side filtering (Turing T1132).
-- The visitor-side `fq=site_key:` stays only where a call is keyless; a keyed call relies on the partition.
-- Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or deletes a site B document.
+The stored API key is not bound to the site key, so it can read and delete every other
+site's documents. Turing has shipped what replaces this. An API key can be bound to a
+partition: its searches see only that partition, its imports are stamped and refused
+outside it, and endpoints that do not enforce partitions refuse it (T1133). An import
+DELETE can name shared fields (T1112). `/search/similar` takes `fq[]` (T1132).
+
+**What it should do.**
+- Provisioning creates or asks for one partitioned key per site key, and stores it in
+  place of the shared one. Health reports an endpoint the key is refused at.
+- Delete-all becomes one field delete. The sweep and Related drop their client-side
+  filtering, and Related asks for exactly the count it shows.
+- The visitor-side `fq=site_key:` stays only where a call is keyless.
+- Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
+  deletes a site B document.
