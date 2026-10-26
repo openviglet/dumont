@@ -225,24 +225,24 @@ catalog copilot is what is left.
 
 ### XLIX.26 A live-LLM browser suite for the AI features (D174)
 
-**What happens.** The live-LLM harness landed (`playwright.ai.config.mjs`, `npm run
-test:e2e:ai`, `tests/e2e/ai/`): a seed of known facts in English and Portuguese and a
-prompt-injection post, deleted again by the teardown; chat specs for grounding, pt_BR,
-injection, no invented figure and a p95 time budget; answer-panel specs; answers saved
-to `tests/e2e/artifacts/ai/answers.json`. On the local stack every spec still skips: the
-SN site has no GenAI binding. Turing has shipped both fixes the suite waited on: a
-manifest `genAi` block now creates the site's GenAI binding (T1116), and every SN call,
-chat included, records its site in the cost ledger, which `cost/summary?site=` narrows
-to (T1127).
+**What happens.** The live-LLM suite runs (`npm run test:e2e:ai`, `tests/e2e/ai/`): a
+seed of known facts in English and Portuguese and a prompt-injection post, deleted again
+by the teardown; chat, answer, natural-language filter (D170) and excerpt-draft (D171)
+specs; answers saved to `tests/e2e/artifacts/ai/answers.json`. Each run reads Turing's
+`cost/summary?site=` before and after (`ai/cost.mjs`), writes `cost.json`, prints the
+tokens and dollars, and fails over `AI_TOKEN_BUDGET` or `AI_COST_BUDGET`. Dollars read
+$0 on the stack until Turing prices its default model (T1144), so the token budget is
+the one that holds today.
+
+On the stack started with `OPENAI_API_KEY` the chat and answer specs now run, against
+Turing's Default Agent, and fail: "the information is not available in the website's
+content". Retrieval does not find the seeded posts, because the SN site has no GenAI
+binding of its own.
 
 **What it should do.**
 - Once the plugin declares the site's GenAI in its manifest (D186), the chat and answer
-  specs run and pass on the stack started with `OPENAI_API_KEY`.
-- Each run reads `/api/v2/llm/cost/summary?site=<SN site>` before and after, reports
-  tokens and dollars beside the p50/p95 times, and fails above a cost budget set in the
-  config.
-- Natural-language filters (D170), the shop copilot (D173) and the site assistant (D175)
-  join the suite as each lands.
+  specs pass on that stack.
+- The shop copilot (D173) and the site assistant (D175) join the suite as each lands.
 
 ### XLIX.27 A site assistant block on Turing's chat (D175)
 
