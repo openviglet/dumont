@@ -32,3 +32,4 @@
 
 ## Track S — The WordPress connector plugin
 
+- ⏸ **D182** (deps: D161 ✅) **No CI job opens the plugin's screens: the browser suite runs only on a laptop** — set aside (Waits for the owner to push and review the first run's baselines.): The CI job exists but has never run, so no linux baselines exist. → §XLIX.38

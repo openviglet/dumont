@@ -640,3 +640,4 @@
 - **D170** — With Suggest filters on, a sentence typed into the search block offers Turing's grounded nl-filters reading as chips; one click applies a filter and drops its words from the query.
 - **D173 (fields, facets and product cards)** — Products send price, stock, SKU, rating and attributes; the block filters them by price range, stock and color, and a product card shows its price and adds it to the cart.
 - **D178 (screen, synonyms and widget)** — Search insights lists a period's top searches with CTR, searches that found nothing and results never opened, with Write about this and Add a synonym, and a dashboard widget shows the week.
+- **D182 (CI job and Linux launcher)** — The WordPress workflow gains an e2e job that starts WordPress and Turing with bin/run-docker.sh, logs the Turing it ran against, runs the browser suite and keeps its artifacts.

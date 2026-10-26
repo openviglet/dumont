@@ -23,6 +23,11 @@ on:
       - wordpress/**
       - .github/workflows/wordpress-plugin.yml
   workflow_dispatch:
+    inputs:
+      turing_image:
+        description: The Turing image the browser suite runs against
+        required: false
+        default: ghcr.io/openviglet/turing-ce:latest
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -70,6 +75,51 @@ jobs:
           npm ci
           npm run lint:js
           npm run build
+
+  # D182: the browser suite (npm run test:e2e) against a real WordPress and Turing, so a
+  # regression in the block, an admin screen, a theme or the pt_BR strings fails here rather
+  # than on the next laptop run. The Turing it ran against is logged from /api/discovery; a
+  # dispatch can name another image. Baselines are per platform: a screenshot with no linux
+  # baseline yet is written, not failed, and uploaded with the artifacts to be reviewed and
+  # committed under tests/e2e/snapshots/linux/.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TURING_IMAGE: ${{ inputs.turing_image || 'ghcr.io/openviglet/turing-ce:latest' }}
+      E2E_CHANNEL: chromium
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: wordpress/package-lock.json
+
+      - name: Install, and the browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Start WordPress and Turing
+        run: sh bin/run-docker.sh
+
+      - name: The Turing under test
+        run: curl -sf "http://localhost:2700/api/discovery"
+
+      - name: Browser suite
+        run: npx playwright test --update-snapshots=missing
+
+      - name: Keep the screens, the report and any new baseline
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            wordpress/tests/e2e/artifacts/
+            wordpress/tests/e2e/snapshots/linux/
+          if-no-files-found: ignore
 
   release:
     if: startsWith(github.ref, 'refs/tags/wordpress-v')

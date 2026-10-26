@@ -125,7 +125,6 @@ This track has no remaining pending tasks.
 - 📋 **D175** (deps: D169 ✅, D174 🛠) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 🛠 **D178** (deps: D176 ✅) **A site owner cannot see top searches, zero-result queries or clicks from wp-admin** — The screen and widget shipped; the period's AI summary is missing, and nothing says when Turing's metrics are off. → §XLIX.32
 - 📋 **D179** (deps: D166 ✅, D170 ✅, D171 🛠, D172 ✅, D175, D177 ✅, D178 🛠) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
-- 📋 **D182** (deps: D161 ✅) **No CI job opens the plugin's screens: the browser suite runs only on a laptop** — A regression in the block, an admin screen, a theme or the pt_BR strings lands unseen until someone runs D161's suite by hand. → §XLIX.38
 - 📋 **D183** (deps: D163 ✅) **The search block guesses a wildcard into instant searches, since Turing matches whole words only** — A phrase or field query typed into the box gets a stray asterisk, and wildcard terms lose stemming and highlight weight. → §XLIX.39
 - 📋 **D186** (deps: D169 ✅) **Provisioning cannot turn a site's generative AI on, so answers stay off until a console visit** — A fresh install has chat but no cited answers, and the admin must find a setting in another product. → §XLIX.42
 - 📋 **D187** (deps: D172 ✅) **Search tuning has no boosts: newer, sticky or chosen post types cannot be ranked up from wp-admin** — An events or news site cannot put recent posts first without Turing's console. → §XLIX.43
@@ -176,6 +175,12 @@ This track has no remaining pending tasks.
 - **The period's AI summary shows, and metrics turned off are explained** A live-LLM
   spec reads a cached summary of the period from Turing's summary endpoint; with metrics
   off in Turing, the screen says so instead of showing an empty period.
+
+## Done when — D182
+
+- **The e2e job passes on a push, with linux baselines committed** A run of the job on
+  GitHub passes, and the tests/e2e/snapshots/linux/ set it wrote on its first run was
+  reviewed by eye and committed, so a later visual change fails the job.
 
 ## Non-goals (do NOT add as tasks)
 
