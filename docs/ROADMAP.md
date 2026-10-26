@@ -120,7 +120,7 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 🛠 **D171** (deps: D169 ✅) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft shipped; audience fit is still missing: no per-persona content-fit score shows for a post on a site whose agent has personas. → §XLIX.30
-- 🛠 **D173** (deps: D162 ✅, D164 ✅) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — A shop cannot filter by price or stock, and Turing's catalog copilot and add-to-cart action go unused. → §XLIX.34
+- ⏳ **D173** (deps: D162 ✅, D164 ✅) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — Result cards still show no price or Add to cart, and the catalog copilot with its add_to_cart action has no block. → §XLIX.34
 - ⏳ **D174** (deps: D169 ✅) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Its chat and answer checks and the cost report can now run: Turing turns a site's GenAI on (T1116) and records its LLM cost (T1127). → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174 ⏳) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D178** (deps: D176 ✅) **A site owner cannot see top searches, zero-result queries or clicks from wp-admin** — The content gaps visitors reveal every day stay invisible, so nobody writes what they were looking for. → §XLIX.32
@@ -157,6 +157,16 @@ This track has no remaining pending tasks.
 - **Each run reports its tokens and dollars and holds a budget** The suite reads
   Turing's cost ledger before and after, reports tokens and dollars with p50 and p95
   time, and fails above a cost budget set in the config.
+
+## Done when — D173
+
+- **A product card shows its price and adds it to the cart** A woo-project spec searches
+  the seeded jackets, reads the sale price on Rain jacket's card, presses Add to cart,
+  and finds the product in WooCommerce's cart through the Store API.
+- **The catalog copilot block puts a product it found in the cart** A live-LLM spec asks
+  the copilot block for a jacket under a price, and its add_to_cart action leaves that
+  product in the cart without a reload; skipped with the reason while D169 reports the
+  copilot off.
 
 ## Non-goals (do NOT add as tasks)
 
