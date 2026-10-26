@@ -639,4 +639,4 @@
 - **D189** — Health's event times and last run are formatted on the server in the site's formats and time zone and the reader's language.
 - **D170** — With Suggest filters on, a sentence typed into the search block offers Turing's grounded nl-filters reading as chips; one click applies a filter and drops its words from the query.
 - **D173 (fields, facets and product cards)** — Products send price, stock, SKU, rating and attributes; the block filters them by price range, stock and color, and a product card shows its price and adds it to the cart.
-- **D178 (insights screen)** — A Search insights screen lists a period's top searches with clicks and CTR, searches that found nothing and results never opened, each gap with Write about this.
+- **D178 (screen, synonyms and widget)** — Search insights lists a period's top searches with CTR, searches that found nothing and results never opened, with Write about this and Add a synonym, and a dashboard widget shows the week.

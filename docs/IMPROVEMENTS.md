@@ -273,21 +273,20 @@ slots and host actions). A WordPress visitor has no way to reach it.
 **What happens.** "Search insights" (`assets/admin/insights.js`, `GET
 viglet-dumont/v1/insights?period=`, `Viglet_Dumont_Insights`) shows, for the last 24
 hours, 7 days, 30 days or all time, the top searches with clicks and click-through, the
-searches that found nothing (with when they were last made) and the ones that found
-results nobody opened, from Turing's `metrics/clicks` and `metrics/failed-searches`. A
-gap row offers "Write about this" (a new draft titled with the search). Searches made
-while typing end in the block's `*` and are left out until a search can keep itself out
-of the metrics (Turing T1145).
+searches that found nothing and the ones that found results nobody opened, from Turing's
+`metrics/clicks` and `metrics/failed-searches`. A gap row offers "Write about this" (a
+new draft titled with the search) and "Add a synonym" (Tuning, D172, opened with
+`?synonym=`). A dashboard widget shows the week's top five and no-result five, cached
+for ten minutes. Searches made while typing end in the block's `*` and are left out
+until a search can keep itself out of the metrics (Turing T1145).
 
 **What it should do next.**
-- "Add a synonym" on a gap row, opening Tuning (D172) with the term filled in.
-- A dashboard widget with the week's top five and zero-result five.
 - An AI summary of the period through Turing's summary endpoint, cached and regenerable
-  like the excerpt draft (D171); hidden when D169 says off.
-- A trend per term and the live count (`metrics/live`), if they read better than the
-  tables alone.
+  like the excerpt draft (D171), with a live-LLM spec.
 - With metrics off, Turing's `/click` answers 204 with `X-Turing-Metrics: disabled`: the
-  screen should say metrics are off rather than show an empty period.
+  screen and the widget should say metrics are off rather than show an empty period.
+- A trend per term and the live count (`metrics/live`), only if they read better than the
+  tables alone.
 
 ### XLIX.35 A showcase site, admin tab and recorded tour (D179)
 
