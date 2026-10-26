@@ -119,10 +119,9 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 🛠 **D164** (deps: D160 ✅) **Facets are flat checkbox lists that vanish once used, crowd phones, and cannot filter a range** — Date and number fields still filter by exact value only: no range facets (last 7 days, 20 to 50) declared as Turing custom facets. → §XLIX.20
-- 📋 **D170** (deps: D164 🛠, D165 ✅) **A sentence typed into search is read as keywords, never as the type and date filters it names** — "Seminars about php from last year" returns everything mentioning those words instead of last year's seminars. → §XLIX.29
+- 📋 **D170** (deps: D164 ✅, D165 ✅) **A sentence typed into search is read as keywords, never as the type and date filters it names** — "Seminars about php from last year" returns everything mentioning those words instead of last year's seminars. → §XLIX.29
 - ⏳ **D171** (deps: D169 ✅) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft can now be built, since Turing's summary endpoint takes Key calls (T1124); the persona content-fit score is still missing. → §XLIX.30
-- 📋 **D173** (deps: D162 ✅, D164 🛠) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — A shop cannot filter by price or stock, and Turing's catalog copilot and add-to-cart action go unused. → §XLIX.34
+- 📋 **D173** (deps: D162 ✅, D164 ✅) **WooCommerce products index as plain posts, with no price, stock or attribute facets and no shopping copilot** — A shop cannot filter by price or stock, and Turing's catalog copilot and add-to-cart action go unused. → §XLIX.34
 - ⏳ **D174** (deps: D169 ✅) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Its chat and answer checks and the cost report can now run: Turing turns a site's GenAI on (T1116) and records its LLM cost (T1127). → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174 ⏳) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D178** (deps: D176 ✅) **A site owner cannot see top searches, zero-result queries or clicks from wp-admin** — The content gaps visitors reveal every day stay invisible, so nobody writes what they were looking for. → §XLIX.32
@@ -133,18 +132,13 @@ This track has no remaining pending tasks.
 - 📋 **D187** (deps: D172 ✅) **Search tuning has no boosts: newer, sticky or chosen post types cannot be ranked up from wp-admin** — An events or news site cannot put recent posts first without Turing's console. → §XLIX.43
 - 📋 **D188** (deps: D176 ✅) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
 - 📋 **D190** (deps: D148 ✅, D177 ✅) **Each site of a shared SN site is kept apart by the plugin's own filters, and its key can still reach the other sites** — A filter the plugin forgets leaks another site's posts, and delete-all and Related page and over-fetch to filter by hand. → §XLIX.46
+- 📋 **D191** (deps: —) **The default e2e suite fails on a stack started with an OpenAI key, since its AI-off answer spec finds AI on** — The spec inherits the site's AI state from the developer's shell and the Turing volume, so a green run depends on an unset key. → §XLIX.47
 
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
-
-## Done when — D164
-
-- **A mapped DATE or INT field offers range facets in the block** The manifest the
-  plugin posts declares Turing custom facets for those fields, the block lists their
-  ranges (last 7 days, this year; 0-20, 20-50), and a spec filters by one.
 
 ## Done when — D171
 

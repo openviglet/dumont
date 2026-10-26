@@ -180,26 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.20 Facet groups, a mobile drawer and range facets (D164)
-
-**What happens.** Facet groups, the kept filtered facet and the phone drawer landed
-(`facets()` in `src/public/search-block.js` rebuilds a filtered facet from the last
-answer that described it, until T1115 ships). Date and number fields can still only be
-filtered by exact value: a visitor cannot ask for "last month" or "20 to 50".
-
-**What it should do.**
-- Range facets for the mapped DATE and INT/FLOAT fields (last 7 days, this year; 0-20,
-  20-50), declared as Turing custom facets in the manifest the plugin posts. The shape
-  is `customFacets: [{field, name, label, items: [{label, rangeStart, rangeEnd}]}]`, dates
-  with `rangeStartDate: "NOW-7DAYS"`. Turing T1122 shipped: stored bounds of integer
-  facets no longer break the range parse, so a manifest-provisioned range facet now
-  counts and reaches the answer. T1135 also lets the manifest set a facet's behaviour.
-- The Fields screen lets a mapped DATE or number field opt into ranges, with editable
-  bounds for numbers and a fixed set for dates.
-- The block lists a range facet like any other group; its filter query is the range Turing
-  answers with, and the applied chip reads the range's label.
-- A spec that filters by a range and removes it.
-
 ### XLIX.29 Natural-language filters offered as chips (D170)
 
 **What happens.** A visitor types "seminars about php from last year", and search treats
@@ -486,3 +466,21 @@ DELETE can name shared fields (T1112). `/search/similar` takes `fq[]` (T1132).
 - The visitor-side `fq=site_key:` stays only where a call is keyless.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
+
+### XLIX.47 The AI-off answer spec depends on the stack's AI state (D191)
+
+**What happens.** `site/answer.spec.mjs` "a site whose AI is off (this stack's real
+Turing)" assumes the Sample site answers with "AI is not enabled for site". The stack's
+`docker-compose.yml` passes `OPENAI_API_KEY` through, and a Turing boot that finds no
+LLM instance creates one with a default agent, so on any machine whose shell carries the
+key (the same one `run-commit.cmd` needs) the panel shows and the default suite fails.
+The state persists in the `turing` volume: unsetting the key later does not turn it off.
+
+**What it should do.**
+- The default suite pins the state it asserts instead of inheriting it: either the spec
+  routes the answer request to Turing's own "not enabled" event, as the other answer specs
+  route theirs, or global-setup switches the site's generative AI off (and the live-LLM
+  suite, `playwright.ai.config.mjs`, switches it back on for itself).
+- Prefer the route: it keeps the default suite independent of Turing's AI settings, which
+  D186 is about to let the manifest change.
+- Done when `npm run test:e2e` passes on a stack started with `OPENAI_API_KEY` set.

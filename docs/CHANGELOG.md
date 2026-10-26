@@ -621,7 +621,7 @@
 - **D161** — Site specs run under classic and third-party themes, pt-br fails on English leaks, a multisite network checks per-site search; CI moved to D182 (design §XLIX.17 recorded in `wordpress/README.md`).
 - **D162** — Results are cards (type, locale date, address, marked snippet, image), with skeleton, empty-with-latest-posts and retry-or-WordPress error states.
 - **D163** — The search box is a WAI-ARIA combobox with instant prefix results, a clear button, focus kept in the box and removable recent searches, all keyboard-tested.
-- **D164 (groups, kept filters, phone drawer)** — Facets are collapsible groups with an applied-count badge and Show more; a filtered facet stays with its other values; phones get a Filters drawer.
+- **D164** — A mapped date or number field can offer range facets: Fields opts it in, the manifest declares a Turing custom facet, and the block filters by range with the range's label on the chip.
 - **D165** — The URL holds query, filters, page (pg) and sort, Back and reload restore them, a sort and page-size setting exist, and refined URLs are noindex.
 - **D167** — Ctrl/Cmd+K and the theme's Search block open an instant-search dialog with keyboard-chosen results; Enter goes to the full search page, a setting or found automatically.
 - **D168** — The block sets filter place, list or grid, result parts and a style, and the editor previews Turing's real answer through the block's own markup; inner blocks moved to D185.
