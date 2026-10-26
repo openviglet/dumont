@@ -270,28 +270,24 @@ slots and host actions). A WordPress visitor has no way to reach it.
 
 ### XLIX.32 A search insights screen in wp-admin (D178)
 
-**What happens.** A site owner cannot see what visitors search for, what they fail to
-find, or what they click. Turing keeps the metrics (top terms by period, live accesses,
-and the clicks D176 reports), but the plugin reads none of them.
+**What happens.** "Search insights" (`assets/admin/insights.js`, `GET
+viglet-dumont/v1/insights?period=`, `Viglet_Dumont_Insights`) shows, for the last 24
+hours, 7 days, 30 days or all time, the top searches with clicks and click-through, the
+searches that found nothing (with when they were last made) and the ones that found
+results nobody opened, from Turing's `metrics/clicks` and `metrics/failed-searches`. A
+gap row offers "Write about this" (a new draft titled with the search). Searches made
+while typing end in the block's `*` and are left out until a search can keep itself out
+of the metrics (Turing T1145).
 
-**What it should do.** A "Search insights" admin screen in the plugin:
-- Top terms today, this week, this month and all time, with counts and CTR.
-- Zero-result queries, each with "Add a synonym" (D172) and "Write about this" (a new
-  draft titled with the query): the content gaps a site owner can act on.
-- A trend sparkline per term, and the live count.
-- An AI summary of the period through Turing's summary endpoint, cached and regenerable
-  as Dumont's own insights page is. Hidden when D169 says off.
+**What it should do next.**
+- "Add a synonym" on a gap row, opening Tuning (D172) with the term filled in.
 - A dashboard widget with the week's top five and zero-result five.
-- Read through the plugin's REST routes with the stored key, capability
-  `manage_options`.
-- Specs: seeded searches and clicks appear in the tables; an empty site shows an empty
-  state, not zeros.
-
-Everything it reads is now REST in Turing. Failed searches and content gaps take a
-from/to/period/rows window (T1119). `GET /api/sn/{siteId}/metrics/clicks` reports
-searches, clicks, CTR and mean clicked position per term, plus the terms found but never
-opened (T1131). The SDK reads that as `fetchClickThrough`. When metrics are off,
-`/click` answers 204 with `X-Turing-Metrics: disabled`, which the screen should explain.
+- An AI summary of the period through Turing's summary endpoint, cached and regenerable
+  like the excerpt draft (D171); hidden when D169 says off.
+- A trend per term and the live count (`metrics/live`), if they read better than the
+  tables alone.
+- With metrics off, Turing's `/click` answers 204 with `X-Turing-Metrics: disabled`: the
+  screen should say metrics are off rather than show an empty period.
 
 ### XLIX.35 A showcase site, admin tab and recorded tour (D179)
 
