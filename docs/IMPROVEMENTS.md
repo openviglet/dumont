@@ -312,27 +312,6 @@ strings lands unseen until the next local run.
 - Speed budgets on a shared runner are noisier than on a laptop; keep them, and read a
   budget failure against the timing annotations before raising a bound.
 
-### XLIX.43 Boosts on the Search tuning screen (D187)
-
-**What happens.** The Search tuning screen (D172) has synonyms, promoted results,
-suggestions and a Try it preview, but no boosts. The server half is written:
-`Viglet_Dumont_Tuning::set_boosts()` and `boosts()` keep the plugin's ranking
-expressions (named "WordPress: …"). Newer first is Turing's recency form
-(`publication_date` = `asc`). Sticky posts first matches the `sticky` field every
-document now carries. A post type "down" is `type IS NOT`, since Turing boosts and never
-sinks. `POST viglet-dumont/v1/tuning/boosts` calls it, and `TuningTest` covers the
-payloads. Saving a ranking expression over the API key used to answer 500 in Turing's
-auditor. Turing T1126 shipped: an API-key request now audits as the key's owner.
-
-**What it should do.**
-- Check `set_boosts()` live against the stack, then add a Boosts card to the screen:
-  "Newer first", "Sticky posts first", and Up, Normal or Down per post type, saved
-  together and read back from `boosts()`.
-- The Try it preview shows the change, as it does for synonyms.
-- Specs: newer first puts Workshop on testing (10 January) ahead of Workshop on search
-  (1 January) for `workshop`; sticky moves a seeded sticky post up; switching both off
-  restores relevance order.
-
 ### XLIX.44 Search abandonment and GA4's recommended events (D188)
 
 **What happens.** The search block and the instant search report searches and result
