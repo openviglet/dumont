@@ -345,28 +345,27 @@ routes.
 
 ### XLIX.49 A branded demo storefront theme (D193)
 
-**What happens.** Every screen the plugin has ever been shown on is the stock Twenty
-Twenty-Five with a test seed. The blocks work, but the page around them reads as a
-fixture, and a marketing screenshot of it sells nothing.
+**What happens.** `run-docker.cmd demo` activates Tarnfell
+(`wordpress/demo/theme/tarnfell`, outside the plugin zip): an outdoor gear brand with
+its own palette and two OFL fonts bundled locally, a home whose hero search box opens
+the plugin's instant search, terrain tiles and the journal's latest posts, and a "Search
+the shop" page holding the search block with its parts (facets, grid, answer slot).
+`demo/setup.php` makes its pages and pretty permalinks; the browser suite's global setup
+puts the default stack back, so its specs and screenshots do not move. axe finds nothing
+on home and search at desktop width.
 
-**What it should do.**
-- A block theme under `wordpress/demo/theme/`, outside the plugin zip, for an original
-  fictional brand (an outdoor and sports gear store; name and logo chosen in the task and
-  checked against existing trademarks). Its own palette, type scale and fonts bundled
-  locally, no third-party CDN.
-- Templates built on the plugin's blocks, never around them: a home page whose hero is the
-  search block with typed suggestions, category tiles and featured products; a results
-  page from the search parts with facets, product cards and the answer slot; a product
-  page with Related and the shopping copilot; a journal (blog) template.
-- Responsive from 360 px, WCAG AA contrast, full keyboard path from search to cart.
-- `run-docker.cmd demo` activates it; the default stack keeps Twenty Twenty-Five, so the
-  existing screenshots and specs do not move.
-- Gate: `npm run e2e:look` captures home, results, product and journal at desktop and phone
-  width, before and after each change, and a Lighthouse run on home and results stays at
-  90 or above for performance and accessibility.
+The brand was checked by a web search only (no brand or store named Tarnfell); a
+registry search is still to do before any public use.
 
-**Not in it.** The catalog content and the guided layer are their own tasks: the theme
-must look right with any catalog.
+**What it should do next.**
+- A product page with Related and the shopping copilot, once WooCommerce is on in the
+  demo (the woo variant's seed is the model), and a journal post template.
+- The hero uses the search block itself once a box-only block goes to the search page
+  (D208).
+- Full keyboard path from search to cart; responsive from 360 px checked on product and
+  journal too.
+- Gate: Lighthouse on home and results at 90 or above for performance and accessibility,
+  and `e2e:look` captures of home, results, product and journal at desktop and phone width.
 
 ### XLIX.50 A realistic demo catalog and journal (D194)
 
@@ -640,3 +639,21 @@ Turing serves a per-term series and a live count (`metrics/live`) beside the per
 reports Search insights reads (D178). Open question: whether a sparkline per row or a
 live counter reads better than the tables alone; settle it with an `e2e:look` screenshot
 of each before building.
+
+### XLIX.64 A box-only search block goes to the search page (D208)
+
+**What happens.** Since D185 the Turing search block takes its parts as inner blocks, so
+a theme can place the search box alone, e.g. in a home page hero. But the box's form
+submits through `actions.submit` in `src/public/search-block.js`, which runs the search
+in place: with no results part in the block, Enter shows nothing. The demo storefront
+(D193) worked around it by putting the theme's own `core/search` in its hero, which the
+instant overlay takes over.
+
+**What it should do.**
+- A search block with no results part sends Enter (and a picked suggestion) to the full
+  search page, the one `Viglet_Dumont_Native_Search::search_page()` resolves for the
+  overlay, as `?q=`.
+- Its suggestions still show as the visitor types.
+- Spec: a page holding a box-only block navigates to the search page with the query, and
+  the results show there.
+- The demo hero (`demo/theme/tarnfell/templates/front-page.html`) then uses the block.
