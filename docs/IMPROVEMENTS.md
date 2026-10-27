@@ -533,29 +533,6 @@ compare table show text alone.
   D193).
 - A `demo` spec finds an image on every result of a curated search.
 
-### XLIX.75 The demo store on its own WordPress (D219)
-
-**What happens.** `run-docker.cmd demo` turns the one WordPress the browser tests use
-into the Tarnfell store (theme, WooCommerce, catalog and journal from `demo/seed/`), and
-the next `npm run test:e2e` turns it back. The demo and the tests share one database and
-one SN site in Turing, so the demo is never up while the tests run, and each side
-carries code to undo the other: `global-setup.mjs` drafts the demo's pages and deletes
-its journal and synonyms, `woo-seed.php` drafts the `TF-` products, `catalog.php` drafts
-the tests' jackets. Pages the demo indexed have turned up in the default suite's counts.
-
-**What it should do.**
-- A `demo` profile in `docker-compose.yml`, beside `multisite`: `wordpress-demo`,
-  `db-demo`, `cron-demo` and `cli-demo` with their own volumes and the same mounts, on
-  `WP_DEMO_PORT` (default 38082). The same Turing, with its own SN site (`SN_DEMO_SITE`,
-  default `Demo`) and API key, and the demo's origin in `TURING_ALLOWEDORIGINS`.
-- `run-docker.cmd demo` starts both, installs and provisions the demo WordPress on first
-  run as `bin/turing-setup.ps1` does for the default one, and seeds it, leaving the default
-  site untouched. `run-docker.cmd demo reset` drops only the demo's volumes.
-- README's "Try it in a real WordPress" describes both sites and their ports.
-
-**Done when** both answer at the same time on their two ports, and a search on one never
-returns a document of the other.
-
 ### XLIX.76 The demo specs on the demo's own WordPress (D220)
 
 **What happens.** The browser suite's `demo` project (`playwright.config.mjs`) is a
