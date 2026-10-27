@@ -139,7 +139,6 @@ This track has no remaining pending tasks.
 - 📋 **D202** (deps: D176 ✅) **The search block's empty state offers nothing to click, though the site knows what its visitors search for** — Chips built from real searches show the catalog's breadth in one glance, provided each one returns results. → §XLIX.58
 - 📋 **D203** (deps: D195, D198, D199, D200, D201, D202, D178 🛠) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
-- 🛠 **D205** (deps: D186 ✅) **The browser suite fails on a keyed stack after D186, and its new settings strings have no Portuguese** — A stale Search panel baseline turns every full run red, and Portuguese admins read D186's setting in English. → §XLIX.61
 
 ## Done when — D144
 

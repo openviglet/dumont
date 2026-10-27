@@ -680,11 +680,3 @@ to a prospect.
 
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
-
-### XLIX.61 The suite and translations D186 left behind (D205)
-
-**What happens.** After D186, `npm run test:e2e` fails on the Settings Search panel: its
-baseline predates the Generative AI section, so `settings-search.png` differs. The six
-strings D186 added have no pt_BR translation. (The AI-off answer spec is D191's.)
-
-**What it should do.** Refresh the baseline and translate the six strings.

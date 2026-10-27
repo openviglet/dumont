@@ -645,3 +645,4 @@
 - **D186** — A Generative AI setting (off by default) declares the manifest's genAi block, so provisioning turns a site's answers on; the Fields screen warns before it applies.
 - **D187** — The Search tuning screen sets newer first, sticky posts first and a post type up or down, and a post stuck from Quick Edit is reindexed so the sticky boost sees it.
 - **D191** — The AI-off answer spec replays Turing's own "not enabled" event, so the default suite no longer depends on whether the stack was started with an OpenAI key.
+- **D205** — The Settings Search panel baseline includes D186's Generative AI section, and its six strings read in Portuguese in a pt_BR admin.
