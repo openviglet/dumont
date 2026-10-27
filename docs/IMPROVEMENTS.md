@@ -336,8 +336,9 @@ are stamped and refused outside it (T1133). An import DELETE can name shared fie
 **What it should do.**
 - Provisioning creates or asks for one partitioned key per site key, stored in place of
   the shared one.
-- Delete-all becomes one field delete. The sweep and Related drop their client-side
-  filtering, and Related asks for exactly the count it shows.
+- The orphan sweep's filtered listing becomes Turing's filter (delete-all and Related
+  shipped).
+
 - The visitor-side `fq=site_key:` stays only where a call is keyless.
 - Turing answers a partitioned key 403 outside its enforced routes: today `nl-filters`
   (D170), `ai/capabilities`, chat and answer (D174, D175), `/api/v2/summary` and
