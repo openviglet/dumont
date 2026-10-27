@@ -517,24 +517,23 @@ off-vocabulary word sets none, and the keyless path still parses price and size.
 
 ### XLIX.56 Product comparison with a neutral summary (D200)
 
-**What happens.** WooCommerce has no comparison, and the plugin's product cards end at
-add-to-cart. A shopper with three candidates opens three tabs.
+**What happens.** On a WooCommerce site whose pages include one with the Compare
+products block (`viglet-dumont/compare`), each product card in the search results has a
+Compare checkbox (up to four, kept for the tab in sessionStorage), and two ticked show a
+"Compare N products" link to that page with `?compare=<ids>`. The block draws, on the
+server (`Viglet_Dumont_Compare::table()`), a table of what every product has (price,
+availability, weight, dimensions, rating, visible attributes), marking the rows where
+they differ. Spec: `woo/compare.spec.mjs`.
 
-**What it should do.**
-- A "Compare" checkbox on the plugin's product cards (results, Related, copilot lists),
-  up to four items, and a compare block rendering a table of the attributes the products
-  share, with differences highlighted.
+**What it should do next.**
+- Compare on the Related and copilot cards too.
 - Above the table, two to four sentences on what the items share and where they differ,
-  naming no winner. The facts (price gaps, which ones are waterproof, weights) are
-  computed in code and passed to Turing's `POST /api/v2/summary`; the model writes only
-  from them, and every number shown comes from the table, not the prose.
-- Without GenAI, the table alone, which is still the feature.
-- Labelled as AI, cached by the set of product ids and their modified dates.
-
-Seen in cursarei's `compareSummary`, which keeps the model to code-computed facts.
-
-**Gate.** A spec compares two seeded products whose differences are known, and asserts
-the summary names no attribute absent from the table and no number absent from it.
+  naming no winner. The facts are the table's, computed in code and passed to Turing's
+  `POST /api/v2/summary`; the model writes only from them, and every number shown comes
+  from the table. Labelled as AI, cached by the product ids and their modified dates;
+  without GenAI, the table alone. Seen in cursarei's `compareSummary`.
+- Gate: a live-LLM spec compares two seeded products and asserts the summary names no
+  attribute and no number absent from the table.
 
 ### XLIX.57 A kit builder from a described plan (D201)
 

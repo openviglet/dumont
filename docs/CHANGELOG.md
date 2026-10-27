@@ -651,3 +651,4 @@
 - **D192** — Every settings select keeps its text clear of WordPress's arrow, in English and pt_BR, and the content select lines up with Start Indexing.
 - **D193 (theme and its four templates)** — run-docker.cmd demo serves Tarnfell, an outdoor gear store theme with its own type and palette, a search-first home and the search block's results page.
 - **D211** — The admin build reads only assets/admin and stays flat across builds, and the zip script refuses a build folder holding anything nested.
+- **D200 (compare table)** — Product cards in the search results tick for comparison, and a Compare products block lays two to four side by side, marking where they differ.

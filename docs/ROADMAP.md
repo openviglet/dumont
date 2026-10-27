@@ -131,10 +131,10 @@ This track has no remaining pending tasks.
 - 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
 - 📋 **D198** (deps: D173 ✅, D175, D186 ✅, D194) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
 - 📋 **D199** (deps: D173 ✅, Turing: a query-to-facets call) **A shopper who types "light rain jacket under R$400, blue" gets keyword results, and the facets beside them stay unset** — People describe a need in a sentence; turning it into the site's own filters, and saying so, is search that understands. → §XLIX.55
-- 🛠 **D200** (deps: D173 ✅) **A shopper choosing between three jackets reads three product pages, and nothing lays them side by side** — Comparing is the step before buying, and a neutral summary of real differences is AI a shopper can trust. → §XLIX.56
+- ⏳ **D200** (deps: D173 ✅) **A shopper choosing between three jackets reads three product pages, and nothing lays them side by side** — The neutral AI summary above the table, and Compare on Related and copilot cards, are still to come. → §XLIX.56
 - 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
 - 📋 **D202** (deps: D176 ✅) **The search block's empty state offers nothing to click, though the site knows what its visitors search for** — Chips built from real searches show the catalog's breadth in one glance, provided each one returns results. → §XLIX.58
-- 📋 **D203** (deps: D195, D198, D199, D200, D201, D202, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
+- 📋 **D203** (deps: D195, D198, D199, D200 ⏳, D201, D202, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
 - 💭 **D207** (deps: D178 ✅) **Search insights shows no trend per search and no live count, only the period's totals** — A site owner cannot tell a search that is rising from one that is fading; worth building only if it reads better than the tables. → §XLIX.63
 - 📋 **D208** (deps: —) **A search block holding only its search box does nothing on submit, so it cannot send a visitor to the results page** — A hero search box is the most common place to put search, and the block's parts cannot fill it. → §XLIX.64
@@ -186,6 +186,11 @@ This track has no remaining pending tasks.
   axe finding nothing.
 - **Lighthouse holds 90 on home and results** A Lighthouse run on the demo home and
   results pages scores 90 or above for performance and accessibility.
+
+## Done when — D200
+
+- **The summary says nothing the table does not** A live-LLM spec compares two seeded
+  jackets and finds no attribute name and no number in the summary that the table lacks.
 
 ## Non-goals (do NOT add as tasks)
 
