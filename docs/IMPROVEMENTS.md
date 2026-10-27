@@ -261,8 +261,7 @@ out of the metrics; the `*` prefixes logged before it are left out.
 **What it should do next.**
 - An AI summary of the period through Turing's summary endpoint, cached and regenerable
   like the excerpt draft (D171), with a live-LLM spec.
-- With metrics off, Turing's `/click` answers 204 with `X-Turing-Metrics: disabled`: the
-  screen and the widget should say metrics are off rather than show an empty period.
+
 
 - A trend per term and the live count (`metrics/live`), only if they read better than the
   tables alone.
