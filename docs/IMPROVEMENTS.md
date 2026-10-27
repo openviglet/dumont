@@ -704,3 +704,26 @@ carry `metricsEnabled` in their body, and the vanilla SDK's report types have th
 - Keep the "metrics are off" notice; it now comes from the same answer as the numbers.
 - Against a Turing older than 2026.3.6 the field is absent: treat absent as unknown and
   fall back to the probe only there, or require 2026.3.6.
+
+### XLIX.72 Pass the site on every summary call (Turing T1150) (D216)
+
+**Where it comes from.** D174's live-LLM suite reads `GET
+/api/v2/llm/cost/summary?site=` before and after a run and fails over a token budget.
+The Search insights summary (D178) and the editor's excerpt draft (D171) call `POST
+/api/v2/summary` with `{cacheKey, data, systemPrompt}` and no site, so Turing recorded
+their spend unattributed: a run that made such a call printed "0 tokens, 0 calls" for
+the site.
+
+**What changed in Turing.** Since T1150 (Turing 2026.3.6) the summary body takes an
+optional `site`, the SN site name. The call's spend is recorded against it, so
+`cost/summary?site=` and the site's budget count it. A name that matches no site is
+refused with 400; a cached summary records nothing. The JS SDKs' `postSummary` has the
+field.
+
+**What to build.**
+- Every `POST /api/v2/summary` the plugin makes (insights summary, excerpt draft, any
+  later caller) sends the configured site name as `site`.
+- D174's cost check then sees those calls; drop any allowance the suite made for the
+  missing spend.
+- Against a Turing older than 2026.3.6 the field is ignored (unknown JSON property), so
+  sending it is safe either way.
