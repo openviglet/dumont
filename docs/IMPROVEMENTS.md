@@ -665,23 +665,3 @@ candidate searches and asked to return groups as JSON; the result is stored in a
 the chips read, never computed on page load. Without GenAI, exact matches only, as
 today. Spec: two seeded variants show as one chip under the more searched one, with the
 stored grouping fixed in the test.
-
-### XLIX.70 The Generative AI setting keeps the site's agent (Turing T1146) (D214)
-
-**Where it comes from.** D186 turns a site's GenAI on by declaring `"genAi": {"agentId":
-"default"}` in the manifest it posts. Until Turing T1146 the manifest had no way to say
-"GenAI on, keep the site's agent", so the Fields screen warns that saving replaces an
-agent an admin chose in the Turing console.
-
-**What changed in Turing.** Since T1146 (Turing 2026.3.6) an omitted `agentId` keeps the
-live binding's agent, and creates a binding on the Default AI Agent only when the site
-has none. `"default"` still rebinds. The Java SDK has `TurSNManifestGenAi.keepAgent()`.
-
-**What to build.**
-- The plugin's Generative AI setting declares `"genAi": {}` (or `keepAgent()`), so a
-  site already answering through a console-chosen agent keeps it.
-- Drop the "saving replaces an agent" warning from the Fields screen.
-- The plan check (`genAiToChange`) is then false for a site that already has a binding,
-  so the Health / `wp dumont ai status` output stops reporting a pending GenAI change.
-- Needs the turing-java-sdk release that carries T1146 if the plugin goes through the
-  SDK; the raw JSON body works against any 2026.3.6 server.

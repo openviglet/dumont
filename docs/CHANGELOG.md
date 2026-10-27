@@ -656,3 +656,4 @@
 - **D207** — Each top search on Search insights reads up, down, steady or new against the period before; the live count was left out, its last minute empty on most sites.
 - **D216** — Every summary the plugin asks Turing for names the SN site, so its spend counts in that site's cost summary and budget.
 - **D215** — Search insights reads whether Turing keeps metrics from the click report it already fetches; the probe click runs only against a Turing older than 2026.3.6.
+- **D214** — Turning GenAI on from the plugin keeps an agent chosen in Turing's console, and binds the Default AI Agent only to a site that has none.

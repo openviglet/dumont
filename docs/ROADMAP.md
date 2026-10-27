@@ -139,7 +139,6 @@ This track has no remaining pending tasks.
 - 📋 **D210** (deps: —) **A template that places the Related block still gets a second one appended after the content** — The append checks only the post's content for the block, so a theme that puts Related in its single template shows it twice. → §XLIX.66
 - 📋 **D212** (deps: D200 ✅) **Compare is offered only on search result cards, not on the Related or copilot product cards** — A shopper meets candidates on a product page and in the copilot too, and must go back to search to compare them. → §XLIX.68
 - 📋 **D213** (deps: D202 ✅) **Two spellings of one search show as two popular chips, a typo beside the word it meant** — "raincoat", "rain jacket" and "rain jaket" are one want, and three chips for it crowd out the other searches. → §XLIX.69
-- 📋 **D214** (deps: D186 ✅) **Turning GenAI on from the plugin rebinds the site to the Default AI Agent, replacing one chosen in Turing's console** — Turing's manifest can now keep the live agent, so the plugin need not overwrite an admin's choice or warn about it. → §XLIX.70
 
 ## Done when — D144
 
