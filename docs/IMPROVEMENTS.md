@@ -685,22 +685,3 @@ has none. `"default"` still rebinds. The Java SDK has `TurSNManifestGenAi.keepAg
   so the Health / `wp dumont ai status` output stops reporting a pending GenAI change.
 - Needs the turing-java-sdk release that carries T1146 if the plugin goes through the
   SDK; the raw JSON body works against any 2026.3.6 server.
-
-### XLIX.71 Read metricsEnabled from the reports, not a probe click (Turing T1149) (D215)
-
-**Where it comes from.** D178's Search insights screen must tell a site owner when
-Turing keeps no search metrics, or an empty period reads as a quiet site. Turing's
-reports did not say, so `Viglet_Dumont_API_Client::metrics_enabled()` posts a click with
-an empty `documentId` and reads the answer: 204 with `X-Turing-Metrics: disabled` when
-off, 400 when on. That depends on Turing checking the flag before validating the click.
-
-**What changed in Turing.** Since T1149 (Turing 2026.3.6) the three reports the screen
-already reads (`metrics/failed-searches`, `metrics/content-gaps`, `metrics/clicks`)
-carry `metricsEnabled` in their body, and the vanilla SDK's report types have the field.
-
-**What to build.**
-- Read `metricsEnabled` from the report the screen and the dashboard widget already
-  fetch, and drop the probe and its extra request.
-- Keep the "metrics are off" notice; it now comes from the same answer as the numbers.
-- Against a Turing older than 2026.3.6 the field is absent: treat absent as unknown and
-  fall back to the probe only there, or require 2026.3.6.

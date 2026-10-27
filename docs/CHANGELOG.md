@@ -655,3 +655,4 @@
 - **D202** — Popular chips honour a Never show list from Settings, and a site with no history shows the admin's own list, each chip still checked to find something.
 - **D207** — Each top search on Search insights reads up, down, steady or new against the period before; the live count was left out, its last minute empty on most sites.
 - **D216** — Every summary the plugin asks Turing for names the SN site, so its spend counts in that site's cost summary and budget.
+- **D215** — Search insights reads whether Turing keeps metrics from the click report it already fetches; the probe click runs only against a Turing older than 2026.3.6.
