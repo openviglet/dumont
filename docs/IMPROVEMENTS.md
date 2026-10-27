@@ -327,29 +327,25 @@ routes.
 
 ### XLIX.50 A realistic demo catalog and journal (D194)
 
-**What happens.** `woo-seed.php` exists to make specs pass: a few products, one
-attribute, no images worth looking at. On it, a facet has one value, a synonym has
-nothing to join and the copilot has nothing to recommend.
+**What happens.** `run-docker.cmd demo` and the browser suite's `demo` project load
+`demo/seed/catalog.php` (idempotent, SKUs `TF-…`): 132 products of the fictional
+Tarnfell brand in eight categories, with colour, material, use and size attributes,
+prices, sales, sold-out items and descriptions that state waterproofing, weight, warmth
+and care. Category, price, stock, colour, material and use are facets; four synonyms are
+set in Turing. The searches in `demo/seed/curated.json` each show one feature (a need in
+words, synonyms, a misspelling, a filter) and `tests/e2e/demo/curated.spec.mjs` checks
+each. The woo tests' seed drafts the demo's products and the demo drafts the tests'
+jackets, so neither sees the other.
 
-**What it should do.**
-- A demo seed under `wordpress/demo/seed/`, loaded by `run-docker.cmd demo` and idempotent
-  on re-run: about 150 products across six to eight categories, with variations, size,
-  colour, material and use attributes, prices, sale prices, stock levels including
-  out-of-stock, and long descriptions that answer real questions (waterproofing, weight,
-  care).
-- A journal of 20 to 30 buying guides and how-tos that name products, so one query returns
-  both a guide and the items it recommends, which is the case native search cannot serve.
-- Everything in English and pt_BR, so the language switch is part of the demo.
-- Images whose licence allows redistribution in the repo (public domain, or generated for
-  the brand), with the source of each recorded in a `CREDITS` file. No photo of a real
-  person or a real brand's product.
-- Seeded synonyms and a few curated queries that each show one feature: a misspelling, a
-  need described in words ("light jacket for rain"), a filter by attribute, a question the
-  answer slot replies to.
-- No reviews or ratings: invented ones would read as genuine.
-
-**Gate.** A spec asserts every curated query returns its intended first result on a
-fresh stack, so the demo cannot rot silently.
+**What it should do next.**
+- A journal of 20 to 30 buying guides and how-tos that name products, so one search returns
+  a guide and the items it recommends.
+- Everything in pt_BR as well, so the language switch is part of the demo.
+- Images whose licence allows redistribution (public domain, or made for the brand), each
+  source in a `CREDITS` file; no real person or real brand's product.
+- A curated question the answer slot replies to, checked by the live-LLM suite (D174).
+- A need phrased in words the catalog does not use ("boots for wet trails") finds nothing
+  with lexical search alone; see whether Turing's semantic retrieval closes it.
 
 ### XLIX.51 Native-versus-Turing compare and a guided layer (D195)
 

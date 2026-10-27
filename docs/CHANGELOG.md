@@ -659,3 +659,4 @@
 - **D214** — Turning GenAI on from the plugin keeps an agent chosen in Turing's console, and binds the Default AI Agent only to a site that has none.
 - **D208** — A search block holding only its box sends Enter or a picked suggestion to the full search page; the demo hero now uses it.
 - **D209** — A search page opened with a query gets its first results, facets and pages from the server, unrecorded in metrics, and shifts under 0.1 as its script answers.
+- **D194 (catalog and curated searches)** — The demo store holds 132 products with real facets and synonyms, and a spec checks each curated search still shows its feature.
