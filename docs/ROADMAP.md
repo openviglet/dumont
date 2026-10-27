@@ -119,8 +119,8 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 🛠 **D171** (deps: D169 ✅, Turing T1143) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft shipped; audience fit is still missing: no per-persona content-fit score shows for a post on a site whose agent has personas. → §XLIX.30
-- 🛠 **D174** (deps: D169 ✅, D186 ✅, Turing T1147) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Chat and answer checks find no source: Turing never embeds a site on the Default AI Agent, the binding D186 makes. → §XLIX.26
+- 🛠 **D171** (deps: D169 ✅) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft shipped; audience fit is still missing: no per-persona content-fit score shows for a post on a site whose agent has personas. → §XLIX.30
+- 🛠 **D174** (deps: D169 ✅, D186 ✅, Turing T1147, Turing T1150) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Chat and answer checks find no source: Turing never embeds a site on the Default AI Agent, the binding D186 makes. → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174 🛠) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D179** (deps: D166 ✅, D170 ✅, D171 🛠, D172 ✅, D175, D177 ✅, D178 ✅, D194) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 🛠 **D188** (deps: D176 ✅, Turing T1142) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44

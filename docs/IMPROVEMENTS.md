@@ -193,9 +193,11 @@ left: the local stack has no persona, so nothing tests it yet.
   persona with its reasons, from Turing's anonymous
   `/api/sn/{site}/persona/{personaId}/content-fit` (T634), called from the plugin's server
   like the excerpt. Hidden when the site has none.
-- List the site's audience personas through Turing T1143, which is filed because no read
-  answers it today: the plugin's key opens `/api/persona` and `/api/ai-agent`, but
-  resolving the site's effective agent there would copy Turing's logic into the plugin.
+- List the personas with Turing's `GET /api/sn/{site}/personas` (T1143, shipped): `id`,
+  `name`, `description`, ordered by name, an empty list when the site has no agent. Every
+  id it returns is one content-fit accepts, and both pass the site API-key gate and take
+  a partitioned key. Call it from PHP with the stored key, like content-fit; the SDK's
+  `fetchSitePersonas` is not on npm until Turing publishes (T1142).
 - The spec provisions one audience persona on the local Turing (`/api/persona`) in
   global-setup, so a site with personas exists to test against.
 - Specs: a persona score shows on a site with one; the action is hidden on a site with
@@ -208,22 +210,23 @@ seed of known facts in English and Portuguese and a prompt-injection post, delet
 by the teardown; chat, answer, natural-language filter (D170) and excerpt-draft (D171)
 specs; answers saved to `tests/e2e/artifacts/ai/answers.json`. Each run reads Turing's
 `cost/summary?site=` before and after (`ai/cost.mjs`), writes `cost.json`, prints the
-tokens and dollars, and fails over `AI_TOKEN_BUDGET` or `AI_COST_BUDGET`. Dollars read
-$0 on the stack although Turing holds the price (Turing T1144); the token budget is the
-one that holds until then.
+tokens and dollars, and fails over `AI_TOKEN_BUDGET` or `AI_COST_BUDGET`.
 
 With the site's GenAI declared in the manifest (D186) the chat and answer specs still
 fail: "the information is not available in the website's content", while search finds
 the seeded post. The binding D186 makes has no agent of its own (the Default AI Agent),
-and Turing's import embeds only a site whose own agent is RAG-enabled, so nothing
-reaches the vector store (Turing T1147).
+and Turing's import embeds only a site whose own agent is RAG-enabled (Turing T1147).
 
 **What it should do.**
-- Once Turing T1147 ships and the stack runs that image, the chat and answer specs pass.
+- Once Turing T1147 ships and the stack runs that image, reindex the seed (posts imported
+  before the fix hold no vectors) and the chat and answer specs pass.
+- The dollar budget holds since Turing T1144. `cost.mjs` also fails when the summary's
+  `unpricedRequests` is above zero: a $0 total is then no measure.
+- The excerpt draft's `/api/v2/summary` call is booked outside the site (Turing T1150);
+  pass the site once it accepts one.
 - The shop copilot (D173) and the site assistant (D175) join the suite as each lands.
-- The teardown's `wp dumont queue run` exits 1 when the cron worker holds the queue lock
-  ("Another worker is sending the queue"), failing a green run; it should wait for the
-  queue to empty instead.
+- The teardown's `wp dumont queue run` waits for the queue to empty instead of exiting 1
+  when the cron worker holds the lock.
 
 ### XLIX.27 A site assistant block on Turing's chat (D175)
 
@@ -309,7 +312,8 @@ and the controller's opt-in abandonment emits `turing_search_abandoned` (T1130).
 
 The published `@viglet/turing-sdk` is still 2026.3.9 (24 August), which has none of
 T1128-T1130; the plugin copies the SDK from `node_modules` (`bin/copy-sdk.mjs`), so this
-waits on a release (Turing T1142).
+waits on a release (Turing T1142, deferred until a maintainer publishes; its pnpm
+check:unreleased counts what waits).
 
 **What it should do.**
 - Hand the analytics bus to the search controllers, with `consent: trackingAllowed`,
