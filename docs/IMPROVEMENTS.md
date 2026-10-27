@@ -321,30 +321,25 @@ waits on a release (Turing T1142).
 ### XLIX.46 Partitioned API keys in place of client-side site filters (D190)
 
 **What happens.** Several WordPress sites share one SN site, told apart by `site_key`
-(D148). The plugin keeps them apart itself:
-- every visitor search sends `fq=site_key:<key>`;
-- `Viglet_Dumont_Indexer::delete_all` pages through a filtered search and deletes one id
-  at a time, and D149's orphan sweep lists ids the same way;
-- `Viglet_Dumont_Related::neighbours()` asks for 50 similar documents and drops the other
-  sites' ones.
+(D148). Delete-all is one delete by that key and Related filters by it in Turing (D190
+part), but the stored API key is not bound to the site key, so it can still read and
+delete every other site's documents. Visitor searches send `fq=site_key:<key>`, and
+D149's orphan sweep lists ids through a filtered search.
 
-The stored API key is not bound to the site key, so it can read and delete every other
-site's documents. Turing now binds a key to a partition: searches see only it, imports
-are stamped and refused outside it (T1133). An import DELETE can name shared fields
-(T1112); `/search/similar` takes `fq[]` (T1132).
+Turing binds a key to a partition (T1133, `POST /api/dev/token` with `partitionField`
+and `partitionValue`), and its guard answers such a key 403 everywhere except search,
+autocomplete, similar, clicks, the metrics reports and imports. The plugin also needs
+the manifest and plan (fields), `/api/sn` and the tuning APIs, `/api/v2/summary` and the
+AI probes, so a partitioned key cannot simply replace the shared one.
 
-**What it should do.**
-- Provisioning creates or asks for one partitioned key per site key, stored in place of
-  the shared one.
-- The orphan sweep's filtered listing becomes Turing's filter (delete-all and Related
-  shipped).
+**Open decision.** Either the network admin keeps the shared key (provisioning and
+tuning done once for the network) and each site holds only its partitioned key, or a
+shared site gives those screens up. Turing could instead enforce partitions on more
+routes.
 
-- The visitor-side `fq=site_key:` stays only where a call is keyless.
-- Turing answers a partitioned key 403 outside its enforced routes: today `nl-filters`
-  (D170), `ai/capabilities`, chat and answer (D174, D175), `/api/v2/summary` and
-  content-fit (D171; T1143 opens content-fit). Chat, answer and nl-filters wait on the
-  vector partition Turing deferred under T1133. Those features turn off on such a key,
-  Health names each, and none falls back to an unbound key.
+**Then.**
+- Each site stores its partitioned key; features its key cannot reach turn off, Health
+  names each, and none falls back to an unbound key.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
 
