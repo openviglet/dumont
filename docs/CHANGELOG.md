@@ -660,3 +660,4 @@
 - **D208** — A search block holding only its box sends Enter or a picked suggestion to the full search page; the demo hero now uses it.
 - **D209** — A search page opened with a query gets its first results, facets and pages from the server, unrecorded in metrics, and shifts under 0.1 as its script answers.
 - **D194** — The demo store's journal of 22 guides names its products, so one search returns a guide and then what it recommends, and seven curated searches are checked.
+- **D195 (compare page)** — The demo's Compare page runs one query through WordPress's own search and Turing's side by side, and a spec reads both columns.

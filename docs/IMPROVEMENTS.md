@@ -327,28 +327,25 @@ routes.
 
 ### XLIX.51 Native-versus-Turing compare and a guided layer (D195)
 
-**What happens.** On the demo, Turing's results simply appear. A visitor who has never
-used WordPress's built-in search has no baseline, so a typo forgiven or a guide found
-from a vague need looks ordinary.
+**What happens.** The demo theme's "Compare searches" page (`tarnfell/compare`,
+`demo/theme/tarnfell/inc/compare.php`, linked as Compare in the header) runs one query
+through WordPress's own search (a `WP_Query` with `s`, as a search page runs it) and
+through the plugin's search block, side by side. It offers the curated searches as
+links, each with the feature it shows. `curated.json` records what WordPress's column
+shows for each (`native`), and `tests/e2e/demo/compare.spec.mjs` reads both columns, so
+a lost difference fails. Measured: WordPress finds nothing for "raincoat", "rucksack"
+and "puffer"; for "light jacket for rain" and "waterproof jacket" it finds the same
+first result as Turing, and the page says so by showing it.
 
-**What it should do.**
-- A "Compare" page in the demo theme: one search box, two columns, WordPress's native
-  `WP_Query` search on the left and the plugin's Turing search on the right, run on the
-  same query and the same catalog. The native column is the real core search, never a
-  weakened copy, so the comparison is honest.
-- One-click example queries above the box, taken from the seed's curated list, each
-  labelled with the feature it shows (typo tolerance, synonyms, semantic match, facets,
-  cited answer); a question shows the AI answer native search has no slot for.
+**What it should do next.**
 - A guided layer on the storefront, off by default and on with `?tour=1` or a "How it
-  works" toggle: small numbered markers on the search box, facets, answer slot, Related
-  and copilot, each opening a two-line note on the Turing feature behind it and a link to
-  its docs page.
-- Both live in the demo theme, not the plugin: no production site ships a compare page.
-- Notes in English and pt_BR, keyboard reachable and dismissable, and they never cover the
+  works" toggle: numbered markers on the search box, facets, answer slot, Related and
+  copilot, each opening a two-line note on the Turing feature behind it and a link to its
+  docs page.
+- The notes in English and pt_BR, keyboard reachable and dismissable, never covering the
   element they describe at phone width.
-
-**Gate.** A spec runs every example query on both columns and asserts Turing's column
-holds the intended result while the native one is checked, not assumed, to differ.
+- The misspelling and the filter on the compare page too, once its Turing column shows
+  the correction and the facets.
 
 ### XLIX.52 A public hosted demo store (D196)
 
