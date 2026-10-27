@@ -263,9 +263,7 @@ out of the metrics; the `*` prefixes logged before it are left out.
   like the excerpt draft (D171), with a live-LLM spec.
 - With metrics off, Turing's `/click` answers 204 with `X-Turing-Metrics: disabled`: the
   screen and the widget should say metrics are off rather than show an empty period.
-- `admin/insights.spec.mjs` fails once the stack has logged 20 one-off failed searches
-  today: the list is capped and ordered by count, so the spec's fresh `zzinsight<ms>` term
-  is never shown. Clean its own term up, or look it up past the cap.
+
 - A trend per term and the live count (`metrics/live`), only if they read better than the
   tables alone.
 

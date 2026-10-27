@@ -646,3 +646,4 @@
 - **D187** — The Search tuning screen sets newer first, sticky posts first and a post type up or down, and a post stuck from Quick Edit is reindexed so the sticky boost sees it.
 - **D191** — The AI-off answer spec replays Turing's own "not enabled" event, so the default suite no longer depends on whether the stack was started with an OpenAI key.
 - **D205** — The Settings Search panel baseline includes D186's Generative AI section, and its six strings read in Portuguese in a pt_BR admin.
+- **D206** — The Search insights spec finds its failed search on a stack with a day of runs logged, searching one fixed term three times.
