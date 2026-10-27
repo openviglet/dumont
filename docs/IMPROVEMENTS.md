@@ -497,27 +497,6 @@ to a prospect.
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 
-### XLIX.77 Global setup refuses a WP_URL that is not the stack (D221)
-
-**What happens.** `global-setup.mjs` seeds the stack through `docker compose run cli
-wp`, which always reaches this compose project's WordPress, but the browser goes to
-`WP_URL`, defaulting to `http://localhost:8080`. A stack started with another `WP_PORT`
-(38081 here, while another project's WordPress held 8080) is seeded correctly and never
-visited: every spec loads the other site, and the failures read as plugin bugs (D210's
-run showed `/?p=9` redirecting to that site's image attachment, and all four Related
-cases red).
-
-**What it should do.** Global setup already runs WP-CLI before anything else. Read `wp
-option get siteurl` there and compare its origin with the projects' `baseURL`; on a
-mismatch, stop before seeding with one message that names both and says to set `WP_URL`
-(or start the stack on that port). The multisite pair does the same against `WP_MS_URL`
-when `E2E_MULTISITE` is set. Do not derive `baseURL` from the stack silently: the config
-is read before global setup runs, and a second source of the URL is the drift this
-removes.
-
-**Done when** `WP_URL` pointing at a WordPress that is not the stack fails global setup
-with that message, and a matching one runs as today.
-
 ### XLIX.78 No Related box in a generated excerpt (D222)
 
 **What happens.** With "Related after posts" covering products (the woo suite turns it
