@@ -207,26 +207,21 @@ left: the local stack has no persona, so nothing tests it yet.
 
 **What happens.** The live-LLM suite runs (`npm run test:e2e:ai`, `tests/e2e/ai/`): a
 seed of known facts in English and Portuguese and a prompt-injection post, deleted again
-by the teardown; chat, answer, natural-language filter (D170) and excerpt-draft (D171)
-specs; answers saved to `tests/e2e/artifacts/ai/answers.json`. Each run reads Turing's
-`cost/summary?site=` before and after (`ai/cost.mjs`), writes `cost.json`, prints the
-tokens and dollars, and fails over `AI_TOKEN_BUDGET` or `AI_COST_BUDGET`.
+by the teardown; chat, answer, natural-language filter (D170), excerpt-draft (D171),
+insights summary (D178) and compare summary (D200) specs; answers saved to
+`tests/e2e/artifacts/ai/answers.json`. Each run reads Turing's `cost/summary?site=`
+before and after (`ai/cost.mjs`), prints the tokens, dollars and calls, and fails over
+`AI_TOKEN_BUDGET` or `AI_COST_BUDGET`, or when any call went unpriced. Against Turing
+2026.3 with T1146-T1150, 11 of 12 pass: chat answers from the seeded posts, in
+Portuguese too, and resists the planted instruction; a run spends about 8,400 tokens and
+$0.0014.
 
-With the site's GenAI declared in the manifest (D186) the chat and answer specs still
-fail: "the information is not available in the website's content", while search finds
-the seeded post. The binding D186 makes has no agent of its own (the Default AI Agent),
-and Turing's import embeds only a site whose own agent is RAG-enabled (Turing T1147).
-
-**What it should do.**
-- Once Turing T1147 ships and the stack runs that image, reindex the seed (posts imported
-  before the fix hold no vectors) and the chat and answer specs pass.
-- The dollar budget holds since Turing T1144. `cost.mjs` also fails when the summary's
-  `unpricedRequests` is above zero: a $0 total is then no measure.
-- The excerpt draft's `/api/v2/summary` call is booked outside the site (Turing T1150);
-  pass the site once it accepts one.
+**What it should do next.**
+- The answer panel's spec fails on Turing's stream, not the plugin: each `token` event is
+  raw text, so a token's leading space is the one an SSE client strips, and the panel reads
+  "Applicationsfortheresearchgrantcloseon14March2026." (Turing T1153). Once that ships and
+  the stack runs the image, the spec passes unchanged.
 - The shop copilot (D173) and the site assistant (D175) join the suite as each lands.
-- The teardown's `wp dumont queue run` waits for the queue to empty instead of exiting 1
-  when the cron worker holds the lock.
 
 ### XLIX.27 A site assistant block on Turing's chat (D175)
 
