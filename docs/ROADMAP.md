@@ -141,7 +141,6 @@ This track has no remaining pending tasks.
 - 📋 **D213** (deps: D202 ✅) **Two spellings of one search show as two popular chips, a typo beside the word it meant** — "raincoat", "rain jacket" and "rain jaket" are one want, and three chips for it crowd out the other searches. → §XLIX.69
 - 📋 **D214** (deps: D186 ✅) **Turning GenAI on from the plugin rebinds the site to the Default AI Agent, replacing one chosen in Turing's console** — Turing's manifest can now keep the live agent, so the plugin need not overwrite an admin's choice or warn about it. → §XLIX.70
 - 📋 **D215** (deps: D178 ✅) **The plugin learns whether Turing records metrics by posting a fake click, an extra request on every insights load** — Turing's reports now carry metricsEnabled, so the probe and its reliance on Turing's validation order can go. → §XLIX.71
-- 📋 **D216** (deps: D178 ✅) **The plugin's summary calls name no site, so the site's Turing cost summary and budget miss their spend** — Turing's summary endpoint now takes a site, so the insights summary and excerpt draft can be billed to the site that asked. → §XLIX.72
 
 ## Done when — D144
 
