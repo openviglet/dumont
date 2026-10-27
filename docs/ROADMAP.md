@@ -130,9 +130,9 @@ This track has no remaining pending tasks.
 - 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
 - 📋 **D203** (deps: D195 ✅, D198, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
-- ⏳ **D217** (deps: D194 ✅, D219 ✅, D220 ✅) **The demo store's products and guides are English only, so a Portuguese search finds nothing** — Left: Portuguese curated searches and a pt_BR demo spec on the demo site, Tarnfell's own strings, and a capa de chuva synonym that also hits rain covers. → §XLIX.73
 - 📋 **D221** (deps: —) **The browser tests seed the stack over WP-CLI but browse WP_URL, so another site on that port fails every spec** — Nothing checks the two are one WordPress, and the failures read as plugin bugs rather than a wrong URL. → §XLIX.77
 - 📋 **D222** (deps: —) **A product's generated summary under its price carries the Related box's text when Related after covers products** — The excerpt is trimmed from the_content, which the append runs on, so the box's titles and dates read as the product's summary. → §XLIX.78
+- 📋 **D223** (deps: D217 ✅) **On a Portuguese demo the Tarnfell theme's own text stays English: menus, hero, footer, compare page and tour** — The theme has no text domain, so a Brazilian prospect reads a store whose catalog is Portuguese and whose frame is not. → §XLIX.79
 
 ## Done when — D144
 
@@ -162,11 +162,6 @@ This track has no remaining pending tasks.
   lists or deletes a site B document.
 - **Features Turing refuses on a partitioned key turn off and say so** Health names each
   one Turing answers 403 on such a key, and none falls back to an unbound key.
-
-## Done when — D217
-
-- **The catalog reads in Portuguese too** With the site in pt_BR, a curated search in
-  Portuguese finds its product, named and described in Portuguese.
 
 ## Non-goals (do NOT add as tasks)
 

@@ -497,24 +497,6 @@ to a prospect.
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 
-### XLIX.73 The demo catalog in Portuguese (D217)
-
-**What happens.** The demo storefront's catalog and journal (`demo/seed/catalog.php`,
-`demo/seed/journal.php`, D194) are English only. With the site switched to pt_BR, the
-theme and the plugin speak Portuguese while every product and guide stays in English,
-and a Portuguese search ("jaqueta impermeável") finds nothing.
-
-**What it should do.**
-- A Portuguese copy of each product name, short description and description, and of
-  each guide, written for Brazilian shoppers (litres, °C and grams stay; sizes stay).
-- Kept beside the English in the seed's own data, so one run seeds both. Either the site
-  in pt_BR seeds the Portuguese, or both are indexed with their locale and Turing's
-  `_setlocale` picks; choose whichever the SN site's locales already support (the plugin
-  indexes with the site's locale today).
-- Portuguese synonyms ("capa de chuva", "jaqueta impermeável"; "mochila", "cargueira").
-- Curated searches in Portuguese in `curated.json`, checked by a `demo` spec run with
-  the site in pt_BR.
-
 ### XLIX.77 Global setup refuses a WP_URL that is not the stack (D221)
 
 **What happens.** `global-setup.mjs` seeds the stack through `docker compose run cli
@@ -555,3 +537,27 @@ page spec: the summary under the price holds no "Related posts".
 
 **Done when** a product page with the setting on shows the Related box once, in the
 description, and the summary carries none of its text.
+
+### XLIX.79 The Tarnfell theme in Portuguese (D223)
+
+**What happens.** With `DEMO_LOCALE=pt_BR` (D217) the catalog, journal, facets,
+WooCommerce and the plugin speak Portuguese, but every word the Tarnfell theme writes
+itself stays English: the announcement bar, the header menu (Shop, Search, Journal,
+Compare), the front page's hero, terrain cards and section headings, the footer, the
+page titles and blog description `demo/setup.php` writes, the compare page's labels and
+"No results found." (`inc/compare.php`), and the tour's feature names. The theme has no
+text domain and no translation call at all: its block templates and parts are plain
+HTML.
+
+**What it should do.**
+- Move each template's and part's visible text into PHP patterns (`patterns/`) that
+  print it through `__()`/`esc_html_e()` under a `tarnfell` text domain, and reference the
+  patterns from the HTML templates, the way block themes translate.
+- `inc/compare.php` and the tour's script strings through the same domain (the tour via
+  `wp_set_script_translations` or localized data).
+- A `languages/tarnfell-pt_BR.po`/`.mo`, loaded with `load_theme_textdomain`.
+- `demo/setup.php` names its pages and the blog description in the site's language
+  (`pt_BR.php` already carries the catalog's copy; add the pages there).
+- The tour spec reads its expected feature names in the demo's locale instead of
+  skipping on pt_BR (`tests/e2e/demo/tour.spec.mjs`), and a `look` of the pt_BR home finds
+  no English string the `.po` translates.
