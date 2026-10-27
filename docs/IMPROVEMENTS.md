@@ -542,24 +542,6 @@ the same id check.
 **Gate.** Live-LLM specs on the demo seed: each curated plan returns only seeded,
 in-stock ids, covers its listed gaps, and the cart total equals WooCommerce's.
 
-### XLIX.58 Trending search chips grouped by meaning (D202)
-
-**What happens.** The search block's "Show popular searches under the box" option draws
-up to eight chips under the box until a visitor types (`parts/trending.php`,
-`Viglet_Dumont_Trending`): the week's top searches in Turing's metrics with at least
-three searches, each checked to return results now, typed prefixes and anything that
-looks like an e-mail or a long run of digits left out, case variants once. Cached for an
-hour. Spec: `site/trending.spec.mjs`.
-
-**What it should do next.**
-- A blocklist in settings: words never shown as chips.
-- On a fresh site with no history, chips from a list the admin types.
-- Variants of one search ("raincoat", "rain jacket", a typo of either) collapse into one
-  chip under the most-searched spelling. The grouping runs on a schedule through Turing's
-  `POST /api/v2/summary`, never on page load; without GenAI, exact matches only.
-
-Seen in cursarei's trending chips, where every chip is guaranteed to return results.
-
 ### XLIX.59 One shopper's story through the demo store (D203)
 
 **What happens.** Each demo task delivers a feature, and the guided layer names them one
@@ -675,3 +657,14 @@ items (`public/copilot.js`) have no checkbox. Give both the same checkbox, readi
 writing the same storage key so a choice made anywhere counts everywhere, and the same
 link once two are ticked. Spec in `woo/compare.spec.mjs`: one jacket ticked in the
 results and one on a product page's Related compare together.
+
+### XLIX.69 Popular chips grouped by meaning (D213)
+
+`Viglet_Dumont_Trending::chips()` (D202) keeps each spelling once, case aside, so
+variants of one search ("raincoat", "rain jacket", a typo of either) each take a chip.
+Group them into one chip under the most-searched spelling. The grouping runs on a
+schedule (WP-Cron, daily) through Turing's `POST /api/v2/summary`, given the week's
+candidate searches and asked to return groups as JSON; the result is stored in an option
+the chips read, never computed on page load. Without GenAI, exact matches only, as
+today. Spec: two seeded variants show as one chip under the more searched one, with the
+stored grouping fixed in the test.
