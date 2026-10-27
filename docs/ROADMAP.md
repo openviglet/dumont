@@ -120,7 +120,7 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 🛠 **D171** (deps: D169 ✅) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft shipped; audience fit is still missing: no per-persona content-fit score shows for a post on a site whose agent has personas. → §XLIX.30
-- 🛠 **D174** (deps: D169 ✅, D186 ✅, Turing T1147, Turing T1150) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Chat and answer checks find no source: Turing never embeds a site on the Default AI Agent, the binding D186 makes. → §XLIX.26
+- 🛠 **D174** (deps: D169 ✅, D186 ✅) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Chat and answer checks find no source: Turing never embeds a site on the Default AI Agent, the binding D186 makes. → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174 🛠) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D179** (deps: D166 ✅, D170 ✅, D171 🛠, D172 ✅, D175, D177 ✅, D178 ✅, D194) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 🛠 **D188** (deps: D176 ✅, Turing T1142) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
@@ -139,9 +139,9 @@ This track has no remaining pending tasks.
 - 📋 **D210** (deps: —) **A template that places the Related block still gets a second one appended after the content** — The append checks only the post's content for the block, so a theme that puts Related in its single template shows it twice. → §XLIX.66
 - 📋 **D212** (deps: D200 ✅) **Compare is offered only on search result cards, not on the Related or copilot product cards** — A shopper meets candidates on a product page and in the copilot too, and must go back to search to compare them. → §XLIX.68
 - 📋 **D213** (deps: D202 ✅) **Two spellings of one search show as two popular chips, a typo beside the word it meant** — "raincoat", "rain jacket" and "rain jaket" are one want, and three chips for it crowd out the other searches. → §XLIX.69
-- 📋 **D214** (deps: D186 ✅, Turing T1146) **Turning GenAI on from the plugin rebinds the site to the Default AI Agent, replacing one chosen in Turing's console** — Turing's manifest can now keep the live agent, so the plugin need not overwrite an admin's choice or warn about it. → §XLIX.70
-- 📋 **D215** (deps: D178 ✅, Turing T1149) **The plugin learns whether Turing records metrics by posting a fake click, an extra request on every insights load** — Turing's reports now carry metricsEnabled, so the probe and its reliance on Turing's validation order can go. → §XLIX.71
-- 📋 **D216** (deps: D178 ✅, Turing T1150) **The plugin's summary calls name no site, so the site's Turing cost summary and budget miss their spend** — Turing's summary endpoint now takes a site, so the insights summary and excerpt draft can be billed to the site that asked. → §XLIX.72
+- 📋 **D214** (deps: D186 ✅) **Turning GenAI on from the plugin rebinds the site to the Default AI Agent, replacing one chosen in Turing's console** — Turing's manifest can now keep the live agent, so the plugin need not overwrite an admin's choice or warn about it. → §XLIX.70
+- 📋 **D215** (deps: D178 ✅) **The plugin learns whether Turing records metrics by posting a fake click, an extra request on every insights load** — Turing's reports now carry metricsEnabled, so the probe and its reliance on Turing's validation order can go. → §XLIX.71
+- 📋 **D216** (deps: D178 ✅) **The plugin's summary calls name no site, so the site's Turing cost summary and budget miss their spend** — Turing's summary endpoint now takes a site, so the insights summary and excerpt draft can be billed to the site that asked. → §XLIX.72
 
 ## Done when — D144
 
