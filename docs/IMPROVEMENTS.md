@@ -515,27 +515,6 @@ and a Portuguese search ("jaqueta impermeável") finds nothing.
 - Curated searches in Portuguese in `curated.json`, checked by a `demo` spec run with
   the site in pt_BR.
 
-### XLIX.76 The demo specs on the demo's own WordPress (D220)
-
-**What happens.** The browser suite's `demo` project (`playwright.config.mjs`) is a
-variant step: `switch:demo` activates Tarnfell and WooCommerce on the default WordPress
-and reseeds the catalog (about 1.6 minutes a run), and the next run's `global-setup.mjs`
-undoes it. A `demo` spec run without its switch tests the default site and fails
-confusingly, and every default spec depends on that clean-up having worked.
-
-**What it should do,** once the demo has its own WordPress (D219):
-- The `demo` project runs against the demo's URL (`WP_DEMO_URL`, default
-  `http://localhost:38082`) with no `switch:demo`, and its own `seed` read from that site;
-  it seeds only when the catalog is missing, so a run does not pay for it again.
-- Remove what only existed to share one site: the demo pages, journal and synonym clean-up
-  in `global-setup.mjs`, the `TF-` drafting in `tests/e2e/fixtures/woo-seed.php`, the
-  test jackets' drafting in `demo/seed/catalog.php`, and the extra `switch.setup.mjs`
-  timeout if nothing else needs it.
-- A `test:e2e:demo` script that runs the demo specs alone, while the demo stays up.
-
-**Done when** `npm run test:e2e` passes with the demo profile running and serving its
-own search, and `test:e2e:demo` passes without touching the default site.
-
 ### XLIX.77 Global setup refuses a WP_URL that is not the stack (D221)
 
 **What happens.** `global-setup.mjs` seeds the stack through `docker compose run cli

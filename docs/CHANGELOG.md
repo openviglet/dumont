@@ -668,3 +668,4 @@
 - **D219** — run-docker.cmd demo starts Tarnfell on its own WordPress (38082) and SN site Demo, so demo and tests run at once and never share documents (design §XLIX.75 recorded in `wordpress/README.md`).
 - **D217 (Portuguese catalog seed)** — DEMO_LOCALE=pt_BR seeds the demo's products, guides, facets and synonyms in Portuguese, so jaqueta impermeável finds them.
 - **D218** — The seed draws a WebP illustration per product colour and a landscape per guide (CC0, about 7 KB), so the grid and pages show pictures (design §XLIX.74 recorded in `wordpress/demo/seed/CREDITS.md`).
+- **D220** — The demo specs run on the demo's own WordPress with no switch or reseed, test:e2e:demo runs them alone, and the cross-site clean-up is gone.
