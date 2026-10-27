@@ -304,6 +304,10 @@ it. The SDK's clicks are `keepalive` with no CSRF prime (T1128). The controller 
 `googleAnalyticsSink({ recommended: true })` also sends `search` and `select_content`,
 and the controller's opt-in abandonment emits `turing_search_abandoned` (T1130).
 
+The published `@viglet/turing-sdk` is still 2026.3.9 (24 August), which has none of
+T1128-T1130; the plugin copies the SDK from `node_modules` (`bin/copy-sdk.mjs`), so this
+waits on a release (Turing T1142).
+
 **What it should do.**
 - Hand the analytics bus to the search controllers, with `consent: trackingAllowed`,
   `sessionCookie: false` and abandonment on. Then drop `trackSearch()` and the hand click
