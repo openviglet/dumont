@@ -666,3 +666,4 @@
 - **D213** — A daily job asks Turing's LLM which popular searches are one want; the chips show each group once, under its most searched spelling.
   checked **Two spellings of one search show as one chip** A spec seeds two variants of one search and finds a single chip under the more searched one.
 - **D219** — run-docker.cmd demo starts Tarnfell on its own WordPress (38082) and SN site Demo, so demo and tests run at once and never share documents (design §XLIX.75 recorded in `wordpress/README.md`).
+- **D217 (Portuguese catalog seed)** — DEMO_LOCALE=pt_BR seeds the demo's products, guides, facets and synonyms in Portuguese, so jaqueta impermeável finds them.
