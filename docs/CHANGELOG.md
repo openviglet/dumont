@@ -644,3 +644,4 @@
 - **D183** — The block and the overlay send as-you-type searches as typed, in Turing's instant mode: the last word matches as a prefix with no wildcard guessed, and half-typed words stay out of the search log.
 - **D186** — A Generative AI setting (off by default) declares the manifest's genAi block, so provisioning turns a site's answers on; the Fields screen warns before it applies.
 - **D187** — The Search tuning screen sets newer first, sticky posts first and a post type up or down, and a post stuck from Quick Edit is reindexed so the sticky boost sees it.
+- **D191** — The AI-off answer spec replays Turing's own "not enabled" event, so the default suite no longer depends on whether the stack was started with an OpenAI key.

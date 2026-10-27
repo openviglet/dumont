@@ -263,6 +263,9 @@ out of the metrics; the `*` prefixes logged before it are left out.
   like the excerpt draft (D171), with a live-LLM spec.
 - With metrics off, Turing's `/click` answers 204 with `X-Turing-Metrics: disabled`: the
   screen and the widget should say metrics are off rather than show an empty period.
+- `admin/insights.spec.mjs` fails once the stack has logged 20 one-off failed searches
+  today: the list is capped and ordered by count, so the spec's fresh `zzinsight<ms>` term
+  is never shown. Clean its own term up, or look it up past the cap.
 - A trend per term and the live count (`metrics/live`), only if they read better than the
   tables alone.
 
@@ -362,24 +365,6 @@ are stamped and refused outside it (T1133). An import DELETE can name shared fie
   Health names each, and none falls back to an unbound key.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
-
-### XLIX.47 The AI-off answer spec depends on the stack's AI state (D191)
-
-**What happens.** `site/answer.spec.mjs` "a site whose AI is off (this stack's real
-Turing)" assumes the Sample site answers with "AI is not enabled for site". The stack's
-`docker-compose.yml` passes `OPENAI_API_KEY` through, and a Turing boot that finds no
-LLM instance creates one with a default agent, so on any machine whose shell carries the
-key (the same one `run-commit.cmd` needs) the panel shows and the default suite fails.
-The state persists in the `turing` volume: unsetting the key later does not turn it off.
-
-**What it should do.**
-- The default suite pins the state it asserts instead of inheriting it: either the spec
-  routes the answer request to Turing's own "not enabled" event, as the other answer specs
-  route theirs, or global-setup switches the site's generative AI off (and the live-LLM
-  suite, `playwright.ai.config.mjs`, switches it back on for itself).
-- Prefer the route: it keeps the default suite independent of Turing's AI settings, which
-  the manifest now changes: since D186 the live-LLM suite's seed sets `generative_ai`, its reindex binds the site's GenAI in Turing, and the default seed's `generative_ai = 0` only stops the plugin declaring it, never turning Turing's binding off.
-- Done when `npm run test:e2e` passes on a stack started with `OPENAI_API_KEY` set.
 
 ### XLIX.48 Selects keep room for their arrow (D192)
 
@@ -695,3 +680,11 @@ to a prospect.
 
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
+
+### XLIX.61 The suite and translations D186 left behind (D205)
+
+**What happens.** After D186, `npm run test:e2e` fails on the Settings Search panel: its
+baseline predates the Generative AI section, so `settings-search.png` differs. The six
+strings D186 added have no pt_BR translation. (The AI-off answer spec is D191's.)
+
+**What it should do.** Refresh the baseline and translate the six strings.

@@ -126,7 +126,6 @@ This track has no remaining pending tasks.
 - 📋 **D179** (deps: D166 ✅, D170 ✅, D171 🛠, D172 ✅, D175, D177 ✅, D178 🛠, D194) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 📋 **D188** (deps: D176 ✅) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
 - 📋 **D190** (deps: D148 ✅, D177 ✅) **Each site of a shared SN site is kept apart by the plugin's own filters, and its key can still reach the other sites** — A filter the plugin forgets leaks another site's posts, and delete-all and Related page and over-fetch to filter by hand. → §XLIX.46
-- 📋 **D191** (deps: —) **The default e2e suite fails on a stack started with an OpenAI key, since its AI-off answer spec finds AI on** — The spec inherits the site's AI state from the developer's shell and the Turing volume, so a green run depends on an unset key. → §XLIX.47
 - 📋 **D192** (deps: —) **The settings page's selects draw their text under the dropdown arrow, so All Content on the Actions tab reads cut** — The plugin's own CSS overrides the right padding WordPress keeps for the arrow, on every select of the settings page. → §XLIX.48
 - 📋 **D193** (deps: D173 ✅) **The demo stack runs on stock Twenty Twenty-Five, so nothing it shows looks like a store a buyer would trust** — A prospect judges the search by the site around it, and a bare theme makes Turing's results look like a test page. → §XLIX.49
 - 📋 **D194** (deps: D173 ✅, D193) **The Woo seed holds a handful of test products, too few for facets, synonyms or a copilot to show anything** — Search only impresses over a catalog large and varied enough for a typo, a vague need or a filter to matter. → §XLIX.50
@@ -140,6 +139,7 @@ This track has no remaining pending tasks.
 - 📋 **D202** (deps: D176 ✅) **The search block's empty state offers nothing to click, though the site knows what its visitors search for** — Chips built from real searches show the catalog's breadth in one glance, provided each one returns results. → §XLIX.58
 - 📋 **D203** (deps: D195, D198, D199, D200, D201, D202, D178 🛠) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
+- 🛠 **D205** (deps: D186 ✅) **The browser suite fails on a keyed stack after D186, and its new settings strings have no Portuguese** — A stale Search panel baseline turns every full run red, and Portuguese admins read D186's setting in English. → §XLIX.61
 
 ## Done when — D144
 
