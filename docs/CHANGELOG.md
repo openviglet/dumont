@@ -650,3 +650,4 @@
 - **D190 (delete-all and Related)** — Delete-all is one Turing delete by this site's key, and Related asks Turing for this site's neighbours only, three per post shown.
 - **D192** — Every settings select keeps its text clear of WordPress's arrow, in English and pt_BR, and the content select lines up with Start Indexing.
 - **D193 (theme and its four templates)** — run-docker.cmd demo serves Tarnfell, an outdoor gear store theme with its own type and palette, a search-first home and the search block's results page.
+- **D211** — The admin build reads only assets/admin and stays flat across builds, and the zip script refuses a build folder holding anything nested.
