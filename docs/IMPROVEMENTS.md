@@ -571,24 +571,6 @@ to a prospect.
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 
-### XLIX.64 A box-only search block goes to the search page (D208)
-
-**What happens.** Since D185 the Turing search block takes its parts as inner blocks, so
-a theme can place the search box alone, e.g. in a home page hero. But the box's form
-submits through `actions.submit` in `src/public/search-block.js`, which runs the search
-in place: with no results part in the block, Enter shows nothing. The demo storefront
-(D193) worked around it by putting the theme's own `core/search` in its hero, which the
-instant overlay takes over.
-
-**What it should do.**
-- A search block with no results part sends Enter (and a picked suggestion) to the full
-  search page, the one `Viglet_Dumont_Native_Search::search_page()` resolves for the
-  overlay, as `?q=`.
-- Its suggestions still show as the visitor types.
-- Spec: a page holding a box-only block navigates to the search page with the query, and
-  the results show there.
-- The demo hero (`demo/theme/tarnfell/templates/front-page.html`) then uses the block.
-
 ### XLIX.65 The search block keeps its results still while it loads (D209)
 
 **What happens.** Lighthouse 12 on the demo storefront's results page (`run-docker.cmd
