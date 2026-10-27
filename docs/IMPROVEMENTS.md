@@ -592,13 +592,6 @@ to a prospect.
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 
-### XLIX.63 Trends and the live count on Search insights (D207)
-
-Turing serves a per-term series and a live count (`metrics/live`) beside the period
-reports Search insights reads (D178). Open question: whether a sparkline per row or a
-live counter reads better than the tables alone; settle it with an `e2e:look` screenshot
-of each before building.
-
 ### XLIX.64 A box-only search block goes to the search page (D208)
 
 **What happens.** Since D185 the Turing search block takes its parts as inner blocks, so
