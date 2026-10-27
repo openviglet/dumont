@@ -649,7 +649,7 @@
 - **D206** — The Search insights spec finds its failed search on a stack with a day of runs logged, searching one fixed term three times.
 - **D190 (delete-all and Related)** — Delete-all is one Turing delete by this site's key, and Related asks Turing for this site's neighbours only, three per post shown.
 - **D192** — Every settings select keeps its text clear of WordPress's arrow, in English and pt_BR, and the content select lines up with Start Indexing.
-- **D193 (theme and its four templates)** — run-docker.cmd demo serves Tarnfell, an outdoor gear store theme with its own type and palette, a search-first home and the search block's results page.
+- **D193** — The Tarnfell storefront scores Lighthouse 90+ on home and results, its hero is the search block, and a spec walks from search to cart by keyboard (design §XLIX.49 recorded in `wordpress/README.md`).
 - **D211** — The admin build reads only assets/admin and stays flat across builds, and the zip script refuses a build folder holding anything nested.
 - **D200** — Compared products get a neutral AI summary above their table, shown only when every figure in it is the table's; without GenAI the table stands alone.
 - **D202** — Popular chips honour a Never show list from Settings, and a site with no history shows the admin's own list, each chip still checked to find something.

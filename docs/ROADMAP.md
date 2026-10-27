@@ -123,9 +123,8 @@ This track has no remaining pending tasks.
 - 📋 **D175** (deps: D169 ✅, D174 🛠) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175, D177 ✅, D178 ✅, D194) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 🛠 **D188** (deps: D176 ✅, Turing T1142) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
-- 🛠 **D193** (deps: D173 ✅, D208 ✅, D209 ✅) **The demo stack runs on stock Twenty Twenty-Five, so nothing it shows looks like a store a buyer would trust** — The results page waits on the search block's shift, the hero on a box-only block; no keyboard spec yet. → §XLIX.49
-- 📋 **D194** (deps: D173 ✅, D193 🛠) **The Woo seed holds a handful of test products, too few for facets, synonyms or a copilot to show anything** — Search only impresses over a catalog large and varied enough for a typo, a vague need or a filter to matter. → §XLIX.50
-- 📋 **D195** (deps: D193 🛠, D194) **A visitor to the demo cannot tell what Turing adds, since nothing compares it with WordPress's own search** — The difference sells only when seen: the same query, native results beside Turing's, with each feature named where it acts. → §XLIX.51
+- 📋 **D194** (deps: D173 ✅, D193 ✅) **The Woo seed holds a handful of test products, too few for facets, synonyms or a copilot to show anything** — Search only impresses over a catalog large and varied enough for a typo, a vague need or a filter to matter. → §XLIX.50
+- 📋 **D195** (deps: D193 ✅, D194) **A visitor to the demo cannot tell what Turing adds, since nothing compares it with WordPress's own search** — The difference sells only when seen: the same query, native results beside Turing's, with each feature named where it acts. → §XLIX.51
 - 💭 **D196** (deps: D203) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
 - 📋 **D198** (deps: D173 ✅, D175, D186 ✅, D194) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
@@ -165,14 +164,6 @@ This track has no remaining pending tasks.
   lists or deletes a site B document.
 - **Features Turing refuses on a partitioned key turn off and say so** Health names each
   one Turing answers 403 on such a key, and none falls back to an unbound key.
-
-## Done when — D193
-
-- **Product and journal pages are on the brand** e2e:look captures of a product page
-  with Related and the copilot, and of a journal post, at desktop and phone width, with
-  axe finding nothing.
-- **Lighthouse holds 90 on home and results** A Lighthouse run on the demo home and
-  results pages scores 90 or above for performance and accessibility.
 
 ## Done when — D213
 

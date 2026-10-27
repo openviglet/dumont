@@ -325,29 +325,6 @@ routes.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
 
-### XLIX.49 A branded demo storefront theme (D193)
-
-**What happens.** `run-docker.cmd demo` activates Tarnfell
-(`wordpress/demo/theme/tarnfell`, outside the plugin zip) with WooCommerce and the woo
-tests' jackets: an outdoor gear brand with its own palette and two preloaded OFL fonts;
-a home whose hero search box opens the plugin's instant search; "Search the shop" with
-the search block and its parts; a product page with the copilot and Related; a journal
-post with Related. The browser suite's global setup puts the default stack back.
-
-Measured: axe finds nothing on home, search and a post, and on a product only
-WooCommerce's own mini-cart drawer (`aria-hidden` holding focusable elements).
-Lighthouse: home 93 performance, 96 accessibility; results 80 and 96, its layout shift
-the search block's own (D209).
-
-The brand was checked by a web search only (no brand or store named Tarnfell); a
-registry search is still to do before any public use.
-
-**What it should do next.**
-- Results reach 90 once the search block stops shifting (D209).
-- The hero uses the search block itself once a box-only block goes to the search page
-  (D208).
-- A keyboard path from search to cart, checked by a spec.
-
 ### XLIX.50 A realistic demo catalog and journal (D194)
 
 **What happens.** `woo-seed.php` exists to make specs pass: a few products, one
