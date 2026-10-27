@@ -133,8 +133,10 @@ This track has no remaining pending tasks.
 - 📋 **D210** (deps: —) **A template that places the Related block still gets a second one appended after the content** — The append checks only the post's content for the block, so a theme that puts Related in its single template shows it twice. → §XLIX.66
 - 📋 **D212** (deps: D200 ✅) **Compare is offered only on search result cards, not on the Related or copilot product cards** — A shopper meets candidates on a product page and in the copilot too, and must go back to search to compare them. → §XLIX.68
 - 📋 **D213** (deps: D202 ✅) **Two spellings of one search show as two popular chips, a typo beside the word it meant** — "raincoat", "rain jacket" and "rain jaket" are one want, and three chips for it crowd out the other searches. → §XLIX.69
-- 📋 **D217** (deps: D194 ✅) **The demo store's products and guides are English only, so a Portuguese search finds nothing** — The language switch is part of what the demo shows, and Brazilian prospects search in Portuguese. → §XLIX.73
-- 📋 **D218** (deps: D194 ✅) **The demo store's products and guides have no images, so the grid, product pages and compare table show text alone** — A store without pictures reads as unfinished, and images must be ones the repository may redistribute. → §XLIX.74
+- 📋 **D217** (deps: D194 ✅, D219) **The demo store's products and guides are English only, so a Portuguese search finds nothing** — The language switch is part of what the demo shows, and Brazilian prospects search in Portuguese. → §XLIX.73
+- 📋 **D218** (deps: D194 ✅, D219) **The demo store's products and guides have no images, so the grid, product pages and compare table show text alone** — A store without pictures reads as unfinished, and images must be ones the repository may redistribute. → §XLIX.74
+- 📋 **D219** (deps: —) **The demo store and the browser tests share one WordPress and one SN site, so the demo is never up while tests run** — Each side carries code to undo the other, and leftovers from one have broken the other's counts. → §XLIX.75
+- 📋 **D220** (deps: D219) **The demo specs reseed the test WordPress as a variant step, and the default suite carries clean-up to undo them** — A demo run costs minutes of reseeding and a skipped switch tests the wrong site. → §XLIX.76
 
 ## Done when — D144
 
