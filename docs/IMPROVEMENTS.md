@@ -515,24 +515,6 @@ and a Portuguese search ("jaqueta impermeável") finds nothing.
 - Curated searches in Portuguese in `curated.json`, checked by a `demo` spec run with
   the site in pt_BR.
 
-### XLIX.74 Licensed images for the demo catalog (D218)
-
-**What happens.** The demo storefront's 132 products (`demo/seed/catalog.php`, D194) and
-its journal have no images, so the search block's grid layout, the product pages and the
-compare table show text alone.
-
-**What it should do.**
-- An image per product model (colours may share one, or tint it) and per guide, whose
-  licence allows redistribution in this repository: public domain, or made for the brand
-  (illustrations or renders of fictional products). No photo of a real person and no real
-  brand's product.
-- The source and licence of each in `demo/seed/CREDITS.md`.
-- Imported by the seed as attachments, set as product and featured images, so the plugin
-  indexes them as each document's `image`.
-- Kept small (WebP, about 800 px wide), so the demo's Lighthouse scores hold (90 or more,
-  D193).
-- A `demo` spec finds an image on every result of a curated search.
-
 ### XLIX.76 The demo specs on the demo's own WordPress (D220)
 
 **What happens.** The browser suite's `demo` project (`playwright.config.mjs`) is a
