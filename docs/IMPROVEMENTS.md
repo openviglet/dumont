@@ -346,26 +346,25 @@ routes.
 ### XLIX.49 A branded demo storefront theme (D193)
 
 **What happens.** `run-docker.cmd demo` activates Tarnfell
-(`wordpress/demo/theme/tarnfell`, outside the plugin zip): an outdoor gear brand with
-its own palette and two OFL fonts bundled locally, a home whose hero search box opens
-the plugin's instant search, terrain tiles and the journal's latest posts, and a "Search
-the shop" page holding the search block with its parts (facets, grid, answer slot).
-`demo/setup.php` makes its pages and pretty permalinks; the browser suite's global setup
-puts the default stack back, so its specs and screenshots do not move. axe finds nothing
-on home and search at desktop width.
+(`wordpress/demo/theme/tarnfell`, outside the plugin zip) with WooCommerce and the woo
+tests' jackets: an outdoor gear brand with its own palette and two preloaded OFL fonts;
+a home whose hero search box opens the plugin's instant search; "Search the shop" with
+the search block and its parts; a product page with the copilot and Related; a journal
+post with Related. The browser suite's global setup puts the default stack back.
+
+Measured: axe finds nothing on home, search and a post, and on a product only
+WooCommerce's own mini-cart drawer (`aria-hidden` holding focusable elements).
+Lighthouse: home 93 performance, 96 accessibility; results 80 and 96, its layout shift
+the search block's own (D209).
 
 The brand was checked by a web search only (no brand or store named Tarnfell); a
 registry search is still to do before any public use.
 
 **What it should do next.**
-- A product page with Related and the shopping copilot, once WooCommerce is on in the
-  demo (the woo variant's seed is the model), and a journal post template.
+- Results reach 90 once the search block stops shifting (D209).
 - The hero uses the search block itself once a box-only block goes to the search page
   (D208).
-- Full keyboard path from search to cart; responsive from 360 px checked on product and
-  journal too.
-- Gate: Lighthouse on home and results at 90 or above for performance and accessibility,
-  and `e2e:look` captures of home, results, product and journal at desktop and phone width.
+- A keyboard path from search to cart, checked by a spec.
 
 ### XLIX.50 A realistic demo catalog and journal (D194)
 
@@ -657,3 +656,33 @@ instant overlay takes over.
 - Spec: a page holding a box-only block navigates to the search page with the query, and
   the results show there.
 - The demo hero (`demo/theme/tarnfell/templates/front-page.html`) then uses the block.
+
+### XLIX.65 The search block keeps its results still while it loads (D209)
+
+**What happens.** Lighthouse 12 on the demo storefront's results page (`run-docker.cmd
+demo`, `/search-gear/?q=jacket`, Edge headless) scores performance 80: cumulative layout
+shift 0.216, nearly all of it (0.182) on `.viglet-dumont-search >
+.viglet-dumont-search__part` (the results part) and 0.035 on the first
+`.viglet-dumont-search__result`. It is the block's own: the theme's fonts are preloaded
+and caused nothing once they were, and turning the page's `showAnswer` and
+`suggestFilters` off leaves it at 0.213. The home page, without the block, scores 93
+with no shift.
+
+**What it should do.**
+- Find what moves the results part after the first paint (a server-drawn list replaced
+  on hydration, a toolbar or count that appears late, the facet column settling), with a
+  Lighthouse trace's filmstrip.
+- Reserve its space, or draw the first page on the server exactly as the client will, so
+  a search page with `?q=` shifts under 0.1.
+- A browser spec reads the page's layout shift (`PerformanceObserver` with
+  `layout-shift`) and holds it under 0.1 on the default stack's search page.
+
+### XLIX.66 Related is not appended when the template already holds it (D210)
+
+`Viglet_Dumont_Related::append()` skips a post whose content has the block (`has_block(
+'viglet-dumont/related' )`), but a block theme's template is not the content: Tarnfell's
+`single.html` places Related, and with "Related after posts" on the page showed two
+boxes (D193 turned the setting off in its demo). Check the resolved block template too
+(`get_block_template` for the current template, or a render-time flag the block sets
+when it draws), and skip the append when it holds the block. Spec: a theme template with
+the block and the setting on shows one Related box.
