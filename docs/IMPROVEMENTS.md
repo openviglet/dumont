@@ -325,28 +325,6 @@ routes.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
 
-### XLIX.50 A realistic demo catalog and journal (D194)
-
-**What happens.** `run-docker.cmd demo` and the browser suite's `demo` project load
-`demo/seed/catalog.php` (idempotent, SKUs `TF-…`): 132 products of the fictional
-Tarnfell brand in eight categories, with colour, material, use and size attributes,
-prices, sales, sold-out items and descriptions that state waterproofing, weight, warmth
-and care. Category, price, stock, colour, material and use are facets; four synonyms are
-set in Turing. The searches in `demo/seed/curated.json` each show one feature (a need in
-words, synonyms, a misspelling, a filter) and `tests/e2e/demo/curated.spec.mjs` checks
-each. The woo tests' seed drafts the demo's products and the demo drafts the tests'
-jackets, so neither sees the other.
-
-**What it should do next.**
-- A journal of 20 to 30 buying guides and how-tos that name products, so one search returns
-  a guide and the items it recommends.
-- Everything in pt_BR as well, so the language switch is part of the demo.
-- Images whose licence allows redistribution (public domain, or made for the brand), each
-  source in a `CREDITS` file; no real person or real brand's product.
-- A curated question the answer slot replies to, checked by the live-LLM suite (D174).
-- A need phrased in words the catalog does not use ("boots for wet trails") finds nothing
-  with lexical search alone; see whether Turing's semantic retrieval closes it.
-
 ### XLIX.51 Native-versus-Turing compare and a guided layer (D195)
 
 **What happens.** On the demo, Turing's results simply appear. A visitor who has never
@@ -575,3 +553,39 @@ candidate searches and asked to return groups as JSON; the result is stored in a
 the chips read, never computed on page load. Without GenAI, exact matches only, as
 today. Spec: two seeded variants show as one chip under the more searched one, with the
 stored grouping fixed in the test.
+
+### XLIX.73 The demo catalog in Portuguese (D217)
+
+**What happens.** The demo storefront's catalog and journal (`demo/seed/catalog.php`,
+`demo/seed/journal.php`, D194) are English only. With the site switched to pt_BR, the
+theme and the plugin speak Portuguese while every product and guide stays in English,
+and a Portuguese search ("jaqueta impermeável") finds nothing.
+
+**What it should do.**
+- A Portuguese copy of each product name, short description and description, and of
+  each guide, written for Brazilian shoppers (litres, °C and grams stay; sizes stay).
+- Kept beside the English in the seed's own data, so one run seeds both. Either the site
+  in pt_BR seeds the Portuguese, or both are indexed with their locale and Turing's
+  `_setlocale` picks; choose whichever the SN site's locales already support (the plugin
+  indexes with the site's locale today).
+- Portuguese synonyms ("capa de chuva", "jaqueta impermeável"; "mochila", "cargueira").
+- Curated searches in Portuguese in `curated.json`, checked by a `demo` spec run with
+  the site in pt_BR.
+
+### XLIX.74 Licensed images for the demo catalog (D218)
+
+**What happens.** The demo storefront's 132 products (`demo/seed/catalog.php`, D194) and
+its journal have no images, so the search block's grid layout, the product pages and the
+compare table show text alone.
+
+**What it should do.**
+- An image per product model (colours may share one, or tint it) and per guide, whose
+  licence allows redistribution in this repository: public domain, or made for the brand
+  (illustrations or renders of fictional products). No photo of a real person and no real
+  brand's product.
+- The source and licence of each in `demo/seed/CREDITS.md`.
+- Imported by the seed as attachments, set as product and featured images, so the plugin
+  indexes them as each document's `image`.
+- Kept small (WebP, about 800 px wide), so the demo's Lighthouse scores hold (90 or more,
+  D193).
+- A `demo` spec finds an image on every result of a curated search.

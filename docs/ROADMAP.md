@@ -121,13 +121,12 @@ This track has no remaining pending tasks.
 
 - 🛠 **D174** (deps: D169 ✅, D186 ✅, Turing T1153) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Chat now answers from the posts; the answer panel reads one run-on word, as Turing's stream drops each token's leading space. → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174 🛠) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
-- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175, D177 ✅, D178 ✅, D194 ⏳) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
+- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175, D177 ✅, D178 ✅, D194 ✅) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 🛠 **D188** (deps: D176 ✅, Turing T1142) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
-- ⏳ **D194** (deps: D173 ✅, D193 ✅) **The Woo seed holds a handful of test products, too few for facets, synonyms or a copilot to show anything** — Buying guides, the pt_BR catalog, licensed images and a curated question for the answer slot are still to come. → §XLIX.50
-- 📋 **D195** (deps: D193 ✅, D194 ⏳) **A visitor to the demo cannot tell what Turing adds, since nothing compares it with WordPress's own search** — The difference sells only when seen: the same query, native results beside Turing's, with each feature named where it acts. → §XLIX.51
+- 📋 **D195** (deps: D193 ✅, D194 ✅) **A visitor to the demo cannot tell what Turing adds, since nothing compares it with WordPress's own search** — The difference sells only when seen: the same query, native results beside Turing's, with each feature named where it acts. → §XLIX.51
 - 💭 **D196** (deps: D203) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
-- 📋 **D198** (deps: D173 ✅, D175, D186 ✅, D194 ⏳) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
+- 📋 **D198** (deps: D173 ✅, D175, D186 ✅, D194 ✅) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
 - 📋 **D199** (deps: D173 ✅, Turing: a query-to-facets call) **A shopper who types "light rain jacket under R$400, blue" gets keyword results, and the facets beside them stay unset** — People describe a need in a sentence; turning it into the site's own filters, and saying so, is search that understands. → §XLIX.55
 - 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
 - 📋 **D203** (deps: D195, D198, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
@@ -135,6 +134,8 @@ This track has no remaining pending tasks.
 - 📋 **D210** (deps: —) **A template that places the Related block still gets a second one appended after the content** — The append checks only the post's content for the block, so a theme that puts Related in its single template shows it twice. → §XLIX.66
 - 📋 **D212** (deps: D200 ✅) **Compare is offered only on search result cards, not on the Related or copilot product cards** — A shopper meets candidates on a product page and in the copilot too, and must go back to search to compare them. → §XLIX.68
 - 📋 **D213** (deps: D202 ✅) **Two spellings of one search show as two popular chips, a typo beside the word it meant** — "raincoat", "rain jacket" and "rain jaket" are one want, and three chips for it crowd out the other searches. → §XLIX.69
+- 📋 **D217** (deps: D194 ✅) **The demo store's products and guides are English only, so a Portuguese search finds nothing** — The language switch is part of what the demo shows, and Brazilian prospects search in Portuguese. → §XLIX.73
+- 📋 **D218** (deps: D194 ✅) **The demo store's products and guides have no images, so the grid, product pages and compare table show text alone** — A store without pictures reads as unfinished, and images must be ones the repository may redistribute. → §XLIX.74
 
 ## Done when — D144
 
@@ -170,10 +171,8 @@ This track has no remaining pending tasks.
 - **Two spellings of one search show as one chip** A spec seeds two variants of one
   search and finds a single chip under the more searched one.
 
-## Done when — D194
+## Done when — D217
 
-- **One search returns a guide and the products it names** A curated search in the demo
-  spec has a buying guide first and the products it recommends after it.
 - **The catalog reads in Portuguese too** With the site in pt_BR, a curated search in
   Portuguese finds its product, named and described in Portuguese.
 
