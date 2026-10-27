@@ -658,3 +658,4 @@
 - **D215** — Search insights reads whether Turing keeps metrics from the click report it already fetches; the probe click runs only against a Turing older than 2026.3.6.
 - **D214** — Turning GenAI on from the plugin keeps an agent chosen in Turing's console, and binds the Default AI Agent only to a site that has none.
 - **D208** — A search block holding only its box sends Enter or a picked suggestion to the full search page; the demo hero now uses it.
+- **D209** — A search page opened with a query gets its first results, facets and pages from the server, unrecorded in metrics, and shifts under 0.1 as its script answers.

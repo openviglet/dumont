@@ -571,26 +571,6 @@ to a prospect.
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 
-### XLIX.65 The search block keeps its results still while it loads (D209)
-
-**What happens.** Lighthouse 12 on the demo storefront's results page (`run-docker.cmd
-demo`, `/search-gear/?q=jacket`, Edge headless) scores performance 80: cumulative layout
-shift 0.216, nearly all of it (0.182) on `.viglet-dumont-search >
-.viglet-dumont-search__part` (the results part) and 0.035 on the first
-`.viglet-dumont-search__result`. It is the block's own: the theme's fonts are preloaded
-and caused nothing once they were, and turning the page's `showAnswer` and
-`suggestFilters` off leaves it at 0.213. The home page, without the block, scores 93
-with no shift.
-
-**What it should do.**
-- Find what moves the results part after the first paint (a server-drawn list replaced
-  on hydration, a toolbar or count that appears late, the facet column settling), with a
-  Lighthouse trace's filmstrip.
-- Reserve its space, or draw the first page on the server exactly as the client will, so
-  a search page with `?q=` shifts under 0.1.
-- A browser spec reads the page's layout shift (`PerformanceObserver` with
-  `layout-shift`) and holds it under 0.1 on the default stack's search page.
-
 ### XLIX.66 Related is not appended when the template already holds it (D210)
 
 `Viglet_Dumont_Related::append()` skips a post whose content has the block (`has_block(
