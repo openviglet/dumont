@@ -544,25 +544,21 @@ in-stock ids, covers its listed gaps, and the cart total equals WooCommerce's.
 
 ### XLIX.58 Trending search chips grouped by meaning (D202)
 
-**What happens.** Before a visitor types, the search block is an empty box. The site's
-search metrics (D176) know the week's searches, but only wp-admin sees them.
+**What happens.** The search block's "Show popular searches under the box" option draws
+up to eight chips under the box until a visitor types (`parts/trending.php`,
+`Viglet_Dumont_Trending`): the week's top searches in Turing's metrics with at least
+three searches, each checked to return results now, typed prefixes and anything that
+looks like an e-mail or a long run of digits left out, case variants once. Cached for an
+hour. Spec: `site/trending.spec.mjs`.
 
-**What it should do.**
-- An option on the search block: up to eight chips under the box, from the period's top
-  searches in Turing's metrics, above a minimum count.
-- A chip is shown only if its query returns results now, checked when the list is built,
-  so no chip leads to an empty page.
+**What it should do next.**
+- A blocklist in settings: words never shown as chips.
+- On a fresh site with no history, chips from a list the admin types.
 - Variants of one search ("raincoat", "rain jacket", a typo of either) collapse into one
   chip under the most-searched spelling. The grouping runs on a schedule through Turing's
   `POST /api/v2/summary`, never on page load; without GenAI, exact matches only.
-- A blocklist in settings, and queries that look like personal data (an email, a
-  document number) never become chips.
-- On a fresh site with no history, chips from a list the admin types.
 
 Seen in cursarei's trending chips, where every chip is guaranteed to return results.
-
-**Gate.** Specs: a seeded query with no results never becomes a chip, two variants show
-as one, and the empty-history fallback renders the typed list.
 
 ### XLIX.59 One shopper's story through the demo store (D203)
 

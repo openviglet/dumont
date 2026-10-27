@@ -652,3 +652,4 @@
 - **D193 (theme and its four templates)** — run-docker.cmd demo serves Tarnfell, an outdoor gear store theme with its own type and palette, a search-first home and the search block's results page.
 - **D211** — The admin build reads only assets/admin and stays flat across builds, and the zip script refuses a build folder holding anything nested.
 - **D200** — Compared products get a neutral AI summary above their table, shown only when every figure in it is the table's; without GenAI the table stands alone.
+- **D202 (popular chips)** — The search block can show the week's popular searches under its box, each one checked to find something and none that looks like personal data.
