@@ -221,6 +221,9 @@ reaches the vector store (Turing T1147).
 **What it should do.**
 - Once Turing T1147 ships and the stack runs that image, the chat and answer specs pass.
 - The shop copilot (D173) and the site assistant (D175) join the suite as each lands.
+- The teardown's `wp dumont queue run` exits 1 when the cron worker holds the queue lock
+  ("Another worker is sending the queue"), failing a green run; it should wait for the
+  queue to empty instead.
 
 ### XLIX.27 A site assistant block on Turing's chat (D175)
 
@@ -515,26 +518,6 @@ Seen in cursarei's `nlFilters`, which proved the pattern on courses.
 **Gate.** Specs on the demo seed: each curated sentence sets its expected facets, an
 off-vocabulary word sets none, and the keyless path still parses price and size.
 
-### XLIX.56 Product comparison with a neutral summary (D200)
-
-**What happens.** On a WooCommerce site whose pages include one with the Compare
-products block (`viglet-dumont/compare`), each product card in the search results has a
-Compare checkbox (up to four, kept for the tab in sessionStorage), and two ticked show a
-"Compare N products" link to that page with `?compare=<ids>`. The block draws, on the
-server (`Viglet_Dumont_Compare::table()`), a table of what every product has (price,
-availability, weight, dimensions, rating, visible attributes), marking the rows where
-they differ. Spec: `woo/compare.spec.mjs`.
-
-**What it should do next.**
-- Compare on the Related and copilot cards too.
-- Above the table, two to four sentences on what the items share and where they differ,
-  naming no winner. The facts are the table's, computed in code and passed to Turing's
-  `POST /api/v2/summary`; the model writes only from them, and every number shown comes
-  from the table. Labelled as AI, cached by the product ids and their modified dates;
-  without GenAI, the table alone. Seen in cursarei's `compareSummary`.
-- Gate: a live-LLM spec compares two seeded products and asserts the summary names no
-  attribute and no number absent from the table.
-
 ### XLIX.57 A kit builder from a described plan (D201)
 
 **What happens.** The shopping copilot turns a need into a short list, one need at a
@@ -685,3 +668,14 @@ boxes (D193 turned the setting off in its demo). Check the resolved block templa
 (`get_block_template` for the current template, or a render-time flag the block sets
 when it draws), and skip the append when it holds the block. Spec: a theme template with
 the block and the setting on shows one Related box.
+
+### XLIX.68 Compare from the Related and copilot cards (D212)
+
+The search block's cards tick products for comparison into sessionStorage
+(`viglet-dumont-compare`, at most four) and show a "Compare N products" link to the page
+holding the compare block (`config.shop.comparePage`, D200). The Related block
+(`blocks/related`, drawn on the server, `public/related.js`) and the copilot's product
+items (`public/copilot.js`) have no checkbox. Give both the same checkbox, reading and
+writing the same storage key so a choice made anywhere counts everywhere, and the same
+link once two are ticked. Spec in `woo/compare.spec.mjs`: one jacket ticked in the
+results and one on a product page's Related compare together.
