@@ -130,13 +130,13 @@ This track has no remaining pending tasks.
 - 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
 - 📋 **D203** (deps: D195 ✅, D198, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
-- 📋 **D210** (deps: —) **A template that places the Related block still gets a second one appended after the content** — The append checks only the post's content for the block, so a theme that puts Related in its single template shows it twice. → §XLIX.66
 - 📋 **D212** (deps: D200 ✅) **Compare is offered only on search result cards, not on the Related or copilot product cards** — A shopper meets candidates on a product page and in the copilot too, and must go back to search to compare them. → §XLIX.68
 - 📋 **D213** (deps: D202 ✅) **Two spellings of one search show as two popular chips, a typo beside the word it meant** — "raincoat", "rain jacket" and "rain jaket" are one want, and three chips for it crowd out the other searches. → §XLIX.69
 - 📋 **D217** (deps: D194 ✅, D219) **The demo store's products and guides are English only, so a Portuguese search finds nothing** — The language switch is part of what the demo shows, and Brazilian prospects search in Portuguese. → §XLIX.73
 - 📋 **D218** (deps: D194 ✅, D219) **The demo store's products and guides have no images, so the grid, product pages and compare table show text alone** — A store without pictures reads as unfinished, and images must be ones the repository may redistribute. → §XLIX.74
 - 📋 **D219** (deps: —) **The demo store and the browser tests share one WordPress and one SN site, so the demo is never up while tests run** — Each side carries code to undo the other, and leftovers from one have broken the other's counts. → §XLIX.75
 - 📋 **D220** (deps: D219) **The demo specs reseed the test WordPress as a variant step, and the default suite carries clean-up to undo them** — A demo run costs minutes of reseeding and a skipped switch tests the wrong site. → §XLIX.76
+- 📋 **D221** (deps: —) **The browser tests seed the stack over WP-CLI but browse WP_URL, so another site on that port fails every spec** — Nothing checks the two are one WordPress, and the failures read as plugin bugs rather than a wrong URL. → §XLIX.77
 
 ## Done when — D144
 

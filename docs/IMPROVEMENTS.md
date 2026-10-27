@@ -497,16 +497,6 @@ to a prospect.
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 
-### XLIX.66 Related is not appended when the template already holds it (D210)
-
-`Viglet_Dumont_Related::append()` skips a post whose content has the block (`has_block(
-'viglet-dumont/related' )`), but a block theme's template is not the content: Tarnfell's
-`single.html` places Related, and with "Related after posts" on the page showed two
-boxes (D193 turned the setting off in its demo). Check the resolved block template too
-(`get_block_template` for the current template, or a render-time flag the block sets
-when it draws), and skip the append when it holds the block. Spec: a theme template with
-the block and the setting on shows one Related box.
-
 ### XLIX.68 Compare from the Related and copilot cards (D212)
 
 The search block's cards tick products for comparison into sessionStorage
@@ -608,3 +598,24 @@ confusingly, and every default spec depends on that clean-up having worked.
 
 **Done when** `npm run test:e2e` passes with the demo profile running and serving its
 own search, and `test:e2e:demo` passes without touching the default site.
+
+### XLIX.77 Global setup refuses a WP_URL that is not the stack (D221)
+
+**What happens.** `global-setup.mjs` seeds the stack through `docker compose run cli
+wp`, which always reaches this compose project's WordPress, but the browser goes to
+`WP_URL`, defaulting to `http://localhost:8080`. A stack started with another `WP_PORT`
+(38081 here, while another project's WordPress held 8080) is seeded correctly and never
+visited: every spec loads the other site, and the failures read as plugin bugs (D210's
+run showed `/?p=9` redirecting to that site's image attachment, and all four Related
+cases red).
+
+**What it should do.** Global setup already runs WP-CLI before anything else. Read `wp
+option get siteurl` there and compare its origin with the projects' `baseURL`; on a
+mismatch, stop before seeding with one message that names both and says to set `WP_URL`
+(or start the stack on that port). The multisite pair does the same against `WP_MS_URL`
+when `E2E_MULTISITE` is set. Do not derive `baseURL` from the stack silently: the config
+is read before global setup runs, and a second source of the URL is the drift this
+removes.
+
+**Done when** `WP_URL` pointing at a WordPress that is not the stack fails global setup
+with that message, and a matching one runs as today.
