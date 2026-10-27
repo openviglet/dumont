@@ -119,10 +119,9 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 🛠 **D171** (deps: D169 ✅) **Authors get no help from Turing while writing: no excerpt draft, duplicate check, link ideas or audience fit** — The excerpt draft shipped; audience fit is still missing: no per-persona content-fit score shows for a post on a site whose agent has personas. → §XLIX.30
 - 🛠 **D174** (deps: D169 ✅, D186 ✅, Turing T1153) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Chat now answers from the posts; the answer panel reads one run-on word, as Turing's stream drops each token's leading space. → §XLIX.26
 - 📋 **D175** (deps: D169 ✅, D174 🛠) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
-- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 🛠, D172 ✅, D175, D177 ✅, D178 ✅, D194) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
+- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175, D177 ✅, D178 ✅, D194) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 🛠 **D188** (deps: D176 ✅, Turing T1142) **Search abandonment is never reported, and GA4's own site-search reports stay empty** — A site cannot see who searched and left without opening anything, or read searches in GA4's built-in reports. → §XLIX.44
 - 🛠 **D193** (deps: D173 ✅, D208, D209) **The demo stack runs on stock Twenty Twenty-Five, so nothing it shows looks like a store a buyer would trust** — The results page waits on the search block's shift, the hero on a box-only block; no keyboard spec yet. → §XLIX.49
 - 📋 **D194** (deps: D173 ✅, D193 🛠) **The Woo seed holds a handful of test products, too few for facets, synonyms or a copilot to show anything** — Search only impresses over a catalog large and varied enough for a typo, a vague need or a filter to matter. → §XLIX.50
@@ -145,15 +144,6 @@ This track has no remaining pending tasks.
 - **A declared custom sort converges on the site with the fields** The jobs schema
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
-
-## Done when — D171
-
-- **An author drafts an excerpt and accepts it** Draft an excerpt calls Turing's summary
-  through the plugin's REST route with the stored key, Use fills the excerpt field,
-  nothing is saved unasked, and a spec covers it.
-- **A site with personas shows each one's content-fit** When the SN site has personas,
-  Assist shows a content-fit score per persona with its reasons, hidden when there are
-  none.
 
 ## Done when — D174
 

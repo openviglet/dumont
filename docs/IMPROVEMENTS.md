@@ -180,29 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.30 An Assist section in the editor panel (D171)
-
-**What happens.** The editor panel's Assist section has "Already covered?" and "Link
-ideas" (`GET viglet-dumont/v1/post/<id>/assist`) and "Draft an excerpt" (`POST
-viglet-dumont/v1/post/<id>/excerpt`, `Viglet_Dumont_Post_State::draft_excerpt()`, which
-calls Turing's `/api/v2/summary` with the stored key). Audience fit is the one action
-left: the local stack has no persona, so nothing tests it yet.
-
-**What it should do.**
-- "Fits the audience?": when the SN site's agent has audience personas, a score per
-  persona with its reasons, from Turing's anonymous
-  `/api/sn/{site}/persona/{personaId}/content-fit` (T634), called from the plugin's server
-  like the excerpt. Hidden when the site has none.
-- List the personas with Turing's `GET /api/sn/{site}/personas` (T1143, shipped): `id`,
-  `name`, `description`, ordered by name, an empty list when the site has no agent. Every
-  id it returns is one content-fit accepts, and both pass the site API-key gate and take
-  a partitioned key. Call it from PHP with the stored key, like content-fit; the SDK's
-  `fetchSitePersonas` is not on npm until Turing publishes (T1142).
-- The spec provisions one audience persona on the local Turing (`/api/persona`) in
-  global-setup, so a site with personas exists to test against.
-- Specs: a persona score shows on a site with one; the action is hidden on a site with
-  none.
-
 ### XLIX.26 A live-LLM browser suite for the AI features (D174)
 
 **What happens.** The live-LLM suite runs (`npm run test:e2e:ai`, `tests/e2e/ai/`): a
@@ -222,6 +199,9 @@ $0.0014.
   "Applicationsfortheresearchgrantcloseon14March2026." (Turing T1153). Once that ships and
   the stack runs the image, the spec passes unchanged.
 - The shop copilot (D173) and the site assistant (D175) join the suite as each lands.
+- The teardown returns once the queue is sent, before Turing commits the deletions: a
+  default run started right after read "5 results" for 4 in `site/url.spec.mjs`. Wait for
+  the seeded posts to leave the index before returning.
 
 ### XLIX.27 A site assistant block on Turing's chat (D175)
 
