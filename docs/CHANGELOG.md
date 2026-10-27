@@ -662,3 +662,4 @@
 - **D194** — The demo store's journal of 22 guides names its products, so one search returns a guide and then what it recommends, and seven curated searches are checked.
 - **D195** — The demo's "How it works" tour marks each Turing feature on the page with a keyboard-reachable note in English or Portuguese that never covers it.
 - **D210** — Related after posts skips a post whose block template or its parts place the block, so a block theme shows one (design §XLIX.66 recorded in `wordpress/src/includes/class-viglet-dumont-related.php`).
+- **D212** — Related and copilot product cards offer Compare, ticking into the one list the search cards use, with the compare link once two are ticked.
