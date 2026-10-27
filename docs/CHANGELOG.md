@@ -639,7 +639,7 @@
 - **D189** — Health's event times and last run are formatted on the server in the site's formats and time zone and the reader's language.
 - **D170** — With Suggest filters on, a sentence typed into the search block offers Turing's grounded nl-filters reading as chips; one click applies a filter and drops its words from the query.
 - **D173** — An Ask the catalog block talks to Turing's catalog copilot; its cited products show the shop's price and go in the cart with a click, beside the search block's price facets and product cards.
-- **D178 (screen, widget and metrics-off notice)** — Search insights lists a period's top searches with CTR, searches that found nothing and results never opened, with Write about this and Add a synonym, and a dashboard widget shows the week.
+- **D178** — Search insights summarizes the period through Turing's language model on request, cached and rewritable, beside its tables and the metrics-off notice.
 - **D182 (CI job and Linux launcher)** — The WordPress workflow gains an e2e job that starts WordPress and Turing with bin/run-docker.sh, logs the Turing it ran against, runs the browser suite and keeps its artifacts.
 - **D183** — The block and the overlay send as-you-type searches as typed, in Turing's instant mode: the last word matches as a prefix with no wildcard guessed, and half-typed words stay out of the search log.
 - **D186** — A Generative AI setting (off by default) declares the manifest's genAi block, so provisioning turns a site's answers on; the Fields screen warns before it applies.

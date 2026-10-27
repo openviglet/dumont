@@ -246,26 +246,6 @@ slots and host actions). A WordPress visitor has no way to reach it.
 - Specs in the `ai` project (D174): a question about a seeded post gets that post as a
   citation, a follow-up keeps context, and navigation stays on the site.
 
-### XLIX.32 A search insights screen in wp-admin (D178)
-
-**What happens.** "Search insights" (`assets/admin/insights.js`, `GET
-viglet-dumont/v1/insights?period=`, `Viglet_Dumont_Insights`) shows, for the last 24
-hours, 7 days, 30 days or all time, the top searches with clicks and click-through, the
-searches that found nothing and the ones that found results nobody opened, from Turing's
-`metrics/clicks` and `metrics/failed-searches`. A gap row offers "Write about this" (a
-new draft titled with the search) and "Add a synonym" (Tuning, D172, opened with
-`?synonym=`). A dashboard widget shows the week's top five and no-result five, cached
-for ten minutes. Searches made while typing go in Turing's instant mode (D183) and stay
-out of the metrics; the `*` prefixes logged before it are left out.
-
-**What it should do next.**
-- An AI summary of the period through Turing's summary endpoint, cached and regenerable
-  like the excerpt draft (D171), with a live-LLM spec.
-
-
-- A trend per term and the live count (`metrics/live`), only if they read better than the
-  tables alone.
-
 ### XLIX.35 A showcase site, admin tab and recorded tour (D179)
 
 **What happens.** Each Turing feature the plugin brings to WordPress lands as its own
@@ -677,3 +657,10 @@ to a prospect.
 
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
+
+### XLIX.63 Trends and the live count on Search insights (D207)
+
+Turing serves a per-term series and a live count (`metrics/live`) beside the period
+reports Search insights reads (D178). Open question: whether a sparkline per row or a
+live counter reads better than the tables alone; settle it with an `e2e:look` screenshot
+of each before building.
