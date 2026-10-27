@@ -497,17 +497,6 @@ to a prospect.
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 
-### XLIX.69 Popular chips grouped by meaning (D213)
-
-`Viglet_Dumont_Trending::chips()` (D202) keeps each spelling once, case aside, so
-variants of one search ("raincoat", "rain jacket", a typo of either) each take a chip.
-Group them into one chip under the most-searched spelling. The grouping runs on a
-schedule (WP-Cron, daily) through Turing's `POST /api/v2/summary`, given the week's
-candidate searches and asked to return groups as JSON; the result is stored in an option
-the chips read, never computed on page load. Without GenAI, exact matches only, as
-today. Spec: two seeded variants show as one chip under the more searched one, with the
-stored grouping fixed in the test.
-
 ### XLIX.73 The demo catalog in Portuguese (D217)
 
 **What happens.** The demo storefront's catalog and journal (`demo/seed/catalog.php`,

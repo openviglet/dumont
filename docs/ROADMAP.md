@@ -130,7 +130,6 @@ This track has no remaining pending tasks.
 - 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
 - 📋 **D203** (deps: D195 ✅, D198, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
-- 📋 **D213** (deps: D202 ✅) **Two spellings of one search show as two popular chips, a typo beside the word it meant** — "raincoat", "rain jacket" and "rain jaket" are one want, and three chips for it crowd out the other searches. → §XLIX.69
 - 📋 **D217** (deps: D194 ✅, D219) **The demo store's products and guides are English only, so a Portuguese search finds nothing** — The language switch is part of what the demo shows, and Brazilian prospects search in Portuguese. → §XLIX.73
 - 📋 **D218** (deps: D194 ✅, D219) **The demo store's products and guides have no images, so the grid, product pages and compare table show text alone** — A store without pictures reads as unfinished, and images must be ones the repository may redistribute. → §XLIX.74
 - 📋 **D219** (deps: —) **The demo store and the browser tests share one WordPress and one SN site, so the demo is never up while tests run** — Each side carries code to undo the other, and leftovers from one have broken the other's counts. → §XLIX.75
@@ -166,11 +165,6 @@ This track has no remaining pending tasks.
   lists or deletes a site B document.
 - **Features Turing refuses on a partitioned key turn off and say so** Health names each
   one Turing answers 403 on such a key, and none falls back to an unbound key.
-
-## Done when — D213
-
-- **Two spellings of one search show as one chip** A spec seeds two variants of one
-  search and finds a single chip under the more searched one.
 
 ## Done when — D217
 
