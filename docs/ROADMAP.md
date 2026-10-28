@@ -113,7 +113,6 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
-- 📋 **D234** (deps: D232 ✅) **The shipping rule still writes user docs into vigletdocs, a second copy that drifts** — One place to write a page, in the same commit as the change it documents, is the whole point of the move. → §L.5
 - 💭 **D235** (deps: D232 ✅, D233 ✅) **Old docs.viglet.org/dumont links would 404 once those pages leave vigletdocs** — Search results and the Turing and Shio docs point there, and a path-for-path redirect keeps every one of them working. → §L.6
 
 ## Track A — Structured-source connector framework

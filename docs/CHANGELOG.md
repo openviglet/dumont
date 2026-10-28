@@ -187,6 +187,7 @@
 - **D231** — /docs carries the site's nav and footer from src/lib/site-links.ts, and index cards are .astro components on the site's tokens (design §L.2 recorded in `dumont-site/README.md`).
 - **D232** — The 20 docs-dumont pages, 15 images and 9 Mermaid diagrams build under /docs with their URL tails, and the links validator passes (design §L.3 recorded in `dumont-site/README.md`).
 - **D233** — Every site, console and README docs link points at /docs; each docs page has a .md twin and sits in the sitemap, manifest and llms.txt (design §L.4 recorded in `dumont-site/README.md`).
+- **D234** — The shipping skill and agents.md put a user-facing page in dumont-site/docs, same commit; vigletdocs says the docs moved (design §L.5 recorded in `.claude/skills/dumont-roadmap-docs/SKILL.md`).
 
 ## Track E — Data quality & trust
 

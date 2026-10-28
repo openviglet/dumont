@@ -47,6 +47,7 @@ Each file has one job — keep them in sync and never duplicate content:
 - Frontend routes: `dumont-react/src/DumontRoutes.tsx`
 - Frontend sidebar: `dumont-react/src/components/app-sidebar.tsx`
 - Sample configs: `scripts/config/dumont-connector.properties`, `aem/aem-plugin-sample/`
+- End-user docs: `dumont-site/docs/src/content/docs/` (dumont.viglet.org/docs; sidebar in `dumont-site/docs/astro.config.mjs`). A user-facing change writes its page there, in the same commit
 
 ### Build & Test Commands
 ```bash

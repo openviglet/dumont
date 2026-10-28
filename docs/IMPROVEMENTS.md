@@ -442,24 +442,6 @@ The end-user documentation moves from vigletdocs into this repository, as an Ast
 Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
 system, and docs.viglet.org/dumont later redirects to it.
 
-### L.5 Shipping writes the docs here (D234)
-
-**What happens.** The shipping rule sends every user-facing change to
-`vigletdocs.github.io/docs-dumont` as a separate commit in another repo, gated by that
-repo's `npm run build`. Once the area exists, two copies of the docs would drift on the
-first ship that edits only one.
-
-**What it should do.**
-- The `dumont-roadmap-docs` skill's "Propagating to end-user documentation" and "When a
-  track completes" point at `dumont-site/docs/`, gated by the area's build; the change and
-  its page land in **one** commit, which removes the two-repo step.
-- `agents.md` names the area in Project Structure and Key Paths.
-- `docs-dumont` in vigletdocs is frozen: its index says where the docs moved, and no page
-  is edited there again. Removing it from the Docusaurus config waits for L.6, so its
-  URLs keep answering until the redirect does.
-
-**Gate.** No rule in the skill or `agents.md` names `docs-dumont` as a place to write.
-
 ### L.6 docs.viglet.org/dumont redirects to /docs (D235)
 
 **What happens.** Search engines, the Turing and Shio docs and old links all point at
