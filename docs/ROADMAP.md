@@ -111,8 +111,6 @@ This track has no remaining pending tasks.
 
 ## Track R — API access and credential handling
 
-## Track D — Adoption & authoring
-
 ## Track A — Structured-source connector framework
 
 - ⏳ **D144** (deps: SDK custom-sort release) **A structured schema cannot declare custom facets or sorts, so the Turing manifest Dumont posts never carries them** — Custom sorts need a turing-java-sdk release with TurSNManifestCustomSort; 2026.3.6 has facets only. → §XLVIII
