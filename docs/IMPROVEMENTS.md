@@ -274,33 +274,6 @@ strings lands unseen until the next local run.
 - Speed budgets on a shared runner are noisier than on a laptop; keep them, and read a
   budget failure against the timing annotations before raising a bound.
 
-### XLIX.44 Search abandonment and GA4's recommended events (D188)
-
-**What happens.** The search block and the instant search report searches and result
-clicks (D176) through workarounds in `src/public/search.js`. Clicks go out through a
-hand `fetchRaw` with `keepalive`. Search events are re-emitted by `trackSearch()`,
-because the controller's analytics option wrote a cookie before consent. GA gets only
-the `turing_*` names, and no event says "searched and left". Turing has shipped all of
-it. The SDK's clicks are `keepalive` with no CSRF prime (T1128). The controller takes a
-`consent` function and `sessionCookie: false`, and skips instant-mode searches (T1129).
-`googleAnalyticsSink({ recommended: true })` also sends `search` and `select_content`,
-and the controller's opt-in abandonment emits `turing_search_abandoned` (T1130).
-
-The published `@viglet/turing-sdk` is still 2026.3.9 (24 August), which has none of
-T1128-T1130; the plugin copies the SDK from `node_modules` (`bin/copy-sdk.mjs`), so this
-waits on a release (Turing T1142, deferred until a maintainer publishes; its pnpm
-check:unreleased counts what waits).
-
-**What it should do.**
-- Hand the analytics bus to the search controllers, with `consent: trackingAllowed`,
-  `sessionCookie: false` and abandonment on. Then drop `trackSearch()` and the hand click
-  call for the SDK's `trackResultClick`.
-- Turn on the sink's recommended mode.
-- Specs in `tests/e2e/site/analytics.spec.mjs`, kept as they are, plus:
-  - leaving after a search sends one abandonment;
-  - a result click sends none;
-  - the stubbed gtag receives `search` with `search_term`.
-
 ### XLIX.46 Partitioned API keys in place of client-side site filters (D190)
 
 **What happens.** Several WordPress sites share one SN site, told apart by `site_key`
@@ -497,3 +470,24 @@ to a prospect.
 
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
+
+### XLIX.80 Drop the refinement filter once the SDK tells refinements apart (D224)
+
+**What happens.** Since D188 the search block and the instant search report through the
+SDK's search controller, which counts a facet, a sort or a page as another search
+(Turing T1155). `wordpress/src/public/search.js` holds the workaround: the Google
+Analytics sink is wrapped so `turing_search`, `turing_search_no_results` and
+`turing_search_refined` pass only while `reportSearchesWhen()` says the request in
+flight is one the visitor settled on, and `search-block.js` sets `settled = false`
+before each facet, sort, page and filter-clear call. `site/analytics.spec.mjs` ("a
+filter, a sort or a page on a search is not reported as another search") is what holds
+it.
+
+**What it should do,** once a `@viglet/turing-sdk` release carries T1155:
+- Bump the SDK in `wordpress/package.json` and rebuild (`npm run build` copies it).
+- Delete `reportSearchesWhen()`, the sink wrapper and the `settled` flag, or keep `settled`
+  only if the SDK takes it as `{ report: false }` on the refinement calls.
+- The spec stays as it is and must pass unchanged.
+
+Turing T1156 (the click posted without asking consent) needs nothing here: the plugin
+checks `trackingAllowed()` before every click, which stays.

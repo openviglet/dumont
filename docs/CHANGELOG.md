@@ -672,3 +672,4 @@
 - **D221** — Global and demo setup compare WP_URL, WP_MS_URL and WP_DEMO_URL with the stack's siteurl and stop before seeding, naming both, when they differ.
 - **D222** — Related after posts skips content filtered while an excerpt is built, so a product's generated summary is its own text and the box shows once.
 - **D223** — Tarnfell prints its text through a tarnfell text domain with a pt_BR translation, so a Portuguese demo reads Portuguese throughout and the tour spec runs in it.
+- **D188** — On SDK 2026.3.10 the search controllers report through the bus with consent and no cookie, GA4 gets search and select_content, and a search left behind is reported.
