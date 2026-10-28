@@ -295,7 +295,8 @@ shopper has to know them all to ask.
 - Prices and totals come from WooCommerce, never from the model.
 
 The block side landed against Turing T1159/T1167 (`copilot/kit`), checked with a mocked
-reply. Left: the live run, which needs a `turing-ce:local` built after T1159. Seen in
+reply. Left: the live run. On the GHCR image (`3b726072ee`) every demo plan stages
+nothing: the gap queries use need words the catalog lacks (Turing T1169). Seen in
 cursarei's profile analysis, which returns a staged path of real courses with the same
 id check.
 

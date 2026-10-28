@@ -117,10 +117,12 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 💭 **D196** (deps: D203 ⏸) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
-- 📋 **D197** (deps: D203 ⏸, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
-- 📋 **D204** (deps: D203 ⏸) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
+- 💭 **D196** (deps: D203 📋) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
+- 📋 **D197** (deps: D203 📋, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
+- 📋 **D204** (deps: D203 📋) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
+- ⏳ **D201** (deps: D173 ✅, D198 ✅, Turing T1169: kit gaps in catalog words) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — The live run on the demo: Turing's kit stages nothing there yet. → §XLIX.57
+- 📋 **D203** (deps: D195 ✅, D198 ✅, D199 ✅, D200 ✅, D201 ⏳, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells: one shopper, each feature the next step. → §XLIX.59
 
 ## Done when — D144
 
