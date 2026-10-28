@@ -193,9 +193,9 @@ the docs have one screenshot per screen, and a prospect cannot try any of it.
 - Landed instead of a Showcase tab: Health's AI features table names the block that
   shows each feature; a second tab would rerun the same LLM-spending check.
 
-- A guided tour, `npm run e2e:tour`, that drives the showcase and records a video and
-  screenshots per feature. It is the source for the docs' per-feature screenshots;
-  the site and the demo video follow the shopper's story instead (D203, D204).
+- Landed: `npm run e2e:tour` records a video and a screenshot per feature into
+  `tests/e2e/artifacts/tour/`; the site and the demo video follow the shopper's story (D203, D204).
+
 - vigletdocs: a "Turing on WordPress" page with the feature matrix and those
   screenshots, and the site copy claims only what the tour shows working
   (`dumont-site` rule).
