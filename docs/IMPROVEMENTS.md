@@ -276,31 +276,6 @@ chat, a shopping copilot and insights, has no page, and nothing links to a demo.
 recording rather than hand-made mock-ups, and a link check covers the new calls to
 action.
 
-### XLIX.54 Turing's generative AI on the demo store (D198)
-
-**What happens.** The plugin carries Turing's generative features as blocks (the answer
-slot on results, the shopping copilot, the RAG chat once D175 lands), but the demo tasks
-treat them as one marker among many. On a store, they are the headline.
-
-**What it should do.**
-- `run-docker.cmd demo` turns the SN site's GenAI on through provisioning (D186), so a
-  fresh demo stack answers without a console visit when a key is given, and says plainly
-  on the page when none is.
-- Results: the cited answer above the products for a question-shaped query ("what do I
-  need for a winter hike?"), its citations linking the guides and products it read.
-- A site-wide chat launcher in the theme answering from the catalog and the journal, with
-  sources under every reply; on a product page it opens scoped to that product.
-- The shopping copilot on product and results pages: a need described in words becomes a
-  short list of products with reasons, and its add-to-cart action fills the real cart.
-- Curated prompts in the seed, in English and pt_BR, each with the sources its answer must
-  cite, plus one off-catalog question the assistant must decline rather than invent.
-- Every generative element is labelled as AI and shows its sources; none answers without
-  one.
-
-**Gate.** The live-LLM suite (D174) runs the curated prompts on the demo seed and
-asserts grounding, the declined question and the cost per run; the keyless suite asserts
-the no-key notice.
-
 ### XLIX.55 Text to filters on the search block (D199)
 
 **What happens.** The search block sends the whole sentence as the query. Price, colour

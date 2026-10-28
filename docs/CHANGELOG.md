@@ -677,4 +677,4 @@
 - **D175** — A Site assistant block, or a launcher on every page, opens a chat streaming Turing's answers from the site's posts with the posts it used, kept across pages.
 - **D228** — npm run lint:js is clean again: the woo keyboard spec reads the focused element through the page's own document, as the fixtures do.
 - **D179** — The demo Showcase, Health naming each feature's block, npm run e2e:tour and the vigletdocs Turing on WordPress page show Turing's WordPress features together.
-- **D198 (GenAI, assistant, no-key notice)** — The demo turns the store's generative AI and corner Site assistant on, and the showcase says when Turing has no language model to answer with.
+- **D198** — The demo's generative AI is on, with the assistant on every page, a no-key notice, and curated prompts answered live from the guides they name.
