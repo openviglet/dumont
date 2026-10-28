@@ -679,3 +679,4 @@
 - **D179** — The demo Showcase, Health naming each feature's block, npm run e2e:tour and the vigletdocs Turing on WordPress page show Turing's WordPress features together.
 - **D198** — The demo's generative AI is on, with the assistant on every page, a no-key notice, and curated prompts answered live from the guides they name.
 - **D225 (readme sections)** — readme.txt has an External services section naming what goes to Turing and when, a Plugins > Add New install, and a link to the source.
+- **D226** — The WordPress plugin workflow runs Plugin Check on the built package on every change and gates the release; today it reports no errors.

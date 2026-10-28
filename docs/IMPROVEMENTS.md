@@ -394,23 +394,6 @@ name real wordpress.org accounts. MIT is GPL-compatible and accepted; switching 
 Done when the readme validates on the wordpress.org readme validator and the package
 holds nothing the directory forbids.
 
-### XLIX.82 Plugin Check as a CI gate (D226)
-
-Plugin Check (PCP) is the tool the WordPress.org review team runs on every submission.
-It overlaps with the WordPress Coding Standards that `composer check` already enforces,
-but it also checks what PHPCS does not: unescaped output reached at runtime, remote
-calls and enqueued off-site assets, files the directory forbids in a package, readme
-headers against the plugin header, and the trademark rules on the name and slug.
-
-The gate runs `wp plugin check` on the built package, the same `viglet-dumont/` folder
-`bin/build-zip.sh` produces, inside the WordPress the e2e job already starts, so it
-judges what would be uploaded rather than the source tree. Errors fail the workflow;
-warnings are reported and either fixed or annotated with the reason, the way the PHPCS
-rules are.
-
-Done when the `wordpress-plugin.yml` workflow runs PCP on every change to `wordpress/`
-and the current package passes it with no errors.
-
 ### XLIX.83 Releases deployed to the plugin directory (D227)
 
 WordPress.org never reads GitHub: an approved plugin gets its own SVN repository at
