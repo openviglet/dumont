@@ -292,9 +292,9 @@ GenAI:
   built in code from the chosen values, never from model prose. One click undoes it.
 - Answers cached by query and vocabulary version, with a daily cap.
 
-**Turing side.** If no Turing call takes a closed vocabulary and returns choices (its
-roadmap rules out free-form JSON output in favour of tool-calling schemas), the Turing
-task is filed first through the friction skill and named in this line's deps.
+**Turing side.** Shipped as T1085: `POST /api/sn/{site}/nl-filters` with `{text,
+locale}` answers the `q` and `fq` for the SN site's own facets (Turing 2026.3.4+), so
+the closed vocabulary is Turing's and the block only applies and explains the answer.
 
 Seen in cursarei's `nlFilters`, which proved the pattern on courses.
 
