@@ -476,15 +476,3 @@ The first submission is manual and outside this task: a wordpress.org account up
 the zip, the review team approves it, and only then does SVN exist.
 
 Done when a `wordpress-v*` tag updates the directory listing with no step by hand.
-
-### XLIX.84 The JS lint gate is red on the woo keyboard spec (D228)
-
-**What happens.** `npm run lint:js` in `wordpress/` exits 1 on HEAD: two
-`@wordpress/no-global-active-element` errors in `tests/e2e/woo/keyboard.spec.mjs` (lines
-24 and 35), which read `document.activeElement` inside `page.evaluate`. The spec arrived
-with D193, so every task since has run a red JS lint gate on code it never touched.
-
-**What it should do.** Read the focused element through a node, as `fixtures.mjs`
-already does in `tabTo` (`el === el.ownerDocument.activeElement`), so the spec says the
-same thing and the rule passes. No disable comment: the rule's remedy fits here. `npm
-run lint:js` is then clean.

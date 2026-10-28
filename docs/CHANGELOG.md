@@ -675,3 +675,4 @@
 - **D188** — On SDK 2026.3.10 the search controllers report through the bus with consent and no cookie, GA4 gets search and select_content, and a search left behind is reported.
 - **D224** — On SDK 2026.3.11 the controller tells a refinement from a new search, so the plugin's bus filter and settled flag are gone and the spec passes unchanged.
 - **D175** — A Site assistant block, or a launcher on every page, opens a chat streaming Turing's answers from the site's posts with the posts it used, kept across pages.
+- **D228** — npm run lint:js is clean again: the woo keyboard spec reads the focused element through the page's own document, as the fixtures do.

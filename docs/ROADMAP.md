@@ -130,7 +130,6 @@ This track has no remaining pending tasks.
 - 📋 **D225** (deps: —) **The readme would fail the WordPress.org review: no External services section, a GitHub-only install, no source link** — The directory is where WordPress users install plugins, and its reviewers refuse a readme that hides the calls to Turing. → §XLIX.81
 - 📋 **D226** (deps: —) **CI never runs Plugin Check, so what the directory reviewers flag is found only after a submission** — PHPCS covers coding standards, not the reviewers' own checks, and a rejected review costs weeks. → §XLIX.82
 - 📋 **D227** (deps: D225, D226, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D228** (deps: —) **The plugin's JS lint fails on HEAD: the woo keyboard spec reads the focused element through a global** — A gate that is already red cannot tell a task whether it broke something. → §XLIX.84
 
 ## Done when — D144
 
