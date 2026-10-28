@@ -190,8 +190,9 @@ the docs have one screenshot per screen, and a prospect cannot try any of it.
 - Landed: the demo's `/showcase/` page holds the search, the copilot and the Site
   assistant, and `?tour=1` numbers each feature in page order once it shows.
 
-- An admin "Showcase" tab listing each feature: on or off (from D169), the block that
-  shows it, and a link to the page section.
+- Landed instead of a Showcase tab: Health's AI features table names the block that
+  shows each feature; a second tab would rerun the same LLM-spending check.
+
 - A guided tour, `npm run e2e:tour`, that drives the showcase and records a video and
   screenshots per feature. It is the source for the docs' per-feature screenshots;
   the site and the demo video follow the shopper's story instead (D203, D204).

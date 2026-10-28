@@ -676,4 +676,4 @@
 - **D224** — On SDK 2026.3.11 the controller tells a refinement from a new search, so the plugin's bus filter and settled flag are gone and the spec passes unchanged.
 - **D175** — A Site assistant block, or a launcher on every page, opens a chat streaming Turing's answers from the site's posts with the posts it used, kept across pages.
 - **D228** — npm run lint:js is clean again: the woo keyboard spec reads the focused element through the page's own document, as the fixtures do.
-- **D179 (showcase page)** — The demo has a Showcase page holding the search, copilot and Site assistant, and the How it works tour numbers each feature in page order once it shows.
+- **D179 (showcase page, feature states on Health)** — The demo has a Showcase page numbered by the tour in page order, and Health's AI table names the block that shows each feature beside its state.
