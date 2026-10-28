@@ -435,3 +435,134 @@ keep the two exclusions if the lists stay short and say so; keep
 `load_plugin_textdomain` while the GitHub zip is a supported install, since a site not
 installed from the directory loads no language pack. Then make the CI job fail on
 warnings too.
+
+## L The documentation area
+
+The end-user documentation moves from vigletdocs into this repository, as an Astro +
+Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
+system, and docs.viglet.org/dumont later redirects to it.
+
+### L.1 The documentation area at /docs (D230)
+
+**What happens.** The end-user documentation lives in another repository
+(`vigletdocs.github.io/docs-dumont`, a Docusaurus multi-instance shared with Turing and
+Shio) and publishes at `docs.viglet.org/dumont/`. A feature and its page ship in two
+repos, two commits and two deploys, and `dumont-site` links out to a domain it does not
+build.
+
+**What it should do.** Follow the roadkeep pattern (`roadkeep/site/docs`): a second npm
+project at `dumont-site/docs/`, Astro + Starlight, served at `dumont.viglet.org/docs`.
+- `base: "/docs"`, `site: "https://dumont.viglet.org"`, `outDir: "../dist/docs"`.
+- `build:docs` runs **last** in `dumont-site`'s `build`: `vite build` empties `dist/`, so
+  an earlier docs build is deleted by the step after it and the deploy goes green with the
+  area missing.
+- Pagefind search (built at deploy time, no service), `lastUpdated`, the GitHub social
+  link, the same Google tag the site carries.
+- A workspace member under the root `pnpm-workspace.yaml`, so `publish-github-pages.yml`
+  needs no new step: it already copies `dumont-site/dist/*` into `_site/`.
+- One placeholder page, so the area builds before any content moves (L.3).
+
+**Gate.** `pnpm run build:site` writes `dist/docs/index.html` and the Pagefind index,
+and the workflow's assembly check asserts `_site/docs/index.html` exists, the way it
+already asserts the marketplace folders.
+
+### L.2 The area themed from the design system (D231)
+
+**What happens.** Starlight's default theme is its own: grey ramps, a teal-ish accent,
+its own header. roadkeep only overrides the `--sl-color-*` ramp, which is enough for a
+tool page but would make `/docs` read as a different product from the page one click
+away. The Docusaurus pages today carry inline-styled cards (`index.mdx`'s `Pill`,
+`FeatureCard`, `NavCard`) against `--color-*` variables that only that theme declares.
+
+**What it should do.** Theme the area from `@viglet/viglet-design-system`, not by hand:
+- Import `preset.css` / `tokens.css` / `fonts.css` and map every `--sl-color-*`, font and
+  radius to the `--vg-*` tokens, light and dark, so a token change in the design system
+  reaches the docs with no edit here.
+- Starlight's `data-theme` and the site's mode toggle agree: one stored choice, no flash
+  of the other palette between `/` and `/docs`.
+- Override Starlight's `Header` and `Footer` components to render the same brand, nav
+  links and footer as `dumont-site`, so the area is a section of the site rather than a
+  neighbour.
+- The index page and the cards it needs are `.astro` components on the design system's
+  site layer (`site.css`, VDS214), not inline styles; asides, tabs, code blocks and tables
+  styled to the same tokens.
+- Readable at a 320px phone: no horizontal page scroll, wide tables scroll in their box.
+
+**Gate.** Screenshots of the index and one long reference page, light and dark, desktop
+and 320px, reviewed before and after; no colour literal in the area's CSS outside a
+token mapping.
+
+### L.3 The docs-dumont pages move into the area (D232)
+
+**What happens.** The 20 pages of `docs-dumont` (getting started, installation,
+configuration reference, architecture, indexing plugins, connectors, developer guide,
+REST API, extending) are written for Docusaurus.
+
+**What it should do.** Move them into `dumont-site/docs/src/content/docs/` with their
+content unchanged and their Docusaurus-isms converted:
+- Frontmatter: `sidebar_position` / `sidebar_label` / `slug` / `id` become Starlight's
+  `sidebar` keys; `index.mdx` drops `@docusaurus/Link` and its inline components for the
+  L.2 ones.
+- Admonitions (`:::note`, `:::tip`, `:::warning`) checked against Starlight's aside syntax.
+- The 15 images under `/img/diagrams/` and `/img/screenshots/dumont-*` copied into the
+  area's assets and referenced relatively, so the base is applied.
+- Links to `/turing/*` become absolute `https://docs.viglet.org/turing/...` - they leave
+  this site; internal links become relative.
+- The sidebar written from `sidebars-dumont.ts`, same order and groups.
+- Every page keeps its URL tail (`/dumont/rest-api` becomes `/docs/rest-api`), which is what
+  makes the redirect in L.6 a prefix rewrite instead of a table.
+
+**Gate.** `starlight-links-validator` passes (no broken internal link or anchor), every
+page and image from `docs-dumont` has a counterpart, and a diff of the rendered text
+shows no content lost.
+
+### L.4 The site points at its own docs (D233)
+
+**What happens.** `site-content.ts` points `docs`, `install` and `rest` at
+`docs.viglet.org/dumont/...`, the footer names `docs.viglet.org`, and the site's
+`sitemap.xml`, `llms.txt` and Markdown twins know nothing about a docs area.
+
+**What it should do.**
+- Every docs link in `site-content.ts` and the footer resolves inside `/docs`.
+- `sitemap.xml` lists the docs pages (Starlight's sitemap merged with the site's, or one
+  sitemap index over both); `llms.txt` points at the docs.
+- Each docs page gets a Markdown twin at the same address, built from the render the way
+  roadkeep's `twins.mjs` does, so the site's twin rule holds across both builds.
+- The root `README.md` and `agents.md` (`dumont-site` row) say where the docs live.
+
+**Gate.** A link check over the assembled `_site` reports no link to
+`docs.viglet.org/dumont`, and every docs page has an `index.md` twin.
+
+### L.5 Shipping writes the docs here (D234)
+
+**What happens.** The shipping rule sends every user-facing change to
+`vigletdocs.github.io/docs-dumont` as a separate commit in another repo, gated by that
+repo's `npm run build`. Once the area exists, two copies of the docs would drift on the
+first ship that edits only one.
+
+**What it should do.**
+- The `dumont-roadmap-docs` skill's "Propagating to end-user documentation" and "When a
+  track completes" point at `dumont-site/docs/`, gated by the area's build; the change and
+  its page land in **one** commit, which removes the two-repo step.
+- `agents.md` names the area in Project Structure and Key Paths.
+- `docs-dumont` in vigletdocs is frozen: its index says where the docs moved, and no page
+  is edited there again. Removing it from the Docusaurus config waits for L.6, so its
+  URLs keep answering until the redirect does.
+
+**Gate.** No rule in the skill or `agents.md` names `docs-dumont` as a place to write.
+
+### L.6 docs.viglet.org/dumont redirects to /docs (D235)
+
+**What happens.** Search engines, the Turing and Shio docs and old links all point at
+`docs.viglet.org/dumont/...`. Removing those pages without a redirect turns each into a
+404.
+
+**What it should do.** Redirect `docs.viglet.org/dumont/*` to
+`dumont.viglet.org/docs/*`, path for path (L.3 keeps the tails identical, so this is a
+prefix rewrite). GitHub Pages has no server-side redirect, so each old route becomes a
+static page with `<link rel="canonical">` and a `meta refresh` (or Docusaurus'
+client-redirects plugin), and then `docs-dumont` leaves the vigletdocs build.
+Cross-links from the Turing and Shio docs move to the new address in the same pass.
+
+**Gate.** Every route `docs-dumont` published answers with a redirect to its
+counterpart, checked from the old sitemap.
