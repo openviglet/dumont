@@ -497,26 +497,6 @@ to a prospect.
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 
-### XLIX.78 No Related box in a generated excerpt (D222)
-
-**What happens.** With "Related after posts" covering products (the woo suite turns it
-on since D212), a WooCommerce product without a short description shows, under its
-price, "A Red jacket for the field. Related posts Wool jacket October 26, 2026 Compare
-Linen jacket ..." on Twenty Twenty-Five. The summary is generated from the content, and
-`wp_trim_excerpt()` runs `the_content` on the main query's post inside the loop, so
-`Viglet_Dumont_Related::append()` adds the box and the trim keeps its text with the tags
-stripped. A post whose template shows `core/post-excerpt` gets the same tail.
-
-**What it should do.** `append()` returns the content untouched while an excerpt is
-being built: `doing_filter( 'get_the_excerpt' )` (the hook `wp_trim_excerpt` is called
-from), and WooCommerce's `woocommerce_short_description` path if its summary is built
-another way (check which one Twenty Twenty-Five's single-product template reaches). Unit
-test beside D210's in `RelatedTest`; spec in `woo/compare.spec.mjs` or a woo product
-page spec: the summary under the price holds no "Related posts".
-
-**Done when** a product page with the setting on shows the Related box once, in the
-description, and the summary carries none of its text.
-
 ### XLIX.79 The Tarnfell theme in Portuguese (D223)
 
 **What happens.** With `DEMO_LOCALE=pt_BR` (D217) the catalog, journal, facets,

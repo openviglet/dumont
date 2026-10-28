@@ -670,3 +670,4 @@
 - **D218** — The seed draws a WebP illustration per product colour and a landscape per guide (CC0, about 7 KB), so the grid and pages show pictures (design §XLIX.74 recorded in `wordpress/demo/seed/CREDITS.md`).
 - **D220** — The demo specs run on the demo's own WordPress with no switch or reseed, test:e2e:demo runs them alone, and the cross-site clean-up is gone.
 - **D221** — Global and demo setup compare WP_URL, WP_MS_URL and WP_DEMO_URL with the stack's siteurl and stop before seeding, naming both, when they differ.
+- **D222** — Related after posts skips content filtered while an excerpt is built, so a product's generated summary is its own text and the box shows once.
