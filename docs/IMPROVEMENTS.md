@@ -441,19 +441,3 @@ warnings too.
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
 Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
 system, and docs.viglet.org/dumont later redirects to it.
-
-### L.6 docs.viglet.org/dumont redirects to /docs (D235)
-
-**What happens.** Search engines, the Turing and Shio docs and old links all point at
-`docs.viglet.org/dumont/...`. Removing those pages without a redirect turns each into a
-404.
-
-**What it should do.** Redirect `docs.viglet.org/dumont/*` to
-`dumont.viglet.org/docs/*`, path for path (L.3 keeps the tails identical, so this is a
-prefix rewrite). GitHub Pages has no server-side redirect, so each old route becomes a
-static page with `<link rel="canonical">` and a `meta refresh` (or Docusaurus'
-client-redirects plugin), and then `docs-dumont` leaves the vigletdocs build.
-Cross-links from the Turing and Shio docs move to the new address in the same pass.
-
-**Gate.** Every route `docs-dumont` published answers with a redirect to its
-counterpart, checked from the old sitemap.

@@ -188,6 +188,7 @@
 - **D232** — The 20 docs-dumont pages, 15 images and 9 Mermaid diagrams build under /docs with their URL tails, and the links validator passes (design §L.3 recorded in `dumont-site/README.md`).
 - **D233** — Every site, console and README docs link points at /docs; each docs page has a .md twin and sits in the sitemap, manifest and llms.txt (design §L.4 recorded in `dumont-site/README.md`).
 - **D234** — The shipping skill and agents.md put a user-facing page in dumont-site/docs, same commit; vigletdocs says the docs moved (design §L.5 recorded in `.claude/skills/dumont-roadmap-docs/SKILL.md`).
+- **D235** — All 20 docs.viglet.org/dumont pages redirect to their /docs counterpart, docs-dumont left the vigletdocs build, and Turing docs and blog link the new pages.
 
 ## Track E — Data quality & trust
 

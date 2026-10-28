@@ -113,8 +113,6 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
-- 💭 **D235** (deps: D232 ✅, D233 ✅) **Old docs.viglet.org/dumont links would 404 once those pages leave vigletdocs** — Search results and the Turing and Shio docs point there, and a path-for-path redirect keeps every one of them working. → §L.6
-
 ## Track A — Structured-source connector framework
 
 - ⏳ **D144** (deps: SDK custom-sort release) **A structured schema cannot declare custom facets or sorts, so the Turing manifest Dumont posts never carries them** — Custom sorts need a turing-java-sdk release with TurSNManifestCustomSort; 2026.3.6 has facets only. → §XLVIII
