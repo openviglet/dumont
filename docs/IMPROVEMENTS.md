@@ -319,8 +319,9 @@ shopper has to know them all to ask.
 - Without GenAI, the mode is hidden rather than faked.
 - Prices and totals come from WooCommerce, never from the model.
 
-Seen in cursarei's profile analysis, which returns a staged path of real courses with
-the same id check.
+Waits on Turing T1159, the call that returns the gaps and stages; the plugin draws them
+and fills the cart. Seen in cursarei's profile analysis, which returns a staged path of
+real courses with the same id check.
 
 **Gate.** Live-LLM specs on the demo seed: each curated plan returns only seeded,
 in-stock ids, covers its listed gaps, and the cart total equals WooCommerce's.
