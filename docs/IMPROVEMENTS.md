@@ -485,8 +485,8 @@ it.
 
 **What it should do,** once a `@viglet/turing-sdk` release carries T1155:
 - Bump the SDK in `wordpress/package.json` and rebuild (`npm run build` copies it).
-- Delete `reportSearchesWhen()`, the sink wrapper and the `settled` flag, or keep `settled`
-  only if the SDK takes it as `{ report: false }` on the refinement calls.
+- Delete `reportSearchesWhen()`, the sink wrapper and the `settled` flag: the SDK tells a
+  refinement apart by itself (same `q` as the last reported search), with no new option.
 - The spec stays as it is and must pass unchanged.
 
 Turing T1156 (the click posted without asking consent) needs nothing here: the plugin
