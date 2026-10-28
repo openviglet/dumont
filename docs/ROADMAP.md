@@ -119,8 +119,8 @@ This track has no remaining pending tasks.
 
 - 💭 **D196** (deps: D203) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
-- 📋 **D199** (deps: D173 ✅) **A shopper who types "light rain jacket under R$400, blue" gets keyword results, and the facets beside them stay unset** — People describe a need in a sentence; turning it into the site's own filters, and saying so, is search that understands. → §XLIX.55
-- 📋 **D203** (deps: D195 ✅, D198 ✅, D199, D200 ✅, D201 ✅, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
+- ⏳ **D199** (deps: D173 ✅) **A shopper who types "light rain jacket under R$400, blue" gets keyword results, and the facets beside them stay unset** — Sizes read in code, a daily cap on readings, and the demo search page with curated-sentence specs. → §XLIX.55
+- 📋 **D203** (deps: D195 ✅, D198 ✅, D199 ⏳, D200 ✅, D201 ✅, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D236** (deps: —) **Admin e2e accessibility checks fail whenever WordPress core has an update, on core's own update nag** — A red suite should mean the plugin broke, not that a core release came out, and the chain stops the woo specs. → §XLIX.86
@@ -164,6 +164,13 @@ This track has no remaining pending tasks.
 - **A live kit on the demo seed returns only seeded, in-stock ids** With the stack's
   Turing built after T1159, each curated plan on the Tarnfell demo returns only seeded
   product ids, covers its listed gaps, and the cart total shown equals WooCommerce's.
+
+## Done when — D199
+
+- **Sizes, a daily cap and the demo's curated sentences are covered** A size facet
+  filters from "size M" or "tamanho 42" in code; readings stop at a per-day cap the
+  settings name; the Tarnfell search page has apply on, and a spec per curated sentence
+  sets its expected facets.
 
 ## Non-goals (do NOT add as tasks)
 

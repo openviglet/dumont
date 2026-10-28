@@ -278,28 +278,29 @@ action.
 
 ### XLIX.55 Text to filters on the search block (D199)
 
-**What happens.** The search block sends the whole sentence as the query. Price, colour
-and size words compete as keywords, and the facets a shopper would have clicked stay
-untouched.
+**What landed.** The search block's **Apply them instead of suggesting** option (beside
+D170's suggestions): the filters Turing's `nl-filters` (T1085) grounded are applied, the
+words they came from leave the query, and a line built from the filters ("Understood:
+Color: Red, Price: ≤ 200") offers Undo. A price is read in code (`readPrice` in
+`search-block.js`, en and pt_BR, money-marked amounts only) and filters the field the
+WooCommerce price is mapped to, with or without an LLM. Readings are kept per page, so
+the same sentence costs one call.
 
-**What it should do.** An option on the search block, on by default where the SN site has
-GenAI:
-- The query and the SN site's facet vocabulary, as closed lists, go to Turing, which
-  returns the chosen values. A value outside the lists is dropped; nothing is invented.
-- A parser in code recovers price ranges and sizes the model left out, and runs alone when
-  there is no LLM, so the feature degrades instead of failing.
-- The facets are set visibly and a line says "Understood: rain jackets, blue, up to R$400",
-  built in code from the chosen values, never from model prose. One click undoes it.
-- Answers cached by query and vocabulary version, with a daily cap.
+**Decision.** The option is off by default, not on: D170 shipped "a guess is the
+visitor's to take", and turning on auto-apply for every site that enabled suggestions
+would change what their visitors see  without asking.
 
-**Turing side.** Shipped as T1085: `POST /api/sn/{site}/nl-filters` with `{text,
-locale}` answers the `q` and `fq` for the SN site's own facets (Turing 2026.3.4+), so
-the closed vocabulary is Turing's and the block only applies and explains the answer.
+**What is left.**
+- Sizes read in code like prices ("size M", "tamanho 42"), on a size facet the mapping
+  declares; the woo seed has none yet.
+- A daily cap on readings per site, so a crawler typing sentences cannot run up the LLM
+  bill; Turing has no such cap on `nl-filters`, so it is the plugin's (an option counted per
+  day).
+- The demo's search page with the option on, and specs on the demo seed: each curated
+  sentence sets its expected facets, an off-vocabulary word sets none.
 
-Seen in cursarei's `nlFilters`, which proved the pattern on courses.
-
-**Gate.** Specs on the demo seed: each curated sentence sets its expected facets, an
-off-vocabulary word sets none, and the keyless path still parses price and size.
+**Gate.** `woo/understand.spec.mjs` (price alone, Turing's reading plus price, an amount
+that is not money); the left items add their own specs.
 
 ### XLIX.57 A kit builder from a described plan (D201)
 

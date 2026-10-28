@@ -298,6 +298,13 @@ publication date, show as chips under the box; a click applies one and takes the
 was read from out of the query. Nothing is applied without a click. Each sentence is an LLM
 call, and with no language model in Turing nothing is offered.
 
+With **Apply them instead of suggesting** on as well, the filters are applied straight away
+and a line under the box says what was read: "Understood: Color: Red, Price: ≤ 200", with
+**Undo** to put the search back as it was typed. On a WooCommerce shop a price the sentence
+names ("under $400", "até R$ 400", "entre 100 e 300 reais", "over $50") is read by the block
+itself and filters the shop's price field, so it works even with no language model in
+Turing. Only an amount marked as money counts: "under 2 kg" is left alone.
+
 A site with its own search blocks turns the block off:
 
 ```php
