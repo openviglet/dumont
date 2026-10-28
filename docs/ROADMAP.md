@@ -121,10 +121,10 @@ This track has no remaining pending tasks.
 
 - 💭 **D196** (deps: D203) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
-- 📋 **D198** (deps: D173 ✅, D175 ✅, D186 ✅, D194 ✅) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
+- ⏳ **D198** (deps: D173 ✅, D175 ✅, D186 ✅, D194 ✅) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Left: curated prompts with their sources, an off-catalog decline, and a no-key notice. → §XLIX.54
 - 📋 **D199** (deps: D173 ✅, Turing: a query-to-facets call) **A shopper who types "light rain jacket under R$400, blue" gets keyword results, and the facets beside them stay unset** — People describe a need in a sentence; turning it into the site's own filters, and saying so, is search that understands. → §XLIX.55
-- 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
-- 📋 **D203** (deps: D195 ✅, D198, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
+- 📋 **D201** (deps: D173 ✅, D198 ⏳) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
+- 📋 **D203** (deps: D195 ✅, D198 ⏳, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
 - 📋 **D225** (deps: —) **The readme would fail the WordPress.org review: no External services section, a GitHub-only install, no source link** — The directory is where WordPress users install plugins, and its reviewers refuse a readme that hides the calls to Turing. → §XLIX.81
 - 📋 **D226** (deps: —) **CI never runs Plugin Check, so what the directory reviewers flag is found only after a submission** — PHPCS covers coding standards, not the reviewers' own checks, and a rejected review costs weeks. → §XLIX.82
@@ -149,6 +149,18 @@ This track has no remaining pending tasks.
   lists or deletes a site B document.
 - **Features Turing refuses on a partitioned key turn off and say so** Health names each
   one Turing answers 403 on such a key, and none falls back to an unbound key.
+
+## Done when — D198
+
+- **Curated AI prompts in en and pt_BR are answered from the sources they name** The
+  demo seed lists each prompt with the guides or products its answer must cite; the
+  live-LLM suite asks them on the demo and checks the citations.
+- **An off-catalog question is declined, not answered** One curated prompt asks for
+  something the store does not sell; the live-LLM suite checks the answer names no
+  product and invents no price.
+- **Without an LLM key the demo says so on the page** On a stack started without
+  OPENAI_API_KEY, the showcase states that the AI features are off and why, and a
+  keyless demo spec checks that notice.
 
 ## Non-goals (do NOT add as tasks)
 
