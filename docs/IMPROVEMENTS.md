@@ -180,30 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.35 A showcase site, admin tab and recorded tour (D179)
-
-**What happens.** Each Turing feature the plugin brings to WordPress lands as its own
-block or screen. Nobody can see them together: the Docker stack starts with a test seed,
-the docs have one screenshot per screen, and a prospect cannot try any of it.
-
-**What it should do.**
-- Landed: the demo's `/showcase/` page holds the search, the copilot and the Site
-  assistant, and `?tour=1` numbers each feature in page order once it shows.
-
-- Landed instead of a Showcase tab: Health's AI features table names the block that
-  shows each feature; a second tab would rerun the same LLM-spending check.
-
-- Landed: `npm run e2e:tour` records a video and a screenshot per feature into
-  `tests/e2e/artifacts/tour/`; the site and the demo video follow the shopper's story (D203, D204).
-
-- vigletdocs: a "Turing on WordPress" page with the feature matrix and those
-  screenshots, and the site copy claims only what the tour shows working
-  (`dumont-site` rule).
-- Specs: the tour runs green on the stack with a key, and the keyless parts run without
-  one.
-
-Last in the track's AI series: it gathers what the others built.
-
 ### XLIX.38 The browser suite in CI (D182)
 
 **What happens.** The browser suite (D159, D160, D161) runs only where someone starts
