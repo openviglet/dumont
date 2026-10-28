@@ -119,7 +119,7 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175 ✅, D177 ✅, D178 ✅, D194 ✅) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
+- ⏳ **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175 ✅, D177 ✅, D178 ✅, D194 ✅) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Left: an admin Showcase tab, an e2e:tour recording, and the vigletdocs page. → §XLIX.35
 - 💭 **D196** (deps: D203) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
 - 📋 **D198** (deps: D173 ✅, D175 ✅, D186 ✅, D194 ✅) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
@@ -150,6 +150,19 @@ This track has no remaining pending tasks.
   lists or deletes a site B document.
 - **Features Turing refuses on a partitioned key turn off and say so** Health names each
   one Turing answers 403 on such a key, and none falls back to an unbound key.
+
+## Done when — D179
+
+- **An admin Showcase tab lists each feature, its state and its block** The tab reads
+  D169's AI status for on or off and links each feature to its place on the showcase
+  page; an admin spec opens it with one feature off and sees that row say why.
+- **npm run e2e:tour records a video and a screenshot per feature** Run on the demo
+  stack, it drives the showcase with ?tour=1 and leaves one video and one screenshot per
+  numbered feature under tests/e2e/artifacts; the keyless parts run without
+  OPENAI_API_KEY.
+- **vigletdocs has a Turing on WordPress page with the feature matrix** The page in
+  docs-dumont lists each feature with the tour's screenshot, is in sidebars-dumont.ts,
+  and the vigletdocs build passes.
 
 ## Non-goals (do NOT add as tasks)
 

@@ -187,9 +187,9 @@ block or screen. Nobody can see them together: the Docker stack starts with a te
 the docs have one screenshot per screen, and a prospect cannot try any of it.
 
 **What it should do.**
-- `run-docker.cmd demo`: the stack on the demo store's theme, catalog and
-  journal (D193, D194), and a "Showcase" page holding every block. The page has a short label per
-  block naming the Turing feature behind it.
+- Landed: the demo's `/showcase/` page holds the search, the copilot and the Site
+  assistant, and `?tour=1` numbers each feature in page order once it shows.
+
 - An admin "Showcase" tab listing each feature: on or off (from D169), the block that
   shows it, and a link to the page section.
 - A guided tour, `npm run e2e:tour`, that drives the showcase and records a video and
