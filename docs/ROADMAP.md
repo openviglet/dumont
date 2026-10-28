@@ -119,15 +119,18 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D175** (deps: D169 ✅, D174 ✅) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
-- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175, D177 ✅, D178 ✅, D194 ✅) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
+- 📋 **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175 ✅, D177 ✅, D178 ✅, D194 ✅) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 💭 **D196** (deps: D203) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
-- 📋 **D198** (deps: D173 ✅, D175, D186 ✅, D194 ✅) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
+- 📋 **D198** (deps: D173 ✅, D175 ✅, D186 ✅, D194 ✅) **The demo store shows Turing's search but not its generative AI: no cited answer, chat or copilot works on the catalog** — Grounded answers and a shopping assistant are what a prospect has not seen elsewhere, and the demo must show them working. → §XLIX.54
 - 📋 **D199** (deps: D173 ✅, Turing: a query-to-facets call) **A shopper who types "light rain jacket under R$400, blue" gets keyword results, and the facets beside them stay unset** — People describe a need in a sentence; turning it into the site's own filters, and saying so, is search that understands. → §XLIX.55
 - 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
 - 📋 **D203** (deps: D195 ✅, D198, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
+- 📋 **D225** (deps: —) **The readme would fail the WordPress.org review: no External services section, a GitHub-only install, no source link** — The directory is where WordPress users install plugins, and its reviewers refuse a readme that hides the calls to Turing. → §XLIX.81
+- 📋 **D226** (deps: —) **CI never runs Plugin Check, so what the directory reviewers flag is found only after a submission** — PHPCS covers coding standards, not the reviewers' own checks, and a rejected review costs weeks. → §XLIX.82
+- 📋 **D227** (deps: D225, D226, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
+- 📋 **D228** (deps: —) **The plugin's JS lint fails on HEAD: the woo keyboard spec reads the focused element through a global** — A gate that is already red cannot tell a task whether it broke something. → §XLIX.84
 
 ## Done when — D144
 

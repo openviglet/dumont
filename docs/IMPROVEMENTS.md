@@ -180,30 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.27 A site assistant block on Turing's chat (D175)
-
-**What happens.** Turing runs a RAG chat over the site's own content: `GET
-/api/sn/{site}/chat` answered from the seeded WordPress posts on the local stack. The
-SDK has `createChatController` (SSE conversation, session cookie, citations, intents,
-slots and host actions). A WordPress visitor has no way to reach it.
-
-**What it should do.**
-- A "Site assistant" block, also placeable site-wide by a setting (a launcher button in
-  a corner), opening a chat panel built on `createChatController` against the public
-  `/chat/conversation`. It streams tokens and lists the posts it used as cards.
-- Conversation memory per visitor through the SDK's `TUR_SESSION` cookie, with a
-  "New conversation" button that clears it.
-- Host actions limited to what is safe on a content site: `navigate` to a cited post,
-  with `allowNavigate` restricted to the site's own origin.
-- Suggested first questions, set in the block and defaulting to the top search terms
-  once the insights screen reads them.
-- A clear "generated" label and "Was this helpful?" signals. Hidden when D169's probe
-  says chat is off.
-- Accessible: a focus-trapped dialog, `aria-live` for the streamed answer, Escape to
-  close.
-- Specs in the `ai` project (D174): a question about a seeded post gets that post as a
-  citation, a follow-up keeps context, and navigation stays on the site.
-
 ### XLIX.35 A showcase site, admin tab and recorded tour (D179)
 
 **What happens.** Each Turing feature the plugin brings to WordPress lands as its own
@@ -446,3 +422,69 @@ to a prospect.
 
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
+
+### XLIX.81 A readme the plugin directory accepts (D225)
+
+The plugin ships today as a zip on a GitHub release, and `src/readme.txt` is written for
+that path. WordPress.org reviewers reject a plugin that sends data to a service without
+saying so, and this one sends every published post to Turing and every search to it. The
+readme needs an "External services" section naming Turing, what is sent (post content,
+fields, the search query, the analytics events the SDK reports), when, and links to the
+terms and privacy notice of the service the site points at.
+
+Installation must describe Plugins > Add New, with the GitHub zip and Composer kept as
+alternatives in the plugin README. The admin screens ship built by `wp-scripts`, so the
+readme links the public repository for the human-readable source. `Contributors:` must
+name real wordpress.org accounts. MIT is GPL-compatible and accepted; switching to
+"GPLv2 or later" is optional and is decided here, not assumed.
+
+Done when the readme validates on the wordpress.org readme validator and the package
+holds nothing the directory forbids.
+
+### XLIX.82 Plugin Check as a CI gate (D226)
+
+Plugin Check (PCP) is the tool the WordPress.org review team runs on every submission.
+It overlaps with the WordPress Coding Standards that `composer check` already enforces,
+but it also checks what PHPCS does not: unescaped output reached at runtime, remote
+calls and enqueued off-site assets, files the directory forbids in a package, readme
+headers against the plugin header, and the trademark rules on the name and slug.
+
+The gate runs `wp plugin check` on the built package, the same `viglet-dumont/` folder
+`bin/build-zip.sh` produces, inside the WordPress the e2e job already starts, so it
+judges what would be uploaded rather than the source tree. Errors fail the workflow;
+warnings are reported and either fixed or annotated with the reason, the way the PHPCS
+rules are.
+
+Done when the `wordpress-plugin.yml` workflow runs PCP on every change to `wordpress/`
+and the current package passes it with no errors.
+
+### XLIX.83 Releases deployed to the plugin directory (D227)
+
+WordPress.org never reads GitHub: an approved plugin gets its own SVN repository at
+`plugins.svn.wordpress.org/viglet-dumont`, and what it holds is the package, not the
+history. So the monorepo stays the source and no separate repository is needed; the
+directory becomes one more target of the `wordpress-v*` tag.
+
+The `release` job in `wordpress-plugin.yml` already builds the `viglet-dumont/` folder
+through `bin/build-zip.sh`, which refuses a tag that disagrees with the plugin header or
+the readme's Stable tag. A step after it commits that folder to `trunk/`, copies it to
+`tags/<version>`, and sends the directory's banners, icon and screenshots to `assets/`
+from a folder kept outside the package. `10up/action-wordpress-plugin-deploy` does this
+from a subfolder through `BUILD_DIR`; the SVN credentials live in repository secrets.
+
+The first submission is manual and outside this task: a wordpress.org account uploads
+the zip, the review team approves it, and only then does SVN exist.
+
+Done when a `wordpress-v*` tag updates the directory listing with no step by hand.
+
+### XLIX.84 The JS lint gate is red on the woo keyboard spec (D228)
+
+**What happens.** `npm run lint:js` in `wordpress/` exits 1 on HEAD: two
+`@wordpress/no-global-active-element` errors in `tests/e2e/woo/keyboard.spec.mjs` (lines
+24 and 35), which read `document.activeElement` inside `page.evaluate`. The spec arrived
+with D193, so every task since has run a red JS lint gate on code it never touched.
+
+**What it should do.** Read the focused element through a node, as `fixtures.mjs`
+already does in `tabTo` (`el === el.ownerDocument.activeElement`), so the spec says the
+same thing and the rule passes. No disable comment: the rule's remedy fits here. `npm
+run lint:js` is then clean.
