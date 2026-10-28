@@ -31,6 +31,13 @@ and both the site's components and the area's Starlight overrides read it. A
 card on a docs page is `docs/src/components/NavCard.astro` and its siblings,
 never inline styles.
 
+The pages are Markdown under `docs/src/content/docs/`, moved from vigletdocs'
+`docs-dumont` with their URL tails kept (`/dumont/rest-api` is now
+`/docs/rest-api/`). Adding one means adding its `slug` to the `sidebar` in
+`docs/astro.config.mjs`. Write an internal link as `/docs/<page>/`, with the
+base: `starlight-links-validator` fails the build on a broken link or anchor.
+Images live in `docs/public/img/`; ```` ```mermaid ```` fences render as diagrams.
+
 **Adding a page is two rows**: a `ROUTES` entry in `src/App.tsx` and a `routes`
 entry, with title and description, in `src/entry-server.tsx`. The prerender
 throws if the two tables disagree, and every `<head>` patch is a

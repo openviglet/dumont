@@ -5,6 +5,8 @@
 // three, indexed at build time so nothing here needs a service to be up.
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import mermaid from "astro-mermaid";
+import starlightLinksValidator from "starlight-links-validator";
 
 // The site's own consent rule (src/lib/analytics.ts): GA loads only once a visitor accepted
 // it, and the choice is the site's localStorage key — same origin, so a choice made on the
@@ -24,7 +26,13 @@ export default defineConfig({
   outDir: "../dist/docs",
 
   integrations: [
+    // Eight pages carry ```mermaid sequence and flow diagrams, as they did under Docusaurus.
+    // Rendered in the browser, so the build needs no headless browser; before Starlight, which
+    // would otherwise take the fence as code.
+    mermaid({ autoTheme: true }),
     starlight({
+      // A broken internal link or anchor fails the build, the way Docusaurus failed it.
+      plugins: [starlightLinksValidator()],
       title: "Viglet Dumont DEP",
       description:
         "How to install, configure and run Dumont: the connectors, the indexing plugins and the REST API.",
@@ -75,6 +83,38 @@ try {
   }
 } catch (e) {}
 `,
+        },
+      ],
+      // The order and groups of vigletdocs' sidebars-dumont.ts, which these pages came from.
+      sidebar: [
+        { label: "Overview", link: "/" },
+        {
+          label: "Getting Started",
+          items: [{ slug: "getting-started/intro" }, { slug: "getting-started/core-concepts" }],
+        },
+        { slug: "installation-guide" },
+        { slug: "configuration-reference" },
+        { slug: "architecture" },
+        { slug: "indexing-plugins" },
+        {
+          label: "Connectors",
+          items: [
+            { slug: "connectors/overview" },
+            { slug: "connectors/web-crawler" },
+            { slug: "connectors/database" },
+            { slug: "connectors/filesystem" },
+            { slug: "connectors/aem" },
+            { slug: "aem-event-listener" },
+            { slug: "connectors/catalog" },
+            { slug: "connectors/wordpress" },
+            { slug: "connectors/wordpress-turing" },
+          ],
+        },
+        { slug: "developer-guide" },
+        { slug: "rest-api" },
+        {
+          label: "Extending Connectors",
+          items: [{ slug: "extending-aem" }, { slug: "extending-database" }],
         },
       ],
       lastUpdated: true,

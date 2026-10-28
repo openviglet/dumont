@@ -1,0 +1,212 @@
+---
+title: "Connectors Overview"
+description: "Overview of all Viglet Dumont connectors: web crawler, database, filesystem, AEM, and WordPress."
+---
+
+Connectors are the components that extract content from external sources and feed it into the Viglet Dumont processing pipeline. Each connector specializes in a specific type of content source and knows how to navigate, extract, and map content into Job Items that the pipeline can process.
+
+---
+
+## Available Connectors
+
+| Connector | Source Type | Deployment | Artifact |
+|---|---|---|---|
+| [**Web Crawler**](/docs/connectors/web-crawler/) | Websites | **Java Plugin**: loaded via `-Dloader.path` | `web-crawler-plugin.jar` |
+| [**AEM**](/docs/connectors/aem/) | Adobe Experience Manager | **Java Plugin**: loaded via `-Dloader.path` | `aem-plugin.jar` |
+| [**Catalog & JSON API**](/docs/connectors/catalog/) | Normalized catalog feeds and paged JSON APIs | **Java Plugin**: loaded via `-Dloader.path` | `catalog-plugin.jar` |
+| [**Database**](/docs/connectors/database/) | JDBC databases | **Standalone Java CLI**: runs independently | `dumont-db-indexer.jar` |
+| [**FileSystem**](/docs/connectors/filesystem/) | Local/network directories | **Standalone Java CLI**: runs independently | `dumont-filesystem-indexer.jar` |
+| [**WordPress**](/docs/connectors/wordpress/) | WordPress sites | **PHP Plugin**: installed inside WordPress | `viglet-dumont/` |
+
+---
+
+## How Connectors Work
+
+Every connector follows the same lifecycle:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '13px', 'primaryColor': '#fff', 'primaryBorderColor': '#c0c0c0', 'lineColor': '#888', 'textColor': '#333'}}}%%
+graph TD
+    A["🔌 1. Connect to Source"] --> B["🔍 2. Discover Content"]
+    B --> C["📋 3. Extract Fields"]
+    C --> D["📦 4. Create Job Item"]
+    D --> E["📨 5. Submit to Pipeline"]
+    E --> F{"More content?"}
+    F -->|Yes| B
+    F -->|No| G["✅ 6. Finish & Flush"]
+
+    classDef blue fill:#dbeafe,stroke:#4A90D9,stroke-width:2px,color:#1a1a1a
+    classDef green fill:#dcfce7,stroke:#50B86C,stroke-width:2px,color:#1a1a1a
+    classDef purple fill:#ede9fe,stroke:#9B6EC5,stroke-width:2px,color:#1a1a1a
+    classDef amber fill:#fef3c7,stroke:#E8A838,stroke-width:2px,color:#1a1a1a
+
+    class A blue
+    class B,C purple
+    class D,E amber
+    class F,G green
+```
+
+1. **Connect**: Establish a connection to the content source (HTTP, JDBC, file handle, JCR session)
+2. **Discover**: Find content to process (follow links, execute query, list files, traverse nodes)
+3. **Extract**: Pull field values from each content item (title, text, URL, date, custom fields)
+4. **Create**: Build a Job Item with the extracted fields, an action (INDEX/DELETE), and metadata
+5. **Submit**: Pass the Job Item into the processing pipeline (strategies → batch → queue)
+6. **Finish**: Flush any remaining items in the batch processor and signal completion
+
+---
+
+## Connector Interface
+
+All connectors implement the `DumConnectorPlugin` interface:
+
+| Method | Description |
+|---|---|
+| `crawl()` | Full extraction: discover and process all content from the source |
+| `indexAll(source)` | Re-index all content from a specific source |
+| `indexById(source, contentIds)` | Index specific documents by their IDs |
+| `getProviderName()` | Returns the connector's identifier (e.g., `web-crawler`, `database`) |
+
+---
+
+## Connector Plugins vs. Standalone Tools
+
+Dumont connectors are distributed in two forms:
+
+### Connector Plugins (AEM, Web Crawler)
+
+The **AEM** and **Web Crawler** connectors are **plugin JARs** that run inside the `dumont-connector.jar` pipeline. They must be placed in a `libs/` directory and loaded via Spring Boot's `-Dloader.path`:
+
+```bash
+# Directory layout
+dumont-connector.jar
+libs/
+  ├── aem-plugin.jar
+  └── web-crawler-plugin.jar
+
+# Launch with plugins on the classpath
+java -Dloader.path=libs -jar dumont-connector.jar
+```
+
+:::caution[dumont-connector.jar alone does not crawl]
+The connector JAR provides only the pipeline infrastructure (queue, strategies, indexing). Without a plugin JAR on the classpath, there is no data source to extract content from. You must add exactly **one** connector plugin via `-Dloader.path`.
+:::
+
+:::note[One plugin per JVM instance]
+Only **one connector plugin** can be loaded per JVM instance. To run multiple connectors (e.g., AEM and Web Crawler), start separate `dumont-connector.jar` instances, each with its own plugin and port.
+:::
+
+### Standalone CLI Tools (Database, FileSystem)
+
+The **Database** and **FileSystem** connectors are **standalone command-line tools**, separate JARs that run independently and connect to a running Dumont instance via REST API:
+
+```bash
+# Database import (standalone JAR)
+java -cp dumont-db-indexer.jar com.viglet.dumont.connector.db.DumDbImportTool \
+  --server http://localhost:30130 \
+  --api-key <API_KEY> \
+  --driver org.mariadb.jdbc.Driver \
+  --connect "jdbc:mariadb://localhost:3306/products" \
+  --query "SELECT id, name, description, price FROM products" \
+  --site ProductCatalog \
+  --locale en_US
+
+# FileSystem import (standalone JAR)
+java -cp dumont-filesystem-indexer.jar com.viglet.dumont.filesystem.DumFSImportTool \
+  --source-dir /mnt/shared/documents \
+  --server http://localhost:30130 \
+  --api-key <API_KEY> \
+  --site InternalDocs
+```
+
+These tools can be scheduled via cron jobs or CI/CD pipelines.
+
+---
+
+## Managing Connectors via the Viglet Turing Console
+
+The AEM and Web Crawler connector plugins can be managed through the **Turing Admin Console**. To connect a running `dumont-connector.jar` instance to the Turing UI:
+
+1. Open the Turing Admin Console
+2. Navigate to **Enterprise Search → Integration**
+3. Click **New** to create a new integration instance
+4. Set the **Integration Type** (AEM or Web Crawler)
+5. Set the **Endpoint** to the URL of your Dumont connector instance (e.g., `http://localhost:30130`)
+6. Enable the integration
+
+Once connected, the Turing console provides a graphical interface for:
+
+- Configuring sources, content types, and field mappings
+- Triggering full indexing and re-indexing operations
+- Monitoring indexing progress in real time
+- Viewing indexing statistics and status
+- Running double-check consistency validation
+
+For full details on the Integration UI (including monitoring, indexing stats, and double-check) see the [Turing Integration documentation](https://docs.viglet.org/turing/integration).
+
+For AEM-specific configuration (sources, content types, author/publish, delta tracking, locales, indexing rules) see [Turing AEM Connector documentation](https://docs.viglet.org/turing/integration-aem).
+
+---
+
+## Onboarding a New Source
+
+Writing a source configuration by hand means reading the site's markup, picking selectors and
+guessing at field types. The console does that first pass for you and then lets you check it before
+anything is indexed.
+
+**1. Propose.** Give the **AI Source Inference** wizard a URL. Dumont fetches a sample, works out
+what shape the source is (a `sitemap.xml`, a listing page whose links go to detail pages, or a
+table where each row is a record) and proposes a draft: the extraction strategy plus a field
+manifest with a type per field.
+
+It proposes *structure*, never content. Selectors and types, not values. When the sample gives it
+nothing to go on it reports `UNKNOWN` and proposes nothing, rather than inventing a shape.
+
+**2. Edit.** The draft is yours to correct in the wizard. A field the inference named badly, a type
+it read as text that should be a date, a selector that caught one element too many: fix them
+before going further. Nothing has been written yet.
+
+**3. Dry run.** The **Dry-run preview** action extracts a small sample through exactly the path a
+real run uses, and reports what indexing *would* do:
+
+- per-field coverage, so a selector that matches nothing shows as 0% now rather than after a run;
+- records that would be skipped for a missing mandatory field;
+- a diff against the last full index (added, changed, removed, and fields that would go newly
+  empty), plus a schema diff.
+
+It writes nothing. On a source's first onboarding there is no baseline, so everything reads as
+added.
+
+**4. Index.** Only when you confirm the draft does Dumont materialise it into a live source and
+index it. A proposal is never published on its own.
+
+The same three steps are available over HTTP; see the
+[Source Inference API](/docs/rest-api/#source-inference-api).
+
+---
+
+## Common Configuration Pattern
+
+Every connector needs at least these pieces of information:
+
+| Setting | Description |
+|---|---|
+| **Source** | Where to read content (URL, connection string, directory path, AEM endpoint) |
+| **Credentials** | Authentication (username/password, API key, or none) |
+| **Target SN Site** | The Turing Semantic Navigation Site that will receive the content |
+| **Locale** | The language/country code for the content (e.g., `en_US`) |
+| **Field Mapping** | How source fields map to search index fields |
+
+---
+
+## How Each Connector Is Configured
+
+| Connector | Configuration Method | Where |
+|---|---|---|
+| **Web Crawler** | Turing Admin Console | [Turing → Integration](https://docs.viglet.org/turing/integration) |
+| **AEM** | JSON file + Turing Admin Console | `export/` directory + [Turing → Integration](https://docs.viglet.org/turing/integration-aem) |
+| **Database** | CLI parameters | Command-line: see [Database Connector](/docs/connectors/database/) |
+| **FileSystem** | CLI parameters | Command-line: see [FileSystem Connector](/docs/connectors/filesystem/) |
+| **WordPress** | WordPress Admin UI, WP-CLI or environment variables | WordPress → Viglet Dumont → Setup: see [WordPress Connector](/docs/connectors/wordpress/) |
+
+---
+

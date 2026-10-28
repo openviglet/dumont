@@ -185,6 +185,7 @@
 - **D143** — dumont.viglet.org/changelog.json now serves Dumont's releases through 2026.2.16, and www.viglet.org reads it in place of its hand-kept copy.
 - **D230** — dumont-site/docs builds a Starlight area with Pagefind search into dist/docs, last in the site build; the Pages workflow asserts it (design §L.1 recorded in `dumont-site/README.md`).
 - **D231** — /docs carries the site's nav and footer from src/lib/site-links.ts, and index cards are .astro components on the site's tokens (design §L.2 recorded in `dumont-site/README.md`).
+- **D232** — The 20 docs-dumont pages, 15 images and 9 Mermaid diagrams build under /docs with their URL tails, and the links validator passes (design §L.3 recorded in `dumont-site/README.md`).
 
 ## Track E — Data quality & trust
 

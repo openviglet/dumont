@@ -442,30 +442,6 @@ The end-user documentation moves from vigletdocs into this repository, as an Ast
 Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
 system, and docs.viglet.org/dumont later redirects to it.
 
-### L.3 The docs-dumont pages move into the area (D232)
-
-**What happens.** The 20 pages of `docs-dumont` (getting started, installation,
-configuration reference, architecture, indexing plugins, connectors, developer guide,
-REST API, extending) are written for Docusaurus.
-
-**What it should do.** Move them into `dumont-site/docs/src/content/docs/` with their
-content unchanged and their Docusaurus-isms converted:
-- Frontmatter: `sidebar_position` / `sidebar_label` / `slug` / `id` become Starlight's
-  `sidebar` keys; `index.mdx` drops `@docusaurus/Link` and its inline components for the
-  L.2 ones.
-- Admonitions (`:::note`, `:::tip`, `:::warning`) checked against Starlight's aside syntax.
-- The 15 images under `/img/diagrams/` and `/img/screenshots/dumont-*` copied into the
-  area's assets and referenced relatively, so the base is applied.
-- Links to `/turing/*` become absolute `https://docs.viglet.org/turing/...` - they leave
-  this site; internal links become relative.
-- The sidebar written from `sidebars-dumont.ts`, same order and groups.
-- Every page keeps its URL tail (`/dumont/rest-api` becomes `/docs/rest-api`), which is what
-  makes the redirect in L.6 a prefix rewrite instead of a table.
-
-**Gate.** `starlight-links-validator` passes (no broken internal link or anchor), every
-page and image from `docs-dumont` has a counterpart, and a diff of the rendered text
-shows no content lost.
-
 ### L.4 The site points at its own docs (D233)
 
 **What happens.** `site-content.ts` points `docs`, `install` and `rest` at

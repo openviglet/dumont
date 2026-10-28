@@ -33,13 +33,28 @@
   --sl-color-black: var(--background);
 
   --sl-color-bg: var(--background);
-  --sl-color-bg-nav: color-mix(in oklab, var(--background) 85%, transparent);
+  /* Opaque: the phone's sticky "On this page" bar paints with it, and text scrolled
+     under a translucent bar reads through it. */
+  --sl-color-bg-nav: var(--background);
   --sl-color-bg-sidebar: var(--background);
   --sl-color-bg-inline-code: var(--muted);
   --sl-color-hairline: var(--border);
   --sl-color-hairline-light: var(--border);
   --sl-color-hairline-shade: var(--border);
   --sl-color-text: var(--foreground);
+
+  /* Asides. Note and tip carry the brand, as the site's callouts do; danger is the
+     site's destructive. Caution keeps Starlight's amber: the site declares no warning
+     token, and a warning that reads as the brand colour stops reading as a warning. */
+  --sl-color-blue-low: var(--accent);
+  --sl-color-blue: var(--primary);
+  --sl-color-blue-high: var(--accent-foreground);
+  --sl-color-purple-low: var(--accent);
+  --sl-color-purple: var(--primary);
+  --sl-color-purple-high: var(--accent-foreground);
+  --sl-color-red-low: color-mix(in oklab, var(--destructive) 15%, var(--background));
+  --sl-color-red: var(--destructive);
+  --sl-color-red-high: var(--foreground);
 }
 
 .header {
@@ -239,8 +254,8 @@ samp {
   font-weight: 800;
 }
 
-.site-footer-brand {
-  margin-bottom: 0.5rem !important;
+.site-footer p.site-footer-brand {
+  margin-bottom: 0.5rem;
 }
 
 .site-footer-heading {
@@ -249,8 +264,8 @@ samp {
   text-transform: uppercase;
 }
 
-.site-footer-legal {
-  margin-top: 2rem !important;
+.site-footer p.site-footer-legal {
+  margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border);
   font-size: var(--sl-text-xs);
@@ -301,7 +316,12 @@ samp {
 
 .dm-card-link:hover {
   border-color: var(--primary);
-  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dm-card-link:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .dm-card-link > span:last-child {

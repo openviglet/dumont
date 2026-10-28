@@ -1,0 +1,398 @@
+---
+title: "Configuration Reference"
+description: "Complete reference for all Viglet Dumont application.yaml properties: server, database, queue, connectors, and indexing plugins."
+---
+
+This page documents every significant property in the Viglet Dumont `application.yaml` file. Any property can be overridden via environment variables, JVM system properties (`-Dkey=value`), or a separate `application-production.yaml` file.
+
+:::tip[Override pattern]
+To override a property at runtime, use the environment variable convention: replace `.` and `-` with `_` and uppercase everything. For example, `dumont.indexing.provider` becomes `DUMONT_INDEXING_PROVIDER=solr`.
+:::
+
+---
+
+## Full Default Configuration
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:h2:file:./store/db/dumontDB;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=true
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: false
+      path: /h2
+      settings:
+        web-allow-others: true
+  jpa:
+    properties:
+      hibernate:
+        "[globally_quoted_identifiers]": true
+        "[enable_lazy_load_no_trans]": true
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  artemis:
+    mode: embedded
+    broker-url: localhost:61616
+    embedded:
+      enabled: true
+      persistent: true
+      data-directory: store/queue
+      queues: connector-indexing.queue
+  jms:
+    template:
+      default-destination: connector-indexing.queue
+
+server:
+  port: ${PORT:30130}
+
+dumont:
+  indexing:
+    provider: turing
+    job:
+      batch-size: 50
+    solr:
+      url: http://localhost:8983/solr
+      collection: dumont
+    elasticsearch:
+      url: http://localhost:9200
+      index: dumont
+      username: ~
+      password: ~
+
+turing:
+  url: http://localhost:2700
+  apiKey: ""
+
+  aem.querybuilder: false
+  aem.querybuilder.parallelism: 10
+
+logging:
+  file:
+    name: store/logs/dum-connector.log
+  level:
+    com:
+      viglet: INFO
+```
+
+---
+
+## Property Reference
+
+### Server
+
+| Property | Default | Description |
+|---|---|---|
+| `server.port` | `30130` | HTTP port for the Dumont application |
+
+### Admin Account
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.admin.password` | *(unset)* | Password for the local `admin` account, applied at startup while no password is stored. Set it (env `DUMONT_ADMIN_PASSWORD`, at least 6 characters) and a container or CI start comes up with a working login and no first-access setup screen. Once a password is stored, for example set in the console, the property is ignored and a log line says so. |
+
+### LLM Enrichment
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.enrichment.llm.enabled` | `false` | Lets connectors classify with an LLM through Viglet Turing (`/api/v2/summary`, using the configured `turing.url` and `turing.apiKey`). It also lets them extract lists from a record's text, such as the skills a job description names; only items that appear in the text are published. When off, connectors that support an LLM fallback classify with their own rules and dictionaries only. |
+
+### Run Alerts
+
+A run can finish and still carry a warning: a source reports something an operator should act on, or a field's coverage dropped sharply since the last run. The console marks such a run with a **Warning** badge on the Indexing Stats page.
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.alerts.webhook-url` | *(unset)* | URL that receives a JSON `POST` when a source's run starts carrying a warning (`event`, `source`, `provider`, `operationType`, `endTime`, `documentCount`, `partial`, `warnings`). Sent once when a source goes from healthy to warned, not on every warned run. The Turing API key is never sent. Unset, nothing is sent. |
+
+### Run Metrics (Prometheus)
+
+Each source's last run is published for Prometheus at `/actuator/prometheus`. The endpoint is served on a separate management port only, never on `server.port`, and needs no login, so keep that port on your internal network. No other actuator endpoint is exposed.
+
+| Property | Default | Description |
+|---|---|---|
+| `management.server.port` | `30131` | Port that serves `/actuator/prometheus`. |
+
+Every metric carries the `source` and `provider` labels:
+
+| Metric | Meaning |
+|---|---|
+| `dumont_run_last_status` | `1` if the source's last run completed, `0` if it stopped short (a partial run) |
+| `dumont_run_last_finished_seconds` | When the last run ended, in Unix seconds |
+| `dumont_run_last_duration_seconds` | How long the last run took |
+| `dumont_run_last_documents` | Documents the last run indexed |
+| `dumont_runs_total` | Runs that ended, by `outcome` (`complete`, `warned`, `partial`) |
+
+The values are restored from the stored run history at startup, so a restart does not hide a source that has stopped running. Example alert rules:
+
+```yaml
+- alert: DumontRunFailed
+  expr: dumont_run_last_status == 0
+- alert: DumontRunStalled
+  expr: time() - dumont_run_last_finished_seconds > 2 * 3600
+```
+
+### Database
+
+| Property | Default | Description |
+|---|---|---|
+| `spring.datasource.url` | `jdbc:h2:file:./store/db/dumontDB;CASE_INSENSITIVE_IDENTIFIERS=TRUE` | JDBC URL for the indexing state database. If you override it with another H2 URL, keep `CASE_INSENSITIVE_IDENTIFIERS=TRUE`: without it, indexing runs fail when they finish. |
+| `spring.datasource.username` | `sa` | Database username |
+| `spring.datasource.password` | `""` | Database password |
+| `spring.datasource.driver-class-name` | `org.h2.Driver` | JDBC driver class |
+| `spring.h2.console.enabled` | `false` | Enable H2 web console: **do not enable in production** |
+
+### Message Queue (Apache Artemis)
+
+| Property | Default | Description |
+|---|---|---|
+| `spring.artemis.mode` | `embedded` | `embedded` (default) or `native` (external broker) |
+| `spring.artemis.broker-url` | `localhost:61616` | Broker URL when using `native` mode |
+| `spring.artemis.embedded.enabled` | `true` | Enable the embedded broker |
+| `spring.artemis.embedded.persistent` | `true` | Persist queue messages to disk (survives restarts) |
+| `spring.artemis.embedded.data-directory` | `store/queue` | Directory for persisted queue data |
+| `spring.artemis.embedded.queues` | `connector-indexing.queue` | Queue name created on startup |
+
+### Indexing Configuration
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.indexing.provider` | `turing` | Output target: `turing`, `solr`, or `elasticsearch` |
+| `dumont.indexing.job.batch-size` | `50` | Number of Job Items per batch before queue delivery |
+| `dumont.indexing.provision` | `true` | Send each source's declared field schema to the backend before its first document, so fields are created as declared rather than inferred from whichever value arrives first. A rejected schema is logged and indexing continues with the site's current schema. Turing only: other backends have no declarative schema endpoint |
+
+### Extraction Resilience
+
+An incomplete indexing run must not de-index what it never reached. Skipping that sweep is
+unconditional; these tune *when* a run is judged incomplete, and are read by the AEM connector,
+whose extraction is one HTTP fetch per page. See
+[Core Concepts → Data Quality](/docs/getting-started/core-concepts/#data-quality).
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.reactive.indexing` | `false` | Extract on a bounded pool instead of sequentially |
+| `dumont.reactive.parallelism` | `10` | Threads used for parallel extraction |
+| `dumont.reactive.extractTimeoutMs` | `0` | Per-extract wall-clock bound in milliseconds; the overrun is cancelled and counted as one failed extraction. `0` disables it: no extraction is ever cancelled for time |
+| `dumont.reactive.failureRatioThreshold` | `0.5` | Finish standalone (skip the de-index sweep) when this fraction of a run's extractions fail. `0` disables the guard |
+
+### Content Audit
+
+The audit runs on a cron, re-enumerates every source, and files a record for anything the
+connector never queued. With `dumont.audit.index.enabled` it also compares against the search
+index itself and reports three differences: **missing** (in the source, never landed),
+**stale** (landed, but a later write failed), and **orphaned** (in the index, gone from the
+source). Missing and stale ids are requeued through the normal pipeline. Orphans are never
+deleted by the audit: a discovery pass that under-reports ids would otherwise take live content
+out of the index. Instead each pass writes the ids it found into a dated **orphan report** you
+review and apply yourself, through [the orphan endpoints](/docs/rest-api/#orphan-reports).
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.audit.cron` | `0 0 3 * * *` | Cron for the scheduled content audit. `-` disables it |
+| `dumont.audit.cron.zone` | `UTC` | Timezone the cron is evaluated in |
+| `dumont.audit.index.enabled` | `true` | Also compare against the search index. Requires a backend that can enumerate what it holds. Turing can; Solr and Elasticsearch report nothing and the comparison is skipped |
+| `dumont.audit.index.orphanTtl` | `PT24H` | How long an orphan report stays applicable (ISO-8601 duration). Past it, applying is refused and a fresh audit must re-establish the report. `PT0S` or below switches expiry off |
+
+### Turing Connection
+
+| Property | Default | Description |
+|---|---|---|
+| `turing.url` | `http://localhost:2700` | Base URL of the Turing instance |
+| `turing.apiKey` | `""` | API Token for authenticating with Turing |
+
+### Solr Direct Connection
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.indexing.solr.url` | `http://localhost:8983/solr` | Apache Solr base URL |
+| `dumont.indexing.solr.collection` | `dumont` | Solr collection name |
+
+### Elasticsearch Direct Connection
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.indexing.elasticsearch.url` | `http://localhost:9200` | Elasticsearch base URL |
+| `dumont.indexing.elasticsearch.index` | `dumont` | Elasticsearch index name |
+| `dumont.indexing.elasticsearch.username` | *(none)* | Optional authentication username |
+| `dumont.indexing.elasticsearch.password` | *(none)* | Optional authentication password |
+
+### AEM QueryBuilder
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.aem.querybuilder` | `false` | Enable QueryBuilder-based content discovery instead of tree traversal during full indexing |
+| `dumont.aem.querybuilder.parallelism` | `10` | Number of parallel threads for processing discovered paths |
+
+### AEM Adobe I/O Events
+
+See [AEM Connector → Adobe I/O Events](/docs/connectors/aem/#adobe-io-events).
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.aem.webhook.adobe-io.client-id` | – | API Key (Client ID) of the OAuth Server-to-Server credential. When set, an incoming webhook payload whose `recipient_client_id` does not match is rejected with `401`; unset leaves the endpoint open and logs a warning at startup |
+| `dumont.aem.journal.enabled` | `false` | Pull the same events from the Adobe I/O journal, recovering any the webhook dropped. Does not affect the webhook |
+| `dumont.aem.journal.poll-ms` | `60000` | Delay between the end of one journal poll and the start of the next |
+| `dumont.aem.journal.batch-size` | `100` | Events requested per journal page |
+| `dumont.aem.journal.max-pages-per-poll` | `20` | Journal pages followed in one poll, so a large backlog drains across polls rather than in one burst |
+| `dumont.aem.journal.client-id` | – | OAuth Server-to-Server API Key (Client ID) used for the journal |
+| `dumont.aem.journal.client-secret` | – | OAuth Server-to-Server Client Secret used for the journal |
+| `dumont.aem.journal.ims-url` | `https://ims-na1.adobelogin.com/ims/token/v3` | Adobe IMS token endpoint |
+| `dumont.aem.journal.scopes` | `openid,AdobeID,adobeio_api,event_receiver_api` | Scopes requested for the token |
+| `dumont.aem.journal.sources.<source>` | – | Journal URL of the event registration, per Dumont source name |
+
+### AEM Fetch Strategy
+
+Configured per source in the console, not by property: see [AEM Connector → Fetch Strategy](/docs/connectors/aem/#fetch-strategy).
+
+### Dependency Tracking
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.dependencies.enabled` | `false` | Persist `/content/*` references extracted from each indexed page and cascade re-index any dependent document on standalone updates. Currently populated only by the AEM connector, see [AEM Connector → Dependency Tracking](/docs/connectors/aem/#dependency-tracking-and-cascade-re-indexing) |
+
+### Logging
+
+| Property | Default | Description |
+|---|---|---|
+| `logging.file.name` | `store/logs/dum-connector.log` | Log file path |
+| `logging.level.com.viglet` | `INFO` | Log level for Dumont application code |
+
+### Indexing Log
+
+Separate from the application log above. Every document Dumont processes leaves a row per status
+it passes through (prepared, sent to the queue, delivered to the search engine), each naming the
+document, the source that produced it and the run it belonged to. Queried through
+[the Logging API](/docs/rest-api/#logging-api).
+
+It is **off by default**: with no engine configured, the endpoint answers with an empty page and
+nothing is written. Pick MongoDB when you intend to query the log, and Redis when you mostly want
+to tail it: the Redis engine filters and sorts in memory after reading the whole list, so it
+degrades as the log grows.
+
+Turning it on is one setting. `dumont.logging.engine` selects both the side that reads the log and
+the Logback profile that writes it: `logging.config` is derived from it, so `mongodb` selects
+`logback-spring-mongo.xml` and `redis` selects `logback-spring-redis.xml`:
+
+```yaml
+dumont:
+  logging:
+    engine: mongodb
+  mongodb:
+    enabled: true
+    uri: mongodb://mongo:27017
+```
+
+Every profile writes to the console **and** the log file as well as its store, so choosing an engine
+does not cost you either. In particular there is no separate console-only profile to select in a
+container: the Docker image writes to stdout out of the box and the engine still applies.
+
+:::note[Overriding the Logback profile]
+Set `logging.config` yourself only to point at a Logback file of your own; it takes precedence over
+the derived value and its contents are your business.
+
+Setting it to one of the **shipped** profiles that writes a different store (including
+`logback-spring-console.xml`, which writes none) is refused at startup, with both settings quoted.
+That combination has no useful meaning: one store would be read and another, or none, written.
+Before **2026.3.7** it was accepted and produced a log the API reported as healthy and permanently
+empty. If an existing configuration has it, delete the `logging.config` line.
+:::
+
+:::caution[Upgrading from before 2026.3.7 in Docker]
+The images used to pin `-Dlogging.config=classpath:logback-spring-console.xml`, which switched the
+indexing log off no matter what else you set, so the log could not be enabled in a container at
+all. That pin is gone. If you added `logging.config` to your own compose file or entrypoint to work
+around it, remove it: the engine now selects the profile, and keeping the override will be refused
+at startup.
+:::
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.logging.engine` | `none` | `none`, `mongodb` or `redis` |
+| `dumont.logging.database` | `dumontLog` | MongoDB database name |
+| `dumont.logging.collection.indexing` | `indexing` | MongoDB collection holding the indexing rows |
+| `dumont.mongodb.enabled` | `false` | Must also be `true` for the `mongodb` engine to activate |
+| `dumont.mongodb.uri` | `mongodb://localhost:27017` | MongoDB connection string |
+| `dumont.redis.enabled` | `false` | Must also be `true` for the `redis` engine to activate |
+| `dumont.redis.uri` | `redis://localhost:6379/0` | Redis connection string |
+| `dumont.redis.key.indexing` | `dumontLog:indexing` | Redis list key holding the indexing rows |
+| `dumont.redis.maxEntries.indexing` | `50000` | Trim the indexing list to this length on write |
+
+The same `logging.config` also persists the **server log** (the connector's own WARN and ERROR
+lines) to that store, in a second collection or list. It is written by the same machinery and
+fails the same way, but it is not exposed through the Logging API; read it in the store, or in
+`store/logs/dum-connector.log`.
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.logging.collection.server` | `server` | MongoDB collection holding the server-log rows |
+| `dumont.redis.key.server` | `dumontLog:server` | Redis list key holding the server-log rows |
+| `dumont.redis.maxEntries.server` | `10000` | Trim the server list to this length on write |
+
+Each store is connected once and the connection is held for the lifetime of the connector (a
+MongoDB client, or a Redis pool) rather than dialled again per request. Tune either through its
+connection string; the usual options apply.
+
+**When the store refuses a write**, the row is lost: the connector will not stall an indexing run
+waiting for its own log. It says so instead, at `WARN` in the application log
+(`store/logs/dum-connector.log`), naming both which log is losing rows and which store refused
+them:
+
+```
+Indexing log: a row could not be written to MongoDB. Rows are being lost while this lasts,
+so the history will read short rather than empty.
+
+Server log: a row could not be written to Redis. Rows are being lost while this lasts,
+so the history will read short rather than empty.
+```
+
+An outage reports once rather than once per row, with a running count while it lasts and a final
+tally when writes resume, so the number of rows missing is a number you can read rather than
+infer. Grep for `Indexing log:` and `Server log:` after an outage before concluding that a short
+history means a quiet connector.
+
+These warnings always reach the file and the console, never the store being complained about, so
+a MongoDB outage does not swallow the notice that MongoDB is down.
+
+One default is Dumont's rather than the driver's. Where `dumont.mongodb.uri` does not set
+`serverSelectionTimeoutMS`, the indexing log applies **5000 ms** in place of the driver's 30 s, so
+that a MongoDB which is down makes `logging/status` answer in five seconds rather than holding the
+request open for half a minute. Set the option explicitly in the URI to choose your own:
+
+```
+dumont.mongodb.uri: mongodb://mongo:27017/?serverSelectionTimeoutMS=2000
+```
+
+---
+
+## Common Production Overrides
+
+A minimal production override:
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://db-host:5432/dumont_db
+    username: dumont
+    password: strong_password
+    driver-class-name: org.postgresql.Driver
+  h2:
+    console:
+      enabled: false
+
+dumont:
+  indexing:
+    provider: turing
+
+turing:
+  url: https://search.yourcompany.com
+  apiKey: your-turing-api-token
+
+server:
+  port: 30130
+```
+
+---
+

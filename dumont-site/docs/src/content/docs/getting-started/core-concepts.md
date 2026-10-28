@@ -1,0 +1,202 @@
+---
+title: "Core Concepts"
+description: "The fundamental concepts of Viglet Dumont: connectors, job items, the processing pipeline, strategies, and indexing plugins."
+---
+
+This page explains the fundamental concepts of Viglet Dumont in plain terms. No configuration files, no code, just the mental model you need before diving into the technical documentation.
+
+---
+
+## Connectors
+
+A **Connector** is a component that knows how to extract content from a specific type of source. Each connector:
+
+1. **Connects** to a content source (a website, a database, a file folder, an AEM instance)
+2. **Extracts** documents according to its configuration
+3. **Emits** each document as a **Job Item** into the processing pipeline
+
+Dumont ships with five connectors:
+
+| Connector | Source | How it works |
+|---|---|---|
+| **Web Crawler** | Websites | Recursively follows links from a starting URL, extracts page content via HTML parsing |
+| **Database** | JDBC databases | Executes SQL queries and maps each result row to a document |
+| **FileSystem** | Local/network directories | Walks directory trees, extracts text from files via Apache Tika |
+| **AEM** | Adobe Experience Manager | Reads content from AEM author/publish instances via the JCR API |
+| **WordPress** | WordPress sites | Pulls posts, pages, and custom content types from WordPress installations |
+
+Each connector implements the `DumConnectorPlugin` interface and provides three operations: **crawl** (full extraction), **indexAll** (re-index a source), and **indexById** (index specific documents by ID).
+
+---
+
+## Job Items
+
+A **Job Item** is a single document moving through the pipeline. It contains:
+
+- **Fields**: key-value pairs representing the document's content (title, text, URL, date, author, and any custom fields)
+- **Action**: what to do with this document: `INDEX` (add or update) or `DELETE` (remove from the index)
+- **Provider**: which connector produced this item
+- **Locale**: the language/country of the content (e.g., `en_US`, `pt_BR`)
+
+Job Items are the universal data format inside Dumont. Every connector produces them, every strategy evaluates them, and every indexing plugin consumes them.
+
+---
+
+## The Processing Pipeline
+
+When a connector extracts a document, it does not send it directly to the search engine. Instead, the document passes through a multi-stage pipeline designed for reliability, efficiency, and flexibility.
+
+![Dumont, Processing Pipeline](/docs/img/diagrams/dumont-pipeline.svg)
+
+### Stage 1: Extraction
+
+The connector reads content from the source and produces Job Items. Each item includes all the fields needed for indexing.
+
+### Stage 2: Strategy Evaluation
+
+Every Job Item passes through a chain of **Processing Strategies**, evaluated in priority order. Each strategy decides whether the item should be indexed, re-indexed, de-indexed, ignored, or skipped:
+
+| Priority | Strategy | What it does |
+|---|---|---|
+| 10 | **De-index** | Removes documents marked for deletion |
+| 20 | **Ignore (Indexing Rules)** | Skips documents matching regex-based ignore rules |
+| 30 | **Index** | Indexes new documents (not seen before) |
+| 40 | **Re-index** | Updates documents whose content has changed (checksum comparison) |
+| 50 | **Unchanged** | Skips documents that haven't changed since the last run |
+
+The strategy chain uses **checksum-based change detection**: each document's content is hashed, and the hash is compared against the last indexed version. Only documents that have actually changed are re-indexed.
+
+### Stage 3: Batching
+
+Accepted Job Items are collected by the **Batch Processor** into groups (default: 50 items per batch). This reduces the number of messages sent to the queue and improves indexing throughput.
+
+When a batch reaches its configured size, or when the connector signals it has finished, the batch is flushed to the message queue.
+
+### Stage 4: Queue
+
+The batch is sent to **Apache Artemis** (embedded JMS message queue). The queue decouples extraction from delivery: if the search engine is temporarily unavailable, messages wait in the queue and are delivered when the connection is restored.
+
+Queue messages are persisted to disk (`store/queue/`) and survive application restarts.
+
+### Stage 5: Delivery
+
+The **Indexing Plugin** consumes messages from the queue and delivers them to the configured search engine. Dumont supports three output targets:
+
+| Plugin | Target | Description |
+|---|---|---|
+| **Turing** (default) | Viglet Turing | Uses the Turing Java SDK to deliver documents via REST API |
+| **Solr** | Apache Solr | Uses SolrJ to add documents directly to a Solr collection |
+| **Elasticsearch** | Elasticsearch | Uses the Elasticsearch Java Client for bulk indexing |
+
+---
+
+## Indexing Rules
+
+**Indexing Rules** allow you to filter content during extraction, before it enters the pipeline. A rule defines:
+
+- An **attribute** (a field name in the document)
+- A **rule type** (currently `IGNORE`)
+- One or more **values** (regex patterns)
+
+When a document's attribute matches any of the values, the document is skipped entirely. For example, a rule with `attribute = template` and `values = [error-page, redirect]` will prevent any document with those templates from being indexed.
+
+Indexing Rules are configured per source in the admin console and are evaluated by the **IgnoreIndexingRuleStrategy** at priority 20, before the index/re-index/unchanged strategies run.
+
+---
+
+## Change Detection
+
+Dumont tracks every document it has processed using a persistent indexing database. For each document, it stores:
+
+- **Object ID**: the unique identifier from the source
+- **Checksum**: a CRC32 hash of the document's content
+- **Timestamp**: when the document was last indexed
+- **Status**: the current state (preparing, indexed, de-indexed, etc.)
+
+On subsequent runs, the connector compares the new checksum against the stored one. If they match, the document is **unchanged** and skipped. If they differ, the document is **re-indexed**. If a previously indexed document is no longer present in the source, it is **de-indexed**.
+
+This mechanism enables efficient **incremental indexing**, only changed content is sent to the search engine, regardless of how large the source is.
+
+---
+
+## Data Quality
+
+An indexing run that reports success is not the same thing as an index you can trust. A selector
+that stops matching, a write that fails after the ledger recorded it, a run killed halfway: each
+leaves the pipeline reporting nothing wrong. Dumont surfaces all three.
+
+### Field coverage and drift
+
+At the end of every full index, the connector records what percentage of documents carried each
+declared field, and appends that to the source's history. Comparing two runs turns a silent
+extraction failure into a **drift flag** naming the field: a template change that stops populating
+`workload` shows up as its coverage dropping from 100% to 0%, on the next run rather than months
+later. Coverage is reported per source and, for a source with declared content types, per type.
+
+See it under **Enterprise Search → Integration → [your instance] → Coverage**.
+
+### Field provenance
+
+Every published field is tagged with where its value came from (the source, or the named enricher
+that derived it), and the tags travel with the document as a compact `dum_provenance` attribute.
+So "why does this document say that" is answerable from the index itself, and a field that stops
+being produced stays auditable: the connector keeps a per-source record of when each field was
+last seen.
+
+### Interrupted runs do not delete your index
+
+A full index normally ends by de-indexing whatever it did not see, which is how content removed at
+the source leaves the index. That is exactly the wrong thing to do when the run itself failed: the
+ids it never reached look identical to ids that were removed.
+
+So a run that does not complete (an exception, an interruption, or a **wave of extraction
+failures** past a set ratio) finishes *standalone*: the de-index sweep is skipped and the
+previously indexed documents survive. A single hung fetch cannot stall the whole run either; a
+per-extract timeout cancels the overrun and counts it as one failed extraction.
+
+Skipping the sweep on an incomplete run is how every structured source behaves. The two thresholds
+are wired for the AEM connector, whose extraction is one HTTP fetch per page and therefore the one
+that hangs; see [Extraction Resilience](/docs/configuration-reference/#extraction-resilience).
+
+### The audit finds what the run missed
+
+A scheduled audit re-enumerates each source and, where the backend can report what it holds,
+compares against the search index itself, finding documents that never landed, landed and then
+went stale, or linger in the index after leaving the source. See
+[Content Audit](/docs/configuration-reference/#content-audit).
+
+---
+
+## Indexing Status Values
+
+Every document's journey through the pipeline is tracked with a status code:
+
+| Status | Meaning |
+|---|---|
+| `PREPARE_INDEX` | Preparing to index the document |
+| `PREPARE_UNCHANGED` | No changes detected since last indexing |
+| `PREPARE_REINDEX` | Preparing a re-indexation (content changed) |
+| `PREPARE_FORCED_REINDEX` | Forced re-indexation triggered |
+| `RECEIVED_AND_SENT_TO_TURING` | Document received and forwarded to the search engine |
+| `SENT_TO_QUEUE` | Document placed in the Artemis processing queue |
+| `RECEIVED_FROM_QUEUE` | Document consumed from the queue by the indexing plugin |
+| `INDEXED` | Document successfully indexed |
+| `FINISHED` | Operation finished |
+| `DEINDEXED` | Document removed from the index |
+| `NOT_PROCESSED` / `IGNORED` | Document skipped due to an Indexing Rule or strategy decision |
+
+---
+
+## Ready to go deeper?
+
+| I want to... | Go to |
+|---|---|
+| Understand the full system architecture | [Architecture](/docs/architecture/) |
+| Install Dumont | [Installation Guide](/docs/installation-guide/) |
+| Configure a Web Crawler | [Web Crawler Connector](/docs/connectors/web-crawler/) |
+| Index a database | [Database Connector](/docs/connectors/database/) |
+| Understand the indexing plugins | [Indexing Plugins](/docs/indexing-plugins/) |
+| See the full configuration reference | [Configuration Reference](/docs/configuration-reference/) |
+
+---
+

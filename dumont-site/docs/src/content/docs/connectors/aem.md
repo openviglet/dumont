@@ -1,0 +1,564 @@
+---
+title: "AEM Connector"
+description: "Index content from Adobe Experience Manager: event-driven indexing, infinity.json traversal, QueryBuilder discovery, publish-tier delivery APIs for Cloud Service, tag facets, model.json attributes, and custom extensions."
+---
+
+The AEM Connector indexes content from Adobe Experience Manager (AEM) author and publish instances. It consists of two components: an **AEM server-side bundle** (OSGi event listeners installed inside AEM) and a **connector plugin** (Java JAR loaded into `dumont-connector.jar`).
+
+---
+
+## How It Works
+
+The AEM connector receives indexing requests, then accesses AEM to traverse the content tree, fetch page data, extract tags as facets, and optionally call `.model.json` for custom attributes.
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '13px', 'actorBkg': '#dbeafe', 'actorBorder': '#4A90D9', 'actorTextColor': '#1a1a1a', 'activationBkgColor': '#ede9fe', 'activationBorderColor': '#9B6EC5', 'labelBoxBkgColor': '#fef3c7', 'labelBoxBorderColor': '#E8A838', 'labelTextColor': '#1a1a1a', 'loopTextColor': '#b07a1a', 'noteBkgColor': '#dcfce7', 'noteBorderColor': '#50B86C', 'noteTextColor': '#1a1a1a', 'signalColor': '#333', 'signalTextColor': '#333'}}}%%
+sequenceDiagram
+    participant AEM as AEM Instance
+    participant EVT as AEM Event Listener<br/>(OSGi Bundle)
+    participant API as Dumont Connector<br/>(AEM Plugin)
+    participant SE as Turing
+
+    Note over AEM,EVT: Option 1: Automatic (Event-Driven)
+    AEM->>EVT: Page published / modified / deleted
+    EVT->>API: POST /api/v2/aem/index/{source}<br/>{paths, event}
+
+    Note over API: Option 2: Manual (Postman / curl)
+    Note over API: Option 3: Turing Admin Console<br/>(Integration → Indexing Manager)
+
+    API->>AEM: GET {path}.infinity.json
+    AEM-->>API: Full JCR node tree (JSON)
+    API->>AEM: GET {path}/jcr:content.tags.json
+    AEM-->>API: Tags → converted to facets
+    API->>AEM: GET {path}.model.json (optional)
+    AEM-->>API: Sling Model attributes
+    API->>API: Traverse child nodes recursively
+    API->>SE: Index documents (via pipeline)
+```
+
+### Ways to Trigger Indexing
+
+| Method | How | When to use |
+|---|---|---|
+| **AEM Event Listeners** | Install the `aem-server` OSGi bundle inside AEM, it automatically sends indexing requests when content is published, modified, or deleted | Production: real-time content sync |
+| **Adobe I/O Events** | Register a webhook in Adobe Developer Console, optionally with the [journal consumer](#adobe-io-events) as its recovery path | Production on AEM as a Cloud Service, where you cannot install a bundle |
+| **Manual API Call** | Send a POST request to `/api/v2/aem/index/{source}` with a JSON payload containing paths and event type | Development, testing, one-off re-indexing |
+| **Viglet Turing Admin Console** | Use **Enterprise Search → Integration → Indexing Manager** to select paths and trigger indexing/deindexing/publishing operations | Operations: selective re-indexing via UI |
+
+---
+
+## Content Discovery Strategies
+
+How the connector discovers content during a full **Index All** operation depends first on the source's **Fetch Strategy**, which decides *which tier* is asked.
+
+With the default **Author servlets** strategy, two discovery mechanisms are available, selected globally:
+
+| Strategy | Property | How it discovers content |
+|---|---|---|
+| **Tree Traversal** *(default)* | `dumont.aem.querybuilder=false` | Recursively walks the content tree from the root path using `infinity.json`, follows parent→child relationships |
+| **QueryBuilder** | `dumont.aem.querybuilder=true` | Uses AEM's native QueryBuilder API (`/bin/querybuilder.json`) to find all content matching the configured content type in paginated batches |
+
+Both read author-tier Sling servlets. With the **Publish delivery APIs** strategy the connector uses `.model.json` on the publish tier instead: see [Publish-Tier Discovery](#publish-tier-discovery-aem-as-a-cloud-service) below.
+
+### QueryBuilder Discovery
+
+When enabled, the connector queries the QueryBuilder endpoint instead of walking the tree:
+
+```
+GET http://localhost:4502/bin/querybuilder.json?path=/content/wknd&type=cq:Page&p.hits=slim&p.limit=500&p.offset=0
+```
+
+Each page of discovered paths is immediately processed in parallel using a configurable thread pool: the full path list is never held in memory.
+
+**Enable it** by adding the following properties to `application.yaml` or as JVM arguments:
+
+```yaml
+dumont:
+  aem.querybuilder: true
+  aem.querybuilder.parallelism: 10   # number of parallel threads (default)
+```
+
+Or via command-line:
+
+```bash
+java -Ddumont.aem.querybuilder=true -Ddumont.aem.querybuilder.parallelism=10 -jar dumont-connector.jar
+```
+
+:::caution[Content Type required]
+QueryBuilder discovery requires a **Content Type** (e.g., `cq:Page`) configured in the AEM source. Without it, the command logs a warning and skips processing.
+:::
+
+:::tip[When to use QueryBuilder]
+QueryBuilder is recommended for **large content trees** where recursive traversal is slow. It reduces the number of HTTP round-trips to AEM by discovering all paths in bulk, then fetching content in parallel. For small sites (< 1 000 pages), the default tree traversal is typically sufficient.
+:::
+
+### Publish-Tier Discovery (AEM as a Cloud Service)
+
+Neither `infinity.json` nor `/bin/querybuilder.json` is served by an AEM as a Cloud Service publish tier: `infinity.json` is a dispatcher-blocked pattern by default, and QueryBuilder is not exposed on publish at all. Pointing the connector at author instead means holding an authoring credential and reading unpublished content for a job that only ever needed published pages.
+
+Set the source's **Fetch Strategy** to *Publish delivery APIs* and the connector reads the published delivery surface instead:
+
+```
+GET https://delivery-p12345-e67890.adobeaemcloud.com/content/wknd/us/en.model.json
+```
+
+`.model.json` is served by Core Components, is CDN-fronted, and needs no author access. The connector uses it for both jobs the author servlets were doing:
+
+- **Discovery and traversal**: the page model's `:children` lists the pages below it. When the root is a hierarchy root, that is the whole sub-tree in one request; otherwise the connector descends child by child.
+- **Page metadata**: title, template and last-modified date come from the same response. Content the delivery tier serves is published by definition, so every discovered page is treated as delivered.
+
+Attribute extraction already read `.model.json`, so an extension written for the author strategy needs no change.
+
+:::caution[Requires Core Components]
+The delivery strategy depends on `.model.json` being served for the pages you index, which means Core Components (the Sling Model exporter) on the templates in scope. Content Fragments and Assets are not yet reached through their own delivery endpoints: index those through the author strategy.
+:::
+
+QueryBuilder is ignored for a delivery source even when `dumont.aem.querybuilder=true` is set globally.
+
+---
+
+## The Indexing Flow (Step by Step)
+
+When the connector receives an indexing request (from any of the three triggers), it processes each path as follows:
+
+### 1. Fetch the Content Node
+
+The connector calls AEM's `infinity.json` endpoint to get the full JCR node tree:
+
+```
+GET http://localhost:4502/content/wknd/us/en/my-page.infinity.json
+```
+
+This returns the complete node hierarchy as JSON: all properties, child nodes, and metadata. The connector filters out internal nodes (prefixed with `jcr:`, `rep:`, `cq:`).
+
+A source on the *Publish delivery APIs* fetch strategy reads `.model.json` on the delivery host at this step instead: the remaining steps are unchanged.
+
+### 2. Extract Tags as Facets
+
+For each page, the connector fetches tags:
+
+```
+GET http://localhost:4502/content/wknd/us/en/my-page/jcr:content.tags.json
+```
+
+Tags are **automatically converted to facets** in the search index, no manual configuration needed. Each tag becomes a filterable value in the Turing facet panel.
+
+### 3. Fetch Model JSON (Optional: Requires Configuration)
+
+The connector does **not** call `.model.json` by default. To enable it, you must configure a `DumAemExtContentInterface` implementation in the `models` section of the export JSON:
+
+```json
+"models": [
+  {
+    "type": "cq:Page",
+    "className": "com.viglet.dumont.connector.aem.sample.ext.DumAemExtSampleModelJson",
+    "targetAttrs": [ ... ]
+  }
+]
+```
+
+When this is configured, the extension class fetches the Sling Model exporter:
+
+```
+GET http://localhost:4502/content/wknd/us/en/my-page.model.json
+```
+
+This returns structured content from AEM's Sling Models: useful for extracting custom attributes like content fragment paths, component data, or experience fragment references. See [Extending the AEM Connector](/docs/extending-aem/) for how to implement `DumAemExtContentInterface` and the full JSON configuration reference.
+
+### 4. Traverse the Content Tree
+
+Starting from the configured **root path** (e.g., `/content/wknd`), the connector recursively traverses all child nodes that match the configured **content type** (e.g., `cq:Page`). Each matching node goes through steps 1–3 above.
+
+### 5. Map Attributes and Index
+
+For each page, the connector:
+- Applies **attribute mappings** from the configuration (global attributes + model-specific source→target mappings)
+- Runs **custom extension classes** (if configured via `className`)
+- Creates a **Job Item** for both author and publish environments (if enabled)
+- Sends the Job Item through the Viglet Dumont pipeline to Turing
+
+---
+
+## Dependency Tracking and Cascade Re-Indexing
+
+When a page references other content (experience fragments, content fragments, shared components, linked pages), the AEM connector can automatically **re-index every page that depends on an updated path**. This prevents stale content from surviving in the index when a shared resource changes.
+
+### How Dependencies Are Discovered
+
+As each node's `.infinity.json` is fetched, the connector walks the JSON recursively and collects **every string value that starts with `/content`**: those paths become the document's dependency set. The extraction is completely automatic; no configuration on the AEM side is required.
+
+The dependency set is then attached to the `DumJobItemWithSession` and persisted alongside the indexing record (`dum_connector_dependency` table) whenever the record is saved or updated.
+
+### When the Cascade Fires
+
+Dependency processing runs **only on standalone (incremental) indexing**, it is **not** triggered by `Index All`:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '13px', 'actorBkg': '#dbeafe', 'actorBorder': '#4A90D9', 'actorTextColor': '#1a1a1a', 'activationBkgColor': '#ede9fe', 'activationBorderColor': '#9B6EC5', 'noteBkgColor': '#dcfce7', 'noteBorderColor': '#50B86C', 'noteTextColor': '#1a1a1a', 'signalColor': '#333', 'signalTextColor': '#333'}}}%%
+sequenceDiagram
+    participant EVT as AEM Event Listener<br/>(or Manual API)
+    participant API as Dumont Connector
+    participant DB as Indexing Store
+    participant SE as Turing
+
+    EVT->>API: POST /api/v2/aem/index/{source}<br/>{paths: ["/content/wknd/.../header"]}
+    API->>SE: Index the updated path(s)
+    API->>DB: findObjectIdsByDependencies(paths)
+    DB-->>API: IDs of pages that reference those paths
+    API->>SE: Re-index the dependent pages
+```
+
+1. A page is indexed via event listener, manual API call, or the Indexing Manager.
+2. The main indexing command runs first (the `Job Item` is produced and sent).
+3. `DependencyHandler` queries the indexing store for every document whose stored dependency list contains one of the updated paths.
+4. A second `IndexPaths` command re-indexes those dependents, which in turn also have their own dependencies refreshed.
+
+### Configuration
+
+A single property controls both the persistence of dependency links **and** the cascade behavior:
+
+| Property | Default | Description |
+|---|---|---|
+| `dumont.dependencies.enabled` | `false` *(shipped in `application.yaml`)* | Persist `/content/*` dependencies on each indexing record and trigger cascade re-indexing on standalone operations |
+
+Enable it in `application.yaml`:
+
+```yaml
+dumont:
+  dependencies.enabled: true
+```
+
+Or via JVM argument:
+
+```bash
+java -Ddumont.dependencies.enabled=true -jar dumont-connector.jar
+```
+
+:::note[Two effects from one flag]
+When `false`:
+- New/updated indexing records are saved **without** a dependency set (the join table stays empty for those rows)
+- `DependencyHandler.processDependencies()` returns early and no cascade re-indexing happens
+
+After turning the flag on, previously indexed content still has no stored dependencies: run a **Reindex All** to populate the dependency table for existing records.
+:::
+
+:::tip[Performance impact]
+Every standalone index operation performs an extra lookup plus a second indexing pass for any dependents. On sources with heavily shared components (templates, headers/footers, fragments), a single page update can fan out into many re-indexations: budget accordingly, or leave the flag off and rely on scheduled full reindexing.
+:::
+
+---
+
+## AEM Server-Side Bundle (Event Listeners)
+
+The `aem-server` module is an **OSGi bundle installed inside AEM**. It provides event listeners that automatically notify the Dumont connector when content changes.
+
+### Events Captured
+
+| Event Listener | OSGi Topic | Trigger | Path Filter | Dumont Action |
+|---|---|---|---|---|
+| `DumAemPageEventHandler` | `com/day/cq/wcm/api/page` | Page created / modified | n/a | `INDEXING` |
+| `DumAemPageReplicationEventHandler` | `com/day/cq/replication` | Page **activated** (published) | excludes `/content/dam/*` | `PUBLISHING` |
+| `DumAemPageReplicationEventHandler` | `com/day/cq/replication` | Page **deactivated** (unpublished) | excludes `/content/dam/*` | `UNPUBLISHING` |
+| `DumAemContentFragmentReplicationEventHandler` | `com/day/cq/replication` | Content Fragment **activated** | only `/content/dam/*` | `PUBLISHING` |
+| `DumAemContentFragmentReplicationEventHandler` | `com/day/cq/replication` | Content Fragment **deactivated** | only `/content/dam/*` | `UNPUBLISHING` |
+| `DumAemResourceEventHandler` | `org/apache/sling/api/resource/Resource/*` | DAM asset created / modified (`dam:Asset`, `dam:AssetContent`) under `/content` | n/a | `INDEXING` |
+
+:::note[Page vs. Content Fragment replication]
+Both replication handlers subscribe to the same OSGi topic, but each one inspects the paths in the `ReplicationAction` and skips anything outside its domain. The page handler ignores everything under `/content/dam/`; the Content Fragment handler only processes paths under `/content/dam/`. Replication types other than `ACTIVATE` / `DEACTIVATE` (e.g., `INTERNAL_POLL`, `TEST`) are logged at debug level and discarded.
+:::
+
+:::tip[Diagnostic listeners]
+The module also ships `DumAemAllComEventHandler` and `DumAemAllOrgEventHandler`, which log every event under `com/*` and `org/*` topics. They perform **no indexing** and exist only to help diagnose which topics AEM is actually firing: useful when event-driven indexing seems not to trigger. They can be left in place safely; log noise can be trimmed via the AEM logger configuration.
+:::
+
+### OSGi Configuration
+
+The event listeners are configured in AEM via **OSGi Configuration** (AEM → Web Console → Configuration):
+
+| Setting | Description |
+|---|---|
+| **Enabled** | Toggle to enable/disable automatic indexing |
+| **Host** | Dumont connector URL (e.g., `http://dumont-server:30130`) |
+| **Config Name** | Source name configured in the Dumont connector |
+
+### HTTP Payload
+
+When an event fires, the bundle sends:
+
+```
+POST http://dumont-server:30130/api/v2/aem/index/{configName}
+Content-Type: application/json
+
+{
+  "paths": ["/content/wknd/us/en/my-page"],
+  "event": "INDEXING"
+}
+```
+
+Event types: `INDEXING`, `DEINDEXING`, `PUBLISHING`, `UNPUBLISHING`.
+
+---
+
+## Adobe I/O Events
+
+On AEM as a Cloud Service you cannot install the OSGi bundle above. Adobe I/O Events is the route
+instead: register the connector as a consumer in Adobe Developer Console and AEM emits the same
+publish/modify/unpublish/delete events as CloudEvents.
+
+Adobe delivers them two ways, and the connector reads both through one handler, so an event means
+the same thing whichever way it arrives.
+
+### The webhook (push)
+
+Register this URL as the webhook of an event registration, one per source:
+
+```
+POST https://dumont-server:30130/api/v2/aem/webhook/{source}
+```
+
+Adobe verifies the registration with a `GET` carrying a `challenge` query parameter, which the same
+endpoint echoes back. Set `dumont.aem.webhook.adobe-io.client-id` to the credential's **API Key
+(Client ID)** and the connector rejects any payload whose `recipient_client_id` does not match with
+`401`. Left unset, the endpoint is open and logs a warning at startup: development only.
+
+Event types ending in `.published`, `.modified`, `.unpublished` and `.deleted` are acted on; anything
+else is answered `200` and ignored. The path indexed is the event's `data.resource_path`.
+
+### The journal (pull, recovery)
+
+A pushed webhook has no recovery. One lost to a `502`, a rolling restart, a network partition or an
+expired certificate is gone: Adobe retries for a bounded window and then drops it, and the content
+it described stays at whatever version the index last saw. The scheduled audit eventually notices,
+but it is a full re-discovery on a cron most deployments set to hours.
+
+The journal is the same ordered event stream, pulled at your own cadence behind a cursor:
+
+```yaml
+dumont:
+  aem:
+    journal:
+      enabled: true
+      poll-ms: 60000
+      client-id: <API Key (Client ID)>
+      client-secret: <Client Secret>
+      sources:
+        wknd: https://events-va6.adobe.io/events/organizations/1/integrations/2/3
+```
+
+The journal URL is shown on the event registration in Adobe Developer Console. Journalling is
+enabled automatically on every registration, so this costs no extra Adobe-side setup.
+
+Each poll reads a page of events, dispatches them, and only then persists the page's position. That
+ordering is what makes recovery exact: after downtime, a failed page or a crash mid-page, the next
+poll resumes from the last committed position instead of skipping ahead. Re-dispatching an event you
+already indexed is harmless (indexing a path is idempotent), while skipping one is not.
+
+| Property | Default | Purpose |
+|---|---|---|
+| `dumont.aem.journal.enabled` | `false` | Master switch. Off means the webhook alone, exactly as before |
+| `dumont.aem.journal.poll-ms` | `60000` | Delay between the end of one poll and the start of the next |
+| `dumont.aem.journal.batch-size` | `100` | Events requested per page |
+| `dumont.aem.journal.max-pages-per-poll` | `20` | Pages followed in one poll, so a large backlog drains across polls |
+| `dumont.aem.journal.client-id` | – | OAuth Server-to-Server API Key (Client ID) |
+| `dumont.aem.journal.client-secret` | – | OAuth Server-to-Server Client Secret |
+| `dumont.aem.journal.sources.<source>` | – | Journal URL for that Dumont source |
+
+:::tip[Run both]
+The webhook stays the low-latency route: an editor publishes and the page is indexed within
+seconds. The journal is the floor under it, catching what a push drops. Enabling the journal does
+not disable or change the webhook.
+:::
+
+:::note[Replaying deliberately]
+To re-consume from a point in the journal, clear the stored position: the cursor lives in the
+connector's `aem_system` table under the key `{source}/journal-position`. Removing it makes the next
+poll start from the beginning of the journal's retention window.
+:::
+
+---
+
+## Manual API Triggering
+
+You can trigger indexing manually via HTTP (Postman, curl, etc.):
+
+### Index Specific Paths
+
+```bash
+curl -X POST http://localhost:30130/api/v2/aem/index/WKND \
+  -H "Content-Type: application/json" \
+  -d '{
+    "paths": ["/content/wknd/us/en/about"],
+    "event": "INDEXING",
+    "recursive": true
+  }'
+```
+
+### Deindex Specific Paths
+
+```bash
+curl -X POST http://localhost:30130/api/v2/aem/index/WKND \
+  -H "Content-Type: application/json" \
+  -d '{
+    "paths": ["/content/wknd/us/en/old-page"],
+    "event": "DEINDEXING"
+  }'
+```
+
+### Request Body Fields
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `paths` | string[] | *(required)* | AEM content paths to process |
+| `event` | string | `INDEXING` | `INDEXING`, `DEINDEXING`, `PUBLISHING`, or `UNPUBLISHING` |
+| `recursive` | boolean | `false` | Traverse child nodes recursively |
+| `attribute` | string | `ID` | `ID` (path-based) or `URL` (URL-based) |
+
+---
+
+## Source Configuration
+
+Each AEM source defines connection details, content scope, author/publish environments, locale mappings, and delta tracking. Sources are configured in the **Turing Admin Console** under **Enterprise Search → Integration → [your AEM instance] → Sources**.
+
+For the JSON configuration file used by custom extensions (attributes, models, locale paths), see [Extending the AEM Connector](/docs/extending-aem/#aem-configuration-json).
+
+### General
+
+| Field | Description |
+|---|---|
+| Name | Source identifier |
+| Endpoint | URL of the AEM instance (e.g., `http://localhost:4502`) |
+| Username / Password | Credentials for authenticated access to the AEM instance |
+
+### Root Path
+
+Defines the root content path within the AEM repository from which content is traversed (e.g., `/content/wknd`). All child nodes matching the configured content type are indexed recursively from this path.
+
+### Content Types
+
+| Field | Description |
+|---|---|
+| Content Type | Primary content type to be indexed (e.g., `cq:Page`) |
+| Sub Type | Optional sub-type filter within the content type |
+
+### Fetch Strategy
+
+Chooses which AEM tier the connector reads, per source: see [Publish-Tier Discovery](#publish-tier-discovery-aem-as-a-cloud-service) for what changes.
+
+| Field | Description |
+|---|---|
+| Fetch Strategy | `Author servlets (infinity.json)` (the default, for on-premise and AMS) or `Publish delivery APIs (model.json)`, for AEM as a Cloud Service |
+| Delivery URL Prefix | Host the delivery requests are sent to, e.g. `https://delivery-p12345-e67890.adobeaemcloud.com`. Shown only for the delivery strategy; leave blank to reuse the publish URL prefix |
+
+### Delta Tracking
+
+Controls incremental indexing: how the connector detects which content has changed since the last run.
+
+| Field | Description |
+|---|---|
+| Once Pattern | Pattern used to identify content that should only be indexed once |
+| Delta Class | Fully-qualified Java class name responsible for detecting changed content since the last run (see [Extending AEM](/docs/extending-aem/) for custom implementations) |
+
+### Author / Publish
+
+Configures which AEM environments are indexed and how they map to Turing Semantic Navigation Sites.
+
+| Field | Description |
+|---|---|
+| Author | Enable indexing from the AEM author environment |
+| Publish | Enable indexing from the AEM publish environment |
+| SN Site (Author) | Semantic Navigation Site that receives author content |
+| SN Site (Publish) | Semantic Navigation Site that receives publish content |
+| URL Prefix (Author) | URL prefix prepended to document paths in the author index |
+| URL Prefix (Publish) | URL prefix prepended to document paths in the publish index |
+
+### Locales
+
+Maps content language codes to repository paths.
+
+| Field | Description |
+|---|---|
+| Default Locale | Locale used when no language-specific path is matched |
+| Locale Class | Fully-qualified Java class name responsible for resolving document locale (see [Extending AEM](/docs/extending-aem/) for custom implementations) |
+| Locale → Path | Dynamic list mapping each locale code (e.g., `en_US`) to its root path in the repository |
+
+### Source Actions
+
+Each source has two action buttons available in the Turing admin console:
+
+- **Index All**: triggers a full indexing run for all content in this source
+- **Reindex All**: forces a full reindexation, replacing all previously indexed content
+
+---
+
+## Indexing Rules
+
+Indexing Rules allow you to filter content during indexing, for example, to exclude error pages or draft content before it reaches the search index. Rules are configured in the **Turing Admin Console** under **Enterprise Search → Integration → [your AEM instance] → Indexing Rules**.
+
+| Field | Description |
+|---|---|
+| Name | Rule identifier (required) |
+| Description | Purpose of this rule |
+| Source | The source this rule applies to |
+| Attribute | Document field to evaluate (e.g., `template`) |
+| Rule Type | How the rule is applied: currently supports **IGNORE** (skip documents that match) |
+| Values | Dynamic list of values that trigger the rule (add or remove entries) |
+
+**Example:** A rule with `Attribute = template`, `Rule Type = IGNORE`, and `Values = [error-page]` will prevent any document with `template:error-page` from being indexed.
+
+---
+
+## Indexing Manager
+
+The Indexing Manager provides a stepper form in the **Turing Admin Console** for targeting specific documents for manual operations.
+
+| Operation | Description | Colour |
+|---|---|---|
+| **INDEXING** | Index specific content | Blue |
+| **DEINDEXING** | Remove specific content from the index | Red |
+| **PUBLISHING** | Publish content | Green |
+| **UNPUBLISHING** | Unpublish content | Orange |
+
+Each operation step allows you to:
+
+- Select the **Source** to operate on
+- Choose the **attribute** to identify documents: **ID** or **URL**
+- Enter one or more specific values (IDs or URLs)
+- Expand **Advanced Settings** to toggle **Recursive** mode, which traverses child content in hierarchical repositories
+
+## Concurrency
+
+The connector supports two execution modes:
+
+| Mode | When | Behavior |
+|---|---|---|
+| **Exclusive** | Full crawl (`indexAll`) | Only one full crawl per source at a time |
+| **Standalone** | Specific paths (event-driven / manual) | Multiple concurrent updates allowed |
+
+Reactive (parallel) processing can be enabled for large sites:
+
+```properties
+dumont.reactive.indexing=true
+dumont.reactive.parallelism=10
+```
+
+When using **QueryBuilder discovery**, parallelism is controlled separately via `dumont.aem.querybuilder.parallelism` (default `10`). See [Content Discovery Strategies](#content-discovery-strategies) above.
+
+---
+
+:::tip[Customizing the AEM Connector]
+Need custom attribute extractors, delta date logic, or content processors? See [Extending the AEM Connector](/docs/extending-aem/) for the full extension system, configuration JSON reference, and step-by-step guide.
+:::
+
+---
+
+## Related Pages
+
+| Page | Description |
+|---|---|
+| [AEM Event Listener](/docs/aem-event-listener/) | Install the OSGi event listener bundle inside AEM for real-time indexing |
+| [Extending the AEM Connector](/docs/extending-aem/) | Custom attribute extractors, content processors, and configuration JSON reference |
+| [Turing: Integration](https://docs.viglet.org/turing/integration) | General integration management: monitoring, indexing stats, and system information |
+| [Turing: AEM Connector](https://docs.viglet.org/turing/integration-aem) | AEM integration overview from the Turing perspective |
+| [Turing: Semantic Navigation](https://docs.viglet.org/turing/semantic-navigation) | Configure the SN Sites that receive indexed content |
+
+---

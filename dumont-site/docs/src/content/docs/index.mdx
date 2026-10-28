@@ -1,25 +1,90 @@
 ---
-title: Viglet Dumont DEP documentation
-description: Install, configure and run Viglet Dumont DEP, the connector platform that moves content into Turing ES, Solr or Elasticsearch.
+title: Viglet Dumont
+description: "Index Adobe AEM, websites, WordPress, databases and file systems into enterprise search. Install, configure and run the open-source Viglet Dumont connectors."
+tableOfContents: false
 ---
 
 import CardGrid from "../../components/CardGrid.astro";
+import FeatureCard from "../../components/FeatureCard.astro";
 import NavCard from "../../components/NavCard.astro";
 import Pill from "../../components/Pill.astro";
 import SectionLabel from "../../components/SectionLabel.astro";
 
-<Pill>Open source</Pill> <Pill>Apache 2.0</Pill>
+export const VERSION = "2026.3";
 
-Viglet Dumont DEP (Data Exchange Platform) moves content from AEM, databases, file systems
-and the web into Turing ES, Solr or Elasticsearch.
+<Pill>v{VERSION}</Pill> <Pill>Open Source</Pill> <Pill>Apache 2.0</Pill>
 
-The guides are moving here from [docs.viglet.org/dumont](https://docs.viglet.org/dumont/).
-Until they arrive, that address remains the complete documentation.
+**Viglet Dumont** is an open-source data extraction platform. It connects your content (websites, databases, file systems, AEM, WordPress, and paged JSON APIs) to **Viglet Turing** and other search engines through a reliable, asynchronous processing pipeline.
 
-<SectionLabel>Start there</SectionLabel>
+<SectionLabel>Key Capabilities</SectionLabel>
 
-<CardGrid min="200px">
-  <NavCard eyebrow="Step 01" title="Install" description="Docker, standalone JAR or build from source" href="https://docs.viglet.org/dumont/installation-guide" />
-  <NavCard eyebrow="Step 02" title="Configure" description="application.yaml, Turing connection and queue" href="https://docs.viglet.org/dumont/configuration-reference" />
-  <NavCard eyebrow="Step 03" title="Connect" description="Choose a connector and start indexing content" href="https://docs.viglet.org/dumont/connectors/overview" />
+<CardGrid min="220px">
+  <FeatureCard icon="🌐" title="Web Crawler">
+    Recursively crawl websites with URL filtering, authentication, locale detection and incremental change detection.
+  </FeatureCard>
+  <FeatureCard icon="🗄️" title="Database Connector">
+    Run any SQL query against Oracle, PostgreSQL, MariaDB or MySQL and index each row as a searchable document.
+  </FeatureCard>
+  <FeatureCard icon="📁" title="FileSystem Connector">
+    Walk directory trees and extract text from PDFs, Word, Excel, PowerPoint and images (OCR) via Apache Tika.
+  </FeatureCard>
+  <FeatureCard icon="📦" title="AEM Connector">
+    Index on-premise, AMS and Cloud Service instances (author or publish tier) with delta tracking, locale mapping and a schema per content type.
+  </FeatureCard>
+  <FeatureCard icon="📝" title="WordPress Connector">
+    Index posts, pages and custom post types into Turing, with taxonomies and custom fields as facets, WP-CLI, and a search block for block themes.
+  </FeatureCard>
+  <FeatureCard icon="🔗" title="JSON API Sources">
+    Index a job board, product catalog or partner feed from a JSON manifest: paging, daily and monthly call budgets, field mapping and expiry for sources a budget never lets you read in full, with no Java code.
+  </FeatureCard>
+  <FeatureCard icon="🔌" title="Multi-Target Indexing">
+    Deliver content to Turing (default), Apache Solr or Elasticsearch via pluggable indexing adapters.
+  </FeatureCard>
+  <FeatureCard icon="🪄" title="Guided Onboarding">
+    Point the wizard at a URL: Dumont infers the source's shape and field manifest, you correct the draft, and a dry run shows exactly what would be indexed (coverage, skipped records and a diff) before anything is written.
+  </FeatureCard>
+  <FeatureCard icon="🧩" title="Structured Sources">
+    Model a source by its schema, not as a link spider: declared fields sent to the index ahead of the documents, values grounded rather than guessed, and coverage tracked so a layout change cannot silently drop a field.
+  </FeatureCard>
+  <FeatureCard icon="🔍" title="Data Quality & Trust">
+    A scheduled audit compares source, ledger and index, requeues what never landed, and shows where each field came from. A run cut short finishes without de-indexing, and a document to be deleted waits in a report you approve.
+  </FeatureCard>
+  <FeatureCard icon="🧾" title="Queryable Indexing Log">
+    Every status a document passes through, filterable by source, run or document, so you can replay one run end to end. A log that cannot be read says so: a store that is down answers 503 rather than looking like a connector that indexed nothing.
+  </FeatureCard>
+</CardGrid>
+
+<SectionLabel>Quick Start</SectionLabel>
+
+<CardGrid min="180px">
+  <NavCard eyebrow="Step 01" title="Install" description="Docker, standalone JAR or build from source" href="installation-guide/" />
+  <NavCard eyebrow="Step 02" title="Configure" description="application.yaml, Turing connection and queue" href="configuration-reference/" />
+  <NavCard eyebrow="Step 03" title="Understand" description="Connectors, pipeline, strategies and job items" href="getting-started/core-concepts/" />
+  <NavCard eyebrow="Step 04" title="Connect" description="Choose a connector and start indexing content" href="connectors/overview/" />
+</CardGrid>
+
+<SectionLabel>Connectors</SectionLabel>
+
+<CardGrid min="260px">
+  <NavCard icon="🌐" title="Web Crawler" description="Recursive crawling with URL filtering, auth, user agents and locale detection" href="connectors/web-crawler/" />
+  <NavCard icon="🗄️" title="Database Connector" description="JDBC queries against Oracle, PostgreSQL, MariaDB, MySQL: CLI and integrated modes" href="connectors/database/" />
+  <NavCard icon="📁" title="FileSystem Connector" description="Directory traversal with Apache Tika text extraction, OCR and metadata mapping" href="connectors/filesystem/" />
+  <NavCard icon="📦" title="AEM Connector" description="Author, publish and Cloud Service delivery, delta tracking, locale mapping and custom extensions" href="connectors/aem/" />
+  <NavCard icon="📝" title="WordPress Connector" description="Posts, pages and custom content types from WordPress installations" href="connectors/wordpress/" />
+  <NavCard icon="🔗" title="Catalog & JSON API" description="Normalized catalog feeds and paged JSON APIs declared as manifests, with call budgets and expiry" href="connectors/catalog/" />
+</CardGrid>
+
+<SectionLabel>Architecture & Pipeline</SectionLabel>
+
+<CardGrid min="260px">
+  <NavCard icon="🏗️" title="Architecture Overview" description="Component diagram, data flow, module structure, tech stack and deployment topologies" href="architecture/" />
+  <NavCard icon="🧩" title="Core Concepts" description="Connectors, job items, processing strategies, change detection and indexing status" href="getting-started/core-concepts/" />
+  <NavCard icon="🔌" title="Indexing Plugins" description="Deliver content to Turing, Apache Solr or Elasticsearch via pluggable adapters" href="indexing-plugins/" />
+</CardGrid>
+
+<SectionLabel>Technical Reference</SectionLabel>
+
+<CardGrid min="260px">
+  <NavCard icon="📋" title="Configuration Reference" description="Complete application.yaml property reference: server, database, queue, plugins" href="configuration-reference/" />
+  <NavCard icon="🛠️" title="Developer Guide" description="Build from source, project structure, extension points and contribution guide" href="developer-guide/" />
 </CardGrid>
