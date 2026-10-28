@@ -496,27 +496,3 @@ to a prospect.
 
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
-
-### XLIX.79 The Tarnfell theme in Portuguese (D223)
-
-**What happens.** With `DEMO_LOCALE=pt_BR` (D217) the catalog, journal, facets,
-WooCommerce and the plugin speak Portuguese, but every word the Tarnfell theme writes
-itself stays English: the announcement bar, the header menu (Shop, Search, Journal,
-Compare), the front page's hero, terrain cards and section headings, the footer, the
-page titles and blog description `demo/setup.php` writes, the compare page's labels and
-"No results found." (`inc/compare.php`), and the tour's feature names. The theme has no
-text domain and no translation call at all: its block templates and parts are plain
-HTML.
-
-**What it should do.**
-- Move each template's and part's visible text into PHP patterns (`patterns/`) that
-  print it through `__()`/`esc_html_e()` under a `tarnfell` text domain, and reference the
-  patterns from the HTML templates, the way block themes translate.
-- `inc/compare.php` and the tour's script strings through the same domain (the tour via
-  `wp_set_script_translations` or localized data).
-- A `languages/tarnfell-pt_BR.po`/`.mo`, loaded with `load_theme_textdomain`.
-- `demo/setup.php` names its pages and the blog description in the site's language
-  (`pt_BR.php` already carries the catalog's copy; add the pages there).
-- The tour spec reads its expected feature names in the demo's locale instead of
-  skipping on pt_BR (`tests/e2e/demo/tour.spec.mjs`), and a `look` of the pt_BR home finds
-  no English string the `.po` translates.

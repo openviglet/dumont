@@ -130,7 +130,6 @@ This track has no remaining pending tasks.
 - 📋 **D201** (deps: D173 ✅, D198) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
 - 📋 **D203** (deps: D195 ✅, D198, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
-- 📋 **D223** (deps: D217 ✅) **On a Portuguese demo the Tarnfell theme's own text stays English: menus, hero, footer, compare page and tour** — The theme has no text domain, so a Brazilian prospect reads a store whose catalog is Portuguese and whose frame is not. → §XLIX.79
 
 ## Done when — D144
 
