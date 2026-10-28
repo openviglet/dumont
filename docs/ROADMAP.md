@@ -119,8 +119,7 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 🛠 **D174** (deps: D169 ✅, D186 ✅, Turing T1153) **No test exercises Turing's generative features against a real LLM: grounding, injection, speed and cost go unchecked** — Chat now answers from the posts; the answer panel reads one run-on word, as Turing's stream drops each token's leading space. → §XLIX.26
-- 📋 **D175** (deps: D169 ✅, D174 🛠) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
+- 📋 **D175** (deps: D169 ✅, D174 ✅) **Visitors cannot ask the site a question in conversation, though Turing's RAG chat answers from its posts** — A visitor with a question browses or leaves, while a cited chat over the site's own content is one block away. → §XLIX.27
 - 📋 **D179** (deps: D166 ✅, D170 ✅, D171 ✅, D172 ✅, D175, D177 ✅, D178 ✅, D194 ✅) **Turing's features on WordPress cannot be seen together, tried by a prospect or filmed for the docs** — Each block ships alone, so nobody sees what Turing brings to a WordPress site. → §XLIX.35
 - 💭 **D196** (deps: D203) **A prospect can see the demo store only by installing Docker, so a link in a pitch leads nowhere** — Marketing needs a URL anyone opens on a phone, and the store must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - 📋 **D197** (deps: D203, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
@@ -135,15 +134,6 @@ This track has no remaining pending tasks.
 - **A declared custom sort converges on the site with the fields** The jobs schema
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
-
-## Done when — D174
-
-- **The live suite's checks run and pass on a site with GenAI** On a stack whose SN site
-  has its GenAI config, npm run test:e2e:ai runs the chat and answer specs rather than
-  skipping them, and they pass.
-- **Each run reports its tokens and dollars and holds a budget** The suite reads
-  Turing's cost ledger before and after, reports tokens and dollars with p50 and p95
-  time, and fails above a cost budget set in the config.
 
 ## Done when — D182
 

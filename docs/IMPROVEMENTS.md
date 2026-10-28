@@ -180,30 +180,6 @@ nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.26 A live-LLM browser suite for the AI features (D174)
-
-**What happens.** The live-LLM suite runs (`npm run test:e2e:ai`, `tests/e2e/ai/`): a
-seed of known facts in English and Portuguese and a prompt-injection post, deleted again
-by the teardown; chat, answer, natural-language filter (D170), excerpt-draft (D171),
-insights summary (D178) and compare summary (D200) specs; answers saved to
-`tests/e2e/artifacts/ai/answers.json`. Each run reads Turing's `cost/summary?site=`
-before and after (`ai/cost.mjs`), prints the tokens, dollars and calls, and fails over
-`AI_TOKEN_BUDGET` or `AI_COST_BUDGET`, or when any call went unpriced. Against Turing
-2026.3 with T1146-T1150, 11 of 12 pass: chat answers from the seeded posts, in
-Portuguese too, and resists the planted instruction; a run spends about 8,400 tokens and
-$0.0014.
-
-**What it should do next.**
-- The answer panel's spec fails on Turing's stream, not the plugin: each `token` event is
-  raw text, so a token's leading space is the one an SSE client strips, and the panel reads
-  "Applicationsfortheresearchgrantcloseon14March2026." (Turing T1153). Turing fixes it by writing `data: ` plus the token,
-  so the wire format stays as it is: no SDK bump, and the spec passes unchanged once the
-  stack runs that image.
-- The shop copilot (D173) and the site assistant (D175) join the suite as each lands.
-- The teardown returns once the queue is sent, before Turing commits the deletions: a
-  default run started right after read "5 results" for 4 in `site/url.spec.mjs`. Wait for
-  the seeded posts to leave the index before returning.
-
 ### XLIX.27 A site assistant block on Turing's chat (D175)
 
 **What happens.** Turing runs a RAG chat over the site's own content: `GET
