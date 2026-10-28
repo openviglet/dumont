@@ -303,7 +303,9 @@ and a line under the box says what was read: "Understood: Color: Red, Price: ≤
 **Undo** to put the search back as it was typed. On a WooCommerce shop a price the sentence
 names ("under $400", "até R$ 400", "entre 100 e 300 reais", "over $50") is read by the block
 itself and filters the shop's price field, so it works even with no language model in
-Turing. Only an amount marked as money counts: "under 2 kg" is left alone.
+Turing. Only an amount marked as money counts: "under 2 kg" is left alone. A size works
+the same way ("size M", "tamanho 42") on a facet whose field or name says size, and only
+when that value is one the site's products have: "size XXXL" sets nothing.
 
 A site with its own search blocks turns the block off:
 

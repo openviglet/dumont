@@ -276,32 +276,6 @@ chat, a shopping copilot and insights, has no page, and nothing links to a demo.
 recording rather than hand-made mock-ups, and a link check covers the new calls to
 action.
 
-### XLIX.55 Text to filters on the search block (D199)
-
-**What landed.** The search block's **Apply them instead of suggesting** option (beside
-D170's suggestions): the filters Turing's `nl-filters` (T1085) grounded are applied, the
-words they came from leave the query, and a line built from the filters ("Understood:
-Color: Red, Price: ≤ 200") offers Undo. A price is read in code (`readPrice` in
-`search-block.js`, en and pt_BR, money-marked amounts only) and filters the field the
-WooCommerce price is mapped to, with or without an LLM. Readings are kept per page, so
-the same sentence costs one call.
-
-**Decision.** The option is off by default, not on: D170 shipped "a guess is the
-visitor's to take", and turning on auto-apply for every site that enabled suggestions
-would change what their visitors see  without asking.
-
-**What is left.**
-- Sizes read in code like prices ("size M", "tamanho 42"), on a size facet the mapping
-  declares; the woo seed has none yet.
-- A daily cap on readings per site, so a crawler typing sentences cannot run up the LLM
-  bill; Turing has no such cap on `nl-filters`, so it is the plugin's (an option counted per
-  day).
-- The demo's search page with the option on, and specs on the demo seed: each curated
-  sentence sets its expected facets, an off-vocabulary word sets none.
-
-**Gate.** `woo/understand.spec.mjs` (price alone, Turing's reading plus price, an amount
-that is not money); the left items add their own specs.
-
 ### XLIX.57 A kit builder from a described plan (D201)
 
 **What happens.** The shopping copilot turns a need into a short list, one need at a

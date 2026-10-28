@@ -688,4 +688,4 @@
 - **D226** — The WordPress plugin workflow runs Plugin Check on the built package on every change and gates the release; today it reports no errors.
 - **D229 (21 of 23 warnings)** — Plugin Check reports two warnings, both the name's trademark: template variables are prefixed and the two exclusions and the textdomain call are annotated.
 - **D201 (the Build my kit mode)** — Ask the catalog has a Plan a kit mode: Turing stages a plan by need, the shop prices and stocks each product, and the kit goes in the cart in one click.
-- **D199 (apply mode and the price read in code)** — The search block can apply the filters a sentence names, say what it understood with Undo, and read a price like "under R$400" even without an LLM.
+- **D199** — A size is read in code, grounded on the site's own values; the Tarnfell search page applies what a sentence names, and demo specs cover it (design §XLIX.55 recorded in `wordpress/README.md`).
