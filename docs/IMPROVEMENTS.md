@@ -411,26 +411,6 @@ keep the two exclusions if the lists stay short and say so; keep
 installed from the directory loads no language pack. Then make the CI job fail on
 warnings too.
 
-### XLIX.86 The e2e stack hides core's update nag (D236)
-
-**What happens.** The admin specs' `axe()` check fails on five screens (Setup, Fields,
-Health, Health AI features, Settings) whenever WordPress core has a release newer than
-the stack's image. Core prints its update nag on every admin page, and its link
-(`a[aria-label="Please update WordPress now"]`) breaks `label-content-name-mismatch`.
-The plugin's markup is clean; the suite goes red on a date, and the woo project behind
-it in the chain never runs.
-
-**What it should do.**
-- The axe fixture in `tests/e2e/fixtures.mjs` excludes core's update nag
-  (`.update-nag`, `#update-nag`) on admin screens, the way it already scopes a check with
-  `include`. Only core's own notice: a plugin notice stays checked.
-- Or the stack disables the nag for the suite (`wp config set WP_AUTO_UPDATE_CORE false`
-  plus a `pre_site_transient_update_core` filter in an mu-plugin the e2e seed installs), so
-  the screens look like a current install. Prefer this: it also keeps the screenshots stable.
-
-**Gate.** `npm run test:e2e --project=admin` passes on a stack whose WordPress image is
-one release behind.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +

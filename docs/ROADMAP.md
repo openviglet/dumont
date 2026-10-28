@@ -121,7 +121,6 @@ This track has no remaining pending tasks.
 - 📋 **D197** (deps: D203 ⏸, D204) **dumont.viglet.org has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
 - 📋 **D204** (deps: D203 ⏸) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D236** (deps: —) **Admin e2e accessibility checks fail whenever WordPress core has an update, on core's own update nag** — A red suite should mean the plugin broke, not that a core release came out, and the chain stops the woo specs. → §XLIX.86
 
 ## Done when — D144
 
