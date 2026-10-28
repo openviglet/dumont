@@ -680,3 +680,4 @@
 - **D198** — The demo's generative AI is on, with the assistant on every page, a no-key notice, and curated prompts answered live from the guides they name.
 - **D225 (readme sections)** — readme.txt has an External services section naming what goes to Turing and when, a Plugins > Add New install, and a link to the source.
 - **D226** — The WordPress plugin workflow runs Plugin Check on the built package on every change and gates the release; today it reports no errors.
+- **D229 (21 of 23 warnings)** — Plugin Check reports two warnings, both the name's trademark: template variables are prefixed and the two exclusions and the textdomain call are annotated.

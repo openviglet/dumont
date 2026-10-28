@@ -126,7 +126,6 @@ This track has no remaining pending tasks.
 - 📋 **D203** (deps: D195 ✅, D198 ✅, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D229** (deps: —) **Plugin Check reports 23 warnings on the package, none fixed or annotated, so the CI gate passes them silently** — Reviewers read warnings too, and a gate that ignores them lets new ones in unnoticed. → §XLIX.85
 
 ## Done when — D144
 
@@ -155,6 +154,12 @@ This track has no remaining pending tasks.
 - **The readme passes the wordpress.org readme validator**
   wordpress.org/plugins/developers/readme-validator/ reports no error on src/readme.txt,
   and the zip holds nothing the directory forbids.
+
+## Done when — D229
+
+- **Plugin Check reports no warning, and the CI job fails on one** wp plugin check
+  viglet-dumont lists nothing once the plugin and readme titles pass the trademark rule;
+  the plugin-check job then treats warnings as failures.
 
 ## Non-goals (do NOT add as tasks)
 
