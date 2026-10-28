@@ -673,3 +673,4 @@
 - **D222** — Related after posts skips content filtered while an excerpt is built, so a product's generated summary is its own text and the box shows once.
 - **D223** — Tarnfell prints its text through a tarnfell text domain with a pt_BR translation, so a Portuguese demo reads Portuguese throughout and the tour spec runs in it.
 - **D188** — On SDK 2026.3.10 the search controllers report through the bus with consent and no cookie, GA4 gets search and select_content, and a search left behind is reported.
+- **D224** — On SDK 2026.3.11 the controller tells a refinement from a new search, so the plugin's bus filter and settled flag are gone and the spec passes unchanged.

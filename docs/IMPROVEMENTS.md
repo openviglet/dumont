@@ -470,24 +470,3 @@ to a prospect.
 
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
-
-### XLIX.80 Drop the refinement filter once the SDK tells refinements apart (D224)
-
-**What happens.** Since D188 the search block and the instant search report through the
-SDK's search controller, which counts a facet, a sort or a page as another search
-(Turing T1155). `wordpress/src/public/search.js` holds the workaround: the Google
-Analytics sink is wrapped so `turing_search`, `turing_search_no_results` and
-`turing_search_refined` pass only while `reportSearchesWhen()` says the request in
-flight is one the visitor settled on, and `search-block.js` sets `settled = false`
-before each facet, sort, page and filter-clear call. `site/analytics.spec.mjs` ("a
-filter, a sort or a page on a search is not reported as another search") is what holds
-it.
-
-**What it should do,** once a `@viglet/turing-sdk` release carries T1155:
-- Bump the SDK in `wordpress/package.json` and rebuild (`npm run build` copies it).
-- Delete `reportSearchesWhen()`, the sink wrapper and the `settled` flag: the SDK tells a
-  refinement apart by itself (same `q` as the last reported search), with no new option.
-- The spec stays as it is and must pass unchanged.
-
-Turing T1156 (the click posted without asking consent) needs nothing here: the plugin
-checks `trackingAllowed()` before every click, which stays.
