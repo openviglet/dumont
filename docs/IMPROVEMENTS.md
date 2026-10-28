@@ -196,8 +196,9 @@ $0.0014.
 **What it should do next.**
 - The answer panel's spec fails on Turing's stream, not the plugin: each `token` event is
   raw text, so a token's leading space is the one an SSE client strips, and the panel reads
-  "Applicationsfortheresearchgrantcloseon14March2026." (Turing T1153). Once that ships and
-  the stack runs the image, the spec passes unchanged.
+  "Applicationsfortheresearchgrantcloseon14March2026." (Turing T1153). Turing fixes it by writing `data: ` plus the token,
+  so the wire format stays as it is: no SDK bump, and the spec passes unchanged once the
+  stack runs that image.
 - The shop copilot (D173) and the site assistant (D175) join the suite as each lands.
 - The teardown returns once the queue is sent, before Turing commits the deletions: a
   default run started right after read "5 results" for 4 in `site/url.spec.mjs`. Wait for
