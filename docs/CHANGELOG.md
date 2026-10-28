@@ -687,3 +687,4 @@
 - **D225 (readme sections)** — readme.txt has an External services section naming what goes to Turing and when, a Plugins > Add New install, and a link to the source.
 - **D226** — The WordPress plugin workflow runs Plugin Check on the built package on every change and gates the release; today it reports no errors.
 - **D229 (21 of 23 warnings)** — Plugin Check reports two warnings, both the name's trademark: template variables are prefixed and the two exclusions and the textdomain call are annotated.
+- **D201 (the Build my kit mode)** — Ask the catalog has a Plan a kit mode: Turing stages a plan by need, the shop prices and stocks each product, and the kit goes in the cart in one click.

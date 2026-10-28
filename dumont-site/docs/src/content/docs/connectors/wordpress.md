@@ -304,6 +304,31 @@ A site with its own search blocks turns the block off:
 add_filter( 'viglet_dumont_register_blocks', '__return_false' );
 ```
 
+### The Ask the catalog block
+
+The **Ask the catalog** block is a conversation with Turing's catalog copilot. A visitor
+asks in plain words, and the answer comes from this site's content and cites the items it
+used. On a WooCommerce shop each cited product shows the shop's price and an **Add to cart**
+button; the copilot never puts anything in the cart by itself. The block appears only when
+Turing has a language model for the copilot.
+
+**Build my kit.** With **Offer Build my kit** on (the default, in the block's settings), the
+block has a second mode, **Plan a kit**. The visitor describes a plan ("two days crossing the
+mountains in July, first time") and Turing answers with the needs the plan implies, each
+with the products it found for it and a one-line reason drawn from the product's own
+attributes:
+
+- Prices come from WooCommerce, and so does stock: a product the shop cannot sell is marked
+  **Out of stock** and left out of the cart, whatever the index says.
+- A need the catalog has nothing for is named ("Nothing in the catalog yet for: shelter")
+  rather than filled with something unrelated.
+- Journal posts that cover the plan are listed as **Guides for this plan**.
+- The visitor can untick any product, then **Add N products to the cart** puts the rest in
+  the cart at once. The confirmation shows the cart's total as WooCommerce computes it.
+
+The kit needs a Turing that has the kit call (`POST /api/sn/{site}/copilot/kit`), which
+2026.3.6 does not, and the **Stock** field mapped, which a WooCommerce site has by default.
+
 ### Building your own search on the SDK
 
 The plugin registers [`@viglet/turing-sdk`](https://www.npmjs.com/package/@viglet/turing-sdk)
