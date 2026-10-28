@@ -3,6 +3,9 @@
 // A second build beside the site rather than more routes in it: the site is a prerendered
 // landing page with no sidebar, no per-page contents and no search, and Starlight is those
 // three, indexed at build time so nothing here needs a service to be up.
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import mermaid from "astro-mermaid";
@@ -16,6 +19,11 @@ const GA_ID = "G-SMSL7R3897";
 const CONSENT_KEY = "dumont-analytics-consent";
 
 export default defineConfig({
+  // The real path, not the one the shell came in by. Run from a junction (the worktrees'
+  // `dumont/latest`), Astro takes the junction as its root while Vite resolves every module,
+  // content.config.ts included, to the real path; the two never match, the content config is
+  // "not loaded", the docs collection is empty and the sidebar's first slug throws.
+  root: realpathSync(fileURLToPath(new URL(".", import.meta.url))),
   site: "https://dumont.viglet.org",
   // Astro rewrites the links it generates, not ones typed by hand: an absolute href written
   // into a page must carry /docs itself or it 404s in production alone.
