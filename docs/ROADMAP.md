@@ -125,9 +125,8 @@ This track has no remaining pending tasks.
 - 🛠 **D201** (deps: D173 ✅, D198 ✅, Turing T1159: a plan-to-kit copilot call) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — Whole-basket help raises the order, and a staged kit of real, in-stock products is what no keyword search can build. → §XLIX.57
 - 📋 **D203** (deps: D195 ✅, D198 ✅, D199, D200 ✅, D201, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells where a feature list does not: one shopper, one trip, each Turing feature the next step she needs. → §XLIX.59
 - 📋 **D204** (deps: D203) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
-- 📋 **D225** (deps: —) **The readme would fail the WordPress.org review: no External services section, a GitHub-only install, no source link** — The directory is where WordPress users install plugins, and its reviewers refuse a readme that hides the calls to Turing. → §XLIX.81
 - 📋 **D226** (deps: —) **CI never runs Plugin Check, so what the directory reviewers flag is found only after a submission** — PHPCS covers coding standards, not the reviewers' own checks, and a rejected review costs weeks. → §XLIX.82
-- 📋 **D227** (deps: D225, D226, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
+- 📋 **D227** (deps: D225 ✅, D226, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 
 ## Done when — D144
 
@@ -148,6 +147,14 @@ This track has no remaining pending tasks.
   lists or deletes a site B document.
 - **Features Turing refuses on a partitioned key turn off and say so** Health names each
   one Turing answers 403 on such a key, and none falls back to an unbound key.
+
+## Done when — D225
+
+- **Contributors names the plugin owners' real wordpress.org accounts** Each name in
+  readme.txt's Contributors line opens a profile on profiles.wordpress.org.
+- **The readme passes the wordpress.org readme validator**
+  wordpress.org/plugins/developers/readme-validator/ reports no error on src/readme.txt,
+  and the zip holds nothing the directory forbids.
 
 ## Non-goals (do NOT add as tasks)
 

@@ -678,3 +678,4 @@
 - **D228** — npm run lint:js is clean again: the woo keyboard spec reads the focused element through the page's own document, as the fixtures do.
 - **D179** — The demo Showcase, Health naming each feature's block, npm run e2e:tour and the vigletdocs Turing on WordPress page show Turing's WordPress features together.
 - **D198** — The demo's generative AI is on, with the assistant on every page, a no-key notice, and curated prompts answered live from the guides they name.
+- **D225 (readme sections)** — readme.txt has an External services section naming what goes to Turing and when, a Plugins > Add New install, and a link to the source.

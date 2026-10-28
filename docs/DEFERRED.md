@@ -34,3 +34,4 @@
 
 - ⏸ **D182** (deps: D161 ✅) **No CI job opens the plugin's screens: the browser suite runs only on a laptop** — set aside (Waits for the owner to push and review the first run's baselines.): The CI job exists but has never run, so no linux baselines exist. → §XLIX.38
 - ⏸ **D190** (deps: D148 ✅, D177 ✅) **Each site of a shared SN site is kept apart by the plugin's own filters, and its key can still reach the other sites** — set aside (Who keeps the shared key is the owner's call.): The stored key still reaches every site sharing the SN site. → §XLIX.46
+- ⏸ **D225** (deps: —) **The readme would fail the WordPress.org review: no External services section, a GitHub-only install, no source link** — set aside (Needs a person: wp.org accounts, validator run.): Left: real wordpress.org accounts in Contributors, and a pass on the directory's readme validator. → §XLIX.81
