@@ -1,0 +1,83 @@
+/*
+ * Starlight in the site's colours. Every value is one of the site's tokens
+ * (../../src/tokens.css, loaded before this file), so a token change reaches the
+ * docs with no edit here. No colour literal belongs in this file.
+ */
+
+:root,
+::backdrop {
+  --sl-font: "Plus Jakarta Sans", system-ui, sans-serif;
+  --sl-font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Starlight's ramp runs from --sl-color-black (the ground) to --sl-color-white (the
+   text) in dark, and is inverted in light; mapping both grounds to the site's
+   semantic tokens is what lets one block serve both. */
+:root[data-theme="dark"],
+:root[data-theme="light"],
+:root {
+  --sl-color-accent-low: var(--accent);
+  --sl-color-accent: var(--primary);
+  --sl-color-accent-high: var(--accent-foreground);
+  --sl-color-text-accent: var(--primary);
+  --sl-color-text-invert: var(--primary-foreground);
+
+  --sl-color-white: var(--foreground);
+  --sl-color-gray-1: var(--foreground);
+  --sl-color-gray-2: var(--secondary-foreground);
+  --sl-color-gray-3: var(--muted-foreground);
+  --sl-color-gray-4: var(--muted-foreground);
+  --sl-color-gray-5: var(--border);
+  --sl-color-gray-6: var(--muted);
+  --sl-color-gray-7: var(--card);
+  --sl-color-black: var(--background);
+
+  --sl-color-bg: var(--background);
+  --sl-color-bg-nav: color-mix(in oklab, var(--background) 85%, transparent);
+  --sl-color-bg-sidebar: var(--background);
+  --sl-color-bg-inline-code: var(--muted);
+  --sl-color-hairline: var(--border);
+  --sl-color-hairline-light: var(--border);
+  --sl-color-hairline-shade: var(--border);
+  --sl-color-text: var(--foreground);
+}
+
+.header {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* The site's monospaced rule: a ligated `--` is a flag that does not exist. */
+code,
+pre,
+kbd,
+samp {
+  font-variant-ligatures: none;
+}
+
+/* Wide tables scroll in their own box, never the page (a 320px phone). */
+.sl-markdown-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  color: var(--foreground);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-brand img {
+  width: 28px;
+  height: 28px;
+}
+
+.site-brand .area {
+  font-weight: 500;
+  color: var(--muted-foreground);
+}

@@ -184,6 +184,7 @@
 - **D65** — One MapStruct mapper now declares the exported field list for both directions with unmappedTargetPolicy=ERROR, so an unmapped field fails the build instead of vanishing from the export.
 - **D143** — dumont.viglet.org/changelog.json now serves Dumont's releases through 2026.2.16, and www.viglet.org reads it in place of its hand-kept copy.
 - **D230** — dumont-site/docs builds a Starlight area with Pagefind search into dist/docs, last in the site build; the Pages workflow asserts it (design §L.1 recorded in `dumont-site/README.md`).
+- **D231 (tokens, theme and brand)** — Starlight reads the site's own tokens from src/tokens.css, shares its stored light/dark choice both ways, and carries the cube mark linking home.
 
 ## Track E — Data quality & trust
 

@@ -1,0 +1,59 @@
+/*
+ * The site's colour tokens, in plain CSS so the /docs area (docs/, Starlight) reads the
+ * same file: a change here reaches both with no second edit. The dark ground answers to
+ * the site's `.dark` class and to Starlight's `data-theme="dark"`.
+ */
+
+/*
+ * Dumont brand: teal (#0F766E, the colour of the Dumont cube mark) on a COOL
+ * green-grey neutral. The three Viglet sites are siblings on purpose: same type
+ * pair, same section grammar, one colour each — Turing royal blue, Shio violet,
+ * Dumont teal.
+ *
+ * The light-mode primary is the mark's own teal-700, which already keeps AA
+ * contrast under white text. On dark surfaces the brand shows as the lighter
+ * teals (#5EEAD4, #99F6E4), where it is the text colour rather than the fill.
+ */
+:root {
+  --radius: 0.75rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.17 0.015 200);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.17 0.015 200);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.17 0.015 200);
+  --primary: oklch(0.51 0.09 186);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.97 0.008 190);
+  --secondary-foreground: oklch(0.26 0.03 200);
+  --muted: oklch(0.97 0.008 190);
+  --muted-foreground: oklch(0.5 0.02 200);
+  --accent: oklch(0.96 0.025 186);
+  --accent-foreground: oklch(0.32 0.06 186);
+  --destructive: oklch(0.58 0.24 27);
+  --border: oklch(0.92 0.01 195);
+  --input: oklch(0.92 0.01 195);
+  --ring: oklch(0.6 0.1 186);
+}
+
+.dark,
+[data-theme="dark"] {
+  --background: oklch(0.15 0.012 200);
+  --foreground: oklch(0.96 0.005 190);
+  --card: oklch(0.19 0.015 200);
+  --card-foreground: oklch(0.96 0.005 190);
+  --popover: oklch(0.19 0.015 200);
+  --popover-foreground: oklch(0.96 0.005 190);
+  --primary: oklch(0.8 0.12 180);
+  --primary-foreground: oklch(0.16 0.02 200);
+  --secondary: oklch(0.24 0.015 200);
+  --secondary-foreground: oklch(0.96 0.005 190);
+  --muted: oklch(0.24 0.015 200);
+  --muted-foreground: oklch(0.7 0.015 200);
+  --accent: oklch(0.28 0.04 186);
+  --accent-foreground: oklch(0.96 0.005 190);
+  --destructive: oklch(0.7 0.19 22);
+  --border: oklch(0.29 0.018 200);
+  --input: oklch(0.29 0.018 200);
+  --ring: oklch(0.7 0.1 180);
+}

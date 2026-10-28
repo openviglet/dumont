@@ -1,0 +1,24 @@
+---
+// Starlight's ThemeProvider, keyed to the site's choice. The site stores
+// `dumont-site-theme` (light | dark | system) and Starlight `starlight-theme`
+// (light | dark | ''), so without this a reader who picked dark on / lands on a light
+// /docs. The site's key is the one choice: it is copied into Starlight's before the
+// first paint, and a pick made here is written back to it.
+import Default from "@astrojs/starlight/components/ThemeProvider.astro";
+---
+
+<script is:inline>
+  try {
+    var site = localStorage.getItem("dumont-site-theme");
+    if (site === "light" || site === "dark") localStorage.setItem("starlight-theme", site);
+    else if (site === "system") localStorage.setItem("starlight-theme", "");
+    document.addEventListener("change", function (e) {
+      var t = e.target;
+      if (!(t instanceof HTMLSelectElement) || !t.closest("starlight-theme-select")) return;
+      localStorage.setItem("dumont-site-theme", t.value === "auto" ? "system" : t.value);
+    });
+  } catch (e) {
+    /* storage blocked: Starlight falls back to the system scheme */
+  }
+</script>
+<Default />

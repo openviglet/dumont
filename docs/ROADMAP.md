@@ -113,8 +113,8 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
-- 📋 **D231** (deps: D230 ✅) **A stock Starlight theme would make /docs read as a different product from the site** — The docs must look like the Viglet design system the site and console share, so a token change reaches them with no edit. → §L.2
-- 📋 **D232** (deps: D230 ✅, D231) **The 20 Dumont pages are Docusaurus MDX in vigletdocs, so the new area has no content** — Moving them whole, with their URL tails kept, is what lets the old address redirect page for page. → §L.3
+- ⏳ **D231** (deps: D230 ✅) **A stock Starlight theme would make /docs read as a different product from the site** — The site's nav and footer in Starlight's Header and Footer, and the index cards as .astro components on the same tokens. → §L.2
+- 📋 **D232** (deps: D230 ✅, D231 ⏳) **The 20 Dumont pages are Docusaurus MDX in vigletdocs, so the new area has no content** — Moving them whole, with their URL tails kept, is what lets the old address redirect page for page. → §L.3
 - 📋 **D233** (deps: D232) **The site links docs.viglet.org/dumont, and its sitemap and twins skip the docs** — A reader and a crawler should find the docs on the site that now builds them, with no hop to another domain. → §L.4
 - 📋 **D234** (deps: D232) **The shipping rule still writes user docs into vigletdocs, a second copy that drifts** — One place to write a page, in the same commit as the change it documents, is the whole point of the move. → §L.5
 - 💭 **D235** (deps: D232, D233) **Old docs.viglet.org/dumont links would 404 once those pages leave vigletdocs** — Search results and the Turing and Shio docs point there, and a path-for-path redirect keeps every one of them working. → §L.6
@@ -166,6 +166,15 @@ This track has no remaining pending tasks.
 - **Plugin Check reports no warning, and the CI job fails on one** wp plugin check
   viglet-dumont lists nothing once the plugin and readme titles pass the trademark rule;
   the plugin-check job then treats warnings as failures.
+
+## Done when — D231
+
+- **/docs carries the site's nav links and footer** Header and Footer overrides render
+  Connectors, The product, For AEM and the site footer; a screenshot of /docs beside /
+  at desktop and 320px shows the same chrome, with no horizontal page scroll.
+- **The index cards are .astro components on the site's tokens** Pill, FeatureCard and
+  NavCard exist as components under docs/src/components, and no colour literal appears
+  in the area's CSS or in those components outside the token mapping.
 
 ## Non-goals (do NOT add as tasks)
 

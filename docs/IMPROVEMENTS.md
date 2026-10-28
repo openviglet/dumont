@@ -442,31 +442,30 @@ The end-user documentation moves from vigletdocs into this repository, as an Ast
 Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
 system, and docs.viglet.org/dumont later redirects to it.
 
-### L.2 The area themed from the design system (D231)
+### L.2 The area themed from the site's own tokens (D231)
 
-**What happens.** Starlight's default theme is its own: grey ramps, a teal-ish accent,
-its own header. roadkeep only overrides the `--sl-color-*` ramp, which is enough for a
-tool page but would make `/docs` read as a different product from the page one click
-away. The Docusaurus pages today carry inline-styled cards (`index.mdx`'s `Pill`,
-`FeatureCard`, `NavCard`) against `--color-*` variables that only that theme declares.
+**Correction.** The design first said to theme the area from
+`@viglet/viglet-design-system`'s `--vg-*` tokens. `dumont-site` does not use them: it
+declares its own teal tokens, and the design system's tones (default orange, `warm`,
+`navy`) have no teal. Theming from `--vg-*` would have made `/docs` the different
+product this line exists to prevent.
 
-**What it should do.** Theme the area from `@viglet/viglet-design-system`, not by hand:
-- Import `preset.css` / `tokens.css` / `fonts.css` and map every `--sl-color-*`, font and
-  radius to the `--vg-*` tokens, light and dark, so a token change in the design system
-  reaches the docs with no edit here.
-- Starlight's `data-theme` and the site's mode toggle agree: one stored choice, no flash
-  of the other palette between `/` and `/docs`.
-- Override Starlight's `Header` and `Footer` components to render the same brand, nav
-  links and footer as `dumont-site`, so the area is a section of the site rather than a
-  neighbour.
-- The index page and the cards it needs are `.astro` components on the design system's
-  site layer (`site.css`, VDS214), not inline styles; asides, tabs, code blocks and tables
-  styled to the same tokens.
-- Readable at a 320px phone: no horizontal page scroll, wide tables scroll in their box.
+**What landed.** The site's tokens moved to `dumont-site/src/tokens.css`, which the
+site's `index.css` imports and Starlight loads first in `customCss`;
+`docs/src/styles/area.css` maps every `--sl-color-*` and the type pair onto them, with
+no colour literal. The dark ground answers to `.dark` and to `data-theme="dark"`. A
+`ThemeProvider` override makes `dumont-site-theme` the one stored choice, both ways.
+`SiteTitle` renders the cube mark and wordmark linking to `/`.
+
+**What is left.**
+- Override Starlight's `Header` and `Footer` to carry the site's nav links (Connectors, The
+  product, For AEM) and its footer, so the area is a section of the site, not a neighbour.
+- The index page and the cards the moved pages need (`Pill`, `FeatureCard`, `NavCard`) as
+  `.astro` components on the same tokens, not inline styles; asides, tabs and code blocks
+  checked against them once D232's content is in.
 
 **Gate.** Screenshots of the index and one long reference page, light and dark, desktop
-and 320px, reviewed before and after; no colour literal in the area's CSS outside a
-token mapping.
+and 320px; no horizontal page scroll.
 
 ### L.3 The docs-dumont pages move into the area (D232)
 

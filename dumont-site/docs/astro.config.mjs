@@ -33,7 +33,28 @@ export default defineConfig({
       favicon: "https://dumont.viglet.org/favicon.svg",
       pagefind: true,
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/openviglet/dumont" }],
+      // The site's own tokens first, then the mapping of Starlight's onto them: the area is
+      // themed from the file the landing page is, so one edit there restyles both.
+      customCss: ["../src/tokens.css", "./src/styles/area.css"],
+      components: {
+        SiteTitle: "./src/components/SiteTitle.astro",
+        ThemeProvider: "./src/components/ThemeProvider.astro",
+      },
       head: [
+        // The site's type pair, from the same Google Fonts request its index.html makes.
+        { tag: "link", attrs: { rel: "preconnect", href: "https://fonts.googleapis.com" } },
+        {
+          tag: "link",
+          attrs: { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: true },
+        },
+        {
+          tag: "link",
+          attrs: {
+            rel: "stylesheet",
+            href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap",
+          },
+        },
+        { tag: "meta", attrs: { name: "theme-color", content: "#0f766e" } },
         {
           tag: "script",
           content: `
