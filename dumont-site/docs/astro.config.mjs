@@ -38,6 +38,10 @@ export default defineConfig({
       customCss: ["../src/tokens.css", "./src/styles/area.css"],
       components: {
         SiteTitle: "./src/components/SiteTitle.astro",
+        // The site's nav and footer, read from src/lib/site-links.ts as the site's are.
+        SocialIcons: "./src/components/SocialIcons.astro",
+        MobileMenuFooter: "./src/components/MobileMenuFooter.astro",
+        Footer: "./src/components/Footer.astro",
         ThemeProvider: "./src/components/ThemeProvider.astro",
       },
       head: [

@@ -1,0 +1,41 @@
+---
+// Starlight's page footer (last updated, pagination), then the site's own footer: the same
+// blurb and columns, read from the module the site's footer reads.
+import Default from "@astrojs/starlight/components/Footer.astro";
+import { FOOTER_BLURB, FOOTER_COLUMNS, LINKS } from "../../../src/lib/site-links";
+
+const external = (href: string) =>
+  href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {};
+---
+
+<Default />
+<footer class="site-footer">
+  <div class="site-footer-grid">
+    <div>
+      <p class="site-footer-brand">Viglet Dumont</p>
+      <p>{FOOTER_BLURB}</p>
+    </div>
+    {
+      FOOTER_COLUMNS.map((col) => (
+        <div>
+          <p class="site-footer-heading">{col.label}</p>
+          <ul>
+            {col.items.map((link) => (
+              <li>
+                <a href={link.href} {...external(link.href)}>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+  <p class="site-footer-legal">
+    &copy; {new Date().getFullYear()} Viglet Dumont &middot;
+    <a href={LINKS.license} target="_blank" rel="noreferrer">Apache 2.0</a> &middot;
+    <a href={LINKS.viglet} target="_blank" rel="noreferrer">viglet.org</a> &middot;
+    <a href="/llms.txt">llms.txt</a>
+  </p>
+</footer>

@@ -3,8 +3,23 @@ title: Viglet Dumont DEP documentation
 description: Install, configure and run Viglet Dumont DEP, the connector platform that moves content into Turing ES, Solr or Elasticsearch.
 ---
 
+import CardGrid from "../../components/CardGrid.astro";
+import NavCard from "../../components/NavCard.astro";
+import Pill from "../../components/Pill.astro";
+import SectionLabel from "../../components/SectionLabel.astro";
+
+<Pill>Open source</Pill> <Pill>Apache 2.0</Pill>
+
 Viglet Dumont DEP (Data Exchange Platform) moves content from AEM, databases, file systems
 and the web into Turing ES, Solr or Elasticsearch.
 
 The guides are moving here from [docs.viglet.org/dumont](https://docs.viglet.org/dumont/).
 Until they arrive, that address remains the complete documentation.
+
+<SectionLabel>Start there</SectionLabel>
+
+<CardGrid min="200px">
+  <NavCard eyebrow="Step 01" title="Install" description="Docker, standalone JAR or build from source" href="https://docs.viglet.org/dumont/installation-guide" />
+  <NavCard eyebrow="Step 02" title="Configure" description="application.yaml, Turing connection and queue" href="https://docs.viglet.org/dumont/configuration-reference" />
+  <NavCard eyebrow="Step 03" title="Connect" description="Choose a connector and start indexing content" href="https://docs.viglet.org/dumont/connectors/overview" />
+</CardGrid>

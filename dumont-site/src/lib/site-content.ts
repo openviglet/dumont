@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { LINKS } from "./site-links";
 import {
   Activity,
   BookOpen,
@@ -30,21 +31,7 @@ import {
  * it is a bug report waiting to be filed by a reader.
  */
 
-export const LINKS = {
-  docs: "https://docs.viglet.org/dumont/",
-  install: "https://docs.viglet.org/dumont/installation-guide",
-  rest: "https://docs.viglet.org/dumont/rest-api",
-  repo: "https://github.com/openviglet/dumont",
-  license: "https://github.com/openviglet/dumont/blob/HEAD/LICENSE",
-  roadmap: "https://github.com/openviglet/dumont/blob/HEAD/docs/ROADMAP.md",
-  changelog: "https://github.com/openviglet/dumont/blob/HEAD/docs/CHANGELOG.md",
-  strategy: "https://github.com/openviglet/dumont/blob/HEAD/docs/STRATEGY.md",
-  issues: "https://github.com/openviglet/dumont/issues",
-  image: "https://github.com/orgs/openviglet/packages/container/package/dumont-ce",
-  turing: "https://turing.viglet.org",
-  shio: "https://shio.viglet.org",
-  viglet: "https://www.viglet.org",
-} as const;
+export { LINKS };
 
 export const DOCKER_RUN = "docker run -p 30130:30130 ghcr.io/openviglet/dumont-ce:latest";
 

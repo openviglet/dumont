@@ -1,0 +1,9 @@
+---
+// Cards in a grid that reflows to one column on a phone. `min` is a card's narrowest width.
+interface Props {
+  min?: string;
+}
+const { min = "220px" } = Astro.props;
+---
+
+<div class="dm-grid not-content" style={`--dm-grid-min: ${min}`}><slot /></div>

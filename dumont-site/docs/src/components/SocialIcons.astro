@@ -1,0 +1,26 @@
+---
+// The site's nav beside Starlight's social icons, which is the one slot of its header that
+// sits on the right at every width. Read from the module the site's own nav reads, so a
+// link changed there changes here. Groups are <details>, so they need no script.
+import Default from "@astrojs/starlight/components/SocialIcons.astro";
+import { NAV_AEM, NAV_GROUPS } from "../../../src/lib/site-links";
+---
+
+<nav class="site-nav" aria-label="Viglet Dumont">
+  <a href={NAV_AEM.href} class="site-nav-pill">{NAV_AEM.label}</a>
+  {
+    NAV_GROUPS.map((group) => (
+      <details class="site-nav-group">
+        <summary>{group.label}</summary>
+        <ul>
+          {group.items.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    ))
+  }
+</nav>
+<Default />

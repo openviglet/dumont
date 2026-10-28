@@ -1,0 +1,14 @@
+---
+// One capability: an icon, a title and a sentence. Not a link; NavCard is.
+interface Props {
+  icon: string;
+  title: string;
+}
+const { icon, title } = Astro.props;
+---
+
+<div class="dm-card not-content">
+  <span class="dm-card-icon" aria-hidden="true">{icon}</span>
+  <p class="dm-card-title">{title}</p>
+  <p class="dm-card-body"><slot /></p>
+</div>

@@ -25,7 +25,11 @@ Starlight, Pagefind search), built **last** into `dist/docs/`: `vite build`
 empties `dist/`, so built any earlier it would be deleted. `pnpm --dir
 dumont-site run dev:docs` serves it on its own. Its colours are the site's:
 `src/tokens.css` holds the tokens both read, and `docs/src/styles/area.css`
-maps Starlight's onto them, so a colour changes in that one file.
+maps Starlight's onto them, so a colour changes in that one file. Its nav and
+footer are the site's too: `src/lib/site-links.ts` declares them with no React,
+and both the site's components and the area's Starlight overrides read it. A
+card on a docs page is `docs/src/components/NavCard.astro` and its siblings,
+never inline styles.
 
 **Adding a page is two rows**: a `ROUTES` entry in `src/App.tsx` and a `routes`
 entry, with title and description, in `src/entry-server.tsx`. The prerender

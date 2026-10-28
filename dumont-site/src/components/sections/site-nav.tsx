@@ -9,38 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Container, Logo } from "@/components/brand";
-import { LINKS } from "@/lib/site-content";
+import { LINKS, NAV_AEM, NAV_GROUPS, NAV_LINKS } from "@/lib/site-links";
 import { cn } from "@/lib/utils";
-
-// Hrefs are root-anchored ("/#…") so they keep working from any page: the
-// browser navigates home and scrolls to the section.
-const NAV_LINKS = [{ label: "Docs", href: LINKS.docs }];
-
-const NAV_GROUPS = [
-  {
-    label: "Connectors",
-    items: [
-      { label: "Adobe Experience Manager", href: "/aem/" },
-      { label: "Edge Delivery Services", href: "/connectors/#eds" },
-      { label: "Databases (JDBC)", href: "/connectors/#database" },
-      { label: "Web crawler", href: "/connectors/#web-crawler" },
-      { label: "Files and documents", href: "/connectors/#files" },
-      { label: "Catalogs and JSON APIs", href: "/connectors/#catalog" },
-      { label: "All connectors", href: "/connectors/" },
-    ],
-  },
-  {
-    label: "The product",
-    items: [
-      { label: "How it fits", href: "/#how" },
-      { label: "An index you can trust", href: "/trust/" },
-      { label: "AI, where it helps", href: "/#ai" },
-      { label: "Marketplace samples", href: "/#marketplace" },
-      { label: "With Turing and Shio", href: "/#suite" },
-      { label: "Self-host", href: "/#self-host" },
-    ],
-  },
-];
 
 export function SiteNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -98,11 +68,11 @@ export function SiteNav() {
           {/* AEM is the deepest connector and the audience most likely to be
               looking for one, so it gets a pill instead of a dropdown row. */}
           <a
-            href="/aem/"
+            href={NAV_AEM.href}
             className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-sm font-bold whitespace-nowrap text-primary transition-colors hover:border-primary/50 hover:bg-primary/15"
           >
             <Layers className="size-3.5" />
-            For AEM
+            {NAV_AEM.label}
           </a>
           {NAV_GROUPS.map((group) => (
             <DropdownMenu key={group.label}>

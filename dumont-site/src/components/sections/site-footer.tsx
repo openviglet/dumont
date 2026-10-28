@@ -1,41 +1,6 @@
 import { Container, Logo } from "@/components/brand";
-import { LINKS } from "@/lib/site-content";
+import { FOOTER_BLURB, FOOTER_COLUMNS, LINKS } from "@/lib/site-links";
 import { reopenConsent } from "@/lib/analytics";
-
-const COLUMNS: { heading: string; links: { label: string; href: string }[] }[] = [
-  {
-    heading: "Connectors",
-    links: [
-      { label: "Adobe Experience Manager", href: "/aem/" },
-      { label: "Edge Delivery Services", href: "/connectors/#eds" },
-      { label: "Databases (JDBC)", href: "/connectors/#database" },
-      { label: "Web crawler", href: "/connectors/#web-crawler" },
-      { label: "Files and documents", href: "/connectors/#files" },
-      { label: "Catalogs and JSON APIs", href: "/connectors/#catalog" },
-    ],
-  },
-  {
-    heading: "The product",
-    links: [
-      { label: "How it fits", href: "/#how" },
-      { label: "An index you can trust", href: "/trust/" },
-      { label: "AI, where it helps", href: "/#ai" },
-      { label: "Marketplace", href: "/#marketplace" },
-      { label: "Self-host", href: "/#self-host" },
-    ],
-  },
-  {
-    heading: "Open and inspectable",
-    links: [
-      { label: "Documentation", href: LINKS.docs },
-      { label: "Source", href: LINKS.repo },
-      { label: "Roadmap", href: LINKS.roadmap },
-      { label: "Changelog", href: LINKS.changelog },
-      { label: "Viglet Turing", href: LINKS.turing },
-      { label: "Viglet Shio", href: LINKS.shio },
-    ],
-  },
-];
 
 export function SiteFooter() {
   return (
@@ -44,19 +9,15 @@ export function SiteFooter() {
         <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Logo className="text-[#e8f5f3]" />
-            <p className="mt-3 max-w-xs text-sm leading-relaxed">
-              Open-source connectors from AEM, Edge Delivery Services, databases, files,
-              web sites and JSON APIs into Turing ES, Solr or Elasticsearch, with an audit
-              that keeps the index true to the source.
-            </p>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed">{FOOTER_BLURB}</p>
           </div>
-          {COLUMNS.map((col) => (
-            <div key={col.heading}>
+          {FOOTER_COLUMNS.map((col) => (
+            <div key={col.label}>
               <h3 className="text-xs font-bold tracking-[0.06em] text-[#e8f5f3] uppercase">
-                {col.heading}
+                {col.label}
               </h3>
               <ul className="mt-4 space-y-2.5">
-                {col.links.map((link) => (
+                {col.items.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}

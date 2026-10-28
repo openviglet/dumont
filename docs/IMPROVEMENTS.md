@@ -442,31 +442,6 @@ The end-user documentation moves from vigletdocs into this repository, as an Ast
 Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
 system, and docs.viglet.org/dumont later redirects to it.
 
-### L.2 The area themed from the site's own tokens (D231)
-
-**Correction.** The design first said to theme the area from
-`@viglet/viglet-design-system`'s `--vg-*` tokens. `dumont-site` does not use them: it
-declares its own teal tokens, and the design system's tones (default orange, `warm`,
-`navy`) have no teal. Theming from `--vg-*` would have made `/docs` the different
-product this line exists to prevent.
-
-**What landed.** The site's tokens moved to `dumont-site/src/tokens.css`, which the
-site's `index.css` imports and Starlight loads first in `customCss`;
-`docs/src/styles/area.css` maps every `--sl-color-*` and the type pair onto them, with
-no colour literal. The dark ground answers to `.dark` and to `data-theme="dark"`. A
-`ThemeProvider` override makes `dumont-site-theme` the one stored choice, both ways.
-`SiteTitle` renders the cube mark and wordmark linking to `/`.
-
-**What is left.**
-- Override Starlight's `Header` and `Footer` to carry the site's nav links (Connectors, The
-  product, For AEM) and its footer, so the area is a section of the site, not a neighbour.
-- The index page and the cards the moved pages need (`Pill`, `FeatureCard`, `NavCard`) as
-  `.astro` components on the same tokens, not inline styles; asides, tabs and code blocks
-  checked against them once D232's content is in.
-
-**Gate.** Screenshots of the index and one long reference page, light and dark, desktop
-and 320px; no horizontal page scroll.
-
 ### L.3 The docs-dumont pages move into the area (D232)
 
 **What happens.** The 20 pages of `docs-dumont` (getting started, installation,
