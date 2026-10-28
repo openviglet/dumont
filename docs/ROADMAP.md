@@ -113,9 +113,8 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
-- 📋 **D230** (deps: —) **The user docs live in another repo, so a feature and its page ship in two commits** — Docs built beside the code ship with it, and dumont.viglet.org/docs keeps the reader on the product's own site. → §L.1
-- 📋 **D231** (deps: D230) **A stock Starlight theme would make /docs read as a different product from the site** — The docs must look like the Viglet design system the site and console share, so a token change reaches them with no edit. → §L.2
-- 📋 **D232** (deps: D230, D231) **The 20 Dumont pages are Docusaurus MDX in vigletdocs, so the new area has no content** — Moving them whole, with their URL tails kept, is what lets the old address redirect page for page. → §L.3
+- 📋 **D231** (deps: D230 ✅) **A stock Starlight theme would make /docs read as a different product from the site** — The docs must look like the Viglet design system the site and console share, so a token change reaches them with no edit. → §L.2
+- 📋 **D232** (deps: D230 ✅, D231) **The 20 Dumont pages are Docusaurus MDX in vigletdocs, so the new area has no content** — Moving them whole, with their URL tails kept, is what lets the old address redirect page for page. → §L.3
 - 📋 **D233** (deps: D232) **The site links docs.viglet.org/dumont, and its sitemap and twins skip the docs** — A reader and a crawler should find the docs on the site that now builds them, with no hop to another domain. → §L.4
 - 📋 **D234** (deps: D232) **The shipping rule still writes user docs into vigletdocs, a second copy that drifts** — One place to write a page, in the same commit as the change it documents, is the whole point of the move. → §L.5
 - 💭 **D235** (deps: D232, D233) **Old docs.viglet.org/dumont links would 404 once those pages leave vigletdocs** — Search results and the Turing and Shio docs point there, and a path-for-path redirect keeps every one of them working. → §L.6

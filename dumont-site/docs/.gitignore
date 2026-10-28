@@ -1,0 +1,4 @@
+# The output lands in ../dist/docs, which dumont-site/.gitignore already keeps out.
+node_modules
+.astro
+*.local

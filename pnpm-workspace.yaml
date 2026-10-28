@@ -1,6 +1,7 @@
 packages:
   - "dumont-react"
   - "dumont-site"
+  - "dumont-site/docs"
   - "aem/aem-plugin-sample/turing-export/app"
   - "assets/assets-plugin-sample/turing-export/app"
   - "db/db-plugin-sample/turing-export/app"

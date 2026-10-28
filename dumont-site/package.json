@@ -16,7 +16,9 @@
   "scripts": {
     "dev": "vite",
     "preview": "vite preview",
-    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs && node scripts/og-image.mjs",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs && node scripts/og-image.mjs && pnpm run build:docs",
+    "build:docs": "pnpm --dir docs run build",
+    "dev:docs": "pnpm --dir docs run dev",
     "typecheck": "tsc -b --noEmit",
     "lint": "tsc -b --noEmit"
   },

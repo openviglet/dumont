@@ -56,7 +56,7 @@ jobs:
       - name: Install workspace deps
         run: pnpm install --frozen-lockfile
 
-      # tsc -b → vite build → vite build --ssr → prerender → og-image.
+      # tsc -b → vite build → vite build --ssr → prerender → og-image → the /docs area.
       - name: Build the site
         run: pnpm run build:site
 
@@ -106,6 +106,10 @@ jobs:
             test -f "_site/marketplace/$slug/index.html" || { echo "marketplace/$slug has no index.html"; exit 1; }
           done
           test -f _site/index.html || { echo "no index.html in the assembled site"; exit 1; }
+          # The docs area builds last in dumont-site's build; reordered, vite build empties
+          # dist/ after it and the area silently goes missing.
+          test -f _site/docs/index.html || { echo "no docs/index.html in the assembled site"; exit 1; }
+          test -d _site/docs/pagefind || { echo "the docs area has no search index"; exit 1; }
 
           find _site -name index.html | sort
 

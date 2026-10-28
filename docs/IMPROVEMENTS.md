@@ -442,30 +442,6 @@ The end-user documentation moves from vigletdocs into this repository, as an Ast
 Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
 system, and docs.viglet.org/dumont later redirects to it.
 
-### L.1 The documentation area at /docs (D230)
-
-**What happens.** The end-user documentation lives in another repository
-(`vigletdocs.github.io/docs-dumont`, a Docusaurus multi-instance shared with Turing and
-Shio) and publishes at `docs.viglet.org/dumont/`. A feature and its page ship in two
-repos, two commits and two deploys, and `dumont-site` links out to a domain it does not
-build.
-
-**What it should do.** Follow the roadkeep pattern (`roadkeep/site/docs`): a second npm
-project at `dumont-site/docs/`, Astro + Starlight, served at `dumont.viglet.org/docs`.
-- `base: "/docs"`, `site: "https://dumont.viglet.org"`, `outDir: "../dist/docs"`.
-- `build:docs` runs **last** in `dumont-site`'s `build`: `vite build` empties `dist/`, so
-  an earlier docs build is deleted by the step after it and the deploy goes green with the
-  area missing.
-- Pagefind search (built at deploy time, no service), `lastUpdated`, the GitHub social
-  link, the same Google tag the site carries.
-- A workspace member under the root `pnpm-workspace.yaml`, so `publish-github-pages.yml`
-  needs no new step: it already copies `dumont-site/dist/*` into `_site/`.
-- One placeholder page, so the area builds before any content moves (L.3).
-
-**Gate.** `pnpm run build:site` writes `dist/docs/index.html` and the Pagefind index,
-and the workflow's assembly check asserts `_site/docs/index.html` exists, the way it
-already asserts the marketplace folders.
-
 ### L.2 The area themed from the design system (D231)
 
 **What happens.** Starlight's default theme is its own: grey ramps, a teal-ish accent,

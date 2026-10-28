@@ -183,6 +183,7 @@
   `DumStructuredPreviewPluginTest`.
 - **D65** — One MapStruct mapper now declares the exported field list for both directions with unmappedTargetPolicy=ERROR, so an unmapped field fails the build instead of vanishing from the export.
 - **D143** — dumont.viglet.org/changelog.json now serves Dumont's releases through 2026.2.16, and www.viglet.org reads it in place of its hand-kept copy.
+- **D230** — dumont-site/docs builds a Starlight area with Pagefind search into dist/docs, last in the site build; the Pages workflow asserts it (design §L.1 recorded in `dumont-site/README.md`).
 
 ## Track E — Data quality & trust
 
