@@ -38,6 +38,13 @@ The pages are Markdown under `docs/src/content/docs/`, moved from vigletdocs'
 base: `starlight-links-validator` fails the build on a broken link or anchor.
 Images live in `docs/public/img/`; ```` ```mermaid ```` fences render as diagrams.
 
+`scripts/docs-twins.mjs` runs after both builds and holds the site's rules
+across them: every docs page gets a Markdown twin at `<path>.md` converted from
+its render, `/docs/llms.txt` indexes them (and fails the build if
+`public/llms.txt` stops naming it), and the docs pages join `sitemap.xml` and
+`manifest.json`. Site links to the docs come from `LINKS` in
+`src/lib/site-links.ts` and stay on this domain.
+
 **Adding a page is two rows**: a `ROUTES` entry in `src/App.tsx` and a `routes`
 entry, with title and description, in `src/entry-server.tsx`. The prerender
 throws if the two tables disagree, and every `<head>` patch is a

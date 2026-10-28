@@ -442,23 +442,6 @@ The end-user documentation moves from vigletdocs into this repository, as an Ast
 Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
 system, and docs.viglet.org/dumont later redirects to it.
 
-### L.4 The site points at its own docs (D233)
-
-**What happens.** `site-content.ts` points `docs`, `install` and `rest` at
-`docs.viglet.org/dumont/...`, the footer names `docs.viglet.org`, and the site's
-`sitemap.xml`, `llms.txt` and Markdown twins know nothing about a docs area.
-
-**What it should do.**
-- Every docs link in `site-content.ts` and the footer resolves inside `/docs`.
-- `sitemap.xml` lists the docs pages (Starlight's sitemap merged with the site's, or one
-  sitemap index over both); `llms.txt` points at the docs.
-- Each docs page gets a Markdown twin at the same address, built from the render the way
-  roadkeep's `twins.mjs` does, so the site's twin rule holds across both builds.
-- The root `README.md` and `agents.md` (`dumont-site` row) say where the docs live.
-
-**Gate.** A link check over the assembled `_site` reports no link to
-`docs.viglet.org/dumont`, and every docs page has an `index.md` twin.
-
 ### L.5 Shipping writes the docs here (D234)
 
 **What happens.** The shipping rule sends every user-facing change to

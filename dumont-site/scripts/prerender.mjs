@@ -171,7 +171,7 @@ const manifest = {
     "/llms.txt is the whole product in one file.",
   routes: index,
   product: {
-    docs: "https://docs.viglet.org/dumont/",
+    docs: `${SITE_ORIGIN}/docs/`,
     source: "https://github.com/openviglet/dumont",
     image: "ghcr.io/openviglet/dumont-ce:latest",
     marketplace: `${SITE_ORIGIN}/marketplace/`,

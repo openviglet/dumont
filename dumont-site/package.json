@@ -16,7 +16,7 @@
   "scripts": {
     "dev": "vite",
     "preview": "vite preview",
-    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs && node scripts/og-image.mjs && pnpm run build:docs",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs && node scripts/og-image.mjs && pnpm run build:docs && node scripts/docs-twins.mjs",
     "build:docs": "pnpm --dir docs run build",
     "dev:docs": "pnpm --dir docs run dev",
     "typecheck": "tsc -b --noEmit",
@@ -41,6 +41,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "marked": "^18.1.1",
+    "node-html-parser": "^9.0.5",
     "tw-animate-css": "^1.4.0",
     "typescript": "~5.9.3",
     "vite": "^8.3.2"

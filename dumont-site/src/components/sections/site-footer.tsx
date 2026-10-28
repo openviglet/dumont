@@ -45,7 +45,7 @@ export function SiteFooter() {
               viglet.org
             </a>
             <a href={LINKS.docs} className="hover:text-[#e8f5f3]">
-              docs.viglet.org
+              Docs
             </a>
             <a href="/llms.txt" className="font-mono hover:text-[#e8f5f3]">
               llms.txt

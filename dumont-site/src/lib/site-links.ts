@@ -5,9 +5,9 @@
  */
 
 export const LINKS = {
-  docs: "https://docs.viglet.org/dumont/",
-  install: "https://docs.viglet.org/dumont/installation-guide",
-  rest: "https://docs.viglet.org/dumont/rest-api",
+  docs: "/docs/",
+  install: "/docs/installation-guide/",
+  rest: "/docs/rest-api/",
   repo: "https://github.com/openviglet/dumont",
   license: "https://github.com/openviglet/dumont/blob/HEAD/LICENSE",
   roadmap: "https://github.com/openviglet/dumont/blob/HEAD/docs/ROADMAP.md",

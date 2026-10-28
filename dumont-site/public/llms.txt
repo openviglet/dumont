@@ -29,8 +29,8 @@ Every page of this site has a Markdown twin at `<path>.md` (the home page at `/i
 
 ## Links
 
-- [Documentation](https://docs.viglet.org/dumont/)
-- [Installation guide](https://docs.viglet.org/dumont/installation-guide)
+- [Documentation](https://dumont.viglet.org/docs/): every page has a Markdown twin; [the index of them](https://dumont.viglet.org/docs/llms.txt)
+- [Installation guide](https://dumont.viglet.org/docs/installation-guide.md)
 - [Source](https://github.com/openviglet/dumont)
 - [Viglet Turing ES](https://turing.viglet.org)
 - [Viglet Shio](https://shio.viglet.org)
