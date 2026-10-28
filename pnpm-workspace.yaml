@@ -20,6 +20,15 @@ onlyBuiltDependencies:
 # ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY.
 confirmModulesPurge: false
 
+# astro-mermaid imports @astrojs/markdown-satteri to hook the Markdown processor and does not
+# declare it, so it resolved only while pnpm happened to hoist a copy; without it the
+# integration falls back to remark plugins that Astro 7 no longer installs and the docs
+# build fails. Declared here at the version the rest of the area uses.
+packageExtensions:
+  astro-mermaid:
+    dependencies:
+      "@astrojs/markdown-satteri": "^0.4.5"
+
 minimumReleaseAgeExclude:
   - '@viglet/viglet-design-system@2026.3.5||2026.3.11'
 
