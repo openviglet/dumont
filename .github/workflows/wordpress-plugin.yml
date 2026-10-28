@@ -76,6 +76,30 @@ jobs:
           npm run lint:js
           npm run build
 
+  # D226: Plugin Check, the tool the WordPress.org review team runs, on the package the release
+  # job would upload (the zip's viglet-dumont/ folder), not on the source tree. Errors fail the
+  # job; warnings are reported in the log.
+  plugin-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: wordpress/package-lock.json
+
+      - name: Build the package
+        run: |
+          npm ci
+          npm run build
+          unzip -q "$(sh bin/build-zip.sh)" -d build/package
+
+      - uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: wordpress/build/package/viglet-dumont
+
   # D182: the browser suite (npm run test:e2e) against a real WordPress and Turing, so a
   # regression in the block, an admin screen, a theme or the pt_BR strings fails here rather
   # than on the next laptop run. The Turing it ran against is logged from /api/discovery; a
@@ -123,7 +147,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/wordpress-v')
-    needs: [check, admin]
+    needs: [check, admin, plugin-check]
     runs-on: ubuntu-latest
     permissions:
       contents: write

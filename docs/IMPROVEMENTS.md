@@ -429,3 +429,25 @@ The first submission is manual and outside this task: a wordpress.org account up
 the zip, the review team approves it, and only then does SVN exist.
 
 Done when a `wordpress-v*` tag updates the directory listing with no step by hand.
+
+### XLIX.85 Plugin Check warnings, fixed or annotated (D229)
+
+**What happens.** `wp plugin check viglet-dumont` (Plugin Check, which the D226 CI job
+now runs) finds no error and 23 warnings, measured on 2026-10-28:
+
+- 18 `PrefixAllGlobals.NonPrefixedVariableFound` in `admin/views/settings-page.php` and
+  `templates/search-results.php`: template variables in the global scope without the
+  `viglet_dumont_` prefix the block templates already use.
+- 2 `trademarked_term`: "WordPress" in the plugin name and the readme title.
+- 2 `WPQueryParams.PostNotIn_*`: `post__not_in` in the indexer (line 159) and `exclude` in the
+  mapping (line 663).
+- 1 `load_plugin_textdomainFound`: the call in `viglet_dumont_init()`, which WordPress 4.6+
+  does for a plugin hosted on wordpress.org.
+
+**What it should do.** Fix each, or annotate it where it stands with the reason, as the
+PHPCS rules are: prefix the template variables; rename to a title the directory accepts
+(the trademark rules allow "for WordPress" at the end; decide it with D225's readme);
+keep the two exclusions if the lists stay short and say so; keep
+`load_plugin_textdomain` while the GitHub zip is a supported install, since a site not
+installed from the directory loads no language pack. Then make the CI job fail on
+warnings too.
