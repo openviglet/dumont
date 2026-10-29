@@ -27,7 +27,7 @@ export function AppFooter() {
           Viglet Dumont{version ? ` ${version}` : ""}
         </span>
         <span className="text-xs text-muted-foreground/40">·</span>
-        <a href="https://dumont.viglet.org/docs/" target="_blank" rel="noopener noreferrer" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+        <a href="https://openviglet.github.io/dumont/docs/" target="_blank" rel="noopener noreferrer" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
           Docs
         </a>
         <span className="text-xs text-muted-foreground/40">·</span>

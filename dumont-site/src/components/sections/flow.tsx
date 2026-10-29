@@ -2,6 +2,7 @@ import { ArrowRight, Database, Layers } from "lucide-react";
 import { Container, SectionHeader } from "@/components/brand";
 import { VigletLogo } from "@/components/viglet-logo";
 import { CONNECTORS, TARGETS } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 const STAGES = ["read", "extract", "checksum", "queue", "index", "audit"];
 
@@ -35,7 +36,7 @@ export function Flow() {
               {CONNECTORS.map((c) => (
                 <li key={c.id}>
                   <a
-                    href={`/connectors/#${c.id}`}
+                    href={sitePath(`/connectors/#${c.id}`)}
                     className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
                   >
                     <c.icon className="size-4 shrink-0 text-primary" />

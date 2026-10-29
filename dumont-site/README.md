@@ -1,7 +1,7 @@
 # dumont-site
 
 The public site for **Viglet Dumont**, published to
-[dumont.viglet.org](https://dumont.viglet.org/) by
+[openviglet.github.io/dumont](https://openviglet.github.io/dumont/) by
 `.github/workflows/publish-github-pages.yml`.
 
 Stack: **Vite + React 19 + TypeScript + Tailwind CSS v4 + shadcn/ui**, the same
@@ -34,8 +34,8 @@ never inline styles.
 The pages are Markdown under `docs/src/content/docs/`, moved from vigletdocs'
 `docs-dumont` with their URL tails kept (`/dumont/rest-api` is now
 `/docs/rest-api/`). Adding one means adding its `slug` to the `sidebar` in
-`docs/astro.config.mjs`. Write an internal link as `/docs/<page>/`, with the
-base: `starlight-links-validator` fails the build on a broken link or anchor.
+`docs/astro.config.mjs`. Write an internal link as `/dumont/docs/<page>/`, with
+the base: `starlight-links-validator` fails the build on a broken link or anchor.
 Images live in `docs/public/img/`; ```` ```mermaid ```` fences render as diagrams.
 
 `scripts/docs-twins.mjs` runs after both builds and holds the site's rules
@@ -43,7 +43,13 @@ across them: every docs page gets a Markdown twin at `<path>.md` converted from
 its render, `/docs/llms.txt` indexes them (and fails the build if
 `public/llms.txt` stops naming it), and the docs pages join `sitemap.xml` and
 `manifest.json`. Site links to the docs come from `LINKS` in
-`src/lib/site-links.ts` and stay on this domain.
+`src/lib/site-links.ts` and stay on this site.
+
+The site is a GitHub project page, served under `/dumont/` rather than at the
+root of a domain. `SITE_ORIGIN` and `BASE` in `src/lib/site-links.ts` are the one
+declaration of that: the Vite base, the Astro base, every canonical and every
+in-site href (`sitePath("/aem/")`) are built from them. A hand-typed `href="/…"`
+in a component points outside the site.
 
 **Adding a page is two rows**: a `ROUTES` entry in `src/App.tsx` and a `routes`
 entry, with title and description, in `src/entry-server.tsx`. The prerender

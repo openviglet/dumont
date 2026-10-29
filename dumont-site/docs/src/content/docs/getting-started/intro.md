@@ -70,13 +70,13 @@ These are the main building blocks you will work with in Dumont. You do not need
 
 | Concept | What it is | Learn more |
 |---|---|---|
-| **Connector** | A component that extracts content from a specific source type (web, database, files, AEM, WordPress) | [Connectors](/docs/connectors/overview/) |
-| **Indexing Plugin** | The output adapter that delivers documents to a search engine, Turing (default), Apache Solr, or Elasticsearch | [Indexing Plugins](/docs/indexing-plugins/) |
-| **Job Item** | A single document being processed through the pipeline, with fields, metadata, and an action (index, de-index, update) | [Core Concepts](/docs/getting-started/core-concepts/) |
-| **Batch Processor** | Groups individual job items into configurable batches (default: 50) for efficient queue delivery | [Core Concepts](/docs/getting-started/core-concepts/) |
-| **Message Queue** | Apache Artemis (embedded): decouples connector extraction from indexing delivery for reliability and throughput | [Architecture](/docs/architecture/) |
-| **Processing Strategy** | Priority-based rules that determine how each document is handled, index, re-index, de-index, ignore, or skip unchanged | [Core Concepts](/docs/getting-started/core-concepts/) |
-| **Indexing Rules** | Regex-based filters that skip documents matching specific attribute patterns before they reach the queue | [Core Concepts](/docs/getting-started/core-concepts/) |
+| **Connector** | A component that extracts content from a specific source type (web, database, files, AEM, WordPress) | [Connectors](/dumont/docs/connectors/overview/) |
+| **Indexing Plugin** | The output adapter that delivers documents to a search engine, Turing (default), Apache Solr, or Elasticsearch | [Indexing Plugins](/dumont/docs/indexing-plugins/) |
+| **Job Item** | A single document being processed through the pipeline, with fields, metadata, and an action (index, de-index, update) | [Core Concepts](/dumont/docs/getting-started/core-concepts/) |
+| **Batch Processor** | Groups individual job items into configurable batches (default: 50) for efficient queue delivery | [Core Concepts](/dumont/docs/getting-started/core-concepts/) |
+| **Message Queue** | Apache Artemis (embedded): decouples connector extraction from indexing delivery for reliability and throughput | [Architecture](/dumont/docs/architecture/) |
+| **Processing Strategy** | Priority-based rules that determine how each document is handled, index, re-index, de-index, ignore, or skip unchanged | [Core Concepts](/dumont/docs/getting-started/core-concepts/) |
+| **Indexing Rules** | Regex-based filters that skip documents matching specific attribute patterns before they reach the queue | [Core Concepts](/dumont/docs/getting-started/core-concepts/) |
 
 ---
 
@@ -85,31 +85,31 @@ These are the main building blocks you will work with in Dumont. You do not need
 Not sure where to start? Here is a suggested path depending on what you want to do:
 
 **I want to understand how Dumont works**
-→ Read [Core Concepts](/docs/getting-started/core-concepts/) first, then [Architecture](/docs/architecture/).
+→ Read [Core Concepts](/dumont/docs/getting-started/core-concepts/) first, then [Architecture](/dumont/docs/architecture/).
 
 **I want to install Dumont**
-→ Go to the [Installation Guide](/docs/installation-guide/).
+→ Go to the [Installation Guide](/dumont/docs/installation-guide/).
 
 **I want to crawl a website**
-→ Go to [Web Crawler Connector](/docs/connectors/web-crawler/).
+→ Go to [Web Crawler Connector](/dumont/docs/connectors/web-crawler/).
 
 **I want to index a database**
-→ Go to [Database Connector](/docs/connectors/database/).
+→ Go to [Database Connector](/dumont/docs/connectors/database/).
 
 **I want to index files from a directory**
-→ Go to [FileSystem Connector](/docs/connectors/filesystem/).
+→ Go to [FileSystem Connector](/dumont/docs/connectors/filesystem/).
 
 **I want to connect AEM to Turing**
-→ Go to [AEM Connector](/docs/connectors/aem/).
+→ Go to [AEM Connector](/dumont/docs/connectors/aem/).
 
 **I want to index WordPress content**
-→ Go to [WordPress Connector](/docs/connectors/wordpress/).
+→ Go to [WordPress Connector](/dumont/docs/connectors/wordpress/).
 
 **I want to send content to Solr or Elasticsearch directly**
-→ Go to [Indexing Plugins](/docs/indexing-plugins/).
+→ Go to [Indexing Plugins](/dumont/docs/indexing-plugins/).
 
 **I want to contribute or build from source**
-→ Go to the [Developer Guide](/docs/developer-guide/).
+→ Go to the [Developer Guide](/dumont/docs/developer-guide/).
 
 ---
 

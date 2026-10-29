@@ -221,9 +221,9 @@ java -cp dumont-db-indexer.jar:target/my-db-extensions-1.0.0.jar \
 
 | Page | Description |
 |---|---|
-| [Database Connector](/docs/connectors/database/) | CLI parameters, SQL examples, supported databases |
-| [Extending the AEM Connector](/docs/extending-aem/) | AEM extension interfaces and configuration JSON |
-| [Developer Guide](/docs/developer-guide/) | Project structure, build, and contribution guide |
+| [Database Connector](/dumont/docs/connectors/database/) | CLI parameters, SQL examples, supported databases |
+| [Extending the AEM Connector](/dumont/docs/extending-aem/) | AEM extension interfaces and configuration JSON |
+| [Developer Guide](/dumont/docs/developer-guide/) | Project structure, build, and contribution guide |
 
 ---
 

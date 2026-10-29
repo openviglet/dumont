@@ -15,7 +15,7 @@ Viglet Dumont is a modular data extraction platform that runs connectors indepen
 
 The system has three layers: content sources on the left, the Dumont pipeline in the center, and search engines on the right.
 
-![Dumont: High-Level Architecture](/docs/img/diagrams/dumont-architecture.svg)
+![Dumont: High-Level Architecture](/dumont/docs/img/diagrams/dumont-architecture.svg)
 
 Each numbered block is detailed in its own diagram below.
 
@@ -25,7 +25,7 @@ Each numbered block is detailed in its own diagram below.
 
 Connectors extract content and feed it into the pipeline. They come in three forms: Java plugins, standalone CLI tools, and the WordPress PHP plugin.
 
-![Dumont: Connector Types](/docs/img/diagrams/dumont-connectors.svg)
+![Dumont: Connector Types](/dumont/docs/img/diagrams/dumont-connectors.svg)
 
 | Type | Connectors | How they connect |
 |---|---|---|
@@ -33,7 +33,7 @@ Connectors extract content and feed it into the pipeline. They come in three for
 | **Standalone CLI** | Database, FileSystem | Separate JARs that connect to a running Dumont instance via REST API |
 | **PHP Plugin** | WordPress | Installed inside WordPress: sends content directly to Turing, bypasses Dumont |
 
-For details on each connector, see [Connectors Overview](/docs/connectors/overview/).
+For details on each connector, see [Connectors Overview](/dumont/docs/connectors/overview/).
 
 ---
 
@@ -41,7 +41,7 @@ For details on each connector, see [Connectors Overview](/docs/connectors/overvi
 
 Once a connector produces a Job Item, it passes through a multi-stage pipeline before reaching the search engine.
 
-![Dumont: Pipeline Detail](/docs/img/diagrams/dumont-pipeline-detail.svg)
+![Dumont: Pipeline Detail](/dumont/docs/img/diagrams/dumont-pipeline-detail.svg)
 
 | Stage | Component | What it does |
 |---|---|---|
@@ -52,7 +52,7 @@ Once a connector produces a Job Item, it passes through a multi-stage pipeline b
 
 The **Indexing DB** stores checksums and status for every processed document, enabling incremental indexing on subsequent runs.
 
-For the conceptual explanation of each stage, see [Core Concepts, The Processing Pipeline](/docs/getting-started/core-concepts/#the-processing-pipeline).
+For the conceptual explanation of each stage, see [Core Concepts, The Processing Pipeline](/dumont/docs/getting-started/core-concepts/#the-processing-pipeline).
 
 ---
 
@@ -60,7 +60,7 @@ For the conceptual explanation of each stage, see [Core Concepts, The Processing
 
 The complete sequence from content source to search engine:
 
-![Dumont, Indexing Flow](/docs/img/diagrams/dumont-indexing-flow.svg)
+![Dumont, Indexing Flow](/dumont/docs/img/diagrams/dumont-indexing-flow.svg)
 
 ---
 
@@ -102,9 +102,9 @@ by separate settings, so the status endpoint reports them separately: whether th
 reachable, and whether an appender is attached that would accept a row. A log nothing is writing
 says so, rather than presenting an empty history as a quiet one.
 
-See [Content Audit configuration](/docs/configuration-reference/#content-audit), the
-[orphan report endpoints](/docs/rest-api/#orphan-reports) and the
-[Logging API](/docs/rest-api/#logging-api).
+See [Content Audit configuration](/dumont/docs/configuration-reference/#content-audit), the
+[orphan report endpoints](/dumont/docs/rest-api/#orphan-reports) and the
+[Logging API](/dumont/docs/rest-api/#logging-api).
 
 ---
 
@@ -200,8 +200,8 @@ Dumont + PostgreSQL
 
 | Page | Description |
 |---|---|
-| [Core Concepts](/docs/getting-started/core-concepts/) | Pipeline stages, strategies, and change detection |
-| [Connectors Overview](/docs/connectors/overview/) | All connectors and deployment types |
-| [Indexing Plugins](/docs/indexing-plugins/) | Turing, Solr, Elasticsearch output targets |
-| [Installation Guide](/docs/installation-guide/) | Setup with `-Dloader.path` and systemd |
+| [Core Concepts](/dumont/docs/getting-started/core-concepts/) | Pipeline stages, strategies, and change detection |
+| [Connectors Overview](/dumont/docs/connectors/overview/) | All connectors and deployment types |
+| [Indexing Plugins](/dumont/docs/indexing-plugins/) | Turing, Solr, Elasticsearch output targets |
+| [Installation Guide](/dumont/docs/installation-guide/) | Setup with `-Dloader.path` and systemd |
 | [Turing: Architecture](https://docs.viglet.org/turing/architecture-overview) | Search-side architecture: indexing reception, search flow, and deployment topologies |

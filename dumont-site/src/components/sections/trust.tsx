@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Container, SectionHeader } from "@/components/brand";
 import { TRUST } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 /** The operational half. `detailed` shows each feature's second line, for /trust/. */
 export function Trust({ detailed = false }: { detailed?: boolean }) {
@@ -44,7 +45,7 @@ export function Trust({ detailed = false }: { detailed?: boolean }) {
         {!detailed && (
           <div className="mt-8 text-center">
             <a
-              href="/trust/"
+              href={sitePath("/trust/")}
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
             >
               How each check works <ArrowRight className="size-4" />

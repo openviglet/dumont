@@ -137,7 +137,7 @@ This will:
 ---
 
 :::tip[Customizing the Database Connector]
-Need to transform or enrich rows during import? See [Extending the Database Connector](/docs/extending-database/) for the `DumDbExtCustomImpl` interface and step-by-step guide.
+Need to transform or enrich rows during import? See [Extending the Database Connector](/dumont/docs/extending-database/) for the `DumDbExtCustomImpl` interface and step-by-step guide.
 :::
 
 ---

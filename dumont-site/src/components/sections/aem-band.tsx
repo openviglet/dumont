@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container, Eyebrow } from "@/components/brand";
 import { AEM_POINTS } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 /**
  * AEM gets a band of its own on the landing page because it is the deepest
@@ -38,7 +39,7 @@ export function AemBand() {
 
         <div className="mt-10 flex justify-center">
           <Button asChild size="lg">
-            <a href="/aem/">
+            <a href={sitePath("/aem/")}>
               Dumont for AEM <ArrowRight className="size-4" />
             </a>
           </Button>

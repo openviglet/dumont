@@ -11,12 +11,12 @@ Connectors are the components that extract content from external sources and fee
 
 | Connector | Source Type | Deployment | Artifact |
 |---|---|---|---|
-| [**Web Crawler**](/docs/connectors/web-crawler/) | Websites | **Java Plugin**: loaded via `-Dloader.path` | `web-crawler-plugin.jar` |
-| [**AEM**](/docs/connectors/aem/) | Adobe Experience Manager | **Java Plugin**: loaded via `-Dloader.path` | `aem-plugin.jar` |
-| [**Catalog & JSON API**](/docs/connectors/catalog/) | Normalized catalog feeds and paged JSON APIs | **Java Plugin**: loaded via `-Dloader.path` | `catalog-plugin.jar` |
-| [**Database**](/docs/connectors/database/) | JDBC databases | **Standalone Java CLI**: runs independently | `dumont-db-indexer.jar` |
-| [**FileSystem**](/docs/connectors/filesystem/) | Local/network directories | **Standalone Java CLI**: runs independently | `dumont-filesystem-indexer.jar` |
-| [**WordPress**](/docs/connectors/wordpress/) | WordPress sites | **PHP Plugin**: installed inside WordPress | `viglet-dumont/` |
+| [**Web Crawler**](/dumont/docs/connectors/web-crawler/) | Websites | **Java Plugin**: loaded via `-Dloader.path` | `web-crawler-plugin.jar` |
+| [**AEM**](/dumont/docs/connectors/aem/) | Adobe Experience Manager | **Java Plugin**: loaded via `-Dloader.path` | `aem-plugin.jar` |
+| [**Catalog & JSON API**](/dumont/docs/connectors/catalog/) | Normalized catalog feeds and paged JSON APIs | **Java Plugin**: loaded via `-Dloader.path` | `catalog-plugin.jar` |
+| [**Database**](/dumont/docs/connectors/database/) | JDBC databases | **Standalone Java CLI**: runs independently | `dumont-db-indexer.jar` |
+| [**FileSystem**](/dumont/docs/connectors/filesystem/) | Local/network directories | **Standalone Java CLI**: runs independently | `dumont-filesystem-indexer.jar` |
+| [**WordPress**](/dumont/docs/connectors/wordpress/) | WordPress sites | **PHP Plugin**: installed inside WordPress | `viglet-dumont/` |
 
 ---
 
@@ -180,7 +180,7 @@ added.
 index it. A proposal is never published on its own.
 
 The same three steps are available over HTTP; see the
-[Source Inference API](/docs/rest-api/#source-inference-api).
+[Source Inference API](/dumont/docs/rest-api/#source-inference-api).
 
 ---
 
@@ -204,9 +204,9 @@ Every connector needs at least these pieces of information:
 |---|---|---|
 | **Web Crawler** | Turing Admin Console | [Turing → Integration](https://docs.viglet.org/turing/integration) |
 | **AEM** | JSON file + Turing Admin Console | `export/` directory + [Turing → Integration](https://docs.viglet.org/turing/integration-aem) |
-| **Database** | CLI parameters | Command-line: see [Database Connector](/docs/connectors/database/) |
-| **FileSystem** | CLI parameters | Command-line: see [FileSystem Connector](/docs/connectors/filesystem/) |
-| **WordPress** | WordPress Admin UI, WP-CLI or environment variables | WordPress → Viglet Dumont → Setup: see [WordPress Connector](/docs/connectors/wordpress/) |
+| **Database** | CLI parameters | Command-line: see [Database Connector](/dumont/docs/connectors/database/) |
+| **FileSystem** | CLI parameters | Command-line: see [FileSystem Connector](/dumont/docs/connectors/filesystem/) |
+| **WordPress** | WordPress Admin UI, WP-CLI or environment variables | WordPress → Viglet Dumont → Setup: see [WordPress Connector](/dumont/docs/connectors/wordpress/) |
 
 ---
 

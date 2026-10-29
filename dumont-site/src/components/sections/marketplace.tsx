@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { Container, SectionHeader } from "@/components/brand";
 import { SAMPLES } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 /**
  * The samples are built and copied into /marketplace/<slug>/ by the Pages
@@ -26,7 +27,7 @@ export function Marketplace() {
           {SAMPLES.map((s) => (
             <a
               key={s.slug}
-              href={`/marketplace/${s.slug}/`}
+              href={sitePath(`/marketplace/${s.slug}/`)}
               className="group flex flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
             >
               <span className="w-fit rounded-md border border-primary/25 bg-primary/5 px-2 py-0.5 font-mono text-[0.68rem] font-semibold text-primary">

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/brand";
 import { CopyCommand } from "@/components/copy-command";
 import { DOCKER_RUN, LINKS } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 export function CallToAction() {
   return (
@@ -35,7 +36,7 @@ export function CallToAction() {
               variant="outline"
               className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white dark:bg-white/10"
             >
-              <a href="/#marketplace">Start from a sample</a>
+              <a href={sitePath("/#marketplace")}>Start from a sample</a>
             </Button>
             <Button
               asChild

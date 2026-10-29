@@ -3,7 +3,7 @@ title: "Turing on WordPress"
 description: What each Viglet Turing feature looks like on a WordPress site through the Dumont plugin, which block shows it, and which ones need a language model.
 ---
 
-The [WordPress Connector](/docs/connectors/wordpress/) brings Viglet Turing's search and generative
+The [WordPress Connector](/dumont/docs/connectors/wordpress/) brings Viglet Turing's search and generative
 features to a WordPress site as blocks. This page lists each feature, the block that shows it,
 and whether it needs a language model in Turing. **Health → AI features** in wp-admin checks the
 generative ones against your Turing and names, for each, the block a visitor meets it in.
@@ -27,7 +27,7 @@ off, so a page can hold it before Turing is set up.
 
 ## Search as you type
 
-![Search as you type, with its note from the tour](/docs/img/screenshots/dumont-wordpress-tour-search.png)
+![Search as you type, with its note from the tour](/dumont/docs/img/screenshots/dumont-wordpress-tour-search.png)
 
 Suggestions come from what the index holds, a misspelling is offered its correction, and
 synonyms set in Turing apply to every search. The search box is the **Turing search** block's,
@@ -35,7 +35,7 @@ or the instant search's.
 
 ## Filters from the catalog
 
-![Filters from the catalog, with its note from the tour](/docs/img/screenshots/dumont-wordpress-tour-filters.png)
+![Filters from the catalog, with its note from the tour](/dumont/docs/img/screenshots/dumont-wordpress-tour-filters.png)
 
 The fields you mark as facets on the **Fields** screen are sent to Turing with each post, and
 the block shows them beside the results with a count for the current search. On WooCommerce,
@@ -43,7 +43,7 @@ category, price and attributes are facets too.
 
 ## Ask the catalog
 
-![Ask the catalog, with its note from the tour](/docs/img/screenshots/dumont-wordpress-tour-copilot.png)
+![Ask the catalog, with its note from the tour](/dumont/docs/img/screenshots/dumont-wordpress-tour-copilot.png)
 
 A visitor describes what they need in a sentence. Turing's catalog copilot answers from the
 site's content and lists the items it cites. On a WooCommerce shop each cited product shows the
@@ -51,7 +51,7 @@ shop's price, and **Add to cart** puts it in the cart; the copilot never adds an
 
 ## Site assistant
 
-![The Site assistant, with its note from the tour](/docs/img/screenshots/dumont-wordpress-tour-assistant.png)
+![The Site assistant, with its note from the tour](/dumont/docs/img/screenshots/dumont-wordpress-tour-assistant.png)
 
 A button opens a chat over the site's posts. Answers stream in, labelled as generated, with the
 posts they used as links and a **Was this helpful?** that reaches Turing. The conversation
@@ -73,4 +73,4 @@ run-docker.cmd demo     :: the demo on http://localhost:38082, the showcase at /
 ```
 
 `npm run e2e:tour` in the plugin's `wordpress/` folder walks that page and records a video and
-the screenshots on this page. See [Try it locally](/docs/connectors/wordpress/#try-it-locally).
+the screenshots on this page. See [Try it locally](/dumont/docs/connectors/wordpress/#try-it-locally).

@@ -163,7 +163,7 @@ When this is configured, the extension class fetches the Sling Model exporter:
 GET http://localhost:4502/content/wknd/us/en/my-page.model.json
 ```
 
-This returns structured content from AEM's Sling Models: useful for extracting custom attributes like content fragment paths, component data, or experience fragment references. See [Extending the AEM Connector](/docs/extending-aem/) for how to implement `DumAemExtContentInterface` and the full JSON configuration reference.
+This returns structured content from AEM's Sling Models: useful for extracting custom attributes like content fragment paths, component data, or experience fragment references. See [Extending the AEM Connector](/dumont/docs/extending-aem/) for how to implement `DumAemExtContentInterface` and the full JSON configuration reference.
 
 ### 4. Traverse the Content Tree
 
@@ -419,7 +419,7 @@ curl -X POST http://localhost:30130/api/v2/aem/index/WKND \
 
 Each AEM source defines connection details, content scope, author/publish environments, locale mappings, and delta tracking. Sources are configured in the **Turing Admin Console** under **Enterprise Search → Integration → [your AEM instance] → Sources**.
 
-For the JSON configuration file used by custom extensions (attributes, models, locale paths), see [Extending the AEM Connector](/docs/extending-aem/#aem-configuration-json).
+For the JSON configuration file used by custom extensions (attributes, models, locale paths), see [Extending the AEM Connector](/dumont/docs/extending-aem/#aem-configuration-json).
 
 ### General
 
@@ -456,7 +456,7 @@ Controls incremental indexing: how the connector detects which content has chang
 | Field | Description |
 |---|---|
 | Once Pattern | Pattern used to identify content that should only be indexed once |
-| Delta Class | Fully-qualified Java class name responsible for detecting changed content since the last run (see [Extending AEM](/docs/extending-aem/) for custom implementations) |
+| Delta Class | Fully-qualified Java class name responsible for detecting changed content since the last run (see [Extending AEM](/dumont/docs/extending-aem/) for custom implementations) |
 
 ### Author / Publish
 
@@ -478,7 +478,7 @@ Maps content language codes to repository paths.
 | Field | Description |
 |---|---|
 | Default Locale | Locale used when no language-specific path is matched |
-| Locale Class | Fully-qualified Java class name responsible for resolving document locale (see [Extending AEM](/docs/extending-aem/) for custom implementations) |
+| Locale Class | Fully-qualified Java class name responsible for resolving document locale (see [Extending AEM](/dumont/docs/extending-aem/) for custom implementations) |
 | Locale → Path | Dynamic list mapping each locale code (e.g., `en_US`) to its root path in the repository |
 
 ### Source Actions
@@ -546,7 +546,7 @@ When using **QueryBuilder discovery**, parallelism is controlled separately via 
 ---
 
 :::tip[Customizing the AEM Connector]
-Need custom attribute extractors, delta date logic, or content processors? See [Extending the AEM Connector](/docs/extending-aem/) for the full extension system, configuration JSON reference, and step-by-step guide.
+Need custom attribute extractors, delta date logic, or content processors? See [Extending the AEM Connector](/dumont/docs/extending-aem/) for the full extension system, configuration JSON reference, and step-by-step guide.
 :::
 
 ---
@@ -555,8 +555,8 @@ Need custom attribute extractors, delta date logic, or content processors? See [
 
 | Page | Description |
 |---|---|
-| [AEM Event Listener](/docs/aem-event-listener/) | Install the OSGi event listener bundle inside AEM for real-time indexing |
-| [Extending the AEM Connector](/docs/extending-aem/) | Custom attribute extractors, content processors, and configuration JSON reference |
+| [AEM Event Listener](/dumont/docs/aem-event-listener/) | Install the OSGi event listener bundle inside AEM for real-time indexing |
+| [Extending the AEM Connector](/dumont/docs/extending-aem/) | Custom attribute extractors, content processors, and configuration JSON reference |
 | [Turing: Integration](https://docs.viglet.org/turing/integration) | General integration management: monitoring, indexing stats, and system information |
 | [Turing: AEM Connector](https://docs.viglet.org/turing/integration-aem) | AEM integration overview from the Turing perspective |
 | [Turing: Semantic Navigation](https://docs.viglet.org/turing/semantic-navigation) | Configure the SN Sites that receive indexed content |

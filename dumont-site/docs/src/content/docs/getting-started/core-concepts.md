@@ -46,7 +46,7 @@ Job Items are the universal data format inside Dumont. Every connector produces 
 
 When a connector extracts a document, it does not send it directly to the search engine. Instead, the document passes through a multi-stage pipeline designed for reliability, efficiency, and flexibility.
 
-![Dumont, Processing Pipeline](/docs/img/diagrams/dumont-pipeline.svg)
+![Dumont, Processing Pipeline](/dumont/docs/img/diagrams/dumont-pipeline.svg)
 
 ### Stage 1: Extraction
 
@@ -156,14 +156,14 @@ per-extract timeout cancels the overrun and counts it as one failed extraction.
 
 Skipping the sweep on an incomplete run is how every structured source behaves. The two thresholds
 are wired for the AEM connector, whose extraction is one HTTP fetch per page and therefore the one
-that hangs; see [Extraction Resilience](/docs/configuration-reference/#extraction-resilience).
+that hangs; see [Extraction Resilience](/dumont/docs/configuration-reference/#extraction-resilience).
 
 ### The audit finds what the run missed
 
 A scheduled audit re-enumerates each source and, where the backend can report what it holds,
 compares against the search index itself, finding documents that never landed, landed and then
 went stale, or linger in the index after leaving the source. See
-[Content Audit](/docs/configuration-reference/#content-audit).
+[Content Audit](/dumont/docs/configuration-reference/#content-audit).
 
 ---
 
@@ -191,12 +191,12 @@ Every document's journey through the pipeline is tracked with a status code:
 
 | I want to... | Go to |
 |---|---|
-| Understand the full system architecture | [Architecture](/docs/architecture/) |
-| Install Dumont | [Installation Guide](/docs/installation-guide/) |
-| Configure a Web Crawler | [Web Crawler Connector](/docs/connectors/web-crawler/) |
-| Index a database | [Database Connector](/docs/connectors/database/) |
-| Understand the indexing plugins | [Indexing Plugins](/docs/indexing-plugins/) |
-| See the full configuration reference | [Configuration Reference](/docs/configuration-reference/) |
+| Understand the full system architecture | [Architecture](/dumont/docs/architecture/) |
+| Install Dumont | [Installation Guide](/dumont/docs/installation-guide/) |
+| Configure a Web Crawler | [Web Crawler Connector](/dumont/docs/connectors/web-crawler/) |
+| Index a database | [Database Connector](/dumont/docs/connectors/database/) |
+| Understand the indexing plugins | [Indexing Plugins](/dumont/docs/indexing-plugins/) |
+| See the full configuration reference | [Configuration Reference](/dumont/docs/configuration-reference/) |
 
 ---
 

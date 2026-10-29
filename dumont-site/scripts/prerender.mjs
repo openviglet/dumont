@@ -17,11 +17,11 @@ import { resolve, dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 import { pageToMarkdown } from "./markdown.mjs";
 
-const SITE_ORIGIN = "https://dumont.viglet.org";
 const distDir = resolve(process.cwd(), "dist");
 const serverEntry = resolve(process.cwd(), "dist-ssr", "entry-server.js");
 
-const { render, routes } = await import(pathToFileURL(serverEntry).href);
+// SITE_URL is the published root, base included ("https://openviglet.github.io/dumont/").
+const { render, routes, BASE, SITE_URL } = await import(pathToFileURL(serverEntry).href);
 const template = readFileSync(resolve(distDir, "index.html"), "utf-8");
 
 /** Replace the first match of `re` in `text`, or throw so a drift fails the build. */
@@ -41,6 +41,9 @@ function pageUrl(path) {
   return path.endsWith("/") ? path : `${path}/`;
 }
 
+/** A route's canonical: the published root plus the route, never the root twice. */
+const canonicalOf = (path) => `${SITE_URL}${pageUrl(path).slice(1)}`;
+
 /**
  * Every link to a route must use `pageUrl`. Search Console reports a link that
  * redirects as a page with a redirect, and the route keys have no slash, so a
@@ -48,11 +51,13 @@ function pageUrl(path) {
  * not the source, because an href can come out of a data file.
  */
 const routePaths = new Set(routes.map((r) => r.path).filter((p) => p !== "/"));
+const origin = new URL(SITE_URL).origin.replaceAll(".", String.raw`\.`);
 function assertSlashedLinks(text, where) {
   const bad = [];
-  const re = /(?:href="|\]\(|<loc>)(?:https:\/\/dumont\.viglet\.org)?(\/[^"#?)<\s]*)/g;
+  const re = new RegExp(String.raw`(?:href="|\]\(|<loc>)(?:${origin})?(/[^"#?)<\s]*)`, "g");
   for (const m of text.matchAll(re)) {
-    if (routePaths.has(m[1])) bad.push(m[1]);
+    // Routes are declared without the base the site is served under ("/dumont/aem" is "/aem").
+    if (m[1].startsWith(BASE) && routePaths.has(`/${m[1].slice(BASE.length)}`)) bad.push(m[1]);
   }
   if (bad.length) {
     throw new Error(
@@ -64,7 +69,7 @@ function assertSlashedLinks(text, where) {
 
 function buildHtml(route) {
   const appHtml = render(route.path);
-  const canonical = `${SITE_ORIGIN}${pageUrl(route.path)}`;
+  const canonical = canonicalOf(route.path);
   const title = route.title;
   const desc = route.description;
 
@@ -120,7 +125,7 @@ const index = [];
 for (const route of routes) {
   const html = buildHtml(route);
   assertSlashedLinks(html, route.path);
-  const canonical = `${SITE_ORIGIN}${pageUrl(route.path)}`;
+  const canonical = canonicalOf(route.path);
 
   const outFile =
     route.path === "/"
@@ -163,18 +168,18 @@ const manifest = {
   identity: {
     name: "Viglet Dumont",
     kind: "marketing-site",
-    origin: SITE_ORIGIN,
+    origin: SITE_URL,
     builtAt: new Date().toISOString(),
   },
   startHere:
     "Every route has a Markdown twin at <path>.md. Fetch that instead of the HTML. " +
-    "/llms.txt is the whole product in one file.",
+    `${BASE}llms.txt is the whole product in one file.`,
   routes: index,
   product: {
-    docs: `${SITE_ORIGIN}/docs/`,
+    docs: `${SITE_URL}docs/`,
     source: "https://github.com/openviglet/dumont",
     image: "ghcr.io/openviglet/dumont-ce:latest",
-    marketplace: `${SITE_ORIGIN}/marketplace/`,
+    marketplace: `${SITE_URL}marketplace/`,
   },
 };
 writeFileSync(resolve(distDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf-8");

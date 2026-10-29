@@ -2,14 +2,16 @@ import React from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { ThemeProvider } from "@/components/theme-provider";
+import { BASE } from "@/lib/site-links";
 import "./index.css";
 
-// The route is derived from the URL: the same trivial rule the server used.
+// The route is derived from the URL: the same trivial rule the server used, read
+// below the base the site is served at ("/dumont/aem/" is the route "/aem").
 const container = document.getElementById("root")!;
 const tree = (
   <React.StrictMode>
     <ThemeProvider defaultTheme="system" storageKey="dumont-site-theme">
-      <App path={globalThis.location.pathname} />
+      <App path={`/${globalThis.location.pathname.slice(BASE.length)}`} />
     </ThemeProvider>
   </React.StrictMode>
 );

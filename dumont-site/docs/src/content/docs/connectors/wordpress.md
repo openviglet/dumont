@@ -91,7 +91,7 @@ Then open **Viglet Dumont → Setup**.
 
 ## Connect to Turing
 
-![The Setup page](/docs/img/screenshots/dumont-wordpress-setup.png)
+![The Setup page](/dumont/docs/img/screenshots/dumont-wordpress-setup.png)
 
 **Viglet Dumont → Setup** takes the connection, then **Save and test the connection** checks
 it one step at a time and stops at the first failure, naming it:
@@ -144,7 +144,7 @@ custom fields can be added on the Settings page.
 
 ### Fields and facets
 
-![The Fields page](/docs/img/screenshots/dumont-wordpress-fields.png)
+![The Fields page](/dumont/docs/img/screenshots/dumont-wordpress-fields.png)
 
 **Viglet Dumont → Fields** maps, per post type, what else becomes its own Turing field:
 
@@ -236,7 +236,7 @@ The same operations answer over REST under `viglet-dumont/v1/`: `status`, `index
 | **Health** | Published versus indexed per type, the queue, its last run, the last 50 events |
 | **Settings** | Post types, categories, tags, comments, custom fields, exclusions, batch size, search |
 
-![The Health page](/docs/img/screenshots/dumont-wordpress-health.png)
+![The Health page](/dumont/docs/img/screenshots/dumont-wordpress-health.png)
 
 **Health** has **Retry failed** and **Send queue now**, and lists every send, removal,
 provisioning and sweep with its error when it failed.
@@ -256,7 +256,7 @@ The same panel's **Assist** section helps while writing, and changes nothing on 
   language. **Use this excerpt** fills the excerpt field; the post changes only when you
   save it. **Draft another** asks again. Turing needs a default language model for it.
 
-![The Search column in the post list](/docs/img/screenshots/dumont-wordpress-posts.png)
+![The Search column in the post list](/dumont/docs/img/screenshots/dumont-wordpress-posts.png)
 
 **Viglet Dumont → Insights** shows what visitors searched for in the last 24 hours, 7 days,
 30 days or all time, read from Turing's search metrics with the stored API key: the top
@@ -284,7 +284,7 @@ page**.
 
 ### The Turing search block
 
-![The Turing search block](/docs/img/screenshots/dumont-wordpress-search-block.png)
+![The Turing search block](/dumont/docs/img/screenshots/dumont-wordpress-search-block.png)
 
 The **Turing search** block is a complete search UI for any page. It has a box with
 suggestions, "did you mean", the mapped facets, results and pages. It is built with the

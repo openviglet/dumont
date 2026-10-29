@@ -169,7 +169,7 @@ The values are restored from the stored run history at startup, so a restart doe
 An incomplete indexing run must not de-index what it never reached. Skipping that sweep is
 unconditional; these tune *when* a run is judged incomplete, and are read by the AEM connector,
 whose extraction is one HTTP fetch per page. See
-[Core Concepts → Data Quality](/docs/getting-started/core-concepts/#data-quality).
+[Core Concepts → Data Quality](/dumont/docs/getting-started/core-concepts/#data-quality).
 
 | Property | Default | Description |
 |---|---|---|
@@ -187,7 +187,7 @@ index itself and reports three differences: **missing** (in the source, never la
 source). Missing and stale ids are requeued through the normal pipeline. Orphans are never
 deleted by the audit: a discovery pass that under-reports ids would otherwise take live content
 out of the index. Instead each pass writes the ids it found into a dated **orphan report** you
-review and apply yourself, through [the orphan endpoints](/docs/rest-api/#orphan-reports).
+review and apply yourself, through [the orphan endpoints](/dumont/docs/rest-api/#orphan-reports).
 
 | Property | Default | Description |
 |---|---|---|
@@ -228,7 +228,7 @@ review and apply yourself, through [the orphan endpoints](/docs/rest-api/#orphan
 
 ### AEM Adobe I/O Events
 
-See [AEM Connector → Adobe I/O Events](/docs/connectors/aem/#adobe-io-events).
+See [AEM Connector → Adobe I/O Events](/dumont/docs/connectors/aem/#adobe-io-events).
 
 | Property | Default | Description |
 |---|---|---|
@@ -245,13 +245,13 @@ See [AEM Connector → Adobe I/O Events](/docs/connectors/aem/#adobe-io-events).
 
 ### AEM Fetch Strategy
 
-Configured per source in the console, not by property: see [AEM Connector → Fetch Strategy](/docs/connectors/aem/#fetch-strategy).
+Configured per source in the console, not by property: see [AEM Connector → Fetch Strategy](/dumont/docs/connectors/aem/#fetch-strategy).
 
 ### Dependency Tracking
 
 | Property | Default | Description |
 |---|---|---|
-| `dumont.dependencies.enabled` | `false` | Persist `/content/*` references extracted from each indexed page and cascade re-index any dependent document on standalone updates. Currently populated only by the AEM connector, see [AEM Connector → Dependency Tracking](/docs/connectors/aem/#dependency-tracking-and-cascade-re-indexing) |
+| `dumont.dependencies.enabled` | `false` | Persist `/content/*` references extracted from each indexed page and cascade re-index any dependent document on standalone updates. Currently populated only by the AEM connector, see [AEM Connector → Dependency Tracking](/dumont/docs/connectors/aem/#dependency-tracking-and-cascade-re-indexing) |
 
 ### Logging
 
@@ -265,7 +265,7 @@ Configured per source in the console, not by property: see [AEM Connector → Fe
 Separate from the application log above. Every document Dumont processes leaves a row per status
 it passes through (prepared, sent to the queue, delivered to the search engine), each naming the
 document, the source that produced it and the run it belonged to. Queried through
-[the Logging API](/docs/rest-api/#logging-api).
+[the Logging API](/dumont/docs/rest-api/#logging-api).
 
 It is **off by default**: with no engine configured, the endpoint answers with an empty page and
 nothing is written. Pick MongoDB when you intend to query the log, and Redis when you mostly want

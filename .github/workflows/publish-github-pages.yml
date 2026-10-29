@@ -1,8 +1,8 @@
-# dumont.viglet.org, built and published by CI.
+# openviglet.github.io/dumont, built and published by CI.
 #
 # Two things go into the published tree:
 #   * the site itself, `dumont-site/` (Vite + React, prerendered to one static
-#     index.html per route plus a Markdown twin), at the root;
+#     index.html per route plus a Markdown twin), at the root of the artefact;
 #   * the marketplace, one folder per `*-plugin-sample/turing-export/app`, under
 #     /marketplace/<slug>/ with the importable zip and its README rendered as the
 #     folder's index.
@@ -12,9 +12,9 @@
 #
 # Published from this repository with the native Pages deploy, so it needs no
 # secret: the job's GITHUB_TOKEN carries `pages: write`. One-time repository
-# setting: Settings → Pages → Source = "GitHub Actions", custom domain
-# dumont.viglet.org. With an Actions deploy the domain lives in that setting; the
-# CNAME in the artefact is kept only so a local `dist/` says where it belongs.
+# setting: Settings → Pages → Source = "GitHub Actions", no custom domain. It is
+# a project page, so Pages serves the artefact under /dumont/ and the site is
+# built for that base (dumont-site/src/lib/site-links.ts).
 name: Publish GitHub Pages
 
 on:
@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build and publish dumont.viglet.org
+    name: Build and publish openviglet.github.io/dumont
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -7,6 +7,7 @@ import { SiteNav } from "@/components/sections/site-nav";
 import { SiteFooter } from "@/components/sections/site-footer";
 import { CallToAction } from "@/components/sections/cta";
 import { AEM_POINTS, LINKS } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 const DEPLOYMENTS = [
   {
@@ -74,7 +75,7 @@ export function AemPage() {
               variant="outline"
               className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white dark:bg-white/10"
             >
-              <a href="/marketplace/wknd/">See the WKND sample</a>
+              <a href={sitePath("/marketplace/wknd/")}>See the WKND sample</a>
             </Button>
           </div>
         </PageHero>
@@ -161,7 +162,7 @@ export function AemPage() {
                   reindex.
                 </p>
                 <a
-                  href="/trust/"
+                  href={sitePath("/trust/")}
                   className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
                 >
                   What the nightly audit checks <ArrowRight className="size-4" />

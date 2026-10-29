@@ -2,14 +2,14 @@
 
 > Open-source, self-hosted connectors that move content from Adobe Experience Manager, Edge Delivery Services, JDBC databases, file shares, web sites and paged JSON APIs into Turing ES, Solr or Elasticsearch, and keep the index true to the source: checksummed incremental runs, a nightly audit against the index, deletions that wait for a person, and per-field coverage and drift. Spring Boot 4 on Java 21, Apache 2.0.
 
-Every page of this site has a Markdown twin at `<path>.md` (the home page at `/index.md`); across its routes that is 0 KB of Markdown against 0 KB of HTML. `/manifest.json` lists them.
+Every page of this site has a Markdown twin at `<path>.md` (the home page at `/dumont/index.md`); across its routes that is 0 KB of Markdown against 0 KB of HTML. `/dumont/manifest.json` lists them.
 
 ## Pages
 
-- [Home](https://dumont.viglet.org/index.md): what Dumont does, the four ways an index drifts, connectors, trust, AI, samples, self-hosting
-- [Dumont for AEM](https://dumont.viglet.org/aem.md): on-prem, AMS, AEM as a Cloud Service and Edge Delivery Services; fragments; Adobe I/O Events, OSGi bundle, journal poller
-- [Connectors](https://dumont.viglet.org/connectors.md): every source and target, source inference, the plugin SPI
-- [An index you can trust](https://dumont.viglet.org/trust.md): safe finish, audit, orphan reports, coverage and drift, provenance, Prometheus metrics
+- [Home](https://openviglet.github.io/dumont/index.md): what Dumont does, the four ways an index drifts, connectors, trust, AI, samples, self-hosting
+- [Dumont for AEM](https://openviglet.github.io/dumont/aem.md): on-prem, AMS, AEM as a Cloud Service and Edge Delivery Services; fragments; Adobe I/O Events, OSGi bundle, journal poller
+- [Connectors](https://openviglet.github.io/dumont/connectors.md): every source and target, source inference, the plugin SPI
+- [An index you can trust](https://openviglet.github.io/dumont/trust.md): safe finish, audit, orphan reports, coverage and drift, provenance, Prometheus metrics
 
 ## Facts
 
@@ -21,16 +21,16 @@ Every page of this site has a Markdown twin at `<path>.md` (the home page at `/i
 
 ## Marketplace
 
-- [WKND (AEM)](https://dumont.viglet.org/marketplace/wknd/): Adobe's WKND reference site indexed from AEM
-- [WKND EDS (Edge Delivery Services)](https://dumont.viglet.org/marketplace/wknd-eds/): the same site read from aem.live
-- [Celestial Gallery (Files)](https://dumont.viglet.org/marketplace/celestial-gallery/): a folder of astrophotography
-- [Retro Arcade (Database)](https://dumont.viglet.org/marketplace/retro-arcade/): a SQL catalogue of arcade games
-- [Wikipedia Explorer (Web crawler)](https://dumont.viglet.org/marketplace/wikipedia/): Wikipedia crawled politely
+- [WKND (AEM)](https://openviglet.github.io/dumont/marketplace/wknd/): Adobe's WKND reference site indexed from AEM
+- [WKND EDS (Edge Delivery Services)](https://openviglet.github.io/dumont/marketplace/wknd-eds/): the same site read from aem.live
+- [Celestial Gallery (Files)](https://openviglet.github.io/dumont/marketplace/celestial-gallery/): a folder of astrophotography
+- [Retro Arcade (Database)](https://openviglet.github.io/dumont/marketplace/retro-arcade/): a SQL catalogue of arcade games
+- [Wikipedia Explorer (Web crawler)](https://openviglet.github.io/dumont/marketplace/wikipedia/): Wikipedia crawled politely
 
 ## Links
 
-- [Documentation](https://dumont.viglet.org/docs/): every page has a Markdown twin; [the index of them](https://dumont.viglet.org/docs/llms.txt)
-- [Installation guide](https://dumont.viglet.org/docs/installation-guide.md)
+- [Documentation](https://openviglet.github.io/dumont/docs/): every page has a Markdown twin; [the index of them](https://openviglet.github.io/dumont/docs/llms.txt)
+- [Installation guide](https://openviglet.github.io/dumont/docs/installation-guide.md)
 - [Source](https://github.com/openviglet/dumont)
 - [Viglet Turing ES](https://turing.viglet.org)
 - [Viglet Shio](https://shio.viglet.org)

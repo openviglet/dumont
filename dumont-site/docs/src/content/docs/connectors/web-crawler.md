@@ -142,8 +142,8 @@ If no locale extension is configured, the default locale from the source configu
 
 | Page | Description |
 |---|---|
-| [Connectors Overview](/docs/connectors/overview/) | All available connectors |
-| [Core Concepts](/docs/getting-started/core-concepts/) | Pipeline, strategies, and change detection |
+| [Connectors Overview](/dumont/docs/connectors/overview/) | All available connectors |
+| [Core Concepts](/dumont/docs/getting-started/core-concepts/) | Pipeline, strategies, and change detection |
 | [Turing: Integration](https://docs.viglet.org/turing/integration) | How Turing receives content from connectors |
 
 ---

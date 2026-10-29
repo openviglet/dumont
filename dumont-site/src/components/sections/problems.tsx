@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Container, SectionHeader } from "@/components/brand";
 import { PROBLEMS } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 /**
  * The argument of the site, in four pairs. A visitor who has run a search
@@ -36,7 +37,7 @@ export function Problems() {
 
         <div className="mt-8 text-center">
           <a
-            href="/trust/"
+            href={sitePath("/trust/")}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
           >
             Everything Dumont checks after a run <ArrowRight className="size-4" />

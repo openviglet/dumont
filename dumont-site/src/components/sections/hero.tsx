@@ -4,6 +4,7 @@ import { Container } from "@/components/brand";
 import { CopyCommand } from "@/components/copy-command";
 import { RunReport } from "@/components/run-report";
 import { DOCKER_RUN, LINKS } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 const PROMISES = [
   "A failed run never empties the index",
@@ -53,7 +54,7 @@ export function Hero() {
               variant="outline"
               className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white dark:bg-white/10"
             >
-              <a href="/aem/">Dumont for AEM</a>
+              <a href={sitePath("/aem/")}>Dumont for AEM</a>
             </Button>
             <Button
               asChild

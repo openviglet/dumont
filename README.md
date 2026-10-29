@@ -14,7 +14,7 @@ Solr or Elasticsearch. It runs on your own servers, is built with Java 21 and Sp
 and is extended through plugins.
 
 > 🌐 **Product page:** [viglet.org/dumont](https://www.viglet.org/dumont/) ·
-> 📚 **Documentation:** [dumont.viglet.org/docs](https://dumont.viglet.org/docs/) ·
+> 📚 **Documentation:** [openviglet.github.io/dumont/docs](https://openviglet.github.io/dumont/docs/) ·
 > 🔎 **Search on top:** [Viglet Turing](https://github.com/openviglet/turing)
 
 ## Who it is for

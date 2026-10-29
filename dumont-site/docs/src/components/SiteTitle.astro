@@ -1,13 +1,15 @@
 ---
 // The site's brand in place of Starlight's title: the cube mark and the wordmark link
 // to the landing page, and "Docs" to this area's index, so /docs reads as a section of
-// dumont.viglet.org. The mark is the site's own favicon, served at its root.
+// the site. The mark is the site's own favicon, served at its root.
+import { sitePath } from "../../../src/lib/site-links";
+
 const home = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <span class="site-brand">
-  <a href="/" class="site-brand" aria-label="Viglet Dumont home">
-    <img src="https://dumont.viglet.org/favicon.svg" alt="" width="28" height="28" />
+  <a href={sitePath("/")} class="site-brand" aria-label="Viglet Dumont home">
+    <img src={sitePath("/favicon.svg")} alt="" width="28" height="28" />
     <span>Viglet Dumont</span>
   </a>
   <a href={home} class="site-brand area">Docs</a>

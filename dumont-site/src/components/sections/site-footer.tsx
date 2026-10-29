@@ -1,5 +1,5 @@
 import { Container, Logo } from "@/components/brand";
-import { FOOTER_BLURB, FOOTER_COLUMNS, LINKS } from "@/lib/site-links";
+import { FOOTER_BLURB, FOOTER_COLUMNS, LINKS, sitePath } from "@/lib/site-links";
 import { reopenConsent } from "@/lib/analytics";
 
 export function SiteFooter() {
@@ -47,7 +47,7 @@ export function SiteFooter() {
             <a href={LINKS.docs} className="hover:text-[#e8f5f3]">
               Docs
             </a>
-            <a href="/llms.txt" className="font-mono hover:text-[#e8f5f3]">
+            <a href={sitePath("/llms.txt")} className="font-mono hover:text-[#e8f5f3]">
               llms.txt
             </a>
             <button type="button" onClick={reopenConsent} className="hover:text-[#e8f5f3]">

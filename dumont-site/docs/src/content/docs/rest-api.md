@@ -130,7 +130,7 @@ endpoints below are for scripting it.
 
 A report is per source and per site, and only the newest one stands: a later pass supersedes the
 report it replaces, and a pass that finds no orphan retracts it. A report also expires (see
-[`dumont.audit.index.orphanTtl`](/docs/configuration-reference/#content-audit)), because applying
+[`dumont.audit.index.orphanTtl`](/dumont/docs/configuration-reference/#content-audit)), because applying
 evidence that a reindex has since overtaken would delete live documents.
 
 To produce a report on demand rather than waiting for the cron, run the audit:
@@ -187,7 +187,7 @@ delivered to the search engine. Each row names the document, the source that pro
 transaction id of the run it belonged to, so you can ask what one source did or replay a single
 run end to end.
 
-It needs a store: see [Indexing Log configuration](/docs/configuration-reference/#indexing-log). With
+It needs a store: see [Indexing Log configuration](/dumont/docs/configuration-reference/#indexing-log). With
 no engine configured the endpoints below answer with an empty page.
 
 ### Is It On?
@@ -567,7 +567,7 @@ GET /api/v2/aem/source/{id}
 POST /api/v2/aem/source
 ```
 
-**Request body:** Full `DumAemSource` JSON (see [Extending the AEM Connector, Configuration JSON](/docs/extending-aem/#aem-configuration-json)).
+**Request body:** Full `DumAemSource` JSON (see [Extending the AEM Connector, Configuration JSON](/dumont/docs/extending-aem/#aem-configuration-json)).
 
 #### Update Source
 
@@ -605,6 +605,6 @@ Returns an empty AEM source model for reference.
 
 | Page | Description |
 |---|---|
-| [AEM Connector](/docs/connectors/aem/) | AEM indexing flow, event listeners, and manual triggering |
-| [Connectors Overview](/docs/connectors/overview/) | All connectors and how they're managed |
+| [AEM Connector](/dumont/docs/connectors/aem/) | AEM indexing flow, event listeners, and manual triggering |
+| [Connectors Overview](/dumont/docs/connectors/overview/) | All connectors and how they're managed |
 | [Turing: Integration](https://docs.viglet.org/turing/integration) | Turing admin console for managing connectors |

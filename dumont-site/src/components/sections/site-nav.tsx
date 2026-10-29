@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Container, Logo } from "@/components/brand";
-import { LINKS, NAV_AEM, NAV_GROUPS, NAV_LINKS } from "@/lib/site-links";
+import { LINKS, NAV_AEM, NAV_GROUPS, NAV_LINKS, sitePath } from "@/lib/site-links";
 import { cn } from "@/lib/utils";
 
 export function SiteNav() {
@@ -42,7 +42,7 @@ export function SiteNav() {
     >
       <Container className="flex h-16 items-center gap-4">
         <div className="flex shrink-0 items-center gap-2.5">
-          <a href="/" className="text-base" aria-label="Viglet Dumont home">
+          <a href={sitePath("/")} className="text-base" aria-label="Viglet Dumont home">
             <Logo className="hidden sm:inline-flex" />
             <Logo showWord={false} className="sm:hidden" />
           </a>
@@ -102,7 +102,7 @@ export function SiteNav() {
 
         <div className="ml-auto flex items-center gap-2">
           <Button asChild size="sm">
-            <a href="/#self-host">
+            <a href={sitePath("/#self-host")}>
               Get started
               <ArrowRight className="size-4" />
             </a>

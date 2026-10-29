@@ -15,12 +15,17 @@
  */
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { parse } from "node-html-parser";
 
-const SITE_ORIGIN = "https://dumont.viglet.org";
-const dist = resolve(dirname(fileURLToPath(import.meta.url)), "..", "dist");
+const site = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+// The published root, base included ("https://openviglet.github.io/dumont/"), from the
+// SSR bundle the prerender read it from. Paths below are site paths ("/docs/x"), so the
+// root loses its slash before one is appended.
+const { SITE_URL } = await import(pathToFileURL(join(site, "dist-ssr", "entry-server.js")).href);
+const SITE_ORIGIN = SITE_URL.replace(/\/$/, "");
+const dist = join(site, "dist");
 const built = join(dist, "docs");
 
 const HEADINGS = { h1: "#", h2: "##", h3: "###", h4: "####", h5: "#####", h6: "######" };

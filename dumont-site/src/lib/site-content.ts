@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { LINKS } from "./site-links";
+import { LINKS, sitePath } from "./site-links";
 import {
   Activity,
   BookOpen,
@@ -364,7 +364,7 @@ export const SUITE = [
     name: "Viglet Dumont",
     role: "Moves content into the index",
     body: "Connectors from AEM, EDS, databases, files, sites and JSON APIs, with audits and a safe finish.",
-    href: "/",
+    href: sitePath("/"),
   },
   {
     id: "turing",

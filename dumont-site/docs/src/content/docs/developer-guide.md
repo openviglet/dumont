@@ -87,8 +87,8 @@ Dumont provides extension points at multiple levels:
 
 | Extension | Guide | Maven Artifact |
 |---|---|---|
-| **AEM extensions**: attribute extractors, model.json processors (with fluent API), delta date logic | [Extending the AEM Connector](/docs/extending-aem/) | `com.viglet.dumont:aem-commons:2026.2.3` |
-| **Database extensions**: custom row transformations during SQL import | [Extending the Database Connector](/docs/extending-database/) | `com.viglet.dumont:db-commons:2026.2.3` |
+| **AEM extensions**: attribute extractors, model.json processors (with fluent API), delta date logic | [Extending the AEM Connector](/dumont/docs/extending-aem/) | `com.viglet.dumont:aem-commons:2026.2.3` |
+| **Database extensions**: custom row transformations during SQL import | [Extending the Database Connector](/dumont/docs/extending-database/) | `com.viglet.dumont:db-commons:2026.2.3` |
 
 ### Platform-Level Extensions
 
@@ -187,7 +187,7 @@ Register your plugin as a Spring `@Component` with `@ConditionalOnProperty(name 
 
 Strategies are evaluated in priority order for each Job Item:
 
-![Dumont, Processing Strategy Flow](/docs/img/diagrams/dumont-strategy-flow.svg)
+![Dumont, Processing Strategy Flow](/dumont/docs/img/diagrams/dumont-strategy-flow.svg)
 
 To add a custom strategy, implement the strategy interface and assign a priority between the existing ones.
 

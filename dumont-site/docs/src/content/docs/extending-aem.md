@@ -803,9 +803,9 @@ Extension classes are loaded via `DumCustomClassCache` using `Class.forName()`. 
 
 | Page | Description |
 |---|---|
-| [AEM Connector](/docs/connectors/aem/) | AEM connector features, configuration, and locale mapping |
-| [Installation Guide](/docs/installation-guide/) | How to deploy plugins with `-Dloader.path` |
-| [Developer Guide](/docs/developer-guide/) | Project structure, build, and contribution guide |
+| [AEM Connector](/dumont/docs/connectors/aem/) | AEM connector features, configuration, and locale mapping |
+| [Installation Guide](/dumont/docs/installation-guide/) | How to deploy plugins with `-Dloader.path` |
+| [Developer Guide](/dumont/docs/developer-guide/) | Project structure, build, and contribution guide |
 
 ---
 

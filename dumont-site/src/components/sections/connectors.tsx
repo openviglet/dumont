@@ -1,6 +1,7 @@
 import { ArrowRight, Check } from "lucide-react";
 import { Container, SectionHeader } from "@/components/brand";
 import { CONNECTORS } from "@/lib/site-content";
+import { sitePath } from "@/lib/site-links";
 
 /** The six source cards. `detailed` adds each connector's points, for /connectors/. */
 export function Connectors({ detailed = false }: { detailed?: boolean }) {
@@ -27,7 +28,7 @@ export function Connectors({ detailed = false }: { detailed?: boolean }) {
               <Card
                 key={c.id}
                 id={detailed ? c.id : undefined}
-                href={detailed ? undefined : `/connectors/#${c.id}`}
+                href={detailed ? undefined : sitePath(`/connectors/#${c.id}`)}
                 className="group flex scroll-mt-24 flex-col rounded-2xl border border-border bg-card p-6 transition-all hover:border-primary/40 hover:shadow-lg"
               >
                 <div className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#0f766e] to-[#0e7490] text-white shadow-sm">

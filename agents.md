@@ -27,7 +27,7 @@ Each file has one job — keep them in sync and never duplicate content:
 - **connector/connector-app**: Spring Boot 4 backend (Java 21), main application — runs on port 30130
 - **connector/connector-commons**: Connector API interfaces and common classes
 - **dumont-react**: React + TypeScript frontend (Vite, Tailwind CSS v4, shadcn/ui, Module Federation)
-- **dumont-site**: the public site, dumont.viglet.org (prerendered Vite + React, published by `publish-github-pages.yml` with the marketplace samples under `/marketplace/`). Copy lives in `src/lib/site-content.ts`, links in `src/lib/site-links.ts`; the end-user docs are its `/docs` area (`dumont-site/docs/`, Astro + Starlight). Every claim must be something the code does — see `dumont-site/README.md`
+- **dumont-site**: the public site, openviglet.github.io/dumont (a GitHub project page under the `/dumont/` base, declared once in `src/lib/site-links.ts`; prerendered Vite + React, published by `publish-github-pages.yml` with the marketplace samples under `/marketplace/`). Copy lives in `src/lib/site-content.ts`, links in `src/lib/site-links.ts`; the end-user docs are its `/docs` area (`dumont-site/docs/`, Astro + Starlight). Every claim must be something the code does — see `dumont-site/README.md`
 - **commons**: Shared utilities (caching, logging, file handling, exceptions)
 - **spring**: Spring utilities (UUID generation, persistence, JPA helpers)
 - **aem**: Adobe Experience Manager plugin + sample
@@ -47,7 +47,7 @@ Each file has one job — keep them in sync and never duplicate content:
 - Frontend routes: `dumont-react/src/DumontRoutes.tsx`
 - Frontend sidebar: `dumont-react/src/components/app-sidebar.tsx`
 - Sample configs: `scripts/config/dumont-connector.properties`, `aem/aem-plugin-sample/`
-- End-user docs: `dumont-site/docs/src/content/docs/` (dumont.viglet.org/docs; sidebar in `dumont-site/docs/astro.config.mjs`). A user-facing change writes its page there, in the same commit
+- End-user docs: `dumont-site/docs/src/content/docs/` (openviglet.github.io/dumont/docs; sidebar in `dumont-site/docs/astro.config.mjs`). A user-facing change writes its page there, in the same commit
 
 ### Build & Test Commands
 ```bash

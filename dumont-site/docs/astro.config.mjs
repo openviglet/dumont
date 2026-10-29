@@ -1,4 +1,4 @@
-// The documentation area, at https://dumont.viglet.org/docs.
+// The documentation area, at https://openviglet.github.io/dumont/docs.
 //
 // A second build beside the site rather than more routes in it: the site is a prerendered
 // landing page with no sidebar, no per-page contents and no search, and Starlight is those
@@ -10,6 +10,8 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import mermaid from "astro-mermaid";
 import starlightLinksValidator from "starlight-links-validator";
+
+import { BASE, SITE_ORIGIN, SITE_URL } from "../src/lib/site-links.ts";
 
 // The site's own consent rule (src/lib/analytics.ts): GA loads only once a visitor accepted
 // it, and the choice is the site's localStorage key — same origin, so a choice made on the
@@ -24,10 +26,10 @@ export default defineConfig({
   // content.config.ts included, to the real path; the two never match, the content config is
   // "not loaded", the docs collection is empty and the sidebar's first slug throws.
   root: realpathSync(fileURLToPath(new URL(".", import.meta.url))),
-  site: "https://dumont.viglet.org",
+  site: SITE_ORIGIN,
   // Astro rewrites the links it generates, not ones typed by hand: an absolute href written
-  // into a page must carry /docs itself or it 404s in production alone.
-  base: "/docs",
+  // into a page must carry /dumont/docs itself or it 404s in production alone.
+  base: `${BASE}docs`,
   // Inside the site's dist/, because the deploy copies that one directory. `vite build` empties
   // dist/, so this build runs *last* in dumont-site's `build` — earlier, the step after it
   // deletes the area and the deploy goes green without it.
@@ -46,7 +48,7 @@ export default defineConfig({
         "How to install, configure and run Dumont: the connectors, the indexing plugins and the REST API.",
       // The site's own icon, served at its root: Starlight's default would need a second copy
       // in a public/ here, which is a file that drifts from the one the site ships.
-      favicon: "https://dumont.viglet.org/favicon.svg",
+      favicon: `${SITE_URL}favicon.svg`,
       pagefind: true,
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/openviglet/dumont" }],
       // The site's own tokens first, then the mapping of Starlight's onto them: the area is

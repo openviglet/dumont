@@ -384,9 +384,9 @@ A complete production deployment with two connectors:
 
 | Page | Description |
 |---|---|
-| [Configuration Reference](/docs/configuration-reference/) | All application.yaml properties |
-| [Architecture](/docs/architecture/) | System components and data flow |
-| [Connectors Overview](/docs/connectors/overview/) | Available connectors and how to configure them |
+| [Configuration Reference](/dumont/docs/configuration-reference/) | All application.yaml properties |
+| [Architecture](/dumont/docs/architecture/) | System components and data flow |
+| [Connectors Overview](/dumont/docs/connectors/overview/) | Available connectors and how to configure them |
 
 ---
 

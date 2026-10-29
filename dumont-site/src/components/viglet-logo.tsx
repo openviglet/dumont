@@ -1,3 +1,5 @@
+import { sitePath } from "@/lib/site-links";
+
 /**
  * VigletLogo: product mark.
  *
@@ -33,7 +35,7 @@ export function VigletLogo({ identifier, size = 48, className }: VigletLogoProps
   if (!name) return null;
   return (
     <img
-      src={`/logos/${identifier}${size < 56 ? "-small" : ""}.svg`}
+      src={sitePath(`/logos/${identifier}${size < 56 ? "-small" : ""}.svg`)}
       alt={name}
       width={size}
       height={size}
