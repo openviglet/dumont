@@ -294,11 +294,10 @@ shopper has to know them all to ask.
 - Without GenAI, the mode is hidden rather than faked.
 - Prices and totals come from WooCommerce, never from the model.
 
-The block side landed against Turing T1159/T1167 (`copilot/kit`), checked with a mocked
-reply. Left: the live run. On the GHCR image (`3b726072ee`) every demo plan stages
-nothing: copilot free text queries `_text_`, which Lucene never indexes (Turing T1169).
-Seen in cursarei's profile analysis, which returns a staged path of real courses with
-the same id check.
+The block side landed against Turing T1159/T1167, checked with a mocked reply. Left: the
+live run. After T1169 the demo kit fills one need of five: Lucene does not stem (T1170),
+gap queries arrive as `product_cat: …` text (T1171), a post is staged as a product
+(T1172).
 
 **Gate.** Live-LLM specs on the demo seed: each curated plan returns only seeded,
 in-stock ids, covers its listed gaps, and the cart total equals WooCommerce's.
