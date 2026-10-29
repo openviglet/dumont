@@ -9,14 +9,14 @@
 
 ## Marketplace
 
-- [Marketplace Index](https://dumont.viglet.org/marketplace/marketplace.json): JSON catalog of available connector samples and templates
+- [Marketplace Index](https://openviglet.github.io/dumont/marketplace/marketplace.json): JSON catalog of available connector samples and templates
 
 ### Available Packages
 
-- [WKND (AEM)](https://dumont.viglet.org/marketplace/wknd/): Adobe Experience Manager connector sample using the WKND reference site
-- [Celestial Gallery (Assets)](https://dumont.viglet.org/marketplace/celestial-gallery/): Assets connector sample indexing astrophotography
-- [Retro Arcade (Database)](https://dumont.viglet.org/marketplace/retro-arcade/): JDBC connector sample indexing a retro arcade catalog
-- [Wikipedia (Web Crawler)](https://dumont.viglet.org/marketplace/wikipedia/): Web crawler connector sample ingesting Wikipedia articles
+- [WKND (AEM)](https://openviglet.github.io/dumont/marketplace/wknd/): Adobe Experience Manager connector sample using the WKND reference site
+- [Celestial Gallery (Assets)](https://openviglet.github.io/dumont/marketplace/celestial-gallery/): Assets connector sample indexing astrophotography
+- [Retro Arcade (Database)](https://openviglet.github.io/dumont/marketplace/retro-arcade/): JDBC connector sample indexing a retro arcade catalog
+- [Wikipedia (Web Crawler)](https://openviglet.github.io/dumont/marketplace/wikipedia/): Web crawler connector sample ingesting Wikipedia articles
 
 ## Connectors
 

@@ -330,9 +330,9 @@ const html = `<!doctype html>
     <section class="hero">
       <div class="hero-inner">
         <nav class="crumbs">
-          <a href="/">Dumont</a>
+          <a href="../../">Dumont</a>
           <span class="sep">/</span>
-          <a href="/#marketplace">Marketplace</a>
+          <a href="../../#marketplace">Marketplace</a>
           <span class="sep">/</span>
           <span>${escapeHtml(slug)}</span>
         </nav>

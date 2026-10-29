@@ -64,8 +64,8 @@ jobs:
       - name: Copy static pages assets
         run: cp -r .github/pages/* _site/
 
-      - name: Add CNAME
-        run: echo "dumont.viglet.org" > _site/CNAME
+      # No CNAME: the site is served at https://openviglet.github.io/dumont/, a
+      # project path, so links in .github/pages carry the /dumont/ prefix.
 
       - name: Deploy to openviglet/dumont-ce (github-pages branch)
         uses: peaceiris/actions-gh-pages@v4
