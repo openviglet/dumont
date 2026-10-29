@@ -67,10 +67,10 @@ jobs:
       # No CNAME: the site is served at https://openviglet.github.io/dumont/, a
       # project path, so links in .github/pages carry the /dumont/ prefix.
 
-      - name: Deploy to openviglet/dumont-ce (github-pages branch)
+      - name: Deploy to openviglet/dumont (github-pages branch)
         uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.GH_PKG_TOKEN }}
-          external_repository: openviglet/dumont-ce
+          external_repository: openviglet/dumont
           publish_branch: github-pages
           publish_dir: ./_site
