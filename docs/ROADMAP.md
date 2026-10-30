@@ -123,8 +123,6 @@ This track has no remaining pending tasks.
 
 ## Track T — Releases and links match what the site describes
 
-- 📋 **D254** (deps: —) **The README and the repository homepage point at www.viglet.org/dumont instead of the product site** — Readers land on a copy whose canonical names another page, and crawlers keep the old address alive. → §LI.3
-
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema

@@ -27,6 +27,10 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
+      # D254: no README points at Dumont's old homes (www.viglet.org/dumont, docs.viglet.org/dumont).
+      - name: README links
+        run: node scripts/check-readme-links.mjs
+
       # The frontend is a pnpm workspace. The Maven build installs its own Node and pnpm through
       # frontend-maven-plugin, so these two exist for the cache below and to keep a local
       # `pnpm` invocation on the same version as the one Maven downloads.

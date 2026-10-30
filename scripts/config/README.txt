@@ -54,5 +54,5 @@ at the same time, start them on different ports:
 
 Documentation
 -------------
-  https://viglet.org/dumont/
+  https://openviglet.github.io/dumont/
   https://github.com/openviglet/dumont

@@ -10,6 +10,7 @@
     "build:site": "pnpm --filter dumont-site run build",
     "dev:site": "pnpm --filter dumont-site run dev",
     "lint": "pnpm -r run lint",
+    "check:readme-links": "node scripts/check-readme-links.mjs",
     "clean": "rimraf \"**/node_modules\" \"**/dist\" \"**/build\""
   },
   "engines": {

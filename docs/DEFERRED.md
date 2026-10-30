@@ -39,3 +39,4 @@
 
 ## Track T — Releases and links match what the site describes
 
+- ⏸ **D254** (deps: —) **The README and the repository homepage point at www.viglet.org/dumont instead of the product site** — set aside (A public repo setting the owner changes.): GitHub's homepage field still names www.viglet.org/dumont; the owner sets it with gh repo edit. → §LI.3
