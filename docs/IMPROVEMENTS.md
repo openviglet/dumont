@@ -416,3 +416,67 @@ page; `npm run story:video` still builds a silent one without the narration file
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
 Starlight area of dumont-site served at dumont.viglet.org/docs, themed from the design
 system, and docs.viglet.org/dumont later redirects to it.
+
+## LI Releases and links match what the site describes
+
+Filed from the portfolio review of 2026-10-30 (visibility repo, estrategia/portfolio.md
+and produtos/dumont.md): the release, the names on the files and the links in the README
+trail the site and the 2026.3 line.
+
+### LI.1 A 2026.3 release, with the image published by the same run (D252)
+
+**Where it showed.** On 2026-10-30 the newest release on openviglet/dumont is v2026.2.15
+of 2026-04-28 (3 downloads on its jars) and `ghcr.io/openviglet/dumont-ce` was last
+pushed on 2026-07-08, while October brought structured sources, the onboarding wizard
+with simulation, the scheduled index audit and the new console, all described on the
+site and in the README (visibility repo, produtos/dumont.md).
+
+**Why it costs.** Whoever follows the site to the download installs a build six months
+older than what they just read about, and the first feature they look for is missing.
+
+**What is in the way.** `publish.yml` on 2026.3 still releases to `RELEASE_REPO:
+openviglet/dumont-ce`, a name GitHub no longer resolves, and uses `--generate-notes`.
+`publish-docker.yml` is a separate manual dispatch, so the image and the release can
+drift, which is what happened.
+
+**Design.** Point the release at openviglet/dumont, let the release job call the image
+publish with the same version (as Turing's T1113 did), write notes for people from the
+changelog rather than generated ones, and cut a 2026.3 release so it becomes Latest. The
+image name stays `dumont-ce` until a rename is decided for the whole suite.
+
+### LI.2 Release files and installer say Viglet Dumont (D253)
+
+**Where it showed.** v2026.2.15 ships `Dumont-DEP-x86_64.AppImage`;
+`scripts/package-dist.sh` names the AppDir and AppImage `Dumont-DEP`, the NSIS installer
+shows "Viglet Dumont DEP" as its name, product name, uninstall entry and Java prompts
+(`scripts/installer/dumont.nsi`), the desktop entry says the same
+(`scripts/installer/appimage/dumont.desktop`), and the root `pom.xml` is "Dumont DEP
+Master", which the startup banner repeats.
+
+**Why it costs.** On 2026-10-17 the suite dropped the acronyms from its names: "Viglet
+Dumont" first, "Dumont" after, with "Data Exchange Platform" written beside it where the
+kind of product matters. The README and the site follow it; the installer, the file a
+person downloads and the window title they see on first run do not (visibility repo,
+produtos/dumont.md, 2026-10-30).
+
+**Design.** Rename the packaging outputs to `Dumont-x86_64.AppImage`, change every
+display string above to "Viglet Dumont", and update the publish upload glob to match.
+Older releases keep their assets.
+
+### LI.3 The README points at openviglet.github.io/dumont (D254)
+
+**Where it showed.** The README's "Product page" line and its closing link point at
+www.viglet.org/dumont/, and the GitHub homepage field says the same. That page still
+answers 200, with a canonical to openviglet.github.io/dumont/, where the product site
+and its documentation moved on 2026-10-29.
+
+**Why it costs.** A reader who follows the README lands on a copy that names another
+page as the real one, and a crawler or AI assistant that trusts the repository keeps the
+old address alive. The suite decided that the product sites live on
+openviglet.github.io, with the documentation in the product's own repository (visibility
+repo, CLAUDE.md and produtos/dumont.md, 2026-10-30).
+
+**Design.** Point the README's product and documentation links and the homepage field at
+openviglet.github.io/dumont/, sweep the other READMEs in the repository (plugins,
+WordPress plugin `readme.txt` "Plugin URI") for the old host, and add a docs check that
+refuses www.viglet.org/dumont and docs.viglet.org/dumont in README files.

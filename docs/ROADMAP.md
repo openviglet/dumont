@@ -122,6 +122,12 @@ This track has no remaining pending tasks.
 - 🛠 **D242** (deps: Turing T1178) **On a product page the copilot and the Site assistant do not know which product the shopper is asking about** — A product page's "Ask us" is a question about that product, and an answer drawn from the whole catalog misses it. → §XLIX.92
 - 📋 **D243** (deps: Turing T1177) **Three curated demo searches no longer show their buying guide first, so the demo suite is red on the published Turing** — The curated order is what the site and tour promise, and a demo that contradicts its own copy cannot be shown. → §XLIX.93
 
+## Track T — Releases and links match what the site describes
+
+- 📋 **D252** (deps: —) **The newest release is v2026.2.15 of April and the image is from July, so what the site describes cannot be installed** — Whoever follows the site to the download gets a build six months older than the features they came for. → §LI.1
+- 📋 **D253** (deps: —) **The download, the installer and the startup banner still say Dumont DEP, the acronym the product name dropped** — The installer is the first screen a new user sees, and the old name reads as another or older product. → §LI.2
+- 📋 **D254** (deps: —) **The README and the repository homepage point at www.viglet.org/dumont instead of the product site** — Readers land on a copy whose canonical names another page, and crawlers keep the old address alive. → §LI.3
+
 ## Done when — D144
 
 - **A declared custom sort converges on the site with the fields** The jobs schema

@@ -36,3 +36,6 @@
 - ⏸ **D229** (deps: —) **Plugin Check reports 23 warnings on the package, none fixed or annotated, so the CI gate passes them silently** — set aside (Waits on the plugin name, a person's call (D225).): Left: the name's trademark warning, decided with D225, then failing CI on warnings too. → §XLIX.85
 - ⏸ **D196** (deps: —) **The demo store has no Turing anyone can reach, so a Playground link or a pitch cannot search or chat** — set aside (Needs a person to pick host, budget and owner.): Playground hosts WordPress for free; Turing must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - ⏸ **D246** (deps: D204 ✅) **The demo video is silent and published nowhere, so a prospect never meets it** — set aside (Needs a chosen voice and a published release.): A pitch video without a voice or a link is a file on one machine (follows D204). → §XLIX.96
+
+## Track T — Releases and links match what the site describes
+
