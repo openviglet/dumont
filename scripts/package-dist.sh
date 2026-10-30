@@ -3,7 +3,7 @@
 # package-dist.sh
 # Builds Dumont from source and creates distribution packages:
 #   - dumont-install.zip   (portable, works on Linux and Windows)
-#   - Dumont-DEP.AppImage  (Linux self-contained executable)
+#   - Dumont.AppImage  (Linux self-contained executable)
 #   - dumont-install.exe   (Windows installer, if makensis is available)
 #
 # Usage:  ./scripts/package-dist.sh [--skip-build]
@@ -129,7 +129,7 @@ echo "    $(du -h "$ZIP_OUTPUT" | cut -f1)"
 #  2. AppImage
 # =====================================================================
 echo "==> Preparing AppImage..."
-APPDIR="${PROJECT_ROOT}/target/Dumont-DEP.AppDir"
+APPDIR="${PROJECT_ROOT}/target/Dumont.AppDir"
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/lib/dumont"
 
@@ -154,7 +154,7 @@ if [ ! -f "$APPIMAGETOOL" ]; then
     chmod +x "$APPIMAGETOOL"
 fi
 
-APPIMAGE_OUTPUT="${PROJECT_ROOT}/target/Dumont-DEP-${ARCH}.AppImage"
+APPIMAGE_OUTPUT="${PROJECT_ROOT}/target/Dumont-${ARCH}.AppImage"
 ARCH="$ARCH" "$APPIMAGETOOL" "$APPDIR" "$APPIMAGE_OUTPUT"
 chmod +x "$APPIMAGE_OUTPUT"
 echo "    $(du -h "$APPIMAGE_OUTPUT" | cut -f1)"
@@ -174,4 +174,4 @@ fi
 # =====================================================================
 echo ""
 echo "==> All done. Outputs in target/:"
-ls -lh "${PROJECT_ROOT}/target/${DIST_NAME}".{zip,exe} "${PROJECT_ROOT}/target/"Dumont-DEP-*.AppImage 2>/dev/null || true
+ls -lh "${PROJECT_ROOT}/target/${DIST_NAME}".{zip,exe} "${PROJECT_ROOT}/target/"Dumont-*.AppImage 2>/dev/null || true

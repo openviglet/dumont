@@ -123,7 +123,6 @@ This track has no remaining pending tasks.
 
 ## Track T — Releases and links match what the site describes
 
-- 📋 **D253** (deps: —) **The download, the installer and the startup banner still say Dumont DEP, the acronym the product name dropped** — The installer is the first screen a new user sees, and the old name reads as another or older product. → §LI.2
 - 📋 **D254** (deps: —) **The README and the repository homepage point at www.viglet.org/dumont instead of the product site** — Readers land on a copy whose canonical names another page, and crawlers keep the old address alive. → §LI.3
 
 ## Done when — D144

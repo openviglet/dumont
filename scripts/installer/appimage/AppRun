@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # --------------------------------------------------------------------------
-# AppRun - Entry point for the Dumont DEP AppImage.
+# AppRun - Entry point for the Viglet Dumont AppImage.
 #
 # Usage:
-#   ./Dumont-DEP.AppImage                     (starts AEM connector)
-#   ./Dumont-DEP.AppImage --connector aem
-#   ./Dumont-DEP.AppImage --connector webcrawler
-#   ./Dumont-DEP.AppImage --connector db
-#   ./Dumont-DEP.AppImage --connector assets
-#   ./Dumont-DEP.AppImage --connector catalog
-#   ./Dumont-DEP.AppImage --connector eds
-#   ./Dumont-DEP.AppImage --connector jobs
+#   ./Dumont.AppImage                     (starts AEM connector)
+#   ./Dumont.AppImage --connector aem
+#   ./Dumont.AppImage --connector webcrawler
+#   ./Dumont.AppImage --connector db
+#   ./Dumont.AppImage --connector assets
+#   ./Dumont.AppImage --connector catalog
+#   ./Dumont.AppImage --connector eds
+#   ./Dumont.AppImage --connector jobs
 # --------------------------------------------------------------------------
 set -euo pipefail
 

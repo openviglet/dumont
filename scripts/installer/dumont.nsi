@@ -1,5 +1,5 @@
 ; --------------------------------------------------------------------------
-; Viglet Dumont DEP - NSIS Installer Script
+; Viglet Dumont - NSIS Installer Script
 ;
 ; Requires NSIS 3.x
 ; Built by: scripts/package-dist.bat or GitHub Actions
@@ -14,7 +14,7 @@
 ; --------------------------------------------------------------------------
 ; General
 ; --------------------------------------------------------------------------
-Name "Viglet Dumont DEP"
+Name "Viglet Dumont"
 !ifndef OUTDIR
   !define OUTDIR "..\..\target"
 !endif
@@ -28,10 +28,10 @@ SetCompressor /SOLID lzma
 ; Version info
 ; --------------------------------------------------------------------------
 VIProductVersion "2026.2.1.0"
-VIAddVersionKey "ProductName" "Viglet Dumont DEP"
+VIAddVersionKey "ProductName" "Viglet Dumont"
 VIAddVersionKey "FileVersion" "2026.2.1.0"
 VIAddVersionKey "CompanyName" "Viglet"
-VIAddVersionKey "FileDescription" "Viglet Dumont DEP Installer"
+VIAddVersionKey "FileDescription" "Viglet Dumont Installer"
 VIAddVersionKey "LegalCopyright" "Apache License 2.0"
 
 ; --------------------------------------------------------------------------
@@ -189,7 +189,7 @@ Function JavaPageCreate
 
     ; Description
     ${NSD_CreateLabel} 0 0 100% 36u \
-        "Dumont DEP requires Java 21 or later. Select the Java installation directory (the folder containing the 'bin' subdirectory with java.exe)."
+        "Viglet Dumont requires Java 21 or later. Select the Java installation directory (the folder containing the 'bin' subdirectory with java.exe)."
     Pop $0
 
     ; Label
@@ -239,7 +239,7 @@ Function JavaPageLeave
     ; Validate that java.exe exists
     ${IfNot} ${FileExists} "$JavaHome\bin\java.exe"
         MessageBox MB_YESNO|MB_ICONEXCLAMATION \
-            "java.exe was not found in:$\n$JavaHome\bin\$\n$\nDumont DEP requires Java 21+. Continue anyway?" \
+            "java.exe was not found in:$\n$JavaHome\bin\$\n$\nViglet Dumont requires Java 21+. Continue anyway?" \
             IDYES +2
         Abort
     ${EndIf}
@@ -477,7 +477,7 @@ Section "Dumont Core" SecCore
 
     ; Add/Remove Programs entry
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VigletDumont" \
-        "DisplayName" "Viglet Dumont DEP"
+        "DisplayName" "Viglet Dumont"
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VigletDumont" \
         "UninstallString" '"$INSTDIR\uninstall.exe"'
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\VigletDumont" \

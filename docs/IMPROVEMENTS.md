@@ -399,25 +399,6 @@ Filed from the portfolio review of 2026-10-30 (visibility repo, estrategia/portf
 and produtos/dumont.md): the release, the names on the files and the links in the README
 trail the site and the 2026.3 line.
 
-### LI.2 Release files and installer say Viglet Dumont (D253)
-
-**Where it showed.** v2026.2.15 ships `Dumont-DEP-x86_64.AppImage`;
-`scripts/package-dist.sh` names the AppDir and AppImage `Dumont-DEP`, the NSIS installer
-shows "Viglet Dumont DEP" as its name, product name, uninstall entry and Java prompts
-(`scripts/installer/dumont.nsi`), the desktop entry says the same
-(`scripts/installer/appimage/dumont.desktop`), and the root `pom.xml` is "Dumont DEP
-Master", which the startup banner repeats.
-
-**Why it costs.** On 2026-10-17 the suite dropped the acronyms from its names: "Viglet
-Dumont" first, "Dumont" after, with "Data Exchange Platform" written beside it where the
-kind of product matters. The README and the site follow it; the installer, the file a
-person downloads and the window title they see on first run do not (visibility repo,
-produtos/dumont.md, 2026-10-30).
-
-**Design.** Rename the packaging outputs to `Dumont-x86_64.AppImage`, change every
-display string above to "Viglet Dumont", and update the publish upload glob to match.
-Older releases keep their assets.
-
 ### LI.3 The README points at openviglet.github.io/dumont (D254)
 
 **Where it showed.** The README's "Product page" line and its closing link point at

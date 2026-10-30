@@ -1,7 +1,7 @@
-Viglet Dumont DEP - Distribution
+Viglet Dumont - Distribution
 =================================
 
-Dumont DEP is an open-source data extraction platform that connects content
+Viglet Dumont is an open-source data extraction platform that connects content
 sources to search engines like Viglet Turing ES, Apache Solr, and Elasticsearch.
 
 Prerequisites
