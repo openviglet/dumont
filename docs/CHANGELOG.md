@@ -695,3 +695,4 @@
 - **D197** — The site's /wordpress page tells the plugin as the story's chapters, each with a still from the recording; video embeds are D246 (design §XLIX.53 recorded in `dumont-site/src/pages/wordpress.tsx`).
 - **D237** — In Playground, the plugin and its connection check name the cause when Turing is unreachable instead of reporting Playground's own HTTP 400.
 - **D238** — VIGLET_DUMONT_DEMO runs the plugin keyless: nothing is queued or written to Turing, keyed screens hide, and the check confirms a PUBLIC site by search.
+- **D240** — Build my kit ticks only the first product the shop can sell in each stage, so the cart gets one item per need; colours are left to D245.

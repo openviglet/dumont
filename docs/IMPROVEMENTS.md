@@ -338,28 +338,6 @@ key (see the two tasks this depends on). WordPress costs nothing per visitor.
 **Gate.** A Playwright run opens the blueprint URL, waits for the store, searches a
 seeded product and gets a result from the hosted Turing.
 
-### XLIX.90 A kit stage offers alternatives, not a bundle (D240)
-
-**What happens.** The live kit run on the demo (D201) staged five needs with three
-products each, and for most stages the three were colours of one product: three
-Blencathra tents, three Pillar boots. The block ticks every in-stock product, so "Add
-the kit to cart" put 13 items in the cart for one person's weekend, $2,549.20 of it,
-three tents included.
-
-**What it should do.** A stage lists alternatives for one need, not a bundle:
-- Only the first sellable product of each stage starts ticked; the others stay listed and
-  unticked, so the shopper can swap one in. The cart button counts what is ticked, as now.
-- Products that differ only by colour (the same title before the `, <colour>` the seed
-  appends) collapse to one entry in a stage, so the alternatives are different products.
-  If Turing can return one document per product group, prefer that over collapsing in
-  the block.
-- Out-of-stock handling is unchanged: an unsellable first product passes the tick to the
-  next sellable one.
-
-**Gate.** woo/kit.spec.mjs with a fixed reply holding two colours and two products per
-stage: one ticked per stage, the colours shown once. demo-ai/kit.spec.mjs then asserts
-the cart holds one product per stage.
-
 ### XLIX.91 A staged id the shop does not sell leaves the kit (D241)
 
 **What happens.** Playing the demo's story (D203) live, Build my kit staged post 11, the
