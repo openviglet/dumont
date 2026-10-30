@@ -44,6 +44,12 @@ export const routes: PrerenderRoute[] = [
     description:
       "What Viglet Dumont checks after it sends documents: a failed run never de-indexes, a nightly audit against the index, orphan reports a person applies, per-field coverage and drift, field provenance, and run outcomes as Prometheus metrics.",
   },
+  {
+    path: "/wordpress",
+    title: "WordPress and WooCommerce search with Turing | Viglet Dumont",
+    description:
+      "A WordPress plugin that indexes posts, pages and WooCommerce products into Turing ES: search as you type, filters from a sentence, cited answers, a shopping copilot that builds a kit, product comparison and search insights, shown as one shopper's visit to a demo store.",
+  },
 ];
 
 /** The two tables agree, in both directions. Thrown at import time. */

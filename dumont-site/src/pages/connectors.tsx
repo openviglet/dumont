@@ -4,6 +4,7 @@ import { PageHero } from "@/components/sections/page-hero";
 import { SiteNav } from "@/components/sections/site-nav";
 import { SiteFooter } from "@/components/sections/site-footer";
 import { Connectors } from "@/components/sections/connectors";
+import { WordPressTile } from "@/components/sections/wordpress-tile";
 import { CallToAction } from "@/components/sections/cta";
 import { TARGETS } from "@/lib/site-content";
 
@@ -24,6 +25,7 @@ export function ConnectorsPage() {
         />
 
         <Connectors detailed />
+        <WordPressTile />
 
         <section className="border-y border-border bg-muted/40 py-20">
           <Container>

@@ -3,6 +3,7 @@ import { LandingPage } from "@/pages/landing";
 import { AemPage } from "@/pages/aem";
 import { ConnectorsPage } from "@/pages/connectors";
 import { TrustPage } from "@/pages/trust";
+import { WordPressPage } from "@/pages/wordpress";
 import { ConsentBanner } from "@/components/consent-banner";
 
 /**
@@ -19,6 +20,7 @@ export const ROUTES: Record<string, () => React.JSX.Element> = {
   "/aem": AemPage,
   "/connectors": ConnectorsPage,
   "/trust": TrustPage,
+  "/wordpress": WordPressPage,
 };
 
 /**

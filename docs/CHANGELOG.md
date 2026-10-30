@@ -692,3 +692,4 @@
 - **D236** — The e2e seed installs a test-stack mu-plugin that hides core's update nag, so the admin axe checks pass whatever core has released (design §XLIX.86 recorded in `wordpress/README.md`).
 - **D203** — Each How it works marker now carries its chapter in demo/story.md, so the tour walks the demo in the story's order; the pt_BR run is D244 (design §XLIX.59 recorded in `wordpress/demo/story.md`).
 - **D204** — npm run story:video also writes a 29-second cut, and both videos carry English and pt_BR caption tracks; voice and publishing are D246 (design §XLIX.60 recorded in `wordpress/bin/story-video.mjs`).
+- **D197** — The site's /wordpress page tells the plugin as the story's chapters, each with a still from the recording; video embeds are D246 (design §XLIX.53 recorded in `dumont-site/src/pages/wordpress.tsx`).

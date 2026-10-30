@@ -376,3 +376,12 @@ in the Dumont repository, has a Docker stack for trying it end to end. `run-dock
 starts WordPress, MariaDB, a WP-Cron runner and a local Turing, creates the SN site, gives
 the plugin an API key, and builds the admin screens. WordPress is then at
 `http://localhost:8080` and Turing at `http://localhost:2700`.
+
+`run-docker.cmd demo` also starts the demo store, Tarnfell: a WooCommerce shop with its own
+catalog, buying guides and SN site at `http://localhost:38082`. Its `/showcase/` page holds
+every Turing block, and `?tour=1` on any of its pages marks each feature with its chapter in
+the [shopper's story](https://github.com/openviglet/dumont/blob/2026.3/wordpress/demo/story.md)
+that the [WordPress page](https://openviglet.github.io/dumont/wordpress/) walks through. Set `OPENAI_API_KEY` before
+starting it to turn on the answers, the catalog copilot and the Site assistant; without it
+they stay hidden. `DEMO_LOCALE=pt_BR` seeds the store in Portuguese. The demo is started by
+the Windows launcher only for now: `run-docker.sh` has no `demo` command yet.

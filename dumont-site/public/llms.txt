@@ -8,6 +8,7 @@ Every page of this site has a Markdown twin at `<path>.md` (the home page at `/d
 
 - [Home](https://openviglet.github.io/dumont/index.md): what Dumont does, the four ways an index drifts, connectors, trust, AI, samples, self-hosting
 - [Dumont for AEM](https://openviglet.github.io/dumont/aem.md): on-prem, AMS, AEM as a Cloud Service and Edge Delivery Services; fragments; Adobe I/O Events, OSGi bundle, journal poller
+- [Dumont for WordPress and WooCommerce](https://openviglet.github.io/dumont/wordpress.md): the plugin, told as one shopper's visit to the demo store: popular searches, filters from a sentence, cited answers, comparison, a shopping copilot that builds a kit, checkout, and search insights
 - [Connectors](https://openviglet.github.io/dumont/connectors.md): every source and target, source inference, the plugin SPI
 - [An index you can trust](https://openviglet.github.io/dumont/trust.md): safe finish, audit, orphan reports, coverage and drift, provenance, Prometheus metrics
 

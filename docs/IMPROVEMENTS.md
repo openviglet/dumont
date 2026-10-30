@@ -252,30 +252,6 @@ Turing it can reach. None is hosted.
 **Why an idea.** It is the one task in the series that costs money every day and has an
 outside attack surface, so its host, budget and owner are decided before it is designed.
 
-### XLIX.53 A WordPress and WooCommerce page on the site (D197)
-
-**What happens.** `dumont-site` has a landing page, a connectors page and an AEM page
-(`src/pages/aem.tsx`). The WordPress plugin, which now carries search, facets, answers,
-chat, a shopping copilot and insights, has no page, and nothing links to a demo.
-
-**What it should do.**
-- `src/pages/wordpress.tsx`, routed and prerendered like `aem.tsx`, with its copy in
-  `site-content.ts`: a hero naming the outcome for a store owner with the
-  30-second cut of the demo video (D204), then the page told as the story's chapters
-  (D203): one section per chapter, its still or clip taken from the story recording, the
-  generative ones (answer, kit, chat) shown with their sources, ending on the
-  native-versus-Turing compare and the full video.
-- Calls to action: try the live demo store (once the hosted demo exists; until then the
-  video and the Docker one-liner), install the plugin, read the docs page.
-- English and pt_BR, matching how the rest of the site handles languages.
-- A WordPress tile on the landing and connectors pages pointing at it.
-- The `dumont-site` rule binds: every claim is something the story spec shows
-  working. A capability it cannot film is not on the page.
-
-**Gate.** The site's build and prerender pass, the page's images come from the story
-recording rather than hand-made mock-ups, and a link check covers the new calls to
-action.
-
 ### XLIX.81 A readme the plugin directory accepts (D225)
 
 The plugin ships today as a zip on a GitHub release, and `src/readme.txt` is written for
@@ -564,6 +540,45 @@ a published release to point at.
 
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
+
+### XLIX.97 Render the answer's Markdown, safely (D247)
+
+**What happens.** On the demo store, `light rain jacket under $400` gets an answer panel
+whose text reads `1. **Catbells light rain jacket (Ember)**` then `- Price: $189` on its
+own lines: the model answers in Markdown and the panel prints it as typed. Seen in the
+D203 story recording (chapter 2's still on the site's WordPress page). The panel binds
+the answer with `data-wp-text="state.answer"` in `src/blocks/search/parts/answer.php`,
+which is plain text by design (no HTML from the model reaches the page).
+
+**What it should do.**
+- Render a small, safe Markdown subset: paragraphs, line breaks, ordered and unordered
+  lists, bold and italic. Built as DOM nodes from the parsed text (no `innerHTML` of model
+  output), so nothing the model writes can inject markup or script.
+- Links and images in the answer stay text; the sources list below is the panel's links.
+- The same renderer serves the Site assistant's messages and the copilot's answer, which
+  bind plain text the same way, so the three never disagree.
+
+**Gate.** A site spec with a replayed answer holding a list and bold text: the panel
+shows a list element and strong text, and a `<script>` in the answer arrives as text.
+
+### XLIX.98 The demo store from the shell launcher (D248)
+
+**What happens.** `wordpress/run-docker.cmd demo` starts the demo store (Tarnfell)
+beside the test stack: its own WordPress on port 38082, the catalog seed, the SN site
+`Demo`, a reindex. `wordpress/bin/run-docker.sh`, the launcher for Linux and macOS, has
+no `demo` command, so the site's WordPress page (D197) and the plugin's docs can only
+tell a reader on those systems to use Windows. Found while writing D197's "Run the demo
+store" link.
+
+**What it should do.** `bin/run-docker.sh demo` (and `demo reset`) does what the batch
+file's `:demo` label does, step for step: the same compose profile, the same environment
+variables and defaults (`WP_DEMO_PORT`, `SN_DEMO_SITE`, `DEMO_LOCALE`,
+`OPENAI_API_KEY`), the same Turing provisioning through `bin/turing-setup.ps1` replaced
+by its shell equivalent or `pwsh` when present, the same seed and reindex. Then the docs
+page's "Try it locally" drops its Windows-only note.
+
+**Gate.** On Linux with Docker, `bin/run-docker.sh demo` ends with the storefront
+answering on 38082 and `npm run test:e2e:demo` passing against it.
 
 ## L The documentation area
 

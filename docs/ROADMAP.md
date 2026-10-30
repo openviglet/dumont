@@ -117,7 +117,6 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D197** (deps: D203 ✅, D204 ✅) **The site has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D237** (deps: —) **Inside WordPress Playground the plugin cannot reach Turing: PHP requests go through the browser and get no CORS answer** — A Playground demo is only possible if the plugin can talk to a hosted Turing from playground.wordpress.net. → §XLIX.87
 - 📋 **D238** (deps: —) **A Turing key in a Playground's wp-admin is readable by its visitor, and keys are unscoped, so one can wreck the demo** — A public demo has to hold no key: a PUBLIC SN site already searches and chats anonymously, and every write needs a key. → §XLIX.88
@@ -128,6 +127,8 @@ This track has no remaining pending tasks.
 - 📋 **D243** (deps: Turing T1177) **Three curated demo searches no longer show their buying guide first, so the demo suite is red on the published Turing** — The curated order is what the site and tour promise, and a demo that contradicts its own copy cannot be shown. → §XLIX.93
 - 📋 **D244** (deps: D203 ✅) **The demo's story plays only in English, so a pt_BR demo's journey from need to paid cart is never checked** — The demo speaks pt_BR to Brazilian prospects, and story.md already promises them that journey (follows D203). → §XLIX.94
 - 📋 **D245** (deps: —) **The demo seeds each colour as its own product, so search, compare and the kit show one jacket three times** — A real shop sells one jacket in four colours, and a demo that compares a jacket with itself undersells every feature it shows. → §XLIX.95
+- 📋 **D247** (deps: —) **The search answer panel prints the model's Markdown raw, asterisks and dashes, instead of a list** — An answer that reads as markup looks broken, and it is the first thing a shopper sees above the results. → §XLIX.97
+- 📋 **D248** (deps: —) **On Linux and macOS the demo store cannot be started: run-docker.sh has no demo command** — The site and the docs send prospects to the demo, and most developers who would run it are not on Windows. → §XLIX.98
 
 ## Done when — D144
 

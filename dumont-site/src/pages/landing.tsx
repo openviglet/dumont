@@ -4,6 +4,7 @@ import { Problems } from "@/components/sections/problems";
 import { Flow } from "@/components/sections/flow";
 import { Connectors } from "@/components/sections/connectors";
 import { AemBand } from "@/components/sections/aem-band";
+import { WordPressTile } from "@/components/sections/wordpress-tile";
 import { Trust } from "@/components/sections/trust";
 import { Ai } from "@/components/sections/ai";
 import { Marketplace } from "@/components/sections/marketplace";
@@ -34,6 +35,7 @@ export function LandingPage() {
         <Problems />
         <Flow />
         <Connectors />
+        <WordPressTile />
         <AemBand />
         <Trust />
         <Ai />

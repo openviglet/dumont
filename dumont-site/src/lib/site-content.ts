@@ -288,6 +288,80 @@ export const AEM_POINTS: { icon: LucideIcon; title: string; body: string }[] = [
   },
 ];
 
+/* ── WordPress and WooCommerce ───────────────────────────────────────── */
+
+/**
+ * The /wordpress page, told as the demo store's story (wordpress/demo/story.md): each
+ * chapter is one step `npm run e2e:story` plays live against Turing, and its picture is a
+ * still from that recording (wordpress/bin/story-video.mjs copies them into
+ * public/wordpress/). A capability the story does not play is not a chapter here.
+ */
+export interface StoryChapter {
+  title: string;
+  feature: string;
+  body: string;
+  alt: string;
+}
+
+export const WORDPRESS_STORY: StoryChapter[] = [
+  {
+    title: "Arrives",
+    feature: "Popular searches",
+    body:
+      "Before she types, the week's searches that found something sit under the box as chips, so the catalog shows at a glance. A search that found nothing never becomes a chip.",
+    alt: "The demo store's search page with popular-search chips under the box.",
+  },
+  {
+    title: "Says what she needs",
+    feature: "A sentence becomes filters",
+    body:
+      "“light rain jacket under $400” sets the price filter, says back Understood: Price ≤ 400, and keeps the words that are left in the box. A misspelt name is offered its correction.",
+    alt: "Search results for a sentence, with the price filter it set shown as understood.",
+  },
+  {
+    title: "Asks",
+    feature: "Answers with their sources",
+    body:
+      "The Site assistant answers from the shop's own guides and products and lists what it read. Asked what size of backpack a night in a hut needs, it cites the backpack guide.",
+    alt: "The Site assistant's answer to a question, with the guide it cites below it.",
+  },
+  {
+    title: "Compares",
+    feature: "Side by side, with a summary",
+    body:
+      "Compare, ticked on the search results, opens the products together: the rows that differ are marked, and a summary written by AI from the table sits above it, labelled as such.",
+    alt: "Three jackets compared in a table, with an AI summary of the table above it.",
+  },
+  {
+    title: "Builds the kit",
+    feature: "A plan becomes a kit",
+    body:
+      "She describes the trip, and the catalog copilot stages products by need, each priced and stocked by WooCommerce, with the journal guides that cover the plan. One click puts the kit in the cart.",
+    alt: "A kit staged by need for a two-day trip, each product with its price.",
+  },
+  {
+    title: "Checks one item",
+    feature: "Related, by meaning",
+    body:
+      "On a product's page, Related shows the products and guides most like it, and the copilot under the product answers her question with the products it cites.",
+    alt: "A product page with Related products and guides and the catalog copilot.",
+  },
+  {
+    title: "Buys",
+    feature: "WooCommerce's own checkout",
+    body:
+      "The cart and checkout are the store's own: prices and the total come from WooCommerce, never from the model. The demo pays with an offline method, so an order is placed and nothing is charged.",
+    alt: "The WooCommerce checkout with the kit in the order summary.",
+  },
+  {
+    title: "Backstage",
+    feature: "What the owner sees",
+    body:
+      "WordPress's own search finds nothing for “raincoat”; Turing finds the rain jackets through a synonym. Search insights list what was searched and what found nothing, and one click turns a miss into a synonym.",
+    alt: "Search tuning in wp-admin with the synonym just added from Search insights.",
+  },
+];
+
 /* ── AI, carefully ───────────────────────────────────────────────────── */
 
 export const AI_POINTS: { title: string; body: string }[] = [
