@@ -123,6 +123,9 @@ This track has no remaining pending tasks.
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - ⏳ **D201** (deps: D173 ✅, D198 ✅, Turing T1170–T1172: plural misses, kit retrieval) **A shopper planning a trip cannot ask for everything it needs; the copilot answers one product at a time** — The live run on the demo: Turing's kit fills one need of five there. → §XLIX.57
 - 📋 **D203** (deps: D195 ✅, D198 ✅, D199 ✅, D200 ✅, D201 ⏳, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells: one shopper, each feature the next step. → §XLIX.59
+- 📋 **D237** (deps: —) **Inside WordPress Playground the plugin cannot reach Turing: PHP requests go through the browser and get no CORS answer** — A Playground demo is only possible if the plugin can talk to a hosted Turing from playground.wordpress.net. → §XLIX.87
+- 📋 **D238** (deps: —) **Every Playground visitor would index into the same demo Turing, so one visitor changes what all the others search** — A public demo needs a plugin mode and a Turing key that can search and chat but never index. → §XLIX.88
+- 📋 **D239** (deps: D237, D238) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — A Playground blueprint boots the store in the browser with nothing to install, resets on reload and leaves D196 only Turing to host. → §XLIX.89
 
 ## Done when — D144
 

@@ -411,6 +411,70 @@ keep the two exclusions if the lists stay short and say so; keep
 installed from the directory loads no language pack. Then make the CI job fail on
 warnings too.
 
+### XLIX.87 Reaching Turing from WordPress Playground (D237)
+
+**What happens.** The plugin reaches Turing from PHP (`wp_remote_*` in
+`class-viglet-dumont-api-client.php`). In WordPress Playground, PHP runs in the browser
+and its outbound HTTP goes through the browser's `fetch`, so every call to Turing is a
+cross-origin request from `playground.wordpress.net`. Turing does not answer it with
+CORS headers, and the plugin reports Turing as unreachable.
+
+**What it should do.**
+- The blueprint turns networking on (`features.networking`), without which Playground
+  makes no outbound request at all.
+- The hosted demo Turing allows the Playground origin, and only for the demo site's
+  endpoints (search, autocomplete, chat), with preflight answered. If Turing has no
+  per-site CORS setting, that is a Turing task, filed there, not a proxy written here.
+- The plugin's diagnostics name the cause when a request fails on CORS inside Playground,
+  instead of "Turing unreachable".
+
+**Gate.** From the blueprint, the diagnostics screen shows Turing reachable and a search
+returns seeded products; with the origin removed from the allow-list, it names CORS.
+
+### XLIX.88 A read-only demo mode (D238)
+
+**What happens.** On a normal install the plugin indexes on activation and on every
+save. In WordPress Playground every visitor gets their own WordPress, but they would all
+share the one hosted demo Turing. A visitor who edits a product, or a vandal who writes
+a thousand, changes what every other visitor searches.
+
+**What it should do.**
+- A demo mode, set by the blueprint, in which the plugin searches, autocompletes and chats
+  against a pre-indexed demo site and never indexes: activation, saves and the queue are
+  no-ops, and the indexing screens say why.
+- The demo Turing key is read-only on the server side as well, so the protection does not
+  rest on a plugin setting a visitor can turn off in their own wp-admin.
+- The demo index is built once from the seed, by the same workflow that deploys the demo
+  Turing, and rebuilt when the seed changes.
+- The LLM cap and per-IP limits of D196 apply to this key.
+
+**Gate.** With demo mode on, saving a product queues nothing; with the read-only key, an
+indexing call made by hand is refused by Turing.
+
+### XLIX.89 The demo store in WordPress Playground (D239)
+
+**What happens.** Trying the plugin means Docker (`run-docker.cmd demo`) or a WordPress
+host of one's own. D196 plans a public hosted store, but it has to host WordPress and
+WooCommerce, reset them, and defend wp-admin from strangers.
+
+**What it should do.**
+- A WordPress Playground blueprint (`wordpress/demo/playground/blueprint.json`) that boots
+  WordPress in the visitor's browser with WooCommerce, the plugin, the demo theme and the
+  seed, already configured against a hosted demo Turing, and lands on the store's front page.
+- A link to it (`playground.wordpress.net/?blueprint-url=...`) on the site's WordPress page
+  (D197), in the README and in posts.
+- The tour fits one visit: Playground starts from the blueprint on every load, so a reload is
+  the reset D196 wanted, and nothing a visitor does survives. The guided layer (D203) is on by
+  default.
+- wp-admin is the visitor's own, so the backstage chapter (settings, the indexing queue)
+  is shown rather than closed.
+
+**What this leaves to D196.** Only Turing has to be hosted, behind the read-only demo
+key (see the two tasks this depends on). WordPress costs nothing per visitor.
+
+**Gate.** A Playwright run opens the blueprint URL, waits for the store, searches a
+seeded product and gets a result from the hosted Turing.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
