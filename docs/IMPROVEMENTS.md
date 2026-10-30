@@ -409,25 +409,6 @@ a published release to point at.
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
 
-### XLIX.98 The demo store from the shell launcher (D248)
-
-**What happens.** `wordpress/run-docker.cmd demo` starts the demo store (Tarnfell)
-beside the test stack: its own WordPress on port 38082, the catalog seed, the SN site
-`Demo`, a reindex. `wordpress/bin/run-docker.sh`, the launcher for Linux and macOS, has
-no `demo` command, so the site's WordPress page (D197) and the plugin's docs can only
-tell a reader on those systems to use Windows. Found while writing D197's "Run the demo
-store" link.
-
-**What it should do.** `bin/run-docker.sh demo` (and `demo reset`) does what the batch
-file's `:demo` label does, step for step: the same compose profile, the same environment
-variables and defaults (`WP_DEMO_PORT`, `SN_DEMO_SITE`, `DEMO_LOCALE`,
-`OPENAI_API_KEY`), the same Turing provisioning through `bin/turing-setup.ps1` replaced
-by its shell equivalent or `pwsh` when present, the same seed and reindex. Then the docs
-page's "Try it locally" drops its Windows-only note.
-
-**Gate.** On Linux with Docker, `bin/run-docker.sh demo` ends with the storefront
-answering on 38082 and `npm run test:e2e:demo` passing against it.
-
 ### XLIX.99 Plain text for the compare summary's data (D249)
 
 **What happens.** On the demo store (D245's re-recorded story, chapter 4), the AI

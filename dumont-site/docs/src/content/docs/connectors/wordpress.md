@@ -407,5 +407,6 @@ every Turing block, and `?tour=1` on any of its pages marks each feature with it
 the [shopper's story](https://github.com/openviglet/dumont/blob/2026.3/wordpress/demo/story.md)
 that the [WordPress page](https://openviglet.github.io/dumont/wordpress/) walks through. Set `OPENAI_API_KEY` before
 starting it to turn on the answers, the catalog copilot and the Site assistant; without it
-they stay hidden. `DEMO_LOCALE=pt_BR` seeds the store in Portuguese. The demo is started by
-the Windows launcher only for now: `run-docker.sh` has no `demo` command yet.
+they stay hidden. `DEMO_LOCALE=pt_BR` seeds the store in Portuguese. On Linux and macOS,
+`sh bin/run-docker.sh demo` does the same (it provisions Turing through PowerShell, `pwsh`),
+and `demo reset` deletes the demo's WordPress and database.

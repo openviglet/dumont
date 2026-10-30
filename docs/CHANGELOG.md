@@ -702,3 +702,4 @@
 - **D245** — The demo sells one product per design with colours as variations, and the plugin adds a variable product's first sellable variation to the cart.
 - **D251** — npm run lint:js ignores tests/e2e/artifacts, so Playwright's reports no longer crash it, and it runs in seconds again.
 - **D247** — The search answer, the Site assistant and the copilot render the model's Markdown lists and emphasis from text nodes, so its markup never becomes HTML.
+- **D248** — sh bin/run-docker.sh demo and demo reset build the demo store as the batch file does; checked from scratch under Git Bash with a pwsh shim, not on Linux.
