@@ -386,25 +386,6 @@ demo's contract.
 
 **Gate.** `npm run test:e2e:demo` green on the published image.
 
-### XLIX.94 The story plays in pt_BR too (D244)
-
-**What happens.** `npm run e2e:story` (`tests/e2e/story/shopper.story.mjs`) plays
-`demo/story.md` in English and skips, with the reason, on a demo started with
-`DEMO_LOCALE=pt_BR`. `story.md` already carries each chapter's Portuguese query, but
-nothing checks that the Portuguese journey works end to end.
-
-**What it should do.** The spec reads its words from a per-locale table, as
-`tests/e2e/demo/tour.spec.mjs` does: the queries from `story.md`'s pt_BR lines, and the
-labels a pt_BR demo shows (popular searches, "Entendido:", the compare bar, "Planejar um
-kit", the checkout fields and the offline payment's translated title, the insights
-cards), read off a pt_BR stack rather than guessed. Chapter 3 asks the pt_BR curated
-prompt in `ai-prompts.json`, which already names its cited guide. The synonym chapter
-uses a Portuguese word the catalog does not hold.
-
-**Gate.** `run-docker.cmd demo reset`, then `DEMO_LOCALE=pt_BR run-docker.cmd demo` with
-`OPENAI_API_KEY`, and `npm run e2e:story` green; English still green after switching
-back.
-
 ### XLIX.95 One product per design, its colours as variations (D245)
 
 **What happens.** `wordpress/demo/seed/catalog.php` creates one simple product per

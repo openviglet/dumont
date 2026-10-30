@@ -121,7 +121,6 @@ This track has no remaining pending tasks.
 - 📋 **D239** (deps: D237 ✅, D238 ✅, D196 ⏸) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — A Playground blueprint boots the store in the browser with nothing to install, resets on reload and leaves D196 only Turing to host. → §XLIX.89
 - 🛠 **D242** (deps: Turing T1178) **On a product page the copilot and the Site assistant do not know which product the shopper is asking about** — A product page's "Ask us" is a question about that product, and an answer drawn from the whole catalog misses it. → §XLIX.92
 - 📋 **D243** (deps: Turing T1177) **Three curated demo searches no longer show their buying guide first, so the demo suite is red on the published Turing** — The curated order is what the site and tour promise, and a demo that contradicts its own copy cannot be shown. → §XLIX.93
-- 📋 **D244** (deps: D203 ✅) **The demo's story plays only in English, so a pt_BR demo's journey from need to paid cart is never checked** — The demo speaks pt_BR to Brazilian prospects, and story.md already promises them that journey (follows D203). → §XLIX.94
 - 📋 **D245** (deps: —) **The demo seeds each colour as its own product, so search, compare and the kit show one jacket three times** — A real shop sells one jacket in four colours, and a demo that compares a jacket with itself undersells every feature it shows. → §XLIX.95
 - 📋 **D247** (deps: —) **The search answer panel prints the model's Markdown raw, asterisks and dashes, instead of a list** — An answer that reads as markup looks broken, and it is the first thing a shopper sees above the results. → §XLIX.97
 - 📋 **D248** (deps: —) **On Linux and macOS the demo store cannot be started: run-docker.sh has no demo command** — The site and the docs send prospects to the demo, and most developers who would run it are not on Windows. → §XLIX.98
@@ -159,11 +158,6 @@ This track has no remaining pending tasks.
 - **Plugin Check reports no warning, and the CI job fails on one** wp plugin check
   viglet-dumont lists nothing once the plugin and readme titles pass the trademark rule;
   the plugin-check job then treats warnings as failures.
-
-## Done when — D244
-
-- **The story plays green in pt_BR as well as English** npm run e2e:story passes on a
-  demo started with DEMO_LOCALE=pt_BR, using story.md's Portuguese queries.
 
 ## Done when — D246
 
