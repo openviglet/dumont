@@ -140,6 +140,17 @@ A value set either way wins over the settings page, shows there read-only, and i
 
 `wp dumont status` prints where each value came from.
 
+### Demo mode
+
+`VIGLET_DUMONT_DEMO=1`, as a constant or an environment variable, is for a site whose
+wp-admin belongs to whoever opens it, such as a demo in WordPress Playground. The site then
+holds no API key and never writes to Turing: saving a post queues nothing, the indexing
+buttons say demo mode is on, and **Search tuning** and **Search insights** are hidden,
+because their Turing endpoints need a key. Search, chat, the copilot and answers keep working
+from the visitors' browsers against a **PUBLIC** SN site whose index is built elsewhere, and
+the connection check confirms that site with a search sent without a key. It cannot be
+turned off from wp-admin.
+
 ---
 
 ## What gets indexed

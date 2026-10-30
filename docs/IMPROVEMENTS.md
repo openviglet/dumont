@@ -313,29 +313,6 @@ keep the two exclusions if the lists stay short and say so; keep
 installed from the directory loads no language pack. Then make the CI job fail on
 warnings too.
 
-### XLIX.88 A keyless demo mode (D238)
-
-**What happens.** On a normal install the plugin indexes on activation and on every
-save, with a Turing key stored in its settings. In WordPress Playground that wp-admin
-belongs to the visitor, so any key the blueprint stores is readable by every visitor.
-Turing keys carry no scope (`TurDevToken` has a partition, never a permission), so the
-key would let a stranger rewrite or delete the demo site for everyone.
-
-**What it should do.**
-- No key at all. The demo SN site stays in PUBLIC mode, which already serves search,
-  autocomplete, chat, copilot and answer anonymously (`TurSNSiteApiKeyGateFilter`),
-  while every write needs a key the browser never holds. The plugin already sends no
-  `Key` header when none is set.
-- A demo mode, set by the blueprint as a wp-config constant like the other locked
-  settings: activation, saves and the queue are no-ops, the indexing screens say why,
-  diagnostics stop asking for a key, and features whose endpoints need one are hidden.
-- The demo index is built once from the seed, by the same workflow that deploys the demo
-  Turing (D196), and rebuilt when the seed changes.
-
-**Gate.** With demo mode on, saving a product queues nothing; a test asserts every call
-the plugin makes in demo mode hits a public SN path; an indexing call sent without a key
-is refused by Turing.
-
 ### XLIX.89 The demo store in WordPress Playground (D239)
 
 **What happens.** Trying the plugin means Docker (`run-docker.cmd demo`) or a WordPress
