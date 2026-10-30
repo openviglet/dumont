@@ -297,9 +297,9 @@ fictional shopper preparing her first winter mountain crossing:
 8. **Backstage** — the same query natively versus Turing (D195), then wp-admin's insights
    with her searches and a failed one turned into a synonym (D178).
 
-Delivered as `wordpress/demo/story.md` (script, queries, expected results, English and
-pt_BR), an `npm run e2e:story` spec playing it end to end, and the guided layer's
-markers renumbered to these chapters.
+Landed: `wordpress/demo/story.md` (both languages) and `npm run e2e:story`, in English;
+chapter 3 asks the Site assistant (Turing T1176). Left: the tour's markers renumbered to
+these chapters, and the spec in pt_BR.
 
 **Gate.** The story spec runs green on a fresh demo stack with a key.
 
@@ -475,6 +475,76 @@ three tents included.
 **Gate.** woo/kit.spec.mjs with a fixed reply holding two colours and two products per
 stage: one ticked per stage, the colours shown once. demo-ai/kit.spec.mjs then asserts
 the cart holds one product per stage.
+
+### XLIX.91 A staged id the shop does not sell leaves the kit (D241)
+
+**What happens.** Playing the demo's story (D203) live, Build my kit staged post 11, the
+demo's "Search the shop" page, as a product. `buildKit` in `src/public/copilot.js` asks
+the Store API for each staged id (`shopProduct`); for a page it gets a 404 and `null`,
+and only a product that answers is checked for stock, so the page stays ticked. "Add the
+kit to cart" then posts `{"id":11}` to `/wc/store/v1/cart/add-item` and WooCommerce
+answers 400 `woocommerce_rest_cart_invalid_product`: the shopper reads "Added 13 of 14".
+
+Turing's kit stages any document that is not a guide type, so any indexed page can be
+staged; Turing has no option to say which types are products (filed there).
+
+**What it should do.**
+- A staged id the Store API does not know as a product leaves the kit before it is shown
+  as buyable: removed from its stage, never ticked, never sent to the cart. A stage left
+  empty is said in the unfilled line, as a need the catalog has nothing for.
+- Once Turing takes the product types, the block sends `product` beside `guideTypes`, so
+  the page is never staged and the 404 lookup is never made.
+
+**Gate.** woo/kit.spec.mjs with a fixed reply staging a page id beside two products: the
+page is not listed, "Add 2 products to the cart", and no add-item request names it.
+
+### XLIX.92 Ask about the product on the page (D242)
+
+**What happens.** The demo's product page carries the copilot under "Not sure it fits
+your trip? Ask us", and the Site assistant waits in the corner. Neither knows which
+product the page shows: `src/blocks/copilot/render.php` and
+`src/blocks/assistant/render.php` send no product, so "Will this keep me dry?" is asked
+of the whole catalog and may cite other jackets. The story spine (D203, chapter 6) had
+to phrase its question around that.
+
+**What it should do.**
+- On a singular product (or any singular indexed post), both blocks send the document's
+  Turing id with the question, and the answer is grounded on that document first: it is
+  cited, and other products appear only as alternatives.
+- The question box says so ("Ask about Catbells light rain jacket"), so the shopper knows
+  what "this" means.
+- Off a product page, nothing changes.
+
+**Open choice.** Whether Turing's copilot and chat already take a document to ground on.
+If not, file the Turing line (an optional `documentId` that is retrieved and cited
+first) and make this depend on it; the block side is then a few lines.
+
+**Gate.** A woo spec on a product page: the copilot request carries the product's id,
+and the box label names the product.
+
+### XLIX.93 The curated searches hold their order on the published Turing (D243)
+
+**What happens.** On 2026-10-30, with the demo stack on the published Turing image
+(`ghcr.io/openviglet/turing-ce:latest`, sha-b9bc, which carries T1170's stemming), three
+curated searches in `demo/theme/tarnfell/curated.json` stopped showing their buying
+guide first, and `npm run test:e2e:demo` fails six cases (curated and compare, en_US):
+
+- `waterproof jacket` and `raincoat` → four colours of "Catbells light rain jacket" first;
+  "How to choose a waterproof jacket" is expected first.
+- `puffer` → "Down or synthetic: choosing an insulated jacket" first; "How to wash a down
+  jacket" is expected first.
+
+The guides are indexed (each found by its own title). The demo's curated order is what
+the site and the tour promise, so the demo now shows something its copy does not say.
+
+**What it should do.** Find why the order changed: the stemming release (Turing T1177,
+filed beside this) or the colour variants each indexed as a product (four near-identical
+documents now outscore one guide). Then either Turing restores the title-phrase weight,
+or the curated entries are re-read against the new order with the reason recorded beside
+them. Never edit `curated.json` to whatever comes back without that reason: it is the
+demo's contract.
+
+**Gate.** `npm run test:e2e:demo` green on the published image.
 
 ## L The documentation area
 

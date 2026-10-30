@@ -690,3 +690,4 @@
 - **D201** — Live kits on the demo stage only seeded products, mark what the shop cannot sell and reach the cart at WooCommerce's total (design §XLIX.57 recorded in `wordpress/tests/e2e/demo-ai/kit.spec.mjs`).
 - **D199** — A size is read in code, grounded on the site's own values; the Tarnfell search page applies what a sentence names, and demo specs cover it (design §XLIX.55 recorded in `wordpress/README.md`).
 - **D236** — The e2e seed installs a test-stack mu-plugin that hides core's update nag, so the admin axe checks pass whatever core has released (design §XLIX.86 recorded in `wordpress/README.md`).
+- **D203 (story script and live spec)** — npm run e2e:story plays demo/story.md live, from popular chips to a paid order and the owner's insights, on a demo with a compare page and test checkout.
