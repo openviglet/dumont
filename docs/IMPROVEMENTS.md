@@ -355,9 +355,11 @@ to phrase its question around that.
   what "this" means.
 - Off a product page, nothing changes.
 
-**Settled (2026-10-30).** Turing's copilot takes only `{messages, locale}` and the chat
-only the question, so this waits on Turing T1178 (an optional `documentId`, retrieved
-and cited first). The block side is then a few lines; no workaround in the meantime.
+**Settled (2026-10-30).** Turing's copilot takes only `{messages, locale}`, and the
+chat's `filters` would retrieve the product alone and drop the alternatives, so this
+waits on Turing T1178: an optional `documentId` on both that pins the document,
+retrieved and cited first. The block side is then a few lines; no workaround in the
+meantime.
 
 **Gate.** A woo spec on a product page: the copilot request carries the product's id,
 and the box label names the product.
