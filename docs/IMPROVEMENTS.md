@@ -174,9 +174,12 @@ Once a release carries it:
   `DumTuringIndexingPlugin.manifest` beside the facets.
 - Log `customSortsChanged` with the facets; a refused manifest still never stops indexing.
 
-Done when the jobs schema (trabalharei's `DumJobsSchema`, TRA125) declares "closing
-soonest" and a run against a fresh site leaves the sort on it, and a second run reports
-nothing changed.
+A sort item over an undeclared field is refused at build, as a facet's is. Check the
+release on Central, not `~/.m2`: a local Turing `mvn install` overwrites 2026.3.6 with
+classes the release lacks, so a build passes here and fails in CI.
+
+Done when a test schema declaring a `missingLast` sort leaves it on a fresh site, and a
+second run reports nothing changed.
 
 ## XLIX The WordPress connector plugin
 
@@ -228,26 +231,23 @@ routes.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
 
-### XLIX.52 A public hosted demo store (D196)
+### XLIX.52 A public hosted demo Turing (D196)
 
 **What happens.** The demo store runs only from `run-docker.cmd demo` on a developer's
-machine. A sales pitch, a post or the site can show a video of it, never the thing.
+machine. D239 moves WordPress into the visitor's browser through Playground, which
+resets on every load and costs nothing per visitor, but the store it boots still needs a
+Turing it can reach. None is hosted.
 
 **What it should do.**
-- One public URL serving the demo stack (WordPress, WooCommerce, Turing, the theme and
-  seed), deployed from the repo by a workflow, not by hand. Host and domain are decided in
-  the task; an idea until they are.
-- Reset to the seed nightly and on every deploy, so a visitor's cart or a vandal's edit
-  never lasts.
-- Visitors browse, search, chat and add to cart, or follow the shopper's story
-  with the guided layer on (D203); checkout runs in WooCommerce's test mode
-  with a banner saying no order is real and no payment is taken, and asks for no card.
-  wp-admin is closed to the public; a read-only demo login, if any, is a later decision.
+- One public demo Turing, deployed from the repo by a workflow, not by hand, with the
+  `Demo` SN site in PUBLIC mode and its index built from the seed (D238). Host and
+  domain are decided in the task; an idea until they are.
+- `turing.allowedOrigins` names the Playground origin (D237); no key is handed out.
 - The LLM spend has a hard daily cap from Turing's cost ledger (D174's reading of it):
   past the cap the chat and answers turn off with a visible note, while search keeps
   working. Per-IP rate limits on search, chat and copilot.
-- A health check and an uptime alert, and the Turing and plugin versions it runs shown in
-  the footer.
+- A health check and an uptime alert, and the Turing version it runs exposed for the
+  store's footer.
 
 **Why an idea.** It is the one task in the series that costs money every day and has an
 outside attack surface, so its host, budget and owner are decided before it is designed.
@@ -295,9 +295,9 @@ shopper has to know them all to ask.
 - Prices and totals come from WooCommerce, never from the model.
 
 The block side landed against Turing T1159/T1167, checked with a mocked reply. Left: the
-live run. After T1169 the demo kit fills one need of five: Lucene does not stem (T1170;
-the `Demo` site needs a reindex once it ships), gap queries arrive as `product_cat: …`
-text (T1171), a post is staged as a product (T1172).
+live run. After T1169 the kit filled one need of five; Turing then shipped stemming
+(T1170), gap queries inside the facet value (T1171) and guides never staged (T1172). The
+`Demo` site needs a reindex for T1170 before the gate runs.
 
 **Gate.** Live-LLM specs on the demo seed: each curated plan returns only seeded,
 in-stock ids, covers its listed gaps, and the cart total equals WooCommerce's.
@@ -331,9 +331,9 @@ markers renumbered to these chapters.
 
 ### XLIX.60 A narrated demo video of the story (D204)
 
-**What happens.** The plugin has screenshots per screen and, once D179 lands, a raw
-recording per feature. Neither is something to put at the top of a landing page or send
-to a prospect.
+**What happens.** The plugin has screenshots per screen and, since D179, a raw recording
+per feature. Neither is something to put at the top of a landing page or send to a
+prospect.
 
 **What it should do.**
 - A two-to-three-minute video following the story's chapters in order, ending on the
@@ -422,34 +422,39 @@ CORS headers, and the plugin reports Turing as unreachable.
 **What it should do.**
 - The blueprint turns networking on (`features.networking`), without which Playground
   makes no outbound request at all.
-- The hosted demo Turing allows the Playground origin, and only for the demo site's
-  endpoints (search, autocomplete, chat), with preflight answered. If Turing has no
-  per-site CORS setting, that is a Turing task, filed there, not a proxy written here.
-- The plugin's diagnostics name the cause when a request fails on CORS inside Playground,
-  instead of "Turing unreachable".
+- The demo Turing is a dedicated instance, so it sets `turing.allowedOrigins` to the
+  Playground origin. That allowlist covers all of `/api/**` and needs no Turing change;
+  narrowing it to SN endpoints is unnecessary because the browser holds no key (D238).
+- A browser hides a CORS refusal from `fetch`, so PHP cannot tell it from a dead host.
+  Inside Playground the diagnostics name CORS as the likely cause and the origin Turing
+  must allow, instead of "Turing unreachable".
 
-**Gate.** From the blueprint, the diagnostics screen shows Turing reachable and a search
-returns seeded products; with the origin removed from the allow-list, it names CORS.
+**Gate.** From the blueprint against a local Turing (`http://localhost` is allowed from
+an HTTPS page), the diagnostics show Turing reachable and a search returns seeded
+products; with the origin removed from the allowlist, they name the origin to allow.
 
-### XLIX.88 A read-only demo mode (D238)
+### XLIX.88 A keyless demo mode (D238)
 
 **What happens.** On a normal install the plugin indexes on activation and on every
-save. In WordPress Playground every visitor gets their own WordPress, but they would all
-share the one hosted demo Turing. A visitor who edits a product, or a vandal who writes
-a thousand, changes what every other visitor searches.
+save, with a Turing key stored in its settings. In WordPress Playground that wp-admin
+belongs to the visitor, so any key the blueprint stores is readable by every visitor.
+Turing keys carry no scope (`TurDevToken` has a partition, never a permission), so the
+key would let a stranger rewrite or delete the demo site for everyone.
 
 **What it should do.**
-- A demo mode, set by the blueprint, in which the plugin searches, autocompletes and chats
-  against a pre-indexed demo site and never indexes: activation, saves and the queue are
-  no-ops, and the indexing screens say why.
-- The demo Turing key is read-only on the server side as well, so the protection does not
-  rest on a plugin setting a visitor can turn off in their own wp-admin.
+- No key at all. The demo SN site stays in PUBLIC mode, which already serves search,
+  autocomplete, chat, copilot and answer anonymously (`TurSNSiteApiKeyGateFilter`),
+  while every write needs a key the browser never holds. The plugin already sends no
+  `Key` header when none is set.
+- A demo mode, set by the blueprint as a wp-config constant like the other locked
+  settings: activation, saves and the queue are no-ops, the indexing screens say why,
+  diagnostics stop asking for a key, and features whose endpoints need one are hidden.
 - The demo index is built once from the seed, by the same workflow that deploys the demo
-  Turing, and rebuilt when the seed changes.
-- The LLM cap and per-IP limits of D196 apply to this key.
+  Turing (D196), and rebuilt when the seed changes.
 
-**Gate.** With demo mode on, saving a product queues nothing; with the read-only key, an
-indexing call made by hand is refused by Turing.
+**Gate.** With demo mode on, saving a product queues nothing; a test asserts every call
+the plugin makes in demo mode hits a public SN path; an indexing call sent without a key
+is refused by Turing.
 
 ### XLIX.89 The demo store in WordPress Playground (D239)
 
