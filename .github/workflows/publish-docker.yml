@@ -1,14 +1,40 @@
-# Builds the Viglet Dumont ES Docker image from the root Dockerfile and pushes
+# Builds the Viglet Dumont Docker image from the root Dockerfile and pushes
 # it to the GitHub Container Registry (ghcr.io). The Dockerfile is multi-stage
 # and builds from the checked-out repository (the build context) — no clone,
 # so this workflow only needs the checkout + Docker Buildx (no JDK/Maven setup).
 # For more information see:
 # https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
+#
+# D252 — two modes, so `latest` can no longer fall months behind the releases:
+#   - release: publish.yml calls this after it cuts a release, building the
+#     released commit, tagging the released version and moving `latest` to it
+#     (default branch only). A manual dispatch with `version` set does the same.
+#   - snapshot: a manual dispatch with no version tags `<branch>-snapshot` plus
+#     the commit sha. It never touches `latest` or a version tag, because the
+#     branch's pom names the LAST release and would overwrite its image.
+# The image keeps the name dumont-ce until a rename is decided for the whole
+# suite, so whoever pulls ghcr.io/openviglet/dumont-ce keeps getting updates.
 
 name: Publish Docker Image
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Released version to tag and move latest to (blank = <branch>-snapshot)"
+        type: string
+        required: false
+        default: ""
+  workflow_call:
+    inputs:
+      version:
+        description: "Released version to tag (e.g. 2026.3.2); makes this a release publish"
+        type: string
+        required: true
+      commit:
+        description: "Commit the release landed on; the image is built from it"
+        type: string
+        required: true
 
 env:
   REGISTRY: ghcr.io
@@ -21,10 +47,29 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Resolve mode, version and commit
+        id: cfg
+        env:
+          # Bind inputs to env vars (never interpolate them into the script body).
+          IN_VERSION: ${{ inputs.version }}
+          IN_COMMIT: ${{ inputs.commit }}
+          DISPATCH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          COMMIT="${IN_COMMIT:-$DISPATCH_SHA}"
+          if [ -n "$IN_VERSION" ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "version=$IN_VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
+          echo "short=${COMMIT:0:12}" >> "$GITHUB_OUTPUT"
+      # The release commit is the version bump publish.yml pushed after its run started,
+      # so github.sha would build the commit before it.
       - uses: actions/checkout@v7
-      - name: Resolve project version
-        id: version
-        run: echo "version=$(grep -m1 -oP '(?<=<version>)[^<]+' pom.xml)" >> "$GITHUB_OUTPUT"
+        with:
+          ref: ${{ steps.cfg.outputs.commit }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Log in to the Container registry
@@ -39,9 +84,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=${{ steps.version.outputs.version }}
-            type=sha
+            type=raw,value=latest,enable=${{ steps.cfg.outputs.release == 'true' && github.ref_name == github.event.repository.default_branch }}
+            type=raw,value=${{ steps.cfg.outputs.version }},enable=${{ steps.cfg.outputs.release == 'true' }}
+            type=raw,value=${{ github.ref_name }}-snapshot,enable=${{ steps.cfg.outputs.release != 'true' }}
+            type=raw,value=sha-${{ steps.cfg.outputs.short }}
       - name: Build and push Docker image
         id: build
         uses: docker/build-push-action@v7
@@ -50,6 +96,6 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: |
-            CACHE_BUST=${{ github.sha }}
+            CACHE_BUST=${{ steps.cfg.outputs.commit }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

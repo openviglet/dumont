@@ -1,6 +1,34 @@
 [{
   "name": "",
   "notes": [
+  "[New] Structured Sources: Catalogs, Listings, Databases and JSON APIs Indexed as Typed Records, with the Schema Declared in Code",
+  "[New] Declarative Extraction from Sitemaps, HTML Listings, Tabular Pages and Paged JSON APIs, with Call Budgets",
+  "[New] Grounding Enforced End to End: Empty or Unsupported Values Never Reach the Index",
+  "[New] Dry-Run Preview and Schema Diff Before a Structured Source Writes Anything",
+  "[New] Enrichment Stage with Grounded LLM Classification and List Extraction, a Persistent Cache, a Daily Cap and Closed Label Sets",
+  "[New] Cross-Source Entity Resolution: One Canonical Document per Item, Kept Between Runs",
+  "[New] Field Provenance, Coverage and Drift Monitoring, with a Run Warning and a Webhook on a Source's First Warned Run",
+  "[New] Index Audit That Compares the Source and the Ledger with the Search Index, with Orphan Reports Reviewed and Applied from the Console",
+  "[New] AEM as a Cloud Service Publish Tier through the Delivery APIs, Content Fragments and Assets from Publish, and Recovery of Dropped Adobe I/O Events",
+  "[New] AEM Component Extractors, Schema per Content Type and Versioned Content-Type Recipes",
+  "[New] Adobe Edge Delivery Services (EDS) Source with Reindex and Dry Scan",
+  "[New] Jobs Connector Plugin for Job-Board APIs (Adzuna, Jooble, BNE, JSearch) under Paid-Call Caps",
+  "[New] Several Connector Plugins in One Instance, and One Docker Image That Bundles Them All",
+  "[New] AI-Assisted Source Inference",
+  "[New] Connector Run Outcomes Exposed to Prometheus",
+  "[New] Admin Password from DUMONT_ADMIN_PASSWORD and OIDC Back-Channel Logout",
+  "[Improved] Web Crawler: Sitemap and Robots Awareness, Charset Detection, Bounded Parallel Crawl, Conditional Re-Crawl and a Safe-Run Policy",
+  "[Improved] Console Rebuilt on the Bento Layout, with Section Hubs and Every Source Page Moved onto It",
+  "[Improved] Each Source's Schema Is Declared to Turing Before Its Documents",
+  "[Improved] Indexing Log Filtered by Source and Transaction Id, and Reports Whether Anything Is Writing It",
+  "[Fixed] Scheduled Crawls Run Each Source and Plugin in Isolation, under the Run Lock"
+  ],
+  "pub_date": "2026-10-30T12:00:00Z",
+  "version": "2026.3.2"
+  },
+  {
+  "name": "",
+  "notes": [
   "[New] Plugin Management with PF4J Extensions, Backend and Console",
   "[New] Content Fragment Distribution Events via Sling Content Distribution",
   "[New] Connector Queue API with Queue Status in the Sidebar",

@@ -16,6 +16,9 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      commit: ${{ steps.bump.outputs.commit }}
     permissions:
       contents: write
       packages: write
@@ -52,12 +55,16 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('dumont-react/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-modules-
       - name: Increment Version
+        id: bump
         run: |
           mvn build-helper:parse-version versions:set -Dgpg.skip=true -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion} versions:commit
           git config user.name alexandre.oliveira
           git config user.email alexandre.oliveira@gmail.com
           git commit -m "Updated version in dumont pom.xml" -a
           git push
+          # D252: the docker job below tags the image with this release, built from this commit.
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Configure Maven Settings
         uses: s4u/maven-settings-action@v4.0.0
         with:
@@ -72,14 +79,34 @@ jobs:
       - name: Deploy Version
         env:
           GH_TOKEN: ${{ secrets.GH_PKG_TOKEN }}
-          RELEASE_REPO: openviglet/dumont-ce
+          # D252: openviglet/dumont-ce no longer resolves; releases live on the product repository.
+          RELEASE_REPO: openviglet/dumont
+          RELEASE_COMMIT: ${{ steps.bump.outputs.commit }}
         run: |
           mvn install package -Dgpg.skip=true -Dturing.open-browser=false
           chmod +x scripts/package-dist.sh
           ./scripts/package-dist.sh --skip-build
           export TAG_NAME=v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "TAG_NAME=${TAG_NAME}"
-          gh release create ${TAG_NAME} --repo ${RELEASE_REPO} --generate-notes
+          # D252: the notes are the hand-written entry for this version in the site's
+          # changelog.json (D143), grouped as New / Improved / Fixed, so the release page and
+          # dumont-site/changelog.json say the same thing. With no entry, fall back to
+          # GitHub's generated notes and warn.
+          jq -r --arg v "${TAG_NAME#v}" '
+            .[] | select(.version == $v) | .notes as $n
+            | ["New", "Improved", "Fixed"]
+            | map(. as $k
+                | [$n[] | select(startswith("[" + $k + "] ")) | ltrimstr("[" + $k + "] ")]
+                | select(length > 0)
+                | "### " + $k + "\n\n" + (map("- " + .) | join("\n")) + "\n")
+            | join("\n")' dumont-site/public/changelog.json > /tmp/release-notes.md
+          if [ -s /tmp/release-notes.md ]; then
+            gh release create ${TAG_NAME} --repo ${RELEASE_REPO} --target "${RELEASE_COMMIT}" \
+              --title "${TAG_NAME}" --notes-file /tmp/release-notes.md
+          else
+            echo "::warning::No changelog.json entry for ${TAG_NAME#v}; falling back to generated notes."
+            gh release create ${TAG_NAME} --repo ${RELEASE_REPO} --target "${RELEASE_COMMIT}" --generate-notes
+          fi
           gh release upload ${TAG_NAME} connector/connector-app/target/dumont-connector.jar --repo ${RELEASE_REPO} --clobber
           # Every connector plugin as a loose asset (D94), by shape rather than by name.
           for jar in */*-plugin/target/*-plugin.jar; do
@@ -97,3 +124,16 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+  # D252: every release also publishes ghcr.io/openviglet/dumont-ce from the released commit,
+  # so the image can no longer drift months behind the release, as it did in 2026.
+  docker:
+    needs: publish
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/publish-docker.yml
+    with:
+      version: ${{ needs.publish.outputs.version }}
+      commit: ${{ needs.publish.outputs.commit }}
+    secrets: inherit

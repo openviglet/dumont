@@ -68,7 +68,7 @@ Besides `latest`, every run also publishes the project version and a commit tag 
 
 ### Option 2: Download JARs
 
-Download `dumont-connector.jar` and the connector plugin JARs from the [releases page](https://github.com/openviglet/dumont-ce/releases):
+Download `dumont-connector.jar` and the connector plugin JARs from the [releases page](https://github.com/openviglet/dumont/releases):
 
 ```bash
 mkdir -p /appl/viglet/dumont/server/libs
