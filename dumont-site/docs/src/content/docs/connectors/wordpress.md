@@ -114,6 +114,14 @@ Once every step passes, **Index everything now** runs the first index with a pro
 | **Locale** | The language the content is indexed in, e.g. `pt_BR` |
 | **Site key** | Starts every document id; see [Several sites, one SN site](#several-sites-one-sn-site) |
 
+In [WordPress Playground](https://wordpress.org/playground/), WordPress runs in the
+visitor's browser and so do its requests to Turing: the blueprint needs
+`features.networking` on, and Turing has to be on a public address. A public Turing is
+reached directly when its `turing.allowedOrigins` includes `https://playground.wordpress.net`,
+and through Playground's own proxy when it does not. One on a private address, such as
+`http://localhost:2700`, cannot be reached from there at all, and the connection check says
+so at the **Network** step rather than reporting an HTTP error.
+
 ### From the environment
 
 A container deploy can set the connection with no wp-admin step. Each of these is read

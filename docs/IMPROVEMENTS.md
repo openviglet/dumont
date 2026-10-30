@@ -242,7 +242,9 @@ Turing it can reach. None is hosted.
 - One public demo Turing, deployed from the repo by a workflow, not by hand, with the
   `Demo` SN site in PUBLIC mode and its index built from the seed (D238). Host and
   domain are decided in the task; an idea until they are.
-- `turing.allowedOrigins` names the Playground origin (D237); no key is handed out.
+- `turing.allowedOrigins` names `https://playground.wordpress.net`, so Playground calls it
+  directly rather than through its CORS proxy, which works too (measured in D237); no key
+  is handed out.
 - The LLM spend has a hard daily cap from Turing's cost ledger (D174's reading of it):
   past the cap the chat and answers turn off with a visible note, while search keeps
   working. Per-IP rate limits on search, chat and copilot.
@@ -311,28 +313,6 @@ keep the two exclusions if the lists stay short and say so; keep
 installed from the directory loads no language pack. Then make the CI job fail on
 warnings too.
 
-### XLIX.87 Reaching Turing from WordPress Playground (D237)
-
-**What happens.** The plugin reaches Turing from PHP (`wp_remote_*` in
-`class-viglet-dumont-api-client.php`). In WordPress Playground, PHP runs in the browser
-and its outbound HTTP goes through the browser's `fetch`, so every call to Turing is a
-cross-origin request from `playground.wordpress.net`. Turing does not answer it with
-CORS headers, and the plugin reports Turing as unreachable.
-
-**What it should do.**
-- The blueprint turns networking on (`features.networking`), without which Playground
-  makes no outbound request at all.
-- The demo Turing is a dedicated instance, so it sets `turing.allowedOrigins` to the
-  Playground origin. That allowlist covers all of `/api/**` and needs no Turing change;
-  narrowing it to SN endpoints is unnecessary because the browser holds no key (D238).
-- A browser hides a CORS refusal from `fetch`, so PHP cannot tell it from a dead host.
-  Inside Playground the diagnostics name CORS as the likely cause and the origin Turing
-  must allow, instead of "Turing unreachable".
-
-**Gate.** From the blueprint against a local Turing (`http://localhost` is allowed from
-an HTTPS page), the diagnostics show Turing reachable and a search returns seeded
-products; with the origin removed from the allowlist, they name the origin to allow.
-
 ### XLIX.88 A keyless demo mode (D238)
 
 **What happens.** On a normal install the plugin indexes on activation and on every
@@ -365,7 +345,8 @@ WooCommerce, reset them, and defend wp-admin from strangers.
 **What it should do.**
 - A WordPress Playground blueprint (`wordpress/demo/playground/blueprint.json`) that boots
   WordPress in the visitor's browser with WooCommerce, the plugin, the demo theme and the
-  seed, already configured against a hosted demo Turing, and lands on the store's front page.
+  seed, already configured against a hosted demo Turing, and lands on the store's front page. It sets `features.networking`, without
+  which Playground makes no outbound request; the Turing must be public (D237).
 - A link to it (`playground.wordpress.net/?blueprint-url=...`) on the site's WordPress page
   (D197), in the README and in posts.
 - The tour fits one visit: Playground starts from the blueprint on every load, so a reload is
