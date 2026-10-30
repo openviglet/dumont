@@ -364,30 +364,6 @@ meantime.
 **Gate.** A woo spec on a product page: the copilot request carries the product's id,
 and the box label names the product.
 
-### XLIX.93 The curated searches hold their order on the published Turing (D243)
-
-**What happens.** On 2026-10-30, with the demo stack on the published Turing image
-(`ghcr.io/openviglet/turing-ce:latest`, sha-b9bc, which carries T1170's stemming), three
-curated searches in `demo/theme/tarnfell/curated.json` stopped showing their buying
-guide first, and `npm run test:e2e:demo` fails six cases (curated and compare, en_US):
-
-- `waterproof jacket` and `raincoat` → four colours of "Catbells light rain jacket" first;
-  "How to choose a waterproof jacket" is expected first.
-- `puffer` → "Down or synthetic: choosing an insulated jacket" first; "How to wash a down
-  jacket" is expected first.
-
-The guides are indexed (each found by its own title). The demo's curated order is what
-the site and the tour promise, so the demo now shows something its copy does not say.
-
-**What it should do.** Find why the order changed: the stemming release (Turing T1177,
-filed beside this) or the colour variants each indexed as a product (four near-identical
-documents now outscore one guide). Then either Turing restores the title-phrase weight,
-or the curated entries are re-read against the new order with the reason recorded beside
-them. Never edit `curated.json` to whatever comes back without that reason: it is the
-demo's contract.
-
-**Gate.** `npm run test:e2e:demo` green on the published image.
-
 ### XLIX.96 Narrate the demo video and publish it (D246)
 
 **What happens.** `npm run story:video` (D204) builds `story.mp4` and `story-30s.mp4`
