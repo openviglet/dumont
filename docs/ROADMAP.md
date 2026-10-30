@@ -119,8 +119,8 @@ This track has no remaining pending tasks.
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D239** (deps: D237 ✅, D238 ✅, D196 ⏸) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — A Playground blueprint boots the store in the browser with nothing to install, resets on reload and leaves D196 only Turing to host. → §XLIX.89
-- 🛠 **D242** (deps: Turing T1178) **On a product page the copilot and the Site assistant do not know which product the shopper is asking about** — A product page's "Ask us" is a question about that product, and an answer drawn from the whole catalog misses it. → §XLIX.92
-- 📋 **D243** (deps: Turing T1177) **Three curated demo searches no longer show their buying guide first, so the demo suite is red on the published Turing** — The curated order is what the site and tour promise, and a demo that contradicts its own copy cannot be shown. → §XLIX.93
+- ⏳ **D242** (deps: SDK release with chat documentId) **On a product page the copilot and the Site assistant do not know which product the shopper is asking about** — The Site assistant still asks the whole catalog: its chat goes through the Turing SDK, still 2026.3.11. → §XLIX.92
+- 📋 **D243** (deps: —) **Three curated demo searches no longer show their buying guide first, so the demo suite is red on the published Turing** — The curated order is what the site and tour promise, and a demo that contradicts its own copy cannot be shown. → §XLIX.93
 
 ## Track T — Releases and links match what the site describes
 
@@ -167,6 +167,12 @@ This track has no remaining pending tasks.
   release carries story.mp4 with narration in English and pt_BR whose voice licence is
   recorded, and the site's WordPress page and the docs embed it with both caption
   tracks.
+
+## Done when — D242
+
+- **The Site assistant also asks about the product on the page** On a product page the
+  assistant's chat request carries the product's documentId, once the plugin's
+  @viglet/turing-sdk is a release with T1178's chat option.
 
 ## Non-goals (do NOT add as tasks)
 

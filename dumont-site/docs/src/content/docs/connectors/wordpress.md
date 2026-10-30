@@ -344,6 +344,12 @@ used. On a WooCommerce shop each cited product shows the shop's price and an **A
 button; the copilot never puts anything in the cart by itself. The block appears only when
 Turing has a language model for the copilot.
 
+On a product's page (or any indexed post's), the box reads **Ask about** and the product's
+name, and the question goes to Turing with that product's document: Turing answers about it
+first and always cites it, with other products only as alternatives. This needs a Turing
+that takes the document (2026.3 builds after T1178); an older one answers from the whole
+catalog, as before.
+
 **Build my kit.** With **Offer Build my kit** on (the default, in the block's settings), the
 block has a second mode, **Plan a kit**. The visitor describes a plan ("two days crossing the
 mountains in July, first time") and Turing answers with the needs the plan implies, each
