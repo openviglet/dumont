@@ -703,3 +703,4 @@
 - **D251** — npm run lint:js ignores tests/e2e/artifacts, so Playwright's reports no longer crash it, and it runs in seconds again.
 - **D247** — The search answer, the Site assistant and the copilot render the model's Markdown lists and emphasis from text nodes, so its markup never becomes HTML.
 - **D248** — sh bin/run-docker.sh demo and demo reset build the demo store as the batch file does; checked from scratch under Git Bash with a pwsh shim, not on Linux.
+- **D249** — Compare sends its facts to the model as plain text, so the AI summary writes $151.20, and a summary from the old facts is never served again.

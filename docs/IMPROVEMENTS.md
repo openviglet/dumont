@@ -409,27 +409,6 @@ a published release to point at.
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
 
-### XLIX.99 Plain text for the compare summary's data (D249)
-
-**What happens.** On the demo store (D245's re-recorded story, chapter 4), the AI
-summary above Compare products reads "the jacket costing &#36;151.20, the gloves
-&#36;49.00". `Viglet_Dumont_Compare` (`src/includes/class-viglet-dumont-compare.php`)
-builds each price as `wp_strip_all_tags( wc_price( … ) )`, which drops the tags and
-keeps WooCommerce's HTML entities. The table renders them as `$` in the page, but the
-same rows go to Turing's summary as data, so the model reads `&#36;` and writes it back,
-and the summary is shown as text.
-
-**What it should do.**
-- The rows sent as the summary's data hold plain text: entities decoded
-  (`html_entity_decode( …, ENT_QUOTES | ENT_HTML5, 'UTF-8' )`) after the tags are stripped,
-  for every cell, not only the price.
-- The cache key for the summary changes with the data, so a summary written from the
-  entity-laden rows is not served again.
-
-**Gate.** A CompareTest case: a price whose formatted HTML holds `&#36;` reaches the
-summary data as `$`, and a live `demo-ai` run of the compare chapter shows no `&#` in
-the summary.
-
 ### XLIX.100 A cart status that survives the results' take-over (D250)
 
 **What happens.** The search block renders its result cards on the server, then takes
