@@ -276,32 +276,6 @@ chat, a shopping copilot and insights, has no page, and nothing links to a demo.
 recording rather than hand-made mock-ups, and a link check covers the new calls to
 action.
 
-### XLIX.57 A kit builder from a described plan (D201)
-
-**What happens.** The shopping copilot turns a need into a short list, one need at a
-time. "Two days crossing the mountains in July, first time" is several needs, and the
-shopper has to know them all to ask.
-
-**What it should do.** A "Build my kit" mode of the copilot block:
-- The plan goes to Turing, which retrieves candidates from the SN site and returns a
-  summary, the gaps the plan implies (shelter, layers, water), and stages of products,
-  each with a one-line reason drawn from its attributes.
-- Product ids are checked against the retrieved candidates; an id the model invents is
-  dropped, and an out-of-stock item is replaced or marked. A guide from the journal that
-  covers the plan is cited.
-- "Add the kit to cart" adds every staged item through the copilot's add-to-cart action,
-  and the shopper can remove items first.
-- Without GenAI, the mode is hidden rather than faked.
-- Prices and totals come from WooCommerce, never from the model.
-
-The block side landed against Turing T1159/T1167, checked with a mocked reply. Left: the
-live run. After T1169 the kit filled one need of five; Turing then shipped stemming
-(T1170), gap queries inside the facet value (T1171) and guides never staged (T1172). The
-`Demo` site needs a reindex for T1170 before the gate runs.
-
-**Gate.** Live-LLM specs on the demo seed: each curated plan returns only seeded,
-in-stock ids, covers its listed gaps, and the cart total equals WooCommerce's.
-
 ### XLIX.59 One shopper's story through the demo store (D203)
 
 **What happens.** Each demo task delivers a feature, and the guided layer names them one
@@ -479,6 +453,28 @@ key (see the two tasks this depends on). WordPress costs nothing per visitor.
 
 **Gate.** A Playwright run opens the blueprint URL, waits for the store, searches a
 seeded product and gets a result from the hosted Turing.
+
+### XLIX.90 A kit stage offers alternatives, not a bundle (D240)
+
+**What happens.** The live kit run on the demo (D201) staged five needs with three
+products each, and for most stages the three were colours of one product: three
+Blencathra tents, three Pillar boots. The block ticks every in-stock product, so "Add
+the kit to cart" put 13 items in the cart for one person's weekend, $2,549.20 of it,
+three tents included.
+
+**What it should do.** A stage lists alternatives for one need, not a bundle:
+- Only the first sellable product of each stage starts ticked; the others stay listed and
+  unticked, so the shopper can swap one in. The cart button counts what is ticked, as now.
+- Products that differ only by colour (the same title before the `, <colour>` the seed
+  appends) collapse to one entry in a stage, so the alternatives are different products.
+  If Turing can return one document per product group, prefer that over collapsing in
+  the block.
+- Out-of-stock handling is unchanged: an unsellable first product passes the tick to the
+  next sellable one.
+
+**Gate.** woo/kit.spec.mjs with a fixed reply holding two colours and two products per
+stage: one ticked per stage, the colours shown once. demo-ai/kit.spec.mjs then asserts
+the cart holds one product per stage.
 
 ## L The documentation area
 
