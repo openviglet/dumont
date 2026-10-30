@@ -701,3 +701,4 @@
   checked **The story plays green in pt_BR as well as English** npm run e2e:story passes on a demo started with DEMO_LOCALE=pt_BR, using story.md's Portuguese queries.
 - **D245** — The demo sells one product per design with colours as variations, and the plugin adds a variable product's first sellable variation to the cart.
 - **D251** — npm run lint:js ignores tests/e2e/artifacts, so Playwright's reports no longer crash it, and it runs in seconds again.
+- **D247** — The search answer, the Site assistant and the copilot render the model's Markdown lists and emphasis from text nodes, so its markup never becomes HTML.

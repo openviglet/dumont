@@ -409,26 +409,6 @@ a published release to point at.
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
 
-### XLIX.97 Render the answer's Markdown, safely (D247)
-
-**What happens.** On the demo store, `light rain jacket under $400` gets an answer panel
-whose text reads `1. **Catbells light rain jacket (Ember)**` then `- Price: $189` on its
-own lines: the model answers in Markdown and the panel prints it as typed. Seen in the
-D203 story recording (chapter 2's still on the site's WordPress page). The panel binds
-the answer with `data-wp-text="state.answer"` in `src/blocks/search/parts/answer.php`,
-which is plain text by design (no HTML from the model reaches the page).
-
-**What it should do.**
-- Render a small, safe Markdown subset: paragraphs, line breaks, ordered and unordered
-  lists, bold and italic. Built as DOM nodes from the parsed text (no `innerHTML` of model
-  output), so nothing the model writes can inject markup or script.
-- Links and images in the answer stay text; the sources list below is the panel's links.
-- The same renderer serves the Site assistant's messages and the copilot's answer, which
-  bind plain text the same way, so the three never disagree.
-
-**Gate.** A site spec with a replayed answer holding a list and bold text: the panel
-shows a list element and strong text, and a `<script>` in the answer arrives as text.
-
 ### XLIX.98 The demo store from the shell launcher (D248)
 
 **What happens.** `wordpress/run-docker.cmd demo` starts the demo store (Tarnfell)
