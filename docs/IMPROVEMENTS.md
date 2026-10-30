@@ -409,26 +409,6 @@ a published release to point at.
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
 
-### XLIX.100 A cart status that survives the results' take-over (D250)
-
-**What happens.** The search block renders its result cards on the server, then takes
-them over once its client-side search answers, replacing `state.results` with new
-objects. A visitor who clicks a card's **Add to cart** in between gets the product in
-the cart (the Store API answers 201) but never sees "Added to your cart.":
-`actions.addToCart` in `src/public/search-block.js` writes `cartStatus` on the result
-object it read before the await, and that object is no longer the one on screen. Found
-by the woo spec for a variable product (D245), which failed only in a full run, when the
-page was slower; it now waits for the card's price first.
-
-**What it should do.**
-- A result's cart status survives the take-over: keyed by product id in the block's state
-  (as the compare list already is), or the server-rendered results kept as the same objects
-  when the client's answer holds the same ids.
-- The same for the copilot's and Related's cart buttons, which share `addToCart`.
-
-**Gate.** A woo spec that clicks Add to cart as soon as the server-rendered card is
-visible, without waiting for the price, and sees "Added to your cart.".
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
