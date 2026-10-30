@@ -691,4 +691,4 @@
 - **D199** — A size is read in code, grounded on the site's own values; the Tarnfell search page applies what a sentence names, and demo specs cover it (design §XLIX.55 recorded in `wordpress/README.md`).
 - **D236** — The e2e seed installs a test-stack mu-plugin that hides core's update nag, so the admin axe checks pass whatever core has released (design §XLIX.86 recorded in `wordpress/README.md`).
 - **D203** — Each How it works marker now carries its chapter in demo/story.md, so the tour walks the demo in the story's order; the pt_BR run is D244 (design §XLIX.59 recorded in `wordpress/demo/story.md`).
-- **D204 (recorded and assembled)** — npm run e2e:story:record then npm run story:video turn the live story into a 1080p video with brand cards and English captions, refusing a stale recording.
+- **D204** — npm run story:video also writes a 29-second cut, and both videos carry English and pt_BR caption tracks; voice and publishing are D246 (design §XLIX.60 recorded in `wordpress/bin/story-video.mjs`).

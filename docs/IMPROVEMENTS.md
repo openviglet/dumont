@@ -276,32 +276,6 @@ chat, a shopping copilot and insights, has no page, and nothing links to a demo.
 recording rather than hand-made mock-ups, and a link check covers the new calls to
 action.
 
-### XLIX.60 A narrated demo video of the story (D204)
-
-**What happens.** The plugin has screenshots per screen and, since D179, a raw recording
-per feature. Neither is something to put at the top of a landing page or send to a
-prospect.
-
-**What it should do.**
-- A two-to-three-minute video following the story's chapters in order, ending on the
-  backstage chapter and a call to action (try the demo, install the plugin).
-- Recorded, not mocked: `npm run e2e:story -- --record` plays the story at a human pace on
-  the demo stack at 1920×1080, with cursor highlight and typing visible, and writes one
-  clip per chapter. Every frame is the product running.
-- An assembly script (ffmpeg) joins the clips with chapter titles, captions and an intro
-  and outro card in the demo brand, so a re-record after a UI change is one command, not
-  an editing session.
-- English and pt_BR: captions in both, narration recorded or synthesised (decided in the
-  task, with the voice's licence recorded). A 30-second cut for social posts.
-- Output under `wordpress/demo/video/` (sources and script in the repo, rendered files as
-  release assets, not committed), embedded on the site's WordPress page and the docs.
-
-Landed: `npm run e2e:story:record` and `npm run story:video` (cards, clips, English
-captions, 1m28s). Left: narration, pt_BR captions, the 30-second cut, the embeds.
-
-**Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
-when a chapter clip is missing or older than the story spec it was recorded from.
-
 ### XLIX.81 A readme the plugin directory accepts (D225)
 
 The plugin ships today as a zip on a GitHub release, and `src/readme.txt` is written for
@@ -540,6 +514,56 @@ uses a Portuguese word the catalog does not hold.
 **Gate.** `run-docker.cmd demo reset`, then `DEMO_LOCALE=pt_BR run-docker.cmd demo` with
 `OPENAI_API_KEY`, and `npm run e2e:story` green; English still green after switching
 back.
+
+### XLIX.95 One product per design, its colours as variations (D245)
+
+**What happens.** `wordpress/demo/seed/catalog.php` creates one simple product per
+colour ("Catbells light rain jacket, slate", "…, moss", "…, ember", "…, sky"): 132
+products for about 45 designs. Turing then sees four near-identical documents per
+design, and it shows everywhere the story goes (D203's video, 2026-10-30):
+
+- Chapter 4 compares "three jackets" that are three colours of one Catbells jacket.
+- Build my kit stages three colours of one tent (D240 is the block-side half).
+- Four colours of the rain jacket fill the top of `waterproof jacket`, above the buying
+  guide (possibly part of D243).
+
+A real shop sells a jacket in four colours, not four jackets.
+
+**What it should do.**
+- The seed makes one variable product per design, its colours as variations of the
+  `pa_color` attribute, each variation with its own D218 picture and the stock rule the
+  seed uses today.
+- The WooCommerce mapping indexes the parent once, colours as a multi-value facet, so
+  search, compare and the kit show one card per design.
+- Adding to the cart from search, the copilot or the kit: the Store API needs a variation
+  id for a variable product. The block either sends the first in-stock variation or links
+  to the product page to choose; decide in the task, and keep the kit's one-click promise.
+
+**Gate.** `npm run test:e2e:demo` and `npm run e2e:story` green; the compare chapter
+shows three different jackets.
+
+### XLIX.96 Narrate the demo video and publish it (D246)
+
+**What happens.** `npm run story:video` (D204) builds `story.mp4` and `story-30s.mp4`
+from the recorded story, with brand cards and English and pt_BR captions as soft tracks,
+under `wordpress/tests/e2e/artifacts/video/`. The video is silent, and nothing publishes
+or embeds it: a prospect cannot meet it.
+
+**What it should do.**
+- Narration in English and pt_BR, one line per chapter read over its clip. Recorded by a
+  person or synthesised; whichever is chosen, the voice's licence is recorded beside the
+  script (`wordpress/demo/seed/CREDITS.md` holds the demo's other credits). The assembly
+  mixes a narration file per chapter when one is present, and stays silent without.
+- The release workflow attaches `story.mp4`, `story-30s.mp4` and the captions to the
+  plugin's GitHub release, built on the demo stack, never committed.
+- The site's WordPress page (D197) and the plugin's docs page embed the release asset with
+  both caption tracks.
+
+**Why it waits.** The voice and its licence are a person's decision, and the embed needs
+a published release to point at.
+
+**Gate.** The released video plays with narration and either caption track on the site
+page; `npm run story:video` still builds a silent one without the narration files.
 
 ## L The documentation area
 
