@@ -707,6 +707,7 @@
 - **D250** — A card's cart status is kept by product, so "Added to your cart." still shows after the search block replaces the cards it rendered on the server.
 - **D242 (the copilot)** — On a product page the copilot's box reads Ask about and the product, and the question goes to Turing with its document, answered about first.
 - **D243** — With T1177 the exact-phrase guide leads again; raincoat and puffer re-read with reasons. Demo suite green on Turing HEAD, not yet the published image; pt_BR unchecked.
+- **D255** — Build my kit sends productTypes product, so Turing stages products only and no page reaches a stage or costs a 404.
 
 ## Track T — Releases and links match what the site describes
 
