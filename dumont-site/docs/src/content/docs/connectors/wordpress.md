@@ -351,8 +351,9 @@ attributes:
 - A need the catalog has nothing for is named ("Nothing in the catalog yet for: shelter")
   rather than filled with something unrelated.
 - Journal posts that cover the plan are listed as **Guides for this plan**.
-- The visitor can untick any product, then **Add N products to the cart** puts the rest in
-  the cart at once. The confirmation shows the cart's total as WooCommerce computes it.
+- A need's products are alternatives: the first one the shop can sell starts ticked, and the
+  visitor can tick another or untick it. **Add N products to the cart** puts the ticked ones
+  in the cart at once, and the confirmation shows the cart's total as WooCommerce computes it.
 
 The kit needs a Turing that has the kit call (`POST /api/sn/{site}/copilot/kit`), which
 2026.3.6 does not, and the **Stock** field mapped, which a WooCommerce site has by default.
