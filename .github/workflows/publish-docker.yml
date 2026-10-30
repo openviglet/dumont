@@ -1,7 +1,6 @@
-# Builds the Viglet Dumont Docker image from the root Dockerfile and pushes
-# it to the GitHub Container Registry (ghcr.io). The Dockerfile is multi-stage
-# and builds from the checked-out repository (the build context) — no clone,
-# so this workflow only needs the checkout + Docker Buildx (no JDK/Maven setup).
+# Builds the Viglet Dumont jars on the runner, packages them with Dockerfile.local
+# (the runtime stage of the root Dockerfile) and pushes the image to the GitHub
+# Container Registry (ghcr.io).
 # For more information see:
 # https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
 #
@@ -70,6 +69,20 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ steps.cfg.outputs.commit }}
+      # D252: build the jars on the runner and package them with Dockerfile.local, as
+      # publish-docker.cmd does. Inside the root Dockerfile's build stage the console's
+      # Module Federation type generation emits nothing and check-mf-types fails the build,
+      # while the same Maven build passes on the runner (validate.yml, publish.yml).
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+      - name: Build the connector and its plugins
+        run: |
+          mvn -B package -DskipTests -Dgpg.skip=true -Dturing.open-browser=false \
+            -pl '!aem/aem-plugin-sample,!assets/assets-plugin-sample,!db/db-plugin-sample,!web-crawler/wc-plugin-sample'
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Log in to the Container registry
@@ -93,7 +106,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: ./Dockerfile
+          file: ./Dockerfile.local
           push: true
           build-args: |
             CACHE_BUST=${{ steps.cfg.outputs.commit }}
