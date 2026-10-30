@@ -423,27 +423,6 @@ Filed from the portfolio review of 2026-10-30 (visibility repo, estrategia/portf
 and produtos/dumont.md): the release, the names on the files and the links in the README
 trail the site and the 2026.3 line.
 
-### LI.1 A 2026.3 release, with the image published by the same run (D252)
-
-**Where it showed.** On 2026-10-30 the newest release on openviglet/dumont is v2026.2.15
-of 2026-04-28 (3 downloads on its jars) and `ghcr.io/openviglet/dumont-ce` was last
-pushed on 2026-07-08, while October brought structured sources, the onboarding wizard
-with simulation, the scheduled index audit and the new console, all described on the
-site and in the README (visibility repo, produtos/dumont.md).
-
-**Why it costs.** Whoever follows the site to the download installs a build six months
-older than what they just read about, and the first feature they look for is missing.
-
-**What is in the way.** `publish.yml` on 2026.3 still releases to `RELEASE_REPO:
-openviglet/dumont-ce`, a name GitHub no longer resolves, and uses `--generate-notes`.
-`publish-docker.yml` is a separate manual dispatch, so the image and the release can
-drift, which is what happened.
-
-**Design.** Point the release at openviglet/dumont, let the release job call the image
-publish with the same version (as Turing's T1113 did), write notes for people from the
-changelog rather than generated ones, and cut a 2026.3 release so it becomes Latest. The
-image name stays `dumont-ce` until a rename is decided for the whole suite.
-
 ### LI.2 Release files and installer say Viglet Dumont (D253)
 
 **Where it showed.** v2026.2.15 ships `Dumont-DEP-x86_64.AppImage`;

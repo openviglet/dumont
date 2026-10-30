@@ -124,7 +124,6 @@ This track has no remaining pending tasks.
 
 ## Track T — Releases and links match what the site describes
 
-- 📋 **D252** (deps: —) **The newest release is v2026.2.15 of April and the image is from July, so what the site describes cannot be installed** — Whoever follows the site to the download gets a build six months older than the features they came for. → §LI.1
 - 📋 **D253** (deps: —) **The download, the installer and the startup banner still say Dumont DEP, the acronym the product name dropped** — The installer is the first screen a new user sees, and the old name reads as another or older product. → §LI.2
 - 📋 **D254** (deps: —) **The README and the repository homepage point at www.viglet.org/dumont instead of the product site** — Readers land on a copy whose canonical names another page, and crawlers keep the old address alive. → §LI.3
 

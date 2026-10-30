@@ -708,3 +708,4 @@
 
 ## Track T — Releases and links match what the site describes
 
+- **D252** — v2026.3.2 is the Latest release on openviglet/dumont, with notes written from changelog.json, and ghcr.io/openviglet/dumont-ce:latest and :2026.3.2 carry the same build.
