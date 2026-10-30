@@ -276,33 +276,6 @@ chat, a shopping copilot and insights, has no page, and nothing links to a demo.
 recording rather than hand-made mock-ups, and a link check covers the new calls to
 action.
 
-### XLIX.59 One shopper's story through the demo store (D203)
-
-**What happens.** Each demo task delivers a feature, and the guided layer names them one
-by one. Nothing orders them into a journey, so the tour, the site and the docs would
-each pick a different sequence.
-
-**What it should do.** One scripted journey, the spine every other surface follows. A
-fictional shopper preparing her first winter mountain crossing:
-
-1. **Arrives** — trending chips show the catalog at a glance (D202).
-2. **Says what she needs** — "light rain jacket under R$400"; the facets set themselves
-   and say what they understood (D199), and a misspelling still finds the jacket.
-3. **Asks** — "what do I need for two days in the cold?"; a cited answer quotes a guide
-   and its products (D198).
-4. **Compares** — three jackets side by side, with a neutral summary (D200).
-5. **Builds the kit** — the plan becomes a staged kit of in-stock items (D201).
-6. **Checks one item** — the product page, Related and the chat scoped to it (D198).
-7. **Buys** — the kit lands in the cart, checkout in test mode.
-8. **Backstage** — the same query natively versus Turing (D195), then wp-admin's insights
-   with her searches and a failed one turned into a synonym (D178).
-
-Landed: `wordpress/demo/story.md` (both languages) and `npm run e2e:story`, in English;
-chapter 3 asks the Site assistant (Turing T1176). Left: the tour's markers renumbered to
-these chapters, and the spec in pt_BR.
-
-**Gate.** The story spec runs green on a fresh demo stack with a key.
-
 ### XLIX.60 A narrated demo video of the story (D204)
 
 **What happens.** The plugin has screenshots per screen and, since D179, a raw recording
@@ -545,6 +518,25 @@ them. Never edit `curated.json` to whatever comes back without that reason: it i
 demo's contract.
 
 **Gate.** `npm run test:e2e:demo` green on the published image.
+
+### XLIX.94 The story plays in pt_BR too (D244)
+
+**What happens.** `npm run e2e:story` (`tests/e2e/story/shopper.story.mjs`) plays
+`demo/story.md` in English and skips, with the reason, on a demo started with
+`DEMO_LOCALE=pt_BR`. `story.md` already carries each chapter's Portuguese query, but
+nothing checks that the Portuguese journey works end to end.
+
+**What it should do.** The spec reads its words from a per-locale table, as
+`tests/e2e/demo/tour.spec.mjs` does: the queries from `story.md`'s pt_BR lines, and the
+labels a pt_BR demo shows (popular searches, "Entendido:", the compare bar, "Planejar um
+kit", the checkout fields and the offline payment's translated title, the insights
+cards), read off a pt_BR stack rather than guessed. Chapter 3 asks the pt_BR curated
+prompt in `ai-prompts.json`, which already names its cited guide. The synonym chapter
+uses a Portuguese word the catalog does not hold.
+
+**Gate.** `run-docker.cmd demo reset`, then `DEMO_LOCALE=pt_BR run-docker.cmd demo` with
+`OPENAI_API_KEY`, and `npm run e2e:story` green; English still green after switching
+back.
 
 ## L The documentation area
 
