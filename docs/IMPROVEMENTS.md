@@ -296,6 +296,9 @@ prospect.
 - Output under `wordpress/demo/video/` (sources and script in the repo, rendered files as
   release assets, not committed), embedded on the site's WordPress page and the docs.
 
+Landed: `npm run e2e:story:record` and `npm run story:video` (cards, clips, English
+captions, 1m28s). Left: narration, pt_BR captions, the 30-second cut, the embeds.
+
 **Gate.** The assembly runs from a clean checkout on the demo stack, and a check fails
 when a chapter clip is missing or older than the story spec it was recorded from.
 

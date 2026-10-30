@@ -117,8 +117,8 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D197** (deps: D203 ✅, D204) **The site has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
-- 📋 **D204** (deps: D203 ✅) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
+- 📋 **D197** (deps: D203 ✅, D204 ⏳) **The site has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
+- ⏳ **D204** (deps: D203 ✅) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — The video has no narration, no pt_BR captions, no 30-second cut, and is embedded nowhere yet. → §XLIX.60
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D237** (deps: —) **Inside WordPress Playground the plugin cannot reach Turing: PHP requests go through the browser and get no CORS answer** — A Playground demo is only possible if the plugin can talk to a hosted Turing from playground.wordpress.net. → §XLIX.87
 - 📋 **D238** (deps: —) **A Turing key in a Playground's wp-admin is readable by its visitor, and keys are unscoped, so one can wreck the demo** — A public demo has to hold no key: a PUBLIC SN site already searches and chats anonymously, and every write needs a key. → §XLIX.88
@@ -167,6 +167,12 @@ This track has no remaining pending tasks.
 
 - **The story plays green in pt_BR as well as English** npm run e2e:story passes on a
   demo started with DEMO_LOCALE=pt_BR, using story.md's Portuguese queries.
+
+## Done when — D204
+
+- **The video carries narration, pt_BR captions and a 30-second cut** story:video writes
+  story.mp4 with a narration track whose voice licence is recorded, story.pt.srt, and a
+  30-second cut, and the site's WordPress page and the docs embed the release asset.
 
 ## Non-goals (do NOT add as tasks)
 
