@@ -117,7 +117,6 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 💭 **D196** (deps: —) **The demo store has no Turing anyone can reach, so a Playground link or a pitch cannot search or chat** — Playground hosts WordPress for free; Turing must survive strangers and an LLM bill without a person watching it. → §XLIX.52
 - 📋 **D197** (deps: D203 📋, D204) **The site has a page for AEM but none for WordPress and WooCommerce, the plugin with the most to show** — The site is where a prospect lands, and it says nothing about the plugin, its search or the demo store that proves it. → §XLIX.53
 - 📋 **D204** (deps: D203 📋) **There is no demo video of the product, so a pitch, the site or a post cannot show the story in two minutes** — Most prospects will watch before they ever try, and a video replayed from the story spec stays true as the product changes. → §XLIX.60
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
@@ -125,7 +124,7 @@ This track has no remaining pending tasks.
 - 📋 **D203** (deps: D195 ✅, D198 ✅, D199 ✅, D200 ✅, D201 ⏳, D202 ✅, D178 ✅) **The demo's features are separate stops, and no single path walks a visitor from a vague need to a paid-for cart** — A story sells: one shopper, each feature the next step. → §XLIX.59
 - 📋 **D237** (deps: —) **Inside WordPress Playground the plugin cannot reach Turing: PHP requests go through the browser and get no CORS answer** — A Playground demo is only possible if the plugin can talk to a hosted Turing from playground.wordpress.net. → §XLIX.87
 - 📋 **D238** (deps: —) **A Turing key in a Playground's wp-admin is readable by its visitor, and keys are unscoped, so one can wreck the demo** — A public demo has to hold no key: a PUBLIC SN site already searches and chats anonymously, and every write needs a key. → §XLIX.88
-- 📋 **D239** (deps: D237, D238, D196) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — A Playground blueprint boots the store in the browser with nothing to install, resets on reload and leaves D196 only Turing to host. → §XLIX.89
+- 📋 **D239** (deps: D237, D238, D196 ⏸) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — A Playground blueprint boots the store in the browser with nothing to install, resets on reload and leaves D196 only Turing to host. → §XLIX.89
 
 ## Done when — D144
 
