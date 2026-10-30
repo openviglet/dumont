@@ -338,28 +338,6 @@ key (see the two tasks this depends on). WordPress costs nothing per visitor.
 **Gate.** A Playwright run opens the blueprint URL, waits for the store, searches a
 seeded product and gets a result from the hosted Turing.
 
-### XLIX.91 A staged id the shop does not sell leaves the kit (D241)
-
-**What happens.** Playing the demo's story (D203) live, Build my kit staged post 11, the
-demo's "Search the shop" page, as a product. `buildKit` in `src/public/copilot.js` asks
-the Store API for each staged id (`shopProduct`); for a page it gets a 404 and `null`,
-and only a product that answers is checked for stock, so the page stays ticked. "Add the
-kit to cart" then posts `{"id":11}` to `/wc/store/v1/cart/add-item` and WooCommerce
-answers 400 `woocommerce_rest_cart_invalid_product`: the shopper reads "Added 13 of 14".
-
-Turing's kit stages any document that is not a guide type, so any indexed page can be
-staged; Turing has no option to say which types are products (filed there).
-
-**What it should do.**
-- A staged id the Store API does not know as a product leaves the kit before it is shown
-  as buyable: removed from its stage, never ticked, never sent to the cart. A stage left
-  empty is said in the unfilled line, as a need the catalog has nothing for.
-- Once Turing takes the product types, the block sends `product` beside `guideTypes`, so
-  the page is never staged and the 404 lookup is never made.
-
-**Gate.** woo/kit.spec.mjs with a fixed reply staging a page id beside two products: the
-page is not listed, "Add 2 products to the cart", and no add-item request names it.
-
 ### XLIX.92 Ask about the product on the page (D242)
 
 **What happens.** The demo's product page carries the copilot under "Not sure it fits
