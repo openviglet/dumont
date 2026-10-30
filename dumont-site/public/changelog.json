@@ -12,7 +12,6 @@
   "[New] AEM as a Cloud Service Publish Tier through the Delivery APIs, Content Fragments and Assets from Publish, and Recovery of Dropped Adobe I/O Events",
   "[New] AEM Component Extractors, Schema per Content Type and Versioned Content-Type Recipes",
   "[New] Adobe Edge Delivery Services (EDS) Source with Reindex and Dry Scan",
-  "[New] Jobs Connector Plugin for Job-Board APIs (Adzuna, Jooble, BNE, JSearch) under Paid-Call Caps",
   "[New] Several Connector Plugins in One Instance, and One Docker Image That Bundles Them All",
   "[New] AI-Assisted Source Inference",
   "[New] Connector Run Outcomes Exposed to Prometheus",

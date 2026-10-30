@@ -11,6 +11,10 @@
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /src
 ARG CACHE_BUST=none
+# The Node that frontend-maven-plugin downloads (v26) links against libatomic, which the
+# temurin JDK image does not ship; without it `pnpm install` exits 127 (D252).
+RUN apt-get update && apt-get install -y --no-install-recommends libatomic1 \
+    && rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN chmod +x mvnw
 # Build the connector + all connector plugins (samples excluded). The frontend
