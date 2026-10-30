@@ -330,7 +330,7 @@ export const WORDPRESS_STORY: StoryChapter[] = [
     feature: "Side by side, with a summary",
     body:
       "Compare, ticked on the search results, opens the products together: the rows that differ are marked, and a summary written by AI from the table sits above it, labelled as such.",
-    alt: "Three jackets compared in a table, with an AI summary of the table above it.",
+    alt: "A rain jacket, gloves and trousers compared in a table, with an AI summary above it.",
   },
   {
     title: "Builds the kit",

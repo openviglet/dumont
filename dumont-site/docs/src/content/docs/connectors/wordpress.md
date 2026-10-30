@@ -194,12 +194,16 @@ offers its shop fields as sources: **Product: Price**, **Regular price**, **Sale
 its price, its stock as a **Stock** facet (in the shop's words, "In stock"), its product
 categories and tags, and each global attribute (`pa_color`, ...) as a facet. Turn on
 **Ranges** for the price to filter by "Up to 50", "50 – 100" and so on. A product whose
-stock changes from an order is sent again, although no post was saved.
+stock changes from an order is sent again, although no post was saved, and so is a variable
+product when one of its variations changes.
 
 In the **Turing search** block a product's result shows its price in the shop's currency
 (the regular price struck through when it is on sale) and an **Add to cart** button. It
 adds one through WooCommerce's Store API without leaving the page, and says whether it
-worked, with WooCommerce's reason when it did not (out of stock, say).
+worked, with WooCommerce's reason when it did not (out of stock, say). A variable product
+(one sold in colours or sizes) is indexed once, with its variations' values as facet values,
+and **Add to cart** here, in the catalog copilot and in a kit puts in its first variation the
+shop can sell.
 
 The same mapping is readable and writable as JSON at `viglet-dumont/v1/mapping`. A theme
 can map in code with the `viglet_dumont_mapping` filter, and change a document just before

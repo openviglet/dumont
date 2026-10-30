@@ -386,33 +386,6 @@ demo's contract.
 
 **Gate.** `npm run test:e2e:demo` green on the published image.
 
-### XLIX.95 One product per design, its colours as variations (D245)
-
-**What happens.** `wordpress/demo/seed/catalog.php` creates one simple product per
-colour ("Catbells light rain jacket, slate", "…, moss", "…, ember", "…, sky"): 132
-products for about 45 designs. Turing then sees four near-identical documents per
-design, and it shows everywhere the story goes (D203's video, 2026-10-30):
-
-- Chapter 4 compares "three jackets" that are three colours of one Catbells jacket.
-- Build my kit stages three colours of one tent (D240 is the block-side half).
-- Four colours of the rain jacket fill the top of `waterproof jacket`, above the buying
-  guide (possibly part of D243).
-
-A real shop sells a jacket in four colours, not four jackets.
-
-**What it should do.**
-- The seed makes one variable product per design, its colours as variations of the
-  `pa_color` attribute, each variation with its own D218 picture and the stock rule the
-  seed uses today.
-- The WooCommerce mapping indexes the parent once, colours as a multi-value facet, so
-  search, compare and the kit show one card per design.
-- Adding to the cart from search, the copilot or the kit: the Store API needs a variation
-  id for a variable product. The block either sends the first in-stock variation or links
-  to the product page to choose; decide in the task, and keep the kit's one-click promise.
-
-**Gate.** `npm run test:e2e:demo` and `npm run e2e:story` green; the compare chapter
-shows three different jackets.
-
 ### XLIX.96 Narrate the demo video and publish it (D246)
 
 **What happens.** `npm run story:video` (D204) builds `story.mp4` and `story-30s.mp4`
@@ -474,6 +447,47 @@ page's "Try it locally" drops its Windows-only note.
 
 **Gate.** On Linux with Docker, `bin/run-docker.sh demo` ends with the storefront
 answering on 38082 and `npm run test:e2e:demo` passing against it.
+
+### XLIX.99 Plain text for the compare summary's data (D249)
+
+**What happens.** On the demo store (D245's re-recorded story, chapter 4), the AI
+summary above Compare products reads "the jacket costing &#36;151.20, the gloves
+&#36;49.00". `Viglet_Dumont_Compare` (`src/includes/class-viglet-dumont-compare.php`)
+builds each price as `wp_strip_all_tags( wc_price( … ) )`, which drops the tags and
+keeps WooCommerce's HTML entities. The table renders them as `$` in the page, but the
+same rows go to Turing's summary as data, so the model reads `&#36;` and writes it back,
+and the summary is shown as text.
+
+**What it should do.**
+- The rows sent as the summary's data hold plain text: entities decoded
+  (`html_entity_decode( …, ENT_QUOTES | ENT_HTML5, 'UTF-8' )`) after the tags are stripped,
+  for every cell, not only the price.
+- The cache key for the summary changes with the data, so a summary written from the
+  entity-laden rows is not served again.
+
+**Gate.** A CompareTest case: a price whose formatted HTML holds `&#36;` reaches the
+summary data as `$`, and a live `demo-ai` run of the compare chapter shows no `&#` in
+the summary.
+
+### XLIX.100 A cart status that survives the results' take-over (D250)
+
+**What happens.** The search block renders its result cards on the server, then takes
+them over once its client-side search answers, replacing `state.results` with new
+objects. A visitor who clicks a card's **Add to cart** in between gets the product in
+the cart (the Store API answers 201) but never sees "Added to your cart.":
+`actions.addToCart` in `src/public/search-block.js` writes `cartStatus` on the result
+object it read before the await, and that object is no longer the one on screen. Found
+by the woo spec for a variable product (D245), which failed only in a full run, when the
+page was slower; it now waits for the card's price first.
+
+**What it should do.**
+- A result's cart status survives the take-over: keyed by product id in the block's state
+  (as the compare list already is), or the server-rendered results kept as the same objects
+  when the client's answer holds the same ids.
+- The same for the copilot's and Related's cart buttons, which share `addToCart`.
+
+**Gate.** A woo spec that clicks Add to cart as soon as the server-rendered card is
+visible, without waiting for the price, and sees "Added to your cart.".
 
 ## L The documentation area
 
