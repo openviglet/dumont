@@ -713,4 +713,4 @@
 
 - **D252** — v2026.3.2 is the Latest release on openviglet/dumont, with notes written from changelog.json, and ghcr.io/openviglet/dumont-ce:latest and :2026.3.2 carry the same build.
 - **D253** — The AppImage is Dumont-x86_64.AppImage, and the installer, desktop entry, banner, distribution README and Maven name all read Viglet Dumont.
-- **D254 (the repository files)** — The READMEs link openviglet.github.io/dumont, and CI refuses a README that points at www.viglet.org/dumont or docs.viglet.org/dumont.
+- **D254** — The repository homepage now names https://openviglet.github.io/dumont/, set with gh repo edit.

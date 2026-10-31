@@ -38,5 +38,3 @@
 - ⏸ **D246** (deps: D204 ✅) **The demo video is silent and published nowhere, so a prospect never meets it** — set aside (Needs a chosen voice and a published release.): A pitch video without a voice or a link is a file on one machine (follows D204). → §XLIX.96
 
 ## Track T — Releases and links match what the site describes
-
-- ⏸ **D254** (deps: —) **The README and the repository homepage point at www.viglet.org/dumont instead of the product site** — set aside (A public repo setting the owner changes.): GitHub's homepage field still names www.viglet.org/dumont; the owner sets it with gh repo edit. → §LI.3

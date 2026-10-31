@@ -372,21 +372,3 @@ system, and docs.viglet.org/dumont later redirects to it.
 Filed from the portfolio review of 2026-10-30 (visibility repo, estrategia/portfolio.md
 and produtos/dumont.md): the release, the names on the files and the links in the README
 trail the site and the 2026.3 line.
-
-### LI.3 The README points at openviglet.github.io/dumont (D254)
-
-**Where it showed.** The README's "Product page" line and its closing link point at
-www.viglet.org/dumont/, and the GitHub homepage field says the same. That page still
-answers 200, with a canonical to openviglet.github.io/dumont/, where the product site
-and its documentation moved on 2026-10-29.
-
-**Why it costs.** A reader who follows the README lands on a copy that names another
-page as the real one, and a crawler or AI assistant that trusts the repository keeps the
-old address alive. The suite decided that the product sites live on
-openviglet.github.io, with the documentation in the product's own repository (visibility
-repo, CLAUDE.md and produtos/dumont.md, 2026-10-30).
-
-**Design.** Point the README's product and documentation links and the homepage field at
-openviglet.github.io/dumont/, sweep the other READMEs in the repository (plugins,
-WordPress plugin `readme.txt` "Plugin URI") for the old host, and add a docs check that
-refuses www.viglet.org/dumont and docs.viglet.org/dumont in README files.
