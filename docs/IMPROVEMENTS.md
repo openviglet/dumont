@@ -386,6 +386,91 @@ reindex reports the same.
 **Done when.** On a Turing with RAG embedding on, `run-docker.cmd demo` completes, and a
 unit test covers a timed-out import counted as sent rather than failed.
 
+### XLIX.102 Waterproof trousers have their own category (D257)
+
+**What happens.** `demo/seed/catalog.php` files *Skiddaw waterproof trousers* under
+`waterproof-jackets`, and `images.php` draws by category, so the trousers are drawn as a
+jacket. The story's chapter 4 searches "waterproof jacket" and ticks the first three
+Compare boxes, which are Catbells light rain jacket, Helvellyn waterproof gloves and
+Skiddaw waterproof trousers: the video compares a jacket with gloves and trousers.
+Ticking the "Waterproof jackets" category first still keeps the trousers in (measured on
+the demo stack).
+
+**What it should do.**
+- A `waterproof-trousers` category (en and `pt_BR.php`), its care line, and a trousers
+  drawing in `images.php`; the gaiters may join it.
+- Chapter 4 ticks the category filter before comparing, so it shows the filters and compares
+  three jackets (Catbells, Borrowdale, Helvellyn mountain shell or Wasdale running shell).
+- The seed's other near-misses checked in the same pass: the sleeping mat and silk liner sit
+  under `sleeping-bags`.
+
+**Done when.** The story's chapter 4 compares three waterproof jackets, and no product's
+drawing contradicts its name.
+
+### XLIX.103 Close matches when the refined search finds nothing (D258)
+
+**What happens.** A shopper's sentence of five words or more often lists **0 results**
+while the answer above them names products that fit (search block on the demo stack):
+"waterproof hiking boots under $150 for wet hills" → 0 results, the answer recommends
+the Scafell waterproof hiking boot at $143.20; "lightweight tent for two under $400" →
+0, the answer names the Glaramara two-person tent; "warm jacket for a cold night
+camping" → 0. nl-filters reads the price into a filter, but the remaining words are
+searched as they are, so every one of them must match.
+
+**What it should do.** When the refined search finds nothing, the block retries with the
+remaining words relaxed (any of them, best-first), and failing that lists the products
+the answer cites; it says which it did ("Showing close matches"). The shopper never
+reads an answer about products the page says do not exist.
+
+**Done when.** The three sentences above list the products their answers name, with a
+test on the search block for the fallback.
+
+### XLIX.104 Show the corrected results (D259)
+
+**What happens.** Searching `helvelyn` (one letter off *Helvellyn*, four products and a
+range of the demo) shows "Did you mean: helvellyn" over **No results found**: the
+shopper has to click again to see anything. The story's chapter 2 shows this, and on
+video it reads as a failure.
+
+**What it should do.** When a query finds nothing and Turing's spell-check offers a
+correction that does, the block searches the correction and says so ("Showing results
+for *helvellyn*. Search instead for *helvelyn*"), as the large shops do. Turing's own
+autocorrection may already do it on the first request; the block sends
+`autoCorrectionDisabled: true` on the refined one — check which call should carry it.
+
+**Done when.** `helvelyn` lists the Helvellyn products with the line above, and the
+story's chapter 2 shows results for it.
+
+### XLIX.105 Answer a sentence whose filters were understood (D260)
+
+**What happens.** The search block asks Turing for an answer only when the query is a
+question or has five words or more (`isQuestion` in `src/public/search-block.js`), while
+it reads filters from three words (`readsAsSentence`). So "rain jacket under $400" is
+understood (Price: ≤ 400, two jackets) and gets no answer, and "a rain jacket under
+$400" gets one: one word decides, which a shopper cannot know.
+
+**What it should do.** A query whose filters Turing understood is a sentence about a
+need, and is answered like one; the five-word rule stays for queries nothing was read
+from.
+
+**Done when.** "rain jacket under $400" shows an answer on the demo, with a test on the
+block's decision.
+
+### XLIX.106 A second narration line at each chapter's highlight (D261)
+
+**What happens.** After the story learned to hold on its results (each chapter now 10–27
+s), each chapter's narration is one line of 2–8 s read over its card, then the chapter
+plays on in silence. The longest, the kit (27 s), says nothing while the stages, prices
+and cart total are on screen.
+
+**What it should do.** `demo/narration/script.json` takes an optional second line per
+chapter read at its highlight (chapters.json has the time), saying what the screen shows
+("Two tents under four hundred dollars, and an answer that cites them");
+`story-video.mjs` places it there, and `story:narration` buys it like the others.
+
+**Done when.** No chapter has more than about 6 s without a voice, and the takes still
+fit before the next card.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
