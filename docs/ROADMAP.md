@@ -118,7 +118,6 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D260** (deps: —) **A query whose filters were understood gets no answer under five words** — One word decides whether rain jacket under 400 is answered, which a shopper cannot know. → §XLIX.105
 - ⏳ **D261** (deps: —) **The narrated demo video is silent for most of each chapter once results are held on screen** — Buy the English takes and record the English video the same way. → §XLIX.106
 - ⏳ **D265** (deps: —) **The demo store's pictures are drawings, which read as a mock-up on video** — Buy the 54 photos left once Ideogram accepts the key again (listed in the design). → §XLIX.110
 - 📋 **D266** (deps: —) **The pt_BR demo store's addresses are English, product and guide slugs alike** — A Brazilian shopper reads product and choosing-a-backpacking-tent in every crumb of a store in Portuguese. → §XLIX.111

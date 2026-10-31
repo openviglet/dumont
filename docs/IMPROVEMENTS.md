@@ -364,21 +364,6 @@ a published release to point at.
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
 
-### XLIX.105 Answer a sentence whose filters were understood (D260)
-
-**What happens.** The search block asks Turing for an answer only when the query is a
-question or has five words or more (`isQuestion` in `src/public/search-block.js`), while
-it reads filters from three words (`readsAsSentence`). So "rain jacket under $400" is
-understood (Price: ≤ 400, two jackets) and gets no answer, and "a rain jacket under
-$400" gets one: one word decides, which a shopper cannot know.
-
-**What it should do.** A query whose filters Turing understood is a sentence about a
-need, and is answered like one; the five-word rule stays for queries nothing was read
-from.
-
-**Done when.** "rain jacket under $400" shows an answer on the demo, with a test on the
-block's decision.
-
 ### XLIX.106 A second narration line at each chapter's highlight (D261)
 
 **What happens.** After the story learned to hold on its results (each chapter now 10–27
