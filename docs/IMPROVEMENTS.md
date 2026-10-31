@@ -430,6 +430,9 @@ relevance over the expanded terms, which moved since the cases were written: the
 changed under them (photos, D265; categories, D257; Brazilian prices, D268) and each
 reindex re-embeds the documents.
 
+The block searches Turing's pt_BR index, which no reindex updates (D272): judge the
+order only once D272 indexes into it.
+
 **What it should do.** Decide per case whether the curated order is still the story the
 demo tells. Either tune the demo (a Search tuning spotlight for the guide, which is a
 feature the demo can show) or loosen the case to what it is there to prove: the synonym
