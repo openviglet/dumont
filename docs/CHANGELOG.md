@@ -711,6 +711,12 @@
 - **D246 (narration)** — The video is narrated: npm run story:narration buys one ElevenLabs take per chapter and language through polyweave, and story:video mixes them as English and Portuguese audio tracks.
 - **D196 (seed)** — turing-demo.viglet.org gets the tarnfell SN site (74 documents, site key tarnfell) as a boot seed and allows playground.wordpress.net, in the cloud repo (25a9090).
 - **D262** — While a sentence's filters are read, the search block says Reading your search and keeps the empty state hidden until the refined search answers.
+- **D263** — The demo shows no localhost: crumbs drop this site's domain in the script and the server, the pt_BR store is Recanto da Serra and its price filter reads Preço.
+- **D264** — The seed dates products and guides over the past eight months, the same day on every seed, and removes WordPress's default post and page.
+- **D268** — The pt_BR store sells in reais from Brazil: BRL, prices at about 5.5 to the dollar ending in ,90, ranges with them, and a Brazilian checkout in the story.
+- **D269** — run-docker records a mountain-gear shop's searches in the store's language once per SN site, so a fresh demo has popular searches.
+- **D265 (14 photos)** — npm run demo:photos buys Ideogram photos through polyweave, clothing as a flat lay and gear on the hill, and the seed imports the 800 px WebP where one exists.
+- **D261 (pt-BR narration)** — Ana, the owner, narrates the pt-BR video: a line per card and one per result held still, over a music bed, with Portuguese cards.
 
 ## Track T — Releases and links match what the site describes
 

@@ -124,7 +124,10 @@ This track has no remaining pending tasks.
 - 📋 **D258** (deps: —) **A sentence about a need lists no results while its answer names products that fit it** — The shopper reads a recommendation for a product the page says does not exist, measured on three demo sentences. → §XLIX.103
 - 📋 **D259** (deps: —) **A misspelt search shows Did you mean over no results, so the shopper has to click again** — On the demo's helvelyn search the video shows a failure where a shop would show the corrected results. → §XLIX.104
 - 📋 **D260** (deps: —) **A query whose filters were understood gets no answer under five words** — One word decides whether rain jacket under 400 is answered, which a shopper cannot know. → §XLIX.105
-- 📋 **D261** (deps: —) **The narrated demo video is silent for most of each chapter once results are held on screen** — Chapters of 10 to 27 s carry one 2 to 8 s line, so the kit plays on with no voice. → §XLIX.106
+- ⏳ **D261** (deps: —) **The narrated demo video is silent for most of each chapter once results are held on screen** — Buy the English takes and record the English video the same way. → §XLIX.106
+- ⏳ **D265** (deps: —) **The demo store's pictures are drawings, which read as a mock-up on video** — Buy the 54 photos left once Ideogram accepts the key again (listed in the design). → §XLIX.110
+- 📋 **D266** (deps: —) **The pt_BR demo store's addresses are English, product and guide slugs alike** — A Brazilian shopper reads product and choosing-a-backpacking-tent in every crumb of a store in Portuguese. → §XLIX.111
+- 📋 **D267** (deps: —) **A sentence the search block refines is counted as a failed search in the shop's insights** — The owner reads that a shopper found nothing when the refined search found the product. → §XLIX.112
 
 ## Track T — Releases and links match what the site describes
 
@@ -173,6 +176,16 @@ This track has no remaining pending tasks.
 
 - **turing-demo answers tarnfell** https://turing-demo.viglet.org/api/sn/tarnfell/search
   answers with the seeded products after the cloud host is deployed.
+
+## Done when — D265
+
+- **Every product and guide has a photo** npm run demo:photos reports every photo
+  current and the seed draws none.
+
+## Done when — D261
+
+- **The English video is narrated too** The English takes are bought from the current
+  script and story:video --language en carries them.
 
 ## Non-goals (do NOT add as tasks)
 

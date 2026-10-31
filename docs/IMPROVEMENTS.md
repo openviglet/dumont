@@ -471,6 +471,58 @@ chapter read at its highlight (chapters.json has the time), saying what the scre
 **Done when.** No chapter has more than about 6 s without a voice, and the takes still
 fit before the next card.
 
+### XLIX.110 Photos for the demo store (D265)
+
+**What happens.** The demo store's pictures are flat drawings the seed makes with GD,
+which read as a mock-up on video. `npm run demo:photos` buys photorealistic ones from
+Ideogram 4.0 through polyweave (clothing as a flat lay, gear on the hill, guides as
+outdoor scenes), keeps an 800 px WebP of each in `demo/photos/`, and the seed imports a
+photo wherever one exists.
+
+**What is left.** On 2026-10-31 Ideogram answered 402 (credit run out) and then 401 after 14 of
+the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
+- products: blencathra-mountain-tent, borrowdale-gaiters, borrowdale-travel-pack, bowfell-winter-down-bag, catbells-20-litre-kids-pack, catbells-merino-beanie, coniston-bivvy-bag, ennerdale-65-litre-trekking-pack, ennerdale-insulated-bottle, ennerdale-trail-shoe, fairfield-camp-stove, fairfield-synthetic-summer-bag, glaramara-two-person-tent, grisedale-sleeping-mat, grisedale-wool-jumper, haystacks-dry-bag-set, haystacks-one-person-tent, helvellyn-28-litre-daypack, helvellyn-waterproof-gloves, kentmere-map-case, kirkstone-silk-liner, kirkstone-winter-boot, langdale-cook-set, langdale-family-tent, langdale-heavyweight-fleece, mardale-approach-shoe, pillar-lightweight-hiking-boot, scafell-45-litre-pack, scafell-trekking-poles, skiddaw-three-season-down-bag, wansfell-running-top, wasdale-12-litre-running-vest, wasdale-head-torch
+- guides: choosing-a-backpacking-tent, choosing-hiking-boots, down-or-synthetic-insulation, family-walking-kit, first-wild-camp-kit, how-to-care-for-leather-boots, how-to-dry-wet-boots, how-to-fit-a-backpack, how-to-pitch-a-tent-in-rain, how-to-read-a-hydrostatic-head, how-to-reproof-a-waterproof-jacket, how-to-stay-warm-at-night-camping, how-to-store-a-sleeping-bag, how-to-use-trekking-poles, how-to-wash-a-down-jacket, layering-for-the-hills, sleeping-bag-temperature-ratings, trail-running-kit-list, travel-light-kit, what-size-backpack, winter-hillwalking-kit
+
+**Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
+photo current, and the seed draws none.
+
+### XLIX.111 Portuguese addresses on the pt_BR store (D266)
+
+**What happens.** On the pt_BR demo store every address is English: results read
+`product › barraca-familiar-langdale` and guides `choosing-a-backpacking-tent`,
+`how-to-pitch-a-tent-in-rain` (crumbs measured after D263 dropped the domain). A
+Brazilian shop uses `produto` and Portuguese slugs, so on video the crumbs give the demo
+away.
+
+**What it should do.**
+- The pt_BR seed sets WooCommerce's product base to `produto` (and the category base to
+  `categoria`) and flushes the rewrite rules.
+- A guide's slug follows its title in the site's language. The seed keys guides by their English
+  slug today (`get_page_by_path( $slug )` to find one again, photos named by it), so the English key
+  moves to a meta field (`_tarnfell_key`) the seed looks guides up by, and the photo keeps the key.
+- The story's curated searches that name a URL are checked again.
+
+**Done when.** The pt_BR store's crumbs read `produto › …` and Portuguese guide slugs,
+and an English seed is unchanged.
+
+### XLIX.112 Count the refined search, not the typed one (D267)
+
+**What happens.** A shopper's sentence is searched twice by the search block: first as
+typed, then, once nl-filters read it (D199), refined ("a two-person tent under $400" →
+"two-person tent" with Price ≤ 400). Viglet Turing counts both. The typed form usually
+finds nothing, so the shop's insights list "uma barraca para duas pessoas até R$ 2.200"
+among the searches that found nothing, for a shopper who found the tent (measured on the
+pt_BR demo, D262 hid the empty state but not the count).
+
+**What it should do.** When the block will read a sentence's filters (readsAsSentence
+and the reading applies), its first search is sent with `populateMetrics: false`, as the
+server's first page already is; the refined search is the one counted. When nothing is
+read, the typed search is counted as before.
+
+**Done when.** The demo's insights never list a sentence its refined search answered,
+with a test on the requests the block sends.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
