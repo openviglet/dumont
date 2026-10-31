@@ -717,6 +717,7 @@
 - **D269** — run-docker records a mountain-gear shop's searches in the store's language once per SN site, so a fresh demo has popular searches.
 - **D265 (14 photos)** — npm run demo:photos buys Ideogram photos through polyweave, clothing as a flat lay and gear on the hill, and the seed imports the 800 px WebP where one exists.
 - **D261 (pt-BR narration)** — Ana, the owner, narrates the pt-BR video: a line per card and one per result held still, over a music bed, with Portuguese cards.
+- **D259** — A misspelling that finds nothing is searched as corrected, saying Showing results for X with a link to search as typed; one that finds something still offers Did you mean.
 
 ## Track T — Releases and links match what the site describes
 

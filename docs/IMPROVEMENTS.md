@@ -425,22 +425,6 @@ reads an answer about products the page says do not exist.
 **Done when.** The three sentences above list the products their answers name, with a
 test on the search block for the fallback.
 
-### XLIX.104 Show the corrected results (D259)
-
-**What happens.** Searching `helvelyn` (one letter off *Helvellyn*, four products and a
-range of the demo) shows "Did you mean: helvellyn" over **No results found**: the
-shopper has to click again to see anything. The story's chapter 2 shows this, and on
-video it reads as a failure.
-
-**What it should do.** When a query finds nothing and Turing's spell-check offers a
-correction that does, the block searches the correction and says so ("Showing results
-for *helvellyn*. Search instead for *helvelyn*"), as the large shops do. Turing's own
-autocorrection may already do it on the first request; the block sends
-`autoCorrectionDisabled: true` on the refined one — check which call should carry it.
-
-**Done when.** `helvelyn` lists the Helvellyn products with the line above, and the
-story's chapter 2 shows results for it.
-
 ### XLIX.105 Answer a sentence whose filters were understood (D260)
 
 **What happens.** The search block asks Turing for an answer only when the query is a
