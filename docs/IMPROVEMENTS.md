@@ -364,27 +364,6 @@ a published release to point at.
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
 
-### XLIX.102 Waterproof trousers have their own category (D257)
-
-**What happens.** `demo/seed/catalog.php` files *Skiddaw waterproof trousers* under
-`waterproof-jackets`, and `images.php` draws by category, so the trousers are drawn as a
-jacket. The story's chapter 4 searches "waterproof jacket" and ticks the first three
-Compare boxes, which are Catbells light rain jacket, Helvellyn waterproof gloves and
-Skiddaw waterproof trousers: the video compares a jacket with gloves and trousers.
-Ticking the "Waterproof jackets" category first still keeps the trousers in (measured on
-the demo stack).
-
-**What it should do.**
-- A `waterproof-trousers` category (en and `pt_BR.php`), its care line, and a trousers
-  drawing in `images.php`; the gaiters may join it.
-- Chapter 4 ticks the category filter before comparing, so it shows the filters and compares
-  three jackets (Catbells, Borrowdale, Helvellyn mountain shell or Wasdale running shell).
-- The seed's other near-misses checked in the same pass: the sleeping mat and silk liner sit
-  under `sleeping-bags`.
-
-**Done when.** The story's chapter 4 compares three waterproof jackets, and no product's
-drawing contradicts its name.
-
 ### XLIX.103 Close matches when the refined search finds nothing (D258)
 
 **What happens.** A shopper's sentence of five words or more often lists **0 results**

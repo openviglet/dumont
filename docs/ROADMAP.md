@@ -118,7 +118,6 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D257** (deps: —) **The demo files waterproof trousers as a jacket, so the video compares a jacket with gloves and trousers** — A viewer sees the comparison chapter put unlike things side by side, and the trousers are drawn as a jacket. → §XLIX.102
 - 📋 **D258** (deps: —) **A sentence about a need lists no results while its answer names products that fit it** — The shopper reads a recommendation for a product the page says does not exist, measured on three demo sentences. → §XLIX.103
 - 📋 **D260** (deps: —) **A query whose filters were understood gets no answer under five words** — One word decides whether rain jacket under 400 is answered, which a shopper cannot know. → §XLIX.105
 - ⏳ **D261** (deps: —) **The narrated demo video is silent for most of each chapter once results are held on screen** — Buy the English takes and record the English video the same way. → §XLIX.106
