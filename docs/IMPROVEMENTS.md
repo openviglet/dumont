@@ -395,25 +395,6 @@ the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
 **Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
 photo current, and the seed draws none.
 
-### XLIX.111 Portuguese addresses on the pt_BR store (D266)
-
-**What happens.** On the pt_BR demo store every address is English: results read
-`product › barraca-familiar-langdale` and guides `choosing-a-backpacking-tent`,
-`how-to-pitch-a-tent-in-rain` (crumbs measured after D263 dropped the domain). A
-Brazilian shop uses `produto` and Portuguese slugs, so on video the crumbs give the demo
-away.
-
-**What it should do.**
-- The pt_BR seed sets WooCommerce's product base to `produto` (and the category base to
-  `categoria`) and flushes the rewrite rules.
-- A guide's slug follows its title in the site's language. The seed keys guides by their English
-  slug today (`get_page_by_path( $slug )` to find one again, photos named by it), so the English key
-  moves to a meta field (`_tarnfell_key`) the seed looks guides up by, and the photo keeps the key.
-- The story's curated searches that name a URL are checked again.
-
-**Done when.** The pt_BR store's crumbs read `produto › …` and Portuguese guide slugs,
-and an English seed is unchanged.
-
 ### XLIX.112 Count the refined search, not the typed one (D267)
 
 **What happens.** A shopper's sentence is searched twice by the search block: first as
@@ -453,6 +434,30 @@ feature the demo can show) or loosen the case to what it is there to prove: the 
 brings the guide and the jackets back, in the first results, not at rank one.
 
 **Done when.** Both cases pass on a freshly seeded pt_BR demo, twice in a row.
+
+### XLIX.115 The demo indexes in the locale it speaks (D272)
+
+**What happens.** On the Docker demo started with `DEMO_LOCALE=pt_BR`, the site speaks
+pt_BR but the plugin's own `locale` setting is still the default `en_US` (nothing in
+`run-docker.cmd demo` sets it), so `wp dumont reindex` writes the Portuguese catalog
+into Turing's **en_US** index. The SN site's pt_BR index meanwhile holds an older copy
+that no reindex updates: after D266 changed the addresses, `?_setlocale=en_US` returned
+`/produto/barraca-familiar-langdale/` and `?_setlocale=pt_BR` still `/product/…`
+(measured 2026-10-31).
+
+On the same stack the search page went on showing `product ›` crumbs after the en_US
+index had the new URLs, so the block's structured search may also be served from a cache
+in Turing: to confirm before blaming the locale alone.
+
+**What it should do.**
+- `run-docker.cmd demo` / `bin/run-docker.sh` set the plugin's locale to `DEMO_LOCALE`
+  (`VIGLET_DUMONT_TURING_LOCALE` or the option), so the store searches and indexes one
+  locale.
+- Find out what serves the block stale URLs; if it is Turing's cache, file it in Turing's
+  roadmap (viglet-friction).
+
+**Done when.** A pt_BR demo indexes into and searches Turing's pt_BR locale, and a
+reindex is what the search page shows next.
 
 ## L The documentation area
 

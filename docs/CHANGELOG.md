@@ -724,6 +724,7 @@
 - **D258** — A sentence whose every word finds nothing is searched again for any of them, filters kept, under a Showing close matches notice; the cited-products fallback was not needed.
 - **D270** — The pt_BR understand case expects Preço, and a spell-check is read from a settled answer only, so a read sentence is no longer searched as corrected.
 - **D260** — A sentence filters were read from is answered whatever its length; the five-word rule stays for a query nothing was read from.
+- **D266** — The pt_BR store sells under /produto/ and its guides take slugs from their Portuguese titles, found again by a _tarnfell_key meta; English is unchanged.
 
 ## Track T — Releases and links match what the site describes
 

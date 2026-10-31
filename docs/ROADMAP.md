@@ -118,9 +118,9 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D266** (deps: —) **The pt_BR demo store's addresses are English, product and guide slugs alike** — A Brazilian shopper reads product and choosing-a-backpacking-tent in every crumb of a store in Portuguese. → §XLIX.111
 - 📋 **D267** (deps: —) **A sentence the search block refines is counted as a failed search in the shop's insights** — The owner reads that a shopper found nothing when the refined search found the product. → §XLIX.112
 - 📋 **D271** (deps: —) **Two pt_BR curated searches no longer put the guide first, so the demo suite fails on capa de chuva and puffer** — The curated order is the story the demo tells, and a red case nobody believes hides the next real regression. → §XLIX.114
+- 📋 **D272** (deps: —) **A pt_BR Docker demo indexes into Turing's en_US locale, leaving a stale pt_BR copy** — A reindex does not change what the pt_BR store shows, so a seed change looks like it did nothing. → §XLIX.115
 
 ## Track T — Releases and links match what the site describes
 
