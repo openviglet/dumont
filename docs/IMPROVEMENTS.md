@@ -447,6 +447,28 @@ the words joined by OR: its count is the one to keep, under the sentence as type
 **Done when.** The demo's insights never list a sentence its refined search answered,
 with a test on the requests the block sends.
 
+### XLIX.114 The pt_BR curated order drifted (D271)
+
+**What happens.** Two pt_BR cases of `tests/e2e/demo/curated.spec.mjs` fail on the demo
+stack, with or without any change to the search block (measured with D258 stashed, after a
+fresh reindex):
+- `capa de chuva` expects the guide *Como escolher uma jaqueta impermeável* first; the
+  first result is *Jaqueta de chuva leve Catbells*.
+- `puffer` expects *Pluma ou sintético: como escolher uma jaqueta térmica* first; the first
+  result is *Como lavar uma jaqueta de pluma*.
+
+Both are synonym searches (catalog.php's pt_BR synonyms), so the order is Turing's
+relevance over the expanded terms, which moved since the cases were written: the catalog
+changed under them (photos, D265; categories, D257; Brazilian prices, D268) and each
+reindex re-embeds the documents.
+
+**What it should do.** Decide per case whether the curated order is still the story the
+demo tells. Either tune the demo (a Search tuning spotlight for the guide, which is a
+feature the demo can show) or loosen the case to what it is there to prove: the synonym
+brings the guide and the jackets back, in the first results, not at rank one.
+
+**Done when.** Both cases pass on a freshly seeded pt_BR demo, twice in a row.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +

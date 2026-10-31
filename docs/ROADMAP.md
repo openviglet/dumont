@@ -123,6 +123,7 @@ This track has no remaining pending tasks.
 - ⏳ **D265** (deps: —) **The demo store's pictures are drawings, which read as a mock-up on video** — Buy the 54 photos left once Ideogram accepts the key again (listed in the design). → §XLIX.110
 - 📋 **D266** (deps: —) **The pt_BR demo store's addresses are English, product and guide slugs alike** — A Brazilian shopper reads product and choosing-a-backpacking-tent in every crumb of a store in Portuguese. → §XLIX.111
 - 📋 **D267** (deps: —) **A sentence the search block refines is counted as a failed search in the shop's insights** — The owner reads that a shopper found nothing when the refined search found the product. → §XLIX.112
+- 📋 **D271** (deps: —) **Two pt_BR curated searches no longer put the guide first, so the demo suite fails on capa de chuva and puffer** — The curated order is the story the demo tells, and a red case nobody believes hides the next real regression. → §XLIX.114
 
 ## Track T — Releases and links match what the site describes
 
