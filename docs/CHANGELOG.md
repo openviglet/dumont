@@ -726,6 +726,7 @@
 - **D260** — A sentence filters were read from is answered whatever its length; the five-word rule stays for a query nothing was read from.
 - **D266** — The pt_BR store sells under /produto/ and its guides take slugs from their Portuguese titles, found again by a _tarnfell_key meta; English is unchanged.
 - **D272** — The demo's locale is its plugin setting, written from DEMO_LOCALE, so every CLI call indexes the locale the store searches (design §XLIX.115 superseded: no Turing cache: stale pt_BR copy).
+- **D271** — The pt_BR capa de chuva and puffer cases expect the order the freshly indexed demo gives, which still tells their story; both pass twice in a row.
 
 ## Track T — Releases and links match what the site describes
 
