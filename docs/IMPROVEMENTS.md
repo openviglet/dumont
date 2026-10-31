@@ -364,24 +364,6 @@ a published release to point at.
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
 
-### XLIX.103 Close matches when the refined search finds nothing (D258)
-
-**What happens.** A shopper's sentence of five words or more often lists **0 results**
-while the answer above them names products that fit (search block on the demo stack):
-"waterproof hiking boots under $150 for wet hills" → 0 results, the answer recommends
-the Scafell waterproof hiking boot at $143.20; "lightweight tent for two under $400" →
-0, the answer names the Glaramara two-person tent; "warm jacket for a cold night
-camping" → 0. nl-filters reads the price into a filter, but the remaining words are
-searched as they are, so every one of them must match.
-
-**What it should do.** When the refined search finds nothing, the block retries with the
-remaining words relaxed (any of them, best-first), and failing that lists the products
-the answer cites; it says which it did ("Showing close matches"). The shopper never
-reads an answer about products the page says do not exist.
-
-**Done when.** The three sentences above list the products their answers name, with a
-test on the search block for the fallback.
-
 ### XLIX.105 Answer a sentence whose filters were understood (D260)
 
 **What happens.** The search block asks Turing for an answer only when the query is a
@@ -459,7 +441,8 @@ pt_BR demo, D262 hid the empty state but not the count).
 **What it should do.** When the block will read a sentence's filters (readsAsSentence
 and the reading applies), its first search is sent with `populateMetrics: false`, as the
 server's first page already is; the refined search is the one counted. When nothing is
-read, the typed search is counted as before.
+read, the typed search is counted as before. Close matches (D258) add a third search,
+the words joined by OR: its count is the one to keep, under the sentence as typed.
 
 **Done when.** The demo's insights never list a sentence its refined search answered,
 with a test on the requests the block sends.
