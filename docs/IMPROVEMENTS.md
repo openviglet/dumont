@@ -440,30 +440,6 @@ brings the guide and the jackets back, in the first results, not at rank one.
 
 **Done when.** Both cases pass on a freshly seeded pt_BR demo, twice in a row.
 
-### XLIX.115 The demo indexes in the locale it speaks (D272)
-
-**What happens.** On the Docker demo started with `DEMO_LOCALE=pt_BR`, the site speaks
-pt_BR but the plugin's own `locale` setting is still the default `en_US` (nothing in
-`run-docker.cmd demo` sets it), so `wp dumont reindex` writes the Portuguese catalog
-into Turing's **en_US** index. The SN site's pt_BR index meanwhile holds an older copy
-that no reindex updates: after D266 changed the addresses, `?_setlocale=en_US` returned
-`/produto/barraca-familiar-langdale/` and `?_setlocale=pt_BR` still `/product/…`
-(measured 2026-10-31).
-
-On the same stack the search page went on showing `product ›` crumbs after the en_US
-index had the new URLs, so the block's structured search may also be served from a cache
-in Turing: to confirm before blaming the locale alone.
-
-**What it should do.**
-- `run-docker.cmd demo` / `bin/run-docker.sh` set the plugin's locale to `DEMO_LOCALE`
-  (`VIGLET_DUMONT_TURING_LOCALE` or the option), so the store searches and indexes one
-  locale.
-- Find out what serves the block stale URLs; if it is Turing's cache, file it in Turing's
-  roadmap (viglet-friction).
-
-**Done when.** A pt_BR demo indexes into and searches Turing's pt_BR locale, and a
-reindex is what the search page shows next.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
