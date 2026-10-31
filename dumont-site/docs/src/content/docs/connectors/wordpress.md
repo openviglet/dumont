@@ -346,9 +346,10 @@ Turing has a language model for the copilot.
 
 On a product's page (or any indexed post's), the box reads **Ask about** and the product's
 name, and the question goes to Turing with that product's document: Turing answers about it
-first and always cites it, with other products only as alternatives. This needs a Turing
-that takes the document (2026.3 builds after T1178); an older one answers from the whole
-catalog, as before.
+first and always cites it, with other products only as alternatives. The Site assistant does
+the same: a question asked in it on a product's page is about that product, and one asked
+after moving to another page is about that page. This needs a Turing that takes the document
+(2026.3 builds after T1178); an older one answers from the whole catalog, as before.
 
 **Build my kit.** With **Offer Build my kit** on (the default, in the block's settings), the
 block has a second mode, **Plan a kit**. The visitor describes a plan ("two days crossing the

@@ -338,32 +338,6 @@ key (see the two tasks this depends on). WordPress costs nothing per visitor.
 **Gate.** A Playwright run opens the blueprint URL, waits for the store, searches a
 seeded product and gets a result from the hosted Turing.
 
-### XLIX.92 Ask about the product on the page (D242)
-
-**What happens.** The demo's product page carries the copilot under "Not sure it fits
-your trip? Ask us", and the Site assistant waits in the corner. Neither knows which
-product the page shows: `src/blocks/copilot/render.php` and
-`src/blocks/assistant/render.php` send no product, so "Will this keep me dry?" is asked
-of the whole catalog and may cite other jackets. The story spine (D203, chapter 6) had
-to phrase its question around that.
-
-**What it should do.**
-- On a singular product (or any singular indexed post), both blocks send the document's
-  Turing id with the question, and the answer is grounded on that document first: it is
-  cited, and other products appear only as alternatives.
-- The question box says so ("Ask about Catbells light rain jacket"), so the shopper knows
-  what "this" means.
-- Off a product page, nothing changes.
-
-**Settled (2026-10-30).** Turing's copilot takes only `{messages, locale}`, and the
-chat's `filters` would retrieve the product alone and drop the alternatives, so this
-waits on Turing T1178: an optional `documentId` on both that pins the document,
-retrieved and cited first. The block side is then a few lines; no workaround in the
-meantime.
-
-**Gate.** A woo spec on a product page: the copilot request carries the product's id,
-and the box label names the product.
-
 ### XLIX.96 Narrate the demo video and publish it (D246)
 
 **What happens.** `npm run story:video` (D204) builds `story.mp4` and `story-30s.mp4`
