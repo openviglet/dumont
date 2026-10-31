@@ -708,6 +708,7 @@
 - **D242** — The Site assistant sends each turn with its page's documentId through the SDK chat controller (2026.3.13, Turing T1187), and the copilot shares Indexer::subject().
 - **D243** — With T1177 the exact-phrase guide leads again; raincoat and puffer re-read with reasons. Demo suite green on Turing HEAD, not yet the published image; pt_BR unchecked.
 - **D255** — Build my kit sends productTypes product, so Turing stages products only and no page reaches a stage or costs a 404.
+- **D246 (narration)** — The video is narrated: npm run story:narration buys one ElevenLabs take per chapter and language through polyweave, and story:video mixes them as English and Portuguese audio tracks.
 
 ## Track T — Releases and links match what the site describes
 
