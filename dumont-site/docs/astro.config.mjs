@@ -55,6 +55,7 @@ export default defineConfig({
       // themed from the file the landing page is, so one edit there restyles both.
       customCss: ["../src/tokens.css", "./src/styles/area.css"],
       components: {
+        Head: "./src/components/Head.astro",
         SiteTitle: "./src/components/SiteTitle.astro",
         // The site's nav and footer, read from src/lib/site-links.ts as the site's are.
         SocialIcons: "./src/components/SocialIcons.astro",

@@ -67,6 +67,25 @@ function assertSlashedLinks(text, where) {
   }
 }
 
+/**
+ * A BreadcrumbList for every page below the landing one. Without it Google builds the result's
+ * breadcrumb from the URL and drops `dumont`, so a page reads "openviglet.github.io › aem" as
+ * though it belonged to the host. The docs area emits its own (docs/src/components/Head.astro).
+ */
+function breadcrumbJsonLd(route, canonical) {
+  if (route.path === "/") return "";
+  const items = [
+    { name: "Dumont", item: SITE_URL },
+    { name: route.title.replace(/\s*\|\s*Viglet Dumont$/, ""), item: canonical },
+  ];
+  const json = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({ "@type": "ListItem", position: i + 1, ...it })),
+  }).replace(/</g, "\\u003c");
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
 function buildHtml(route) {
   const appHtml = render(route.path);
   const canonical = canonicalOf(route.path);
@@ -99,6 +118,7 @@ function buildHtml(route) {
     `<link rel="canonical" href="${canonical}" />`,
     "canonical link"
   );
+  html = replaceOrThrow(html, /<\/head>/, `${breadcrumbJsonLd(route, canonical)}</head>`, "</head>");
   html = replaceOrThrow(
     html,
     /<div id="root"><\/div>/,
