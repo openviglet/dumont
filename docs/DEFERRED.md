@@ -36,5 +36,6 @@
 - ⏸ **D229** (deps: —) **Plugin Check reports 23 warnings on the package, none fixed or annotated, so the CI gate passes them silently** — set aside (Waits on the plugin name, a person's call (D225).): Left: the name's trademark warning, decided with D225, then failing CI on warnings too. → §XLIX.85
 - ⏸ **D246** (deps: D204 ✅) **The demo video is silent and published nowhere, so a prospect never meets it** — set aside (Needs a demo-stack recording and a plugin release.): Left: the release attaches story.mp4 and captions, and the site embeds them. → §XLIX.96
 - ⏸ **D196** (deps: —) **The demo store has no Turing anyone can reach, so a Playground link or a pitch cannot search or chat** — set aside (The cloud host deploy is the owner's.): Deploy it on the cloud host and confirm turing-demo.viglet.org/api/sn/tarnfell answers. → §XLIX.52
+- ⏸ **D239** (deps: D237 ✅, D238 ✅, D196 ✅) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — set aside (Needs a cloud reseed and a push.): Reseed hosted tarnfell from the pinned seed, publish Pages, then gate and link. → §XLIX.89
 
 ## Track T — Releases and links match what the site describes

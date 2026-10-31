@@ -118,7 +118,6 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D239** (deps: D237 ✅, D238 ✅, D196 ✅) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — A Playground blueprint boots the store in the browser with nothing to install, resets on reload and leaves D196 only Turing to host. → §XLIX.89
 - 📋 **D256** (deps: —) **wp dumont reindex counts a post failed when Turing indexes it after the client's 30 s timeout** — With RAG embedding on, the demo setup exits 1 and reports 50 failures for an index that is complete. → §XLIX.101
 - 📋 **D257** (deps: —) **The demo files waterproof trousers as a jacket, so the video compares a jacket with gloves and trousers** — A viewer sees the comparison chapter put unlike things side by side, and the trousers are drawn as a jacket. → §XLIX.102
 - 📋 **D258** (deps: —) **A sentence about a need lists no results while its answer names products that fit it** — The shopper reads a recommendation for a product the page says does not exist, measured on three demo sentences. → §XLIX.103
@@ -185,6 +184,14 @@ This track has no remaining pending tasks.
 
 - **The English video is narrated too** The English takes are bought from the current
   script and story:video --language en carries them.
+
+## Done when — D239
+
+- **The blueprint URL finds a seeded product on playground.wordpress.net** A Playwright
+  run opens playground.wordpress.net/?blueprint-url=…/dumont/playground/blueprint.json,
+  searches tent and opens a result that is the product it names, from the hosted Turing.
+- **The site's WordPress page and the README link the demo** Added only once the gate
+  above passes, so no link opens a store whose results point at missing posts.
 
 ## Non-goals (do NOT add as tasks)
 

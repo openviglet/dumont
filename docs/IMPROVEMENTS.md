@@ -335,8 +335,8 @@ WooCommerce, reset them, and defend wp-admin from strangers.
 **What this leaves to D196.** Only Turing has to be hosted, behind the read-only demo
 key (see the two tasks this depends on). WordPress costs nothing per visitor.
 
-**From D196's seed.** The blueprint sets site key and SN site `tarnfell`; a result whose
-id carries that key links to `/?p=<n>`, not to the indexed localhost URL.
+**From D196's seed.** Results link to `/?p=<n>`. The seed now pins ids (products
+10000+100n, guides 20000+100n): reseed the hosted `tarnfell` from it.
 
 **Gate.** A Playwright run opens the blueprint URL, waits for the store, searches a
 seeded product and gets a result from the hosted Turing.

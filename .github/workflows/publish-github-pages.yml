@@ -113,6 +113,19 @@ jobs:
 
           find _site -name index.html | sort
 
+      # D239: the WordPress Playground demo under /playground/: the blueprint and the three zips
+      # its URLs name (the plugin, the Tarnfell theme, the catalog seed). Playground downloads
+      # them from the visitor's browser, and Pages sends the CORS headers a release does not.
+      - name: Build the WordPress Playground demo
+        working-directory: wordpress
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          sh bin/build-playground.sh ../_site/playground
+          for file in blueprint.json viglet-dumont.zip tarnfell.zip tarnfell-demo.zip; do
+            test -s "../_site/playground/$file" || { echo "playground/$file is missing"; exit 1; }
+          done
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
