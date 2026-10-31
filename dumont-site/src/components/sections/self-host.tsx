@@ -38,7 +38,7 @@ const COMPOSE = `services:
       TURING_URL: http://turing:2700
       TURING_APIKEY: <your Turing API key>
   turing:
-    image: ghcr.io/openviglet/turing-ce:latest
+    image: ghcr.io/openviglet/turing:latest
     ports:
       - 2700:2700`;
 

@@ -323,7 +323,7 @@ services:
       TURING_APIKEY: <YOUR_API_KEY>
 
   turing:
-    image: ghcr.io/openviglet/turing-ce:latest
+    image: ghcr.io/openviglet/turing:latest
     ports:
       - "2700:2700"
 
