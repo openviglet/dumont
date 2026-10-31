@@ -38,5 +38,6 @@
 - ⏸ **D196** (deps: —) **The demo store has no Turing anyone can reach, so a Playground link or a pitch cannot search or chat** — set aside (The cloud host deploy is the owner's.): Deploy it on the cloud host and confirm turing-demo.viglet.org/api/sn/tarnfell answers. → §XLIX.52
 - ⏸ **D239** (deps: D237 ✅, D238 ✅, D196 ✅) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — set aside (Needs a cloud reseed and a push.): Reseed hosted tarnfell from the pinned seed, publish Pages, then gate and link. → §XLIX.89
 - ⏸ **D261** (deps: —) **The narrated demo video is silent for most of each chapter once results are held on screen** — set aside (Buying the English takes is a paid purchase for the user to approve.): Buy the English takes and record the English video the same way. → §XLIX.106
+- ⏸ **D265** (deps: —) **The demo store's pictures are drawings, which read as a mock-up on video** — set aside (Waits on Ideogram credit and a working key.): Buy the 54 photos left once Ideogram accepts the key again (listed in the design). → §XLIX.110
 
 ## Track T — Releases and links match what the site describes
