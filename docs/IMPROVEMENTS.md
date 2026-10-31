@@ -361,6 +361,28 @@ a published release to point at.
 **Gate.** The released video plays with narration and either caption track on the site
 page; `npm run story:video` still builds a silent one without the narration files.
 
+### XLIX.101 A timed-out import is not a failed one (D256)
+
+**What happens.** On the demo stack (`run-docker.cmd demo`, fresh Turing with generative
+AI on) `wp dumont reindex` prints `cURL error 28: Operation timed out after 30001
+milliseconds` for 50 posts and ends `Error: 30 sent, 50 failed.`, exiting 1 — which
+fails `run-docker.cmd demo`. Yet the SN site then holds all 74 indexable posts: Turing
+finished every import after the client stopped waiting. It embeds each document for RAG
+during the import (~0.5 s each), so a request outlives `Viglet_Dumont_Api_Client`'s
+fixed 30 s `timeout` (`src/includes/class-viglet-dumont-api-client.php`). A second
+reindex reports the same.
+
+**What it should do.**
+- A timeout is not a failure: the CLI says the post was sent and its outcome is unknown,
+  and the queue's retry reads Turing before re-sending.
+- The indexing call's timeout follows the batch: sized by the number of documents, or
+  configurable (`viglet_dumont_http_timeout` filter), rather than one figure for every call.
+- `wp dumont reindex` exits 0 when every post was accepted or is unknown-but-sent, and
+  non-zero only for a refusal Turing returned.
+
+**Done when.** On a Turing with RAG embedding on, `run-docker.cmd demo` completes, and a
+unit test covers a timed-out import counted as sent rather than failed.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +

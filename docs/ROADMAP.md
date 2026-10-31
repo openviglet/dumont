@@ -119,6 +119,7 @@ This track has no remaining pending tasks.
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D239** (deps: D237 ✅, D238 ✅, D196 ⏸) **Trying the plugin needs Docker or a WordPress host, so a link in a post or on the site cannot open the demo** — A Playground blueprint boots the store in the browser with nothing to install, resets on reload and leaves D196 only Turing to host. → §XLIX.89
+- 📋 **D256** (deps: —) **wp dumont reindex counts a post failed when Turing indexes it after the client's 30 s timeout** — With RAG embedding on, the demo setup exits 1 and reports 50 failures for an index that is complete. → §XLIX.101
 
 ## Track T — Releases and links match what the site describes
 
