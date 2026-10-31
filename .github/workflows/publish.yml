@@ -66,7 +66,7 @@ jobs:
           echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> "$GITHUB_OUTPUT"
           echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Configure Maven Settings
-        uses: s4u/maven-settings-action@v4.0.0
+        uses: s4u/maven-settings-action@v4.1.0
         with:
           servers: |
             [{
