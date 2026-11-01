@@ -407,11 +407,14 @@ pt_BR demo, D262 hid the empty state but not the count).
 
 **What it should do.** When the block will read a sentence's filters (readsAsSentence
 and the reading applies), its first search is sent with `populateMetrics: false`, as the
-server's first page already is (the structured search has no such field: Turing T1200;
-instant mode would rewrite the query, so it is not used); the refined search is the one
-counted. When nothing is read, the typed search is counted as before. Close matches
-(D258) add a third search, the words joined by OR: its count is the one to keep, under
-the sentence as typed.
+server's first page already is; the refined search is the one counted. Instant mode
+would rewrite the query, so it is not used. Turing T1200 adds the field to the
+structured search, honouring `false` only, never echoing it back, and the SDK skips its
+own search event for it. The refined call spreads the echoed request
+(`search-block.js`), so it is counted with no reset. It needs an `@viglet/turing-sdk`
+release carrying the field (the plugin takes it from npm). When nothing is read, the
+typed search is counted as before. Close matches (D258) add a third search, the words
+joined by OR: its count is the one to keep, under the sentence as typed.
 
 **Done when.** The demo's insights never list a sentence its refined search answered,
 with a test on the requests the block sends.
