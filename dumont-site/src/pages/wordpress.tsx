@@ -19,7 +19,7 @@ export function WordPressPage() {
       <SiteNav />
       <main className="flex-1">
         <PageHero
-          eyebrow="Dumont for WordPress and WooCommerce"
+          eyebrow="Viglet Turing Search, for WordPress and WooCommerce"
           title={
             <>
               Search that understands what a shopper means,{" "}

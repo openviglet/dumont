@@ -3,7 +3,7 @@ title: "WordPress Connector"
 description: A WordPress plugin that indexes posts, pages and custom post types into Viglet Turing, provisions their fields as facets, and serves the site's search from Turing.
 ---
 
-The WordPress Connector is a **PHP plugin installed inside WordPress**, `viglet-dumont`. It
+The WordPress Connector is a **PHP plugin installed inside WordPress**, **Viglet Turing Search** (`viglet-turing-search`). It
 sends your content to a Viglet Turing Semantic Navigation (SN) site and answers your
 site's search from it.
 
@@ -55,7 +55,7 @@ graph LR
 
 ## Install
 
-**From wp-admin**: download `viglet-dumont-<version>.zip` from the
+**From wp-admin**: download `viglet-turing-search-<version>.zip` from the
 [Dumont releases](https://github.com/openviglet/dumont/releases) (tags
 `wordpress-v<version>`) and upload it under **Plugins → Add New → Upload Plugin**.
 
@@ -69,23 +69,23 @@ release zip as a package, and `composer/installers` puts it in the plugins direc
             "type": "package",
             "package": {
                 "name": "viglet/dumont-wordpress",
-                "version": "2.0.0",
+                "version": "1.0.0",
                 "type": "wordpress-plugin",
                 "dist": {
                     "type": "zip",
-                    "url": "https://github.com/openviglet/dumont/releases/download/wordpress-v2.0.0/viglet-dumont-2.0.0.zip"
+                    "url": "https://github.com/openviglet/dumont/releases/download/wordpress-v1.0.0/viglet-turing-search-1.0.0.zip"
                 },
                 "require": { "composer/installers": "^2.0" }
             }
         }
     ],
-    "require": { "viglet/dumont-wordpress": "2.0.0" }
+    "require": { "viglet/dumont-wordpress": "1.0.0" }
 }
 ```
 
 **With WP-CLI**: `wp plugin install <zip URL> --activate`.
 
-Then open **Viglet Dumont → Setup**.
+Then open **Viglet Turing Search → Setup**.
 
 ---
 
@@ -93,7 +93,7 @@ Then open **Viglet Dumont → Setup**.
 
 ![The Setup page](/dumont/docs/img/screenshots/dumont-wordpress-setup.png)
 
-**Viglet Dumont → Setup** takes the connection, then **Save and test the connection** checks
+**Viglet Turing Search → Setup** takes the connection, then **Save and test the connection** checks
 it one step at a time and stops at the first failure, naming it:
 
 | Step | Fails when |
@@ -165,7 +165,7 @@ custom fields can be added on the Settings page.
 
 ![The Fields page](/dumont/docs/img/screenshots/dumont-wordpress-fields.png)
 
-**Viglet Dumont → Fields** maps, per post type, what else becomes its own Turing field:
+**Viglet Turing Search → Fields** maps, per post type, what else becomes its own Turing field:
 
 - **Source**: a taxonomy, a meta key the posts actually carry, a post field (excerpt,
   slug, menu order, parent) or the featured image URL.
@@ -281,7 +281,7 @@ The same panel's **Assist** section helps while writing, and changes nothing on 
 
 ![The Search column in the post list](/dumont/docs/img/screenshots/dumont-wordpress-posts.png)
 
-**Viglet Dumont → Insights** shows what visitors searched for in the last 24 hours, 7 days,
+**Viglet Turing Search → Insights** shows what visitors searched for in the last 24 hours, 7 days,
 30 days or all time, read from Turing's search metrics with the stored API key: the top
 searches with their clicks and click-through, the searches that found nothing (with when
 they were last made), and the ones that found results nobody opened. Each of those last

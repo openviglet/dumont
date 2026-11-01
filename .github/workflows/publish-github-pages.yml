@@ -122,7 +122,7 @@ jobs:
           npm ci --no-audit --no-fund
           npm run build
           sh bin/build-playground.sh ../_site/playground
-          for file in blueprint.json viglet-dumont.zip tarnfell.zip tarnfell-demo.zip; do
+          for file in blueprint.json viglet-turing-search.zip tarnfell.zip tarnfell-demo.zip; do
             test -s "../_site/playground/$file" || { echo "playground/$file is missing"; exit 1; }
           done
 

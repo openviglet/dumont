@@ -275,16 +275,17 @@ holds nothing the directory forbids.
 ### XLIX.83 Releases deployed to the plugin directory (D227)
 
 WordPress.org never reads GitHub: an approved plugin gets its own SVN repository at
-`plugins.svn.wordpress.org/viglet-dumont`, and what it holds is the package, not the
-history. So the monorepo stays the source and no separate repository is needed; the
-directory becomes one more target of the `wordpress-v*` tag.
+`plugins.svn.wordpress.org/viglet-turing-search` (the slug since D273), and what it
+holds is the package, not the history. So the monorepo stays the source and no separate
+repository is needed; the directory becomes one more target of the `wordpress-v*` tag.
 
-The `release` job in `wordpress-plugin.yml` already builds the `viglet-dumont/` folder
-through `bin/build-zip.sh`, which refuses a tag that disagrees with the plugin header or
-the readme's Stable tag. A step after it commits that folder to `trunk/`, copies it to
-`tags/<version>`, and sends the directory's banners, icon and screenshots to `assets/`
-from a folder kept outside the package. `10up/action-wordpress-plugin-deploy` does this
-from a subfolder through `BUILD_DIR`; the SVN credentials live in repository secrets.
+The `release` job in `wordpress-plugin.yml` already builds the `viglet-turing-search/`
+folder through `bin/build-zip.sh`, which refuses a tag that disagrees with the plugin
+header or the readme's Stable tag. A step after it commits that folder to `trunk/`,
+copies it to `tags/<version>`, and sends the directory's banners, icon and screenshots
+to `assets/` from a folder kept outside the package.
+`10up/action-wordpress-plugin-deploy` does this from a subfolder through `BUILD_DIR`;
+the SVN credentials live in repository secrets.
 
 The first submission is manual and outside this task: a wordpress.org account uploads
 the zip, the review team approves it, and only then does SVN exist.

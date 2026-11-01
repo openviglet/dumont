@@ -5,7 +5,7 @@
 # PHPUnit on the lowest PHP it supports and on a current one.
 #
 # A tag wordpress-v<version> publishes the installable zip on that tag's GitHub release. The zip
-# holds one viglet-dumont/ folder, so it uploads under Plugins > Add New and installs with
+# holds one viglet-turing-search/ folder, so it uploads under Plugins > Add New and installs with
 # Composer through a package repository entry (wordpress/README.md shows it). bin/build-zip.sh
 # refuses a tag that disagrees with the plugin header.
 
@@ -77,7 +77,7 @@ jobs:
           npm run build
 
   # D226: Plugin Check, the tool the WordPress.org review team runs, on the package the release
-  # job would upload (the zip's viglet-dumont/ folder), not on the source tree. Errors fail the
+  # job would upload (the zip's viglet-turing-search/ folder), not on the source tree. Errors fail the
   # job; warnings are reported in the log.
   plugin-check:
     runs-on: ubuntu-latest
@@ -98,7 +98,7 @@ jobs:
 
       - uses: wordpress/plugin-check-action@v1
         with:
-          build-dir: wordpress/build/package/viglet-dumont
+          build-dir: wordpress/build/package/viglet-turing-search
 
   # D182: the browser suite (npm run test:e2e) against a real WordPress and Turing, so a
   # regression in the block, an admin screen, a theme or the pt_BR strings fails here rather

@@ -206,7 +206,7 @@ Every connector needs at least these pieces of information:
 | **AEM** | JSON file + Turing Admin Console | `export/` directory + [Turing → Integration](https://docs.viglet.org/turing/integration-aem) |
 | **Database** | CLI parameters | Command-line: see [Database Connector](/dumont/docs/connectors/database/) |
 | **FileSystem** | CLI parameters | Command-line: see [FileSystem Connector](/dumont/docs/connectors/filesystem/) |
-| **WordPress** | WordPress Admin UI, WP-CLI or environment variables | WordPress → Viglet Dumont → Setup: see [WordPress Connector](/dumont/docs/connectors/wordpress/) |
+| **WordPress** | WordPress Admin UI, WP-CLI or environment variables | WordPress → Viglet Turing Search → Setup: see [WordPress Connector](/dumont/docs/connectors/wordpress/) |
 
 ---
 
