@@ -40,7 +40,9 @@ export function WordPressPage() {
               variant="outline"
               className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white dark:bg-white/10"
             >
-              <a href={LINKS.wordpressDemo}>Run the demo store</a>
+              <a href={LINKS.wordpressPlayground} target="_blank" rel="noreferrer">
+                Try the demo store in your browser
+              </a>
             </Button>
           </div>
         </PageHero>

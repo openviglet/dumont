@@ -119,6 +119,7 @@ This track has no remaining pending tasks.
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 🛠 **D267** (deps: Turing T1200) **A sentence the search block refines is counted as a failed search in the shop's insights** — The owner reads that a shopper found nothing when the refined search found the product. → §XLIX.112
+- 📋 **D274** (deps: —) **A docker compose run cli-demo without SN_DEMO_SITE indexes into the SN site Demo, not the one the demo was set up with** — A reindex or a delete lands in another SN site and the store keeps showing what it had, as with the locale before D272. → §XLIX.117
 
 ## Track T — Releases and links match what the site describes
 
@@ -177,14 +178,6 @@ This track has no remaining pending tasks.
 
 - **The English video is narrated too** The English takes are bought from the current
   script and story:video --language en carries them.
-
-## Done when — D239
-
-- **The blueprint URL finds a seeded product on playground.wordpress.net** A Playwright
-  run opens playground.wordpress.net/?blueprint-url=…/dumont/playground/blueprint.json,
-  searches tent and opens a result that is the product it names, from the hosted Turing.
-- **The site's WordPress page and the README link the demo** Added only once the gate
-  above passes, so no link opens a store whose results point at missing posts.
 
 ## Non-goals (do NOT add as tasks)
 

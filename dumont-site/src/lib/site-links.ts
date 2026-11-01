@@ -23,6 +23,10 @@ export const LINKS = {
   rest: sitePath("/docs/rest-api/"),
   wordpressDocs: sitePath("/docs/connectors/wordpress/"),
   wordpressDemo: sitePath("/docs/connectors/wordpress/#try-it-locally"),
+  // The demo store in WordPress Playground (D239): the blueprint the Pages workflow publishes.
+  wordpressPlayground: `https://playground.wordpress.net/?blueprint-url=${encodeURIComponent(
+    `${SITE_URL}playground/blueprint.json`,
+  )}`,
   repo: "https://github.com/openviglet/dumont",
   license: "https://github.com/openviglet/dumont/blob/HEAD/LICENSE",
   roadmap: "https://github.com/openviglet/dumont/blob/HEAD/docs/ROADMAP.md",

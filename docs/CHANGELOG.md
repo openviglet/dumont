@@ -718,7 +718,7 @@
 - **D265 (14 photos)** — npm run demo:photos buys Ideogram photos through polyweave, clothing as a flat lay and gear on the hill, and the seed imports the 800 px WebP where one exists.
 - **D261 (pt-BR narration)** — Ana, the owner, narrates the pt-BR video: a line per card and one per result held still, over a music bed, with Portuguese cards.
 - **D259** — A misspelling that finds nothing is searched as corrected, saying Showing results for X with a link to search as typed; one that finds something still offers Did you mean.
-- **D239 (blueprint and its bundle)** — A Playground blueprint boots the store on the hosted Turing, published by the Pages workflow; the seed pins product and guide ids, and results link to ?p=id.
+- **D239** — The demo store opens in WordPress Playground from a link on the site, the docs and the README, and a Playwright gate checks it on playground.wordpress.net.
 - **D256** — An import waits two seconds a document, and one Turing did not answer in time counts as sent, not failed: reindex fails only on a refusal.
 - **D257** — Waterproof trousers have a category of their own and the story's chapter 4 narrows to Waterproof jackets first, so it compares three jackets.
 - **D258** — A sentence whose every word finds nothing is searched again for any of them, filters kept, under a Showing close matches notice; the cited-products fallback was not needed.

@@ -400,6 +400,16 @@ reach Turing at another address than the server does, set `VIGLET_DUMONT_PUBLIC_
 
 ---
 
+## Try it in your browser
+
+[Open the demo store in WordPress Playground](https://playground.wordpress.net/?blueprint-url=https%3A%2F%2Fopenviglet.github.io%2Fdumont%2Fplayground%2Fblueprint.json).
+WordPress, WooCommerce, the plugin and the Tarnfell store start in your browser, with nothing
+to install, and search a hosted Viglet Turing. The first load takes two or three minutes
+while the catalog is created. The plugin runs in demo mode: it reads the hosted index and
+never writes to it, so the Search tuning and Search insights screens are hidden.
+Every feature is marked with its chapter in the shopper's story, and nothing you do is kept:
+a reload starts the store again.
+
 ## Try it locally
 
 The plugin's source, [`wordpress/`](https://github.com/openviglet/dumont/tree/2026.3/wordpress)

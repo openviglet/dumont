@@ -314,34 +314,6 @@ keep the two exclusions if the lists stay short and say so; keep
 installed from the directory loads no language pack. Then make the CI job fail on
 warnings too.
 
-### XLIX.89 The demo store in WordPress Playground (D239)
-
-**What happens.** Trying the plugin means Docker (`run-docker.cmd demo`) or a WordPress
-host of one's own. D196 plans a public hosted store, but it has to host WordPress and
-WooCommerce, reset them, and defend wp-admin from strangers.
-
-**What it should do.**
-- A WordPress Playground blueprint (`wordpress/demo/playground/blueprint.json`) that boots
-  WordPress in the visitor's browser with WooCommerce, the plugin, the demo theme and the
-  seed, already configured against a hosted demo Turing, and lands on the store's front page. It sets `features.networking`, without
-  which Playground makes no outbound request; the Turing must be public (D237).
-- A link to it (`playground.wordpress.net/?blueprint-url=...`) on the site's WordPress page
-  (D197), in the README and in posts.
-- The tour fits one visit: Playground starts from the blueprint on every load, so a reload is
-  the reset D196 wanted, and nothing a visitor does survives. The guided layer (D203) is on by
-  default.
-- wp-admin is the visitor's own, so the backstage chapter (settings, the indexing queue)
-  is shown rather than closed.
-
-**What this leaves to D196.** Only Turing has to be hosted, behind the read-only demo
-key (see the two tasks this depends on). WordPress costs nothing per visitor.
-
-**From D196's seed.** Results link to `/?p=<n>`. The seed now pins ids (products
-10000+100n, guides 20000+100n): reseed the hosted `tarnfell` from it.
-
-**Gate.** A Playwright run opens the blueprint URL, waits for the store, searches a
-seeded product and gets a result from the hosted Turing.
-
 ### XLIX.96 Narrate the demo video and publish it (D246)
 
 **What happens.** `npm run story:video` (D204) builds `story.mp4` and `story-30s.mp4`
@@ -418,6 +390,24 @@ joined by OR: its count is the one to keep, under the sentence as typed.
 
 **Done when.** The demo's insights never list a sentence its refined search answered,
 with a test on the requests the block sends.
+
+### XLIX.117 The demo keeps its SN site in its own settings (D274)
+
+**What happens.** The demo's SN site comes from `VIGLET_DUMONT_TURING_SITE:
+${SN_DEMO_SITE:-Demo}` in `docker-compose.yml`, read when each container starts. A demo
+set up with `SN_DEMO_SITE=tarnfell` searches `tarnfell`, but a later `docker compose run
+--rm cli-demo wp dumont reindex` from a shell without the variable indexes and deletes
+in `Demo` instead (measured 2026-11-01 while regenerating the hosted tarnfell seed for
+D239: the deletes and the reindex landed in `Demo`, and `tarnfell` kept its old
+documents). It is the locale's trap that D272 closed, on the site name.
+
+**What it should do.** The same fix as D272: `run-docker.cmd demo` and
+`bin/run-docker.sh` write `site_name` into the demo site's plugin settings from
+`SN_DEMO_SITE`, and the demo's environment sets `VIGLET_DUMONT_TURING_SITE: ""` so the
+option rules for the web, cron and CLI containers alike.
+
+**Done when.** A `docker compose run cli-demo wp dumont status` from a fresh shell names
+the SN site the demo was set up with.
 
 ## L The documentation area
 
