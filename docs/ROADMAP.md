@@ -131,12 +131,6 @@ This track has no remaining pending tasks.
   declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
   second run logs no customSortsChanged.
 
-## Done when — D182
-
-- **The e2e job passes on a push, with linux baselines committed** A run of the job on
-  GitHub passes, and the tests/e2e/snapshots/linux/ set it wrote on its first run was
-  reviewed by eye and committed, so a later visual change fails the job.
-
 ## Done when — D190
 
 - **Each site key holds its own partitioned API key** Provisioning stores a key bound to

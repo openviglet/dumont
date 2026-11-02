@@ -157,29 +157,6 @@ second run reports nothing changed.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.38 The browser suite in CI (D182)
-
-**What happens.** The browser suite (D159, D160, D161) runs only where someone starts
-`run-docker.cmd` by hand. CI (`validate.yml`) builds and unit-tests the plugin but never
-opens a screen, so a regression in the block, an admin screen, a theme or the pt_BR
-strings lands unseen until the next local run.
-
-**What it should do.**
-- A workflow (on push and PR touching `wordpress/`) that starts the stack with
-  `docker compose` and `run-docker.cmd`'s steps written for a Linux runner, runs
-  `npm run test:e2e` (and `E2E_MULTISITE=1` on a schedule, since it doubles the setup),
-  and uploads `tests/e2e/artifacts/` as an artefact.
-- Turing T1113 shipped: every release pushes `turing-ce` at its version and moves
-  `latest`, a branch dispatch publishes `<branch>-snapshot`, and `/api/discovery` names
-  the build's version and commit. The workflow pins a version (or the snapshot of the
-  branch it pairs with) and logs `/api/discovery`, so a failure names the Turing it ran
-  against.
-- The baselines are per platform (`tests/e2e/snapshots/{platform}/`): the first run
-  writes the `linux` set, which is reviewed by eye and committed before the job can fail
-  on a visual change.
-- Speed budgets on a shared runner are noisier than on a laptop; keep them, and read a
-  budget failure against the timing annotations before raising a bound.
-
 ### XLIX.46 Partitioned API keys in place of client-side site filters (D190)
 
 **What happens.** Several WordPress sites share one SN site, told apart by `site_key`

@@ -646,7 +646,7 @@
 - **D170** — With Suggest filters on, a sentence typed into the search block offers Turing's grounded nl-filters reading as chips; one click applies a filter and drops its words from the query.
 - **D173** — An Ask the catalog block talks to Turing's catalog copilot; its cited products show the shop's price and go in the cart with a click, beside the search block's price facets and product cards.
 - **D178** — Search insights summarizes the period through Turing's language model on request, cached and rewritable, beside its tables and the metrics-off notice.
-- **D182 (CI job and Linux launcher)** — The WordPress workflow gains an e2e job that starts WordPress and Turing with bin/run-docker.sh, logs the Turing it ran against, runs the browser suite and keeps its artifacts.
+- **D182** — The browser suite runs green in CI on every push and PR, against 23 reviewed linux baselines.
 - **D183** — The block and the overlay send as-you-type searches as typed, in Turing's instant mode: the last word matches as a prefix with no wildcard guessed, and half-typed words stay out of the search log.
 - **D186** — A Generative AI setting (off by default) declares the manifest's genAi block, so provisioning turns a site's answers on; the Fields screen warns before it applies.
 - **D187** — The Search tuning screen sets newer first, sticky posts first and a post type up or down, and a post stuck from Quick Edit is reindexed so the sticky boost sees it.
