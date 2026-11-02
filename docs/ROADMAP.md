@@ -122,6 +122,7 @@ This track has no remaining pending tasks.
 - 📋 **D280** (deps: D279) **The story is recorded only at a desktop viewport, which crops badly to 9:16** — A second scripted run at a phone viewport gives vertical cuts that show whole results, at no new narration cost. → §XLIX.123
 - 📋 **D281** (deps: D276 ⏸) **No video shows a developer how the plugin is installed, connected and indexed** — The story speaks to shop owners; whoever puts the plugin on a client site needs install, settings and insights instead. → §XLIX.124
 - 📋 **D282** (deps: D276 ⏸, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
+- 🛠 **D196** (deps: —) **The demo store has no Turing anyone can reach, so a Playground link or a pitch cannot search or chat** — Deploy it on the cloud host and confirm turing-demo.viglet.org/api/sn/tarnfell answers. → §XLIX.52
 
 ## Track T — Releases and links match what the site describes
 
