@@ -13,6 +13,10 @@ name: WordPress plugin
 
 on:
   push:
+    # Branches named too: with only `tags` listed, GitHub runs a push workflow for tags alone,
+    # so no push to a branch ever ran this (D182).
+    branches:
+      - '**'
     paths:
       - wordpress/**
       - .github/workflows/wordpress-plugin.yml
