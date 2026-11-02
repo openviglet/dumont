@@ -118,7 +118,6 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D274** (deps: —) **A docker compose run cli-demo without SN_DEMO_SITE indexes into the SN site Demo, not the one the demo was set up with** — A reindex or a delete lands in another SN site and the store keeps showing what it had, as with the locale before D272. → §XLIX.117
 - 📋 **D275** (deps: —) **The video's opening and closing cards never say it is an open source WordPress plugin, nor where to try it** — A viewer from a search, or watching muted, learns neither what to install nor that the Playground demo exists. → §XLIX.118
 - 📋 **D276** (deps: D275, Turing demo image carrying T1190 and T1191) **Only the pt-BR video exists, and every page that will embed it is in English** — The footage differs by language, so English is its own recording, and the primary video the embeds and cuts start from. → §XLIX.119
 - 📋 **D277** (deps: D275, Turing demo image carrying T1190 and T1191) **The pt-BR video shows Site: localhost in the kit chapter and has the old cards** — It is ready and paid for, and Portuguese searches face less competition, so it is published on its own once clean. → §XLIX.120

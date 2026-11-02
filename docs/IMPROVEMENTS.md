@@ -368,24 +368,6 @@ the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
 **Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
 photo current, and the seed draws none.
 
-### XLIX.117 The demo keeps its SN site in its own settings (D274)
-
-**What happens.** The demo's SN site comes from `VIGLET_DUMONT_TURING_SITE:
-${SN_DEMO_SITE:-Demo}` in `docker-compose.yml`, read when each container starts. A demo
-set up with `SN_DEMO_SITE=tarnfell` searches `tarnfell`, but a later `docker compose run
---rm cli-demo wp dumont reindex` from a shell without the variable indexes and deletes
-in `Demo` instead (measured 2026-11-01 while regenerating the hosted tarnfell seed for
-D239: the deletes and the reindex landed in `Demo`, and `tarnfell` kept its old
-documents). It is the locale's trap that D272 closed, on the site name.
-
-**What it should do.** The same fix as D272: `run-docker.cmd demo` and
-`bin/run-docker.sh` write `site_name` into the demo site's plugin settings from
-`SN_DEMO_SITE`, and the demo's environment sets `VIGLET_DUMONT_TURING_SITE: ""` so the
-option rules for the web, cron and CLI containers alike.
-
-**Done when.** A `docker compose run cli-demo wp dumont status` from a fresh shell names
-the SN site the demo was set up with.
-
 ### XLIX.118 The video's cards say what it is and where to try it (D275)
 
 **What happens.** The video opens on a 3 s title card and closes on one, and neither

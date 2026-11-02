@@ -729,6 +729,7 @@
 - **D271** — The pt_BR capa de chuva and puffer cases expect the order the freshly indexed demo gives, which still tells their story; both pass twice in a row.
 - **D273** — The plugin is Viglet Turing Search, slug and text domain viglet-turing-search, version 1.0.0; internal names stay, and admin screens load by page slug.
 - **D267** — A sentence the block reads is searched first uncounted and its refined search counted; one nothing is read from is counted as typed, and close matches never reach the log.
+- **D274** — The demo's SN site is its plugin setting, written by run-docker from SN_DEMO_SITE, so every CLI call indexes the site the store searches.
 
 ## Track T — Releases and links match what the site describes
 
