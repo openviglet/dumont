@@ -205,29 +205,6 @@ routes.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
 
-### XLIX.52 A public hosted demo Turing (D196)
-
-**What happens.** The demo store runs only from `run-docker.cmd demo` on a developer's
-machine. D239 moves WordPress into the visitor's browser through Playground, which
-resets on every load and costs nothing per visitor, but the store it boots still needs a
-Turing it can reach. None is hosted.
-
-**What it should do.**
-- One public demo Turing, deployed from the repo by a workflow, not by hand, with the
-  `Demo` SN site in PUBLIC mode and its index built from the seed (D238). Host and
-  domain are decided in the task; an idea until they are.
-- `turing.allowedOrigins` names `https://playground.wordpress.net`, so Playground calls it
-  directly rather than through its CORS proxy, which works too (measured in D237); no key
-  is handed out.
-- The LLM spend has a hard daily cap from Turing's cost ledger (D174's reading of it):
-  past the cap the chat and answers turn off with a visible note, while search keeps
-  working. Per-IP rate limits on search, chat and copilot.
-- A health check and an uptime alert, and the Turing version it runs exposed for the
-  store's footer.
-
-**Why an idea.** It is the one task in the series that costs money every day and has an
-outside attack surface, so its host, budget and owner are decided before it is designed.
-
 ### XLIX.81 A readme the plugin directory accepts (D225)
 
 The plugin ships today as a zip on a GitHub release, and `src/readme.txt` is written for

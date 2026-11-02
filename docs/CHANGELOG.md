@@ -709,7 +709,7 @@
 - **D243** — With T1177 the exact-phrase guide leads again; raincoat and puffer re-read with reasons. Demo suite green on Turing HEAD, not yet the published image; pt_BR unchecked.
 - **D255** — Build my kit sends productTypes product, so Turing stages products only and no page reaches a stage or costs a 404.
 - **D246 (narration)** — The video is narrated: npm run story:narration buys one ElevenLabs take per chapter and language through polyweave, and story:video mixes them as English and Portuguese audio tracks.
-- **D196 (seed)** — turing-demo.viglet.org gets the tarnfell SN site (74 documents, site key tarnfell) as a boot seed and allows playground.wordpress.net, in the cloud repo (25a9090).
+- **D196** — turing-demo.viglet.org serves the tarnfell SN site, reseeded every 6 h, and the Playground store searches it (design §XLIX.52 superseded: cloud DEMO.md sets the guards).
 - **D262** — While a sentence's filters are read, the search block says Reading your search and keeps the empty state hidden until the refined search answers.
 - **D263** — The demo shows no localhost: crumbs drop this site's domain in the script and the server, the pt_BR store is Recanto da Serra and its price filter reads Preço.
 - **D264** — The seed dates products and guides over the past eight months, the same day on every seed, and removes WordPress's default post and page.
