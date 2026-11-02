@@ -368,27 +368,6 @@ the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
 **Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
 photo current, and the seed draws none.
 
-### XLIX.118 The video's cards say what it is and where to try it (D275)
-
-**What happens.** The video opens on a 3 s title card and closes on one, and neither
-says what is being shown: only Ana's voice says the shop runs on WordPress and that the
-search is Viglet Turing. A viewer who lands on the video from a search, or watches it
-muted, does not learn that it is an open source plugin they can install, and the closing
-card asks for nothing: the demo store in WordPress Playground, the best invitation the
-plugin has, never appears.
-
-**What it should do.**
-- The opening card names the product and what it is: "Viglet Turing Search", an open source
-  plugin for WordPress and WooCommerce, in the video's language.
-- The closing card carries the call to action: the Playground link (the demo store, nothing
-  to install) and the GitHub repository, held long enough to read.
-- `story-video.mjs` draws both cards from the language's strings, so the English and the
-  pt-BR videos get them from the same source and a rebuild keeps them.
-
-**Done when.** `node bin/story-video.mjs --language en` and `--language pt-BR` both open
-on the product card and close on the Playground and GitHub card, and the frames at those
-moments read without the audio.
-
 ### XLIX.119 The English video, the primary one (D276)
 
 **What happens.** Only the pt-BR video exists (Recanto da Serra, 7m28s). D261 shipped
