@@ -395,30 +395,6 @@ chapters.
 the script settles on) plays the Tarnfell story narrated in English, no frame shows
 "localhost", and the D261 criterion is met.
 
-### XLIX.120 The pt-BR video recorded again without localhost (D277)
-
-**What happens.** The pt-BR video was assembled on 2026-10-31 from a stack whose Turing
-image predates T1190 and T1191, so the kit chapter shows "Site: localhost" among a
-product's reasons, and its cards are the ones from before D275. It is otherwise ready,
-and the narration is already paid for.
-
-**Why it still matters.** In Portuguese, searches such as "busca inteligente
-WooCommerce" face far less competition on YouTube, and Brazil has a large WooCommerce
-market. The pt-BR video is secondary to the English one but does not need to wait for
-it: it is published on its own, with a link to the English version, and is not embedded
-on the English pages.
-
-**What it should do.**
-- With the stack on a Turing image carrying T1190 and T1191, record the story again under
-  `DEMO_LOCALE=pt_BR SN_DEMO_SITE=recanto-da-serra` and assemble it with
-  `--language pt-BR`, which picks up the cards of D275. Takes whose line did not change are
-  reused, so the re-record buys nothing new.
-- Check the other open lines VIDEO.md lists as seen in it (D266's English addresses,
-  D265's drawings) and note which remain.
-
-**Done when.** The pt-BR video opens and closes on the D275 cards and no frame shows
-"localhost".
-
 ### XLIX.122 One clip per chapter (D279)
 
 **What happens.** The video is one 7.5-minute piece plus a 30 s teaser. Someone
@@ -507,6 +483,32 @@ and the plugin's pages embed that.
 **Done when.** The site page and the docs play the English video with captions and show
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
+
+### XLIX.126 An English and a pt-BR demo store side by side (D283)
+
+**What happens.** The demo storefront is one WordPress (`wordpress-demo`, `db-demo`, port
+38082) seeded in one language: `DEMO_LOCALE=pt_BR SN_DEMO_SITE=recanto-da-serra` makes it
+Recanto da Serra, unset makes it Tarnfell. Switching means `run-docker.cmd demo reset`, which
+deletes the other store's database, its search history and orders. On 2026-11-01/02 the pt-BR store was deleted twice to regenerate the English seed for
+D239 and rebuilt for D277, and the video work needs both stores (D276 English, D277 pt-BR).
+
+**What it should do.**
+- Two demo WordPress stacks in `docker-compose.yml`, both under the `demo` profile: the
+  English one as today (`wordpress-demo`, `db-demo`, `cron-demo`, `cli-demo`, port 38082, SN
+  site `tarnfell`) and a pt-BR one (`wordpress-demo-pt`, `db-demo-pt`, `cron-demo-pt`,
+  `cli-demo-pt`, port 38083, SN site `recanto-da-serra`), each with its own volumes, both on
+  the one local Turing.
+- `run-docker.cmd demo` and `bin/run-docker.sh demo` set up both (or one, named:
+  `demo en` / `demo pt`); `demo reset [en|pt]` deletes only the one named. Each store keeps
+  its language and SN site in its own plugin settings (D272, D274).
+- The demo specs and the story read the store's URL by language (`WP_DEMO_URL` /
+  `WP_DEMO_PT_URL`), so `DEMO_LOCALE=pt_BR npm run e2e:story:record` records the pt-BR store
+  without touching the English one.
+- VIDEO.md and the docs' "Try it locally" say which port is which.
+
+**Done when.** Both stores answer at once (38082 Tarnfell, 38083 Recanto da Serra), each
+recording and demo spec run picks its own, and resetting one leaves the other's orders
+and search history in place.
 
 ## L The documentation area
 

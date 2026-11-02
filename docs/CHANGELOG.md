@@ -732,6 +732,7 @@
 - **D274** — The demo's SN site is its plugin setting, written by run-docker from SN_DEMO_SITE, so every CLI call indexes the site the store searches.
 - **D275** — The video opens on Viglet Turing Search, an open source plugin for WordPress and WooCommerce, and ends held 6 s on where to try it: the site's Playground link and GitHub.
 - **D278** — The video's captions are what Ana says, timed to her takes, in SRT and WebVTT beside it and as a track inside; the chapter titles became a YouTube chapter list.
+- **D277** — The pt-BR video is recorded again on the Turing image with T1190, T1191 and T1196: the D275 cards, no Site: localhost, and chapter 8 fixes cantil.
 
 ## Track T — Releases and links match what the site describes
 
