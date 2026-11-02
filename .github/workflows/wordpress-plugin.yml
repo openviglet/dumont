@@ -77,8 +77,9 @@ jobs:
           npm run build
 
   # D226: Plugin Check, the tool the WordPress.org review team runs, on the package the release
-  # job would upload (the zip's viglet-turing-search/ folder), not on the source tree. Errors fail the
-  # job; warnings are reported in the log.
+  # job would upload (the zip's viglet-turing-search/ folder), not on the source tree. A warning
+  # fails the job too (D229): the package checks clean, so a new one is a regression to fix or
+  # annotate where it stands.
   plugin-check:
     runs-on: ubuntu-latest
     steps:
@@ -99,6 +100,7 @@ jobs:
       - uses: wordpress/plugin-check-action@v1
         with:
           build-dir: wordpress/build/package/viglet-turing-search
+          strict: true
 
   # D182: the browser suite (npm run test:e2e) against a real WordPress and Turing, so a
   # regression in the block, an admin screen, a theme or the pt_BR strings fails here rather

@@ -153,12 +153,6 @@ This track has no remaining pending tasks.
   wordpress.org/plugins/developers/readme-validator/ reports no error on src/readme.txt,
   and the zip holds nothing the directory forbids.
 
-## Done when — D229
-
-- **Plugin Check reports no warning, and the CI job fails on one** wp plugin check
-  viglet-dumont lists nothing once the plugin and readme titles pass the trademark rule;
-  the plugin-check job then treats warnings as failures.
-
 ## Done when — D246
 
 - **The released video is narrated and embedded on the site and docs** The plugin

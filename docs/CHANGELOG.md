@@ -686,7 +686,7 @@
 - **D198** — The demo's generative AI is on, with the assistant on every page, a no-key notice, and curated prompts answered live from the guides they name.
 - **D225 (readme sections)** — readme.txt has an External services section naming what goes to Turing and when, a Plugins > Add New install, and a link to the source.
 - **D226** — The WordPress plugin workflow runs Plugin Check on the built package on every change and gates the release; today it reports no errors.
-- **D229 (21 of 23 warnings)** — Plugin Check reports two warnings, both the name's trademark: template variables are prefixed and the two exclusions and the textdomain call are annotated.
+- **D229** — Plugin Check finds nothing on the viglet-turing-search package now, and the CI job runs it strict, so a warning fails.
 - **D201** — Live kits on the demo stage only seeded products, mark what the shop cannot sell and reach the cart at WooCommerce's total (design §XLIX.57 recorded in `wordpress/tests/e2e/demo-ai/kit.spec.mjs`).
 - **D199** — A size is read in code, grounded on the site's own values; the Tarnfell search page applies what a sentence names, and demo specs cover it (design §XLIX.55 recorded in `wordpress/README.md`).
 - **D236** — The e2e seed installs a test-stack mu-plugin that hides core's update nag, so the admin axe checks pass whatever core has released (design §XLIX.86 recorded in `wordpress/README.md`).
