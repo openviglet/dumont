@@ -419,28 +419,6 @@ on the English pages.
 **Done when.** The pt-BR video opens and closes on the D275 cards and no frame shows
 "localhost".
 
-### XLIX.121 Captions carry the narration, not the chapter titles (D278)
-
-**What happens.** `story-video.mjs` writes `story.en.srt` and `story.pt-BR.srt` (about
-630 bytes each) and muxes them as caption tracks, but they hold only the eight chapter
-titles, each spanning a whole chapter. Nothing Ana says is captioned: a muted viewer, a
-deaf viewer or one who does not speak the language follows nothing, and YouTube's search
-and the assistants get no text from the video.
-
-**What it should do.**
-- The captions are the narration: every line of `demo/narration/script.json` in the
-  video's language, timed from where `chapters.json` and the take lengths place it,
-  split into cues short enough to read (two lines, about 42 characters each).
-- The stage directions in brackets (`[excited]`, `[laughs]`) are stripped from the
-  captions.
-- The chapter titles stay available as a chapters list (YouTube's `00:00 Title` lines),
-  written beside the video, not as captions.
-- Both SRT and WebVTT are written, for YouTube and for an HTML `<track>`.
-
-**Done when.** Each video's caption file carries every narrated line at the moment it is
-spoken, a frame check at three lines per language shows the cue on screen with the
-voice, and a chapters text file sits beside each video.
-
 ### XLIX.122 One clip per chapter (D279)
 
 **What happens.** The video is one 7.5-minute piece plus a 30 s teaser. Someone
