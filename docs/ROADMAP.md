@@ -107,8 +107,6 @@ This track has no remaining pending tasks.
 
 ## Track P — Connector run control
 
-- 📋 **D131** (deps: —) **A plugin's only LLM step answers one label of a closed set: no list extracted from the text, no grounded summary** — The grounded summary half is not built. → §XLIII.8
-
 ## Track Q — Builds from released dependencies
 
 ## Track R — API access and credential handling

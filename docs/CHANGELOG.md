@@ -590,7 +590,7 @@
 - **D128** — A scheduled crawl starts each structured source through DumConnectorRunService, the API's start: under its run lock, tracked, and skipped with a log line while a run of it is in progress.
 - **D129** — A scheduled crawl isolates each source and each plugin: one that throws outside extraction is logged with its name, its lock is released, and the crawl moves on.
 - **D130** — A run can warn without being partial: sources and coverage drift raise warnings, the console marks the run, and dumont.alerts.webhook-url hears when a source starts warning.
-- **D131 (grounded list extraction)** — DumExtractionEnricher fills a multi-valued field from a DumExtractorFactory extractor; only items found in the text as whole words publish, cached and capped like classification.
+- **D131** — A plugin can publish a grounded LLM summary: DumSummaryEnricher drops one naming a number or name the text lacks, cuts it to whole sentences and marks it generated.
 - **D132** — An AEM or structured run that ends with no session (source not found, no enabled environment) calls endRunWithoutSession, which releases its lock; a failed AEM discovery finishes standalone.
 - **D137** — A source learns what a canonical document resolution dropped last published: DumResolutionRun keeps the survivorship result before the drop, and deindexed(id, lastPublished) receives it.
 - **D138** — A batch Turing refuses clears its documents' ledger checksums, so the next run resends them, and the run record turns partial with a note naming the source and count.

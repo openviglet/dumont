@@ -98,8 +98,9 @@ dumont:
     directory: ./plugins
   enrichment:
     llm:
-      # Expose an LLM classifier to plugins (DumClassifierFactory, backed by Turing's
-      # /api/v2/summary). Off by default: plugins then run their deterministic steps alone.
+      # Expose an LLM classifier, extractor and summarizer to plugins (DumClassifierFactory,
+      # DumExtractorFactory, DumSummarizerFactory, backed by Turing's /api/v2/summary).
+      # Off by default: plugins then run their deterministic steps alone.
       enabled: false
   indexing:
     # Indexing provider: turing, solr, or elasticsearch

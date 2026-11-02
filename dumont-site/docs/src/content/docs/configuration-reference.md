@@ -98,7 +98,7 @@ logging:
 
 | Property | Default | Description |
 |---|---|---|
-| `dumont.enrichment.llm.enabled` | `false` | Lets connectors classify with an LLM through Viglet Turing (`/api/v2/summary`, using the configured `turing.url` and `turing.apiKey`). It also lets them extract lists from a record's text, such as the skills a job description names; only items that appear in the text are published. When off, connectors that support an LLM fallback classify with their own rules and dictionaries only. |
+| `dumont.enrichment.llm.enabled` | `false` | Lets connectors classify with an LLM through Viglet Turing (`/api/v2/summary`, using the configured `turing.url` and `turing.apiKey`). It also lets them extract lists from a record's text, such as the skills a job description names; only items that appear in the text are published. And it lets them write a short summary of a record's text into a field such as `abstract`: a summary naming a number or a name the text does not hold is dropped, and a published one is always marked as generated in a field beside it. When off, connectors that support an LLM fallback classify with their own rules and dictionaries only. |
 
 ### Run Alerts
 

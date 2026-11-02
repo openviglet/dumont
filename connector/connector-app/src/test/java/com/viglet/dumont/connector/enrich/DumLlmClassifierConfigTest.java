@@ -26,6 +26,7 @@ import org.springframework.web.client.RestClient;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassifier;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassifierFactory;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumExtractorFactory;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumSummarizerFactory;
 import com.viglet.dumont.connector.config.DumTuringCsrfService;
 
 /** The LLM classifier reaches plugins only when the documented flag turns it on (roadmap D106). */
@@ -58,11 +59,22 @@ class DumLlmClassifierConfigTest {
     }
 
     @Test
+    void theFlagOnAlsoExposesAFactoryBuildingTuringSummarizers() {
+        runner.withPropertyValues("dumont.enrichment.llm.enabled=true").run(context -> {
+            assertThat(context).hasSingleBean(DumSummarizerFactory.class);
+            assertThat(context.getBean(DumSummarizerFactory.class)
+                    .create("Summarize this job in two lines.", 240, "jobs-abstract"))
+                    .isInstanceOf(DumTuringSummarizer.class);
+        });
+    }
+
+    @Test
     void theFlagOffOrUnsetExposesNothing() {
         runner.run(context -> assertThat(context).doesNotHaveBean(DumClassifierFactory.class)
-                .doesNotHaveBean(DumExtractorFactory.class));
+                .doesNotHaveBean(DumExtractorFactory.class).doesNotHaveBean(DumSummarizerFactory.class));
         runner.withPropertyValues("dumont.enrichment.llm.enabled=false")
                 .run(context -> assertThat(context).doesNotHaveBean(DumClassifierFactory.class)
-                        .doesNotHaveBean(DumExtractorFactory.class));
+                        .doesNotHaveBean(DumExtractorFactory.class)
+                        .doesNotHaveBean(DumSummarizerFactory.class));
     }
 }

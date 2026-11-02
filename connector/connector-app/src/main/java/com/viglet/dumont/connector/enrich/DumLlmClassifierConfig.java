@@ -23,6 +23,7 @@ import org.springframework.web.client.RestClient;
 
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumClassifierFactory;
 import com.viglet.dumont.connector.commons.spi.structured.enrich.DumExtractorFactory;
+import com.viglet.dumont.connector.commons.spi.structured.enrich.DumSummarizerFactory;
 import com.viglet.dumont.connector.config.DumTuringCsrfService;
 
 /**
@@ -51,5 +52,13 @@ public class DumLlmClassifierConfig {
     DumExtractorFactory dumExtractorFactory(RestClient restClient, DumTuringCsrfService csrfService) {
         return (systemPrompt, cacheKeyPrefix) ->
                 new DumTuringExtractor(restClient, csrfService, systemPrompt, cacheKeyPrefix);
+    }
+
+    /** The prose sibling (D131), under the same flag: a grounded summary, marked as generated. */
+    @Bean
+    @ConditionalOnProperty(name = "dumont.enrichment.llm.enabled", havingValue = "true")
+    DumSummarizerFactory dumSummarizerFactory(RestClient restClient, DumTuringCsrfService csrfService) {
+        return (systemPrompt, maxChars, cacheKeyPrefix) ->
+                new DumTuringSummarizer(restClient, csrfService, systemPrompt, maxChars, cacheKeyPrefix);
     }
 }
