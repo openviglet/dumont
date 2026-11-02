@@ -368,29 +368,6 @@ the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
 **Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
 photo current, and the seed draws none.
 
-### XLIX.112 Count the refined search, not the typed one (D267)
-
-**What happens.** A shopper's sentence is searched twice by the search block: first as
-typed, then, once nl-filters read it (D199), refined ("a two-person tent under $400" →
-"two-person tent" with Price ≤ 400). Viglet Turing counts both. The typed form usually
-finds nothing, so the shop's insights list "uma barraca para duas pessoas até R$ 2.200"
-among the searches that found nothing, for a shopper who found the tent (measured on the
-pt_BR demo, D262 hid the empty state but not the count).
-
-**What it should do.** When the block will read a sentence's filters (readsAsSentence
-and the reading applies), its first search is sent with `populateMetrics: false`, as the
-server's first page already is; the refined search is the one counted. Instant mode
-would rewrite the query, so it is not used. Turing T1200 adds the field to the
-structured search, honouring `false` only, never echoing it back, and the SDK skips its
-own search event for it. The refined call spreads the echoed request
-(`search-block.js`), so it is counted with no reset. It needs an `@viglet/turing-sdk`
-release carrying the field (the plugin takes it from npm). When nothing is read, the
-typed search is counted as before. Close matches (D258) add a third search, the words
-joined by OR: its count is the one to keep, under the sentence as typed.
-
-**Done when.** The demo's insights never list a sentence its refined search answered,
-with a test on the requests the block sends.
-
 ### XLIX.117 The demo keeps its SN site in its own settings (D274)
 
 **What happens.** The demo's SN site comes from `VIGLET_DUMONT_TURING_SITE:
@@ -408,6 +385,189 @@ option rules for the web, cron and CLI containers alike.
 
 **Done when.** A `docker compose run cli-demo wp dumont status` from a fresh shell names
 the SN site the demo was set up with.
+
+### XLIX.118 The video's cards say what it is and where to try it (D275)
+
+**What happens.** The video opens on a 3 s title card and closes on one, and neither
+says what is being shown: only Ana's voice says the shop runs on WordPress and that the
+search is Viglet Turing. A viewer who lands on the video from a search, or watches it
+muted, does not learn that it is an open source plugin they can install, and the closing
+card asks for nothing: the demo store in WordPress Playground, the best invitation the
+plugin has, never appears.
+
+**What it should do.**
+- The opening card names the product and what it is: "Viglet Turing Search", an open source
+  plugin for WordPress and WooCommerce, in the video's language.
+- The closing card carries the call to action: the Playground link (the demo store, nothing
+  to install) and the GitHub repository, held long enough to read.
+- `story-video.mjs` draws both cards from the language's strings, so the English and the
+  pt-BR videos get them from the same source and a rebuild keeps them.
+
+**Done when.** `node bin/story-video.mjs --language en` and `--language pt-BR` both open
+on the product card and close on the Playground and GitHub card, and the frames at those
+moments read without the audio.
+
+### XLIX.119 The English video, the primary one (D276)
+
+**What happens.** Only the pt-BR video exists (Recanto da Serra, 7m28s). D261 shipped
+with its criterion still open: the English takes are not bought and no `--language en`
+video has been assembled. Every place the video will be embedded is in English (this
+site's WordPress page, the docs, the plugin README, the wordpress.org listing, the
+Turing site), and the Playground the closing card points at is the English store, so the
+pt-BR video alone has nowhere to go.
+
+**Why two videos and not one with two audio tracks.** The footage differs by language:
+the pt-BR store is Recanto da Serra in reais on its own SN site, the English one is
+Tarnfell in dollars. English audio over the Portuguese store would not match the screen,
+so each language is its own recording and its own video, with its own title and
+chapters.
+
+**What it should do.**
+- The demo stack runs a Turing image that carries T1190 and T1191, so the kit's reasons no
+  longer show "Site: localhost".
+- `npm run story:narration -- --language en` buys the English takes from the current
+  script; `DEMO_LOCALE` unset, `npm run e2e:story:record` records Tarnfell;
+  `node bin/story-video.mjs --language en` assembles it with the cards of D275.
+- English is the primary video: the embeds and the chapter cuts start from it.
+
+**Done when.** `tests/e2e/artifacts/video/story.en.mp4` (or the language-suffixed name
+the script settles on) plays the Tarnfell story narrated in English, no frame shows
+"localhost", and the D261 criterion is met.
+
+### XLIX.120 The pt-BR video recorded again without localhost (D277)
+
+**What happens.** The pt-BR video was assembled on 2026-10-31 from a stack whose Turing
+image predates T1190 and T1191, so the kit chapter shows "Site: localhost" among a
+product's reasons, and its cards are the ones from before D275. It is otherwise ready,
+and the narration is already paid for.
+
+**Why it still matters.** In Portuguese, searches such as "busca inteligente
+WooCommerce" face far less competition on YouTube, and Brazil has a large WooCommerce
+market. The pt-BR video is secondary to the English one but does not need to wait for
+it: it is published on its own, with a link to the English version, and is not embedded
+on the English pages.
+
+**What it should do.**
+- With the stack on a Turing image carrying T1190 and T1191, record the story again under
+  `DEMO_LOCALE=pt_BR SN_DEMO_SITE=recanto-da-serra` and assemble it with
+  `--language pt-BR`, which picks up the cards of D275. Takes whose line did not change are
+  reused, so the re-record buys nothing new.
+- Check the other open lines VIDEO.md lists as seen in it (D266's English addresses,
+  D265's drawings) and note which remain.
+
+**Done when.** The pt-BR video opens and closes on the D275 cards and no frame shows
+"localhost".
+
+### XLIX.121 Captions carry the narration, not the chapter titles (D278)
+
+**What happens.** `story-video.mjs` writes `story.en.srt` and `story.pt-BR.srt` (about
+630 bytes each) and muxes them as caption tracks, but they hold only the eight chapter
+titles, each spanning a whole chapter. Nothing Ana says is captioned: a muted viewer, a
+deaf viewer or one who does not speak the language follows nothing, and YouTube's search
+and the assistants get no text from the video.
+
+**What it should do.**
+- The captions are the narration: every line of `demo/narration/script.json` in the
+  video's language, timed from where `chapters.json` and the take lengths place it,
+  split into cues short enough to read (two lines, about 42 characters each).
+- The stage directions in brackets (`[excited]`, `[laughs]`) are stripped from the
+  captions.
+- The chapter titles stay available as a chapters list (YouTube's `00:00 Title` lines),
+  written beside the video, not as captions.
+- Both SRT and WebVTT are written, for YouTube and for an HTML `<track>`.
+
+**Done when.** Each video's caption file carries every narrated line at the moment it is
+spoken, a frame check at three lines per language shows the cue on screen with the
+voice, and a chapters text file sits beside each video.
+
+### XLIX.122 One clip per chapter (D279)
+
+**What happens.** The video is one 7.5-minute piece plus a 30 s teaser. Someone
+searching for one thing the plugin does (natural-language search with a price filter, an
+assistant that cites the site's own pages, a kit built from a trip description) only
+finds it inside the long video, if at all: one video is one entry point.
+
+**What it should do.**
+- `story-video.mjs --chapter <n>` builds a standalone clip of one chapter, 40 s to 1 min:
+  a short title card, the chapter's action and result with Ana's lines and captions, and
+  a closing card pointing at the full video and the Playground.
+- The first three cuts are the strongest chapters: 2 (a sentence read as a price filter),
+  3 (the Site assistant answering from the guides, with sources) and 5 (the kit).
+- English first. pt-BR cuts only if the pt-BR long video shows interest in its numbers,
+  which the visibility review reads.
+- Each cut is built from the same recording as the long video, so a new recording rebuilds
+  them all.
+
+**Done when.** `story-video.mjs --language en --chapter 2`, `3` and `5` each produce a
+clip under a minute that opens on its card, carries its captions and closes on the
+full-video and Playground card.
+
+### XLIX.123 A phone-viewport recording for vertical cuts (D280)
+
+**What happens.** The story is recorded at a 1920 x 1080 desktop viewport. Vertical
+formats (YouTube Shorts and the like) need 9:16, and cropping the desktop recording cuts
+the search results, the answer and the filter line in half.
+
+**What it should do.**
+- A second story run at a phone viewport (for example 1080 x 1920 at device scale), using
+  the same spec and the same takes: the search block, the assistant and the compare table
+  are responsive, so the story plays there as it does on the desktop.
+- `story-video.mjs --vertical` assembles the chapter cuts of D279 from that recording,
+  with the cards laid out for 9:16 and the captions placed above the bottom UI band
+  vertical players draw.
+- Anything the story cannot show at a phone width is a finding for the plugin's
+  responsive layout, filed as its own line, not worked around in the video.
+
+**Done when.** The vertical cuts of chapters 2, 3 and 5 play under a minute, every frame
+shows the whole result without cropping, and the captions do not sit under the player's
+own controls.
+
+### XLIX.124 A short technical video for developers (D281)
+
+**What happens.** The video speaks to a shop owner. A developer or an agency deciding
+whether to put the plugin on a client's site wants something else: how it is installed,
+what runs where, and what the owner sees behind the scenes. Chapter 8 ("Behind the
+scenes: native search and its searches in the insights") is the only part with that
+angle, and it sits at the end of a story told to another audience.
+
+**What it should do.**
+- A short technical piece, 2 to 3 minutes, recorded by script like the story: installing
+  the release zip in wp-admin (and the Composer route in a line), the settings page
+  connecting to a Turing instance, the first index of the catalogue, then chapter 8's
+  native search and insights.
+- Narrated plainly, not by Ana, with the same captions and cards pipeline; the closing
+  card points at the repository, the docs and the Playground.
+- If Dumont is named anywhere in the video, it is here, as where the plugin's code lives,
+  and only where the words are true of what the viewer sees.
+
+**Done when.** The technical piece is assembled in English from its own spec, every step
+it shows works on a clean demo stack, and its captions and chapters are written like the
+story's.
+
+### XLIX.125 The video embedded from YouTube, with its transcript (D282)
+
+**What happens.** D246 shipped with its criterion open: the video is neither attached to
+a release nor embedded anywhere. Its plan was to embed the release asset, but GitHub
+serves a release asset as a download, not a stream, so a `<video>` pointing at it loads
+badly. The video goes to YouTube instead, published by Alexandre on the Viglet channel,
+and the plugin's pages embed that.
+
+**What it should do.**
+- This site's WordPress page and the plugin's docs page embed the English YouTube video,
+  with the transcript (the narration of D278) as text below it: assistants and search read
+  text, not video.
+- The plugin README carries `story-30s.mp4` (under 1 MB) as an inline player, uploaded
+  through GitHub's editor.
+- The release workflow attaches `story.mp4`, `story-30s.mp4` and the caption files to the
+  plugin release, for anyone who wants the file.
+- `src/readme.txt` carries the YouTube link, which the wordpress.org directory embeds once
+  the plugin is listed (D227).
+- The pt-BR video is linked from the English description and the reverse, and is not
+  embedded on the English pages.
+
+**Done when.** The site page and the docs play the English video with captions and show
+its transcript, the README plays the 30 s cut, the release carries the files, and the
+D246 criterion is met.
 
 ## L The documentation area
 

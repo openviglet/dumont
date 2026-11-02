@@ -118,8 +118,15 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 🛠 **D267** (deps: Turing T1200) **A sentence the search block refines is counted as a failed search in the shop's insights** — The owner reads that a shopper found nothing when the refined search found the product. → §XLIX.112
 - 📋 **D274** (deps: —) **A docker compose run cli-demo without SN_DEMO_SITE indexes into the SN site Demo, not the one the demo was set up with** — A reindex or a delete lands in another SN site and the store keeps showing what it had, as with the locale before D272. → §XLIX.117
+- 📋 **D275** (deps: —) **The video's opening and closing cards never say it is an open source WordPress plugin, nor where to try it** — A viewer from a search, or watching muted, learns neither what to install nor that the Playground demo exists. → §XLIX.118
+- 📋 **D276** (deps: D275, Turing demo image carrying T1190 and T1191) **Only the pt-BR video exists, and every page that will embed it is in English** — The footage differs by language, so English is its own recording, and the primary video the embeds and cuts start from. → §XLIX.119
+- 📋 **D277** (deps: D275, Turing demo image carrying T1190 and T1191) **The pt-BR video shows Site: localhost in the kit chapter and has the old cards** — It is ready and paid for, and Portuguese searches face less competition, so it is published on its own once clean. → §XLIX.120
+- 📋 **D278** (deps: —) **The video's caption tracks hold only the eight chapter titles, not a word Ana says** — A muted or foreign viewer follows nothing, and search and assistants get no text from the video. → §XLIX.121
+- 📋 **D279** (deps: D276, D278) **Each thing the plugin does is only findable inside one 7.5-minute video** — A clip per strong chapter is one more entry point per search someone makes, built from the same recording. → §XLIX.122
+- 📋 **D280** (deps: D279) **The story is recorded only at a desktop viewport, which crops badly to 9:16** — A second scripted run at a phone viewport gives vertical cuts that show whole results, at no new narration cost. → §XLIX.123
+- 📋 **D281** (deps: D276) **No video shows a developer how the plugin is installed, connected and indexed** — The story speaks to shop owners; whoever puts the plugin on a client site needs install, settings and insights instead. → §XLIX.124
+- 📋 **D282** (deps: D276, D278, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
 
 ## Track T — Releases and links match what the site describes
 
