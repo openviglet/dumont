@@ -484,32 +484,6 @@ and the plugin's pages embed that.
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
 
-### XLIX.126 An English and a pt-BR demo store side by side (D283)
-
-**What happens.** The demo storefront is one WordPress (`wordpress-demo`, `db-demo`, port
-38082) seeded in one language: `DEMO_LOCALE=pt_BR SN_DEMO_SITE=recanto-da-serra` makes it
-Recanto da Serra, unset makes it Tarnfell. Switching means `run-docker.cmd demo reset`, which
-deletes the other store's database, its search history and orders. On 2026-11-01/02 the pt-BR store was deleted twice to regenerate the English seed for
-D239 and rebuilt for D277, and the video work needs both stores (D276 English, D277 pt-BR).
-
-**What it should do.**
-- Two demo WordPress stacks in `docker-compose.yml`, both under the `demo` profile: the
-  English one as today (`wordpress-demo`, `db-demo`, `cron-demo`, `cli-demo`, port 38082, SN
-  site `tarnfell`) and a pt-BR one (`wordpress-demo-pt`, `db-demo-pt`, `cron-demo-pt`,
-  `cli-demo-pt`, port 38083, SN site `recanto-da-serra`), each with its own volumes, both on
-  the one local Turing.
-- `run-docker.cmd demo` and `bin/run-docker.sh demo` set up both (or one, named:
-  `demo en` / `demo pt`); `demo reset [en|pt]` deletes only the one named. Each store keeps
-  its language and SN site in its own plugin settings (D272, D274).
-- The demo specs and the story read the store's URL by language (`WP_DEMO_URL` /
-  `WP_DEMO_PT_URL`), so `DEMO_LOCALE=pt_BR npm run e2e:story:record` records the pt-BR store
-  without touching the English one.
-- VIDEO.md and the docs' "Try it locally" say which port is which.
-
-**Done when.** Both stores answer at once (38082 Tarnfell, 38083 Recanto da Serra), each
-recording and demo spec run picks its own, and resetting one leaves the other's orders
-and search history in place.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +

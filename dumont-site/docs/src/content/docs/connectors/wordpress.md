@@ -418,12 +418,14 @@ starts WordPress, MariaDB, a WP-Cron runner and a local Turing, creates the SN s
 the plugin an API key, and builds the admin screens. WordPress is then at
 `http://localhost:8080` and Turing at `http://localhost:2700`.
 
-`run-docker.cmd demo` also starts the demo store, Tarnfell: a WooCommerce shop with its own
-catalog, buying guides and SN site at `http://localhost:38082`. Its `/showcase/` page holds
+`run-docker.cmd demo` also starts the two demo stores, side by side: Tarnfell, a WooCommerce
+shop with its own catalog, buying guides and SN site at `http://localhost:38082`, and the same
+store in Portuguese and in reais, Recanto da Serra, at `http://localhost:38083`
+(`run-docker.cmd demo en` or `demo pt` starts one). Its `/showcase/` page holds
 every Turing block, and `?tour=1` on any of its pages marks each feature with its chapter in
 the [shopper's story](https://github.com/openviglet/dumont/blob/2026.3/wordpress/demo/story.md)
 that the [WordPress page](https://openviglet.github.io/dumont/wordpress/) walks through. Set `OPENAI_API_KEY` before
 starting it to turn on the answers, the catalog copilot and the Site assistant; without it
-they stay hidden. `DEMO_LOCALE=pt_BR` seeds the store in Portuguese. On Linux and macOS,
-`sh bin/run-docker.sh demo` does the same (it provisions Turing through PowerShell, `pwsh`),
-and `demo reset` deletes the demo's WordPress and database.
+they stay hidden. On Linux and macOS, `sh bin/run-docker.sh demo` does the same (it
+provisions Turing through PowerShell, `pwsh`), and `demo reset en` or `demo reset pt` deletes
+one store's WordPress and database, leaving the other as it was.
