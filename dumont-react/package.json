@@ -38,7 +38,7 @@
     "@tabler/icons-react": "^3.49.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-table": "^9.3.1",
-    "@viglet/viglet-design-system": "^2026.3.19",
+    "@viglet/viglet-design-system": "^2026.3.24",
     "axios": "^1.20.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -59,7 +59,8 @@
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
     "tailwindcss": "^4.3.3",
-    "vaul": "^1.1.2"
+    "vaul": "^1.1.2",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

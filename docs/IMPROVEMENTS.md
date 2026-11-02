@@ -107,32 +107,6 @@ and the summary wait on this line (TRA28's remainder).
 
 ## XLIV Frontend build and lint gates
 
-### XLIV.2 Unpatched xlsx through the design system (D134)
-
-Found in the Dependabot alerts on `openviglet/dumont` (2026-10-11): four high alerts,
-prototype pollution and a ReDoS, on `xlsx` 0.18.5. SheetJS stopped publishing to npm at
-0.18.5; the fixed releases (0.20.3 today) are served only from
-`https://cdn.sheetjs.com`.
-
-Landed: `dumont-react` no longer declares `xlsx`, which no source imported. What still
-pulls it is `@viglet/viglet-design-system`, whose `dependencies` carry `xlsx` ^0.18.5
-for `exportToXlsx`.
-
-What did not work: a `pnpm-workspace.yaml` override pointing `xlsx` at the CDN tarball.
-pnpm 11 refuses it with `ERR_PNPM_EXOTIC_SUBDEP`, since `blockExoticSubdeps` forbids a
-subdependency resolved by URL, and turning that policy off to silence an alert would be
-the worse trade. The same rule means the design system cannot fix it by depending on the
-tarball itself: every pnpm consumer would hit the refusal.
-
-The fix, filed as VDS211 in the design system's roadmap: it takes `xlsx` as a
-`peerDependency`, so each consumer declares the CDN tarball as its own direct
-dependency, which pnpm allows. Then `dumont-react` adds `"xlsx":
-"https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"` and the alerts close.
-
-Exposure meanwhile is low: `exportToXlsx` only writes a workbook (`aoa_to_sheet`,
-`writeFile`), and both CVEs are in the parser. Nothing in the console reads a
-spreadsheet.
-
 ## XLV Builds from released dependencies
 
 A clean checkout of any Dumont branch must compile from the versions its pom names, as

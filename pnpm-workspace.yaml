@@ -30,7 +30,7 @@ packageExtensions:
       "@astrojs/markdown-satteri": "^0.4.5"
 
 minimumReleaseAgeExclude:
-  - '@viglet/viglet-design-system@2026.3.5||2026.3.11'
+  - '@viglet/viglet-design-system@2026.3.5||2026.3.11||2026.3.24'
 
 # Security floors for transitive build and test tooling (D133): each selector lifts only the
 # vulnerable range a Dependabot alert names to its first fixed release, and leaves every newer
@@ -45,3 +45,6 @@ overrides:
   "source-map-js@<1.2.2": "^1.2.2"
   "browserslist@<4.28.7": "^4.28.7"
   "baseline-browser-mapping@<2.11.0": "^2.11.0"
+  # xlsx's last npm release, 0.18.5, carries prototype pollution and ReDoS; SheetJS publishes
+  # the fixed ones only on its CDN (D134). The design system takes xlsx as a peer.
+  "xlsx@<0.20.2": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
