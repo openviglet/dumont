@@ -684,7 +684,7 @@
 - **D228** — npm run lint:js is clean again: the woo keyboard spec reads the focused element through the page's own document, as the fixtures do.
 - **D179** — The demo Showcase, Health naming each feature's block, npm run e2e:tour and the vigletdocs Turing on WordPress page show Turing's WordPress features together.
 - **D198** — The demo's generative AI is on, with the assistant on every page, a no-key notice, and curated prompts answered live from the guides they name.
-- **D225 (readme sections)** — readme.txt has an External services section naming what goes to Turing and when, a Plugins > Add New install, and a link to the source.
+- **D225** — The readme validator passes it with notes only, and Contributors names viglet, the wordpress.org account that submitted the plugin.
 - **D226** — The WordPress plugin workflow runs Plugin Check on the built package on every change and gates the release; today it reports no errors.
 - **D229** — Plugin Check finds nothing on the viglet-turing-search package now, and the CI job runs it strict, so a warning fails.
 - **D201** — Live kits on the demo stage only seeded products, mark what the shop cannot sell and reach the cart at WooCommerce's total (design §XLIX.57 recorded in `wordpress/tests/e2e/demo-ai/kit.spec.mjs`).

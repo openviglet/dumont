@@ -145,14 +145,6 @@ This track has no remaining pending tasks.
 - **Features Turing refuses on a partitioned key turn off and say so** Health names each
   one Turing answers 403 on such a key, and none falls back to an unbound key.
 
-## Done when — D225
-
-- **Contributors names the plugin owners' real wordpress.org accounts** Each name in
-  readme.txt's Contributors line opens a profile on profiles.wordpress.org.
-- **The readme passes the wordpress.org readme validator**
-  wordpress.org/plugins/developers/readme-validator/ reports no error on src/readme.txt,
-  and the zip holds nothing the directory forbids.
-
 ## Done when — D246
 
 - **The released video is narrated and embedded on the site and docs** The plugin

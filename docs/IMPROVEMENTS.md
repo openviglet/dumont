@@ -205,24 +205,6 @@ routes.
 - Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
   deletes a site B document.
 
-### XLIX.81 A readme the plugin directory accepts (D225)
-
-The plugin ships today as a zip on a GitHub release, and `src/readme.txt` is written for
-that path. WordPress.org reviewers reject a plugin that sends data to a service without
-saying so, and this one sends every published post to Turing and every search to it. The
-readme needs an "External services" section naming Turing, what is sent (post content,
-fields, the search query, the analytics events the SDK reports), when, and links to the
-terms and privacy notice of the service the site points at.
-
-Installation must describe Plugins > Add New, with the GitHub zip and Composer kept as
-alternatives in the plugin README. The admin screens ship built by `wp-scripts`, so the
-readme links the public repository for the human-readable source. `Contributors:` must
-name real wordpress.org accounts. MIT is GPL-compatible and accepted; switching to
-"GPLv2 or later" is optional and is decided here, not assumed.
-
-Done when the readme validates on the wordpress.org readme validator and the package
-holds nothing the directory forbids.
-
 ### XLIX.83 Releases deployed to the plugin directory (D227)
 
 WordPress.org never reads GitHub: an approved plugin gets its own SVN repository at
