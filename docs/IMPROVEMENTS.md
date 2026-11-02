@@ -102,6 +102,10 @@ prefix, and a per-day call cap the plugin sets. A `DumExtractionEnricher` writin
 multi-valued field (skills) and a text field (the summary into `abstract`) would make it
 declarative.
 
+Decision (the owner, 2026-11-02): a generated summary may fill `abstract`, drawn from
+the document's text only and marked as generated in a field set beside it, which keeps
+the no-fabrication non-goal.
+
 Workaround in trabalharei: none. Benefits ship from a deterministic dictionary; skills
 and the summary wait on this line (TRA28's remainder).
 
@@ -171,10 +175,9 @@ autocomplete, similar, clicks, the metrics reports and imports. The plugin also 
 the manifest and plan (fields), `/api/sn` and the tuning APIs, `/api/v2/summary` and the
 AI probes, so a partitioned key cannot simply replace the shared one.
 
-**Open decision.** Either the network admin keeps the shared key (provisioning and
-tuning done once for the network) and each site holds only its partitioned key, or a
-shared site gives those screens up. Turing could instead enforce partitions on more
-routes.
+**Decision (the owner, 2026-11-02).** Turing enforces partitions on those routes too
+(Turing T1209), so each site holds only its partitioned key and keeps every screen; no
+network-held shared key, and no screen given up.
 
 **Then.**
 - Each site stores its partitioned key; features its key cannot reach turn off, Health
