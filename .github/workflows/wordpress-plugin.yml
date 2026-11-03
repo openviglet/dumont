@@ -80,10 +80,10 @@ jobs:
           npm run lint:js
           npm run build
 
-  # D226: Plugin Check, the tool the WordPress.org review team runs, on the package the release
-  # job would upload (the zip's viglet-turing-search/ folder), not on the source tree. A warning
-  # fails the job too (D229): the package checks clean, so a new one is a regression to fix or
-  # annotate where it stands.
+  # D226: Plugin Check, the tool the WordPress.org review team runs, on the package uploaded there
+  # (bin/build-zip.sh --wporg: the zip's viglet-turing-search/ folder, without the bundled
+  # translations), not on the source tree. A warning fails the job too (D229): the package checks
+  # clean, so a new one is a regression to fix or annotate where it stands.
   plugin-check:
     runs-on: ubuntu-latest
     steps:
@@ -99,7 +99,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          unzip -q "$(sh bin/build-zip.sh)" -d build/package
+          unzip -q "$(sh bin/build-zip.sh --wporg)" -d build/package
 
       - uses: wordpress/plugin-check-action@v1
         with:
