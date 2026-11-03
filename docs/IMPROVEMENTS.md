@@ -101,30 +101,6 @@ route returns nothing a caller could use to act as Dumont.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.46 Partitioned API keys in place of client-side site filters (D190)
-
-**What happens.** Several WordPress sites share one SN site, told apart by `site_key`
-(D148). Delete-all is one delete by that key and Related filters by it in Turing (D190
-part), but the stored API key is not bound to the site key, so it can still read and
-delete every other site's documents. Visitor searches send `fq=site_key:<key>`, and
-D149's orphan sweep lists ids through a filtered search.
-
-Turing binds a key to a partition (T1133, `POST /api/dev/token` with `partitionField`
-and `partitionValue`), and its guard answers such a key 403 everywhere except search,
-autocomplete, similar, clicks, the metrics reports and imports. The plugin also needs
-the manifest and plan (fields), `/api/sn` and the tuning APIs, `/api/v2/summary` and the
-AI probes, so a partitioned key cannot simply replace the shared one.
-
-**Decision (the owner, 2026-11-02).** Turing enforces partitions on those routes too
-(Turing T1209), so each site holds only its partitioned key and keeps every screen; no
-network-held shared key, and no screen given up.
-
-**Then.**
-- Each site stores its partitioned key; features its key cannot reach turn off, Health
-  names each, and none falls back to an unbound key.
-- Specs: on a multisite stack (`E2E_MULTISITE=1`), site A's key never reads, lists or
-  deletes a site B document.
-
 ### XLIX.83 Releases deployed to the plugin directory (D227)
 
 WordPress.org never reads GitHub: an approved plugin gets its own SVN repository at
