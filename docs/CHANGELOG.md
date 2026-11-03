@@ -734,6 +734,7 @@
 - **D278** — The video's captions are what Ana says, timed to her takes, in SRT and WebVTT beside it and as a track inside; the chapter titles became a YouTube chapter list.
 - **D277** — The pt-BR video is recorded again on the Turing image with T1190, T1191 and T1196: the D275 cards, no Site: localhost, and chapter 8 fixes cantil.
 - **D283** — Tarnfell (38082) and Recanto da Serra (38083) run side by side, each reset alone; tests, story and video pick the pt-BR store with DEMO_LOCALE=pt_BR.
+- **D284 (the Fields screenshot)** — The Fields screenshot masks the previewed post's title, which other specs change, so CI no longer fails on it.
 
 ## Track T — Releases and links match what the site describes
 

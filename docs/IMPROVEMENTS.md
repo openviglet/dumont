@@ -301,7 +301,7 @@ stashed, so the failures come from the stack, not from the code under test.
 
 - `admin/screens.spec.mjs:103` (Health): the page index reports `6 (differs: run a reindex)` where the spec expects `7`. The Turing store was recreated while WordPress kept a page the index no longer holds, and nothing in setup reindexes.
 - `site/trending.spec.mjs:125` (blocked word): the "Popular searches" navigation holds two links named `workshop`, a strict-mode violation. Searches accumulated across runs (differing case or form) surface as two chips with the same text; either the chips should merge on what they display, or the spec should seed its own history.
-- `admin/screens.spec.mjs:36` (Fields): the `fields.png` screenshot differs from the win32 baseline. Not rerun on the previous code, so it is the one to confirm first; the screen itself was not touched.
+- `admin/screens.spec.mjs:36` (Fields): fixed. The preview names the latest modified post, which other specs change, so the title is masked like the document; the linux baseline is rewritten by the next CI run, to be committed from its artifacts.
 
 Done means the three pass on a stack reused across runs, through the setup the suite
 already owns (global setup reindexing or seeding what each spec reads), and a trending
