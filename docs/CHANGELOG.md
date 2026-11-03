@@ -749,7 +749,7 @@
 - **D299** — A new SN site is created from the Setup page: a manifest Turing refuses for want of an engine is sent again on its first enabled one.
 - **D281 (recording)** — run-docker.cmd fresh is a WordPress never given the plugin; e2e:developer:record installs the zip, connects, indexes, searches, opens insights.
 - **D290 (project written)** — --project writes story.<lang>.project/, an FCPXML from the MP4's own timeline with its media beside it: 45 files present, 411.27 s like the MP4.
-- **D291 (audio)** — The music ducks about 8 dB under every line, keyframed on A2 in the project, and the mix measures -14.2 LUFS under -1 dBTP.
+- **D291** — Cards dissolve into and out of the recording and shots in the MP4 at no change of length; no J-cut case, every line starts after its card (design §XLIX.134 recorded in `wordpress/demo/VIDEO.md`).
 
 ## Track T — Releases and links match what the site describes
 

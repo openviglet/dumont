@@ -31,5 +31,6 @@
 - ⏸ **D265** (deps: —) **The demo store's pictures are drawings, which read as a mock-up on video** — set aside (Waits on Ideogram credit and a working key.): Buy the 54 photos left once Ideogram accepts the key again (listed in the design). → §XLIX.110
 - ⏸ **D281** (deps: D276 ✅) **No video shows a developer how the plugin is installed, connected and indexed** — set aside (Needs Alexandre to pick the narrator's voice and approve buying takes.): The walkthrough has no narration (a plain voice, not Ana's) and no assembly into a captioned video with cards. → §XLIX.124
 - ⏸ **D290** (deps: D276 ✅, D278 ✅) **The demo video comes out only as a rendered MP4, so no cut, level or timing can be adjusted in an editor** — set aside (Needs Alexandre to open it in Resolve.): Nobody has opened the project in DaVinci Resolve yet, which free Resolve cannot be scripted to check. → §XLIX.133
+- ⏸ **D300** (deps: D290 ✅) **The Resolve project keeps hard cuts where the MP4 dissolves between a card and the recording** — set aside (Waits on D290's check in Resolve.): Cards sit on lanes above gaps, and an FCPXML transition joins spine items, so the project and the MP4 disagree. → §XLIX.142
 
 ## Track T — Releases and links match what the site describes

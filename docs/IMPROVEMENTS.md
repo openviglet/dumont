@@ -273,21 +273,6 @@ not decode, so the recording is transcoded once into an edit-friendly intermedia
 project points at. Paths are relative to the project, so the folder can move. A rendered
 project is a release asset, not committed, like the MP4.
 
-### XLIX.134 A finished edit: transitions, ducking and loudness (D291)
-
-Today every segment is joined with `-c copy`, so card → chapter → card is a hard cut.
-The music sits at a fixed `0.12` for the whole video, whether Ana is speaking or not,
-and nothing measures the loudness of the final mix.
-
-This work goes into the timeline model of D290, so the MP4 and the Resolve project get
-it alike.
-
-- **Transitions.** A short cross-dissolve where a card meets the recording and between the opening shots. The recording keeps its hard cuts inside a chapter, because those are the product responding.
-- **Ducking.** The music rises in the gaps between lines and dips under each take. In the project these are volume keyframes on A2, which can be moved in Fairlight. In the MP4 they are the same envelope, rendered.
-- **J-cuts.** Where a chapter's line starts before its card ends, the voice leads the picture by a beat instead of starting on the cut.
-- **Loudness.** The mix is normalised to −14 LUFS integrated, YouTube's playback target, with a true-peak ceiling. The measured value is printed beside the video's length so a regression shows up.
-- **Roles.** Dialogue, music and effects are named on their tracks, so Resolve opens them as separate Fairlight tracks rather than as anonymous audio.
-
 ### XLIX.135 The frame follows the action (D292)
 
 `tests/e2e/story/shopper.story.mjs` types into the search box, clicks a chip and holds
@@ -358,6 +343,25 @@ store.
 
 **Done when.** Assembling `--language en` over a pt-BR recording stops with that message
 instead of writing a video, and a matching pair assembles as before.
+
+### XLIX.142 Dissolves in the Resolve project (D300)
+
+**What happens.** Since D291 the MP4 dissolves for half a second wherever a card meets
+the recording or a shot: `bin/story-video.mjs` overlays the card still, fading, on the
+clip beside it, and the video's length does not change. The FCPXML of D290 is written
+from the same timeline but keeps hard cuts there, because the cards and shots sit on
+lanes above gaps and an FCPXML `<transition>` joins spine items, not connected clips. So
+the project and the MP4 disagree at every card.
+
+**What it should do.** Carry the dissolves into the project the way Resolve reads them.
+Either put the cards and shots on the spine (V1) with the recording, so a `<transition>`
+sits between two spine items, giving up the V1/V2/V3 split; or keep the lanes and give
+each card an opacity keyframe ramp (`adjust-blend` / `adjust-transform` keyframes) over
+the dissolve. Which one Resolve imports has to be checked in Resolve, which is why this
+waits on D290's check.
+
+**Done when.** The project opened in Resolve shows the same dissolves the MP4 has, at
+the same places and lengths.
 
 ## L The documentation area
 

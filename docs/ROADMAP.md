@@ -118,9 +118,8 @@ This track has no remaining pending tasks.
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
 - 📋 **D287** (deps: Viglet Turing T1133: copilot reads a partitioned key's partition) **On an SN site shared by several WordPress sites, Build my kit and the copilot stage other sites' products** — Search filters by site key, the generative calls do not, so a kit can sell another site's stock. → §XLIX.128
-- ⏳ **D291** (deps: D290 ✅) **The video joins every shot with a hard cut and keeps the music at one flat level under and between the lines** — Every shot still meets the next with a hard cut: no dissolve where a card meets the recording, no J-cuts. → §XLIX.134
 - 📋 **D292** (deps: D290 ✅) **The recording is always the full 1920x1080 page, so the search box and the answer are small on a phone screen** — Screen demos read when the frame follows the action, and the story already knows which element each step touches. → §XLIX.135
-- 💭 **D293** (deps: D291 ⏳) **Opening the project in Resolve leaves subtitles, the voice chain and delivery settings to set up by hand each time** — FCPXML carries the edit but not Resolve's own settings, and its scripting API can apply them the same way every time. → §XLIX.136
+- 💭 **D293** (deps: D291 ✅) **Opening the project in Resolve leaves subtitles, the voice chain and delivery settings to set up by hand each time** — FCPXML carries the edit but not Resolve's own settings, and its scripting API can apply them the same way every time. → §XLIX.136
 - 📋 **D298** (deps: —) **The video script lays one language's narration over the other store's recording without a word** — The recording does not say which store it played, so only someone watching the result notices the mismatch. → §XLIX.141
 
 ## Track T — Releases and links match what the site describes
@@ -148,12 +147,6 @@ This track has no remaining pending tasks.
   in the Resolve version in use: every clip links, the chapter markers sit where
   chapters.txt says, and the timeline's length matches the MP4's to within one frame.
   Look at it in Resolve; a well-formed XML file is not the check.
-
-## Done when — D291
-
-- **The mix measures -14 LUFS and the music dips under every line** The script prints
-  the integrated loudness of the MP4 (ffmpeg loudnorm/ebur128), and the A2 volume
-  keyframes in the Resolve project fall at each take's start and end.
 
 ## Done when — D292
 
