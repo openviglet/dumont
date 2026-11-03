@@ -125,7 +125,6 @@ This track has no remaining pending tasks.
 - 📋 **D291** (deps: D290) **The video joins every shot with a hard cut and keeps the music at one flat level under and between the lines** — Dissolves, music that ducks under the voice, a loudness target and J-cuts are what make it read as edited rather than assembled. → §XLIX.134
 - 📋 **D292** (deps: D290) **The recording is always the full 1920x1080 page, so the search box and the answer are small on a phone screen** — Screen demos read when the frame follows the action, and the story already knows which element each step touches. → §XLIX.135
 - 💭 **D293** (deps: D291) **Opening the project in Resolve leaves subtitles, the voice chain and delivery settings to set up by hand each time** — FCPXML carries the edit but not Resolve's own settings, and its scripting API can apply them the same way every time. → §XLIX.136
-- 📋 **D297** (deps: —) **The pt-BR demo store shows the product attributes as Colour, Use and Size in English** — The compare table and product pages mix English labels into a Portuguese store, beside facets that already say Cor, Uso and Tamanho. → §XLIX.140
 
 ## Track T — Releases and links match what the site describes
 
