@@ -80,6 +80,11 @@ jobs:
           npm run lint:js
           npm run build
 
+      # What the WordPress.org review reads and PHPCS skips: every Security silencer says why,
+      # unescaped output is limited to a known list, no textdomain loading, no stray notices.
+      - name: The review's rules on the source
+        run: node bin/wporg-check.mjs
+
   # D226: Plugin Check, the tool the WordPress.org review team runs, on the package uploaded there
   # (bin/build-zip.sh --wporg: the zip's viglet-turing-search/ folder, without the bundled
   # translations), not on the source tree. A warning fails the job too (D229): the package checks
@@ -100,6 +105,11 @@ jobs:
           npm ci
           npm run build
           unzip -q "$(sh bin/build-zip.sh --wporg)" -d build/package
+
+      # The pre-review of 3 Nov 2026 found translations and load_plugin_textdomain() in a package
+      # Plugin Check had passed: this reads the package for them.
+      - name: The review's rules on the package
+        run: node bin/wporg-check.mjs --package build/package/viglet-turing-search
 
       - uses: wordpress/plugin-check-action@v1
         with:
