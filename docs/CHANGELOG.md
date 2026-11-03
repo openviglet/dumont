@@ -739,6 +739,7 @@
 - **D285** — A sentence read as a price searches only its other words: a dropped Turing filter takes none out, so "a two-person tent under $400" finds tents with no close matches.
 - **D286** — A correction that finds nothing either is undone: the box, the address and the empty state are the typed query's, and that correction is not offered again.
 - **D288** — Cited and staged documents are priced in one Store API list call, so a guide among them stays a link and makes no failed request.
+- **D289** — Every search the demo story makes is one the narration tells: chapter 2 ends on the tents, and chapter 8's failed search comes from the seeded history in both languages.
 
 ## Track T — Releases and links match what the site describes
 
