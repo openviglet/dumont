@@ -246,26 +246,6 @@ with ffmpeg's `zoompan`/`crop`.
 Recording at 2560x1440 would give the zoom more pixels, but it is a separate decision
 with a cost in recording time, so it stays out of this task.
 
-### XLIX.136 Finishing in Resolve, scripted (D293)
-
-FCPXML moves clips, keyframes and markers. It does not carry what Resolve keeps in its
-own project: a subtitle track, a Fairlight chain on the dialogue, the render settings.
-
-**Settled against Resolve 21's own API reference.** The scripting API reaches all of it:
-`ImportTimelineFromFile` takes FCPXML, `ImportMedia` plus `AddTrack('subtitle')` brings
-in the `.srt`, `ApplyFairlightPresetToCurrentTimeline` applies a dialogue chain saved
-once as a preset (effects are not built by script, a preset is), and `SetRenderSettings`
-/ `AddRenderJob` queue the delivery with embedded captions. Scripting from outside the
-app needs Studio; the free version runs the same script from Workspace > Console or
-Workspace > Scripts, which is enough for a step a person starts anyway. A saved template
-could not import a timeline or captions, so a script it is.
-
-**Landed.** `demo/resolve/finish.py`, written into each `story.<lang>.project/` with its
-paths by `story-video.mjs --project`: it creates the project, imports the timeline,
-reports clips that came in offline (D290's check), adds the captions, applies the preset
-when saved, queues the render. Left: running it once in Resolve, which no session here
-can do.
-
 ### XLIX.142 Dissolves in the Resolve project (D300)
 
 **What happens.** Since D291 the MP4 dissolves for half a second wherever a card meets
