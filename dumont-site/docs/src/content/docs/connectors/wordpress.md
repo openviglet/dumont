@@ -227,6 +227,26 @@ each other's documents. The key defaults to the site's host and path
 
 **Delete All** and `wp dumont sweep` remove only this key's documents.
 
+### A key per site
+
+A plain API key reaches every document in the SN site, so one site's key could read or
+delete another's. Instead, give each site its own key bound to its site key. In the Turing
+console, under **Administration → API Tokens**, set **Partition of a shared site** to the
+field `site_key` and this site's key as the value. Then paste the token into this site's
+Setup. Turing then keeps the key inside the site's own documents. Some things are shared by
+every site of the SN site, so this key cannot change them:
+
+| What | With a key bound to the site |
+|---|---|
+| Fields | Saving fields that would change the SN site's schema is refused, and the Fields screen and Health show Turing's reason. Add or change fields with a key that has no partition |
+| Boosts | Off. The Search tuning screen says why |
+| Synonyms | Listed, but adding or removing one is refused, because every site shares the synonyms |
+| Promoted results | Each site sees, adds and removes only its own, and they show only in its own searches |
+
+Health's AI features check works with either key. On a multisite network, don't set
+`VIGLET_DUMONT_TURING_API_KEY`: a constant applies to every blog and overrides each blog's
+own key.
+
 :::tip[Upgrading from an earlier version]
 Ids used to be `wp-<ID>`. Run **Index All** (or `wp dumont reindex`) once after upgrading:
 it indexes every post under its new id and removes the copy under the old one.

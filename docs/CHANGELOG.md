@@ -653,7 +653,7 @@
 - **D191** — The AI-off answer spec replays Turing's own "not enabled" event, so the default suite no longer depends on whether the stack was started with an OpenAI key.
 - **D205** — The Settings Search panel baseline includes D186's Generative AI section, and its six strings read in Portuguese in a pt_BR admin.
 - **D206** — The Search insights spec finds its failed search on a stack with a day of runs logged, searching one fixed term three times.
-- **D190 (delete-all and Related)** — Delete-all is one Turing delete by this site's key, and Related asks Turing for this site's neighbours only, three per post shown.
+- **D190 (delete-all, Related, partition refusals)** — Delete-all and Related stay inside this site's key; a partitioned key's refusals turn boosts off with Turing's reason, and Health reads AI features from Turing's capabilities.
 - **D192** — Every settings select keeps its text clear of WordPress's arrow, in English and pt_BR, and the content select lines up with Start Indexing.
 - **D193** — The Tarnfell storefront scores Lighthouse 90+ on home and results, its hero is the search block, and a spec walks from search to cart by keyboard (design §XLIX.49 recorded in `wordpress/README.md`).
 - **D211** — The admin build reads only assets/admin and stays flat across builds, and the zip script refuses a build folder holding anything nested.
