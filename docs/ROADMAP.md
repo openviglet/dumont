@@ -116,7 +116,6 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- ⏳ **D281** (deps: D276 ✅) **No video shows a developer how the plugin is installed, connected and indexed** — The walkthrough has no narration (a plain voice, not Ana's) and no assembly into a captioned video with cards. → §XLIX.124
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
 - 📋 **D287** (deps: Viglet Turing T1133: copilot reads a partitioned key's partition) **On an SN site shared by several WordPress sites, Build my kit and the copilot stage other sites' products** — Search filters by site key, the generative calls do not, so a kit can sell another site's stock. → §XLIX.128
 - 📋 **D290** (deps: D276 ✅, D278 ✅) **The demo video comes out only as a rendered MP4, so no cut, level or timing can be adjusted in an editor** — An FCPXML project beside the MP4, read from the same timeline, opens in DaVinci Resolve with every piece separate. → §XLIX.133
