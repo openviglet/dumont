@@ -33,5 +33,6 @@
 - ⏸ **D290** (deps: D276 ✅, D278 ✅) **The demo video comes out only as a rendered MP4, so no cut, level or timing can be adjusted in an editor** — set aside (Needs Alexandre to open it in Resolve.): Nobody has opened the project in DaVinci Resolve yet, which free Resolve cannot be scripted to check. → §XLIX.133
 - ⏸ **D300** (deps: D290 ✅) **The Resolve project keeps hard cuts where the MP4 dissolves between a card and the recording** — set aside (Waits on D290's check in Resolve.): Cards sit on lanes above gaps, and an FCPXML transition joins spine items, so the project and the MP4 disagree. → §XLIX.142
 - ⏸ **D292** (deps: D290 ✅) **The recording is always the full 1920x1080 page, so the search box and the answer are small on a phone screen** — set aside (Waits on D290's check in Resolve.): The Resolve project still shows the full frame: the push-ins are not transform keyframes on V1 yet. → §XLIX.135
+- ⏸ **D293** (deps: D291 ✅) **Opening the project in Resolve leaves subtitles, the voice chain and delivery settings to set up by hand each time** — set aside (Needs Alexandre to run finish.py in Resolve.): finish.py has not been run in Resolve yet, and free Resolve runs scripts only from inside the app. → §XLIX.136
 
 ## Track T — Releases and links match what the site describes

@@ -298,30 +298,23 @@ with a cost in recording time, so it stays out of this task.
 
 ### XLIX.136 Finishing in Resolve, scripted (D293)
 
-FCPXML moves clips, keyframes, markers and transitions. It does not carry what Resolve
-keeps in its own project: a subtitle track styled for the video, a Fairlight chain on
-the dialogue track (EQ, de-esser, compressor or the Dialogue Leveler), the render
-presets, and the decision to export the chapter markers into the MP4.
+FCPXML moves clips, keyframes and markers. It does not carry what Resolve keeps in its
+own project: a subtitle track, a Fairlight chain on the dialogue, the render settings.
 
-Resolve ships a Python scripting API (`DaVinciResolveScript`). A script in
-`wordpress/demo/resolve/` would do the following when run from the Workspace › Console:
+**Settled against Resolve 21's own API reference.** The scripting API reaches all of it:
+`ImportTimelineFromFile` takes FCPXML, `ImportMedia` plus `AddTrack('subtitle')` brings
+in the `.srt`, `ApplyFairlightPresetToCurrentTimeline` applies a dialogue chain saved
+once as a preset (effects are not built by script, a preset is), and `SetRenderSettings`
+/ `AddRenderJob` queue the delivery with embedded captions. Scripting from outside the
+app needs Studio; the free version runs the same script from Workspace > Console or
+Workspace > Scripts, which is enough for a step a person starts anyway. A saved template
+could not import a timeline or captions, so a script it is.
 
-1. Create a project named for the language.
-2. Import `story.<lang>.fcpxml` and the `.srt` as a subtitle track.
-3. Apply the subtitle style and the dialogue chain.
-4. Queue the delivery presets: YouTube 1080p, and the 9:16 crop once D280 exists.
-
-The script is the house style, written down. A hand edit made after it runs is the
-editor's own.
-
-This is an idea, not a design, because three things are unconfirmed:
-
-- Which of these the API can reach. Fairlight effects in particular may not be scriptable.
-- Whether scripting from outside the app needs Resolve Studio, or whether the free version's console is enough.
-- Whether the gain over a saved Resolve project template is worth a script to maintain.
-
-The first step is to check those three on the Resolve version in use. If the answers are
-poor, the task closes as a template saved by hand.
+**Landed.** `demo/resolve/finish.py`, written into each `story.<lang>.project/` with its
+paths by `story-video.mjs --project`: it creates the project, imports the timeline,
+reports clips that came in offline (D290's check), adds the captions, applies the preset
+when saved, queues the render. Left: running it once in Resolve, which no session here
+can do.
 
 ### XLIX.141 The recording names its language (story-video refuses a mismatch) (D298)
 
