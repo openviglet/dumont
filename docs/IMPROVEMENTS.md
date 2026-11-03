@@ -175,28 +175,6 @@ the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
 **Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
 photo current, and the seed draws none.
 
-### XLIX.122 One clip per chapter (D279)
-
-**What happens.** The video is one 7.5-minute piece plus a 30 s teaser. Someone
-searching for one thing the plugin does (natural-language search with a price filter, an
-assistant that cites the site's own pages, a kit built from a trip description) only
-finds it inside the long video, if at all: one video is one entry point.
-
-**What it should do.**
-- `story-video.mjs --chapter <n>` builds a standalone clip of one chapter, 40 s to 1 min:
-  a short title card, the chapter's action and result with Ana's lines and captions, and
-  a closing card pointing at the full video and the Playground.
-- The first three cuts are the strongest chapters: 2 (a sentence read as a price filter),
-  3 (the Site assistant answering from the guides, with sources) and 5 (the kit).
-- English first. pt-BR cuts only if the pt-BR long video shows interest in its numbers,
-  which the visibility review reads.
-- Each cut is built from the same recording as the long video, so a new recording rebuilds
-  them all.
-
-**Done when.** `story-video.mjs --language en --chapter 2`, `3` and `5` each produce a
-clip under a minute that opens on its card, carries its captions and closes on the
-full-video and Playground card.
-
 ### XLIX.123 A phone-viewport recording for vertical cuts (D280)
 
 **What happens.** The story is recorded at a 1920 x 1080 desktop viewport. Vertical
@@ -375,6 +353,27 @@ This is an idea, not a design, because three things are unconfirmed:
 
 The first step is to check those three on the Resolve version in use. If the answers are
 poor, the task closes as a template saved by hand.
+
+### XLIX.141 The recording names its language (story-video refuses a mismatch) (D298)
+
+**What happens.** `chapters.json` records the chapters and whether the run was the
+recording, but not which store it was recorded on. `story-video.mjs --language en` reads
+whatever recording is there, so after a pt-BR recording it lays Ana's English takes and
+English cards over Recanto da Serra's Portuguese pages, prices in reais, and says
+nothing. D279 met it: the first English chapter clips came out over the Portuguese
+store.
+
+**What it should do.**
+- The story writes the language it played (`DEMO_LOCALE`, `en` when unset) into
+  `chapters.json` beside `record`.
+- `story-video.mjs` refuses a `--language` that differs from the recording's, naming the
+  command that records that language's store (`DEMO_LOCALE=pt_BR npm run e2e:story:record`
+  or the bare one), the way it already refuses a recording older than the spec.
+- Optionally keep one recording per language (`artifacts/story/<lang>/`), so recording one
+  store does not discard the other's footage; the refusal alone is the must.
+
+**Done when.** Assembling `--language en` over a pt-BR recording stops with that message
+instead of writing a video, and a matching pair assembles as before.
 
 ## L The documentation area
 

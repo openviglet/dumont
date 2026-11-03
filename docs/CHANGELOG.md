@@ -744,6 +744,7 @@
 - **D295** — A recorded story turns spell-check off on each field it focuses, so no typed word carries the browser's red underline.
 - **D296** — Chapter 2's result line says the filter showed only what fits the budget, true in both stores, and both videos carry its new takes.
 - **D297** — The demo seed names its attributes in the store's language and renames them on a store seeded before, so the pt-BR store says Cor, Uso and Tamanho.
+- **D279** — story-video.mjs --chapter <n> cuts one chapter as a clip under a minute from the recording; English chapters 2, 3 and 5 run 51, 42 and 58 s (design §XLIX.122 recorded in `wordpress/demo/VIDEO.md`).
 
 ## Track T — Releases and links match what the site describes
 

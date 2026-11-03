@@ -116,8 +116,7 @@ This track has no remaining pending tasks.
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D279** (deps: D276 ✅, D278 ✅) **Each thing the plugin does is only findable inside one 7.5-minute video** — A clip per strong chapter is one more entry point per search someone makes, built from the same recording. → §XLIX.122
-- 📋 **D280** (deps: D279) **The story is recorded only at a desktop viewport, which crops badly to 9:16** — A second scripted run at a phone viewport gives vertical cuts that show whole results, at no new narration cost. → §XLIX.123
+- 📋 **D280** (deps: D279 ✅) **The story is recorded only at a desktop viewport, which crops badly to 9:16** — A second scripted run at a phone viewport gives vertical cuts that show whole results, at no new narration cost. → §XLIX.123
 - 📋 **D281** (deps: D276 ✅) **No video shows a developer how the plugin is installed, connected and indexed** — The story speaks to shop owners; whoever puts the plugin on a client site needs install, settings and insights instead. → §XLIX.124
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
 - 📋 **D287** (deps: Viglet Turing T1133: copilot reads a partitioned key's partition) **On an SN site shared by several WordPress sites, Build my kit and the copilot stage other sites' products** — Search filters by site key, the generative calls do not, so a kit can sell another site's stock. → §XLIX.128
@@ -125,6 +124,7 @@ This track has no remaining pending tasks.
 - 📋 **D291** (deps: D290) **The video joins every shot with a hard cut and keeps the music at one flat level under and between the lines** — Dissolves, music that ducks under the voice, a loudness target and J-cuts are what make it read as edited rather than assembled. → §XLIX.134
 - 📋 **D292** (deps: D290) **The recording is always the full 1920x1080 page, so the search box and the answer are small on a phone screen** — Screen demos read when the frame follows the action, and the story already knows which element each step touches. → §XLIX.135
 - 💭 **D293** (deps: D291) **Opening the project in Resolve leaves subtitles, the voice chain and delivery settings to set up by hand each time** — FCPXML carries the edit but not Resolve's own settings, and its scripting API can apply them the same way every time. → §XLIX.136
+- 📋 **D298** (deps: —) **The video script lays one language's narration over the other store's recording without a word** — The recording does not say which store it played, so only someone watching the result notices the mismatch. → §XLIX.141
 
 ## Track T — Releases and links match what the site describes
 
