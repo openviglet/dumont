@@ -750,6 +750,7 @@
 - **D281 (recording)** — run-docker.cmd fresh is a WordPress never given the plugin; e2e:developer:record installs the zip, connects, indexes, searches, opens insights.
 - **D290 (project written)** — --project writes story.<lang>.project/, an FCPXML from the MP4's own timeline with its media beside it: 45 files present, 411.27 s like the MP4.
 - **D291** — Cards dissolve into and out of the recording and shots in the MP4 at no change of length; no J-cut case, every line starts after its card (design §XLIX.134 recorded in `wordpress/demo/VIDEO.md`).
+- **D292 (MP4)** — The story records each acted-on element's box and the video eases in on it, up to 1.6x: the typed query and the answer's sources read at phone size.
 
 ## Track T — Releases and links match what the site describes
 
