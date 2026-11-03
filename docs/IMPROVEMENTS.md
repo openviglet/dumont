@@ -316,27 +316,6 @@ reports clips that came in offline (D290's check), adds the captions, applies th
 when saved, queues the render. Left: running it once in Resolve, which no session here
 can do.
 
-### XLIX.141 The recording names its language (story-video refuses a mismatch) (D298)
-
-**What happens.** `chapters.json` records the chapters and whether the run was the
-recording, but not which store it was recorded on. `story-video.mjs --language en` reads
-whatever recording is there, so after a pt-BR recording it lays Ana's English takes and
-English cards over Recanto da Serra's Portuguese pages, prices in reais, and says
-nothing. D279 met it: the first English chapter clips came out over the Portuguese
-store.
-
-**What it should do.**
-- The story writes the language it played (`DEMO_LOCALE`, `en` when unset) into
-  `chapters.json` beside `record`.
-- `story-video.mjs` refuses a `--language` that differs from the recording's, naming the
-  command that records that language's store (`DEMO_LOCALE=pt_BR npm run e2e:story:record`
-  or the bare one), the way it already refuses a recording older than the spec.
-- Optionally keep one recording per language (`artifacts/story/<lang>/`), so recording one
-  store does not discard the other's footage; the refusal alone is the must.
-
-**Done when.** Assembling `--language en` over a pt-BR recording stops with that message
-instead of writing a video, and a matching pair assembles as before.
-
 ### XLIX.142 Dissolves in the Resolve project (D300)
 
 **What happens.** Since D291 the MP4 dissolves for half a second wherever a card meets

@@ -752,6 +752,7 @@
 - **D291** — Cards dissolve into and out of the recording and shots in the MP4 at no change of length; no J-cut case, every line starts after its card (design §XLIX.134 recorded in `wordpress/demo/VIDEO.md`).
 - **D292 (MP4)** — The story records each acted-on element's box and the video eases in on it, up to 1.6x: the typed query and the answer's sources read at phone size.
 - **D293 (script)** — --project writes finish.py beside the FCPXML: run in Resolve it imports the timeline and captions, reports offline clips and queues the render.
+- **D298** — The recording names its store's language and story-video.mjs refuses another --language, naming the command that records the right store (design §XLIX.141 recorded in `wordpress/demo/VIDEO.md`).
 
 ## Track T — Releases and links match what the site describes
 
