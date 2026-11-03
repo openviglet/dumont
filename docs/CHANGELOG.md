@@ -740,6 +740,7 @@
 - **D286** — A correction that finds nothing either is undone: the box, the address and the empty state are the typed query's, and that correction is not offered again.
 - **D288** — Cited and staged documents are priced in one Store API list call, so a guide among them stays a link and makes no failed request.
 - **D289** — Every search the demo story makes is one the narration tells: chapter 2 ends on the tents, and chapter 8's failed search comes from the seeded history in both languages.
+- **D294** — The facet probe of a filtered search goes out uncounted, so a search opened filtered counts once in the shop's insights.
 
 ## Track T — Releases and links match what the site describes
 
