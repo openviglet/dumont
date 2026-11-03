@@ -175,33 +175,6 @@ the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
 **Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
 photo current, and the seed draws none.
 
-### XLIX.119 The English video, the primary one (D276)
-
-**What happens.** Only the pt-BR video exists (Recanto da Serra, 7m28s). D261 shipped
-with its criterion still open: the English takes are not bought and no `--language en`
-video has been assembled. Every place the video will be embedded is in English (this
-site's WordPress page, the docs, the plugin README, the wordpress.org listing, the
-Turing site), and the Playground the closing card points at is the English store, so the
-pt-BR video alone has nowhere to go.
-
-**Why two videos and not one with two audio tracks.** The footage differs by language:
-the pt-BR store is Recanto da Serra in reais on its own SN site, the English one is
-Tarnfell in dollars. English audio over the Portuguese store would not match the screen,
-so each language is its own recording and its own video, with its own title and
-chapters.
-
-**What it should do.**
-- The demo stack runs a Turing image that carries T1190 and T1191, so the kit's reasons no
-  longer show "Site: localhost".
-- `npm run story:narration -- --language en` buys the English takes from the current
-  script; `DEMO_LOCALE` unset, `npm run e2e:story:record` records Tarnfell;
-  `node bin/story-video.mjs --language en` assembles it with the cards of D275.
-- English is the primary video: the embeds and the chapter cuts start from it.
-
-**Done when.** `tests/e2e/artifacts/video/story.en.mp4` (or the language-suffixed name
-the script settles on) plays the Tarnfell story narrated in English, no frame shows
-"localhost", and the D261 criterion is met.
-
 ### XLIX.122 One clip per chapter (D279)
 
 **What happens.** The video is one 7.5-minute piece plus a 30 s teaser. Someone
@@ -290,6 +263,69 @@ and the plugin's pages embed that.
 **Done when.** The site page and the docs play the English video with captions and show
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
+
+### XLIX.129 The words left after a sentence's filters are read (D285)
+
+**What happens.** "a two-person tent under $400" is read as `Price: ≤ 400`, and the
+search box is left holding "a two-person tent under $". The refined search then looks
+for "under $" too, finds nothing with every word, and the page says "Showing close
+matches". Seen in the demo video's chapter 2 on 2026-11-03.
+
+**Why.** Turing's `nl-filters` answers `q` with only each filter's `sourceWords`
+removed, and for a price range that is `["400"]`, not "under $400". Its price filter
+comes back `grounded: false`, so `readFilters()` in `search-block.js` drops it and uses
+its own `readPrice()`, which matched the whole phrase "under $400". That phrase is then
+removed from Turing's `q`, where it no longer exists, so nothing is removed and the
+leftover stays.
+
+**What it should do.** The query that remains is built from the text the visitor typed,
+minus the words of every filter actually applied: Turing's `sourceWords` for the filters
+kept, and the whole matched phrase for the size and price the block read itself. A
+filter the block dropped takes no words out. The Turing half (`sourceWords` of a range
+should cover its bound words and currency) is T1211.
+
+**Done when.** "a two-person tent under $400" searches "a two-person tent" with the
+price filter on, finds tents without close matches, and a spec covers it.
+
+### XLIX.130 A correction that finds nothing is undone (D286)
+
+**What happens.** D259 searches a query that found nothing again as Turing corrected it,
+and says "Showing results for <correction>. Search instead for <typed>". When the
+correction finds nothing too, the page still says so: "bothy bag", a word the demo shop
+does not use, becomes "Showing results for both bag" over "No results found", and the
+box holds "both bag", which nobody typed. Seen in the demo video's chapter 2 on
+2026-11-03.
+
+**What it should do.** A corrected search that finds nothing is no improvement: the page
+goes back to what the visitor typed, with the box, the address bar and the empty state
+about it, and no "Showing results for" line. It is not corrected again (the same guard
+`searchInstead()` sets).
+
+**Done when.** A query whose correction also finds nothing shows the typed query's empty
+state with no correction notice, and a spec covers it beside the existing D259 one.
+
+### XLIX.128 Generative calls scoped to the site's key (D287)
+
+**What happens.** D148 lets several WordPress sites share one SN site: every document
+carries `site_key`, and the search block, Related, trending, tuning and the native
+search all filter on `fq[]=site_key:<key>`. The calls that go to Turing's generative
+endpoints do not. `copilot.js` posts Build my kit to `/api/sn/{site}/copilot/kit` and
+the product question to `/copilot` with no filter, and Turing's `KitRequest` and
+`CopilotRequest` (`TurSNCatalogCopilotAPI`) take none. On 2026-11-03 the local
+`tarnfell` SN site held the demo store (`site_key=localhost`) and a Playground run's
+copy of the same catalog (`site_key=tarnfell`): the kit staged every product twice, each
+with a "Site: localhost" or "Site: tarnfell" reason, and a shopper on one site could add
+the other site's products.
+
+**What it should do.** The kit, the product question, the Site assistant and the compare
+summary read only this site's documents. Turing's answer is a key bound to the site's
+partition (T1133): its searches are scoped already, while chat, nl-filters and copilot
+refuse such a key until the deferred half of T1133 puts the partition in the vector
+store. D190 binds each network site's key; once T1133 lands, a single site sharing an SN
+site gets the same bound key, and the plugin sends nothing extra.
+
+**Done when.** Two sites sharing an SN site each get a kit, an answer and a comparison
+built from their own products only, covered by a browser spec on the multisite network.
 
 ## L The documentation area
 

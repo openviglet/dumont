@@ -735,6 +735,7 @@
 - **D277** — The pt-BR video is recorded again on the Turing image with T1190, T1191 and T1196: the D275 cards, no Site: localhost, and chapter 8 fixes cantil.
 - **D283** — Tarnfell (38082) and Recanto da Serra (38083) run side by side, each reset alone; tests, story and video pick the pt-BR store with DEMO_LOCALE=pt_BR.
 - **D284** — Health counts as published only what the index would hold, and the trending spec finds each chip by its whole text.
+- **D276** — The English video, recorded on Tarnfell and narrated in English, is story.en.mp4 (6m53s), and each language's video is now named for it (design §XLIX.119 recorded in `wordpress/demo/VIDEO.md`).
 
 ## Track T — Releases and links match what the site describes
 
