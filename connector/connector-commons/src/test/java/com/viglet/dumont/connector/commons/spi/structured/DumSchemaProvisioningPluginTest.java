@@ -41,6 +41,8 @@ import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacet;
 import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacetItem;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomSort;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomSortItem;
 import com.viglet.turing.commons.se.field.TurSEFieldType;
 
 /** The schema reaches the backend ahead of the documents (roadmap D63). */
@@ -156,6 +158,48 @@ class DumSchemaProvisioningPluginTest {
     }
 
     @Test
+    @DisplayName("a declared custom sort is provisioned with the fields (D144)")
+    void customSortsReachTheProvisionedSchema() {
+        plugin.indexAll(SOURCE);
+
+        assertEquals(List.of(CLOSING_SOONEST), context.provisioned.getFirst().customSorts());
+    }
+
+    @Test
+    @DisplayName("a schema declares no custom sort unless asked (D144)")
+    void aSchemaDeclaresNoCustomSortByDefault() {
+        assertTrue(DumStructuredSchema.builder().text("title").build().customSorts().isEmpty());
+        assertTrue(new DumIndexingSchema("Author", Locale.US, List.of()).customSorts().isEmpty());
+    }
+
+    @Test
+    @DisplayName("a custom sort over an undeclared field is refused (D144)")
+    void aCustomSortOverAnUndeclaredFieldIsRefused() {
+        DumStructuredSchema.Builder builder = DumStructuredSchema.builder().text("title")
+                .customSort(CLOSING_SOONEST);
+
+        assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    @DisplayName("a custom sort with no level is refused (D144)")
+    void aCustomSortWithNoLevelIsRefused() {
+        DumStructuredSchema.Builder builder = DumStructuredSchema.builder().text("title")
+                .customSort(TurSNManifestCustomSort.of("empty", List.of()));
+
+        assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    @DisplayName("a custom sort is declared once by name (D144)")
+    void aCustomSortIsDeclaredOnceByName() {
+        DumStructuredSchema.Builder builder = DumStructuredSchema.builder().text("title")
+                .customSort(CLOSING_SOONEST);
+
+        assertThrows(IllegalArgumentException.class, () -> builder.customSort(CLOSING_SOONEST));
+    }
+
+    @Test
     @DisplayName("an empty schema is not a declaration")
     void anEmptySchemaIsNotADeclaration() {
         assertTrue(new DumIndexingSchema("Author", Locale.US, List.of()).isEmpty());
@@ -169,6 +213,9 @@ class DumSchemaProvisioningPluginTest {
             "postedRecently", "Posted", List.of(TurSNManifestCustomFacetItem.since("Last 7 days",
                     "NOW-7DAYS")));
 
+    private static final TurSNManifestCustomSort CLOSING_SOONEST = TurSNManifestCustomSort.of(
+            "closingSoonest", List.of(TurSNManifestCustomSortItem.asc("postedAt").missingLast()));
+
     private static final class Catalog implements DumStructuredSource {
         private final DumStructuredSchema schema = DumStructuredSchema.builder()
                 .field(DumStructuredField.builder("title").type(TurSEFieldType.TEXT)
@@ -177,6 +224,7 @@ class DumSchemaProvisioningPluginTest {
                         .multiValued(true).facet(true).build())
                 .field(DumStructuredField.builder("postedAt").type(TurSEFieldType.DATE).build())
                 .customFacet(RECENT)
+                .customSort(CLOSING_SOONEST)
                 .build();
         private final Map<String, String> titles = new LinkedHashMap<>(Map.of(
                 "c1", "Algorithms", "c2", "Calculus"));

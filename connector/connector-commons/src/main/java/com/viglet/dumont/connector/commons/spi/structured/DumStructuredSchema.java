@@ -25,6 +25,8 @@ import java.util.Optional;
 
 import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacet;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomSort;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomSortItem;
 
 /**
  * The declared field set of a structured source — its <em>schema-as-code</em>.
@@ -42,11 +44,13 @@ public final class DumStructuredSchema {
 
     private final Map<String, DumStructuredField> fields;
     private final List<TurSNManifestCustomFacet> customFacets;
+    private final List<TurSNManifestCustomSort> customSorts;
 
     private DumStructuredSchema(Map<String, DumStructuredField> fields,
-            List<TurSNManifestCustomFacet> customFacets) {
+            List<TurSNManifestCustomFacet> customFacets, List<TurSNManifestCustomSort> customSorts) {
         this.fields = Collections.unmodifiableMap(fields);
         this.customFacets = List.copyOf(customFacets);
+        this.customSorts = List.copyOf(customSorts);
     }
 
     public static Builder builder() {
@@ -89,9 +93,19 @@ public final class DumStructuredSchema {
         return customFacets;
     }
 
+    /**
+     * The custom sorts provisioned with the site (D144): named, multi-level sorts over declared
+     * fields, such as "closing soonest" with undated documents last. Empty unless the source
+     * declares one.
+     */
+    public List<TurSNManifestCustomSort> customSorts() {
+        return customSorts;
+    }
+
     public static final class Builder {
         private final Map<String, DumStructuredField> fields = new LinkedHashMap<>();
         private final Map<String, TurSNManifestCustomFacet> customFacets = new LinkedHashMap<>();
+        private final Map<String, TurSNManifestCustomSort> customSorts = new LinkedHashMap<>();
 
         public Builder field(DumStructuredField field) {
             if (fields.putIfAbsent(field.name(), field) != null) {
@@ -130,6 +144,14 @@ public final class DumStructuredSchema {
             return this;
         }
 
+        /** A custom sort whose levels are over fields this schema declares (D144). */
+        public Builder customSort(TurSNManifestCustomSort customSort) {
+            if (customSorts.putIfAbsent(customSort.name(), customSort) != null) {
+                throw new IllegalArgumentException("Duplicate custom sort declared: " + customSort.name());
+            }
+            return this;
+        }
+
         public DumStructuredSchema build() {
             if (fields.isEmpty()) {
                 throw new IllegalStateException("A structured schema must declare at least one field");
@@ -141,7 +163,21 @@ public final class DumStructuredSchema {
                         throw new IllegalStateException("Custom facet '" + facet.name()
                                 + "' is over undeclared field '" + facet.field() + "'");
                     });
-            return new DumStructuredSchema(fields, new ArrayList<>(customFacets.values()));
+            customSorts.values().forEach(sort -> {
+                if (sort.items() == null || sort.items().isEmpty()) {
+                    throw new IllegalStateException("Custom sort '" + sort.name() + "' has no level");
+                }
+                sort.items().stream()
+                        .map(TurSNManifestCustomSortItem::field)
+                        .filter(field -> !fields.containsKey(field))
+                        .findFirst()
+                        .ifPresent(field -> {
+                            throw new IllegalStateException("Custom sort '" + sort.name()
+                                    + "' is over undeclared field '" + field + "'");
+                        });
+            });
+            return new DumStructuredSchema(fields, new ArrayList<>(customFacets.values()),
+                    new ArrayList<>(customSorts.values()));
         }
     }
 }

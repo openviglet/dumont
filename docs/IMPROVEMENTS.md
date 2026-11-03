@@ -99,39 +99,6 @@ route returns nothing a caller could use to act as Dumont.
 
 ## XLVII Adoption & authoring
 
-## XLVIII Structured schemas declare custom facets and sorts (D144)
-
-Turing's SN site manifest declares custom facets (Turing T1084) and custom sorts (Turing
-T1104: named, multi-level sorts with a placement for documents missing the field, such
-as "closing soonest": `expiresAt` ascending, undated jobs last).
-
-Custom facets shipped:
-`DumStructuredSchema.Builder.customFacet(TurSNManifestCustomFacet)` declares one over a
-declared field, `DumIndexingSchema.customFacets()` carries it, and
-`DumTuringIndexingPlugin.manifest` adds it to the one idempotent manifest call
-(`provision`, D63). None declared sends none, so console-made facets survive.
-
-What is left is the same path for sorts. The SDK source already has `.customSort(new
-TurSNManifestCustomSort(name, description, items))` with
-`TurSNManifestCustomSortItem.asc("expiresAt").missingLast()` and
-`TurSNManifestResult.customSortsChanged()`, but turing-java-sdk 2026.3.6, the pinned
-release, does not; Track Q builds only from released dependencies.
-
-Once a release carries it:
-
-- Bump `turing.version`.
-- Add `customSort(...)` to `DumStructuredSchema.Builder` (unique by name, items over
-  declared fields), carry it on `DumIndexingSchema`, and add it in
-  `DumTuringIndexingPlugin.manifest` beside the facets.
-- Log `customSortsChanged` with the facets; a refused manifest still never stops indexing.
-
-A sort item over an undeclared field is refused at build, as a facet's is. Check the
-release on Central, not `~/.m2`: a local Turing `mvn install` overwrites 2026.3.6 with
-classes the release lacks, so a build passes here and fails in CI.
-
-Done when a test schema declaring a `missingLast` sort leaves it on a fresh site, and a
-second run reports nothing changed.
-
 ## XLIX The WordPress connector plugin
 
 ### XLIX.46 Partitioned API keys in place of client-side site filters (D190)

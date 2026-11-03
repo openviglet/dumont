@@ -132,16 +132,22 @@ for every structured source:
 | **Coverage and drift** | Per-field coverage is recorded per run, so a layout change that silently stops extracting a field is reported instead of discovered months later |
 | **Dry-run preview** | A run can be previewed against the last full index's fingerprint before anything is published |
 
-The schema can also declare **custom facets**: named buckets over one of its fields, such as
-"posted in the last 7 days". They are sent with the fields, so a Turing site gets them on the
-first run without a console step. A schema that declares none leaves the site's own custom facets
-alone.
+The schema can also declare **custom facets**, which are named buckets over one of its fields
+such as "posted in the last 7 days", and **custom sorts**, which are named sorts of one or more
+levels such as "closing soonest": a date ascending, with documents that have no date last. Both
+are sent with the fields, so a Turing site gets them on the first run without a console step, and
+a search selects a custom sort by passing its name as `sort`. A schema that declares none leaves
+the site's own facets and sorts alone. A facet or a sort level over a field the schema does not
+declare is refused when the schema is built.
 
 ```java
 DumStructuredSchema.builder()
         .field(DumStructuredField.builder("postedAt").type(TurSEFieldType.DATE).build())
+        .field(DumStructuredField.builder("expiresAt").type(TurSEFieldType.DATE).build())
         .customFacet(TurSNManifestCustomFacet.of("postedAt", "postedRecently", "Posted",
                 List.of(TurSNManifestCustomFacetItem.since("Last 7 days", "NOW-7DAYS"))))
+        .customSort(TurSNManifestCustomSort.of("closingSoonest",
+                List.of(TurSNManifestCustomSortItem.asc("expiresAt").missingLast())))
         .build();
 ```
 

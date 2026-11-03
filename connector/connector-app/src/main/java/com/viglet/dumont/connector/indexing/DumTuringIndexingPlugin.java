@@ -98,13 +98,14 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
         try {
             TurSNManifestResult result = getTurSNServer().provision(manifest);
             if (result.isNoOp()) {
-                log.debug("Site '{}' schema already matches the {} declared field(s) and {} custom "
-                        + "facet(s)", schema.siteName(), schema.fields().size(),
-                        schema.customFacets().size());
+                log.debug("Site '{}' schema already matches the {} declared field(s), {} custom "
+                        + "facet(s) and {} custom sort(s)", schema.siteName(), schema.fields().size(),
+                        schema.customFacets().size(), schema.customSorts().size());
             } else {
                 log.info("Provisioned site '{}' (created={}) from {} declared field(s); custom facets "
-                        + "changed: {}", result.siteName(), result.siteCreated(),
-                        schema.fields().size(), result.customFacetsChanged());
+                        + "changed: {}; custom sorts changed: {}", result.siteName(),
+                        result.siteCreated(), schema.fields().size(), result.customFacetsChanged(),
+                        result.customSortsChanged());
             }
             return Optional.empty();
         } catch (TurSNManifestException e) {
@@ -123,8 +124,8 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
     }
 
     /**
-     * The manifest a schema converges to. Custom facets (D144) go on the same call as the fields;
-     * the builder sends none when none is declared, which leaves the site's own untouched.
+     * The manifest a schema converges to. Custom facets and sorts (D144) go on the same call as the
+     * fields; the builder sends none when none is declared, which leaves the site's own untouched.
      */
     static TurSNManifest manifest(DumIndexingSchema schema) {
         TurSNManifest.Builder builder = TurSNManifest.builder()
@@ -132,6 +133,7 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
                 .locale(schema.locale())
                 .fields(schema.fields());
         schema.customFacets().forEach(builder::customFacet);
+        schema.customSorts().forEach(builder::customSort);
         return builder.build();
     }
 

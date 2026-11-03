@@ -113,8 +113,6 @@ This track has no remaining pending tasks.
 
 ## Track A — Structured-source connector framework
 
-- ⏳ **D144** (deps: SDK custom-sort release) **A structured schema cannot declare custom facets or sorts, so the Turing manifest Dumont posts never carries them** — Custom sorts need a turing-java-sdk release with TurSNManifestCustomSort; 2026.3.6 has facets only. → §XLVIII
-
 ## Track S — The WordPress connector plugin
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
@@ -125,12 +123,6 @@ This track has no remaining pending tasks.
 - 📋 **D190** (deps: D148 ✅, D177 ✅, Turing T1209) **Each site of a shared SN site is kept apart by the plugin's own filters, and its key can still reach the other sites** — The stored key still reaches every site sharing the SN site. → §XLIX.46
 
 ## Track T — Releases and links match what the site describes
-
-## Done when — D144
-
-- **A declared custom sort converges on the site with the fields** The jobs schema
-  declares "closing soonest"; a run against a fresh site leaves that sort on it, and a
-  second run logs no customSortsChanged.
 
 ## Done when — D190
 

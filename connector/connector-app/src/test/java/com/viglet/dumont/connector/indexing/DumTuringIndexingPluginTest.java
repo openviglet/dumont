@@ -34,6 +34,8 @@ import com.viglet.turing.client.sn.job.TurSNJobAttributeSpec;
 import com.viglet.turing.client.sn.manifest.TurSNManifest;
 import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacet;
 import com.viglet.turing.client.sn.manifest.TurSNManifestCustomFacetItem;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomSort;
+import com.viglet.turing.client.sn.manifest.TurSNManifestCustomSortItem;
 
 @SpringBootTest
 class DumTuringIndexingPluginTest {
@@ -97,5 +99,26 @@ class DumTuringIndexingPluginTest {
                 Locale.US, List.of(new TurSNJobAttributeSpec())));
 
         assertNull(manifest.customFacets());
+    }
+
+    /** D144: the declared custom sorts ride the manifest beside the facets. */
+    @Test
+    void manifestCarriesTheDeclaredCustomSorts() {
+        TurSNManifestCustomSort closingSoonest = TurSNManifestCustomSort.of("closingSoonest",
+                List.of(TurSNManifestCustomSortItem.asc("expiresAt").missingLast()));
+
+        TurSNManifest manifest = DumTuringIndexingPlugin.manifest(new DumIndexingSchema("Sample",
+                Locale.US, List.of(new TurSNJobAttributeSpec()), List.of(), List.of(closingSoonest)));
+
+        assertEquals(List.of(closingSoonest), manifest.customSorts());
+    }
+
+    /** D144: none declared sends none, so the site keeps the sorts its console configured. */
+    @Test
+    void manifestLeavesTheSiteSortsAloneWhenNoneIsDeclared() {
+        TurSNManifest manifest = DumTuringIndexingPlugin.manifest(new DumIndexingSchema("Sample",
+                Locale.US, List.of(new TurSNJobAttributeSpec())));
+
+        assertNull(manifest.customSorts());
     }
 }
