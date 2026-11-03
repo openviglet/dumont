@@ -121,22 +121,10 @@ This track has no remaining pending tasks.
 
 ## Track T — Releases and links match what the site describes
 
-## Done when — D246
-
-- **The released video is narrated and embedded on the site and docs** The plugin
-  release carries story.mp4 with narration in English and pt_BR whose voice licence is
-  recorded, and the site's WordPress page and the docs embed it with both caption
-  tracks.
-
 ## Done when — D265
 
 - **Every product and guide has a photo** npm run demo:photos reports every photo
   current and the seed draws none.
-
-## Done when — D261
-
-- **The English video is narrated too** The English takes are bought from the current
-  script and story:video --language en carries them.
 
 ## Done when — D292
 

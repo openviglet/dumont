@@ -121,44 +121,6 @@ the zip, the review team approves it, and only then does SVN exist.
 
 Done when a `wordpress-v*` tag updates the directory listing with no step by hand.
 
-### XLIX.96 Narrate the demo video and publish it (D246)
-
-**What happens.** `npm run story:video` (D204) builds `story.mp4` and `story-30s.mp4`
-from the recorded story, with brand cards and English and pt_BR captions as soft tracks,
-under `wordpress/tests/e2e/artifacts/video/`. The video is silent, and nothing publishes
-or embeds it: a prospect cannot meet it.
-
-**What it should do.**
-- Narration in English and pt_BR, one line per chapter read over its clip. Recorded by a
-  person or synthesised; whichever is chosen, the voice's licence is recorded beside the
-  script (`wordpress/demo/seed/CREDITS.md` holds the demo's other credits). The assembly
-  mixes a narration file per chapter when one is present, and stays silent without.
-- The release workflow attaches `story.mp4`, `story-30s.mp4` and the captions to the
-  plugin's GitHub release, built on the demo stack, never committed.
-- The site's WordPress page (D197) and the plugin's docs page embed the release asset with
-  both caption tracks.
-
-**Why it waits.** The voice and its licence are a person's decision, and the embed needs
-a published release to point at.
-
-**Gate.** The released video plays with narration and either caption track on the site
-page; `npm run story:video` still builds a silent one without the narration files.
-
-### XLIX.106 A second narration line at each chapter's highlight (D261)
-
-**What happens.** After the story learned to hold on its results (each chapter now 10–27
-s), each chapter's narration is one line of 2–8 s read over its card, then the chapter
-plays on in silence. The longest, the kit (27 s), says nothing while the stages, prices
-and cart total are on screen.
-
-**What it should do.** `demo/narration/script.json` takes an optional second line per
-chapter read at its highlight (chapters.json has the time), saying what the screen shows
-("Two tents under four hundred dollars, and an answer that cites them");
-`story-video.mjs` places it there, and `story:narration` buys it like the others.
-
-**Done when.** No chapter has more than about 6 s without a voice, and the takes still
-fit before the next card.
-
 ### XLIX.110 Photos for the demo store (D265)
 
 **What happens.** The demo store's pictures are flat drawings the seed makes with GD,

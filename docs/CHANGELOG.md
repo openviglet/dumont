@@ -708,7 +708,7 @@
 - **D242** — The Site assistant sends each turn with its page's documentId through the SDK chat controller (2026.3.13, Turing T1187), and the copilot shares Indexer::subject().
 - **D243** — With T1177 the exact-phrase guide leads again; raincoat and puffer re-read with reasons. Demo suite green on Turing HEAD, not yet the published image; pt_BR unchecked.
 - **D255** — Build my kit sends productTypes product, so Turing stages products only and no page reaches a stage or costs a 404.
-- **D246 (narration)** — The video is narrated: npm run story:narration buys one ElevenLabs take per chapter and language through polyweave, and story:video mixes them as English and Portuguese audio tracks.
+- **D246** — The video is narrated; showing it moved to D282, which embeds YouTube on the site and attaches the files to the release.
 - **D196** — turing-demo.viglet.org serves the tarnfell SN site, reseeded every 6 h, and the Playground store searches it (design §XLIX.52 superseded: cloud DEMO.md sets the guards).
 - **D262** — While a sentence's filters are read, the search block says Reading your search and keeps the empty state hidden until the refined search answers.
 - **D263** — The demo shows no localhost: crumbs drop this site's domain in the script and the server, the pt_BR store is Recanto da Serra and its price filter reads Preço.
@@ -716,7 +716,7 @@
 - **D268** — The pt_BR store sells in reais from Brazil: BRL, prices at about 5.5 to the dollar ending in ,90, ranges with them, and a Brazilian checkout in the story.
 - **D269** — run-docker records a mountain-gear shop's searches in the store's language once per SN site, so a fresh demo has popular searches.
 - **D265 (14 photos)** — npm run demo:photos buys Ideogram photos through polyweave, clothing as a flat lay and gear on the hill, and the seed imports the 800 px WebP where one exists.
-- **D261 (pt-BR narration)** — Ana, the owner, narrates the pt-BR video: a line per card and one per result held still, over a music bed, with Portuguese cards.
+- **D261** — Ana narrates the English video too: all 18 English takes are current and story.en.mp4 carries them, with a line over each held result and English captions.
 - **D259** — A misspelling that finds nothing is searched as corrected, saying Showing results for X with a link to search as typed; one that finds something still offers Did you mean.
 - **D239** — The demo store opens in WordPress Playground from a link on the site, the docs and the README, and a Playwright gate checks it on playground.wordpress.net.
 - **D256** — An import waits two seconds a document, and one Turing did not answer in time counts as sent, not failed: reindex fails only on a refusal.
