@@ -264,29 +264,6 @@ and the plugin's pages embed that.
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
 
-### XLIX.129 The words left after a sentence's filters are read (D285)
-
-**What happens.** "a two-person tent under $400" is read as `Price: ≤ 400`, and the
-search box is left holding "a two-person tent under $". The refined search then looks
-for "under $" too, finds nothing with every word, and the page says "Showing close
-matches". Seen in the demo video's chapter 2 on 2026-11-03.
-
-**Why.** Turing's `nl-filters` answers `q` with only each filter's `sourceWords`
-removed, and for a price range that is `["400"]`, not "under $400". Its price filter
-comes back `grounded: false`, so `readFilters()` in `search-block.js` drops it and uses
-its own `readPrice()`, which matched the whole phrase "under $400". That phrase is then
-removed from Turing's `q`, where it no longer exists, so nothing is removed and the
-leftover stays.
-
-**What it should do.** The query that remains is built from the text the visitor typed,
-minus the words of every filter actually applied: Turing's `sourceWords` for the filters
-kept, and the whole matched phrase for the size and price the block read itself. A
-filter the block dropped takes no words out. The Turing half (`sourceWords` of a range
-should cover its bound words and currency) is T1211.
-
-**Done when.** "a two-person tent under $400" searches "a two-person tent" with the
-price filter on, finds tents without close matches, and a spec covers it.
-
 ### XLIX.130 A correction that finds nothing is undone (D286)
 
 **What happens.** D259 searches a query that found nothing again as Turing corrected it,
