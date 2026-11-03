@@ -175,26 +175,6 @@ the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
 **Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
 photo current, and the seed draws none.
 
-### XLIX.123 A phone-viewport recording for vertical cuts (D280)
-
-**What happens.** The story is recorded at a 1920 x 1080 desktop viewport. Vertical
-formats (YouTube Shorts and the like) need 9:16, and cropping the desktop recording cuts
-the search results, the answer and the filter line in half.
-
-**What it should do.**
-- A second story run at a phone viewport (for example 1080 x 1920 at device scale), using
-  the same spec and the same takes: the search block, the assistant and the compare table
-  are responsive, so the story plays there as it does on the desktop.
-- `story-video.mjs --vertical` assembles the chapter cuts of D279 from that recording,
-  with the cards laid out for 9:16 and the captions placed above the bottom UI band
-  vertical players draw.
-- Anything the story cannot show at a phone width is a finding for the plugin's
-  responsive layout, filed as its own line, not worked around in the video.
-
-**Done when.** The vertical cuts of chapters 2, 3 and 5 play under a minute, every frame
-shows the whole result without cropping, and the captions do not sit under the player's
-own controls.
-
 ### XLIX.124 A short technical video for developers (D281)
 
 **What happens.** The video speaks to a shop owner. A developer or an agency deciding
