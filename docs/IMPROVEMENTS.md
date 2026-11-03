@@ -193,6 +193,10 @@ angle, and it sits at the end of a story told to another audience.
 - If Dumont is named anywhere in the video, it is here, as where the plugin's code lives,
   and only where the words are true of what the viewer sees.
 
+**Landed: the recording.** `run-docker.cmd fresh` and `npm run e2e:developer:record`
+leave walkthrough.webm and chapters.json, six chapters (wordpress/demo/VIDEO.md). Left:
+the narration lines and their takes, and `story-video.mjs` assembling that recording.
+
 **Done when.** The technical piece is assembled in English from its own spec, every step
 it shows works on a clean demo stack, and its captions and chapters are written like the
 story's.

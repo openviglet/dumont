@@ -747,6 +747,7 @@
 - **D279** — story-video.mjs --chapter <n> cuts one chapter as a clip under a minute from the recording; English chapters 2, 3 and 5 run 51, 42 and 58 s (design §XLIX.122 recorded in `wordpress/demo/VIDEO.md`).
 - **D280** — npm run e2e:story:vertical records the story at a phone's layout in a 1080x1920 frame; --vertical cuts chapters 2, 3, 5 at 51, 42, 58 s (design §XLIX.123 recorded in `wordpress/demo/VIDEO.md`).
 - **D299** — A new SN site is created from the Setup page: a manifest Turing refuses for want of an engine is sent again on its first enabled one.
+- **D281 (recording)** — run-docker.cmd fresh is a WordPress never given the plugin; e2e:developer:record installs the zip, connects, indexes, searches, opens insights.
 
 ## Track T — Releases and links match what the site describes
 
