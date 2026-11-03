@@ -223,30 +223,6 @@ site gets the same bound key, and the plugin sends nothing extra.
 **Done when.** Two sites sharing an SN site each get a kit, an answer and a comparison
 built from their own products only, covered by a browser spec on the multisite network.
 
-### XLIX.133 The demo video as an editable DaVinci Resolve project (D290)
-
-`bin/story-video.mjs` decides every placement (cuts of `story.webm` from
-`chapters.json`, the held result frames, the cards, the b-roll shots cut at pauses in
-the voice, each take's start) and then throws the decisions away in an ffmpeg concat and
-an `amix`. The edit can only change by changing the code and re-rendering.
-
-Split the script in two. First, a **timeline model**: a list of clips, each with a
-track, a source file, an in point, a duration and a place on the timeline. Second, two
-**writers** that read it: the existing ffmpeg render, and a new `story.<lang>.fcpxml`
-written with `--project`. Because both read one model, the MP4 and the project cannot
-disagree.
-
-Tracks in the project: V1 the recording, cut by chapter, with the held result frames as
-stills; V2 the cards (the PNGs already rendered); V3 the opening and closing shots; A1
-each take as its own clip; A2 the music bed with its volume and fades. The chapters
-become markers, and the `.srt` that already ships is imported as a subtitle track.
-
-The Ken Burns stills go in as transform keyframes when Resolve keeps them, and
-pre-rendered as clips when it does not. Playwright records VP8 WebM, which Resolve may
-not decode, so the recording is transcoded once into an edit-friendly intermediate the
-project points at. Paths are relative to the project, so the folder can move. A rendered
-project is a release asset, not committed, like the MP4.
-
 ### XLIX.135 The frame follows the action (D292)
 
 `tests/e2e/story/shopper.story.mjs` types into the search box, clicks a chip and holds

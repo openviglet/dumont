@@ -138,13 +138,6 @@ This track has no remaining pending tasks.
 - **The English video is narrated too** The English takes are bought from the current
   script and story:video --language en carries them.
 
-## Done when — D290
-
-- **The project opens in DaVinci Resolve with no media offline** Import story.en.fcpxml
-  in the Resolve version in use: every clip links, the chapter markers sit where
-  chapters.txt says, and the timeline's length matches the MP4's to within one frame.
-  Look at it in Resolve; a well-formed XML file is not the check.
-
 ## Done when — D292
 
 - **The typed query and the answer's sources are readable at phone size** Frames from

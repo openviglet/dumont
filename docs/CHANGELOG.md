@@ -748,7 +748,7 @@
 - **D280** — npm run e2e:story:vertical records the story at a phone's layout in a 1080x1920 frame; --vertical cuts chapters 2, 3, 5 at 51, 42, 58 s (design §XLIX.123 recorded in `wordpress/demo/VIDEO.md`).
 - **D299** — A new SN site is created from the Setup page: a manifest Turing refuses for want of an engine is sent again on its first enabled one.
 - **D281** — developer.en.mp4: Chris narrates install, connection, first index, search and insights on a fresh WordPress, 3m26s with cards and captions (design §XLIX.124 recorded in `wordpress/demo/VIDEO.md`).
-- **D290 (project written)** — --project writes story.<lang>.project/, an FCPXML from the MP4's own timeline with its media beside it: 45 files present, 411.27 s like the MP4.
+- **D290** — Opened in DaVinci Resolve 21 every clip came in online: recording, cards and shots on V1-V3, the takes on A1, the ducked music bed alone on A2 (design §XLIX.133 recorded in `wordpress/demo/VIDEO.md`).
 - **D291** — Cards dissolve into and out of the recording and shots in the MP4 at no change of length; no J-cut case, every line starts after its card (design §XLIX.134 recorded in `wordpress/demo/VIDEO.md`).
 - **D292 (MP4)** — The story records each acted-on element's box and the video eases in on it, up to 1.6x: the typed query and the answer's sources read at phone size.
 - **D293 (script)** — --project writes finish.py beside the FCPXML: run in Resolve it imports the timeline and captions, reports offline clips and queues the render.
