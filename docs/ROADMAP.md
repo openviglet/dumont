@@ -120,7 +120,6 @@ This track has no remaining pending tasks.
 - 📋 **D280** (deps: D279) **The story is recorded only at a desktop viewport, which crops badly to 9:16** — A second scripted run at a phone viewport gives vertical cuts that show whole results, at no new narration cost. → §XLIX.123
 - 📋 **D281** (deps: D276 ✅) **No video shows a developer how the plugin is installed, connected and indexed** — The story speaks to shop owners; whoever puts the plugin on a client site needs install, settings and insights instead. → §XLIX.124
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
-- 📋 **D286** (deps: —) **A misspelling whose correction also finds nothing still shows "Showing results for" the correction** — The box and notice then name a search nobody typed over an empty page, where the typed query's own empty state belongs. → §XLIX.130
 - 📋 **D287** (deps: Viglet Turing T1133: copilot reads a partitioned key's partition) **On an SN site shared by several WordPress sites, Build my kit and the copilot stage other sites' products** — Search filters by site key, the generative calls do not, so a kit can sell another site's stock. → §XLIX.128
 
 ## Track T — Releases and links match what the site describes

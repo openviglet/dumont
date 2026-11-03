@@ -264,23 +264,6 @@ and the plugin's pages embed that.
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
 
-### XLIX.130 A correction that finds nothing is undone (D286)
-
-**What happens.** D259 searches a query that found nothing again as Turing corrected it,
-and says "Showing results for <correction>. Search instead for <typed>". When the
-correction finds nothing too, the page still says so: "bothy bag", a word the demo shop
-does not use, becomes "Showing results for both bag" over "No results found", and the
-box holds "both bag", which nobody typed. Seen in the demo video's chapter 2 on
-2026-11-03.
-
-**What it should do.** A corrected search that finds nothing is no improvement: the page
-goes back to what the visitor typed, with the box, the address bar and the empty state
-about it, and no "Showing results for" line. It is not corrected again (the same guard
-`searchInstead()` sets).
-
-**Done when.** A query whose correction also finds nothing shows the typed query's empty
-state with no correction notice, and a spec covers it beside the existing D259 one.
-
 ### XLIX.128 Generative calls scoped to the site's key (D287)
 
 **What happens.** D148 lets several WordPress sites share one SN site: every document
