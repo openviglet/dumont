@@ -747,7 +747,7 @@
 - **D279** — story-video.mjs --chapter <n> cuts one chapter as a clip under a minute from the recording; English chapters 2, 3 and 5 run 51, 42 and 58 s (design §XLIX.122 recorded in `wordpress/demo/VIDEO.md`).
 - **D280** — npm run e2e:story:vertical records the story at a phone's layout in a 1080x1920 frame; --vertical cuts chapters 2, 3, 5 at 51, 42, 58 s (design §XLIX.123 recorded in `wordpress/demo/VIDEO.md`).
 - **D299** — A new SN site is created from the Setup page: a manifest Turing refuses for want of an engine is sent again on its first enabled one.
-- **D281 (recording)** — run-docker.cmd fresh is a WordPress never given the plugin; e2e:developer:record installs the zip, connects, indexes, searches, opens insights.
+- **D281** — developer.en.mp4: Chris narrates install, connection, first index, search and insights on a fresh WordPress, 3m26s with cards and captions (design §XLIX.124 recorded in `wordpress/demo/VIDEO.md`).
 - **D290 (project written)** — --project writes story.<lang>.project/, an FCPXML from the MP4's own timeline with its media beside it: 45 files present, 411.27 s like the MP4.
 - **D291** — Cards dissolve into and out of the recording and shots in the MP4 at no change of length; no J-cut case, every line starts after its card (design §XLIX.134 recorded in `wordpress/demo/VIDEO.md`).
 - **D292 (MP4)** — The story records each acted-on element's box and the video eases in on it, up to 1.6x: the typed query and the answer's sources read at phone size.

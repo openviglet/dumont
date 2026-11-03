@@ -151,16 +151,6 @@ This track has no remaining pending tasks.
   each chapter, scaled down to 390 px wide, show the query text and the answer legibly.
   The moves are transform keyframes in the Resolve project that can be edited there.
 
-## Done when — D281
-
-- **The walkthrough is narrated in a plain voice, one take per chapter** Each of the six
-  chapters has a line in demo/narration and a current take, spoken over its action as
-  the story's are; the voice is not Ana's.
-- **The walkthrough is assembled into a captioned English video with cards**
-  story-video.mjs (or a sibling) cuts walkthrough.webm into a 2-3 minute video with its
-  cards, captions and chapter list, closing on the repository, the docs and the
-  Playground.
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont

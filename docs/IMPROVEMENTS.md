@@ -175,32 +175,6 @@ the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
 **Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
 photo current, and the seed draws none.
 
-### XLIX.124 A short technical video for developers (D281)
-
-**What happens.** The video speaks to a shop owner. A developer or an agency deciding
-whether to put the plugin on a client's site wants something else: how it is installed,
-what runs where, and what the owner sees behind the scenes. Chapter 8 ("Behind the
-scenes: native search and its searches in the insights") is the only part with that
-angle, and it sits at the end of a story told to another audience.
-
-**What it should do.**
-- A short technical piece, 2 to 3 minutes, recorded by script like the story: installing
-  the release zip in wp-admin (and the Composer route in a line), the settings page
-  connecting to a Turing instance, the first index of the catalogue, then chapter 8's
-  native search and insights.
-- Narrated plainly, not by Ana, with the same captions and cards pipeline; the closing
-  card points at the repository, the docs and the Playground.
-- If Dumont is named anywhere in the video, it is here, as where the plugin's code lives,
-  and only where the words are true of what the viewer sees.
-
-**Landed: the recording.** `run-docker.cmd fresh` and `npm run e2e:developer:record`
-leave walkthrough.webm and chapters.json, six chapters (wordpress/demo/VIDEO.md). Left:
-the narration lines and their takes, and `story-video.mjs` assembling that recording.
-
-**Done when.** The technical piece is assembled in English from its own spec, every step
-it shows works on a clean demo stack, and its captions and chapters are written like the
-story's.
-
 ### XLIX.125 The video embedded from YouTube, with its transcript (D282)
 
 **What happens.** D246 shipped with its criterion open: the video is neither attached to
