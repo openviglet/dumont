@@ -738,6 +738,7 @@
 - **D276** — The English video, recorded on Tarnfell and narrated in English, is story.en.mp4 (6m53s), and each language's video is now named for it (design §XLIX.119 recorded in `wordpress/demo/VIDEO.md`).
 - **D285** — A sentence read as a price searches only its other words: a dropped Turing filter takes none out, so "a two-person tent under $400" finds tents with no close matches.
 - **D286** — A correction that finds nothing either is undone: the box, the address and the empty state are the typed query's, and that correction is not offered again.
+- **D288** — Cited and staged documents are priced in one Store API list call, so a guide among them stays a link and makes no failed request.
 
 ## Track T — Releases and links match what the site describes
 
