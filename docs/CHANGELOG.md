@@ -742,6 +742,7 @@
 - **D289** — Every search the demo story makes is one the narration tells: chapter 2 ends on the tents, and chapter 8's failed search comes from the seeded history in both languages.
 - **D294** — The facet probe of a filtered search goes out uncounted, so a search opened filtered counts once in the shop's insights.
 - **D295** — A recorded story turns spell-check off on each field it focuses, so no typed word carries the browser's red underline.
+- **D296** — Chapter 2's result line says the filter showed only what fits the budget, true in both stores, and both videos carry its new takes.
 
 ## Track T — Releases and links match what the site describes
 

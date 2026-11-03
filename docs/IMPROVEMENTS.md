@@ -376,6 +376,25 @@ This is an idea, not a design, because three things are unconfirmed:
 The first step is to check those three on the Resolve version in use. If the answers are
 poor, the task closes as a template saved by hand.
 
+### XLIX.140 The demo's attribute names in the store's language (D297)
+
+**What happens.** On the pt-BR demo store (Recanto da Serra) the compare table's rows
+and a product page's variation selector read "Colour", "Use" and "Size", in English,
+beside "Preço" and "Disponibilidade", while the search facets say "Cor", "Uso" and
+"Tamanho". `demo/seed/catalog.php` creates WooCommerce's global attributes with their
+English names, never passed through `$tr`, the translator every other label goes
+through; `demo/seed/pt_BR.php` already has the words. Seen in the pt-BR video's chapters
+4 and 6 on 2026-11-03.
+
+**What it should do.** Each global attribute is created with `$tr( 'labels', ... )`, and
+a store seeded before keeps its slug but has its name updated (`wc_update_attribute`)
+when it differs, so re-running the seed fixes an existing store. The slugs (`color`,
+`material`, `use`, `size`) stay as they are: the mapping, the facets and the index read
+them.
+
+**Done when.** On the pt-BR store the compare table and the product page say "Cor",
+"Material", "Uso" and "Tamanho", and the English store is unchanged.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
