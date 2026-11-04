@@ -160,11 +160,11 @@ with a "Site: localhost" or "Site: tarnfell" reason, and a shopper on one site c
 the other site's products.
 
 **What it should do.** The kit, the product question, the Site assistant and the compare
-summary read only this site's documents. Turing's answer is a key bound to the site's
-partition (T1133): its searches are scoped already, while chat, nl-filters and copilot
-refuse such a key until the deferred half of T1133 puts the partition in the vector
-store. D190 binds each network site's key; once T1133 lands, a single site sharing an SN
-site gets the same bound key, and the plugin sends nothing extra.
+summary read only this site's documents. These calls leave the visitor's browser with no
+key, so T1133's partitioned key (shipped 2026-11-04) does not reach them: they are
+scoped by a filter, as searches are. The Site assistant sends `filters: {site_key:
+[key]}` on each turn (Turing T1086). The copilot, the kit and nl-filters take no filter
+yet: Turing T1213.
 
 **Done when.** Two sites sharing an SN site each get a kit, an answer and a comparison
 built from their own products only, covered by a browser spec on the multisite network.

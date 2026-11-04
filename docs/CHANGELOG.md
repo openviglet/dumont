@@ -754,6 +754,7 @@
 - **D293** — Workspace > Scripts runs finish.lua in Resolve 21: a dated timeline, a report window, the render queued; captions stay one import by hand (design §XLIX.136 recorded in `wordpress/demo/VIDEO.md`).
 - **D298** — The recording names its store's language and story-video.mjs refuses another --language, naming the command that records the right store (design §XLIX.141 recorded in `wordpress/demo/VIDEO.md`).
 - **D300** — In Resolve each card dissolves into and out of the recording as in the MP4, by Cross Dissolve transitions; beside a shot the cut stays (design §XLIX.142 recorded in `wordpress/demo/VIDEO.md`).
+- **D287 (Site assistant)** — The Site assistant sends this site's key as each turn's filters, so its answers read only this site's documents on a shared SN site.
 
 ## Track T — Releases and links match what the site describes
 
