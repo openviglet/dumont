@@ -392,6 +392,27 @@ proven by the a11y specs; pt_BR ships with it.
 **Done when:** a seeded two-step flow with a choice and a form runs end to end in the
 block, at 390 and 1280px.
 
+### XLIX.156 The plugin read as a school would use it (D316)
+
+**Analysis task: it delivers D lines, not code.** The WordPress plugin and its demo were
+shaped by a store: Tarnfell sells outdoor gear, and the story's eight chapters prove
+search, a sentence read as filters, the assistant, compare, Build my kit, a product page
+and checkout. FESPSP, a school nearly a century old, is the first real non-commerce
+adopter (fespsp-institucional L–P), and already surfaced D303–D315.
+
+**What to analyse:**
+1. **Store-shaped names and defaults.** Find what stays commerce-only and what should be generic:
+   - the copilot is "Ask the catalog";
+   - the kit hard-codes `productTypes:['product']` and `guideTypes:['post']`;
+   - result cards assume a price;
+   - `readPrice` and `readSize` have no date or place counterpart ("em novembro", "em São Paulo").
+2. **A second demo for education and culture:** a fictional school or cultural institute with an agenda, openings, a publisher, a DSpace-like archive and a history tour, with its own `story.md`. It should prove the non-commerce path the way Tarnfell proves the store.
+3. **Source parity:** documents from the plugin and from Dumont sources (D314, D315) should share the same fields, so one SN site's facets, cards and AI features treat them alike (type labels, image, dates, people).
+4. **Operations for a small team:** what an editor sees when Turing is down, a reindex is slow, or the AI budget runs out.
+
+**Delivers:** one D line per finding in Track S or U, each naming the FESPSP line it
+serves, and a design note for the second demo if it is worth building.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +

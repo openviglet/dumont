@@ -128,6 +128,7 @@ This track has no remaining pending tasks.
 - 📋 **D311** (deps: —) **The instant overlay is a flat list of six results with no type, date, image, answer or zero state** — A search meant to be immersive sends every visitor away to the results page to see anything beyond a title. → §XLIX.153
 - 📋 **D312** (deps: —) **The search answer and the Site assistant do not share context: a follow-up starts over** — A visitor who wants to ask one more thing after the answer loses the question, the answer and its sources. → §XLIX.154
 - 📋 **D313** (deps: —) **The Site assistant renders only text and citations: a Turing chat flow's choices, forms and slots cannot run in it** — Guided conversations built in Turing's console never reach a WordPress site, though the SDK already types them. → §XLIX.155
+- 📋 **D316** (deps: —) **The WordPress plugin and its demo were shaped by a store: nothing has proved the path of a school or cultural institute** — Store-shaped names and defaults leak into a non-commerce site, and only a deliberate read finds them all at once. → §XLIX.156
 
 ## Track T — Releases and links match what the site describes
 
