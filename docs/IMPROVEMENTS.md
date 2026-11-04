@@ -169,31 +169,6 @@ yet: Turing T1213.
 **Done when.** Two sites sharing an SN site each get a kit, an answer and a comparison
 built from their own products only, covered by a browser spec on the multisite network.
 
-### XLIX.143 Search results taller under the classic and Ollie themes (D301)
-
-**What happens.** Found on 2026-11-04 while checking the result thumbnails (D265). In
-`tests/e2e/site/search.spec.mjs`, three screenshots fail under `site-classic` (Twenty
-Twenty-One 2.9) and two under `site-ollie` (Ollie 1.6.5, pinned): "the block answers a
-query with this site's results" (`search-block-workshop`), "a facet narrows the results"
-(`search-block-facet`) and, on the classic theme, "a misspelling that finds nothing"
-(`search-block-showing-for`, 646x31 baseline against 610x35). The diffs show every
-result card shifted down by about 25 px per card: the text is the same, the spacing
-between cards is not. The default theme (Twenty Twenty-Five), tablet and phone pass, and
-so do the Portuguese and shop variants when run on their own.
-
-**Not the cause.** The thumbnail frame added on 2026-11-04: the Ollie failures reproduce
-with that change stashed. Not a theme update either, at least for Ollie, whose version
-the config pins. The classic baselines date from D259 (2026-10-31); the classic theme is
-not pinned, so it may also have moved.
-
-**What it costs.** `playwright.config.mjs` chains the variants so one WordPress serves
-them in turn, and a failure skips every variant after it: a full run reports 49 tests
-that did not run.
-
-**Done when.** The cause is found and either fixed in the block's stylesheet or, where a
-theme's own spacing changed, the baselines are retaken and the classic theme is pinned
-like Ollie; a full `npx playwright test` runs every variant to the end.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
