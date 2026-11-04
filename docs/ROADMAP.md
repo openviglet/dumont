@@ -117,7 +117,7 @@ This track has no remaining pending tasks.
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
-- 📋 **D303** (deps: —) **A site sharing an SN site can search only its own site key, never its sibling sites' documents** — One organisation with three WordPress sites cannot offer one search over all of them, though D148 already lets them share the index. → §XLIX.145
+- ⏳ **D303** (deps: Turing T1223) **A site sharing an SN site can search only its own site key, never its sibling sites' documents** — Sibling keys wait on Turing T1223 (site_key values as alternatives): setting, seams, facet labels, badge, Related, navigate. → §XLIX.145
 - 📋 **D304** (deps: —) **An index-only site cannot send its search box to another site's results page: Enter always lands locally** — A microsite that indexes into a shared search must keep a dead local results page or write its own form to reach the real one. → §XLIX.146
 - 📋 **D305** (deps: —) **Result cards show only title, snippet, publication date and image: no mapped field reaches a card** — An event card shows the day it was posted instead of the day it happens, and a book card hides its authors. → §XLIX.147
 - 📋 **D306** (deps: —) **The search block has no fixed filter: a box scoped to one section of the site cannot be built** — Search-in-the-agenda or search-in-the-publisher boxes need a URL filter the visitor can clear and that leaks into shared links. → §XLIX.148
@@ -136,6 +136,12 @@ This track has no remaining pending tasks.
 
 - 📋 **D314** (deps: D315) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Crawling loses authors, advisors, dates and collections, and DSpace is the repository most Brazilian universities run. → §LII.1
 - 📋 **D315** (deps: —) **No Dumont source harvests OAI-PMH, the protocol every repository, OJS journal and catalogue already speaks** — Each academic system would need its own connector where one configurable harvester would serve them all. → §LII.2
+
+## Done when — D303
+
+- **Site A listing B finds B's documents; B finds only its own** The network spec runs
+  it in every search mode: the search block, template mode and the assistant, with
+  site_key declared as alternatives in the manifest (T1223).
 
 ## Non-goals (do NOT add as tasks)
 
