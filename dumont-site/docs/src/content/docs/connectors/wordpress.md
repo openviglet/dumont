@@ -137,6 +137,7 @@ A value set either way wins over the settings page, shows there read-only, and i
 | `VIGLET_DUMONT_TURING_LOCALE` | Locale |
 | `VIGLET_DUMONT_SITE_KEY` | Site key |
 | `VIGLET_DUMONT_PUBLIC_URL` | Turing as visitors' browsers reach it, when that differs |
+| `VIGLET_DUMONT_SEARCH_URL` | A results page on another site that this site's searches go to |
 
 `wp dumont status` prints where each value came from.
 
@@ -246,6 +247,17 @@ every site of the SN site, so this key cannot change them:
 Health's AI features check works with either key. On a multisite network, don't set
 `VIGLET_DUMONT_TURING_API_KEY`: a constant applies to every blog and overrides each blog's
 own key.
+
+### A site whose search lives on another site
+
+A site that indexes into the shared SN site but has no results page of its own can send
+its searches to another site's page. In **Settings → Search**, set **Results page on
+another site** to that page's address (or set `VIGLET_DUMONT_SEARCH_URL`). Then Enter in
+the instant search, a search block with no results part and the theme's search box all
+open that page with the query, as `?q=`, or as `?s=` when the address you set ends in
+`?s=`. This site's own search results page is no longer replaced, because it is not
+where results are shown. The address must be `https`, and it can't be this site's own
+address.
 
 :::tip[Upgrading from an earlier version]
 Ids used to be `wp-<ID>`. Run **Index All** (or `wp dumont reindex`) once after upgrading:

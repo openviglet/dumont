@@ -170,30 +170,6 @@ unknown sibling key; template mode scoped.
 **Done when:** the `network` spec has site A listing B and finding B's documents, and B
 (not listing A) finding only its own, in every search mode.
 
-### XLIX.146 Results page on another site (D304)
-
-**Where it came from.** In the FESPSP setup the projects microsite and the IWL index
-into the shared SN site but have no search of their own: their header field must send
-the visitor to the institutional site's search page. The plugin assumes the results page
-is local. Every target goes through `search_page()` (`native-search.php` 260-288: the
-`search_page` page id, else the first page holding `wp:viglet-dumont/search`, else
-`home_url('?s=')`): the overlay's Enter, the box-only block (D208, `render.php`
-148-158), and core/search posts to the own `?s=`.
-
-**What the plugin should do.** A setting "Results page on another site" (`search_url`, absolute URL, constant `VIGLET_DUMONT_SEARCH_URL`), read as the **first branch of `search_page()`**, so one change moves every caller:
-- Enter in the overlay, the box-only block and every core/search form go to `<search_url>?q=…`;
-- the overlay keeps its instant results (with D303 they can include the target site's documents; without it they are this site's own);
-- native search replacement turns off on this site, since its `?s=` page is no longer the results page, and the Settings screen says so;
-- `public-config` carries it, so a theme's own field can read it.
-
-An index-only site is then: indexing on, `search_url` set, blocks optional. A site that
-leaves it empty changes nothing.
-
-**Tests:** a non-https `search_url` is refused; one equal to this site's page is empty.
-
-**Done when:** a spec on the multisite stack sets `search_url` on the second site and a
-search typed there lands on the first site's results page with the query.
-
 ### XLIX.147 Mapped fields on result cards (D305)
 
 **Where it came from.** FESPSP indexes `evento` (start date, venue), `vaga` (job

@@ -758,6 +758,7 @@
 - **D302** — A page with several blocks that offer Compare draws one bar, the first in reading order; the rest leave the page, screen readers too (design §XLIX.144 recorded in `wordpress/src/public/search.js`).
 - **D301** — The classic and Ollie baselines are retaken and both themes pinned, so a full run reaches every variant: 217 passed (design §XLIX.143 recorded in `wordpress/playwright.config.mjs`).
 - **D303 (scope seam)** — Every visitor read goes through one scope seam, Indexer::scope_filters() and scopeFilters in search.js, and template mode is scoped, no longer listing other sites' documents.
+- **D304** — A Results page on another site setting (or VIGLET_DUMONT_SEARCH_URL) sends the overlay, the box-only block and the theme's search forms there, and local search replacement steps aside.
 
 ## Track T — Releases and links match what the site describes
 
