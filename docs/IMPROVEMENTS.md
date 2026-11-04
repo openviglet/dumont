@@ -148,44 +148,48 @@ D246 criterion is met.
 
 ### XLIX.145 Search across sibling site keys (D303)
 
-**Where it came from.** FESPSP runs three WordPress sites (institutional, projects
-microsite, Instituto Walter Leser) and wants all three in **one** shared SN site (D148
-makes that safe), searched from the institutional site only. Every search path pins the
-own key: `class-viglet-dumont-native-search.php` lines 326, 546 and 687 send
-`fq[]=site_key:<own>`, `public-config` returns one `siteKey`, and D287 confines the AI
-features to it. No workaround written; FESPSP waits on this line.
+**Where it came from.** FESPSP runs three WordPress sites and wants them in one shared
+SN site (D148), searched from the institutional one. Every read path pins the own key,
+and in PHP each caller builds `'site_key:' . site_key()` itself (`native-search.php`
+326, 546, 687; trending, related); JS has one helper (`siteFilter`, `public/search.js`).
+Template mode (`class-viglet-dumont-search.php` 53-66) applies **no** site key at all,
+so on a shared SN site it already lists other sites' documents.
 
-**What the plugin should do.** A setting "Also search these sites" (`search_site_keys`, list of site keys plus a label each, settable by constant `VIGLET_DUMONT_SEARCH_SITE_KEYS` like D151) that every read path honours together with the own key:
-- native search, the search block (server render and store), the overlay, trending chips, Related (opt-in per block, `sites: own|all`);
-- the assistant, copilot and nl-filters, which send the set as `filters` (T1213 already takes a map);
-- `site_key` offered as a facet with the configured labels ("FESPSP", "Projetos", "IWL"), and a small origin badge on result cards from another site;
-- the assistant's `navigate` tool accepting the sibling hosts, never any other host.
+**What the plugin should do.**
+- **One scope seam per language:** a PHP `Indexer::scope_filters()` and the JS `siteFilter`/`siteFilters`, returning the own key plus the configured siblings; every read path calls them, template mode included (which fixes its leak on its own).
+- A setting "Also search these sites" (`search_site_keys`, key plus label, constant `VIGLET_DUMONT_SEARCH_SITE_KEYS` like D151); Related opt-in per block (`sites: own|all`).
+- Assistant, copilot, kit and nl-filters send the set as `filters` (T1213 takes a map).
+- `site_key` as a facet with the labels, and an origin badge on cards from another site.
+- `navigate` compares against the own and sibling origins (today same-origin only, `assistant.js` 43-51), never any other host.
 
-Writes stay on the own key only: index, sweep, delete-all and Tuning never touch a
-sibling's documents. With a partitioned key the browser search is PUBLIC, so the key
-limits nothing here; say so in the README.
+Writes stay on the own key: index, sweep, delete-all and Tuning never touch a sibling.
 
-**Done when:** the multisite `network` spec gains a case where site A lists B and finds
-B's documents, and B (not listing A) still finds only its own.
+**Tests:** Turing's semantics for several values of one field in `fq` (OR, not AND); an
+unknown sibling key; template mode scoped.
+
+**Done when:** the `network` spec has site A listing B and finding B's documents, and B
+(not listing A) finding only its own, in every search mode.
 
 ### XLIX.146 Results page on another site (D304)
 
-**Where it came from.** In the FESPSP setup (see the federated-search line filed just
-before this one) the projects microsite and the IWL index into the shared SN site but
-have no search of their own: their header field must send the visitor to the
-institutional site's search page. The plugin assumes the results page is local. The
-overlay's Enter goes to `search_page` (a local page id), else the first local page
-holding `wp:viglet-dumont/search`, else `home_url('?s=')`; a box-only search block
-(D208) also targets a local page; and the core/search block posts to the own `?s=`.
+**Where it came from.** In the FESPSP setup the projects microsite and the IWL index
+into the shared SN site but have no search of their own: their header field must send
+the visitor to the institutional site's search page. The plugin assumes the results page
+is local. Every target goes through `search_page()` (`native-search.php` 260-288: the
+`search_page` page id, else the first page holding `wp:viglet-dumont/search`, else
+`home_url('?s=')`): the overlay's Enter, the box-only block (D208, `render.php`
+148-158), and core/search posts to the own `?s=`.
 
-**What the plugin should do.** A setting "Results page on another site" (`search_url`, absolute URL, constant `VIGLET_DUMONT_SEARCH_URL`) that, when set:
-- makes Enter in the overlay, the box-only block and every core/search form go to `<search_url>?q=…`;
-- keeps the overlay's instant results (they already come from Turing, and with the federated line they can include the target site's documents);
-- turns off native search replacement on this site, since its own `?s=` page is no longer the results page, and says so on the Settings screen;
-- appears in `public-config` so a theme's own field can read it.
+**What the plugin should do.** A setting "Results page on another site" (`search_url`, absolute URL, constant `VIGLET_DUMONT_SEARCH_URL`), read as the **first branch of `search_page()`**, so one change moves every caller:
+- Enter in the overlay, the box-only block and every core/search form go to `<search_url>?q=…`;
+- the overlay keeps its instant results (with D303 they can include the target site's documents; without it they are this site's own);
+- native search replacement turns off on this site, since its `?s=` page is no longer the results page, and the Settings screen says so;
+- `public-config` carries it, so a theme's own field can read it.
 
-An index-only site is then: indexing on, `search_url` set, blocks optional. Nothing else
-changes for a site that leaves it empty.
+An index-only site is then: indexing on, `search_url` set, blocks optional. A site that
+leaves it empty changes nothing.
+
+**Tests:** a non-https `search_url` is refused; one equal to this site's page is empty.
 
 **Done when:** a spec on the multisite stack sets `search_url` on the second site and a
 search typed there lands on the first site's results page with the query.
@@ -281,19 +285,23 @@ forward and saving brings it back.
 ### XLIX.151 PDF text in the index (D309)
 
 **Where it came from.** Much of what FESPSP visitors look for lives in PDFs: the
-academic office's regulations and forms (the `fespsp/doc-list` block links media-library
-PDFs), the library's rules, and the projects microsite's publications (`publicacao`
-type, whose `fespsp_arquivo_url` meta points at the paper's PDF). The plugin indexes
-post content only: `text` is the rendered `the_content`, attachments are not an
-indexable type, and a PDF URL in meta is sent as a string at most. A paper's own words
-are never searchable.
+academic office's regulations and forms (media-library PDFs linked by a block), the
+library's rules, and the projects microsite's publications (`publicacao`, whose
+`fespsp_arquivo_url` meta points at the paper). The plugin indexes `text` as the
+rendered `the_content` only (`indexer.php` 309-319); attachments never pass
+`should_index()` (status `inherit`), and it sends JSON only, to `/api/sn/import`.
 
-**What the plugin should do.** Pick the seam, and name it in the design:
-- **Attachments as documents**: "Index PDF files" under Settings → Content, indexing `application/pdf` attachments that are attached to (or linked from) a published, indexed post. The document is the PDF: title, the file URL, the parent post as `section`, and the text extracted by Turing on import (if `/api/sn/import` cannot take a binary today, file the Turing half: Tika already sits in Turing's ingestion for other connectors, check `turing-app` before assuming).
-- **PDF text into the parent**: a mapping source `file:<meta key>` that appends the referenced PDF's text to the parent document's `text`, for the `publicacao` case where the PDF is the content.
+**The seam already exists in Turing.** `/api/sn/import` takes JSON only, but
+`/api/sn/import/zip` (`TurSNImportAPI.java` 239-273) takes a zip holding the export JSON
+plus files, and extracts any attribute whose value carries the file protocol through
+Tika. No Turing change is needed; the plugin sends PDFs that way.
 
-Limits to state: size cap, only the site's own uploads (never fetch arbitrary hosts),
-removal when the attachment or parent goes, and a "PDF" value on the `type` facet with a
+**What the plugin should do.**
+- **Attachments as documents:** "Index PDF files" under Settings → Content, for `application/pdf` attachments attached to or linked from a published, indexed post: title, file URL, the parent as `section`, text extracted by Turing.
+- **PDF text into the parent:** a mapping source `file:<meta key>` that extracts the referenced PDF into the parent's `text`, for the `publicacao` case.
+
+Limits: a size cap, only this site's own uploads (never fetch another host), removal
+when the attachment or its parent goes, and a "PDF" value on the `type` facet with a
 pt_BR label.
 
 **Done when:** a seeded PDF's inner sentence is found, and deleting the attachment
@@ -301,25 +309,28 @@ removes it.
 
 ### XLIX.152 Grounded people and themes as facets (D310)
 
-**Where it came from.** FESPSP, a school of nearly a century, wants visitors to explore
-it by **person** and by **theme** across its WordPress sites and DSpace repository (one
-SN site, D303). People and themes sit in text, not fields; and the repository's author
-facet mixes "Bosso, Bruno" with "Antonio Prado" and lists the school's three historical
-names as three authors. The plugin imports straight to `/api/sn/import`, bypassing
-Dumont's enrichment (Track F: entity resolution, taxonomy normalization). Turing
-declares `TurSNFieldType.NER`, but no NLP plugin populates it today (checked: `plugins/`
-holds `se` only).
+**Where it came from.** FESPSP wants visitors to explore it by **person** and **theme**
+across its WordPress sites and DSpace repository (one SN site, D303). People and themes
+sit in text, not fields, and the repository's author facet mixes "Bosso, Bruno" with
+"Antonio Prado".
 
-**What should happen.** Plugin documents gain grounded entity fields, as facets:
-- `pessoas`, `temas`, `instituicoes`, `lugares`: extracted from title and text, each value a span that occurs in the source (the non-goal "never fabricate" holds: no inferred person, no theme the text does not name);
-- **normalization across sites**, so "F. Fernandes" and "Florestan Fernandes" are one value; that is entity resolution, Track F's job;
-- **a site-editable list** of canonical names and aliases (people of the school, research lines) that seeds and constrains it.
+**Where the seam is.** Not Dumont's enrichment: the plugin imports straight to Turing,
+and Track F's D18 resolves duplicate *records* by canonical key, not name variants.
+Turing already declares `TurSNFieldType.NER` and facets `turing_entity_*` at query time
+(`TurSolrQueryBuilder.java` 1065), but nothing populates them. Extraction at Turing's
+import serves every source alike (this plugin, D314, D315, every connector), so the core
+belongs there: a Turing line, filed before this one is built and named as its dep.
 
-Pick the seam in the design: the plugin routes documents through a Dumont enrichment
-endpoint, or Turing extracts at import with the site's LLM. Name the cost (one
-extraction per save) and cache by content hash.
+**What the Turing half must do** (stated for that line): extract people, themes,
+institutions and places from title and text with the site's LLM, each value a span the
+source holds (the non-goal "never fabricate"); resolve variants against a per-SN-site
+list of canonical names and aliases; cache by content hash; one extraction per changed
+document.
 
-The editor panel shows the extracted values, with remove (never add-by-guess).
+**What the plugin does here:**
+- Fields maps the `turing_entity_*` facets to labels (`pessoas`, `temas`…) and offers them on the search block;
+- Settings edits the alias list and sends it to the SN site;
+- the editor panel shows the values extracted for the post, with remove (never add-by-guess).
 
 **Done when:** a seeded post naming a person and a theme is found under both facets, and
 an alias resolves to the canonical name.
@@ -350,15 +361,19 @@ all" lands on the results page with that filter.
 
 **Where it came from.** On FESPSP's site the search answer (D166) and the Site assistant
 (D175) are separate: a visitor who reads the answer to "como funciona a biblioteca" and
-wants "and on Saturdays?" must start over in the assistant, which knows neither
-question, answer nor sources. Nor does an assistant answer citing many documents link to
-the results page.
+wants "and on Saturdays?" must start over. The answer runs its own
+`createAnswerController` with its own conversation (`search-block.js` 528); the
+assistant runs `createChatController` and cannot be opened with turns already in it. Nor
+does an assistant answer citing many documents link to the results page.
+
+**Nothing is missing in Turing.** `ConversationRequest.messages` already becomes the
+chat's `history`, and the SDK's chat controller takes `initialMessages`
+(`controllers/chat.ts` 257). The gap is the plugin's alone.
 
 **What the plugin should do.**
-- **Search → assistant:** under the answer, "Continue in the assistant" opens the assistant (floating or the page's block) with the query and the answer already as the first exchange, so a follow-up keeps the context. Send them as the conversation's opening turns through the chat controller (or a Turing seed field if the API needs one; file the T half if so).
+- **Search → assistant:** under the answer, "Continue in the assistant" opens the assistant (floating or the page's block) seeded through `initialMessages` with the query and the answer as the first exchange. The assistant gains a small open-with-turns API the answer calls.
 - **Assistant → search:** when an answer cites more than three documents, or the visitor asks to "see everything", a link opens the results page with the query and, where the citations share a type, that filter.
-- **The same session** (`TUR_SESSION`) across both, so the answer's helpful/not-helpful signal and the chat's are one trail in Turing's answer signals.
-- **Deep dive** (Turing's research mode): "Go deeper" from either surface renders the cited dossier once Turing ships it.
+- **One session** (`TUR_SESSION`) across both, so the answer's helpful signal and the chat's are one trail; prove the cookie is shared rather than assume it.
 
 Same in the overlay and the results page.
 
@@ -371,20 +386,20 @@ matching results page.
 **Where it came from.** FESPSP wants its site assistant immersive, with guided
 conversations built as Turing chat flows: a tour through the school's near-century of
 history with choices, and an orientation flow ("I want to study / research / work here")
-routing to the right pages. Turing runs flows (`genai/flow`: graph, trigger router,
-function-call, webhook, forms, slots), and `@viglet/turing-sdk` already types them
-(`FlowSelect`, `FormSubmit`, `Slots`; `chat/flow-select`, `chat/form-submit`,
-`chat/slots`). The plugin's assistant (`public/assistant.js`) renders only streamed
-text, citations and the `navigate` tool, so a flow designed in the console cannot run on
-a WordPress site.
+routing to the right pages. Turing runs flows (`genai/flow`: forms with `select` fields,
+slots, flow-select; endpoints `/form-submit`, `/flow-select`, `/slots` in
+`TurSNSiteGenAiAPI`), and `@viglet/turing-sdk` exports `postSiteFlowSelect`,
+`postSiteFormSubmit`, `fetchSiteChatSlots` and the `TurChat…` response types, with
+`submitForm` and `resetFlow` on the chat controller. The plugin's assistant
+(`public/assistant.js`) renders only streamed text, citations and the `navigate` tool.
 
 **What the plugin should do.** The assistant renders what a flow sends:
 - **choices** as buttons, typed answers still accepted;
-- **forms** as native labelled fields with validation, sent through `form-submit` only when the visitor submits;
+- **forms** as native labelled fields with validation, sent through `submitForm` only when the visitor submits;
 - **slot prompts** with label and allowed values;
-- **cards** for cited documents (image, title, card fields, D305), so a history tour shows a photo and its source;
+- **cards** for cited documents with the card fields D305 adds, so a history tour shows a photo and its source;
 - **a flow menu**: block attribute `flows` offered as starting chips beside the suggested questions;
-- **handoff** shown as "a person will answer" when configured, hidden otherwise.
+- **handoff** shown as "a person will answer" when the flow sends one, hidden otherwise.
 
 Each turn is announced, focus moves to the first control, and keyboard-only use is
 proven by the a11y specs; pt_BR ships with it.
@@ -395,19 +410,20 @@ block, at 390 and 1280px.
 ### XLIX.156 The plugin read as a school would use it (D316)
 
 **Analysis task: it delivers D lines, not code.** The WordPress plugin and its demo were
-shaped by a store: Tarnfell sells outdoor gear, and the story's eight chapters prove
+shaped by a store: Tarnfell sells outdoor gear, and `wordpress/demo/story.md` proves
 search, a sentence read as filters, the assistant, compare, Build my kit, a product page
 and checkout. FESPSP, a school nearly a century old, is the first real non-commerce
 adopter (fespsp-institucional L–P), and already surfaced D303–D315.
 
 **What to analyse:**
 1. **Store-shaped names and defaults.** Find what stays commerce-only and what should be generic:
-   - the copilot is "Ask the catalog";
-   - the kit hard-codes `productTypes:['product']` and `guideTypes:['post']`;
-   - result cards assume a price;
-   - `readPrice` and `readSize` have no date or place counterpart ("em novembro", "em São Paulo").
-2. **A second demo for education and culture:** a fictional school or cultural institute with an agenda, openings, a publisher, a DSpace-like archive and a history tour, with its own `story.md`. It should prove the non-commerce path the way Tarnfell proves the store.
-3. **Source parity:** documents from the plugin and from Dumont sources (D314, D315) should share the same fields, so one SN site's facets, cards and AI features treat them alike (type labels, image, dates, people).
+   - the copilot block is titled "Ask the catalog" (`blocks/copilot/block.json`);
+   - the kit hard-codes `productTypes:['product']` and `guideTypes:['post']` (`public/copilot.js` 38-41);
+   - `readPrice` and `readSize` (`public/search-block.js` 913, 998) have no date or place counterpart ("em novembro", "em São Paulo").
+
+   Result cards are already neutral: price shows only with WooCommerce and a numeric price.
+2. **A second demo for education and culture:** a fictional school with an agenda, openings, a publisher, a DSpace-like archive and a history tour, proving the non-commerce path the way Tarnfell proves the store.
+3. **Source parity:** documents from the plugin and from D314/D315 share the same fields, so one SN site's facets, cards and AI features treat them alike.
 4. **Operations for a small team:** what an editor sees when Turing is down, a reindex is slow, or the AI budget runs out.
 
 **Delivers:** one D line per finding in Track S or U, each naming the FESPSP line it
@@ -432,23 +448,23 @@ trail the site and the 2026.3 line.
 **Where it came from.** FESPSP's client wants its institutional repository in the
 unified search of its WordPress sites (one SN site, D303). Measured 2026-11-04:
 `repositorio.fespsp.org.br` runs **DSpace 9.2**, REST at `/server-fespsp/api` (public,
-read with no key), 208 items in six communities (Cátedra Celso Furtado, Instituto Walter
-Leser, Memória Institucional, Produção Científica, Seminários de Pesquisa, a seminar
-cycle), and OAI-PMH at `/server-fespsp/oai/request` with `deletedRecord=transient`.
-DSpace is the default repository of Brazilian universities, so it serves many. Dumont
-has no DSpace or OAI-PMH source (checked), and crawling the HTML would lose authors,
-dates and collections.
+no key), 208 items in six communities, and OAI-PMH at `/server-fespsp/oai/request` with
+`deletedRecord=transient`. DSpace is the default repository of Brazilian universities,
+and crawling its HTML loses authors, dates and collections.
 
-**What Dumont should do.** A `dspace` source plugin on the structured-source SPI, reusing D92's paged-JSON machinery (budgets, incremental runs, sweeps):
-- **items** from `discover/search/objects` or `core/items` (HAL paging), incremental by `lastModified`; the REST base is configured, never assumed to be `/server`;
-- **Dublin Core → typed fields:** title, `dc.contributor.author` and `.advisor` (multi), `dc.date.issued` (DATE), `dc.type`, `dc.subject`, abstract, language; the handle URL as the document URL; overridable per source;
-- **community and collection** as facets, by name;
-- **full text** from the TEXT bundle (DSpace's own extraction), else the ORIGINAL PDF with a size cap; THUMBNAIL as image;
+**A profile on the OAI-PMH source, not a second harvester.** Every DSpace speaks OAI,
+and its `dim` format carries all metadata, deletions and incremental `from` (D315).
+D92's JSON machinery is no shortcut here: its incremental mode expires ids by age and
+never filters by `lastModified`. This line adds, from REST, what OAI lacks.
+
+**What Dumont should do.** A `dspace` source over D315:
+- **metadata** from OAI `dim`: title, `dc.contributor.author` and `.advisor` (multi), `dc.date.issued` (DATE), `dc.type`, `dc.subject`, abstract, language; the handle URL as the document URL; overridable per source;
+- **community and collection** as facets by name, resolved once per run through REST;
+- **full text** from the TEXT bundle (DSpace's own extraction), else the ORIGINAL PDF through the shared capped extraction; THUMBNAIL as image; the REST base configured, never assumed to be `/server`;
 - **withdrawn, private or embargoed** items deleted, never indexed;
 - a site key per source.
 
-Names arrive in mixed forms ("Bosso, Bruno" and "Antonio Prado"); normalizing them is
-the entity line's job, not this one's.
+Name variants ("Bosso, Bruno", "Antonio Prado") are D310's to resolve, not this line's.
 
 **Done when:** an item's author, year, community and a sentence of its full text are
 searchable, and withdrawing it removes it on the next run.
@@ -457,17 +473,22 @@ searchable, and withdrawing it removes it on the next run.
 
 **Where it came from.** Filed beside the DSpace source, from the same FESPSP work.
 Repositories (DSpace of any version, EPrints), OJS journals and catalogues (Tainacan,
-Koha) all speak OAI-PMH 2.0; few share a REST API. A generic source makes each a
-configuration. Dumont has none (checked).
+Koha) all speak OAI-PMH 2.0; few share a REST API. Dumont has no XML harvesting at all
+(no `ListRecords`, no `resumptionToken`), and the paged-JSON machinery (D92) parses JSON
+only. This line is the base the DSpace source (D314) builds on.
 
-**What Dumont should do.** An `oai-pmh` source plugin on the structured-source SPI:
-- **harvest** with `ListRecords`, following `resumptionToken`, with `metadataPrefix` `oai_dc` by default and others (`dim`, `mods`, `qdc`) chosen per source;
-- **incremental** with `from=<last run's responseDate>`, and `set` to restrict to collections;
-- **deletion:** a `<header status="deleted">` removes the document; a repository with `deletedRecord=no` gets a full re-list with the sweep (D92's machinery) at a configured interval;
-- **mapping:** Dublin Core elements to typed fields with the same defaults as the DSpace line, overridable per source; `dc:identifier` URLs chosen as the document URL by a rule (handle, DOI, landing page);
-- **full text:** optional, by following a `dc:identifier` or `dc:relation` that is a PDF on the same host, through the extraction the DSpace line uses, with a size cap;
-- **politeness:** a delay between requests, honouring `Retry-After` and 503s, and a source-level User-Agent so an owner can allowlist the harvester;
-- `Identify` run first, with `granularity` and `earliestDatestamp` stored for the run.
+**What Dumont should do.** An `oai-pmh` source plugin on `DumStructuredSource`, reusing its sweep, incremental and run-note contract as it is:
+- **harvest** with `ListRecords`, following `resumptionToken`, `metadataPrefix` `oai_dc` by default and others (`dim`, `mods`, `qdc`) per source; `Identify` first, storing `granularity`;
+- **incremental** with `from=<last run's responseDate>`, and `set` to restrict to collections, named through `ListSets`;
+- **deletion:** `<header status="deleted">` removes the document; `deletedRecord=no` or `transient` gets a full re-list with the sweep at a configured interval;
+- **mapping:** Dublin Core to typed fields, overridable per source; the URL picked from `dc:identifier` by rule (handle, DOI);
+- **full text**, optional: a same-host PDF in `dc:identifier` or `dc:relation`.
+
+**Shared seams to lift first, not copy:** Tika extraction lives only in `assets-commons`
+with no cap (`BodyContentHandler(-1)`), and the `Pacer` is private to
+`DumJsonApiSource`, which ends a walk on any 429 and never reads `Retry-After`. Move
+both into `connector-commons`, with a size cap and `Retry-After`, plus a source-level
+User-Agent.
 
 **Done when:** an OJS demo journal and a DSpace demo instance both index through
 configuration only, and a deleted record leaves the index on the next incremental run.
