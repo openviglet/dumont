@@ -299,6 +299,99 @@ pt_BR label.
 **Done when:** a seeded PDF's inner sentence is found, and deleting the attachment
 removes it.
 
+### XLIX.152 Grounded people and themes as facets (D310)
+
+**Where it came from.** FESPSP, a school of nearly a century, wants visitors to explore
+it by **person** and by **theme** across its WordPress sites and DSpace repository (one
+SN site, D303). People and themes sit in text, not fields; and the repository's author
+facet mixes "Bosso, Bruno" with "Antonio Prado" and lists the school's three historical
+names as three authors. The plugin imports straight to `/api/sn/import`, bypassing
+Dumont's enrichment (Track F: entity resolution, taxonomy normalization). Turing
+declares `TurSNFieldType.NER`, but no NLP plugin populates it today (checked: `plugins/`
+holds `se` only).
+
+**What should happen.** Plugin documents gain grounded entity fields, as facets:
+- `pessoas`, `temas`, `instituicoes`, `lugares`: extracted from title and text, each value a span that occurs in the source (the non-goal "never fabricate" holds: no inferred person, no theme the text does not name);
+- **normalization across sites**, so "F. Fernandes" and "Florestan Fernandes" are one value; that is entity resolution, Track F's job;
+- **a site-editable list** of canonical names and aliases (people of the school, research lines) that seeds and constrains it.
+
+Pick the seam in the design: the plugin routes documents through a Dumont enrichment
+endpoint, or Turing extracts at import with the site's LLM. Name the cost (one
+extraction per save) and cache by content hash.
+
+The editor panel shows the extracted values, with remove (never add-by-guess).
+
+**Done when:** a seeded post naming a person and a theme is found under both facets, and
+an alias resolves to the canonical name.
+
+### XLIX.153 An immersive layout for the instant overlay (D311)
+
+**Where it came from.** FESPSP wants its search "complete and immersive", one keystroke
+from anywhere. The instant overlay (D167, `public/overlay.js`) is a flat list of six
+results with no type, date, image, answer or zero state; everything richer lives only on
+the results page.
+
+**What the plugin should do.** An "immersive" layout for the overlay (setting `overlay_layout: list|immersive`, list stays the default):
+- **full screen** on phones, a large panel on desktop, with focus trapped and the background inert;
+- **zero state:** recent searches (already in `localStorage`), popular chips (D202) and an editable "Explore" row of links;
+- **results grouped by type** in columns or sections ("Events", "Pages", "Books"), each with the mapped card fields (D305) and its own "see all" into the results page filtered to that type;
+- **an answer strip** on top for question-like queries (D166), with "Continue in the assistant" (the next line);
+- **a preview pane** on desktop for the highlighted result: image, abstract and card fields, so arrows browse without leaving;
+- **keyboard first:** arrows across groups, Tab into the preview, Enter opens, Ctrl+Enter opens the results page; announced with `aria-live`;
+- the federated set (D303) and fixed filters (D306) honoured.
+
+Same Interactivity store as the search block, so a theme can style it with the same BEM
+classes.
+
+**Done when:** axe passes on the open overlay at 390 and 1280px, and a type group's "see
+all" lands on the results page with that filter.
+
+### XLIX.154 From the search answer into the assistant and back (D312)
+
+**Where it came from.** On FESPSP's site the search answer (D166) and the Site assistant
+(D175) are separate: a visitor who reads the answer to "como funciona a biblioteca" and
+wants "and on Saturdays?" must start over in the assistant, which knows neither
+question, answer nor sources. Nor does an assistant answer citing many documents link to
+the results page.
+
+**What the plugin should do.**
+- **Search → assistant:** under the answer, "Continue in the assistant" opens the assistant (floating or the page's block) with the query and the answer already as the first exchange, so a follow-up keeps the context. Send them as the conversation's opening turns through the chat controller (or a Turing seed field if the API needs one; file the T half if so).
+- **Assistant → search:** when an answer cites more than three documents, or the visitor asks to "see everything", a link opens the results page with the query and, where the citations share a type, that filter.
+- **The same session** (`TUR_SESSION`) across both, so the answer's helpful/not-helpful signal and the chat's are one trail in Turing's answer signals.
+- **Deep dive** (Turing's research mode): "Go deeper" from either surface renders the cited dossier once Turing ships it.
+
+Same in the overlay and the results page.
+
+**Done when:** a follow-up typed after "Continue in the assistant" is answered with the
+first question's context, and an assistant answer with many sources links to the
+matching results page.
+
+### XLIX.155 Turing chat flows in the Site assistant (D313)
+
+**Where it came from.** FESPSP wants its site assistant immersive, with guided
+conversations built as Turing chat flows: a tour through the school's near-century of
+history with choices, and an orientation flow ("I want to study / research / work here")
+routing to the right pages. Turing runs flows (`genai/flow`: graph, trigger router,
+function-call, webhook, forms, slots), and `@viglet/turing-sdk` already types them
+(`FlowSelect`, `FormSubmit`, `Slots`; `chat/flow-select`, `chat/form-submit`,
+`chat/slots`). The plugin's assistant (`public/assistant.js`) renders only streamed
+text, citations and the `navigate` tool, so a flow designed in the console cannot run on
+a WordPress site.
+
+**What the plugin should do.** The assistant renders what a flow sends:
+- **choices** as buttons, typed answers still accepted;
+- **forms** as native labelled fields with validation, sent through `form-submit` only when the visitor submits;
+- **slot prompts** with label and allowed values;
+- **cards** for cited documents (image, title, card fields, D305), so a history tour shows a photo and its source;
+- **a flow menu**: block attribute `flows` offered as starting chips beside the suggested questions;
+- **handoff** shown as "a person will answer" when configured, hidden otherwise.
+
+Each turn is announced, focus moves to the first control, and keyboard-only use is
+proven by the a11y specs; pt_BR ships with it.
+
+**Done when:** a seeded two-step flow with a choice and a form runs end to end in the
+block, at 390 and 1280px.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
@@ -310,3 +403,50 @@ system, and docs.viglet.org/dumont later redirects to it.
 Filed from the portfolio review of 2026-10-30 (visibility repo, estrategia/portfolio.md
 and produtos/dumont.md): the release, the names on the files and the links in the README
 trail the site and the 2026.3 line.
+
+## LII Academic repositories as sources (DSpace, OAI-PMH)
+
+### LII.1 A DSpace source (D314)
+
+**Where it came from.** FESPSP's client wants its institutional repository in the
+unified search of its WordPress sites (one SN site, D303). Measured 2026-11-04:
+`repositorio.fespsp.org.br` runs **DSpace 9.2**, REST at `/server-fespsp/api` (public,
+read with no key), 208 items in six communities (Cátedra Celso Furtado, Instituto Walter
+Leser, Memória Institucional, Produção Científica, Seminários de Pesquisa, a seminar
+cycle), and OAI-PMH at `/server-fespsp/oai/request` with `deletedRecord=transient`.
+DSpace is the default repository of Brazilian universities, so it serves many. Dumont
+has no DSpace or OAI-PMH source (checked), and crawling the HTML would lose authors,
+dates and collections.
+
+**What Dumont should do.** A `dspace` source plugin on the structured-source SPI, reusing D92's paged-JSON machinery (budgets, incremental runs, sweeps):
+- **items** from `discover/search/objects` or `core/items` (HAL paging), incremental by `lastModified`; the REST base is configured, never assumed to be `/server`;
+- **Dublin Core → typed fields:** title, `dc.contributor.author` and `.advisor` (multi), `dc.date.issued` (DATE), `dc.type`, `dc.subject`, abstract, language; the handle URL as the document URL; overridable per source;
+- **community and collection** as facets, by name;
+- **full text** from the TEXT bundle (DSpace's own extraction), else the ORIGINAL PDF with a size cap; THUMBNAIL as image;
+- **withdrawn, private or embargoed** items deleted, never indexed;
+- a site key per source.
+
+Names arrive in mixed forms ("Bosso, Bruno" and "Antonio Prado"); normalizing them is
+the entity line's job, not this one's.
+
+**Done when:** an item's author, year, community and a sentence of its full text are
+searchable, and withdrawing it removes it on the next run.
+
+### LII.2 A generic OAI-PMH source (D315)
+
+**Where it came from.** Filed beside the DSpace source, from the same FESPSP work.
+Repositories (DSpace of any version, EPrints), OJS journals and catalogues (Tainacan,
+Koha) all speak OAI-PMH 2.0; few share a REST API. A generic source makes each a
+configuration. Dumont has none (checked).
+
+**What Dumont should do.** An `oai-pmh` source plugin on the structured-source SPI:
+- **harvest** with `ListRecords`, following `resumptionToken`, with `metadataPrefix` `oai_dc` by default and others (`dim`, `mods`, `qdc`) chosen per source;
+- **incremental** with `from=<last run's responseDate>`, and `set` to restrict to collections;
+- **deletion:** a `<header status="deleted">` removes the document; a repository with `deletedRecord=no` gets a full re-list with the sweep (D92's machinery) at a configured interval;
+- **mapping:** Dublin Core elements to typed fields with the same defaults as the DSpace line, overridable per source; `dc:identifier` URLs chosen as the document URL by a rule (handle, DOI, landing page);
+- **full text:** optional, by following a `dc:identifier` or `dc:relation` that is a PDF on the same host, through the extraction the DSpace line uses, with a size cap;
+- **politeness:** a delay between requests, honouring `Retry-After` and 503s, and a source-level User-Agent so an owner can allowlist the harvester;
+- `Identify` run first, with `granularity` and `earliestDatestamp` stored for the run.
+
+**Done when:** an OJS demo journal and a DSpace demo instance both index through
+configuration only, and a deleted record leaves the index on the next incremental run.

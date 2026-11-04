@@ -124,8 +124,17 @@ This track has no remaining pending tasks.
 - 📋 **D307** (deps: —) **Date range facets offer one backward-looking period set: an agenda cannot filter by this week or this month** — Four of the five periods are useless for future dates, so events get a facet nobody can use. → §XLIX.149
 - 📋 **D308** (deps: —) **A post whose end date has passed stays in the index until someone saves it again** — Search keeps offering a job opening or a call whose deadline is gone, and the theme's only fix is a cron flipping the exclude meta. → §XLIX.150
 - 📋 **D309** (deps: —) **PDF files never reach the index: neither media-library PDFs nor a PDF a post links in its meta** — Regulations, forms and papers are what visitors search for most, and their words are invisible to search. → §XLIX.151
+- 📋 **D310** (deps: —) **WordPress documents carry no people or themes: who and what a post names never becomes a facet** — A site cannot be explored by person or theme, and name variants across sites and the repository stay split. → §XLIX.152
+- 📋 **D311** (deps: —) **The instant overlay is a flat list of six results with no type, date, image, answer or zero state** — A search meant to be immersive sends every visitor away to the results page to see anything beyond a title. → §XLIX.153
+- 📋 **D312** (deps: —) **The search answer and the Site assistant do not share context: a follow-up starts over** — A visitor who wants to ask one more thing after the answer loses the question, the answer and its sources. → §XLIX.154
+- 📋 **D313** (deps: —) **The Site assistant renders only text and citations: a Turing chat flow's choices, forms and slots cannot run in it** — Guided conversations built in Turing's console never reach a WordPress site, though the SDK already types them. → §XLIX.155
 
 ## Track T — Releases and links match what the site describes
+
+## Track U — Academic repositories as sources (DSpace, OAI-PMH)
+
+- 📋 **D314** (deps: —) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Crawling loses authors, advisors, dates and collections, and DSpace is the repository most Brazilian universities run. → §LII.1
+- 📋 **D315** (deps: —) **No Dumont source harvests OAI-PMH, the protocol every repository, OJS journal and catalogue already speaks** — Each academic system would need its own connector where one configurable harvester would serve them all. → §LII.2
 
 ## Non-goals (do NOT add as tasks)
 
