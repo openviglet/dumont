@@ -194,6 +194,26 @@ that did not run.
 theme's own spacing changed, the baselines are retaken and the classic theme is pinned
 like Ollie; a full `npx playwright test` runs every variant to the end.
 
+### XLIX.144 One comparison bar per page (D302)
+
+**What happens.** Seen on 2026-11-04 in the vertical clip of chapter 5
+(`story-chapter-5-vertical.en.mp4`, recorded by `npm run e2e:story:vertical` on Tarnfell
+at 432 CSS pixels). After the shopper ticks three products, "Compare 3 products" shows
+twice: once under the search block's results and once inside the Ask the catalog block
+just below it. The search block (D200) and the copilot each render a compare bar, and
+both read the same per-tab comparison list, so their counts always agree and the two
+buttons do the same thing. At desktop width they sit far apart; at phone width they
+stack a few lines from each other.
+
+**What it should do.** One compare bar per page while the list has products: the first
+block on the page that offers comparison shows it, and the others leave it out, or the
+bar lives once at page level (a sticky bar at the foot of the viewport on a phone).
+Ticking a product in either block still adds it to the same list.
+
+**Done when.** A page holding both blocks shows one Compare button, a spec on the woo
+project ticks products in each block and finds one button with the combined count, and
+the vertical clip of chapter 5 shows it once.
+
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
