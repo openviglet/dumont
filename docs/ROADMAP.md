@@ -117,6 +117,13 @@ This track has no remaining pending tasks.
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
+- 📋 **D303** (deps: —) **A site sharing an SN site can search only its own site key, never its sibling sites' documents** — One organisation with three WordPress sites cannot offer one search over all of them, though D148 already lets them share the index. → §XLIX.145
+- 📋 **D304** (deps: D303) **An index-only site cannot send its search box to another site's results page: Enter always lands locally** — A microsite that indexes into a shared search must keep a dead local results page or write its own form to reach the real one. → §XLIX.146
+- 📋 **D305** (deps: —) **Result cards show only title, snippet, publication date and image: no mapped field reaches a card** — An event card shows the day it was posted instead of the day it happens, and a book card hides its authors. → §XLIX.147
+- 📋 **D306** (deps: —) **The search block has no fixed filter: a box scoped to one section of the site cannot be built** — Search-in-the-agenda or search-in-the-publisher boxes need a URL filter the visitor can clear and that leaks into shared links. → §XLIX.148
+- 📋 **D307** (deps: —) **Date range facets offer one backward-looking period set: an agenda cannot filter by this week or this month** — Four of the five periods are useless for future dates, so events get a facet nobody can use. → §XLIX.149
+- 📋 **D308** (deps: —) **A post whose end date has passed stays in the index until someone saves it again** — Search keeps offering a job opening or a call whose deadline is gone, and the theme's only fix is a cron flipping the exclude meta. → §XLIX.150
+- 📋 **D309** (deps: —) **PDF files never reach the index: neither media-library PDFs nor a PDF a post links in its meta** — Regulations, forms and papers are what visitors search for most, and their words are invisible to search. → §XLIX.151
 
 ## Track T — Releases and links match what the site describes
 
