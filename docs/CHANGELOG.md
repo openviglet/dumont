@@ -715,7 +715,7 @@
 - **D264** — The seed dates products and guides over the past eight months, the same day on every seed, and removes WordPress's default post and page.
 - **D268** — The pt_BR store sells in reais from Brazil: BRL, prices at about 5.5 to the dollar ending in ,90, ranges with them, and a Brazilian checkout in the story.
 - **D269** — run-docker records a mountain-gear shop's searches in the store's language once per SN site, so a fresh demo has popular searches.
-- **D265 (14 photos)** — npm run demo:photos buys Ideogram photos through polyweave, clothing as a flat lay and gear on the hill, and the seed imports the 800 px WebP where one exists.
+- **D265** — Every product and guide has an Ideogram photo, shown whole over a blurred copy of itself; tents on level grass, worn kit laid flat (design §XLIX.110 recorded in `wordpress/demo/seed/CREDITS.md`).
 - **D261** — Ana narrates the English video too: all 18 English takes are current and story.en.mp4 carries them, with a line over each held result and English captions.
 - **D259** — A misspelling that finds nothing is searched as corrected, saying Showing results for X with a link to search as typed; one that finds something still offers Did you mean.
 - **D239** — The demo store opens in WordPress Playground from a link on the site, the docs and the README, and a Playwright gate checks it on playground.wordpress.net.

@@ -26,6 +26,4 @@
 
 ## Track S — The WordPress connector plugin
 
-- ⏸ **D265** (deps: —) **The demo store's pictures are drawings, which read as a mock-up on video** — set aside (Waits on Ideogram credit and a working key.): Buy the 54 photos left once Ideogram accepts the key again (listed in the design). → §XLIX.110
-
 ## Track T — Releases and links match what the site describes

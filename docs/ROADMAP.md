@@ -118,13 +118,9 @@ This track has no remaining pending tasks.
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
 - 📋 **D287** (deps: Viglet Turing T1133: copilot reads a partitioned key's partition) **On an SN site shared by several WordPress sites, Build my kit and the copilot stage other sites' products** — Search filters by site key, the generative calls do not, so a kit can sell another site's stock. → §XLIX.128
+- 📋 **D301** (deps: —) **Under Twenty Twenty-One and Ollie each search result renders about 25 px taller than its screenshot baseline** — The theme variants fail on every run, and a failure stops the chain, so the Portuguese and shop specs only run when started by hand. → §XLIX.143
 
 ## Track T — Releases and links match what the site describes
-
-## Done when — D265
-
-- **Every product and guide has a photo** npm run demo:photos reports every photo
-  current and the seed draws none.
 
 ## Non-goals (do NOT add as tasks)
 

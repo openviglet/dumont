@@ -121,22 +121,6 @@ the zip, the review team approves it, and only then does SVN exist.
 
 Done when a `wordpress-v*` tag updates the directory listing with no step by hand.
 
-### XLIX.110 Photos for the demo store (D265)
-
-**What happens.** The demo store's pictures are flat drawings the seed makes with GD,
-which read as a mock-up on video. `npm run demo:photos` buys photorealistic ones from
-Ideogram 4.0 through polyweave (clothing as a flat lay, gear on the hill, guides as
-outdoor scenes), keeps an 800 px WebP of each in `demo/photos/`, and the seed imports a
-photo wherever one exists.
-
-**What is left.** On 2026-10-31 Ideogram answered 402 (credit run out) and then 401 after 14 of
-the 68 photos. Still to buy, about USD 3.20 at 0.06 each:
-- products: blencathra-mountain-tent, borrowdale-gaiters, borrowdale-travel-pack, bowfell-winter-down-bag, catbells-20-litre-kids-pack, catbells-merino-beanie, coniston-bivvy-bag, ennerdale-65-litre-trekking-pack, ennerdale-insulated-bottle, ennerdale-trail-shoe, fairfield-camp-stove, fairfield-synthetic-summer-bag, glaramara-two-person-tent, grisedale-sleeping-mat, grisedale-wool-jumper, haystacks-dry-bag-set, haystacks-one-person-tent, helvellyn-28-litre-daypack, helvellyn-waterproof-gloves, kentmere-map-case, kirkstone-silk-liner, kirkstone-winter-boot, langdale-cook-set, langdale-family-tent, langdale-heavyweight-fleece, mardale-approach-shoe, pillar-lightweight-hiking-boot, scafell-45-litre-pack, scafell-trekking-poles, skiddaw-three-season-down-bag, wansfell-running-top, wasdale-12-litre-running-vest, wasdale-head-torch
-- guides: choosing-a-backpacking-tent, choosing-hiking-boots, down-or-synthetic-insulation, family-walking-kit, first-wild-camp-kit, how-to-care-for-leather-boots, how-to-dry-wet-boots, how-to-fit-a-backpack, how-to-pitch-a-tent-in-rain, how-to-read-a-hydrostatic-head, how-to-reproof-a-waterproof-jacket, how-to-stay-warm-at-night-camping, how-to-store-a-sleeping-bag, how-to-use-trekking-poles, how-to-wash-a-down-jacket, layering-for-the-hills, sleeping-bag-temperature-ratings, trail-running-kit-list, travel-light-kit, what-size-backpack, winter-hillwalking-kit
-
-**Done when.** Every product and guide has a photo, `npm run demo:photos` reports every
-photo current, and the seed draws none.
-
 ### XLIX.125 The video embedded from YouTube, with its transcript (D282)
 
 **What happens.** D246 shipped with its criterion open: the video is neither attached to
@@ -184,6 +168,31 @@ site gets the same bound key, and the plugin sends nothing extra.
 
 **Done when.** Two sites sharing an SN site each get a kit, an answer and a comparison
 built from their own products only, covered by a browser spec on the multisite network.
+
+### XLIX.143 Search results taller under the classic and Ollie themes (D301)
+
+**What happens.** Found on 2026-11-04 while checking the result thumbnails (D265). In
+`tests/e2e/site/search.spec.mjs`, three screenshots fail under `site-classic` (Twenty
+Twenty-One 2.9) and two under `site-ollie` (Ollie 1.6.5, pinned): "the block answers a
+query with this site's results" (`search-block-workshop`), "a facet narrows the results"
+(`search-block-facet`) and, on the classic theme, "a misspelling that finds nothing"
+(`search-block-showing-for`, 646x31 baseline against 610x35). The diffs show every
+result card shifted down by about 25 px per card: the text is the same, the spacing
+between cards is not. The default theme (Twenty Twenty-Five), tablet and phone pass, and
+so do the Portuguese and shop variants when run on their own.
+
+**Not the cause.** The thumbnail frame added on 2026-11-04: the Ollie failures reproduce
+with that change stashed. Not a theme update either, at least for Ollie, whose version
+the config pins. The classic baselines date from D259 (2026-10-31); the classic theme is
+not pinned, so it may also have moved.
+
+**What it costs.** `playwright.config.mjs` chains the variants so one WordPress serves
+them in turn, and a failure skips every variant after it: a full run reports 49 tests
+that did not run.
+
+**Done when.** The cause is found and either fixed in the block's stylesheet or, where a
+theme's own spacing changed, the baselines are retaken and the classic theme is pinned
+like Ollie; a full `npx playwright test` runs every variant to the end.
 
 ## L The documentation area
 
