@@ -121,6 +121,13 @@ This track has no remaining pending tasks.
 
 ## Track T — Releases and links match what the site describes
 
+## Done when — D287
+
+- **Two sites sharing an SN site each get a kit and an answer of their own products**
+  Once Turing T1213 takes a filter on the copilot, the kit and nl-filters, the plugin
+  sends this site's key with each; a spec on the multisite network asks both sites for a
+  kit and an answer and finds only that site's products cited and staged.
+
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
