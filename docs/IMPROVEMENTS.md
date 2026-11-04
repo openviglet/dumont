@@ -208,25 +208,6 @@ with ffmpeg's `zoompan`/`crop`.
 Recording at 2560x1440 would give the zoom more pixels, but it is a separate decision
 with a cost in recording time, so it stays out of this task.
 
-### XLIX.142 Dissolves in the Resolve project (D300)
-
-**What happens.** Since D291 the MP4 dissolves for half a second wherever a card meets
-the recording or a shot: `bin/story-video.mjs` overlays the card still, fading, on the
-clip beside it, and the video's length does not change. The FCPXML of D290 is written
-from the same timeline but keeps hard cuts there, because the cards and shots sit on
-lanes above gaps and an FCPXML `<transition>` joins spine items, not connected clips. So
-the project and the MP4 disagree at every card.
-
-**What it should do.** Carry the dissolves into the project the way Resolve reads them.
-Either put the cards and shots on the spine (V1) with the recording, so a `<transition>`
-sits between two spine items, giving up the V1/V2/V3 split; or keep the lanes and give
-each card an opacity keyframe ramp (`adjust-blend` / `adjust-transform` keyframes) over
-the dissolve. Which one Resolve imports has to be checked in Resolve, which is why this
-waits on D290's check.
-
-**Done when.** The project opened in Resolve shows the same dissolves the MP4 has, at
-the same places and lengths.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
