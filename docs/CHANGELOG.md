@@ -750,7 +750,7 @@
 - **D281** — developer.en.mp4: Chris narrates install, connection, first index, search and insights on a fresh WordPress, 3m26s with cards and captions (design §XLIX.124 recorded in `wordpress/demo/VIDEO.md`).
 - **D290** — Opened in DaVinci Resolve 21 every clip came in online: recording, cards and shots on V1-V3, the takes on A1, the ducked music bed alone on A2 (design §XLIX.133 recorded in `wordpress/demo/VIDEO.md`).
 - **D291** — Cards dissolve into and out of the recording and shots in the MP4 at no change of length; no J-cut case, every line starts after its card (design §XLIX.134 recorded in `wordpress/demo/VIDEO.md`).
-- **D292 (MP4)** — The story records each acted-on element's box and the video eases in on it, up to 1.6x: the typed query and the answer's sources read at phone size.
+- **D292** — The push-ins are transform keyframes on V1 in Resolve too, the MP4's curve: the frame closes in on the search box as she types (design §XLIX.135 recorded in `wordpress/demo/VIDEO.md`).
 - **D293** — Workspace > Scripts runs finish.lua in Resolve 21: a dated timeline, a report window, the render queued; captions stay one import by hand (design §XLIX.136 recorded in `wordpress/demo/VIDEO.md`).
 - **D298** — The recording names its store's language and story-video.mjs refuses another --language, naming the command that records the right store (design §XLIX.141 recorded in `wordpress/demo/VIDEO.md`).
 - **D300** — In Resolve each card dissolves into and out of the recording as in the MP4, by Cross Dissolve transitions; beside a shot the cut stays (design §XLIX.142 recorded in `wordpress/demo/VIDEO.md`).

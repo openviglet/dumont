@@ -185,29 +185,6 @@ site gets the same bound key, and the plugin sends nothing extra.
 **Done when.** Two sites sharing an SN site each get a kit, an answer and a comparison
 built from their own products only, covered by a browser spec on the multisite network.
 
-### XLIX.135 The frame follows the action (D292)
-
-`tests/e2e/story/shopper.story.mjs` types into the search box, clicks a chip and holds
-on a result, but the video always shows the whole viewport. At 1080p on a phone, the
-query being typed and the answer's sources are a few pixels tall.
-
-The spec already writes `chapters.json`, marking where each line starts and the
-highlight. It should also record, at each of those moments, the **bounding box of the
-element the step acts on** (the input, the answer panel, the comparison table), using
-Playwright's `boundingBox()` at the time it acts.
-
-The timeline model then turns each box into a slow **push-in**: scale and position
-keyframes that ease towards the box while the action runs and ease back out before the
-next one. The box gets a margin, the scale is capped (around 1.6x, so text stays sharp
-from a 1080p source), and no move is shorter than the ease itself.
-
-In the Resolve project these are ordinary transform keyframes on V1. A move that feels
-wrong is dragged or deleted there, with no re-recording. The MP4 renders the same curve
-with ffmpeg's `zoompan`/`crop`.
-
-Recording at 2560x1440 would give the zoom more pixels, but it is a separate decision
-with a cost in recording time, so it stays out of this task.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
