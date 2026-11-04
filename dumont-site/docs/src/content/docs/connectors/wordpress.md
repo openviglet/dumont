@@ -179,6 +179,11 @@ custom fields can be added on the Settings page.
   30 days, this year, before this year). A number lists its own ranges, each with a label
   and a **From** and **To**; an empty bound is an open end, and an empty label is written
   from the bounds ("20 – 50", "Up to 20", "50 or more").
+- **Show on result cards** adds the field to each result in the **Turing search** block,
+  as a "Label: value" line under the snippet, in the order of the fields. The label is the
+  field's label, or its name when it has none. A `DATE` field is written in the site's date
+  format, a multiple field's values are joined with commas, and a URL is never shown as
+  text. An event, say, can show the day it happens beside the day it was posted.
 - **Leave this type out of search** switches a whole post type off.
 
 **In Turing** says where each field stands: *In Turing*, *Added on the next save*, or
