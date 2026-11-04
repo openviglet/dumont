@@ -117,16 +117,8 @@ This track has no remaining pending tasks.
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
-- ⏳ **D287** (deps: Viglet Turing T1213: copilot, kit and nl-filters take a filter) **On an SN site shared by several WordPress sites, Build my kit and the copilot stage other sites' products** — Ask the catalog, Build my kit and nl-filters still read every site's documents; they wait on Turing T1213. → §XLIX.128
 
 ## Track T — Releases and links match what the site describes
-
-## Done when — D287
-
-- **Two sites sharing an SN site each get a kit and an answer of their own products**
-  Once Turing T1213 takes a filter on the copilot, the kit and nl-filters, the plugin
-  sends this site's key with each; a spec on the multisite network asks both sites for a
-  kit and an answer and finds only that site's products cited and staged.
 
 ## Non-goals (do NOT add as tasks)
 

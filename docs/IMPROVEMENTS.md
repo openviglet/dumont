@@ -146,29 +146,6 @@ and the plugin's pages embed that.
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
 
-### XLIX.128 Generative calls scoped to the site's key (D287)
-
-**What happens.** D148 lets several WordPress sites share one SN site: every document
-carries `site_key`, and the search block, Related, trending, tuning and the native
-search all filter on `fq[]=site_key:<key>`. The calls that go to Turing's generative
-endpoints do not. `copilot.js` posts Build my kit to `/api/sn/{site}/copilot/kit` and
-the product question to `/copilot` with no filter, and Turing's `KitRequest` and
-`CopilotRequest` (`TurSNCatalogCopilotAPI`) take none. On 2026-11-03 the local
-`tarnfell` SN site held the demo store (`site_key=localhost`) and a Playground run's
-copy of the same catalog (`site_key=tarnfell`): the kit staged every product twice, each
-with a "Site: localhost" or "Site: tarnfell" reason, and a shopper on one site could add
-the other site's products.
-
-**What it should do.** The kit, the product question, the Site assistant and the compare
-summary read only this site's documents. These calls leave the visitor's browser with no
-key, so T1133's partitioned key (shipped 2026-11-04) does not reach them: they are
-scoped by a filter, as searches are. The Site assistant sends `filters: {site_key:
-[key]}` on each turn (Turing T1086). The copilot, the kit and nl-filters take no filter
-yet: Turing T1213.
-
-**Done when.** Two sites sharing an SN site each get a kit, an answer and a comparison
-built from their own products only, covered by a browser spec on the multisite network.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
