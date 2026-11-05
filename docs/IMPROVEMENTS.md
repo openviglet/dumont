@@ -287,22 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.167 Fast failure while Turing is down (D328)
-
-**Found by D316.** When Turing hangs, every page that reads it waits up to the client's
-30 s timeout (`class-viglet-dumont-api-client.php` 548): the search block's first paint
-(`class-viglet-dumont-native-search.php` 548-566), the theme search (905-908, which
-falls back to WordPress search only after the wait), and Related, which tries VECTOR
-then MLT and caches no failure, so it pays twice on every view
-(`class-viglet-dumont-related.php` 201-231).
-
-**What to build.** A short "Turing is down" mark (a transient of about a minute, set by
-any failed read) that every render path checks before calling, and a render timeout of a
-few seconds, apart from the admin and indexing calls that may wait longer.
-
-**Done when:** with Turing stopped, a page with the search block and Related renders in
-under three seconds, and the theme search falls back at once.
-
 ### XLIX.168 Stopped jobs said and replayed (D329)
 
 **Found by D316.** After about three hours of a Turing outage, edits stop reaching

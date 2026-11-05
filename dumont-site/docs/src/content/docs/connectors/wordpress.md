@@ -408,6 +408,14 @@ answer, WordPress searches its database as before. The plugin's older results pa
 facets, for classic themes) remains available as **Results page → The plugin's results
 page**.
 
+**When Turing is down.** A page a visitor is waiting on (the theme's search, the search
+block's first page, Related, popular searches, the plugin's results page) waits at most
+three seconds for Turing. When it gets no answer at all, it renders without it and marks
+Turing down for a minute, so the pages after it do not wait: the theme's search falls back
+to WordPress's own at once, and Related shows nothing. An HTTP error from Turing does not
+set the mark. Admin screens, Index All and the queue keep their longer waits. The
+`viglet_dumont_render_timeout` filter changes the three seconds.
+
 ### The instant search
 
 With **Instant search from anywhere** on, Ctrl+K (⌘K on a Mac) and the theme's own search
