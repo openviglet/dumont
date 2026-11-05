@@ -307,8 +307,9 @@ prefix is a key in scope (`class-viglet-dumont-related.php`), reading the whole 
 and losing neighbours past the 50th.
 
 **What to build.** Once T1235 ships, send the scope as the search does (`fq[]` per key
-with `fqi.op=OR`, through `Indexer::scope_query()`), with the site's key, and drop the
-over-fetch and the prefix filter.
+with `fqi.op=OR`, through `Indexer::scope_query()`), keyless through `for_scope()` (a
+partition-bound key sees only its own site), and drop the over-fetch and the prefix
+filter.
 
 **Done when:** Related with `sites: all` asks `similar` with the scope's filters and
 shows a sibling's neighbour that ranks past the 50th in the whole SN site.
