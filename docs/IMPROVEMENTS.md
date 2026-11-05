@@ -170,32 +170,6 @@ unknown sibling key; template mode scoped.
 **Done when:** the `network` spec has site A listing B and finding B's documents, and B
 (not listing A) finding only its own, in every search mode.
 
-### XLIX.149 Period sets for date range facets (D307)
-
-**Where it came from.** FESPSP's agenda (`evento` type) maps its start date as DATE with
-`range: true` (D164). The custom facet the plugin declares has one fixed set of periods
-built for publication dates: Upcoming (NOW→), Last 7 days, Last 30 days, This year,
-Before this year. For an agenda, four of the five look backwards; what a visitor asks is
-"today", "this week", "this month", "upcoming" and "past". The set is hard-coded in
-`class-viglet-dumont-mapping.php`.
-
-**What the plugin should do.** In Fields, a "Periods" choice per range-enabled DATE field:
-- **Past** (today's default, unchanged for existing sites);
-- **Agenda**: Today, This week, This month, Upcoming, Past;
-- **Custom**: up to 8 `{label, from, to}` with Turing date math (`NOW/DAY`, `NOW+7DAYS`…), validated before the manifest is sent.
-
-Labels are translated (en, pt_BR); weeks follow `start_of_week`. The chip and nl-filters
-read the chosen set, so "debates em novembro" can ground on This month only when the set
-has it.
-
-A related need: an event with a poster period runs from start to an end date. "This
-week" should match an event whose span overlaps the week. Name in the section whether
-that is two fields on the custom facet (start ≤ end of period and end ≥ start of period)
-or a Turing addition, and file the Turing half if so.
-
-**Done when:** with Agenda periods, a seeded event later this week is under This week
-and Upcoming, and one from last month under Past only.
-
 ### XLIX.150 Documents that leave search on a date (D308)
 
 **Where it came from.** FESPSP's job openings (`vaga`) carry `fespsp_vaga_ate`, the last

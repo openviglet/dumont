@@ -761,6 +761,7 @@
 - **D304** — A Results page on another site setting (or VIGLET_DUMONT_SEARCH_URL) sends the overlay, the box-only block and the theme's search forms there, and local search replacement steps aside.
 - **D305** — Per type, a mapped DATE field and image field replace the card's date and image, the overlay shows that date and the first card field, and viglet_dumont_result_card filters server cards.
 - **D306** — A scoped block names its scope under the box with a whole-site link, a box-only block carries it to the search page as scope[], and popular chips step aside inside a scope.
+- **D307** — Date range facets pick their periods: Past, Agenda (today, next 7 days, this month, upcoming, past) or eight of their own (design §XLIX.149 superseded: no /WEEK: next 7 days; spans are T1224).
 
 ## Track T — Releases and links match what the site describes
 

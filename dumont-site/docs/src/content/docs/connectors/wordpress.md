@@ -175,8 +175,13 @@ custom fields can be added on the Settings page.
   timestamp, or any date `strtotime` reads.
 - **Multiple**, **Facet** with its label, and a **Weight** (1 to 100) for ranking.
 - **Ranges**, on a `DATE` or number field: a range facet as well, provisioned as a Turing
-  custom facet named `<field>_range`. A date gets a fixed set (upcoming, last 7 days, last
-  30 days, this year, before this year). A number lists its own ranges, each with a label
+  custom facet named `<field>_range`. A date picks its **Periods**: **Past**, for
+  publication dates (upcoming, last 7 days, last 30 days, this year, before this year);
+  **Agenda**, for dates still to come (today, next 7 days, this month, upcoming, past); or
+  **My own**, up to eight, each bound in Turing's date math (`NOW/DAY`, `NOW/DAY+7DAYS`,
+  `2026-12-01`). Turing's date math has no weeks, so an agenda offers the next 7 days rather
+  than the calendar week. A period buckets the one field, so an event is placed by its start
+  date even when it runs for weeks. A number lists its own ranges, each with a label
   and a **From** and **To**; an empty bound is an open end, and an empty label is written
   from the bounds ("20 – 50", "Up to 20", "50 or more").
 - **Show on result cards** adds the field to each result in the **Turing search** block,
