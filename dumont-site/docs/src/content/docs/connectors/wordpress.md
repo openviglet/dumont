@@ -362,6 +362,7 @@ it indexes every post under its new id and removes the copy under the old one.
 | `wp dumont sweep [--dry-run]` | Removes from Turing this site key's documents that WordPress no longer publishes, e.g. posts deleted while the plugin was off |
 | `wp dumont queue run [--retry-failed]` | Sends the queue now, ignoring backoff, and names each post that failed |
 | `wp dumont queue status` | Lists the waiting and failed jobs with their last error |
+| `wp dumont ai status [--format=json]` | Which of Turing's AI features the site can use, and why each one that is off is off; exits non-zero when any is off. While the site's AI budget is spent it warns *AI budget exhausted until* and the reset date |
 
 The same operations answer over REST under `viglet-dumont/v1/`: `status`, `index`,
 `sweep`, `queue/run` and `queue/retry`. `POST reindex` starts Index All in the background
@@ -386,6 +387,26 @@ provisioning, sweep and reindex with its error when it failed. While a reindex r
 card shows how many posts are done of how many, how many failed, a batch waiting to be
 tried again and **Cancel reindex**, and it updates every few seconds. Cancelling keeps what
 was already sent.
+
+**When the AI budget runs out.** Turing can cap what a site spends on AI. Once the cap is
+reached, Turing refuses every AI call until the budget resets. While that lasts:
+
+- The **Ask this site** block says *Answers are paused for now; search still works.* rather
+  than that the site could not answer.
+- The **Turing search** block shows the same line where the answer would be. Search and
+  its results are unaffected.
+- A sentence whose filters cannot be read is searched as typed.
+- **Health**'s **AI features** card shows *AI budget exhausted until* and the reset date
+  (or *for now* when Turing names none), with Turing's own explanation, and **Check AI
+  features** marks the features that are on as **Paused**. The moment the budget ran out and
+  the moment it came back are listed among the events.
+
+A visitor's browser sees only that Turing refused, never when the budget resets. So it tells
+WordPress, and WordPress asks Turing once to read the reset date. It does that at most once
+every ten minutes whatever the visitors send, so a forged report cannot make Health say the
+budget is spent. The line goes away when the reset date passes, or as soon as an AI call
+WordPress makes goes through again. A **Check AI features** asks Turing again first, so a
+budget raised in Turing shows at once.
 
 The post lists gain a **Search** column: *Indexed 2 mins ago*, *Queued*, *Failed* (the
 error shows on hover), *Excluded* or *Not published*. The block editor has a **Search**

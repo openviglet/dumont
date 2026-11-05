@@ -779,6 +779,7 @@
 - **D329** — Stopped edits raise an admin notice linking to Health, and the queue replays them once a ping or send goes through, so an outage longer than the retries ends with every edit in search.
 - **D330** — A refused Reindex now shows the post's state and Turing's reason in the editor panel, and the 502 carries a message for any client.
 - **D331** — Index All runs through WP-Cron with stored progress, retries a failed batch and is cancelled from Health, so closing the tab no longer stops a reindex.
+- **D332** — A spent AI budget is recorded from Turing's 429 with its reset date and shown on Health, and the copilot and search block say answers are paused instead of failing.
 
 ## Track T — Releases and links match what the site describes
 

@@ -287,22 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.171 A spent AI budget said, with its reset (D332)
-
-**Found by D316.** When the site's AI budget runs out, Turing answers 429
-`quota-exhausted` with `resetsAt`, and the plugin reads none of it: the answer panel
-just hides (`public/search-block.js` 233-240), nl-filters swallows the error (742-744),
-the copilot says "The catalog could not answer right now." (`blocks/copilot/render.php`
-48), and Health has no AI card; the AI status reports on/off from capabilities, never
-usage (`viglet-dumont.php` 94-124).
-
-**What to build.** AI failures recorded as events by kind (quota, model error, off), and
-"AI budget exhausted until <date>" on Health and the AI screen; visitor surfaces say
-answers are paused rather than failing silently.
-
-**Done when:** with the quota spent, Health names it and its reset date, and the copilot
-says answers are paused.
-
 ### XLIX.172 Past excludes today on an agenda (D333)
 
 **Found by D325.** The school demo seeds an event dated today; it lists under **Today**
@@ -353,6 +337,23 @@ progress. Keep the lock so two never overlap.
 
 **Done when:** on a site with no visitors and the Health page closed, a started reindex
 finishes; with `DISABLE_WP_CRON` and Health open, it finishes too.
+
+### XLIX.175 Paused answers on every AI surface (D336)
+
+**Found by D332.** A 429 `quota-exhausted` now reads as "Answers are paused for now;
+search still works." on the copilot and the search block's answer panel, and the browser
+reports it so Health shows the reset date (`isAiPaused`, `reportAiPaused` in
+`public/search.js`). The overlay's instant answer (`public/overlay.js`) and the Site
+assistant (`public/assistant.js`) still hide or say nothing, and no surface can tell a
+visitor when answers come back: the SDK's `TuringHttpError` drops the response body, so
+`resetsAt` never reaches the browser (Turing T1234).
+
+**What to build.** The same paused line, from PHP state, on the overlay's answer and the
+assistant's reply, with the report; once T1234 ships, read `error.problem.resetsAt` and
+say "until <date>" on every surface.
+
+**Done when:** with the quota spent, the overlay and the assistant say answers are
+paused until the reset date.
 
 ## L The documentation area
 
