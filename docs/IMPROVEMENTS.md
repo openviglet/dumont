@@ -209,30 +209,3 @@ and produtos/dumont.md): the release, the names on the files and the links in th
 trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
-
-### LII.1 A DSpace source (D314)
-
-**Where it came from.** A client wants its institutional repository in the unified
-search of its WordPress sites (one SN site, D303). Measured 2026-11-04: the repository
-runs **DSpace 9.2**, with REST and OAI-PMH under a non-default server path (public, no
-key), about two hundred items in six communities, and `deletedRecord=transient`. DSpace
-is the default repository of Brazilian universities, and crawling its HTML loses
-authors, dates and collections.
-
-**A profile on the OAI-PMH source, not a second harvester.** Every DSpace speaks OAI,
-and its `dim` format carries all metadata, deletions and incremental `from` (D315).
-D92's JSON machinery is no shortcut here: its incremental mode expires ids by age and
-never filters by `lastModified`. This line adds, from REST, what OAI lacks.
-
-**What Dumont should do.** A `dspace` source over D315:
-- **metadata** from OAI `dim`: title, `dc.contributor.author` and `.advisor` (multi), `dc.date.issued` (DATE), `dc.type`, `dc.subject`, abstract, language; the handle URL as the document URL;
-- **community and collection** as facets by name, resolved once per run through REST;
-- **full text** from the TEXT bundle (DSpace's own extraction), else the ORIGINAL PDF through the shared capped extraction; THUMBNAIL as image; the REST base configured;
-- **withdrawn, private or embargoed** items deleted, never indexed;
-- a site key per source.
-
-Name variants of one author ("Surname, Name" beside "Name Surname") are D310's to
-resolve, not this line's.
-
-**Done when:** an item's author, year, community and a sentence of its full text are
-searchable, and withdrawing it removes it on the next run.

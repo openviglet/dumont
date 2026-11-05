@@ -124,14 +124,6 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D314** (deps: D315 ✅, D338 ✅) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Left: the end-to-end check in Turing, against the local DSpace with fictional documents (D338). → §LII.1
-
-## Done when — D314
-
-- **A DSpace item is found by author, year, community and its text** On a DSpace whose
-  OAI index is populated, a harvested item answers those four searches in Turing, and
-  withdrawing it removes it on the next run.
-
 ## Non-goals (do NOT add as tasks)
 
 - General-purpose open-web crawling at breadth (Scrapy/Playwright-farm scope). Dumont
