@@ -287,23 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.161 Plugin deletes scoped to its own documents (D322)
-
-**Found by D316.** A site that sets its WordPress site key on a Dumont source too (the
-DSpace profile sets `site_key` from its own setting) loses those documents on the
-plugin's next full reindex: `orphans()` marks every held id under the own key that is
-not `<key>:post:<n>` as an orphan (`class-viglet-dumont-operations.php` 150-175),
-`reindex()` ends with that sweep, and delete-all filters on `site_key` alone
-(`class-viglet-dumont-indexer.php` 348). The obvious way to make an archive searchable
-from WordPress therefore deletes the archive.
-
-**What to build.** Scope the plugin's deletes to its own documents, not to the key: the
-sweep and delete-all also require the plugin's `source_apps` (or the `<key>:post:` id
-prefix), and the Health screen warns when foreign documents share the own key.
-
-**Done when:** a document with the site key but another source survives Index All and
-Delete All.
-
 ### XLIX.162 A copilot that is not a shop's (D323)
 
 **Found by D316.** The copilot block reads as a shop on any site: its title "Ask the

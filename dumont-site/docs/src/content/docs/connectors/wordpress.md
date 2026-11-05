@@ -276,7 +276,10 @@ network) can therefore publish into one SN site for a unified search, without re
 each other's documents. The key defaults to the site's host and path
 (`example.org-projetos`); set it in Setup or with `VIGLET_DUMONT_SITE_KEY`.
 
-**Delete All** and `wp dumont sweep` remove only this key's documents.
+**Delete All** and `wp dumont sweep` remove only this key's documents, and only the ones the
+plugin sent. A Dumont connector given the same site key, such as a catalog of theses that
+should come up in the site's search, keeps its documents through Index All, the sweep and
+Delete All. **Search health** says how many documents under the key came from another source.
 
 ### A key per site
 
