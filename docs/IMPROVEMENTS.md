@@ -287,31 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.159 PDFs linked from a post, and gone with it (D319)
-
-**Where it came from.** D309 made PDFs searchable two ways: a PDF attached to a post in
-search is a document of its own (`Viglet_Dumont_Pdf`, synced on `add_attachment`,
-`edit_attachment`, `delete_attachment` and Index All), and a mapping source `file:<meta
-key>` reads a meta-named PDF into the post's own text. Two cases it left:
-
-- **Linked, not attached.** A block in a page links a media-library PDF uploaded elsewhere
-  (`post_parent` 0, or another post). The academic office's forms are this shape. It is
-  never sent, since `indexable()` requires the parent to be in search.
-- **The parent leaves search.** A post unpublished, excluded or past its "Leaves search on"
-  date (D308) is removed at once, but its attached PDFs stay in search until the next
-  `wp dumont sweep` (orphans() reads them as no longer indexable).
-
-**What to build.**
-1. When a post is indexed, find the links in its rendered content to this site's uploads
-   (`attachment_url_to_postid`) that are PDFs, and treat each as in search while any post in
-   search links it; record the linking posts in a meta on the attachment so removal knows
-   when the last one goes.
-2. When a post is removed from search (the queue's `delete` job, and `expire()`), remove the
-   PDFs it attaches or links that no other post in search holds.
-
-**Done when:** a page linking a PDF it did not upload makes the PDF findable, and
-unpublishing the page removes the PDF without a sweep.
-
 ### XLIX.161 Plugin deletes scoped to its own documents (D322)
 
 **Found by D316.** A site that sets its WordPress site key on a Dumont source too (the

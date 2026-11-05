@@ -247,12 +247,18 @@ For a rule no field can express, the `viglet_dumont_should_index` filter (`$inde
 ### PDF files
 
 With **PDF files attached to them** on (Settings → Content), each PDF in the media library
-attached to a post in search is a document of its own, found by the words inside it. The
-plugin sends the file with the document, and Turing reads its text. A PDF shows as **PDF**
-in the type badge and facet, with its post as its section. It is sent when uploaded or
-edited, and on **Index All**, and it is removed when the attachment is deleted. Only this
-site's own uploads are sent, up to 20 MB each (the `viglet_dumont_pdf_max_bytes` filter
-changes the cap). A PDF whose post leaves search stays until the next sweep.
+that a post in search attaches or links is a document of its own, found by the words
+inside it. A link counts when the post's content points at the PDF's address in this
+site's uploads, so a form uploaded once and linked from several pages is found even though
+no page attached it. The plugin sends the file with the document, and Turing reads its
+text. A PDF shows as **PDF** in the type badge and facet, with its post as its section. It
+is sent when uploaded or edited, when a post in search first attaches or links it, and on
+**Index All**. It is removed when the attachment is deleted, and when no post in search
+holds it any more: the last post that attaches or links it is unpublished, excluded,
+deleted or past its **Leaves search on** date, or stops linking it. A PDF another post in
+search still links stays. Only this site's own uploads are sent, up to 20 MB each (the
+`viglet_dumont_pdf_max_bytes` filter changes the cap); a link to a file on another host is
+never followed.
 
 A post can also carry a PDF's words in its own document. In **Fields**, the source **Text
 of the PDF in meta: `<key>`** reads the PDF a meta names, by this site's upload address or

@@ -768,6 +768,7 @@
 - **D320** — The immersive overlay previews the highlighted result on a desktop, lists popular searches before typing, opens all results on Ctrl+Enter, and can answer a resting question on top.
 - **D316** — The plugin was read as a school would use it, and its gaps are filed as D322-D332: shared-key deletes, shop wording, periods, a school demo, field parity, outages and AI budget.
 - **D317** — npm run check:i18n and CI regenerate the .pot and fail, naming the string, when it is out of date or a string lacks a pt_BR translation.
+- **D319** — A PDF a post links (not only attaches) now reaches search, and leaves it once no post in search still holds it, on the queue, Index All, expiry and delete paths.
 
 ## Track T — Releases and links match what the site describes
 
