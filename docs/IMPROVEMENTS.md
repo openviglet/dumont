@@ -270,28 +270,6 @@ proven by the a11y specs; pt_BR ships with it.
 **Done when:** a seeded two-step flow with a choice and a form runs end to end in the
 block, at 390 and 1280px.
 
-### XLIX.156 The plugin read as a school would use it (D316)
-
-**Analysis task: it delivers D lines, not code.** The WordPress plugin and its demo were
-shaped by a store: Tarnfell sells outdoor gear, and `wordpress/demo/story.md` proves
-search, a sentence read as filters, the assistant, compare, Build my kit, a product page
-and checkout. A school client is the first real non-commerce adopter, and already
-surfaced D303–D315.
-
-**What to analyse:**
-1. **Store-shaped names and defaults.** Find what stays commerce-only and what should be generic:
-   - the copilot block is titled "Ask the catalog" (`blocks/copilot/block.json`);
-   - the kit hard-codes `productTypes:['product']` and `guideTypes:['post']` (`public/copilot.js` 38-41);
-   - `readPrice` and `readSize` (`public/search-block.js` 913, 998) have no date or place counterpart ("em novembro", "em São Paulo").
-
-   Result cards are already neutral: price shows only with WooCommerce and a numeric price.
-2. **A second demo for education and culture:** a fictional school with an agenda, openings, a publisher, a DSpace-like archive and a history tour, proving the non-commerce path the way Tarnfell proves the store.
-3. **Source parity:** documents from the plugin and from D314/D315 share the same fields, so one SN site's facets, cards and AI features treat them alike.
-4. **Operations for a small team:** what an editor sees when Turing is down, a reindex is slow, or the AI budget runs out.
-
-**Delivers:** one D line per finding in Track S or U, each naming the line it serves,
-and a design note for the second demo if it is worth building.
-
 ### XLIX.157 Untranslated strings fail a gate (D317)
 
 **Where it came from.** D305 regenerated the `.pot` and the pt_BR `.po` (README,
@@ -357,6 +335,187 @@ key>` reads a meta-named PDF into the post's own text. Two cases it left:
 
 **Done when:** a page linking a PDF it did not upload makes the PDF findable, and
 unpublishing the page removes the PDF without a sweep.
+
+### XLIX.161 Plugin deletes scoped to its own documents (D322)
+
+**Found by D316.** A site that sets its WordPress site key on a Dumont source too (the
+DSpace profile sets `site_key` from its own setting) loses those documents on the
+plugin's next full reindex: `orphans()` marks every held id under the own key that is
+not `<key>:post:<n>` as an orphan (`class-viglet-dumont-operations.php` 150-175),
+`reindex()` ends with that sweep, and delete-all filters on `site_key` alone
+(`class-viglet-dumont-indexer.php` 348). The obvious way to make an archive searchable
+from WordPress therefore deletes the archive.
+
+**What to build.** Scope the plugin's deletes to its own documents, not to the key: the
+sweep and delete-all also require the plugin's `source_apps` (or the `<key>:post:` id
+prefix), and the Health screen warns when foreign documents share the own key.
+
+**Done when:** a document with the site key but another source survives Index All and
+Delete All.
+
+### XLIX.162 A copilot that is not a shop's (D323)
+
+**Found by D316.** The copilot block reads as a shop on any site: its title "Ask the
+catalog", description and `shop` keyword (`blocks/copilot/block.json` 5-9), its defaults
+("Looking through the catalog…", "Nothing in the catalog matches that.", `render.php`
+18, 47-70), the editor copy (`copilot-block-editor.js` 36-76) and the AI status labels
+(`viglet-dumont.php` 101, 108). Its kit is on by default (`render.php` 19, 92-95) and
+hard-codes `productTypes:['product']`, `guideTypes:['post']` and `stock_status`
+(`public/copilot.js` 36-41), so on a site with no WooCommerce it shows "Plan a kit" and
+can never stage anything.
+
+**What to build.** Neutral default strings ("Ask this site") with the shop wording only
+while WooCommerce is active; the kit on by default only with WooCommerce; the staged
+types, guide types and availability field as block attributes, so a school stages
+courses or events and cites pages.
+
+**Done when:** on a site without WooCommerce the block names no catalog, shows no kit,
+and a kit set to stage `event` stages events.
+
+### XLIX.163 Periods read from a sentence (D324)
+
+**Found by D316.** The search block reads a price and a size in code (`readPrice`,
+`readSize`, `public/search-block.js` 776-796, 948, 1033) but nothing reads a period:
+`dateWords` (665-667) holds only backward words (today, yesterday, last, passado,
+último…), with no next, próximo, tomorrow, amanhã, fim de semana or month names, so "em
+novembro" is not even treated as a sentence and nl-filters is never asked.
+
+**What to build.** Future and month words in `dateWords` (en, pt_BR), and a code-side
+`readPeriod` that maps "next week", "this month", "em novembro" onto the mapped date
+field's period facet (D307's agenda set), the agenda counterpart of `readPrice`, applied
+or suggested like the others.
+
+**Done when:** "debates em novembro" on an agenda filters the event dates to November
+with no language model.
+
+### XLIX.164 A second demo for education and culture (D325)
+
+**Found by D316.** Every shipped non-commerce feature (period sets, leaving search,
+PDFs, card date and image, fixed filters) is proven only by isolated fixtures, never on
+a coherent site, a recorded story or the docs. The demo tooling runs two stores but each
+step assumes a store: `setup_demo` hard-codes the Tarnfell title, theme, WooCommerce and
+catalog seed (`bin/run-docker.sh` 188-222, `run-docker.cmd`), `demo/setup.php` the shop
+pages, and every service mounts only the Tarnfell theme.
+
+**What to build.** First a store descriptor (theme, seed, title, WooCommerce yes or no,
+port, SN site) the scripts and Playwright read; then a fictional school beside Tarnfell:
+a block theme with front page, agenda, openings, books and a tour, a bilingual seed with
+events, openings closing on a date, books with PDFs, a `story.md` and five to eight
+specs. Leave the archive half (a Dumont source and a mock OAI-PMH) for after D322's
+seam.
+
+**Done when:** `run-docker.cmd demo edu` serves the school, and its specs walk the
+agenda, an opening leaving search and a book's PDF.
+
+### XLIX.165 One field contract for posts and archive records (D326)
+
+**Found by D316.** One SN site holding WordPress posts and Dumont's OAI-PMH or DSpace
+records gets parallel fields for the same concept: `author` (one string) beside
+`authors` and `advisors`; `publication_date` beside `date`/`dateText`, so cards, the
+Newest sort, period facets and the nl "Published" chip miss archive items; `abstract`
+only on posts, so archive cards have no snippet; `categories`/`section`/`tags` beside
+`subjects`/`community`/`collection` (plugin `class-viglet-dumont-indexer.php` 396-409;
+source `DumOaiPmhSource.java` 113-151, `DumDSpaceProfile.java` 89-131).
+
+**What to build.** One canonical contract both sides honour for the shared concepts
+(authors multi, a single publication date field, abstract, subjects), stated in the
+docs: either the source maps onto the plugin's names, or the plugin offers a mapping
+preset that sends `authors`, `subjects` and `date`. Decide which side moves by what
+Turing's default fields and the SN site's facets expect.
+
+**Done when:** a post and an archive record by the same author share one author facet
+value and both show a date and a snippet on their cards.
+
+### XLIX.166 Types from other sources (D327)
+
+**Found by D316.** A document from another source carries a free-text, possibly
+multi-valued `type` (`dc:type`), and the search block assumes a WordPress post type: the
+server reads `(string) $fields['type']` (`class-viglet-dumont-native-search.php` 580),
+likely "Array" with a notice on a list, and the browser joins the values with commas
+(`public/search.js` 115). Type labels, card date and image come from WordPress post
+types only (`blocks/search/render.php` 30-36; `native-search.php` 360-371), so such a
+document gets a raw badge and cannot be configured.
+
+**What to build.** Read the first value of `type` on both sides, and let Fields list the
+type values the SN site holds beyond WordPress's, with a label and the card date and
+image like a post type's.
+
+**Done when:** a record with `type: ["Article","Thesis"]` shows the label set for
+Article, and its card date follows the field chosen for it.
+
+### XLIX.167 Fast failure while Turing is down (D328)
+
+**Found by D316.** When Turing hangs, every page that reads it waits up to the client's
+30 s timeout (`class-viglet-dumont-api-client.php` 548): the search block's first paint
+(`class-viglet-dumont-native-search.php` 548-566), the theme search (905-908, which
+falls back to WordPress search only after the wait), and Related, which tries VECTOR
+then MLT and caches no failure, so it pays twice on every view
+(`class-viglet-dumont-related.php` 201-231).
+
+**What to build.** A short "Turing is down" mark (a transient of about a minute, set by
+any failed read) that every render path checks before calling, and a render timeout of a
+few seconds, apart from the admin and indexing calls that may wait longer.
+
+**Done when:** with Turing stopped, a page with the search block and Related renders in
+under three seconds, and the theme search falls back at once.
+
+### XLIX.168 Stopped jobs said and replayed (D329)
+
+**Found by D316.** After about three hours of a Turing outage, edits stop reaching
+search for good: a job gives up after `MAX_ATTEMPTS = 8` with backoff from 60 s to 3600
+s (`class-viglet-dumont-queue.php` 41-47), and the only place it shows is the Health
+page's "stopped retrying" count (`assets/admin/health.js` 292-330). No admin notice
+warns (`class-viglet-dumont-admin.php` hooks only the demo and missing-build notices),
+and nothing replays the jobs when Turing comes back.
+
+**What to build.** An admin notice and a dashboard line while failed jobs exist, linking
+to Health; and once a ping succeeds again, the stopped jobs re-queued automatically.
+
+**Done when:** an outage longer than the retries ends with every edit in search after
+Turing returns, with no click.
+
+### XLIX.169 The panel shows why a reindex failed (D330)
+
+**Found by D316.** The editor panel's "Reindex now" shows "Failed" with no reason: on
+failure the server answers 502 with `describe()` (state, label, detail) and no `message`
+(`class-viglet-dumont-post-state.php` 474-497), while the panel prints `error.message`,
+which is empty (`src/admin/js/editor-panel.js` 267-268, 283-284).
+
+**What to build.** The panel renders the error's own `label` and `detail` (Turing's
+reason), and the server adds a `message` to the 502 so any client gets one.
+
+**Done when:** a reindex refused by Turing shows Turing's reason in the panel.
+
+### XLIX.170 Reindex in the background, resumable (D331)
+
+**Found by D316.** Index All from Settings runs its batches in the browser tab
+(`src/admin/js/admin.js` 105-128): closing the tab or one failed batch stops it, the
+offset is lost, nothing warns before leaving, and a missing `post_type` defaults to
+`post` (`viglet-dumont.php` 754-756). A slow reindex on a shared host is a session the
+editor must babysit.
+
+**What to build.** Full reindexes run through the queue or WP-Cron with their progress
+stored, resumed after a failure, shown on Health with a cancel; the Settings button only
+starts it. A `beforeunload` warning while the old in-tab path remains.
+
+**Done when:** closing the tab mid-reindex, the reindex finishes, and Health shows its
+progress meanwhile.
+
+### XLIX.171 A spent AI budget said, with its reset (D332)
+
+**Found by D316.** When the site's AI budget runs out, Turing answers 429
+`quota-exhausted` with `resetsAt`, and the plugin reads none of it: the answer panel
+just hides (`public/search-block.js` 233-240), nl-filters swallows the error (742-744),
+the copilot says "The catalog could not answer right now." (`blocks/copilot/render.php`
+48), and Health has no AI card; the AI status reports on/off from capabilities, never
+usage (`viglet-dumont.php` 94-124).
+
+**What to build.** AI failures recorded as events by kind (quota, model error, off), and
+"AI budget exhausted until <date>" on Health and the AI screen; visitor surfaces say
+answers are paused rather than failing silently.
+
+**Done when:** with the quota spent, Health names it and its reset date, and the copilot
+says answers are paused.
 
 ## L The documentation area
 
