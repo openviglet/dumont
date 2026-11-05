@@ -585,10 +585,21 @@ search page. **Instant search layout** picks how it looks:
   beside the list, with its image, snippet and card fields. Ctrl+Enter (⌘+Enter) opens the
   full results page whatever is highlighted. On a phone it fills the screen.
 
+  **Explore links** adds a row of the site's own links to that empty state, below the
+  recent and popular searches, and Tab reaches them. Write one `Label | URL` per line, at
+  most eight, for example `Events | /events/`. The URL must be a full `http://` or
+  `https://` address or a path on this site that starts with `/`. A line with any other URL,
+  or with no label, is dropped when the settings are saved. The row hides once the visitor
+  types.
+
   With **Answer questions on top of the immersive layout** on, a question that rests for a
   moment gets Turing's answer above the results. Each answer is an LLM call, so it is off
   by default, and it needs the site's answers working in Turing (Health shows whether they
   are).
+
+A query of three words or more, or one that reads as a question, often finds nothing as
+typed, because Turing requires every word. The instant search then searches again for any
+of its words and puts the best matches first, in both layouts, as the search block does.
 
 ### The Turing search block
 
