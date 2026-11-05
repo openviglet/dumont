@@ -359,6 +359,12 @@ suggestions, "did you mean", the mapped facets, results and pages. It is built w
 Interactivity API on Turing's JS SDK and takes its colours and type from the theme. It
 reads `?q=` (or `?s=`), so a page holding it can serve as the site's search page.
 
+**Always filter by** scopes a block to one section of the site: a box on the events page
+set to `type:event` searches only events, and one set to a mapped facet's value
+(`publisher:sociology`) only what carries it. Each filter is `field:value`. Every search
+the block makes stays inside them, the first page drawn on the server included. Visitors
+never see them as a filter they can remove, and they never appear in the page's address.
+
 With **Suggest the filters a sentence names** on, a search that reads as a sentence ("posts
 about php from last year") also asks Turing's natural-language filters which filters it
 names. The ones Turing checked against the site, on a mapped facet or on the post type or

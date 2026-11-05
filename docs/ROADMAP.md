@@ -118,7 +118,7 @@ This track has no remaining pending tasks.
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
 - ⏳ **D303** (deps: Turing T1223) **A site sharing an SN site can search only its own site key, never its sibling sites' documents** — Sibling keys wait on Turing T1223 (site_key values as alternatives): setting, seams, facet labels, badge, Related, navigate. → §XLIX.145
-- 📋 **D306** (deps: —) **The search block has no fixed filter: a box scoped to one section of the site cannot be built** — Search-in-the-agenda or search-in-the-publisher boxes need a URL filter the visitor can clear and that leaks into shared links. → §XLIX.148
+- ⏳ **D306** (deps: —) **The search block has no fixed filter: a box scoped to one section of the site cannot be built** — A scope label with a whole-site link; a box-only block carrying the scope to its results page; autocomplete and trending chips scoped. → §XLIX.148
 - 📋 **D307** (deps: —) **Date range facets offer one backward-looking period set: an agenda cannot filter by this week or this month** — Four of the five periods are useless for future dates, so events get a facet nobody can use. → §XLIX.149
 - 📋 **D308** (deps: —) **A post whose end date has passed stays in the index until someone saves it again** — Search keeps offering a job opening or a call whose deadline is gone, and the theme's only fix is a cron flipping the exclude meta. → §XLIX.150
 - 📋 **D309** (deps: —) **PDF files never reach the index: neither media-library PDFs nor a PDF a post links in its meta** — Regulations, forms and papers are what visitors search for most, and their words are invisible to search. → §XLIX.151
@@ -141,6 +141,12 @@ This track has no remaining pending tasks.
 - **Site A listing B finds B's documents; B finds only its own** The network spec runs
   it in every search mode: the search block, template mode and the assistant, with
   site_key declared as alternatives in the manifest (T1223).
+
+## Done when — D306
+
+- **A box-only block's scope reaches its results page, labelled there** A spec submits a
+  box-only block set to type:page and lands on the results page listing no post, with an
+  "in Pages" label and a whole-site link that drops the scope.
 
 ## Non-goals (do NOT add as tasks)
 
