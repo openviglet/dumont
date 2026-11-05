@@ -27,6 +27,7 @@
 ## Track S — The WordPress connector plugin
 
 - ⏸ **D311** (deps: D305 ✅) **The instant overlay is a flat list of six results with no type, date, image, answer or zero state** — set aside (The local Turing agent has no embedding model to check answers.): Left: an Explore row, Continue in the assistant (D312), and the answer strip checked live. → §XLIX.153
+- ⏸ **D312** (deps: —) **The search answer and the Site assistant do not share context: a follow-up starts over** — set aside (Answers and chat are off locally: the agent has no embedding model.): A visitor who wants to ask one more thing after the answer loses the question, the answer and its sources. → §XLIX.154
 
 ## Track T — Releases and links match what the site describes
 
