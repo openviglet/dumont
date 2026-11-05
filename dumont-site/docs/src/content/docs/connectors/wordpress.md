@@ -195,7 +195,10 @@ custom fields can be added on the Settings page.
   **Agenda**, for dates still to come (today, next 7 days, this month, upcoming, past); or
   **My own**, up to eight, each bound in Turing's date math (`NOW/DAY`, `NOW/DAY+7DAYS`,
   `2026-12-01`). Turing's date math has no weeks, so an agenda offers the next 7 days rather
-  than the calendar week. A period buckets the one field, so an event is placed by its start
+  than the calendar week. Turing includes a range's end, and a day-only date is stored at
+  midnight UTC, so each agenda period ends a second before the next one starts: an event
+  today is never under **Past**, and one tomorrow is never under **Today**. A period of your
+  own that should end where another starts needs the same `-1SECOND`. A period buckets the one field, so an event is placed by its start
   date even when it runs for weeks. A number lists its own ranges, each with a label
   and a **From** and **To**; an empty bound is an open end, and an empty label is written
   from the bounds ("20 – 50", "Up to 20", "50 or more").

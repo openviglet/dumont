@@ -780,6 +780,7 @@
 - **D330** — A refused Reindex now shows the post's state and Turing's reason in the editor panel, and the 502 carries a message for any client.
 - **D331** — Index All runs through WP-Cron with stored progress, retries a failed batch and is cancelled from Health, so closing the tab no longer stops a reindex.
 - **D332** — A spent AI budget is recorded from Turing's 429 with its reset date and shown on Health, and the copilot and search block say answers are paused instead of failing.
+- **D333** — Each agenda period ends a second before the next starts, so an event dated today is Today and never Past, and tomorrow's is never Today.
 
 ## Track T — Releases and links match what the site describes
 

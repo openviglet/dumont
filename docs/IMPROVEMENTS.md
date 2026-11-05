@@ -287,24 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.172 Past excludes today on an agenda (D333)
-
-**Found by D325.** The school demo seeds an event dated today; it lists under **Today**
-and also under **Past**. `Viglet_Dumont_Mapping::date_ranges('agenda')` declares Past as
-`from: null, to: 'NOW/DAY'`, Turing's range facet includes its end, and a day-only date
-is indexed at midnight UTC, which is exactly `NOW/DAY`. The site spec
-`agenda-periods.spec.mjs` missed it because its past event was 35 days old; the school's
-`demo-edu/agenda` spec checks only the days on either side of the edge and says why.
-
-**What to build.** End Past just before today: an exclusive upper bound if the
-manifest's range items can say so (Turing's `rangeEndDate` semantics), else
-`NOW/DAY-1SECOND`, and the same rule wherever a period's end meets the next one's start
-(the `past` set's Upcoming starts at `NOW`). Extend the site spec with an event dated
-today.
-
-**Done when:** an event dated today is under Today, Next 7 days and Upcoming, never
-under Past, on the site spec and the school demo.
-
 ### XLIX.173 Foreign types through one negative filter (D334)
 
 **Found by D327.** `Viglet_Dumont_Mapping::discover_foreign()` lists the `type` values
