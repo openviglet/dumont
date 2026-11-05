@@ -117,10 +117,16 @@ This track has no remaining pending tasks.
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
+- 🛠 **D311** (deps: D305 ✅) **The instant overlay is a flat list of six results with no type, date, image, answer or zero state** — Left: an Explore row, Continue in the assistant (D312), and the answer strip checked live. → §XLIX.153
+- 📋 **D312** (deps: —) **The search answer and the Site assistant do not share context: a follow-up starts over** — A visitor who wants to ask one more thing after the answer loses the question, the answer and its sources. → §XLIX.154
+- 📋 **D313** (deps: D305 ✅) **The Site assistant renders only text and citations: a Turing chat flow's choices, forms and slots cannot run in it** — Guided conversations built in Turing's console never reach a WordPress site. → §XLIX.155
 
 ## Track T — Releases and links match what the site describes
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
+
+- 📋 **D338** (deps: —) **No DSpace to develop or test the DSpace profile against: the only repository at hand has an empty OAI index** — The profile's end-to-end check, and any change to it, waits on someone else's repository. → §LII.4
+- 📋 **D314** (deps: D315 ✅, D338) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Left: the end-to-end check in Turing, against the local DSpace with fictional documents (D338). → §LII.1
 
 ## Done when — D311
 
