@@ -146,28 +146,6 @@ and the plugin's pages embed that.
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
 
-### XLIX.153 An immersive layout for the instant overlay (D311)
-
-**Where it came from.** A client wants its search "complete and immersive", one
-keystroke from anywhere. The instant overlay (D167, `public/overlay.js`) is a flat list
-of six results with no type, date, image, answer or zero state; everything richer lives
-only on the results page.
-
-**What the plugin should do.** An "immersive" layout for the overlay (setting `overlay_layout: list|immersive`, list stays the default):
-- **full screen** on phones, a large panel on desktop, with focus trapped and the background inert;
-- **zero state:** recent searches (already in `localStorage`), popular chips (D202) and an editable "Explore" row of links;
-- **results grouped by type** in columns or sections ("Events", "Pages", "Books"), each with the mapped card fields (D305) and its own "see all" into the results page filtered to that type;
-- **an answer strip** on top for question-like queries (D166), with "Continue in the assistant" (the next line);
-- **a preview pane** on desktop for the highlighted result: image, abstract and card fields, so arrows browse without leaving;
-- **keyboard first:** arrows across groups, Tab into the preview, Enter opens, Ctrl+Enter opens the results page; announced with `aria-live`;
-- the federated set (D303) and fixed filters (D306) honoured.
-
-Same Interactivity store as the search block, so a theme can style it with the same BEM
-classes.
-
-**Done when:** axe passes on the open overlay at 390 and 1280px, and a type group's "see
-all" lands on the results page with that filter.
-
 ### XLIX.154 From the search answer into the assistant and back (D312)
 
 **Where it came from.** On a client's site the search answer (D166) and the Site
