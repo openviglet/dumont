@@ -136,8 +136,6 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D321** (deps: —) **An OAI-PMH record can get a private address as its URL, and an OJS article's PDF text is never found** — The DSpace demo leaks an internal host into its records, and OJS hides PDFs behind its article page. → §LII.3
-
 ## Done when — D303
 
 - **Site A listing B finds B's documents; B finds only its own** The network spec runs

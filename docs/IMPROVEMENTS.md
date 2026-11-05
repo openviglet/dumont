@@ -508,29 +508,3 @@ resolve, not this line's.
 
 **Done when:** an item's author, year, community and a sentence of its full text are
 searchable, and withdrawing it removes it on the next run.
-
-### LII.3 Public URLs and landing-page PDFs for OAI-PMH records (D321)
-
-**Where it came from.** D315's live check harvested two pages from a real OJS journal
-(revistas.usp.br/rce, 200 records) and from demo.dspace.org (199 records, one deleted).
-Both harvested, but two things came out wrong:
-
-- **A private address as the record's URL.** On the DSpace demo the `url` rule
-  (`DumOaiPmhSource`: a handle or DOI link first, else the first http(s) identifier) picked
-  `http://10.17.50.146:4000/handle/123456789/4970`, an internal host the repository leaked
-  into its Dublin Core. A visitor can't open it.
-- **No PDF text from OJS.** With `oaiPmhFullText` on, nothing was extracted from either
-  site: OJS links the article page (`article/view/{id}`), whose PDF sits at
-  `article/download/{id}/{galley}`, and DSpace's `/handle/` pages answered 403.
-
-**What to build.**
-1. In the URL rule, skip addresses whose host is a private, loopback or link-local IP or a
-   bare hostname without a dot, and prefer one on the base URL's own host; fall back to the
-   next candidate.
-2. For full text, learn the PDF from the landing page instead of guessing: fetch the
-   same-host `article/view` (OJS) or `/items/{uuid}` (DSpace 7) page, read its
-   `citation_pdf_url` meta tag (both systems emit it), and fetch that when it is on the same
-   host. The size caps and pacing stay as they are.
-
-**Done when:** the DSpace demo's records carry no private URL, and an OJS article's PDF
-words find it, both checked live as in D315.

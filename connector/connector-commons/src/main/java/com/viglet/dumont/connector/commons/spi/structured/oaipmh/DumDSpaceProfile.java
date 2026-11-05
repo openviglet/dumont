@@ -223,7 +223,7 @@ public final class DumDSpaceProfile {
         List<String> languages = new ArrayList<>(dim.values(DC, "language", "iso"));
         languages.addAll(dim.values(DC, "language", null));
         rec.set(DumOaiPmhSource.LANGUAGE, distinct(languages), dimProvenance("dc.language.iso"));
-        rec.set(DumOaiPmhSource.URL, handleUrl(dim.values(DC, "identifier", "uri")).orElse(null),
+        rec.set(DumOaiPmhSource.URL, handleUrl(dim.values(DC, "identifier", "uri"), restHost).orElse(null),
                 dimProvenance("dc.identifier.uri"));
         rec.set(DumOaiPmhSource.RELATIONS, distinct(dim.matching(DC, "relation", q -> true)),
                 dimProvenance("dc.relation"));
@@ -496,11 +496,15 @@ public final class DumDSpaceProfile {
         return first < 0 ? second : second < 0 ? first : Math.min(first, second);
     }
 
-    /** The first {@code dc.identifier.uri} that is a handle link, else the generic URL rule's choice. */
-    static Optional<String> handleUrl(List<String> uris) {
+    /**
+     * The first {@code dc.identifier.uri} that is a handle link a visitor can open, else the generic
+     * URL rule's choice; an address on a private or dotless host is never one (D321).
+     */
+    static Optional<String> handleUrl(List<String> uris, String host) {
         return uris.stream().map(String::strip)
-                .filter(u -> u.regionMatches(true, 0, "http", 0, 4) && handleOfUrl(u).isPresent())
-                .findFirst().or(() -> DumOaiPmhSource.url(uris));
+                .filter(u -> u.regionMatches(true, 0, "http", 0, 4) && handleOfUrl(u).isPresent()
+                        && DumOaiPmhSource.isPublic(u))
+                .findFirst().or(() -> DumOaiPmhSource.url(uris, host));
     }
 
     private static List<String> distinct(List<String> values) {

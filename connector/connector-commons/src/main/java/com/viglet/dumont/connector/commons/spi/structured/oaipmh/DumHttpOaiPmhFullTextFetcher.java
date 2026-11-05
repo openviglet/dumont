@@ -22,10 +22,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalLong;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import com.viglet.dumont.connector.commons.http.DumHttpRetry;
 import com.viglet.dumont.connector.commons.http.DumPacer;
@@ -44,8 +49,9 @@ import lombok.extern.slf4j.Slf4j;
  *
  * <p>
  * <strong>PDF only, and capped.</strong> A response is read only when it is served as
- * {@code application/pdf}, or as a generic binary from a path ending in {@code .pdf}; a landing
- * page is closed unread. The body goes through the shared {@link DumTextExtractor} with a
+ * {@code application/pdf}, or as a generic binary from a path ending in {@code .pdf}. A landing
+ * page is read only for the PDF its {@code citation_pdf_url} meta tag names (D321), which is then
+ * fetched under the same host rule; nothing else on it is followed. The body goes through the shared {@link DumTextExtractor} with a
  * {@value #DEFAULT_MAX_BYTES}-byte (50 MiB) and {@value #DEFAULT_MAX_CHARS}-character cap, and a
  * declared {@code Content-Length} over the byte cap is refused before a byte is read.
  *
@@ -67,6 +73,8 @@ public final class DumHttpOaiPmhFullTextFetcher implements DumOaiPmhFullTextFetc
     public static final Duration DEFAULT_MIN_INTERVAL = Duration.ofSeconds(1);
     /** The most redirects one fetch follows. */
     public static final int MAX_REDIRECTS = 3;
+    /** The most of a landing page read when looking for its PDF: 2 MiB. */
+    public static final int MAX_PAGE_BYTES = 2 * 1024 * 1024;
 
     private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(2);
 
@@ -98,7 +106,15 @@ public final class DumHttpOaiPmhFullTextFetcher implements DumOaiPmhFullTextFetc
 
     @Override
     public Optional<String> text(String url, String host) throws IOException {
-        URI uri = URI.create(url);
+        return fetch(URI.create(url), host, true);
+    }
+
+    /**
+     * @param landing whether an HTML answer may name its PDF through {@code citation_pdf_url}; the
+     *                PDF it names is fetched with this off, so one landing page is all that is read
+     */
+    private Optional<String> fetch(URI start, String host, boolean landing) throws IOException {
+        URI uri = start;
         for (int hop = 0; hop <= MAX_REDIRECTS; hop++) {
             if (!onHost(uri, host)) {
                 log.info("Not fetching full text from {}: not on {}", DumHttpRetry.redact(uri.toString()), host);
@@ -120,16 +136,50 @@ public final class DumHttpOaiPmhFullTextFetcher implements DumOaiPmhFullTextFetc
                 if (status / 100 != 2) {
                     throw new IOException("HTTP %d from %s".formatted(status, DumHttpRetry.redact(uri.toString())));
                 }
-                return read(uri, response, body);
+                return answer(uri, response, body, host, landing);
             }
         }
-        log.info("Not fetching full text from {}: more than {} redirects", DumHttpRetry.redact(url), MAX_REDIRECTS);
+        log.info("Not fetching full text from {}: more than {} redirects", DumHttpRetry.redact(start.toString()),
+                MAX_REDIRECTS);
         return Optional.empty();
     }
 
-    private Optional<String> read(URI uri, HttpResponse<InputStream> response, InputStream body) {
-        String contentType = response.headers().firstValue("Content-Type").orElse("")
-                .toLowerCase(Locale.ROOT);
+    /** A 2xx answer: a landing page's PDF when it names one and may, else the body as a PDF. */
+    private Optional<String> answer(URI uri, HttpResponse<InputStream> response, InputStream body, String host,
+            boolean landing) throws IOException {
+        String contentType = response.headers().firstValue("Content-Type").orElse("").toLowerCase(Locale.ROOT);
+        if (!landing || !contentType.startsWith("text/html")) {
+            return read(uri, response, body, contentType);
+        }
+        Optional<URI> pdf = citationPdf(body, uri);
+        if (pdf.isEmpty()) {
+            log.debug("No full text at {}: a page naming no citation_pdf_url", DumHttpRetry.redact(uri.toString()));
+            return Optional.empty();
+        }
+        return fetch(pdf.get(), host, false);
+    }
+
+    /**
+     * The PDF a landing page names in its {@code citation_pdf_url} meta tag, the Highwire tag OJS
+     * and DSpace both emit (roadmap <strong>D321</strong>), resolved against the page. At most
+     * {@value #MAX_PAGE_BYTES} bytes of the page are read.
+     */
+    static Optional<URI> citationPdf(InputStream body, URI page) throws IOException {
+        byte[] head = body.readNBytes(MAX_PAGE_BYTES);
+        Document document = Jsoup.parse(new String(head, StandardCharsets.UTF_8), page.toString());
+        Element meta = document.selectFirst("meta[name=citation_pdf_url][content]");
+        if (meta == null || meta.attr("content").isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(page.resolve(meta.attr("content").strip()));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> read(URI uri, HttpResponse<InputStream> response, InputStream body,
+            String contentType) {
         if (!isPdf(contentType, uri.getPath())) {
             log.debug("No full text at {}: served as '{}'", DumHttpRetry.redact(uri.toString()), contentType);
             return Optional.empty();
@@ -167,11 +217,22 @@ public final class DumHttpOaiPmhFullTextFetcher implements DumOaiPmhFullTextFetc
         return pdfPath && (contentType.isBlank() || contentType.startsWith("application/octet-stream"));
     }
 
-    /** Whether {@code uri} is an http(s) URL on {@code host}, compared without case. */
+    /**
+     * Whether {@code uri} is an http(s) URL on {@code host}, compared without case and with a
+     * leading {@code www.} on either side ignored (D321): a journal harvested at
+     * {@code www.journal.example} links its articles at {@code journal.example}.
+     */
     static boolean onHost(URI uri, String host) {
         String scheme = uri.getScheme();
-        return host != null && uri.getHost() != null
-                && ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
-                && uri.getHost().equalsIgnoreCase(host);
+        return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) && sameHost(uri.getHost(), host);
+    }
+
+    /** Whether two host names are the same site: equal without case, a leading {@code www.} aside. */
+    static boolean sameHost(String a, String b) {
+        return a != null && b != null && withoutWww(a).equalsIgnoreCase(withoutWww(b));
+    }
+
+    private static String withoutWww(String host) {
+        return host.regionMatches(true, 0, "www.", 0, 4) ? host.substring(4) : host;
     }
 }

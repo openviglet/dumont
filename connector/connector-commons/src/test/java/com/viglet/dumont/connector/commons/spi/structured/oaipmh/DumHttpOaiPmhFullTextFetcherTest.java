@@ -66,7 +66,14 @@ class DumHttpOaiPmhFullTextFetcherTest {
         server.createContext("/octet/paper.pdf", exchange -> respond(exchange, 200, "application/octet-stream", pdf));
         server.createContext("/items/7", exchange -> respond(exchange, 200, "text/html",
                 "<html>landing</html>".getBytes(StandardCharsets.UTF_8)));
-        server.createContext("/moved", exchange -> redirect(exchange, "/bitstream/paper.pdf"));
+        server.createContext("/article/view/7", exchange -> respond(exchange, 200, "text/html; charset=utf-8",
+                page("/article/download/7/12")));
+        server.createContext("/article/download/7/12", exchange -> respond(exchange, 200, "application/pdf", pdf));
+        server.createContext("/article/view/8", exchange -> respond(exchange, 200, "text/html",
+                page("http://localhost:" + server.getAddress().getPort() + "/bitstream/paper.pdf")));
+        server.createContext("/article/view/9", exchange -> respond(exchange, 200, "text/html",
+                page("/article/view/7")));
+        server.createContext("/moved",exchange -> redirect(exchange, "/bitstream/paper.pdf"));
         server.createContext("/away", exchange -> redirect(exchange,
                 "http://localhost:" + server.getAddress().getPort() + "/bitstream/paper.pdf"));
         server.createContext("/missing.pdf", exchange -> respond(exchange, 404, "text/html", new byte[0]));
@@ -89,6 +96,22 @@ class DumHttpOaiPmhFullTextFetcherTest {
     @Test
     void aLandingPageIsNotReadAsText() throws IOException {
         assertEquals(Optional.empty(), fetcher().text(url("/items/7"), HOST));
+    }
+
+    @Test
+    void aLandingPageLeadsToThePdfItsCitationTagNames() throws IOException {
+        assertTrue(fetcher().text(url("/article/view/7"), HOST).orElseThrow().contains(SENTENCE));
+        assertEquals(List.of("/article/view/7", "/article/download/7/12"), served);
+    }
+
+    @Test
+    void aCitationTagOnAnotherHostOrToAnotherPageIsNotFollowed() throws IOException {
+        assertEquals(Optional.empty(), fetcher().text(url("/article/view/8"), HOST));
+        assertEquals(List.of("/article/view/8"), served, "the PDF on another host is never fetched");
+
+        served.clear();
+        assertEquals(Optional.empty(), fetcher().text(url("/article/view/9"), HOST));
+        assertEquals(List.of("/article/view/9", "/article/view/7"), served, "one landing page is all that is read");
     }
 
     @Test
@@ -137,6 +160,10 @@ class DumHttpOaiPmhFullTextFetcherTest {
         assertFalse(DumHttpOaiPmhFullTextFetcher.isPdf("application/octet-stream", "/x/paper"));
         assertTrue(DumHttpOaiPmhFullTextFetcher.onHost(URI.create("HTTPS://Repo.Example/a"), "repo.example"));
         assertFalse(DumHttpOaiPmhFullTextFetcher.onHost(URI.create("ftp://repo.example/a"), "repo.example"));
+        assertTrue(DumHttpOaiPmhFullTextFetcher.onHost(URI.create("https://journal.example/a"), "www.journal.example"),
+                "a leading www. is the same site");
+        assertFalse(DumHttpOaiPmhFullTextFetcher.onHost(URI.create("https://cdn.journal.example/a"),
+                "www.journal.example"), "another subdomain is not");
     }
 
     private DumHttpOaiPmhFullTextFetcher fetcher() {
@@ -171,6 +198,12 @@ class DumHttpOaiPmhFullTextFetcherTest {
         try (OutputStream out = exchange.getResponseBody()) {
             out.write(body);
         }
+    }
+
+    private static byte[] page(String pdfUrl) {
+        return ("<html><head><meta name=\"citation_title\" content=\"A paper\">"
+                + "<meta content=\"" + pdfUrl + "\" name=\"citation_pdf_url\"></head><body>landing</body></html>")
+                .getBytes(StandardCharsets.UTF_8);
     }
 
     private static byte[] pdf(String text) throws IOException {

@@ -239,12 +239,28 @@ class DumOaiPmhSourceTest {
     @Test
     void theUrlRulePrefersAHandleOrDoiOverAPlainUrl() {
         assertEquals(Optional.of("http://hdl.handle.net/123/456"), DumOaiPmhSource.url(List.of(
-                "oai:repo:1", "https://repo.example/items/1", "http://hdl.handle.net/123/456")));
+                "oai:repo:1", "https://repo.example/items/1", "http://hdl.handle.net/123/456"), "repo.example"));
         assertEquals(Optional.of("https://repo.example/handle/123/456"), DumOaiPmhSource.url(List.of(
-                "https://repo.example/bitstream/1.pdf", "https://repo.example/handle/123/456")));
+                "https://repo.example/bitstream/1.pdf", "https://repo.example/handle/123/456"), "repo.example"));
         assertEquals(Optional.of("https://repo.example/items/1"), DumOaiPmhSource.url(List.of(
-                "10.1234/abc", "https://repo.example/items/1", "https://repo.example/items/2")));
-        assertEquals(Optional.empty(), DumOaiPmhSource.url(List.of("oai:repo:1", "ISBN 978-0")));
+                "10.1234/abc", "https://repo.example/items/1", "https://repo.example/items/2"), "repo.example"));
+        assertEquals(Optional.empty(), DumOaiPmhSource.url(List.of("oai:repo:1", "ISBN 978-0"), "repo.example"));
+    }
+
+    @Test
+    void theUrlRuleNeverPicksAnAddressAVisitorCannotOpen() {
+        assertEquals(Optional.of("https://repo.example/items/1"), DumOaiPmhSource.url(List.of(
+                "http://10.17.50.146:4000/handle/123/4970", "https://repo.example/items/1"), "repo.example"),
+                "a private IP's handle link loses to a public URL");
+        assertEquals(Optional.of("https://repo.example/items/1"), DumOaiPmhSource.url(List.of(
+                "https://mirror.example/items/1", "https://repo.example/items/1"), "repo.example"),
+                "the base URL's own host comes before another");
+        assertEquals(Optional.empty(), DumOaiPmhSource.url(List.of("http://127.0.0.1/a", "http://intranet/b",
+                "http://[fd00::1]/c", "http://192.168.0.2/d", "http://169.254.1.1/e"), "repo.example"));
+        assertTrue(DumOaiPmhSource.isPublic("https://8.8.8.8/x"));
+        assertTrue(DumOaiPmhSource.isPublic("https://[2001:db8::1]/x"));
+        assertFalse(DumOaiPmhSource.isPublic("http://172.20.0.1/x"));
+        assertFalse(DumOaiPmhSource.isPublic("http://repo.localhost/x"));
     }
 
     @Test

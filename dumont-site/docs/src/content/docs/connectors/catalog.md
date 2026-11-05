@@ -145,13 +145,13 @@ A catalog source can harvest any OAI-PMH 2.0 repository instead of a JSON API: D
 
 Each run follows `resumptionToken` to the end. The first run harvests everything and sweeps like any source. Later runs ask only for what changed since the last complete harvest (`from`, as a day), and do not sweep. A record the repository marks deleted leaves the index on that run. A repository that keeps no deletion records never reports them, so its removals leave on the next full harvest. Changing the address, the format, the set or the full-text switch starts over with a full harvest.
 
-Dublin Core becomes these fields: `title`, `text` (the descriptions), `authors`, `subjects`, `date` (when it reads as a date, else `dateText`), `type`, `publisher`, `language`, `relations` and `url`. The `url` is the record's handle or DOI link when it has one, else its first web address. Nothing is filled in that the record does not hold. A repository that answers 429 or 503 is retried after its `Retry-After`, up to three times.
+Dublin Core becomes these fields: `title`, `text` (the descriptions), `authors`, `subjects`, `date` (when it reads as a date, else `dateText`), `type`, `publisher`, `language`, `relations` and `url`. The `url` is the record's handle or DOI link when it has one, else a web address on the repository's own host, else its first web address. An address a visitor cannot open is never used: one on a private, loopback or link-local IP, or on a name without a dot such as `intranet`, which some repositories leak into their records. Nothing is filled in that the record does not hold. A repository that answers 429 or 503 is retried after its `Retry-After`, up to three times.
 
 ### Full text
 
-With **Full text from PDFs** on, the connector looks at each record's `dc:identifier` and `dc:relation` values for web addresses on the repository's own host, the host of the base URL. Addresses ending in `.pdf` are tried first, then the others, at most three per record. The first one that answers with a PDF (served as `application/pdf`, or a generic binary from a `.pdf` address) has its text appended to `text`, after the descriptions. A landing page is closed without being read.
+With **Full text from PDFs** on, the connector looks at each record's `dc:identifier` and `dc:relation` values for web addresses on the repository's own host, the host of the base URL. Addresses ending in `.pdf` are tried first, then the others, at most three per record. The first one that answers with a PDF (served as `application/pdf`, or a generic binary from a `.pdf` address) has its text appended to `text`, after the descriptions. An article or item page is read only for the PDF its `citation_pdf_url` tag names, which journal and repository systems such as OJS and DSpace put on it; that PDF is fetched in its place. No other link on the page is followed.
 
-- **Same host only.** An address on any other host is never fetched, and neither is a redirect that leaves the host.
+- **Same host only.** An address on any other host is never fetched, and neither is a redirect that leaves the host. A leading `www.` does not count as another host, so a journal harvested at `www.journal.example` still reads PDFs from `journal.example`.
 - **Capped.** A PDF over 50 MiB is not read, and its text is cut at one million characters.
 - **Polite.** Downloads are spaced one second apart, and a 429 or 503 is retried after its `Retry-After`, like the harvest.
 - **Never fatal.** A PDF that fails or holds no text leaves the record as its metadata describes it.
@@ -180,7 +180,7 @@ Each `dim` record becomes these fields:
 | `text` | `dc.description.abstract` (else `dc.description`), then the full text |
 | `subjects` | `dc.subject`, every qualifier (`cnpq` included) |
 | `type`, `publisher`, `language` | `dc.type`, `dc.publisher`, `dc.language.iso` and `dc.language` |
-| `url` | the handle link in `dc.identifier.uri` |
+| `url` | the handle link in `dc.identifier.uri`, never one on a private address |
 | `relations` | `dc.relation`, every qualifier |
 | `community`, `collection` | the names of the record's `com_` and `col_` sets |
 | `image` | the first file of the item's `THUMBNAIL` bundle |

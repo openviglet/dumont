@@ -238,7 +238,10 @@ class DumDSpaceProfileTest {
         assertEquals(Optional.empty(), DumDSpaceProfile.handle(item("oai:x:42", "urn:nbn:1")));
         assertEquals("col_123456789_9", DumDSpaceProfile.setSpec("col_", "123456789/9"));
         assertEquals(Optional.of("https://r.example/handle/1/2"), DumDSpaceProfile.handleUrl(
-                List.of("https://doi.org/10.1/x", "https://r.example/handle/1/2")));
+                List.of("https://doi.org/10.1/x", "https://r.example/handle/1/2"), "r.example"));
+        assertEquals(Optional.of("https://r.example/handle/1/2"), DumDSpaceProfile.handleUrl(
+                List.of("http://10.17.50.146:4000/handle/1/2", "https://r.example/handle/1/2"), "r.example"),
+                "a handle link on a private address is never the record's URL");
     }
 
     @Test

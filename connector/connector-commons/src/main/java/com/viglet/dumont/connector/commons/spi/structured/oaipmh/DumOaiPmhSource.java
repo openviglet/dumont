@@ -17,9 +17,11 @@
 package com.viglet.dumont.connector.commons.spi.structured.oaipmh;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -299,7 +301,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         rec.set(TYPE, item.values("type"), provenance("type"));
         rec.set(PUBLISHER, item.values("publisher"), provenance("publisher"));
         rec.set(LANGUAGE, item.values("language"), provenance("language"));
-        rec.set(URL, url(item.values("identifier")).orElse(null), provenance("identifier"));
+        rec.set(URL, url(item.values("identifier"), host).orElse(null), provenance("identifier"));
         rec.set(RELATIONS, item.values("relation"), provenance("relation"));
         return Optional.of(rec.build());
     }
@@ -361,8 +363,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     }
 
     private static boolean isOnHost(URI uri, String host) {
-        return host != null && uri.getHost() != null && uri.getHost().equalsIgnoreCase(host)
-                && ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()));
+        return DumHttpOaiPmhFullTextFetcher.onHost(uri, host);
     }
 
     private static boolean endsWithPdf(URI uri) {
@@ -377,17 +378,52 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     }
 
     /**
-     * The record's link: the first {@code dc:identifier} that is an http(s) URL, preferring a
-     * handle ({@code hdl.handle.net} or a {@code /handle/} path) or a DOI ({@code doi.org}) link,
-     * which outlive a repository's own URL scheme. Empty when no identifier is a URL.
+     * The record's link: a {@code dc:identifier} that is an http(s) URL a visitor can open,
+     * preferring a handle ({@code hdl.handle.net} or a {@code /handle/} path) or a DOI
+     * ({@code doi.org}) link, which outlive a repository's own URL scheme, then one on the base
+     * URL's own {@code host}, then the first. An address on a private, loopback or link-local IP,
+     * or on a bare hostname with no dot, is never chosen (D321): a repository can leak its internal
+     * host into its Dublin Core. Empty when no identifier qualifies.
      */
-    static Optional<String> url(List<String> identifiers) {
+    static Optional<String> url(List<String> identifiers, String host) {
         List<String> urls = identifiers.stream().map(String::strip)
                 .filter(v -> v.regionMatches(true, 0, "http://", 0, 7)
                         || v.regionMatches(true, 0, "https://", 0, 8))
+                .filter(DumOaiPmhSource::isPublic)
                 .toList();
         return urls.stream().filter(DumOaiPmhSource::isPersistent).findFirst()
+                .or(() -> urls.stream().filter(u -> uri(u).filter(x -> isOnHost(x, host)).isPresent()).findFirst())
                 .or(() -> urls.stream().findFirst());
+    }
+
+    /** Whether a URL's host is one a visitor can reach: no private IP literal, no dotless name. */
+    static boolean isPublic(String url) {
+        String host = uri(url).map(URI::getHost).orElse(null);
+        if (host == null || host.isBlank()) {
+            return false;
+        }
+        String bare = host.startsWith("[") && host.endsWith("]") ? host.substring(1, host.length() - 1) : host;
+        if (bare.contains(":") || IPV4.matcher(bare).matches()) {
+            return !isPrivateAddress(bare);
+        }
+        return bare.contains(".") && !bare.toLowerCase(Locale.ROOT).endsWith(".localhost");
+    }
+
+    private static final Pattern IPV4 = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3}");
+
+    /** An IP literal (never a name: nothing is resolved) that is private, loopback, link-local or unset. */
+    private static boolean isPrivateAddress(String literal) {
+        try {
+            // A literal already matched as one: getByName parses it and never resolves.
+            InetAddress address = InetAddress.getByName(literal);
+            byte[] bytes = address.getAddress();
+            boolean uniqueLocal = bytes.length == 16 && (bytes[0] & 0xfe) == 0xfc;
+            boolean sharedCgnat = bytes.length == 4 && (bytes[0] & 0xff) == 100 && (bytes[1] & 0xc0) == 64;
+            return address.isSiteLocalAddress() || address.isLoopbackAddress() || address.isLinkLocalAddress()
+                    || address.isAnyLocalAddress() || uniqueLocal || sharedCgnat;
+        } catch (UnknownHostException | IllegalArgumentException e) {
+            return true;
+        }
     }
 
     private static boolean isPersistent(String url) {
