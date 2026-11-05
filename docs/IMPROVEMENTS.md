@@ -263,23 +263,6 @@ say "until <date>" on every surface.
 **Done when:** with the quota spent, the overlay and the assistant say answers are
 paused until the reset date.
 
-### XLIX.176 Related across siblings through the filter operators (D337)
-
-**Found by D303.** With `sites: all`, the Related block asks Turing's `/search/similar`
-for neighbours across this site and its siblings. That endpoint ignores the filter
-operators, so `site_key:a` and `site_key:b` together return nothing (Turing T1235). The
-block therefore asks unfiltered and keyless for up to 50 rows and keeps the ids whose
-prefix is a key in scope (`class-viglet-dumont-related.php`), reading the whole SN site
-and losing neighbours past the 50th.
-
-**What to build.** Once T1235 ships, send the scope as the search does (`fq[]` per key
-with `fqi.op=OR`, through `Indexer::scope_query()`), keyless through `for_scope()` (a
-partition-bound key sees only its own site), and drop the over-fetch and the prefix
-filter.
-
-**Done when:** Related with `sites: all` asks `similar` with the scope's filters and
-shows a sibling's neighbour that ranks past the 50th in the whole SN site.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +

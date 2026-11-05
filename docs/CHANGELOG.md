@@ -785,6 +785,7 @@
 - **D310 (plugin side)** — An opt-in turns on Turing's entity extraction, the People, Organisations and Places facets are labelled and offered, name variants sync to a thesaurus, and the editor panel lists the names.
 - **D318** — A search block asks Turing's autocomplete with its scope (site keys and fixed filters), so a box scoped to pages never suggests a term only posts hold.
 - **D334** — Fields reads only the other sources' documents through a negative filter on the plugin's own (Turing T1233), so however many posts a site has, their types are found.
+- **D337** — Related across sibling sites asks similar inside the scope (one site_key per site with fqi.op=OR, Turing T1235), so the nearest neighbours across sites come back without an over-fetch.
 
 ## Track T — Releases and links match what the site describes
 

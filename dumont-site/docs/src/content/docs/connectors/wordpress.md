@@ -417,8 +417,10 @@ too. The assistant may open a page on a listed site only when its address is giv
 
 The **Related content** block stays on this site's posts unless its **Include the sites this
 one also searches** setting is on. With it on, the other sites' documents appear with their
-title, their site's label and a link to their own site. The automatic placement after
-content keeps the default.
+title, their site's label and a link to their own site, asked of Turing inside the same
+scope the search uses, so the nearest posts across those sites come first. This needs a
+Turing whose similar-documents search reads the site keys as alternatives (2026.3 builds
+after T1235). The automatic placement after content keeps the default.
 
 The list is one-way: a site you list does not find this one's documents unless it lists this
 site too. Writing never reaches another site's documents. Index All, the sweep, **Delete All**,
