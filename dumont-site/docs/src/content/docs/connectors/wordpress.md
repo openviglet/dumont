@@ -54,6 +54,17 @@ graph LR
   one bad post does not block the rest of its batch.
 - **Each post records its state**: when it was last indexed, its last error and its
   failed attempts. The post lists and the block editor show it (see [Admin](#admin)).
+- **Index All runs in the background.** The button under **Settings → Actions**, and
+  **Index everything now** on **Setup**, only start the reindex; WP-Cron sends it a few
+  batches at a time, so you can close the page as soon as it starts. A batch Turing does
+  not take is tried again after a wait (30 seconds, doubling, up to 10 minutes); after five
+  tries its posts count as failed and the reindex goes on with the next batch. A reindex of
+  all content then sends every PDF and sweeps, like `wp dumont reindex`, and skips the
+  sweep when any post failed. **Search health** shows its progress, has **Cancel reindex**,
+  and shows how the last one ended. WP-Cron runs when someone visits the site: on a site
+  with no visitors, or with `DISABLE_WP_CRON`, the reindex moves only when the server's own
+  cron calls `wp-cron.php` (or runs `wp cron event run --due-now`), and Search health says
+  when it has stopped moving.
 
 ---
 
@@ -347,13 +358,15 @@ it indexes every post under its new id and removes the copy under the old one.
 |---|---|
 | `wp dumont status` | Connection, SN site, site key, published versus indexed documents per type, the queue, and where each setting came from |
 | `wp dumont index [--type=<type>] [--ids=<ids>] [--since=<date>]` | Indexes now, synchronously, with a progress bar; exits non-zero when a batch fails. `--ids` also removes the listed posts that are not published |
-| `wp dumont reindex` | Provisions the fields, indexes every published post, then sweeps |
+| `wp dumont reindex` | Provisions the fields, indexes every published post, then sweeps. Runs in the terminal, synchronously, unlike Index All in wp-admin |
 | `wp dumont sweep [--dry-run]` | Removes from Turing this site key's documents that WordPress no longer publishes, e.g. posts deleted while the plugin was off |
 | `wp dumont queue run [--retry-failed]` | Sends the queue now, ignoring backoff, and names each post that failed |
 | `wp dumont queue status` | Lists the waiting and failed jobs with their last error |
 
 The same operations answer over REST under `viglet-dumont/v1/`: `status`, `index`,
-`sweep`, `queue/run` and `queue/retry`.
+`sweep`, `queue/run` and `queue/retry`. `POST reindex` starts Index All in the background
+(`type` is `all` or one post type), `GET reindex` reads its progress and
+`POST reindex/cancel` stops it.
 
 ---
 
@@ -363,13 +376,16 @@ The same operations answer over REST under `viglet-dumont/v1/`: `status`, `index
 |---|---|
 | **Setup** | The connection and its step-by-step test, the SN site, the first index |
 | **Fields** | The per-type field mapping, its state in Turing, a document preview |
-| **Health** | Published versus indexed per type, the queue, its last run, the last 50 events |
+| **Health** | Published versus indexed per type, the running reindex and the last one, the queue, its last run, the last 50 events |
 | **Settings** | Post types, categories, tags, comments, custom fields, exclusions, batch size, search |
 
 ![The Health page](/dumont/docs/img/screenshots/dumont-wordpress-health.png)
 
 **Health** has **Retry failed** and **Send queue now**, and lists every send, removal,
-provisioning and sweep with its error when it failed.
+provisioning, sweep and reindex with its error when it failed. While a reindex runs, its
+card shows how many posts are done of how many, how many failed, a batch waiting to be
+tried again and **Cancel reindex**, and it updates every few seconds. Cancelling keeps what
+was already sent.
 
 The post lists gain a **Search** column: *Indexed 2 mins ago*, *Queued*, *Failed* (the
 error shows on hover), *Excluded* or *Not published*. The block editor has a **Search**

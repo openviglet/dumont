@@ -287,21 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.170 Reindex in the background, resumable (D331)
-
-**Found by D316.** Index All from Settings runs its batches in the browser tab
-(`src/admin/js/admin.js` 105-128): closing the tab or one failed batch stops it, the
-offset is lost, nothing warns before leaving, and a missing `post_type` defaults to
-`post` (`viglet-dumont.php` 754-756). A slow reindex on a shared host is a session the
-editor must babysit.
-
-**What to build.** Full reindexes run through the queue or WP-Cron with their progress
-stored, resumed after a failure, shown on Health with a cancel; the Settings button only
-starts it. A `beforeunload` warning while the old in-tab path remains.
-
-**Done when:** closing the tab mid-reindex, the reindex finishes, and Health shows its
-progress meanwhile.
-
 ### XLIX.171 A spent AI budget said, with its reset (D332)
 
 **Found by D316.** When the site's AI budget runs out, Turing answers 429
@@ -352,6 +337,22 @@ the 2,000 ceiling and its note in the docs.
 
 **Done when:** a foreign type present only after the first 2,000 documents is listed in
 Fields.
+
+### XLIX.174 A reindex that moves without traffic (D335)
+
+**Found by D331.** Index All now runs through WP-Cron (`Viglet_Dumont_Reindex`), a few
+batches per cron run. WP-Cron only runs on page views, so a site with no traffic, or
+with `DISABLE_WP_CRON` and no system cron, moves the reindex only when someone visits or
+a cron is wired; Health warns after ten minutes without progress and the docs say so.
+
+**What to build.** While a reindex runs, keep it moving on its own: after each step,
+fire a non-blocking loopback request to `wp-cron.php` (as `spawn_cron()` does,
+respecting `DISABLE_WP_CRON` by falling back to an authenticated REST step the Health
+page polls), and let the Health page's 3-second poll advance one step when it sees no
+progress. Keep the lock so two never overlap.
+
+**Done when:** on a site with no visitors and the Health page closed, a started reindex
+finishes; with `DISABLE_WP_CRON` and Health open, it finishes too.
 
 ## L The documentation area
 
