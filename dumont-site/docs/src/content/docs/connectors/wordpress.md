@@ -61,10 +61,15 @@ graph LR
   tries its posts count as failed and the reindex goes on with the next batch. A reindex of
   all content then sends every PDF and sweeps, like `wp dumont reindex`, and skips the
   sweep when any post failed. **Search health** shows its progress, has **Cancel reindex**,
-  and shows how the last one ended. WP-Cron runs when someone visits the site: on a site
-  with no visitors, or with `DISABLE_WP_CRON`, the reindex moves only when the server's own
-  cron calls `wp-cron.php` (or runs `wp cron event run --due-now`), and Search health says
-  when it has stopped moving.
+  and shows how the last one ended. It does not need visitors: after each step the site
+  asks itself for the next one (a background request to its own
+  `viglet-dumont/v1/reindex/step`, signed with a token only the running reindex knows), so
+  a started reindex finishes on a site nobody visits. Where the server cannot reach its own
+  address, such as a container behind a mapped port, point the request at one it can with
+  the `viglet_dumont_reindex_step_url` filter, as `cron_request` does for WP-Cron. While
+  **Search health** is open it also takes a step whenever the reindex has sat idle for 15
+  seconds, which covers a host that blocks those requests. A batch waiting out a retry
+  after Turing failed resumes on the next WP-Cron run or the next step from Search health.
 
 ---
 

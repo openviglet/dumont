@@ -304,22 +304,6 @@ the 2,000 ceiling and its note in the docs.
 **Done when:** a foreign type present only after the first 2,000 documents is listed in
 Fields.
 
-### XLIX.174 A reindex that moves without traffic (D335)
-
-**Found by D331.** Index All now runs through WP-Cron (`Viglet_Dumont_Reindex`), a few
-batches per cron run. WP-Cron only runs on page views, so a site with no traffic, or
-with `DISABLE_WP_CRON` and no system cron, moves the reindex only when someone visits or
-a cron is wired; Health warns after ten minutes without progress and the docs say so.
-
-**What to build.** While a reindex runs, keep it moving on its own: after each step,
-fire a non-blocking loopback request to `wp-cron.php` (as `spawn_cron()` does,
-respecting `DISABLE_WP_CRON` by falling back to an authenticated REST step the Health
-page polls), and let the Health page's 3-second poll advance one step when it sees no
-progress. Keep the lock so two never overlap.
-
-**Done when:** on a site with no visitors and the Health page closed, a started reindex
-finishes; with `DISABLE_WP_CRON` and Health open, it finishes too.
-
 ### XLIX.175 Paused answers on every AI surface (D336)
 
 **Found by D332.** A 429 `quota-exhausted` now reads as "Answers are paused for now;

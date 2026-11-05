@@ -121,7 +121,6 @@ This track has no remaining pending tasks.
 - 📋 **D310** (deps: Turing T1225) **WordPress documents carry no people or themes: who and what a post names never becomes a facet** — A site cannot be explored by person or theme, and name variants across sites and the repository stay split. → §XLIX.152
 - 📋 **D318** (deps: Turing T1226) **A scoped search block's suggestions ignore its scope: the box suggests terms only content outside it holds** — A visitor in a box scoped to events picks a suggested term and finds nothing. → §XLIX.158
 - 📋 **D334** (deps: Turing T1233) **Fields finds another source's types by paging up to 2,000 documents, so a large site can miss one** — A type that sorts after the first 2,000 documents never reaches Fields and cannot be labelled. → §XLIX.173
-- 📋 **D335** (deps: —) **A background Index All only advances when WP-Cron runs, so on a site with no visits it stalls** — A low-traffic or DISABLE_WP_CRON site sees Health warn of a stalled reindex that nothing will move. → §XLIX.174
 - 📋 **D336** (deps: Turing T1234) **The overlay's answer and the site assistant still go quiet on a spent AI budget, and no visitor sees when it returns** — Two AI surfaces fail silently where the copilot and search block say answers are paused. → §XLIX.175
 
 ## Track T — Releases and links match what the site describes
