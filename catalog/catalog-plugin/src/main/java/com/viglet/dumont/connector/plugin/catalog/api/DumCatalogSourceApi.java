@@ -18,6 +18,7 @@ package com.viglet.dumont.connector.plugin.catalog.api;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -117,8 +118,19 @@ public class DumCatalogSourceApi {
         // rather than discovered on its first crawl.
         existing.setJsonApiManifest(catalogSource.getJsonApiManifest());
         existing.setJsonApiSecrets(catalogSource.getJsonApiSecrets());
+        // An OAI-PMH binding (D315). The watermark is the harvest's own, but it only means anything
+        // for the repository, format and set that set it: pointing elsewhere starts a full harvest.
+        if (!Objects.equals(existing.getOaiPmhBaseUrl(), catalogSource.getOaiPmhBaseUrl())
+                || !Objects.equals(existing.getOaiPmhMetadataPrefix(), catalogSource.getOaiPmhMetadataPrefix())
+                || !Objects.equals(existing.getOaiPmhSet(), catalogSource.getOaiPmhSet())) {
+            existing.setOaiPmhWatermark(null);
+        }
+        existing.setOaiPmhBaseUrl(catalogSource.getOaiPmhBaseUrl());
+        existing.setOaiPmhMetadataPrefix(catalogSource.getOaiPmhMetadataPrefix());
+        existing.setOaiPmhSet(catalogSource.getOaiPmhSet());
         try {
             DumCatalogSourceProvider.validateJsonApi(existing);
+            DumCatalogSourceProvider.validateOaiPmh(existing);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }

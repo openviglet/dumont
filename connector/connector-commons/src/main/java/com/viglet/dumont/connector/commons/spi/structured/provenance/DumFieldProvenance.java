@@ -95,6 +95,14 @@ public record DumFieldProvenance(String strategy, String selector, Double confid
         return new DumFieldProvenance("json", path, null, null);
     }
 
+    /**
+     * An OAI-PMH origin (roadmap D315); {@code element} is the metadata element the value was read
+     * from, such as {@code "dc:title"}.
+     */
+    public static DumFieldProvenance oaiPmh(String element) {
+        return new DumFieldProvenance("oai-pmh", element, null, null);
+    }
+
     /** A value an enricher derived (roadmap D04); {@code name} identifies the enricher. */
     public static DumFieldProvenance enrichment(String name) {
         String suffix = (name == null || name.isBlank()) ? "" : ":" + name.trim();

@@ -56,6 +56,9 @@ public class DumCatalogExchangeProcess {
     private static final String SN_SITES = "turSNSites";
     private static final String JSON_API_MANIFEST = "jsonApiManifest";
     private static final String JSON_API_SECRETS = "jsonApiSecrets";
+    private static final String OAI_PMH_BASE_URL = "oaiPmhBaseUrl";
+    private static final String OAI_PMH_METADATA_PREFIX = "oaiPmhMetadataPrefix";
+    private static final String OAI_PMH_SET = "oaiPmhSet";
 
     private final DumCatalogSourceRepository sourceRepository;
 
@@ -79,6 +82,10 @@ public class DumCatalogExchangeProcess {
             if (source.getJsonApiManifest() != null && !source.getJsonApiManifest().isBlank()) {
                 json.put(JSON_API_MANIFEST, asJson(source.getJsonApiManifest()));
             }
+            // The OAI-PMH binding travels (D315); its watermark is this instance's harvest state.
+            json.putOpt(OAI_PMH_BASE_URL, source.getOaiPmhBaseUrl());
+            json.putOpt(OAI_PMH_METADATA_PREFIX, source.getOaiPmhMetadataPrefix());
+            json.putOpt(OAI_PMH_SET, source.getOaiPmhSet());
             array.put(json);
         }
         return array.toString(2);
@@ -112,7 +119,7 @@ public class DumCatalogExchangeProcess {
         JSONArray array = new JSONArray(trimmed);
         for (int i = 0; i < array.length(); i++) {
             JSONObject json = array.optJSONObject(i);
-            if (json == null || !(json.has(CATALOG_URL) || json.has(JSON_API_MANIFEST))) {
+            if (json == null || !(json.has(CATALOG_URL) || json.has(JSON_API_MANIFEST) || json.has(OAI_PMH_BASE_URL))) {
                 continue;
             }
             upsert(json);
@@ -139,6 +146,11 @@ public class DumCatalogExchangeProcess {
         }
         if (json.has(JSON_API_SECRETS)) {
             source.setJsonApiSecrets(json.get(JSON_API_SECRETS).toString());
+        }
+        if (json.has(OAI_PMH_BASE_URL)) {
+            source.setOaiPmhBaseUrl(json.optString(OAI_PMH_BASE_URL, null));
+            source.setOaiPmhMetadataPrefix(json.optString(OAI_PMH_METADATA_PREFIX, null));
+            source.setOaiPmhSet(json.optString(OAI_PMH_SET, null));
         }
         sourceRepository.save(source);
         log.info("Imported catalog source '{}'", name);

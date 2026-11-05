@@ -32,6 +32,9 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePro
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiManifest;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiSource;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhSource;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhState;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeParameters;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeRef;
@@ -70,16 +73,19 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
     private final DumHtmlFetcher htmlFetcher;
     private final DumJsonFetcher jsonFetcher;
     private final DumCatalogJsonApiStates jsonApiStates;
+    private final DumOaiPmhFetcher oaiPmhFetcher;
 
     public DumCatalogSourceProvider(DumCatalogSourceRepository sourceRepository,
             DumCatalogFetcher fetcher, DumRecipeLibrary recipeLibrary, DumHtmlFetcher htmlFetcher,
-            DumJsonFetcher jsonFetcher, DumCatalogJsonApiStates jsonApiStates) {
+            DumJsonFetcher jsonFetcher, DumCatalogJsonApiStates jsonApiStates,
+            DumOaiPmhFetcher oaiPmhFetcher) {
         this.sourceRepository = sourceRepository;
         this.fetcher = fetcher;
         this.recipeLibrary = recipeLibrary;
         this.htmlFetcher = htmlFetcher;
         this.jsonFetcher = jsonFetcher;
         this.jsonApiStates = jsonApiStates;
+        this.oaiPmhFetcher = oaiPmhFetcher;
     }
 
     @Override
@@ -98,9 +104,9 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
             try {
                 return Optional.of(resolve(source));
             } catch (IllegalArgumentException e) {
-                // Only a JSON API binding can be refused here; the API validates it on save, so this
-                // is a row written around the API (an import, a hand edit).
-                log.error("Catalog source '{}' cannot run its JSON API manifest: {}", sourceName,
+                // Only a JSON API or OAI-PMH binding can be refused here; the API validates both on
+                // save, so this is a row written around the API (an import, a hand edit).
+                log.error("Catalog source '{}' cannot run its binding: {}", sourceName,
                         e.getMessage());
                 return Optional.empty();
             }
@@ -108,12 +114,16 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
     }
 
     /**
-     * Pick the running source for {@code source}: its JSON API manifest when it has one (D92), else
-     * native when flipped and bound, else the sidecar.
+     * Pick the running source for {@code source}: its OAI-PMH repository when it has one (D315),
+     * else its JSON API manifest (D92), else native when flipped and bound, else the sidecar.
      *
-     * @throws IllegalArgumentException when the source's JSON API manifest or secrets cannot run
+     * @throws IllegalArgumentException when the source's OAI-PMH binding, or its JSON API manifest
+     *                                  or secrets, cannot run
      */
     public DumStructuredSource resolve(DumCatalogSource source) {
+        if (isOaiPmh(source)) {
+            return oaiPmhSource(source);
+        }
         if (isJsonApi(source)) {
             return jsonApiSource(source);
         }
@@ -185,6 +195,48 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
                 .secrets(secretsOf(source)).build();
     }
 
+    /**
+     * The OAI-PMH source a base URL declares (roadmap <strong>D315</strong>), bound to this source's
+     * name, sites and locale, keeping its watermark on the source's own row.
+     *
+     * @throws IllegalArgumentException when the base URL is not an http(s) URL
+     */
+    public DumOaiPmhSource oaiPmhSource(DumCatalogSource source) {
+        return DumOaiPmhSource.builder(source.getOaiPmhBaseUrl(), oaiPmhFetcher)
+                .metadataPrefix(source.getOaiPmhMetadataPrefix())
+                .set(source.getOaiPmhSet())
+                .sourceName(source.getName())
+                .providerName(DumCatalogPlugin.PROVIDER_NAME)
+                .siteNames(source.getTurSNSites() == null ? List.of() : List.copyOf(source.getTurSNSites()))
+                .locale(localeOf(source))
+                .state(new RowWatermark(sourceRepository, source.getName()))
+                .build();
+    }
+
+    /**
+     * Checks that a source's OAI-PMH binding can run, without calling the repository: an http(s)
+     * base URL, and no JSON API manifest beside it, since a source runs one or the other. A source
+     * with no base URL passes.
+     *
+     * @throws IllegalArgumentException naming what is wrong
+     */
+    public static void validateOaiPmh(DumCatalogSource source) {
+        if (!isOaiPmh(source)) {
+            return;
+        }
+        if (isJsonApi(source)) {
+            throw new IllegalArgumentException(
+                    "A source harvests either an OAI-PMH repository or a JSON API manifest, not both");
+        }
+        DumOaiPmhSource.builder(source.getOaiPmhBaseUrl(), url -> "")
+                .sourceName(notBlank(source.getName()) ? source.getName() : "unnamed").build();
+    }
+
+    /** Whether this source harvests an OAI-PMH repository. */
+    public static boolean isOaiPmh(DumCatalogSource source) {
+        return notBlank(source.getOaiPmhBaseUrl());
+    }
+
     /** Whether this source runs a JSON API manifest rather than the sidecar or a recipe. */
     public static boolean isJsonApi(DumCatalogSource source) {
         return notBlank(source.getJsonApiManifest());
@@ -221,6 +273,28 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
 
     private static boolean notBlank(String value) {
         return value != null && !value.isBlank();
+    }
+
+    /**
+     * An OAI-PMH watermark kept on the source's own row (D315): one value per source, read and
+     * written by name so a harvest never saves a stale copy of the rest of the row.
+     */
+    private record RowWatermark(DumCatalogSourceRepository repository, String sourceName)
+            implements DumOaiPmhState {
+
+        @Override
+        public Optional<String> watermark() {
+            return repository.findByName(sourceName).map(DumCatalogSource::getOaiPmhWatermark)
+                    .filter(DumCatalogSourceProvider::notBlank);
+        }
+
+        @Override
+        public void watermark(String responseDate) {
+            repository.findByName(sourceName).ifPresent(row -> {
+                row.setOaiPmhWatermark(responseDate);
+                repository.save(row);
+            });
+        }
     }
 
     private static Locale localeOf(DumCatalogSource source) {

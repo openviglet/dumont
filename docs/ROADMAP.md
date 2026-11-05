@@ -128,8 +128,8 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D314** (deps: D315) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Crawling loses authors, advisors, dates and collections, and DSpace is the repository most Brazilian universities run. → §LII.1
-- 📋 **D315** (deps: —) **No Dumont source harvests OAI-PMH, the protocol every repository, OJS journal and catalogue already speaks** — Each academic system would need its own connector where one configurable harvester would serve them all. → §LII.2
+- 📋 **D314** (deps: D315 ⏳) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Crawling loses authors, advisors, dates and collections, and DSpace is the repository most Brazilian universities run. → §LII.1
+- ⏳ **D315** (deps: —) **No Dumont source harvests OAI-PMH, the protocol every repository, OJS journal and catalogue already speaks** — The console form fields; Tika and the Pacer lifted into connector-commons for same-host PDF full text; checked against an OJS and a DSpace demo. → §LII.2
 
 ## Done when — D303
 
@@ -142,6 +142,12 @@ This track has no remaining pending tasks.
 - **A question in the immersive overlay shows Turing's answer on top** A spec asks a
   question on the AI stack and reads the answer strip above the groups, with a desktop
   preview of the highlighted result beside them.
+
+## Done when — D315
+
+- **An OJS and a DSpace demo index through configuration only** Both demo instances
+  harvest from the console form alone, and a record deleted there leaves the index on
+  the next incremental run.
 
 ## Non-goals (do NOT add as tasks)
 

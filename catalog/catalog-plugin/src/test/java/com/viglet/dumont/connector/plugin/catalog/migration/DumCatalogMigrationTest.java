@@ -93,7 +93,8 @@ class DumCatalogMigrationTest {
         DumCatalogSourceRepository repository = mock(DumCatalogSourceRepository.class);
         return new DumCatalogSourceProvider(repository, catalogFetcher, library, htmlFetcher,
                 request -> "[]",
-                name -> new com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumInMemoryJsonApiState());
+                name -> new com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumInMemoryJsonApiState(),
+                url -> "");
     }
 
     @Test

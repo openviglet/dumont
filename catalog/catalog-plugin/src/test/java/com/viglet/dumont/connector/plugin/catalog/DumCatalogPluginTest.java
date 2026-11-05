@@ -86,7 +86,8 @@ class DumCatalogPluginTest {
     private static DumCatalogSourceProvider sidecarProvider(DumCatalogSourceRepository repository,
             DumCatalogFetcher fetcher) {
         return new DumCatalogSourceProvider(repository, fetcher, new DumRecipeLibrary(),
-                DumHtmlFetcher.ofPages(Map.of()), request -> "[]", name -> new DumInMemoryJsonApiState());
+                DumHtmlFetcher.ofPages(Map.of()), request -> "[]", name -> new DumInMemoryJsonApiState(),
+                url -> "");
     }
 
     private DumCatalogSource ufmg() {

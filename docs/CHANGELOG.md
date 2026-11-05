@@ -775,3 +775,4 @@
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
+- **D315 (harvester)** — A catalog source with an oaiPmhBaseUrl harvests OAI-PMH through resumptionToken, incrementally from its last complete harvest, mapping Dublin Core and removing deleted records.

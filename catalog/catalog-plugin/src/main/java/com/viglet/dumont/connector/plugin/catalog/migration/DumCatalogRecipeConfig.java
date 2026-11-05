@@ -21,6 +21,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumHttpJsonFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumHttpOaiPmhFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumJsoupFetcher;
@@ -57,5 +59,11 @@ public class DumCatalogRecipeConfig {
     @Bean
     DumJsonFetcher dumCatalogJsonFetcher() {
         return new DumHttpJsonFetcher();
+    }
+
+    /** The JDK client a source bound to an OAI-PMH repository (D315) harvests with. */
+    @Bean
+    DumOaiPmhFetcher dumCatalogOaiPmhFetcher() {
+        return new DumHttpOaiPmhFetcher();
     }
 }

@@ -171,7 +171,7 @@ class DumCatalogJsonApiTest {
                     return requests.size() == 1
                             ? page(new int[] {1, 2})
                             : page(new int[] {3});
-                }, name -> states.computeIfAbsent(name, n -> new DumInMemoryJsonApiState()));
+                }, name -> states.computeIfAbsent(name, n -> new DumInMemoryJsonApiState()), url -> "");
     }
 
     private static DumCatalogSourceRepository repositoryWith(DumCatalogSource source) {

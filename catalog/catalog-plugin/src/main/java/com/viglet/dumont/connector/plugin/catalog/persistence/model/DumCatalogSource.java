@@ -127,6 +127,29 @@ public class DumCatalogSource implements Serializable {
     @Column(name = "json_api_secrets")
     private String jsonApiSecrets;
 
+    /**
+     * An OAI-PMH 2.0 base URL (roadmap <strong>D315</strong>). When set, the source harvests the
+     * repository through {@code DumOaiPmhSource} instead of fetching {@link #catalogUrl}, and its
+     * schema is the Dublin Core one that source declares.
+     */
+    @Column(name = "oai_pmh_base_url", length = 2000)
+    private String oaiPmhBaseUrl;
+
+    /** The OAI-PMH metadata format to harvest; blank means {@code oai_dc}. */
+    @Column(name = "oai_pmh_metadata_prefix")
+    private String oaiPmhMetadataPrefix;
+
+    /** The OAI-PMH set to harvest; blank means the whole repository. */
+    @Column(name = "oai_pmh_set")
+    private String oaiPmhSet;
+
+    /**
+     * The {@code responseDate} of the last complete OAI-PMH harvest, the next run's {@code from}.
+     * Written by the harvest, never by the API or an import.
+     */
+    @Column(name = "oai_pmh_watermark")
+    private String oaiPmhWatermark;
+
     @Builder.Default
     @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "catalog_sn_site", joinColumns = @JoinColumn(name = "source_id"))

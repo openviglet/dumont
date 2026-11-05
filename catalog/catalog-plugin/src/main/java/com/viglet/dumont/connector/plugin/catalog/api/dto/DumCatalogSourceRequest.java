@@ -47,5 +47,8 @@ public class DumCatalogSourceRequest {
     private String nativeListingUrl;
     private String jsonApiManifest;
     private String jsonApiSecrets;
+    private String oaiPmhBaseUrl;
+    private String oaiPmhMetadataPrefix;
+    private String oaiPmhSet;
     private Collection<String> turSNSites = new HashSet<>();
 }

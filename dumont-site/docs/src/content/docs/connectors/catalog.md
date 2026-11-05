@@ -131,6 +131,23 @@ With `incremental` set, a run never sweeps. The connector stores when it last sa
 
 ---
 
+## OAI-PMH repositories
+
+A catalog source can harvest any OAI-PMH 2.0 repository instead of a JSON API: DSpace, EPrints, an OJS journal, Tainacan or Koha. Set `oaiPmhBaseUrl` to the repository's OAI endpoint (for example `https://repo.example.org/server/oai/request`), and leave out the manifest. Two optional fields narrow it:
+
+| Field | Default | What it does |
+|---|---|---|
+| `oaiPmhMetadataPrefix` | `oai_dc` | The metadata format asked for. Only its Dublin Core (`dc:`) elements are read. |
+| `oaiPmhSet` | none | One OAI set (a collection) to harvest instead of the whole repository. |
+
+Each run follows `resumptionToken` to the end. The first run harvests everything and sweeps like any source. Later runs ask only for what changed since the last complete harvest (`from`, as a day), and do not sweep. A record the repository marks deleted leaves the index on that run. A repository that keeps no deletion records never reports them, so its removals leave on the next full harvest. Changing the address, the format or the set starts over with a full harvest.
+
+Dublin Core becomes these fields: `title`, `text` (the descriptions), `authors`, `subjects`, `date` (when it reads as a date, else `dateText`), `type`, `publisher`, `language`, `relations` and `url`. The `url` is the record's handle or DOI link when it has one, else its first web address. Nothing is filled in that the record does not hold. A repository that answers 429 or 503 is retried after its `Retry-After`, up to three times.
+
+For now an OAI-PMH source is created through the REST API or an import file; the console's source form does not show these fields yet.
+
+---
+
 ## REST API
 
 | Method | Path | Description |
