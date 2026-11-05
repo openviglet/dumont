@@ -1057,7 +1057,17 @@
       "oaiPmhSet": "Set",
       "oaiPmhSetDesc": "Harvest only this set (a collection or a community). Blank harvests the whole repository.",
       "oaiPmhFullText": "Full text from PDFs",
-      "oaiPmhFullTextDesc": "Also read each record's PDF, when its identifier or relation links to one on the repository's own host, and add its text after the description. Other hosts are never fetched. Changing this restarts the harvest from the beginning."
+      "oaiPmhFullTextDesc": "Also read each record's PDF, when its identifier or relation links to one on the repository's own host, and add its text after the description. Other hosts are never fetched. Changing this restarts the harvest from the beginning.",
+      "oaiPmhDSpace": "DSpace profile",
+      "oaiPmhDSpaceDesc": "Read the repository as DSpace: harvest its native dim format, so authors, advisors, issue date and abstract stay apart, and complete each item from the DSpace REST API with its community and collection names, its thumbnail and its text. Withdrawn, private and hidden items are removed, never indexed. Changing this restarts the harvest from the beginning.",
+      "dspaceRestUrl": "DSpace REST API URL",
+      "dspaceRestUrlDesc": "The REST API base on the repository's host, usually ending in /server/api, but check yours: an install can serve it under any path.",
+      "dspaceRestUrlRequired": "The DSpace profile needs the REST API URL.",
+      "dspaceRestUrlInvalid": "The REST API URL must be an http(s) URL.",
+      "siteKey": "Site key",
+      "siteKeyDesc": "A value stored on every record as site_key, to tell this repository's records apart in a shared index. Blank uses the base URL's host.",
+      "dspaceFullText": "Full text",
+      "dspaceFullTextDesc": "Add each item's text after the abstract: DSpace's own extracted text (the TEXT bundle) when it has one, else its PDF. Files the public may not read are skipped and the item is indexed without them. On by default; changing it restarts the harvest."
     },
     "dbSource": {
       "general": "General",

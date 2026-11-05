@@ -172,7 +172,7 @@ class DumCatalogJsonApiTest {
                             ? page(new int[] {1, 2})
                             : page(new int[] {3});
                 }, name -> states.computeIfAbsent(name, n -> new DumInMemoryJsonApiState()), url -> "",
-                (url, host) -> java.util.Optional.empty());
+                (url, host) -> java.util.Optional.empty(), null);
     }
 
     private static DumCatalogSourceRepository repositoryWith(DumCatalogSource source) {

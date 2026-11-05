@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.xml.XMLConstants;
@@ -49,7 +50,9 @@ import org.xml.sax.SAXParseException;
  *
  * <p>
  * Metadata is read as Dublin Core: every element in the {@code dc} namespace under a record's
- * {@code metadata}, whatever wraps it, keyed by local name. Slice 1 maps {@code oai_dc} only.
+ * {@code metadata}, whatever wraps it, keyed by local name. A record in DSpace's native {@code dim}
+ * format (roadmap <strong>D314</strong>) is read as well, each {@code <dim:field>} with its schema,
+ * element and qualifier, and so are the header's {@code setSpec} values.
  *
  * @param responseDate    the response's {@code responseDate}, or {@code null} if absent
  * @param errors          each {@code <error>} as code to message, in order
@@ -64,14 +67,30 @@ record DumOaiPmhResponse(String responseDate, Map<String, String> errors, List<I
 
     static final String OAI_NS = "http://www.openarchives.org/OAI/2.0/";
     static final String DC_NS = "http://purl.org/dc/elements/1.1/";
+    static final String DIM_NS = "http://www.dspace.org/xmlns/dspace/dim";
 
-    /** One harvested record: its header, and its Dublin Core values by element name. */
-    record Item(String identifier, String datestamp, boolean deleted, Map<String, List<String>> dc) {
+    /**
+     * One harvested record: its header, its Dublin Core values by element name, its sets and, for
+     * a {@code dim} record, every {@code <dim:field>} in document order.
+     */
+    record Item(String identifier, String datestamp, boolean deleted, Map<String, List<String>> dc,
+            List<String> sets, List<DimField> dim) {
+
+        Item(String identifier, String datestamp, boolean deleted, Map<String, List<String>> dc) {
+            this(identifier, datestamp, deleted, dc, List.of(), List.of());
+        }
 
         /** Every value of one Dublin Core element, empty when the record has none. */
         List<String> values(String element) {
             return dc.getOrDefault(element, List.of());
         }
+    }
+
+    /**
+     * One {@code <dim:field mdschema element qualifier>} value; {@code qualifier} is {@code null}
+     * when the field has none.
+     */
+    record DimField(String schema, String element, String qualifier, String value) {
     }
 
     /**
@@ -107,7 +126,10 @@ record DumOaiPmhResponse(String responseDate, Map<String, String> errors, List<I
                 .orElse(null);
         String datestamp = header.flatMap(h -> child(h, "datestamp")).map(DumOaiPmhResponse::text)
                 .orElse(null);
+        List<String> sets = header.map(h -> children(h, "setSpec").stream().map(DumOaiPmhResponse::text)
+                .filter(Objects::nonNull).toList()).orElse(List.of());
         Map<String, List<String>> dc = new LinkedHashMap<>();
+        List<DimField> dim = new ArrayList<>();
         child(element, "metadata").ifPresent(metadata -> {
             NodeList elements = metadata.getElementsByTagNameNS(DC_NS, "*");
             for (int i = 0; i < elements.getLength(); i++) {
@@ -117,8 +139,22 @@ record DumOaiPmhResponse(String responseDate, Map<String, String> errors, List<I
                     dc.computeIfAbsent(value.getLocalName(), k -> new ArrayList<>()).add(text);
                 }
             }
+            NodeList fields = metadata.getElementsByTagNameNS(DIM_NS, "field");
+            for (int i = 0; i < fields.getLength(); i++) {
+                Element field = (Element) fields.item(i);
+                String text = text(field);
+                if (text != null) {
+                    dim.add(new DimField(attribute(field, "mdschema"), attribute(field, "element"),
+                            attribute(field, "qualifier"), text));
+                }
+            }
         });
-        return new Item(identifier, datestamp, deleted, dc);
+        return new Item(identifier, datestamp, deleted, dc, sets, dim);
+    }
+
+    private static String attribute(Element element, String name) {
+        String value = element.getAttribute(name).strip();
+        return value.isEmpty() ? null : value;
     }
 
     private static Optional<Element> child(Element parent, String localName) {

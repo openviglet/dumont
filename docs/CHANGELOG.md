@@ -776,3 +776,4 @@
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
 - **D315** — The catalog form configures an OAI-PMH source, a same-host PDF's text is optional, Tika, pacing and Retry-After are shared, and a USP OJS and the DSpace demo harvest live.
+- **D314 (DSpace profile)** — A DSpace profile on the OAI source maps dim, names communities and collections, takes TEXT-bundle or PDF text and thumbnails through REST, and drops withdrawn items.

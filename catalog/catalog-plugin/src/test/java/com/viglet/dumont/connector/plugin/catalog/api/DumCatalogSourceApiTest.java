@@ -16,6 +16,7 @@
 package com.viglet.dumont.connector.plugin.catalog.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -33,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.viglet.dumont.connector.commons.spi.structured.parity.DumParityCriteria;
 import com.viglet.dumont.connector.commons.spi.structured.parity.DumParityReport;
@@ -144,6 +146,51 @@ class DumCatalogSourceApiTest {
         api.catalogSourceUpdate("a", req);
         assertThat(existing.getOaiPmhFullText()).isTrue();
         assertThat(existing.getOaiPmhWatermark()).as("records harvested before lack the text").isNull();
+    }
+
+    @Test
+    void theDSpaceProfileSavesItsFieldsDefaultsFullTextOnAndRestartsTheHarvest() {
+        DumCatalogSource existing = DumCatalogSource.builder().id("a").oaiPmhBaseUrl("https://repo.example/oai")
+                .oaiPmhWatermark("2026-11-01T10:00:00Z").build();
+        when(repository.findById("a")).thenReturn(Optional.of(existing));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        DumCatalogSourceRequest req = new DumCatalogSourceRequest();
+        req.setName("repo");
+        req.setOaiPmhBaseUrl("https://repo.example/oai");
+        req.setOaiPmhProfile("dspace");
+        req.setDspaceRestUrl("https://repo.example/server-x/api");
+        req.setSiteKey("repo");
+
+        api.catalogSourceUpdate("a", req);
+
+        assertThat(existing.getOaiPmhProfile()).isEqualTo("dspace");
+        assertThat(existing.getDspaceRestUrl()).isEqualTo("https://repo.example/server-x/api");
+        assertThat(existing.getSiteKey()).isEqualTo("repo");
+        assertThat(existing.getOaiPmhFullText()).as("full text is on for DSpace unless turned off").isTrue();
+        assertThat(existing.getOaiPmhWatermark()).as("dim records replace the Dublin Core ones").isNull();
+
+        existing.setOaiPmhWatermark("2026-11-02T10:00:00Z");
+        req.setOaiPmhFullText(false);
+        api.catalogSourceUpdate("a", req);
+        assertThat(existing.getOaiPmhFullText()).isFalse();
+        assertThat(existing.getOaiPmhWatermark()).isNull();
+    }
+
+    @Test
+    void theDSpaceProfileNeedsARestUrlAndAKnownName() {
+        DumCatalogSource existing = DumCatalogSource.builder().id("a").build();
+        when(repository.findById("a")).thenReturn(Optional.of(existing));
+        DumCatalogSourceRequest req = new DumCatalogSourceRequest();
+        req.setName("repo");
+        req.setOaiPmhBaseUrl("https://repo.example/oai");
+        req.setOaiPmhProfile("dspace");
+
+        assertThatThrownBy(() -> api.catalogSourceUpdate("a", req))
+                .isInstanceOf(ResponseStatusException.class).hasMessageContaining("REST API URL");
+
+        req.setOaiPmhProfile("eprints");
+        assertThatThrownBy(() -> api.catalogSourceUpdate("a", req))
+                .isInstanceOf(ResponseStatusException.class).hasMessageContaining("Unknown OAI-PMH profile");
     }
 
     @Test

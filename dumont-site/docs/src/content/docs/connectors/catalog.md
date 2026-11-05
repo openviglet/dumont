@@ -158,6 +158,42 @@ With **Full text from PDFs** on, the connector looks at each record's `dc:identi
 
 Full text costs a request per address tried, so a large repository takes longer to harvest. It is off by default.
 
+### DSpace
+
+Most Brazilian university repositories run DSpace. Its `oai_dc` output merges authors with advisors and drops the community and collection, so a DSpace repository is better read with the **DSpace profile**: the same harvest, in DSpace's own `dim` format, with each item completed from the DSpace REST API. Turn on **DSpace profile** in the OAI-PMH card and fill **DSpace REST API URL**. That is the REST base on the repository's host, usually ending in `/server/api`. The connector never guesses it, because an install can serve it under any path, such as `/repository/api`. Through the API or an import file, the same settings are `oaiPmhProfile: "dspace"`, `dspaceRestUrl` and `siteKey`.
+
+| Form field | API field | Default | What it does |
+|---|---|---|---|
+| DSpace profile | `oaiPmhProfile` | `generic` | `dspace` reads the repository as DSpace. The metadata prefix is then always `dim`. |
+| DSpace REST API URL | `dspaceRestUrl` | none, required | The REST base the items, names and files are read from. |
+| Site key | `siteKey` | the base URL's host | Stored on every record as `site_key`, to tell this repository apart in a shared index. |
+| Full text | `oaiPmhFullText` | **on** | Adds each item's text after the abstract. Only `false` turns it off. |
+
+Each `dim` record becomes these fields:
+
+| Field | From |
+|---|---|
+| `title` | `dc.title` |
+| `authors` | `dc.contributor.author`, then `dc.creator` |
+| `advisors` | `dc.contributor.advisor` and its numbered forms (`advisor1`, `advisor-co1`) |
+| `date` | `dc.date.issued` as a year, month, day or instant; else `dateText` as written |
+| `text` | `dc.description.abstract` (else `dc.description`), then the full text |
+| `subjects` | `dc.subject`, every qualifier (`cnpq` included) |
+| `type`, `publisher`, `language` | `dc.type`, `dc.publisher`, `dc.language.iso` and `dc.language` |
+| `url` | the handle link in `dc.identifier.uri` |
+| `relations` | `dc.relation`, every qualifier |
+| `community`, `collection` | the names of the record's `com_` and `col_` sets |
+| `image` | the first file of the item's `THUMBNAIL` bundle |
+| `site_key` | the source's site key |
+
+Nothing is filled in that the record does not hold. Community and collection names are read from the REST API once per run, page by page. A set whose name REST does not give is left out rather than indexed as `com_123456789_7`.
+
+Each item is looked up in REST by its handle. An item that REST reports withdrawn or not discoverable, or that answers 401 or 403 (private), is removed from the index and never indexed. A withdrawn item that the OAI-PMH feed marks deleted leaves the same way. An item REST cannot find is indexed from its metadata alone.
+
+With full text on, the connector reads the item's `TEXT` bundle first, which holds the text DSpace already extracted. When there is no `TEXT` bundle, it reads the item's `ORIGINAL` PDFs, at most three. The limits of the generic full text apply: the REST host only, 50 MiB and one million characters per file, and a 429 or 503 retried after its `Retry-After`. REST calls are spaced half a second apart. A file the public may not read (401, 403, an embargo) adds no text, and the item is still indexed with its metadata. A lookup, its bundles and one text file take about four requests per item, so the first harvest of a few hundred items runs for several minutes.
+
+DSpace's OAI-PMH answers from its own index, which is built by `dspace oai import`. A repository that never ran it answers `noRecordsMatch` to every harvest, even though the site shows items. The connector reports that as an empty, complete harvest, so ask the repository's administrators to run the import.
+
 ---
 
 ## REST API

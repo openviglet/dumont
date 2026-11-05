@@ -151,6 +151,23 @@ public class DumCatalogSource implements Serializable {
     private Boolean oaiPmhFullText;
 
     /**
+     * How the OAI-PMH repository is read (roadmap <strong>D314</strong>): blank or {@code generic}
+     * maps Dublin Core; {@code dspace} harvests {@code dim} and completes each record from the
+     * DSpace REST API at {@link #dspaceRestUrl}. With {@code dspace}, a null {@link #oaiPmhFullText}
+     * means full text is on.
+     */
+    @Column(name = "oai_pmh_profile")
+    private String oaiPmhProfile;
+
+    /** The DSpace REST API base, such as {@code https://repo.example/server/api}; the DSpace profile only. */
+    @Column(name = "dspace_rest_url", length = 2000)
+    private String dspaceRestUrl;
+
+    /** The {@code site_key} every DSpace record carries; blank means the OAI-PMH base URL's host. */
+    @Column(name = "site_key")
+    private String siteKey;
+
+    /**
      * The {@code responseDate} of the last complete OAI-PMH harvest, the next run's {@code from}.
      * Written by the harvest, never by the API or an import.
      */

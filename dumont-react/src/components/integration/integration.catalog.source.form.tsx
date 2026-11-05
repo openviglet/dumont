@@ -76,6 +76,9 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
     defaultValues: value
   });
   const navigate = useNavigate()
+  // The DSpace profile (D314) harvests dim and reads the REST API, so it swaps the prefix field for
+  // the REST URL and the site key, and its full text is on unless turned off.
+  const dspace = form.watch("oaiPmhProfile") === "dspace"
 
   useEffect(() => {
     form.reset({ ...value, site: value.turSNSites?.[0] ?? "" });
@@ -345,21 +348,64 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="oaiPmhMetadataPrefix"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("forms.catalogSource.oaiPmhMetadataPrefix")}</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="oaiPmhProfile"
+                  render={({ field }) => (
+                    <FormItemTwoColumns className="rounded-lg border p-4">
+                      <FormItemTwoColumns.Left className="space-y-0.5">
+                        <FormItemTwoColumns.Label className="text-base">{t("forms.catalogSource.oaiPmhDSpace")}</FormItemTwoColumns.Label>
+                        <FormItemTwoColumns.Description>{t("forms.catalogSource.oaiPmhDSpaceDesc")}</FormItemTwoColumns.Description>
+                      </FormItemTwoColumns.Left>
+                      <FormItemTwoColumns.Right>
                         <FormControl>
-                          <Input {...field} value={field.value ?? ""} placeholder="oai_dc" type="text" />
+                          <GradientSwitch aria-label={t("forms.catalogSource.oaiPmhDSpace")} checked={field.value === "dspace"}
+                            onCheckedChange={(on) => field.onChange(on ? "dspace" : "generic")} />
                         </FormControl>
-                        <FormDescription>{t("forms.catalogSource.oaiPmhMetadataPrefixDesc")}</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItemTwoColumns.Right>
+                    </FormItemTwoColumns>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  {dspace ? (
+                    <FormField
+                      control={form.control}
+                      name="dspaceRestUrl"
+                      rules={{
+                        validate: (url, values) => {
+                          if (values.oaiPmhProfile !== "dspace") return true
+                          if (!url?.trim()) return t("forms.catalogSource.dspaceRestUrlRequired")
+                          return isHttpUrlOrBlank(url) || t("forms.catalogSource.dspaceRestUrlInvalid")
+                        },
+                      }}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("forms.catalogSource.dspaceRestUrl")}</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value ?? ""} placeholder="https://repositorio.example.edu/server/api" type="text" />
+                          </FormControl>
+                          <FormDescription>{t("forms.catalogSource.dspaceRestUrlDesc")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="oaiPmhMetadataPrefix"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("forms.catalogSource.oaiPmhMetadataPrefix")}</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value ?? ""} placeholder="oai_dc" type="text" />
+                          </FormControl>
+                          <FormDescription>{t("forms.catalogSource.oaiPmhMetadataPrefixDesc")}</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <FormField
                     control={form.control}
@@ -377,18 +423,37 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                   />
                 </div>
 
+                {dspace && (
+                  <FormField
+                    control={form.control}
+                    name="siteKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("forms.catalogSource.siteKey")}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ""} placeholder="repositorio.example.edu" type="text" />
+                        </FormControl>
+                        <FormDescription>{t("forms.catalogSource.siteKeyDesc")}</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <FormField
                   control={form.control}
                   name="oaiPmhFullText"
                   render={({ field }) => (
                     <FormItemTwoColumns className="rounded-lg border p-4">
                       <FormItemTwoColumns.Left className="space-y-0.5">
-                        <FormItemTwoColumns.Label className="text-base">{t("forms.catalogSource.oaiPmhFullText")}</FormItemTwoColumns.Label>
-                        <FormItemTwoColumns.Description>{t("forms.catalogSource.oaiPmhFullTextDesc")}</FormItemTwoColumns.Description>
+                        <FormItemTwoColumns.Label className="text-base">{t(dspace ? "forms.catalogSource.dspaceFullText" : "forms.catalogSource.oaiPmhFullText")}</FormItemTwoColumns.Label>
+                        <FormItemTwoColumns.Description>{t(dspace ? "forms.catalogSource.dspaceFullTextDesc" : "forms.catalogSource.oaiPmhFullTextDesc")}</FormItemTwoColumns.Description>
                       </FormItemTwoColumns.Left>
                       <FormItemTwoColumns.Right>
                         <FormControl>
-                          <GradientSwitch aria-label={t("forms.catalogSource.oaiPmhFullText")} checked={field.value ?? false} onCheckedChange={field.onChange} />
+                          <GradientSwitch aria-label={t(dspace ? "forms.catalogSource.dspaceFullText" : "forms.catalogSource.oaiPmhFullText")}
+                            checked={dspace ? field.value !== false : field.value === true}
+                            onCheckedChange={field.onChange} />
                         </FormControl>
                       </FormItemTwoColumns.Right>
                     </FormItemTwoColumns>

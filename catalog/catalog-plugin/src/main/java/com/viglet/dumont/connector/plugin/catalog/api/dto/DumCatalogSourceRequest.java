@@ -51,5 +51,8 @@ public class DumCatalogSourceRequest {
     private String oaiPmhMetadataPrefix;
     private String oaiPmhSet;
     private Boolean oaiPmhFullText;
+    private String oaiPmhProfile;
+    private String dspaceRestUrl;
+    private String siteKey;
     private Collection<String> turSNSites = new HashSet<>();
 }

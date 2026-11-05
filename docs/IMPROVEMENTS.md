@@ -148,7 +148,7 @@ D246 criterion is met.
 
 ### XLIX.145 Search across sibling site keys (D303)
 
-**Where it came from.** FESPSP runs three WordPress sites and wants them in one shared
+**Where it came from.** A client runs three WordPress sites and wants them in one shared
 SN site (D148), searched from the institutional one. Every read path pins the own key,
 and in PHP each caller builds `'site_key:' . site_key()` itself (`native-search.php`
 326, 546, 687; trending, related); JS has one helper (`siteFilter`, `public/search.js`).
@@ -172,10 +172,10 @@ unknown sibling key; template mode scoped.
 
 ### XLIX.152 Grounded people and themes as facets (D310)
 
-**Where it came from.** FESPSP wants visitors to explore it by **person** and **theme**
-across its WordPress sites and DSpace repository (one SN site, D303). People and themes
-sit in text, not fields, and the repository's author facet mixes "Bosso, Bruno" with
-"Antonio Prado".
+**Where it came from.** A client wants visitors to explore it by **person** and
+**theme** across its WordPress sites and DSpace repository (one SN site, D303). People
+and themes sit in text, not fields, and the repository's author facet mixes "Surname,
+Name" with "Name Surname".
 
 **Where the seam is.** Not Dumont's enrichment: the plugin imports straight to Turing,
 and Track F's D18 resolves duplicate *records* by canonical key, not name variants.
@@ -200,10 +200,10 @@ an alias resolves to the canonical name.
 
 ### XLIX.153 An immersive layout for the instant overlay (D311)
 
-**Where it came from.** FESPSP wants its search "complete and immersive", one keystroke
-from anywhere. The instant overlay (D167, `public/overlay.js`) is a flat list of six
-results with no type, date, image, answer or zero state; everything richer lives only on
-the results page.
+**Where it came from.** A client wants its search "complete and immersive", one
+keystroke from anywhere. The instant overlay (D167, `public/overlay.js`) is a flat list
+of six results with no type, date, image, answer or zero state; everything richer lives
+only on the results page.
 
 **What the plugin should do.** An "immersive" layout for the overlay (setting `overlay_layout: list|immersive`, list stays the default):
 - **full screen** on phones, a large panel on desktop, with focus trapped and the background inert;
@@ -222,9 +222,9 @@ all" lands on the results page with that filter.
 
 ### XLIX.154 From the search answer into the assistant and back (D312)
 
-**Where it came from.** On FESPSP's site the search answer (D166) and the Site assistant
-(D175) are separate: a visitor who reads the answer to "como funciona a biblioteca" and
-wants "and on Saturdays?" must start over. The answer runs its own
+**Where it came from.** On a client's site the search answer (D166) and the Site
+assistant (D175) are separate: a visitor who reads the answer to "como funciona a
+biblioteca" and wants "and on Saturdays?" must start over. The answer runs its own
 `createAnswerController` with its own conversation (`search-block.js` 528); the
 assistant runs `createChatController` and cannot be opened with turns already in it. Nor
 does an assistant answer citing many documents link to the results page.
@@ -246,7 +246,7 @@ matching results page.
 
 ### XLIX.155 Turing chat flows in the Site assistant (D313)
 
-**Where it came from.** FESPSP wants its site assistant immersive, with guided
+**Where it came from.** A client wants its site assistant immersive, with guided
 conversations built as Turing chat flows: a tour through the school's near-century of
 history with choices, and an orientation flow ("I want to study / research / work here")
 routing to the right pages. Turing runs flows (`genai/flow`: forms with `select` fields,
@@ -275,8 +275,8 @@ block, at 390 and 1280px.
 **Analysis task: it delivers D lines, not code.** The WordPress plugin and its demo were
 shaped by a store: Tarnfell sells outdoor gear, and `wordpress/demo/story.md` proves
 search, a sentence read as filters, the assistant, compare, Build my kit, a product page
-and checkout. FESPSP, a school nearly a century old, is the first real non-commerce
-adopter (fespsp-institucional L–P), and already surfaced D303–D315.
+and checkout. A school client is the first real non-commerce adopter, and already
+surfaced D303–D315.
 
 **What to analyse:**
 1. **Store-shaped names and defaults.** Find what stays commerce-only and what should be generic:
@@ -289,8 +289,8 @@ adopter (fespsp-institucional L–P), and already surfaced D303–D315.
 3. **Source parity:** documents from the plugin and from D314/D315 share the same fields, so one SN site's facets, cards and AI features treat them alike.
 4. **Operations for a small team:** what an editor sees when Turing is down, a reindex is slow, or the AI budget runs out.
 
-**Delivers:** one D line per finding in Track S or U, each naming the FESPSP line it
-serves, and a design note for the second demo if it is worth building.
+**Delivers:** one D line per finding in Track S or U, each naming the line it serves,
+and a design note for the second demo if it is worth building.
 
 ### XLIX.157 Untranslated strings fail a gate (D317)
 
@@ -374,12 +374,12 @@ trail the site and the 2026.3 line.
 
 ### LII.1 A DSpace source (D314)
 
-**Where it came from.** FESPSP's client wants its institutional repository in the
-unified search of its WordPress sites (one SN site, D303). Measured 2026-11-04:
-`repositorio.fespsp.org.br` runs **DSpace 9.2**, REST at `/server-fespsp/api` (public,
-no key), 208 items in six communities, and OAI-PMH at `/server-fespsp/oai/request` with
-`deletedRecord=transient`. DSpace is the default repository of Brazilian universities,
-and crawling its HTML loses authors, dates and collections.
+**Where it came from.** A client wants its institutional repository in the unified
+search of its WordPress sites (one SN site, D303). Measured 2026-11-04: the repository
+runs **DSpace 9.2**, with REST and OAI-PMH under a non-default server path (public, no
+key), about two hundred items in six communities, and `deletedRecord=transient`. DSpace
+is the default repository of Brazilian universities, and crawling its HTML loses
+authors, dates and collections.
 
 **A profile on the OAI-PMH source, not a second harvester.** Every DSpace speaks OAI,
 and its `dim` format carries all metadata, deletions and incremental `from` (D315).
@@ -387,13 +387,14 @@ D92's JSON machinery is no shortcut here: its incremental mode expires ids by ag
 never filters by `lastModified`. This line adds, from REST, what OAI lacks.
 
 **What Dumont should do.** A `dspace` source over D315:
-- **metadata** from OAI `dim`: title, `dc.contributor.author` and `.advisor` (multi), `dc.date.issued` (DATE), `dc.type`, `dc.subject`, abstract, language; the handle URL as the document URL; overridable per source;
+- **metadata** from OAI `dim`: title, `dc.contributor.author` and `.advisor` (multi), `dc.date.issued` (DATE), `dc.type`, `dc.subject`, abstract, language; the handle URL as the document URL;
 - **community and collection** as facets by name, resolved once per run through REST;
-- **full text** from the TEXT bundle (DSpace's own extraction), else the ORIGINAL PDF through the shared capped extraction; THUMBNAIL as image; the REST base configured, never assumed to be `/server`;
+- **full text** from the TEXT bundle (DSpace's own extraction), else the ORIGINAL PDF through the shared capped extraction; THUMBNAIL as image; the REST base configured;
 - **withdrawn, private or embargoed** items deleted, never indexed;
 - a site key per source.
 
-Name variants ("Bosso, Bruno", "Antonio Prado") are D310's to resolve, not this line's.
+Name variants of one author ("Surname, Name" beside "Name Surname") are D310's to
+resolve, not this line's.
 
 **Done when:** an item's author, year, community and a sentence of its full text are
 searchable, and withdrawing it removes it on the next run.

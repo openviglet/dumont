@@ -18,8 +18,17 @@ export type TurIntegrationCatalogSource = {
   oaiPmhMetadataPrefix?: string;
   /** The OAI-PMH set to harvest; blank means the whole repository. */
   oaiPmhSet?: string;
-  /** Also read each record's PDF, from the repository's own host only. */
+  /**
+   * Also read each record's full text, from the repository's own host only. Off unless set, except
+   * under the DSpace profile, where only `false` turns it off.
+   */
   oaiPmhFullText?: boolean;
+  /** How the repository is read (D314): `generic` Dublin Core (the default) or `dspace`. */
+  oaiPmhProfile?: "generic" | "dspace";
+  /** The DSpace REST API base, e.g. `https://repo.example/server/api`; the DSpace profile only. */
+  dspaceRestUrl?: string;
+  /** The `site_key` every DSpace record carries; blank means the OAI-PMH base URL's host. */
+  siteKey?: string;
   /** Turing Semantic Navigation site(s) this source publishes to. */
   turSNSites: string[];
 };

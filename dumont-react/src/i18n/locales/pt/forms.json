@@ -1057,7 +1057,17 @@
       "oaiPmhSet": "Conjunto (set)",
       "oaiPmhSetDesc": "Colete só este conjunto (uma coleção ou comunidade). Em branco, coleta o repositório inteiro.",
       "oaiPmhFullText": "Texto completo dos PDFs",
-      "oaiPmhFullTextDesc": "Lê também o PDF de cada registro, quando o identificador ou a relação aponta para um no próprio host do repositório, e acrescenta o texto depois da descrição. Outros hosts nunca são acessados. Mudar esta opção recomeça a coleta do início."
+      "oaiPmhFullTextDesc": "Lê também o PDF de cada registro, quando o identificador ou a relação aponta para um no próprio host do repositório, e acrescenta o texto depois da descrição. Outros hosts nunca são acessados. Mudar esta opção recomeça a coleta do início.",
+      "oaiPmhDSpace": "Perfil DSpace",
+      "oaiPmhDSpaceDesc": "Lê o repositório como DSpace: coleta o formato nativo dim, para que autores, orientadores, data de publicação e resumo fiquem separados, e completa cada item pela API REST do DSpace com os nomes da comunidade e da coleção, a miniatura e o texto. Itens retirados, privados ou ocultos são removidos, nunca indexados. Mudar esta opção recomeça a coleta do início.",
+      "dspaceRestUrl": "URL da API REST do DSpace",
+      "dspaceRestUrlDesc": "A base da API REST no host do repositório, em geral terminada em /server/api, mas confira a sua: uma instalação pode servi-la em qualquer caminho.",
+      "dspaceRestUrlRequired": "O perfil DSpace precisa da URL da API REST.",
+      "dspaceRestUrlInvalid": "A URL da API REST precisa ser uma URL http(s).",
+      "siteKey": "Chave do site",
+      "siteKeyDesc": "Um valor gravado em todo registro como site_key, para separar os registros deste repositório num índice compartilhado. Em branco, usa o host da URL base.",
+      "dspaceFullText": "Texto completo",
+      "dspaceFullTextDesc": "Acrescenta o texto de cada item depois do resumo: o texto que o próprio DSpace extraiu (o pacote TEXT), quando existe, senão o PDF. Arquivos que o público não pode ler são pulados e o item é indexado sem eles. Ligado por padrão; mudar esta opção recomeça a coleta."
     },
     "dbSource": {
       "general": "Geral",

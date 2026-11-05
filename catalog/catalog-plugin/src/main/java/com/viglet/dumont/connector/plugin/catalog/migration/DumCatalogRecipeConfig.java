@@ -21,6 +21,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumHttpJsonFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumDSpaceRest;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumHttpDSpaceRest;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumHttpOaiPmhFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumHttpOaiPmhFullTextFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFetcher;
@@ -76,5 +78,14 @@ public class DumCatalogRecipeConfig {
     @Bean
     DumOaiPmhFullTextFetcher dumCatalogOaiPmhFullTextFetcher() {
         return new DumHttpOaiPmhFullTextFetcher();
+    }
+
+    /**
+     * What an OAI-PMH source with the DSpace profile (D314) reads the repository's REST API with:
+     * its own host only, paced, and with the full-text caps on bitstream content.
+     */
+    @Bean
+    DumDSpaceRest dumCatalogDSpaceRest() {
+        return new DumHttpDSpaceRest();
     }
 }

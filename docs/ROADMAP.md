@@ -128,7 +128,6 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D314** (deps: D315 ✅) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Crawling loses authors, advisors, dates and collections, and DSpace is the repository most Brazilian universities run. → §LII.1
 - 📋 **D321** (deps: —) **An OAI-PMH record can get a private address as its URL, and an OJS article's PDF text is never found** — The DSpace demo leaks an internal host into its records, and OJS hides PDFs behind its article page. → §LII.3
 
 ## Done when — D303
@@ -142,6 +141,12 @@ This track has no remaining pending tasks.
 - **A question in the immersive overlay shows Turing's answer on top** A spec asks a
   question on the AI stack and reads the answer strip above the groups, with a desktop
   preview of the highlighted result beside them.
+
+## Done when — D314
+
+- **A DSpace item is found by author, year, community and its text** On a DSpace whose
+  OAI index is populated, a harvested item answers those four searches in Turing, and
+  withdrawing it removes it on the next run.
 
 ## Non-goals (do NOT add as tasks)
 

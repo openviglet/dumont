@@ -32,6 +32,8 @@ import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePro
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiManifest;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiSource;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumDSpaceProfile;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumDSpaceRest;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFullTextFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhSource;
@@ -68,6 +70,11 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
 
+    /** The {@code oaiPmhProfile} that reads the repository as DSpace (roadmap D314). */
+    public static final String DSPACE_PROFILE = "dspace";
+    /** The {@code oaiPmhProfile} that maps Dublin Core, the default. */
+    public static final String GENERIC_PROFILE = "generic";
+
     private final DumCatalogSourceRepository sourceRepository;
     private final DumCatalogFetcher fetcher;
     private final DumRecipeLibrary recipeLibrary;
@@ -76,11 +83,13 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
     private final DumCatalogJsonApiStates jsonApiStates;
     private final DumOaiPmhFetcher oaiPmhFetcher;
     private final DumOaiPmhFullTextFetcher oaiPmhFullTextFetcher;
+    private final DumDSpaceRest dspaceRest;
 
     public DumCatalogSourceProvider(DumCatalogSourceRepository sourceRepository,
             DumCatalogFetcher fetcher, DumRecipeLibrary recipeLibrary, DumHtmlFetcher htmlFetcher,
             DumJsonFetcher jsonFetcher, DumCatalogJsonApiStates jsonApiStates,
-            DumOaiPmhFetcher oaiPmhFetcher, DumOaiPmhFullTextFetcher oaiPmhFullTextFetcher) {
+            DumOaiPmhFetcher oaiPmhFetcher, DumOaiPmhFullTextFetcher oaiPmhFullTextFetcher,
+            DumDSpaceRest dspaceRest) {
         this.sourceRepository = sourceRepository;
         this.fetcher = fetcher;
         this.recipeLibrary = recipeLibrary;
@@ -89,6 +98,7 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
         this.jsonApiStates = jsonApiStates;
         this.oaiPmhFetcher = oaiPmhFetcher;
         this.oaiPmhFullTextFetcher = oaiPmhFullTextFetcher;
+        this.dspaceRest = dspaceRest;
     }
 
     @Override
@@ -201,15 +211,19 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
     /**
      * The OAI-PMH source a base URL declares (roadmap <strong>D315</strong>), bound to this source's
      * name, sites and locale, keeping its watermark on the source's own row, and reading each
-     * record's PDF when the source has full text on.
+     * record's PDF when the source has full text on. With the DSpace profile (D314) the records are
+     * read as {@code dim} and completed from the DSpace REST API, which also gives their full text.
      *
-     * @throws IllegalArgumentException when the base URL is not an http(s) URL
+     * @throws IllegalArgumentException when the base URL, or the DSpace REST URL, is not http(s)
      */
     public DumOaiPmhSource oaiPmhSource(DumCatalogSource source) {
+        boolean fullText = oaiPmhFullText(source);
+        boolean dspace = isDSpace(source);
         return DumOaiPmhSource.builder(source.getOaiPmhBaseUrl(), oaiPmhFetcher)
                 .metadataPrefix(source.getOaiPmhMetadataPrefix())
                 .set(source.getOaiPmhSet())
-                .fullText(Boolean.TRUE.equals(source.getOaiPmhFullText()) ? oaiPmhFullTextFetcher : null)
+                .fullText(fullText && !dspace ? oaiPmhFullTextFetcher : null)
+                .dspace(dspace ? dspaceProfile(source, dspaceRest, fullText) : null)
                 .sourceName(source.getName())
                 .providerName(DumCatalogPlugin.PROVIDER_NAME)
                 .siteNames(source.getTurSNSites() == null ? List.of() : List.copyOf(source.getTurSNSites()))
@@ -233,8 +247,52 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
             throw new IllegalArgumentException(
                     "A source harvests either an OAI-PMH repository or a JSON API manifest, not both");
         }
+        String profile = blankToNull(source.getOaiPmhProfile());
+        if (profile != null && !GENERIC_PROFILE.equals(profile) && !DSPACE_PROFILE.equals(profile)) {
+            throw new IllegalArgumentException("Unknown OAI-PMH profile '%s': use %s or %s".formatted(profile,
+                    GENERIC_PROFILE, DSPACE_PROFILE));
+        }
         DumOaiPmhSource.builder(source.getOaiPmhBaseUrl(), url -> "")
-                .sourceName(notBlank(source.getName()) ? source.getName() : "unnamed").build();
+                .sourceName(notBlank(source.getName()) ? source.getName() : "unnamed")
+                .dspace(isDSpace(source) ? dspaceProfile(source, VALIDATION_ONLY, false) : null)
+                .build();
+    }
+
+    /** What validation builds a DSpace profile with: it is never asked anything. */
+    private static final DumDSpaceRest VALIDATION_ONLY = new DumDSpaceRest() {
+        @Override
+        public Response get(String url, String host) {
+            throw new IllegalStateException("validation calls no REST API");
+        }
+
+        @Override
+        public Optional<String> text(String url, String host) {
+            throw new IllegalStateException("validation calls no REST API");
+        }
+    };
+
+    private static DumDSpaceProfile dspaceProfile(DumCatalogSource source, DumDSpaceRest rest, boolean fullText) {
+        return DumDSpaceProfile.builder(source.getDspaceRestUrl(), rest).fullText(fullText)
+                .siteKey(source.getSiteKey()).build();
+    }
+
+    /** Whether this source reads its OAI-PMH repository as DSpace (D314). */
+    public static boolean isDSpace(DumCatalogSource source) {
+        return DSPACE_PROFILE.equals(blankToNull(source.getOaiPmhProfile()));
+    }
+
+    /**
+     * Whether the source's records carry full text: on only when asked, except under the DSpace
+     * profile, where it is on unless turned off.
+     */
+    public static boolean oaiPmhFullText(DumCatalogSource source) {
+        return isDSpace(source) ? !Boolean.FALSE.equals(source.getOaiPmhFullText())
+                : Boolean.TRUE.equals(source.getOaiPmhFullText());
+    }
+
+    /** {@code value} stripped, or {@code null} when blank. */
+    public static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.strip();
     }
 
     /** Whether this source harvests an OAI-PMH repository. */

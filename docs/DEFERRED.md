@@ -34,3 +34,4 @@
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
+- ⏸ **D314** (deps: D315 ✅) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — set aside (The live DSpace's OAI index is empty (noRecordsMatch).): Left: the end-to-end check in Turing. → §LII.1

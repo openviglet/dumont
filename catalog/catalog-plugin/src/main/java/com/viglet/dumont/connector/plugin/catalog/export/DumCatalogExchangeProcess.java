@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.viglet.dumont.connector.plugin.catalog.persistence.model.DumCatalogSource;
+import com.viglet.dumont.connector.plugin.catalog.source.DumCatalogSourceProvider;
 import com.viglet.dumont.connector.plugin.catalog.persistence.repository.DumCatalogSourceRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +61,9 @@ public class DumCatalogExchangeProcess {
     private static final String OAI_PMH_METADATA_PREFIX = "oaiPmhMetadataPrefix";
     private static final String OAI_PMH_SET = "oaiPmhSet";
     private static final String OAI_PMH_FULL_TEXT = "oaiPmhFullText";
+    private static final String OAI_PMH_PROFILE = "oaiPmhProfile";
+    private static final String DSPACE_REST_URL = "dspaceRestUrl";
+    private static final String SITE_KEY = "siteKey";
 
     private final DumCatalogSourceRepository sourceRepository;
 
@@ -89,7 +93,14 @@ public class DumCatalogExchangeProcess {
             json.putOpt(OAI_PMH_SET, source.getOaiPmhSet());
             if (Boolean.TRUE.equals(source.getOaiPmhFullText())) {
                 json.put(OAI_PMH_FULL_TEXT, true);
+            } else if (Boolean.FALSE.equals(source.getOaiPmhFullText())
+                    && DumCatalogSourceProvider.isDSpace(source)) {
+                // Off has to travel for DSpace (D314), where a missing value means on.
+                json.put(OAI_PMH_FULL_TEXT, false);
             }
+            json.putOpt(OAI_PMH_PROFILE, source.getOaiPmhProfile());
+            json.putOpt(DSPACE_REST_URL, source.getDspaceRestUrl());
+            json.putOpt(SITE_KEY, source.getSiteKey());
             array.put(json);
         }
         return array.toString(2);
@@ -155,7 +166,11 @@ public class DumCatalogExchangeProcess {
             source.setOaiPmhBaseUrl(json.optString(OAI_PMH_BASE_URL, null));
             source.setOaiPmhMetadataPrefix(json.optString(OAI_PMH_METADATA_PREFIX, null));
             source.setOaiPmhSet(json.optString(OAI_PMH_SET, null));
-            source.setOaiPmhFullText(json.optBoolean(OAI_PMH_FULL_TEXT, false));
+            source.setOaiPmhProfile(json.optString(OAI_PMH_PROFILE, null));
+            source.setDspaceRestUrl(json.optString(DSPACE_REST_URL, null));
+            source.setSiteKey(json.optString(SITE_KEY, null));
+            source.setOaiPmhFullText(json.has(OAI_PMH_FULL_TEXT) ? Boolean.valueOf(json.optBoolean(OAI_PMH_FULL_TEXT))
+                    : DumCatalogSourceProvider.isDSpace(source) ? null : Boolean.FALSE);
         }
         sourceRepository.save(source);
         log.info("Imported catalog source '{}'", name);

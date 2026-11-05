@@ -95,6 +95,12 @@ import lombok.extern.slf4j.Slf4j;
  * PDF text it gets to {@code text}, after the description. A failed or empty fetch leaves the
  * record as the metadata alone describes it.
  *
+ * <p>
+ * <strong>DSpace.</strong> With a {@link DumDSpaceProfile} (roadmap <strong>D314</strong>) the
+ * harvest asks for {@code dim}, the schema is {@link DumDSpaceProfile#SCHEMA}, and each record is
+ * mapped and completed from the repository's REST API by the profile; an item REST reports
+ * withdrawn, private or not discoverable joins {@link #goneIds()} instead of being indexed.
+ *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
@@ -165,6 +171,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     private final DumOaiPmhState state;
     private final boolean incrementalEnabled;
     private final DumOaiPmhFullTextFetcher fullText;
+    private final DumDSpaceProfile dspace;
     private final String host;
 
     private final List<String> notes = new ArrayList<>();
@@ -176,7 +183,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
 
     private DumOaiPmhSource(Builder builder) {
         this.baseUrl = builder.baseUrl.trim();
-        this.metadataPrefix = builder.metadataPrefix;
+        this.metadataPrefix = builder.dspace != null ? DumDSpaceProfile.METADATA_PREFIX : builder.metadataPrefix;
         this.set = builder.set;
         this.sourceName = builder.sourceName;
         this.providerName = builder.providerName;
@@ -186,6 +193,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         this.state = builder.state;
         this.incrementalEnabled = builder.incremental;
         this.fullText = builder.fullText;
+        this.dspace = builder.dspace;
         this.host = URI.create(this.baseUrl).getHost();
     }
 
@@ -210,7 +218,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
 
     @Override
     public DumStructuredSchema schema() {
-        return SCHEMA;
+        return dspace != null ? DumDSpaceProfile.SCHEMA : SCHEMA;
     }
 
     @Override
@@ -247,7 +255,11 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     @Override
     public synchronized List<String> runNotes() {
         records();
-        return List.copyOf(notes);
+        List<String> all = new ArrayList<>(notes);
+        if (dspace != null) {
+            all.addAll(dspace.notes());
+        }
+        return List.copyOf(all);
     }
 
     /** How many requests the harvest made. */
@@ -261,6 +273,15 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         DumOaiPmhResponse.Item item = records().get(contentId);
         if (item == null) {
             return Optional.empty();
+        }
+        if (dspace != null) {
+            DumDSpaceProfile.Outcome outcome = dspace.extract(contentId, item, host);
+            if (outcome.gone()) {
+                synchronized (this) {
+                    gone.add(contentId);
+                }
+            }
+            return outcome.record();
         }
         DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, SCHEMA);
         rec.set(TITLE, item.values("title").stream().findFirst().orElse(null), provenance("title"));
@@ -535,6 +556,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         private DumOaiPmhState state = new DumInMemoryOaiPmhState();
         private boolean incremental = true;
         private DumOaiPmhFullTextFetcher fullText;
+        private DumDSpaceProfile dspace;
 
         private Builder(String baseUrl, DumOaiPmhFetcher fetcher) {
             if (baseUrl == null || !(baseUrl.strip().regionMatches(true, 0, "http://", 0, 7)
@@ -602,6 +624,16 @@ public final class DumOaiPmhSource implements DumStructuredSource {
          */
         public Builder fullText(DumOaiPmhFullTextFetcher fullText) {
             this.fullText = fullText;
+            return this;
+        }
+
+        /**
+         * Reads the repository as DSpace (roadmap D314): {@code dim} metadata whatever
+         * {@link #metadataPrefix(String)} says, completed through {@code dspace}'s REST API.
+         * {@code null}, the default, keeps the generic Dublin Core mapping.
+         */
+        public Builder dspace(DumDSpaceProfile dspace) {
+            this.dspace = dspace;
             return this;
         }
 
