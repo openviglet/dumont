@@ -774,6 +774,7 @@
 - **D324** — The search block reads a month, next week, tomorrow or this month from a sentence and filters the agenda's date with no language model.
 - **D325** — A fictional school demo (run-docker.cmd demo edu, en and pt_BR) walks agenda periods, an opening leaving search, PDFs and card dates; demos now read a site descriptor.
 - **D326** — Archive records send Turing's author, publication_date and abstract, and the plugin declares author multi-valued, so a post and a thesis share one author facet, date and snippet.
+- **D327** — Cards read the first value of a document's type, and Fields lists other sources' types with a label, card date and image, so an Article record shows its own badge and date.
 
 ## Track T — Releases and links match what the site describes
 

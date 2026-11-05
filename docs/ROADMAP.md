@@ -120,13 +120,13 @@ This track has no remaining pending tasks.
 - ⏳ **D303** (deps: Turing T1223) **A site sharing an SN site can search only its own site key, never its sibling sites' documents** — Sibling keys wait on Turing T1223 (site_key values as alternatives): setting, seams, facet labels, badge, Related, navigate. → §XLIX.145
 - 📋 **D310** (deps: Turing T1225) **WordPress documents carry no people or themes: who and what a post names never becomes a facet** — A site cannot be explored by person or theme, and name variants across sites and the repository stay split. → §XLIX.152
 - 📋 **D318** (deps: Turing T1226) **A scoped search block's suggestions ignore its scope: the box suggests terms only content outside it holds** — A visitor in a box scoped to events picks a suggested term and finds nothing. → §XLIX.158
-- 📋 **D327** (deps: —) **A document whose type is not a WordPress post type gets a raw or broken badge and cannot be configured** — An archive record's type shows as "Array" or a comma list, with no label, card date or image of its own. → §XLIX.166
 - 📋 **D328** (deps: —) **When Turing hangs, pages with search or Related wait up to 30 seconds, every view** — An outage of the search service slows the whole site instead of only its search. → §XLIX.167
 - 📋 **D329** (deps: —) **After a few hours of outage, queued edits stop retrying and nothing tells the editor or replays them** — Edits made during an outage silently never reach search. → §XLIX.168
 - 📋 **D330** (deps: —) **The editor panel's Reindex now says "Failed" with no reason** — An editor cannot tell a refused document from a Turing outage. → §XLIX.169
 - 📋 **D331** (deps: —) **Index All runs in the browser tab: closing it or one failed batch stops the reindex with no resume** — A slow reindex on a shared host is a session the editor must babysit. → §XLIX.170
 - 📋 **D332** (deps: —) **When the AI budget runs out, answers, filters and the copilot go quiet or blame the catalog, and Health says nothing** — An editor cannot tell a spent budget from a broken site, nor when it comes back. → §XLIX.171
 - 📋 **D333** (deps: —) **An agenda event dated today shows under both Today and Past** — Past ends at NOW/DAY inclusive and a day-only date is midnight UTC, so today's events read as already gone. → §XLIX.172
+- 📋 **D334** (deps: Turing T1231) **Fields finds another source's types by paging up to 2,000 documents, so a large site can miss one** — A type that sorts after the first 2,000 documents never reaches Fields and cannot be labelled. → §XLIX.173
 
 ## Track T — Releases and links match what the site describes
 

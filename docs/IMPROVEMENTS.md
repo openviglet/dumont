@@ -287,23 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.166 Types from other sources (D327)
-
-**Found by D316.** A document from another source carries a free-text, possibly
-multi-valued `type` (`dc:type`), and the search block assumes a WordPress post type: the
-server reads `(string) $fields['type']` (`class-viglet-dumont-native-search.php` 580),
-likely "Array" with a notice on a list, and the browser joins the values with commas
-(`public/search.js` 115). Type labels, card date and image come from WordPress post
-types only (`blocks/search/render.php` 30-36; `native-search.php` 360-371), so such a
-document gets a raw badge and cannot be configured.
-
-**What to build.** Read the first value of `type` on both sides, and let Fields list the
-type values the SN site holds beyond WordPress's, with a label and the card date and
-image like a post type's.
-
-**Done when:** a record with `type: ["Article","Thesis"]` shows the label set for
-Article, and its card date follows the field chosen for it.
-
 ### XLIX.167 Fast failure while Turing is down (D328)
 
 **Found by D316.** When Turing hangs, every page that reads it waits up to the client's
@@ -395,6 +378,23 @@ today.
 
 **Done when:** an event dated today is under Today, Next 7 days and Upcoming, never
 under Past, on the site spec and the school demo.
+
+### XLIX.173 Foreign types through one negative filter (D334)
+
+**Found by D327.** `Viglet_Dumont_Mapping::discover_foreign()` lists the `type` values
+other sources sent under the site key. Turing returns no results for a negative filter
+(`fq[]=-source_apps:wordpress`), so the method counts the key's documents minus the
+plugin's own and, when any remain, pages the site's documents 100 at a time up to 2,000,
+skipping its own. On a site with more documents a foreign type that Turing orders late
+is never seen; the docs say so.
+
+**What to build.** Once Turing T1231 honours negative filter queries, ask once with
+`fq[]=site_key:<key>&fq[]=-source_apps:<app>` and read the types from that answer (paged
+over foreign documents only, or from a facet on `type` if Turing offers one), and drop
+the 2,000 ceiling and its note in the docs.
+
+**Done when:** a foreign type present only after the first 2,000 documents is listed in
+Fields.
 
 ## L The documentation area
 

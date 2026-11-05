@@ -195,6 +195,13 @@ custom fields can be added on the Settings page.
   day it happens. A date with no time of day is shown as that day in every time zone. The
   instant search shows the same date, and the first card field, under each result.
 - **Leave this type out of search** switches a whole post type off.
+- **Types from other sources** lists the types of documents another source sent under the
+  site key, such as a catalog's `Article` or `Thesis`, which no post type has. Each one
+  gets a **Label** (its badge on result cards), a **Date shown on cards** from the date
+  fields its documents carry (`defense_date`, say) and an **Image on cards** from their
+  text fields. This changes how they look, never what is indexed. A record with several
+  types, `["Article", "Thesis"]`, is shown as its first. The section appears once Turing
+  holds such a document; the screen reads up to 2,000 of the site's documents to find them.
 
 **In Turing** says where each field stands: *In Turing*, *Added on the next save*, or
 *Conflict* when Turing already holds the field with another type. **Preview document**
@@ -280,6 +287,8 @@ each other's documents. The key defaults to the site's host and path
 plugin sent. A Dumont connector given the same site key, such as a catalog of theses that
 should come up in the site's search, keeps its documents through Index All, the sweep and
 Delete All. **Search health** says how many documents under the key came from another source.
+Their types get a label, a card date and a card image under **Fields → Types from other
+sources**.
 
 A post and an archive record use the same field for the author, the date and the snippet:
 Turing's own `author`, `publication_date` and `abstract`, which the
