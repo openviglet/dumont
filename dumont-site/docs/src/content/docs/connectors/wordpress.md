@@ -184,6 +184,11 @@ custom fields can be added on the Settings page.
   field's label, or its name when it has none. A `DATE` field is written in the site's date
   format, a multiple field's values are joined with commas, and a URL is never shown as
   text. An event, say, can show the day it happens beside the day it was posted.
+- **Date shown on cards** and **Image on cards**, per post type: the card's date can be one
+  of the type's `DATE` fields instead of the publication date, and its image one of its
+  text fields (an image URL) instead of the featured image. An event's card then shows the
+  day it happens. A date with no time of day is shown as that day in every time zone. The
+  instant search shows the same date, and the first card field, under each result.
 - **Leave this type out of search** switches a whole post type off.
 
 **In Turing** says where each field stands: *In Turing*, *Added on the next save*, or
@@ -213,7 +218,10 @@ shop can sell.
 
 The same mapping is readable and writable as JSON at `viglet-dumont/v1/mapping`. A theme
 can map in code with the `viglet_dumont_mapping` filter, and change a document just before
-it is sent with `viglet_dumont_document`.
+it is sent with `viglet_dumont_document`. `viglet_dumont_result_card` changes a result card
+the search block draws on the server, before its script runs (`$card`, `$document`). The
+script redraws a card from the mapping alone, so use the filter only for what Fields can't
+set, or the card changes once the page loads.
 
 ### Excluding content
 

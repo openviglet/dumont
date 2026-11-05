@@ -759,7 +759,7 @@
 - **D301** — The classic and Ollie baselines are retaken and both themes pinned, so a full run reaches every variant: 217 passed (design §XLIX.143 recorded in `wordpress/playwright.config.mjs`).
 - **D303 (scope seam)** — Every visitor read goes through one scope seam, Indexer::scope_filters() and scopeFilters in search.js, and template mode is scoped, no longer listing other sites' documents.
 - **D304** — A Results page on another site setting (or VIGLET_DUMONT_SEARCH_URL) sends the overlay, the box-only block and the theme's search forms there, and local search replacement steps aside.
-- **D305 (card fields)** — A mapped field marked Show on result cards in Fields becomes a labelled line on each search block result, dates in the site's format, on first paint and in the browser alike.
+- **D305** — Per type, a mapped DATE field and image field replace the card's date and image, the overlay shows that date and the first card field, and viglet_dumont_result_card filters server cards.
 
 ## Track T — Releases and links match what the site describes
 

@@ -170,25 +170,6 @@ unknown sibling key; template mode scoped.
 **Done when:** the `network` spec has site A listing B and finding B's documents, and B
 (not listing A) finding only its own, in every search mode.
 
-### XLIX.147 Mapped fields on result cards (D305)
-
-**Where it came from.** FESPSP indexes `evento` (start date, venue), `vaga` (job
-opening: subtitle, deadline) and `livro` (authors, publisher, cover), and its design
-(fespsp-base FB93) asks for a card per type. The search block's cards (D162) show title,
-snippet, publication date, type and image; the markup is fixed in
-`blocks/search/parts/*.php` and the store, with no filter on result HTML. An event card
-shows the day it was *published*.
-
-**What the plugin should do.**
-- In Fields, a per-field option "Show on result cards" (`card: true`) with an order. The value travels in the search response already (mapped fields are document fields), so the store renders it as a labelled line; DATE fields are formatted in the site's locale and timezone (`wp_date` format), lists joined, URLs never shown raw.
-- Per type, "Date shown on cards": publication date (default) or a mapped DATE field, so an event shows its start.
-- Per type, "Image": the thumbnail (default) or a mapped image field.
-- A PHP filter on the server-rendered card (`viglet_dumont_result_card`, `array $parts, array $document`) with the same keys the store uses, so first paint and hydration agree; document that the client mirrors it only through the mapping.
-- The overlay uses the same date and first card field.
-
-**Done when:** a seeded type with a DATE meta shows that date on the card, in pt_BR
-format under `pt-br`.
-
 ### XLIX.148 Fixed filters on the search block (D306)
 
 **Where it came from.** FESPSP wants section boxes: "Buscar na agenda" on `/eventos/`,
@@ -404,6 +385,30 @@ adopter (fespsp-institucional L–P), and already surfaced D303–D315.
 
 **Delivers:** one D line per finding in Track S or U, each naming the FESPSP line it
 serves, and a design note for the second demo if it is worth building.
+
+### XLIX.157 Untranslated strings fail a gate (D317)
+
+**Where it came from.** D305 regenerated the `.pot` and the pt_BR `.po` (README,
+"Translations") and found eight strings shipped by earlier tasks with no `msgstr`: the
+Health screen's AI agent reasons ("The SN site has no AI agent in Turing.", ...) and
+"Turing refused this site's API key here: %s". A pt_BR site showed them in English. D304
+shipped "Results page on another site" the same way, and only the pt-br spec caught it,
+because the untranslated label happened to contain an older translated phrase ("Results
+page").
+
+**Why nothing caught it.** `tests/e2e/i18n/pt-br.spec.mjs` reports a leak only when a
+string the `.po` already translates shows up in English. A string missing from the
+`.po`, or present with an empty `msgstr`, is invisible to it, and nothing regenerates
+the `.pot` in CI.
+
+**What should happen.** A gate that fails when the `.pot` the source would produce today
+differs from the committed one, or when the pt_BR `.po` holds an entry with an empty
+`msgstr`: `wp i18n make-pot` in the `wordpress-plugin.yml` job (the README's Docker
+line), then a check that every msgid has a translation. Run locally from an npm script
+so a task sees it before committing.
+
+**Done when:** adding `__( 'Something new', 'viglet-turing-search' )` without
+translating it fails the gate, naming the string.
 
 ## L The documentation area
 
