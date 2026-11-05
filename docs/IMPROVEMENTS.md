@@ -170,31 +170,6 @@ unknown sibling key; template mode scoped.
 **Done when:** the `network` spec has site A listing B and finding B's documents, and B
 (not listing A) finding only its own, in every search mode.
 
-### XLIX.151 PDF text in the index (D309)
-
-**Where it came from.** Much of what FESPSP visitors look for lives in PDFs: the
-academic office's regulations and forms (media-library PDFs linked by a block), the
-library's rules, and the projects microsite's publications (`publicacao`, whose
-`fespsp_arquivo_url` meta points at the paper). The plugin indexes `text` as the
-rendered `the_content` only (`indexer.php` 309-319); attachments never pass
-`should_index()` (status `inherit`), and it sends JSON only, to `/api/sn/import`.
-
-**The seam already exists in Turing.** `/api/sn/import` takes JSON only, but
-`/api/sn/import/zip` (`TurSNImportAPI.java` 239-273) takes a zip holding the export JSON
-plus files, and extracts any attribute whose value carries the file protocol through
-Tika. No Turing change is needed; the plugin sends PDFs that way.
-
-**What the plugin should do.**
-- **Attachments as documents:** "Index PDF files" under Settings → Content, for `application/pdf` attachments attached to or linked from a published, indexed post: title, file URL, the parent as `section`, text extracted by Turing.
-- **PDF text into the parent:** a mapping source `file:<meta key>` that extracts the referenced PDF into the parent's `text`, for the `publicacao` case.
-
-Limits: a size cap, only this site's own uploads (never fetch another host), removal
-when the attachment or its parent goes, and a "PDF" value on the `type` facet with a
-pt_BR label.
-
-**Done when:** a seeded PDF's inner sentence is found, and deleting the attachment
-removes it.
-
 ### XLIX.152 Grounded people and themes as facets (D310)
 
 **Where it came from.** FESPSP wants visitors to explore it by **person** and **theme**
@@ -357,6 +332,31 @@ key (D303) and the block's fixed filters both scope the suggestions. If the SDK 
 them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
+
+### XLIX.159 PDFs linked from a post, and gone with it (D319)
+
+**Where it came from.** D309 made PDFs searchable two ways: a PDF attached to a post in
+search is a document of its own (`Viglet_Dumont_Pdf`, synced on `add_attachment`,
+`edit_attachment`, `delete_attachment` and Index All), and a mapping source `file:<meta
+key>` reads a meta-named PDF into the post's own text. Two cases it left:
+
+- **Linked, not attached.** A block in a page links a media-library PDF uploaded elsewhere
+  (`post_parent` 0, or another post). The academic office's forms are this shape. It is
+  never sent, since `indexable()` requires the parent to be in search.
+- **The parent leaves search.** A post unpublished, excluded or past its "Leaves search on"
+  date (D308) is removed at once, but its attached PDFs stay in search until the next
+  `wp dumont sweep` (orphans() reads them as no longer indexable).
+
+**What to build.**
+1. When a post is indexed, find the links in its rendered content to this site's uploads
+   (`attachment_url_to_postid`) that are PDFs, and treat each as in search while any post in
+   search links it; record the linking posts in a meta on the attachment so removal knows
+   when the last one goes.
+2. When a post is removed from search (the queue's `delete` job, and `expire()`), remove the
+   PDFs it attaches or links that no other post in search holds.
+
+**Done when:** a page linking a PDF it did not upload makes the PDF findable, and
+unpublishing the page removes the PDF without a sweep.
 
 ## L The documentation area
 

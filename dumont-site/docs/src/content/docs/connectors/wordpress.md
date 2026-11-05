@@ -254,6 +254,12 @@ edited, and on **Index All**, and it is removed when the attachment is deleted. 
 site's own uploads are sent, up to 20 MB each (the `viglet_dumont_pdf_max_bytes` filter
 changes the cap). A PDF whose post leaves search stays until the next sweep.
 
+A post can also carry a PDF's words in its own document. In **Fields**, the source **Text
+of the PDF in meta: `<key>`** reads the PDF a meta names, by this site's upload address or
+by attachment ID, into a `TEXT` field of the post. A search for a sentence in the paper
+then finds the post itself. This works whether or not **PDF files attached to them** is on,
+and a file on another host is never fetched.
+
 ---
 
 ## Several sites, one SN site

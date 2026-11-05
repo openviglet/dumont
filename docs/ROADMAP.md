@@ -118,7 +118,6 @@ This track has no remaining pending tasks.
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
 - ⏳ **D303** (deps: Turing T1223) **A site sharing an SN site can search only its own site key, never its sibling sites' documents** — Sibling keys wait on Turing T1223 (site_key values as alternatives): setting, seams, facet labels, badge, Related, navigate. → §XLIX.145
-- ⏳ **D309** (deps: —) **PDF files never reach the index: neither media-library PDFs nor a PDF a post links in its meta** — A file:<meta key> source extracting a linked PDF into its post's text; PDFs linked but not attached; a post leaving search taking its PDFs at once. → §XLIX.151
 - 📋 **D310** (deps: —) **WordPress documents carry no people or themes: who and what a post names never becomes a facet** — A site cannot be explored by person or theme, and name variants across sites and the repository stay split. → §XLIX.152
 - 📋 **D311** (deps: D305 ✅) **The instant overlay is a flat list of six results with no type, date, image, answer or zero state** — A search meant to be immersive sends every visitor away to the results page to see anything beyond a title. → §XLIX.153
 - 📋 **D312** (deps: —) **The search answer and the Site assistant do not share context: a follow-up starts over** — A visitor who wants to ask one more thing after the answer loses the question, the answer and its sources. → §XLIX.154
@@ -126,6 +125,7 @@ This track has no remaining pending tasks.
 - 📋 **D316** (deps: —) **The WordPress plugin and its demo were shaped by a store: nothing has proved the path of a school or cultural institute** — Store-shaped names and defaults leak into a non-commerce site, and only a deliberate read finds them all at once. → §XLIX.156
 - 📋 **D317** (deps: —) **A new plugin string ships untranslated in pt_BR and no gate notices: the pt-br spec checks only strings the .po has** — Nine admin strings reached pt_BR sites in English across three tasks, and one was caught only by chance. → §XLIX.157
 - 📋 **D318** (deps: —) **A scoped search block's suggestions ignore its scope: the box suggests terms only content outside it holds** — A visitor in a box scoped to events picks a suggested term and finds nothing. → §XLIX.158
+- 📋 **D319** (deps: —) **A PDF a page links but did not upload never reaches search, and a post leaving search keeps its PDFs until a sweep** — Forms linked from an office's page stay invisible, and an unpublished page's PDFs stay findable. → §XLIX.159
 
 ## Track T — Releases and links match what the site describes
 
@@ -139,12 +139,6 @@ This track has no remaining pending tasks.
 - **Site A listing B finds B's documents; B finds only its own** The network spec runs
   it in every search mode: the search block, template mode and the assistant, with
   site_key declared as alternatives in the manifest (T1223).
-
-## Done when — D309
-
-- **A post's meta-linked PDF puts its words in the post's own text** A spec maps
-  file:<meta key> on a seeded post whose meta names this site's PDF, and a sentence only
-  the PDF holds finds the post.
 
 ## Non-goals (do NOT add as tasks)
 
