@@ -45,9 +45,13 @@ graph LR
   save wins.
 - **A worker sends the queue** in batches through WP-Cron, or through
   `wp dumont queue run` on hosts that disable WP-Cron. When Turing is unreachable, a job
-  backs off (1 minute, doubling, up to an hour). After 8 failed attempts it waits for a
-  replay. A post Turing refuses is retried on its own, so one bad post does not block the
-  rest of its batch.
+  backs off (1 minute, doubling, up to an hour). After 8 failed attempts, about three hours,
+  it stops retrying. Every admin screen then warns that edits have not reached search, with
+  a link to **Search health**. The worker asks Turing every 15 minutes whether it is back,
+  and once a ping or any send goes through, the stopped edits go back in line with no click.
+  A job is put back at most three times, so a document Turing keeps refusing stops for good
+  and waits for **Retry** on Search health. A post Turing refuses is retried on its own, so
+  one bad post does not block the rest of its batch.
 - **Each post records its state**: when it was last indexed, its last error and its
   failed attempts. The post lists and the block editor show it (see [Admin](#admin)).
 

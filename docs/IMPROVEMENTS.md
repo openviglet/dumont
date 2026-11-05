@@ -287,21 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.168 Stopped jobs said and replayed (D329)
-
-**Found by D316.** After about three hours of a Turing outage, edits stop reaching
-search for good: a job gives up after `MAX_ATTEMPTS = 8` with backoff from 60 s to 3600
-s (`class-viglet-dumont-queue.php` 41-47), and the only place it shows is the Health
-page's "stopped retrying" count (`assets/admin/health.js` 292-330). No admin notice
-warns (`class-viglet-dumont-admin.php` hooks only the demo and missing-build notices),
-and nothing replays the jobs when Turing comes back.
-
-**What to build.** An admin notice and a dashboard line while failed jobs exist, linking
-to Health; and once a ping succeeds again, the stopped jobs re-queued automatically.
-
-**Done when:** an outage longer than the retries ends with every edit in search after
-Turing returns, with no click.
-
 ### XLIX.169 The panel shows why a reindex failed (D330)
 
 **Found by D316.** The editor panel's "Reindex now" shows "Failed" with no reason: on
@@ -372,7 +357,7 @@ plugin's own and, when any remain, pages the site's documents 100 at a time up t
 skipping its own. On a site with more documents a foreign type that Turing orders late
 is never seen; the docs say so.
 
-**What to build.** Once Turing T1231 honours negative filter queries, ask once with
+**What to build.** Once Turing T1233 honours negative filter queries, ask once with
 `fq[]=site_key:<key>&fq[]=-source_apps:<app>` and read the types from that answer (paged
 over foreign documents only, or from a facet on `type` if Turing offers one), and drop
 the 2,000 ceiling and its note in the docs.
