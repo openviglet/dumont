@@ -270,30 +270,6 @@ proven by the a11y specs; pt_BR ships with it.
 **Done when:** a seeded two-step flow with a choice and a form runs end to end in the
 block, at 390 and 1280px.
 
-### XLIX.157 Untranslated strings fail a gate (D317)
-
-**Where it came from.** D305 regenerated the `.pot` and the pt_BR `.po` (README,
-"Translations") and found eight strings shipped by earlier tasks with no `msgstr`: the
-Health screen's AI agent reasons ("The SN site has no AI agent in Turing.", ...) and
-"Turing refused this site's API key here: %s". A pt_BR site showed them in English. D304
-shipped "Results page on another site" the same way, and only the pt-br spec caught it,
-because the untranslated label happened to contain an older translated phrase ("Results
-page").
-
-**Why nothing caught it.** `tests/e2e/i18n/pt-br.spec.mjs` reports a leak only when a
-string the `.po` already translates shows up in English. A string missing from the
-`.po`, or present with an empty `msgstr`, is invisible to it, and nothing regenerates
-the `.pot` in CI.
-
-**What should happen.** A gate that fails when the `.pot` the source would produce today
-differs from the committed one, or when the pt_BR `.po` holds an entry with an empty
-`msgstr`: `wp i18n make-pot` in the `wordpress-plugin.yml` job (the README's Docker
-line), then a check that every msgid has a translation. Run locally from an npm script
-so a task sees it before committing.
-
-**Done when:** adding `__( 'Something new', 'viglet-turing-search' )` without
-translating it fails the gate, naming the string.
-
 ### XLIX.158 Suggestions inside the block's scope (D318)
 
 **Where it came from.** D306 gave the search block fixed filters ("Always filter by")

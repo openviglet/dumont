@@ -767,6 +767,7 @@
 - **D311 (immersive layout)** — An immersive overlay layout groups results by type with images and a See all per type, starts from recent searches and fills a phone's screen, axe-clean at 390 and 1280px.
 - **D320** — The immersive overlay previews the highlighted result on a desktop, lists popular searches before typing, opens all results on Ctrl+Enter, and can answer a resting question on top.
 - **D316** — The plugin was read as a school would use it, and its gaps are filed as D322-D332: shared-key deletes, shop wording, periods, a school demo, field parity, outages and AI budget.
+- **D317** — npm run check:i18n and CI regenerate the .pot and fail, naming the string, when it is out of date or a string lacks a pt_BR translation.
 
 ## Track T — Releases and links match what the site describes
 

@@ -85,6 +85,11 @@ jobs:
       - name: The review's rules on the source
         run: node bin/wporg-check.mjs
 
+      # D317: the committed .pot is what the source produces today (WP-CLI in Docker), and every
+      # string in it is translated to pt_BR; the pt-br spec only sees strings the .po already has.
+      - name: Every string translated to pt_BR
+        run: node bin/check-i18n.mjs
+
   # D226: Plugin Check, the tool the WordPress.org review team runs, on the package uploaded there
   # (bin/build-zip.sh --wporg: the zip's viglet-turing-search/ folder, without the bundled
   # translations), not on the source tree. A warning fails the job too (D229): the package checks
