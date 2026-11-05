@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Thermal comfort in passive school buildings</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Lindqvist, Erik</dcvalue>
+  <dcvalue element="date" qualifier="issued">2024-02-10</dcvalue>
+  <dcvalue element="description" qualifier="abstract">A year of indoor temperature logs from six naturally ventilated classrooms.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Building physics</dcvalue>
+  <dcvalue element="subject" qualifier="none">Schools</dcvalue>
+  <dcvalue element="type" qualifier="none">Article</dcvalue>
+  <dcvalue element="language" qualifier="iso">en</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Low-cost sensors for river turbidity</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Silva, Ana</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Moreau, Claire</dcvalue>
+  <dcvalue element="date" qualifier="issued">2022-03</dcvalue>
+  <dcvalue element="description" qualifier="abstract">Open hardware turbidity probes calibrated against a laboratory nephelometer.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Water quality</dcvalue>
+  <dcvalue element="subject" qualifier="none">Sensors</dcvalue>
+  <dcvalue element="type" qualifier="none">Article</dcvalue>
+  <dcvalue element="language" qualifier="iso">en</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

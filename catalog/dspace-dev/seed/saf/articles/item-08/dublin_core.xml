@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Pollinator corridors along railway verges</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Haddad, Leila</dcvalue>
+  <dcvalue element="date" qualifier="issued">2025-04-22</dcvalue>
+  <dcvalue element="description" qualifier="abstract">Transect counts of bees and hoverflies on mown and unmown railway verges.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Pollinators</dcvalue>
+  <dcvalue element="subject" qualifier="none">Linear habitats</dcvalue>
+  <dcvalue element="type" qualifier="none">Article</dcvalue>
+  <dcvalue element="language" qualifier="iso">en</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

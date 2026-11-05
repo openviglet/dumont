@@ -124,8 +124,7 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D338** (deps: —) **No DSpace to develop or test the DSpace profile against: the only repository at hand has an empty OAI index** — The profile's end-to-end check, and any change to it, waits on someone else's repository. → §LII.4
-- 📋 **D314** (deps: D315 ✅, D338) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Left: the end-to-end check in Turing, against the local DSpace with fictional documents (D338). → §LII.1
+- 📋 **D314** (deps: D315 ✅, D338 ✅) **No Dumont source reads DSpace: a university repository's theses and papers reach Turing only through HTML crawling** — Left: the end-to-end check in Turing, against the local DSpace with fictional documents (D338). → §LII.1
 
 ## Done when — D314
 

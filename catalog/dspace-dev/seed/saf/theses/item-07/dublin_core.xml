@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Glacier retreat signals in alpine lake cores</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Novak, Petra</dcvalue>
+  <dcvalue element="contributor" qualifier="advisor">Okafor, Daniel</dcvalue>
+  <dcvalue element="date" qualifier="issued">2018-05-30</dcvalue>
+  <dcvalue element="description" qualifier="abstract">Varve counts from two alpine lakes read against regional glacier records.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Paleoclimate</dcvalue>
+  <dcvalue element="subject" qualifier="none">Lake sediments</dcvalue>
+  <dcvalue element="type" qualifier="none">Thesis</dcvalue>
+  <dcvalue element="language" qualifier="iso">en</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

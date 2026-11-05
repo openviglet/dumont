@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Mycorrhizal networks in restored mangrove soils</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Silva, Ana</dcvalue>
+  <dcvalue element="contributor" qualifier="advisor">Okafor, Daniel</dcvalue>
+  <dcvalue element="date" qualifier="issued">2021-06-15</dcvalue>
+  <dcvalue element="description" qualifier="abstract">A survey of fungal partners on the roots of replanted mangroves, comparing three restoration ages along one estuary.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Mangroves</dcvalue>
+  <dcvalue element="subject" qualifier="none">Soil ecology</dcvalue>
+  <dcvalue element="subject" qualifier="none">Restoration</dcvalue>
+  <dcvalue element="type" qualifier="none">Thesis</dcvalue>
+  <dcvalue element="language" qualifier="iso">en</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

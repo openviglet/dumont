@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Tide pool temperature extremes on basalt shores</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Moreau, Claire</dcvalue>
+  <dcvalue element="date" qualifier="issued">2025-08</dcvalue>
+  <dcvalue element="description" qualifier="abstract">Loggers in twelve tide pools recorded daily extremes through one summer.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Intertidal ecology</dcvalue>
+  <dcvalue element="subject" qualifier="none">Temperature</dcvalue>
+  <dcvalue element="type" qualifier="none">Article</dcvalue>
+  <dcvalue element="language" qualifier="iso">en</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

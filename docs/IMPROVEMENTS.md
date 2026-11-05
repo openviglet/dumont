@@ -236,24 +236,3 @@ resolve, not this line's.
 
 **Done when:** an item's author, year, community and a sentence of its full text are
 searchable, and withdrawing it removes it on the next run.
-
-### LII.4 A local DSpace with fictional documents (D338)
-
-**Where it came from.** D314 built the DSpace profile of the OAI-PMH source (`dim`
-harvest, REST completion, full text, withdrawn items dropped) and left its end-to-end
-check open: the one real repository available answers its REST API but holds no OAI
-records (`noRecordsMatch`), and the public demo changes under any test that relies on
-it.
-
-**What to build.** A DSpace kept in the repo for development and tests, under
-`catalog/dspace-dev/` with a README: the official DSpace 8 backend images (REST at
-`/server/api`, OAI at `/server/oai/request`, no Angular UI) on ports that clash with
-nothing in the local stack; a repeatable seed of fictional documents (one community, two
-collections, six to ten items with authors in both name orders, advisors, abstracts,
-subjects, types, a PDF carrying a sentence only it holds, and one withdrawn or private
-item), loaded through the DSpace CLI and followed by `dspace oai import` so the OAI
-index is filled; and the commands to start, seed, harvest it into the local Turing and
-stop it.
-
-**Done when:** one command starts the DSpace and seeds it, and its OAI endpoint lists
-the seeded items in `dim`.

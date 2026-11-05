@@ -191,11 +191,15 @@ Each `dim` record becomes these fields:
 
 Nothing is filled in that the record does not hold. Community and collection names are read from the REST API once per run, page by page. A set whose name REST does not give is left out rather than indexed as `com_123456789_7`.
 
-Each item is looked up in REST by its handle. An item that REST reports withdrawn or not discoverable, or that answers 401 or 403 (private), is removed from the index and never indexed. A withdrawn item that the OAI-PMH feed marks deleted leaves the same way. An item REST cannot find is indexed from its metadata alone.
+Each item is looked up in REST by its handle. An item that REST reports withdrawn or not discoverable, or that answers 401 or 403 (private), is removed from the index and never indexed. A withdrawn item that the OAI-PMH feed marks deleted leaves the same way. DSpace 8 marks both withdrawn and private items deleted in OAI-PMH, but only as of its last `oai import`; an item hidden after that import is still served as live, and the REST check is what drops it. An item REST cannot find is indexed from its metadata alone.
 
 With full text on, the connector reads the item's `TEXT` bundle first, which holds the text DSpace already extracted. When there is no `TEXT` bundle, it reads the item's `ORIGINAL` PDFs, at most three. The limits of the generic full text apply: the REST host only, 50 MiB and one million characters per file, and a 429 or 503 retried after its `Retry-After`. REST calls are spaced half a second apart. A file the public may not read (401, 403, an embargo) adds no text, and the item is still indexed with its metadata. A lookup, its bundles and one text file take about four requests per item, so the first harvest of a few hundred items runs for several minutes.
 
 DSpace's OAI-PMH answers from its own index, which is built by `dspace oai import`. A repository that never ran it answers `noRecordsMatch` to every harvest, even though the site shows items. The connector reports that as an empty, complete harvest, so ask the repository's administrators to run the import.
+
+#### Try it against a local DSpace
+
+The repository's `catalog/dspace-dev/` folder runs a DSpace 8 backend in Docker, with REST at `http://localhost:18080/server/api` and OAI-PMH at `http://localhost:18080/server/oai/request`. A seed script fills it with a small fictional repository: one community, two collections, and nine items. Four of the items carry a PDF, one is withdrawn, and two are private. One of the private items is hidden after the OAI index was built, so only the REST check can drop it. The folder's `e2e.py` creates a source with the DSpace profile over the connector's API, harvests the repository into a local Viglet Turing, and checks the result: a title word and a PDF-only word both find the thesis, the author facet groups it, the three dropped items are absent, and `community` and `collection` hold names. Its `README.md` has the commands.
 
 ---
 

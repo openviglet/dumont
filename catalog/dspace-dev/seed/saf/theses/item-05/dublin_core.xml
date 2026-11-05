@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Cartografia participativa de nascentes urbanas</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Costa, Bruno</dcvalue>
+  <dcvalue element="contributor" qualifier="advisor">Silva, Ana</dcvalue>
+  <dcvalue element="date" qualifier="issued">2019-11-20</dcvalue>
+  <dcvalue element="description" qualifier="abstract">Mapeamento de nascentes em bairros centrais com moradores e escolas.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Nascentes</dcvalue>
+  <dcvalue element="subject" qualifier="none">Cartografia participativa</dcvalue>
+  <dcvalue element="type" qualifier="none">Thesis</dcvalue>
+  <dcvalue element="language" qualifier="iso">pt</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

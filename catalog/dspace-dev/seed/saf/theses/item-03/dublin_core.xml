@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Rainwater harvesting adoption in semi-arid towns</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Tanaka, Hiro</dcvalue>
+  <dcvalue element="contributor" qualifier="advisor">Okafor, Daniel</dcvalue>
+  <dcvalue element="contributor" qualifier="advisor">Moreau, Claire</dcvalue>
+  <dcvalue element="date" qualifier="issued">2020</dcvalue>
+  <dcvalue element="description" qualifier="abstract">Interviews with households in four towns on why cisterns are or are not adopted.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Water supply</dcvalue>
+  <dcvalue element="subject" qualifier="none">Household survey</dcvalue>
+  <dcvalue element="type" qualifier="none">Thesis</dcvalue>
+  <dcvalue element="language" qualifier="iso">en</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

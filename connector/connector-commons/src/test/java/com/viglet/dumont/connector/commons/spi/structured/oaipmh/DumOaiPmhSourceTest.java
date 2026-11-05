@@ -62,6 +62,18 @@ class DumOaiPmhSourceTest {
     }
 
     @Test
+    void aFailureWithNoMessageIsNamedByItsType() {
+        // What the JDK client throws when nothing listens on the repository's port.
+        DumOaiPmhSource source = source(url -> {
+            throw new java.net.ConnectException();
+        }, new DumInMemoryOaiPmhState(), null);
+
+        assertEquals(List.of(), source.discover());
+        assertFalse(source.discoveryComplete());
+        assertEquals(List.of("stopped: call 1 failed (ConnectException)"), source.runNotes());
+    }
+
+    @Test
     void noRecordsMatchIsAnEmptyCompleteHarvest() {
         DumInMemoryOaiPmhState state = new DumInMemoryOaiPmhState();
         DumOaiPmhSource source = source(pages(error("2026-11-02T08:00:00Z", "noRecordsMatch",

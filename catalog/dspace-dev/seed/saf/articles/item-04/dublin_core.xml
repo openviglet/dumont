@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dublin_core schema="dc">
+  <dcvalue element="title" qualifier="none">Seed dispersal by fruit bats in fragmented forests</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Ndiaye, Fatou</dcvalue>
+  <dcvalue element="contributor" qualifier="author">Okafor, Daniel</dcvalue>
+  <dcvalue element="date" qualifier="issued">2023-09-01</dcvalue>
+  <dcvalue element="description" qualifier="abstract">Camera traps and seed rain collectors across eleven forest patches.</dcvalue>
+  <dcvalue element="subject" qualifier="none">Seed dispersal</dcvalue>
+  <dcvalue element="subject" qualifier="none">Bats</dcvalue>
+  <dcvalue element="subject" qualifier="none">Forest fragments</dcvalue>
+  <dcvalue element="type" qualifier="none">Article</dcvalue>
+  <dcvalue element="language" qualifier="iso">en</dcvalue>
+  <dcvalue element="publisher" qualifier="none">Lumen University</dcvalue>
+</dublin_core>

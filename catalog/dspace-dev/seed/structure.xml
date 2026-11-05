@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import_structure>
+  <community>
+    <name>Lumen University Research</name>
+    <description>Theses and articles of the fictional Lumen University, seeded for Dumont's catalog connector.</description>
+    <collection>
+      <name>Theses and Dissertations</name>
+      <description>Graduate theses.</description>
+    </collection>
+    <collection>
+      <name>Journal Articles</name>
+      <description>Articles by faculty and students.</description>
+    </collection>
+  </community>
+</import_structure>

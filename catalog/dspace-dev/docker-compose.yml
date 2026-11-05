@@ -1,0 +1,104 @@
+# A local DSpace 8 backend for trying the catalog connector's DSpace profile (roadmap D314).
+#
+# Follows DSpace's own docker-compose.yml (tag dspace-8.5) with three changes: the published
+# release images instead of the -test ones, no local config mount (the image's defaults plus the
+# environment below), and ports that keep clear of the Turing / WordPress / Dumont stacks here.
+# Only the backend: REST at http://localhost:18080/server/api, OAI-PMH at
+# http://localhost:18080/server/oai/request. No Angular UI.
+#
+#   docker compose -p dumont-dspace up -d
+#   ./seed.sh            # administrator, community, collections, items, OAI index
+#
+# Every name in the seed is fictional ("Lumen University").
+name: dumont-dspace
+
+networks:
+  dspacenet:
+    ipam:
+      config:
+        # Must match proxies.trusted.ipranges below.
+        - subnet: 172.29.0.0/16
+
+services:
+  dspace:
+    container_name: dumont-dspace
+    restart: unless-stopped
+    image: docker.io/dspace/dspace:${DSPACE_VER:-dspace-8.5}
+    environment:
+      # __P__ => "." in a dspace.cfg key (DSpace's config-definition.xml).
+      dspace__P__dir: /dspace
+      # The URL the connector reaches REST through: pid/find redirects are built from it.
+      dspace__P__server__P__url: http://localhost:18080/server
+      # There is no UI; this only shapes the handle links in dc.identifier.uri
+      # (handle.canonical.prefix = ${dspace.ui.url}/handle/), on a reserved .test host.
+      dspace__P__ui__P__url: http://repository.lumen.test
+      dspace__P__name: Lumen University Repository
+      mail__P__admin: admin@lumen.test
+      db__P__url: jdbc:postgresql://dspacedb:5432/dspace
+      solr__P__server: http://dspacesolr:8983/solr
+      proxies__P__trusted__P__ipranges: 172.29.0
+      oai__P__enabled: "true"
+      LOGGING_CONFIG: /dspace/config/log4j2-container.xml
+    depends_on:
+      - dspacedb
+      - dspacesolr
+    networks:
+      - dspacenet
+    ports:
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - assetstore:/dspace/assetstore
+      # The seed (SAF packages, structure file) is read from here by `dspace import`.
+      - ./seed:/seed:ro
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        while (!</dev/tcp/dspacedb/5432) > /dev/null 2>&1; do sleep 1; done;
+        /dspace/bin/dspace database migrate
+        java -jar /dspace/webapps/server-boot.jar --dspace.dir=/dspace
+
+  dspacedb:
+    container_name: dumont-dspace-db
+    restart: unless-stopped
+    image: docker.io/dspace/dspace-postgres-pgcrypto:${DSPACE_VER:-dspace-8.5}
+    environment:
+      PGDATA: /pgdata
+      POSTGRES_PASSWORD: dspace
+    networks:
+      - dspacenet
+    volumes:
+      - pgdata:/pgdata
+
+  dspacesolr:
+    container_name: dumont-dspace-solr
+    restart: unless-stopped
+    image: docker.io/dspace/dspace-solr:${DSPACE_VER:-dspace-8.5}
+    networks:
+      - dspacenet
+    working_dir: /var/solr/data
+    volumes:
+      - solr_data:/var/solr/data
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        init-var-solr
+        precreate-core authority /opt/solr/server/solr/configsets/authority
+        cp -r /opt/solr/server/solr/configsets/authority/* authority
+        precreate-core oai /opt/solr/server/solr/configsets/oai
+        cp -r /opt/solr/server/solr/configsets/oai/* oai
+        precreate-core search /opt/solr/server/solr/configsets/search
+        cp -r /opt/solr/server/solr/configsets/search/* search
+        precreate-core statistics /opt/solr/server/solr/configsets/statistics
+        cp -r /opt/solr/server/solr/configsets/statistics/* statistics
+        precreate-core qaevent /opt/solr/server/solr/configsets/qaevent
+        cp -r /opt/solr/server/solr/configsets/qaevent/* qaevent
+        precreate-core suggestion /opt/solr/server/solr/configsets/suggestion
+        cp -r /opt/solr/server/solr/configsets/suggestion/* suggestion
+        exec solr -f
+
+volumes:
+  assetstore:
+  pgdata:
+  solr_data:

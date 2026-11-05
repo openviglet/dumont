@@ -799,3 +799,4 @@
 - **D315** — The catalog form configures an OAI-PMH source, a same-host PDF's text is optional, Tika, pacing and Retry-After are shared, and a USP OJS and the DSpace demo harvest live.
 - **D314 (DSpace profile)** — A DSpace profile on the OAI source maps dim, names communities and collections, takes TEXT-bundle or PDF text and thumbnails through REST, and drops withdrawn items.
 - **D321** — An OAI-PMH record's URL skips private and dotless hosts, and full text follows a page's citation_pdf_url on the same site (www. aside): OJS articles now yield their PDF text.
+- **D338** — catalog/dspace-dev runs a DSpace 8.5 backend seeded with nine fictional items (PDF full text, withdrawn and private ones) and fills its OAI index; e2e.py harvests it into Turing.

@@ -528,8 +528,8 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         try {
             body = fetcher.fetch(url);
         } catch (IOException e) {
-            log.warn("OAI-PMH source '{}' call {} failed: {}", sourceName, calls, e.getMessage());
-            notes.add("stopped: call %d failed (%s)".formatted(calls, e.getMessage()));
+            log.warn("OAI-PMH source '{}' call {} failed: {}", sourceName, calls, failure(e));
+            notes.add("stopped: call %d failed (%s)".formatted(calls, failure(e)));
             return null;
         }
         try {
@@ -540,6 +540,16 @@ public final class DumOaiPmhSource implements DumStructuredSource {
             notes.add("stopped: call %d returned no OAI-PMH response".formatted(calls));
             return null;
         }
+    }
+
+    /**
+     * What a failed call says in the run notes. The JDK client throws a {@code ConnectException}
+     * with no message when nothing listens on the port, which read "call 1 failed (null)"; the
+     * exception's simple name says what happened.
+     */
+    static String failure(IOException e) {
+        String message = e.getMessage();
+        return message == null || message.isBlank() ? e.getClass().getSimpleName() : message;
     }
 
     private Map<String, DumOaiPmhResponse.Item> stopped(Map<String, DumOaiPmhResponse.Item> found,
