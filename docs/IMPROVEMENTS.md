@@ -146,30 +146,6 @@ and the plugin's pages embed that.
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
 
-### XLIX.145 Search across sibling site keys (D303)
-
-**Where it came from.** A client runs three WordPress sites and wants them in one shared
-SN site (D148), searched from the institutional one. Every read path pins the own key,
-and in PHP each caller builds `'site_key:' . site_key()` itself (`native-search.php`
-326, 546, 687; trending, related); JS has one helper (`siteFilter`, `public/search.js`).
-Template mode (`class-viglet-dumont-search.php` 53-66) applies **no** site key at all,
-so on a shared SN site it already lists other sites' documents.
-
-**What the plugin should do.**
-- **One scope seam per language:** a PHP `Indexer::scope_filters()` and the JS `siteFilter`/`siteFilters`, returning the own key plus the configured siblings; every read path calls them, template mode included (which fixes its leak on its own).
-- A setting "Also search these sites" (`search_site_keys`, key plus label, constant `VIGLET_DUMONT_SEARCH_SITE_KEYS` like D151); Related opt-in per block (`sites: own|all`).
-- Assistant, copilot, kit and nl-filters send the set as `filters` (T1213 takes a map).
-- `site_key` as a facet with the labels, and an origin badge on cards from another site.
-- `navigate` compares against the own and sibling origins (today same-origin only, `assistant.js` 43-51), never any other host.
-
-Writes stay on the own key: index, sweep, delete-all and Tuning never touch a sibling.
-
-**Tests:** Turing's semantics for several values of one field in `fq` (OR, not AND); an
-unknown sibling key; template mode scoped.
-
-**Done when:** the `network` spec has site A listing B and finding B's documents, and B
-(not listing A) finding only its own, in every search mode.
-
 ### XLIX.152 Grounded people and themes as facets (D310)
 
 **Where it came from.** A client wants visitors to explore it by **person** and
@@ -320,6 +296,22 @@ say "until <date>" on every surface.
 
 **Done when:** with the quota spent, the overlay and the assistant say answers are
 paused until the reset date.
+
+### XLIX.176 Related across siblings through the filter operators (D337)
+
+**Found by D303.** With `sites: all`, the Related block asks Turing's `/search/similar`
+for neighbours across this site and its siblings. That endpoint ignores the filter
+operators, so `site_key:a` and `site_key:b` together return nothing (Turing T1235). The
+block therefore asks unfiltered and keyless for up to 50 rows and keeps the ids whose
+prefix is a key in scope (`class-viglet-dumont-related.php`), reading the whole SN site
+and losing neighbours past the 50th.
+
+**What to build.** Once T1235 ships, send the scope as the search does (`fq[]` per key
+with `fqi.op=OR`, through `Indexer::scope_query()`), with the site's key, and drop the
+over-fetch and the prefix filter.
+
+**Done when:** Related with `sites: all` asks `similar` with the scope's filters and
+shows a sibling's neighbour that ranks past the 50th in the whole SN site.
 
 ## L The documentation area
 

@@ -57,7 +57,8 @@ A button opens a chat over the site's posts. Answers stream in, labelled as gene
 posts they used as links and a **Was this helpful?** that reaches Turing. The conversation
 lasts across the pages of the visitor's tab, so a cited post can be opened without losing it;
 **New conversation** starts again. The only action the assistant may take on the page is
-opening another page of the same site.
+opening another page of the same site, or of a site it [also searches](/docs/connectors/wordpress/#searching-other-sites-too)
+whose address the setting gives.
 
 Place the **Site assistant** block where you want it, or turn on **Settings → Search →
 Generative AI → Site assistant on every page** for a button in the corner of every page.

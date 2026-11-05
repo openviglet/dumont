@@ -117,21 +117,15 @@ This track has no remaining pending tasks.
 
 - 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
 - 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
-- ⏳ **D303** (deps: Turing T1223) **A site sharing an SN site can search only its own site key, never its sibling sites' documents** — Sibling keys wait on Turing T1223 (site_key values as alternatives): setting, seams, facet labels, badge, Related, navigate. → §XLIX.145
-- 📋 **D310** (deps: Turing T1225) **WordPress documents carry no people or themes: who and what a post names never becomes a facet** — A site cannot be explored by person or theme, and name variants across sites and the repository stay split. → §XLIX.152
-- 📋 **D318** (deps: Turing T1226) **A scoped search block's suggestions ignore its scope: the box suggests terms only content outside it holds** — A visitor in a box scoped to events picks a suggested term and finds nothing. → §XLIX.158
+- 📋 **D310** (deps: —) **WordPress documents carry no people or themes: who and what a post names never becomes a facet** — A site cannot be explored by person or theme, and name variants across sites and the repository stay split. → §XLIX.152
+- 📋 **D318** (deps: —) **A scoped search block's suggestions ignore its scope: the box suggests terms only content outside it holds** — A visitor in a box scoped to events picks a suggested term and finds nothing. → §XLIX.158
 - 📋 **D334** (deps: Turing T1233) **Fields finds another source's types by paging up to 2,000 documents, so a large site can miss one** — A type that sorts after the first 2,000 documents never reaches Fields and cannot be labelled. → §XLIX.173
 - 📋 **D336** (deps: Turing T1234) **The overlay's answer and the site assistant still go quiet on a spent AI budget, and no visitor sees when it returns** — Two AI surfaces fail silently where the copilot and search block say answers are paused. → §XLIX.175
+- 📋 **D337** (deps: Turing T1235) **Related across sibling sites reads 50 unfiltered neighbours and keeps the ones in scope, so further ones are lost** — A post's best neighbour on a sibling site can sit past the 50th in the whole SN site and never show. → §XLIX.176
 
 ## Track T — Releases and links match what the site describes
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
-
-## Done when — D303
-
-- **Site A listing B finds B's documents; B finds only its own** The network spec runs
-  it in every search mode: the search block, template mode and the assistant, with
-  site_key declared as alternatives in the manifest (T1223).
 
 ## Done when — D311
 

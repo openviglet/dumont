@@ -158,6 +158,7 @@ A value set either way wins over the settings page, shows there read-only, and i
 | `VIGLET_DUMONT_SITE_KEY` | Site key |
 | `VIGLET_DUMONT_PUBLIC_URL` | Turing as visitors' browsers reach it, when that differs |
 | `VIGLET_DUMONT_SEARCH_URL` | A results page on another site that this site's searches go to |
+| `VIGLET_DUMONT_SEARCH_SITE_KEYS` | The other sites this site [also searches](#searching-other-sites-too): `key \| label \| address` entries separated by commas or new lines, or a JSON list of `{key, label, url}` |
 
 `wp dumont status` prints where each value came from.
 
@@ -341,6 +342,58 @@ every site of the SN site, so this key cannot change them:
 Health's AI features check works with either key. On a multisite network, don't set
 `VIGLET_DUMONT_TURING_API_KEY`: a constant applies to every blog and overrides each blog's
 own key.
+
+### Searching other sites too
+
+Each site searches only its own key by default. To have a site also find what other sites
+publish into the same SN site, list them in **Settings → Connection → Also search these
+sites**, one per line: the other site's key, then optionally a label and its address,
+separated by `|`:
+
+```text
+second-site | Second site | https://second.example.org/
+library | The library
+```
+
+`VIGLET_DUMONT_SEARCH_SITE_KEYS` sets the same list from outside WordPress. Keys are cleaned up
+the way the **Site key** is. A blank key, a key listed twice, or this site's own key is left out.
+A label defaults to the key, and an address other than `http` or `https` is dropped.
+
+With sites listed, every search here reads this site's key and theirs: the **Turing search**
+block, the theme's search page, the plugin's results page, the instant search, the editor's
+preview and the check behind the popular-search chips. A result from another site:
+
+- links to that site's own address, never to a page here;
+- carries its site's label: as a badge on the block's cards and the results page, and in the
+  instant search's line under the title. On the theme's search page it uses the theme's
+  markup, so it shows as the theme shows any post, without a badge;
+- adds a **Site** facet to the block and the results page, one value per site by its label,
+  so a visitor can narrow to one site and back.
+
+The generative features (**Ask the catalog**, **Build my kit**, the **Site assistant** and
+the filters read from a sentence) send every listed key, so they cite those sites' documents
+too. The assistant may open a page on a listed site only when its address is given.
+
+The **Related content** block stays on this site's posts unless its **Include the sites this
+one also searches** setting is on. With it on, the other sites' documents appear with their
+title, their site's label and a link to their own site. The automatic placement after
+content keeps the default.
+
+The list is one-way: a site you list does not find this one's documents unless it lists this
+site too. Writing never reaches another site's documents. Index All, the sweep, **Delete All**,
+the counts on **Search health**, **Search tuning** and **Already covered?** in the editor all
+work on this site's key alone.
+
+A [key bound to the site](#a-key-per-site) reads only its own site's documents, so searches
+across sites are sent without the key, the way a visitor's browser sends them. Search in Turing
+is public, so this exposes nothing new.
+
+:::note[Two values in one facet]
+Turing combines two values of one field as alternatives only when the request asks for that,
+and the request can ask it only for every field at once (`fqi.op=OR`). So while other sites are
+listed, two values a visitor picks in the same facet also become alternatives (either one)
+rather than both. Filters on different facets still all apply.
+:::
 
 ### A site whose search lives on another site
 

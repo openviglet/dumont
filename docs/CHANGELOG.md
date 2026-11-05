@@ -757,7 +757,7 @@
 - **D287** — The assistant, the copilot, Build my kit and nl-filters send this site's key as filters, so on a shared SN site each reads only its own documents (design §XLIX.128 recorded in `wordpress/README.md`).
 - **D302** — A page with several blocks that offer Compare draws one bar, the first in reading order; the rest leave the page, screen readers too (design §XLIX.144 recorded in `wordpress/src/public/search.js`).
 - **D301** — The classic and Ollie baselines are retaken and both themes pinned, so a full run reaches every variant: 217 passed (design §XLIX.143 recorded in `wordpress/playwright.config.mjs`).
-- **D303 (scope seam)** — Every visitor read goes through one scope seam, Indexer::scope_filters() and scopeFilters in search.js, and template mode is scoped, no longer listing other sites' documents.
+- **D303** — A site searches its sibling site keys too (setting or constant): every read sends the keys as alternatives, writes stay on its own, and cards, the Site facet and navigate know each origin.
 - **D304** — A Results page on another site setting (or VIGLET_DUMONT_SEARCH_URL) sends the overlay, the box-only block and the theme's search forms there, and local search replacement steps aside.
 - **D305** — Per type, a mapped DATE field and image field replace the card's date and image, the overlay shows that date and the first card field, and viglet_dumont_result_card filters server cards.
 - **D306** — A scoped block names its scope under the box with a whole-site link, a box-only block carries it to the search page as scope[], and popular chips step aside inside a scope.
