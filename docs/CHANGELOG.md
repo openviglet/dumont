@@ -782,7 +782,7 @@
 - **D332** — A spent AI budget is recorded from Turing's 429 with its reset date and shown on Health, and the copilot and search block say answers are paused instead of failing.
 - **D333** — Each agenda period ends a second before the next starts, so an event dated today is Today and never Past, and tomorrow's is never Today.
 - **D335** — A background reindex asks the site for its own next step over a signed loopback, and Health steps an idle run, so a started reindex finishes on a site nobody visits.
-- **D310 (plugin side)** — An opt-in turns on Turing's entity extraction, the People, Organisations and Places facets are labelled and offered, name variants sync to a thesaurus, and the editor panel lists the names.
+- **D310** — Checked live on Turing with T1228 and an LLM: a post naming "Lima, Ana Paula" is found under the person facet as Ana Paula Lima and under the place Recife; an emptied variant list drops the thesaurus.
 - **D318** — A search block asks Turing's autocomplete with its scope (site keys and fixed filters), so a box scoped to pages never suggests a term only posts hold.
 - **D334** — Fields reads only the other sources' documents through a negative filter on the plugin's own (Turing T1233), so however many posts a site has, their types are found.
 - **D337** — Related across sibling sites asks similar inside the scope (one site_key per site with fqi.op=OR, Turing T1235), so the nearest neighbours across sites come back without an over-fetch.

@@ -146,34 +146,6 @@ and the plugin's pages embed that.
 its transcript, the README plays the 30 s cut, the release carries the files, and the
 D246 criterion is met.
 
-### XLIX.152 Grounded people and themes as facets (D310)
-
-**Where it came from.** A client wants visitors to explore it by **person** and
-**theme** across its WordPress sites and DSpace repository (one SN site, D303). People
-and themes sit in text, not fields, and the repository's author facet mixes "Surname,
-Name" with "Name Surname".
-
-**Where the seam is.** Not Dumont's enrichment: the plugin imports straight to Turing,
-and Track F's D18 resolves duplicate *records* by canonical key, not name variants.
-Turing already declares `TurSNFieldType.NER` and facets `turing_entity_*` at query time
-(`TurSolrQueryBuilder.java` 1065), but nothing populates them. Extraction at Turing's
-import serves every source alike (this plugin, D314, D315, every connector), so the core
-belongs there: a Turing line, filed before this one is built and named as its dep.
-
-**What the Turing half must do** (stated for that line): extract people, themes,
-institutions and places from title and text with the site's LLM, each value a span the
-source holds (the non-goal "never fabricate"); resolve variants against a per-SN-site
-list of canonical names and aliases; cache by content hash; one extraction per changed
-document.
-
-**What the plugin does here:**
-- Fields maps the `turing_entity_*` facets to labels (`pessoas`, `temas`…) and offers them on the search block;
-- Settings edits the alias list and sends it to the SN site;
-- the editor panel shows the values extracted for the post, with remove (never add-by-guess).
-
-**Done when:** a seeded post naming a person and a theme is found under both facets, and
-an alias resolves to the canonical name.
-
 ### XLIX.153 An immersive layout for the instant overlay (D311)
 
 **Where it came from.** A client wants its search "complete and immersive", one
