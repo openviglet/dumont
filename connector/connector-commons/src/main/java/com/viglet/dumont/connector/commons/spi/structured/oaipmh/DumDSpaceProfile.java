@@ -100,6 +100,8 @@ public final class DumDSpaceProfile {
                     .embeddingRole(DumEmbeddingRole.BODY)
                     .description("dc.description.abstract; then the TEXT bundle or a PDF when full text is on")
                     .build())
+            .field(DumStructuredField.builder(DumOaiPmhSource.ABSTRACT).type(TurSEFieldType.TEXT)
+                    .description("The first dc.description.abstract, else dc.description").build())
             .field(DumStructuredField.builder(DumOaiPmhSource.AUTHORS).multiValued(true).facet(true)
                     .description("dc.contributor.author, dc.creator").build())
             .field(DumStructuredField.builder(ADVISORS).multiValued(true).facet(true)
@@ -244,6 +246,9 @@ public final class DumDSpaceProfile {
             parts.addAll(dim.values(DC, "description", null));
             locator = parts.isEmpty() ? null : "dim:dc.description";
         }
+        // The card's snippet (D326): the first abstract, under Turing's own description field.
+        rec.set(DumOaiPmhSource.ABSTRACT, parts.stream().findFirst().orElse(null),
+                locator == null ? null : DumFieldProvenance.oaiPmh(locator));
         Optional<FullText> found = fullText ? fullText(bundles, contentId) : Optional.empty();
         if (found.isPresent()) {
             parts.add(found.get().text());

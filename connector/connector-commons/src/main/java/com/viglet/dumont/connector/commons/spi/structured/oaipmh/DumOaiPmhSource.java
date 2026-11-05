@@ -112,11 +112,14 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     /** The metadata format every OAI-PMH repository must serve. */
     public static final String DEFAULT_METADATA_PREFIX = "oai_dc";
 
+    // Turing's own names where a WordPress post has the same concept (D326): one SN site holding
+    // both shares one author facet, one date for cards, sorts and periods, and one snippet.
     public static final String TITLE = "title";
     public static final String TEXT = "text";
-    public static final String AUTHORS = "authors";
+    public static final String ABSTRACT = "abstract";
+    public static final String AUTHORS = "author";
     public static final String SUBJECTS = "subjects";
-    public static final String DATE = "date";
+    public static final String DATE = "publication_date";
     public static final String DATE_TEXT = "dateText";
     public static final String TYPE = "type";
     public static final String PUBLISHER = "publisher";
@@ -133,6 +136,8 @@ public final class DumOaiPmhSource implements DumStructuredSource {
                     .embeddingRole(DumEmbeddingRole.BODY)
                     .description("dc:description, every value; then a same-host PDF's text when full text is on")
                     .build())
+            .field(DumStructuredField.builder(ABSTRACT).type(TurSEFieldType.TEXT)
+                    .description("The first dc:description").build())
             .field(DumStructuredField.builder(AUTHORS).multiValued(true).facet(true)
                     .description("dc:creator").build())
             .field(DumStructuredField.builder(SUBJECTS).multiValued(true).facet(true)
@@ -310,6 +315,8 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     private void setText(DumStructuredRecord.Builder rec, DumOaiPmhResponse.Item item) {
         List<String> parts = new ArrayList<>(item.values("description"));
         String locator = parts.isEmpty() ? null : "dc:description";
+        // The card's snippet (D326): the first description, under Turing's own field.
+        rec.set(ABSTRACT, parts.stream().findFirst().orElse(null), provenance("description"));
         Optional<FullText> found = fullText(item);
         if (found.isPresent()) {
             parts.add(found.get().text());

@@ -281,6 +281,15 @@ plugin sent. A Dumont connector given the same site key, such as a catalog of th
 should come up in the site's search, keeps its documents through Index All, the sweep and
 Delete All. **Search health** says how many documents under the key came from another source.
 
+A post and an archive record use the same field for the author, the date and the snippet:
+Turing's own `author`, `publication_date` and `abstract`, which the
+[catalog connector](/dumont/docs/connectors/catalog/) sends for OAI-PMH and DSpace records
+too. So a thesis and a post by the same person share one author facet value, and both show
+a date and a snippet on their cards. The plugin declares `author` with several values, for a
+thesis's co-authors. A site provisioned by an older version, where `author` held one value,
+is converted the next time the fields are sent to Turing (Turing recreates the field), so
+run **Index All** afterwards.
+
 ### A key per site
 
 A plain API key reaches every document in the SN site, so one site's key could read or

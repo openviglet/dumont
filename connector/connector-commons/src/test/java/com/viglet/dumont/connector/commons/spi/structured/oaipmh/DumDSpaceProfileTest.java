@@ -51,10 +51,11 @@ class DumDSpaceProfileTest {
         DumStructuredRecord r = harvest(true, null).extract(ID).orElseThrow();
 
         assertEquals("Solos do Cerrado", r.values().get("title"));
-        assertEquals(List.of("Silva, Ana", "Souza, Bruno"), r.values().get("authors"));
+        assertEquals(List.of("Silva, Ana", "Souza, Bruno"), r.values().get("author"));
         assertEquals(List.of("Lima, Carla", "Rocha, Davi"), r.values().get("advisors"));
-        assertEquals("2021-03-01T00:00:00Z", r.values().get("date"));
+        assertEquals("2021-03-01T00:00:00Z", r.values().get("publication_date"));
         assertEquals("Resumo da tese.", r.values().get("text"));
+        assertEquals("Resumo da tese.", r.values().get("abstract"), "the card's snippet (D326)");
         assertEquals(List.of("Tese"), r.values().get("type"));
         assertEquals(List.of("Carbono", "CNPQ::CIENCIAS AGRARIAS"), r.values().get("subjects"));
         assertEquals(List.of("por"), r.values().get("language"));
@@ -72,9 +73,9 @@ class DumDSpaceProfileTest {
         DumStructuredRecord r = harvest(listRecords(bare), true, null).extract(ID).orElseThrow();
 
         assertEquals("Só título", r.values().get("title"));
-        assertNull(r.values().get("date"));
+        assertNull(r.values().get("publication_date"));
         assertEquals("[s.d.]", r.values().get("dateText"));
-        for (String absent : List.of("authors", "advisors", "url", "text", "community", "collection", "image")) {
+        for (String absent : List.of("author", "advisors", "url", "text", "community", "collection", "image")) {
             assertNull(r.values().get(absent), absent);
         }
     }

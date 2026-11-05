@@ -145,7 +145,9 @@ A catalog source can harvest any OAI-PMH 2.0 repository instead of a JSON API: D
 
 Each run follows `resumptionToken` to the end. The first run harvests everything and sweeps like any source. Later runs ask only for what changed since the last complete harvest (`from`, as a day), and do not sweep. A record the repository marks deleted leaves the index on that run. A repository that keeps no deletion records never reports them, so its removals leave on the next full harvest. Changing the address, the format, the set or the full-text switch starts over with a full harvest.
 
-Dublin Core becomes these fields: `title`, `text` (the descriptions), `authors`, `subjects`, `date` (when it reads as a date, else `dateText`), `type`, `publisher`, `language`, `relations` and `url`. The `url` is the record's handle or DOI link when it has one, else a web address on the repository's own host, else its first web address. An address a visitor cannot open is never used: one on a private, loopback or link-local IP, or on a name without a dot such as `intranet`, which some repositories leak into their records. Nothing is filled in that the record does not hold. A repository that answers 429 or 503 is retried after its `Retry-After`, up to three times.
+Dublin Core becomes these fields: `title`, `text` (the descriptions), `abstract` (the first description), `author` (every creator), `subjects`, `publication_date` (when it reads as a date, else `dateText`), `type`, `publisher`, `language`, `relations` and `url`.
+
+`author`, `publication_date` and `abstract` are Turing's own names for the author, the date and the snippet, the ones a WordPress post carries too. An SN site that holds both a WordPress site and a repository therefore has one author facet, one date that result cards, the Newest sort and period facets read, and one snippet. The [WordPress plugin](/dumont/docs/connectors/wordpress/) declares `author` with several values, as the connector does. The `url` is the record's handle or DOI link when it has one, else a web address on the repository's own host, else its first web address. An address a visitor cannot open is never used: one on a private, loopback or link-local IP, or on a name without a dot such as `intranet`, which some repositories leak into their records. Nothing is filled in that the record does not hold. A repository that answers 429 or 503 is retried after its `Retry-After`, up to three times.
 
 ### Full text
 
@@ -174,9 +176,10 @@ Each `dim` record becomes these fields:
 | Field | From |
 |---|---|
 | `title` | `dc.title` |
-| `authors` | `dc.contributor.author`, then `dc.creator` |
+| `author` | `dc.contributor.author`, then `dc.creator` |
 | `advisors` | `dc.contributor.advisor` and its numbered forms (`advisor1`, `advisor-co1`) |
-| `date` | `dc.date.issued` as a year, month, day or instant; else `dateText` as written |
+| `publication_date` | `dc.date.issued` as a year, month, day or instant; else `dateText` as written |
+| `abstract` | the first `dc.description.abstract` (else `dc.description`) |
 | `text` | `dc.description.abstract` (else `dc.description`), then the full text |
 | `subjects` | `dc.subject`, every qualifier (`cnpq` included) |
 | `type`, `publisher`, `language` | `dc.type`, `dc.publisher`, `dc.language.iso` and `dc.language` |

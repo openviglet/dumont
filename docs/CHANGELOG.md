@@ -773,6 +773,7 @@
 - **D323** — Without WooCommerce the copilot block names this site, offers no kit unless switched on, and a plan stages the types, guides and availability field the block names.
 - **D324** — The search block reads a month, next week, tomorrow or this month from a sentence and filters the agenda's date with no language model.
 - **D325** — A fictional school demo (run-docker.cmd demo edu, en and pt_BR) walks agenda periods, an opening leaving search, PDFs and card dates; demos now read a site descriptor.
+- **D326** — Archive records send Turing's author, publication_date and abstract, and the plugin declares author multi-valued, so a post and a thesis share one author facet, date and snippet.
 
 ## Track T — Releases and links match what the site describes
 

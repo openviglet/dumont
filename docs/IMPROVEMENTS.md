@@ -287,25 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.165 One field contract for posts and archive records (D326)
-
-**Found by D316.** One SN site holding WordPress posts and Dumont's OAI-PMH or DSpace
-records gets parallel fields for the same concept: `author` (one string) beside
-`authors` and `advisors`; `publication_date` beside `date`/`dateText`, so cards, the
-Newest sort, period facets and the nl "Published" chip miss archive items; `abstract`
-only on posts, so archive cards have no snippet; `categories`/`section`/`tags` beside
-`subjects`/`community`/`collection` (plugin `class-viglet-dumont-indexer.php` 396-409;
-source `DumOaiPmhSource.java` 113-151, `DumDSpaceProfile.java` 89-131).
-
-**What to build.** One canonical contract both sides honour for the shared concepts
-(authors multi, a single publication date field, abstract, subjects), stated in the
-docs: either the source maps onto the plugin's names, or the plugin offers a mapping
-preset that sends `authors`, `subjects` and `date`. Decide which side moves by what
-Turing's default fields and the SN site's facets expect.
-
-**Done when:** a post and an archive record by the same author share one author facet
-value and both show a date and a snippet on their cards.
-
 ### XLIX.166 Types from other sources (D327)
 
 **Found by D316.** A document from another source carries a free-text, possibly

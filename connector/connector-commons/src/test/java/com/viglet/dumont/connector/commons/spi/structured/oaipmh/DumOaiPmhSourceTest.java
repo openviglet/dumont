@@ -209,17 +209,19 @@ class DumOaiPmhSourceTest {
         DumStructuredRecord r = source.extract("oai:repo:9").orElseThrow();
         assertEquals("Soil carbon in the Cerrado", r.values().get("title"));
         assertEquals("First paragraph.\n\nSecond.", r.values().get("text"));
-        assertEquals(List.of("Silva, Ana", "Souza, Bruno"), r.values().get("authors"));
+        // Turing's own names, the ones a WordPress post sends (D326).
+        assertEquals("First paragraph.", r.values().get("abstract"));
+        assertEquals(List.of("Silva, Ana", "Souza, Bruno"), r.values().get("author"));
         assertEquals(List.of("Soil", "Carbon"), r.values().get("subjects"));
-        assertEquals("2021-03-01T00:00:00Z", r.values().get("date"));
+        assertEquals("2021-03-01T00:00:00Z", r.values().get("publication_date"));
         assertNull(r.values().get("dateText"));
         assertEquals(List.of("Article"), r.values().get("type"));
         assertEquals(List.of("Repo Press"), r.values().get("publisher"));
         assertEquals(List.of("por"), r.values().get("language"));
         assertEquals("https://doi.org/10.1234/abc", r.values().get("url"));
         assertEquals(List.of("https://repo.example/collections/1"), r.values().get("relations"));
-        assertEquals("oai-pmh", r.provenance().get("authors").strategy());
-        assertEquals("dc:creator", r.provenance().get("authors").selector());
+        assertEquals("oai-pmh", r.provenance().get("author").strategy());
+        assertEquals("dc:creator", r.provenance().get("author").selector());
         assertTrue(r.missingMandatoryFields().isEmpty());
     }
 
@@ -231,7 +233,7 @@ class DumOaiPmhSourceTest {
         source.discover();
 
         DumStructuredRecord r = source.extract("oai:repo:1").orElseThrow();
-        assertNull(r.values().get("date"));
+        assertNull(r.values().get("publication_date"));
         assertEquals("circa 1890", r.values().get("dateText"));
         assertNull(r.values().get("url"), "a URL is never built from the OAI identifier");
     }
