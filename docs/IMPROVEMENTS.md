@@ -287,25 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.164 A second demo for education and culture (D325)
-
-**Found by D316.** Every shipped non-commerce feature (period sets, leaving search,
-PDFs, card date and image, fixed filters) is proven only by isolated fixtures, never on
-a coherent site, a recorded story or the docs. The demo tooling runs two stores but each
-step assumes a store: `setup_demo` hard-codes the Tarnfell title, theme, WooCommerce and
-catalog seed (`bin/run-docker.sh` 188-222, `run-docker.cmd`), `demo/setup.php` the shop
-pages, and every service mounts only the Tarnfell theme.
-
-**What to build.** First a store descriptor (theme, seed, title, WooCommerce yes or no,
-port, SN site) the scripts and Playwright read; then a fictional school beside Tarnfell:
-a block theme with front page, agenda, openings, books and a tour, a bilingual seed with
-events, openings closing on a date, books with PDFs, a `story.md` and five to eight
-specs. Leave the archive half (a Dumont source and a mock OAI-PMH) for after D322's
-seam.
-
-**Done when:** `run-docker.cmd demo edu` serves the school, and its specs walk the
-agenda, an opening leaving search and a book's PDF.
-
 ### XLIX.165 One field contract for posts and archive records (D326)
 
 **Found by D316.** One SN site holding WordPress posts and Dumont's OAI-PMH or DSpace
@@ -415,6 +396,24 @@ answers are paused rather than failing silently.
 
 **Done when:** with the quota spent, Health names it and its reset date, and the copilot
 says answers are paused.
+
+### XLIX.172 Past excludes today on an agenda (D333)
+
+**Found by D325.** The school demo seeds an event dated today; it lists under **Today**
+and also under **Past**. `Viglet_Dumont_Mapping::date_ranges('agenda')` declares Past as
+`from: null, to: 'NOW/DAY'`, Turing's range facet includes its end, and a day-only date
+is indexed at midnight UTC, which is exactly `NOW/DAY`. The site spec
+`agenda-periods.spec.mjs` missed it because its past event was 35 days old; the school's
+`demo-edu/agenda` spec checks only the days on either side of the edge and says why.
+
+**What to build.** End Past just before today: an exclusive upper bound if the
+manifest's range items can say so (Turing's `rangeEndDate` semantics), else
+`NOW/DAY-1SECOND`, and the same rule wherever a period's end meets the next one's start
+(the `past` set's Upcoming starts at `NOW`). Extend the site spec with an event dated
+today.
+
+**Done when:** an event dated today is under Today, Next 7 days and Upcoming, never
+under Past, on the site spec and the school demo.
 
 ## L The documentation area
 

@@ -772,6 +772,7 @@
 - **D322** — The sweep only ever touches the plugin's own ids, so a source sharing the site key survives Index All, the sweep and Delete All; Health counts its documents.
 - **D323** — Without WooCommerce the copilot block names this site, offers no kit unless switched on, and a plan stages the types, guides and availability field the block names.
 - **D324** — The search block reads a month, next week, tomorrow or this month from a sentence and filters the agenda's date with no language model.
+- **D325** — A fictional school demo (run-docker.cmd demo edu, en and pt_BR) walks agenda periods, an opening leaving search, PDFs and card dates; demos now read a site descriptor.
 
 ## Track T — Releases and links match what the site describes
 

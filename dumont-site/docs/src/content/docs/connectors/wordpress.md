@@ -565,3 +565,16 @@ starting it to turn on the answers, the catalog copilot and the Site assistant; 
 they stay hidden. On Linux and macOS, `sh bin/run-docker.sh demo` does the same (it
 provisions Turing through PowerShell, `pwsh`), and `demo reset en` or `demo reset pt` deletes
 one store's WordPress and database, leaving the other as it was.
+
+`run-docker.cmd demo edu` starts a demo school beside the stores: Lumen School at
+`http://localhost:38085`, or Escola Lumen in Portuguese at `http://localhost:38086` with
+`demo edu-pt`. It has no WooCommerce: it puts the plugin's features for a site that is not a
+store together on one site. Its **Agenda** page is a search block fixed to events. The event's
+day filters by **Today**, **Next 7 days**, **This month**, **Upcoming** and **Past**, and a
+search like `debates in December` is read as that month. Each event's card shows the day it
+happens and its poster. An opening leaves search the day after it closes, and the **Library**
+finds a book by a sentence inside its sample chapter, a PDF. Every date is counted from the day
+the school is set up, so the agenda is never stale. The
+[school's story](https://github.com/openviglet/dumont/blob/2026.3/wordpress/demo/school/story.md)
+walks it, and `npm run test:e2e:edu` runs its browser tests. Each demo site, store or school, is
+described by one file in `demo/sites/`, which the scripts and the browser tests read.
