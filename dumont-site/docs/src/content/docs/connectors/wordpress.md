@@ -244,6 +244,16 @@ afterwards. `wp dumont sweep` applies the same rule.
 For a rule no field can express, the `viglet_dumont_should_index` filter (`$index`,
 `$post`) has the last word on whether a post is in search.
 
+### PDF files
+
+With **PDF files attached to them** on (Settings → Content), each PDF in the media library
+attached to a post in search is a document of its own, found by the words inside it. The
+plugin sends the file with the document, and Turing reads its text. A PDF shows as **PDF**
+in the type badge and facet, with its post as its section. It is sent when uploaded or
+edited, and on **Index All**, and it is removed when the attachment is deleted. Only this
+site's own uploads are sent, up to 20 MB each (the `viglet_dumont_pdf_max_bytes` filter
+changes the cap). A PDF whose post leaves search stays until the next sweep.
+
 ---
 
 ## Several sites, one SN site
