@@ -26,6 +26,8 @@
 
 ## Track S — The WordPress connector plugin
 
+- ⏸ **D311** (deps: D305 ✅) **The instant overlay is a flat list of six results with no type, date, image, answer or zero state** — set aside (The local Turing agent has no embedding model to check answers.): Left: an Explore row, Continue in the assistant (D312), and the answer strip checked live. → §XLIX.153
+
 ## Track T — Releases and links match what the site describes
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)

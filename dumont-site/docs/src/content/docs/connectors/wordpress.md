@@ -391,7 +391,14 @@ search page. **Instant search layout** picks how it looks:
 - **Immersive**: up to twelve results grouped by type ("Posts", "Pages", "PDF files"), each
   with its image, date and first card field, and a **See all** per type that opens the
   results page filtered to that type. Before anything is typed it lists this browser's
-  recent searches. On a phone it fills the screen.
+  recent searches and the site's popular ones. On a desktop the highlighted result shows
+  beside the list, with its image, snippet and card fields. Ctrl+Enter (⌘+Enter) opens the
+  full results page whatever is highlighted. On a phone it fills the screen.
+
+  With **Answer questions on top of the immersive layout** on, a question that rests for a
+  moment gets Turing's answer above the results. Each answer is an LLM call, so it is off
+  by default, and it needs the site's answers working in Turing (Health shows whether they
+  are).
 
 ### The Turing search block
 

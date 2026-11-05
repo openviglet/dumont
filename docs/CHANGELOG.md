@@ -765,6 +765,7 @@
 - **D308** — A type's Leaves search on DATE field takes a post out of search when it passes, by a scheduled event, and a later date brings it back; viglet_dumont_should_index decides the rest.
 - **D309** — A file:<meta key> source reads the PDF a post's meta names into the post's own TEXT field through the zip import, so a sentence in the paper finds the post.
 - **D311 (immersive layout)** — An immersive overlay layout groups results by type with images and a See all per type, starts from recent searches and fills a phone's screen, axe-clean at 390 and 1280px.
+- **D320** — The immersive overlay previews the highlighted result on a desktop, lists popular searches before typing, opens all results on Ctrl+Enter, and can answer a resting question on top.
 
 ## Track T — Releases and links match what the site describes
 
