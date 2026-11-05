@@ -593,7 +593,10 @@ reads `?q=` (or `?s=`), so a page holding it can serve as the site's search page
 **Always filter by** scopes a block to one section of the site: a box on the events page
 set to `type:event` searches only events, and one set to a mapped facet's value
 (`publisher:sociology`) only what carries it. Each filter is `field:value`. Every search
-the block makes stays inside them, the first page drawn on the server included. Visitors
+the block makes stays inside them, the first page drawn on the server included, and so do
+the terms it suggests as the visitor types: a box set to `type:event` never offers a word
+only posts hold. Scoped suggestions need a Turing that answers a filtered autocomplete with
+terms (2026.3 builds after T1226); an older one answers it with document titles. Visitors
 never see them as a filter they can remove. Under the box a line names the scope ("In
 Events") with a **Search the whole site** link to the site's search page, keeping the query.
 A scoped block with only a search box takes its scope to the search page, where the same

@@ -246,23 +246,6 @@ proven by the a11y specs; pt_BR ships with it.
 **Done when:** a seeded two-step flow with a choice and a form runs end to end in the
 block, at 390 and 1280px.
 
-### XLIX.158 Suggestions inside the block's scope (D318)
-
-**Where it came from.** D306 gave the search block fixed filters ("Always filter by")
-and kept every search, the first paint and nl-filters inside them. The box's suggestions
-are the one read left out: `createSiteAutoComplete()` (`public/search.js`) asks Turing's
-autocomplete with the query alone, so a box scoped to `type:event` suggests terms only
-posts and pages hold, and picking one finds nothing in the scope.
-
-**What to build.** Turing's autocomplete endpoint reads `fq[]` like search does
-(`TurSNSiteAutoCompleteAPI` takes the filter operators). Check whether the SDK's
-`createAutoComplete` passes filters; if it does, give `createSiteAutoComplete()` a
-filters argument and have the block pass `blockScope()` (search-block.js), so the site
-key (D303) and the block's fixed filters both scope the suggestions. If the SDK drops
-them, file the gap in Turing's roadmap first and wait on it.
-
-**Done when:** a block set to `type:page` suggests no term that appears only in posts.
-
 ### XLIX.173 Foreign types through one negative filter (D334)
 
 **Found by D327.** `Viglet_Dumont_Mapping::discover_foreign()` lists the `type` values
