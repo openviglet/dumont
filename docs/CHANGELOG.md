@@ -771,6 +771,7 @@
 - **D319** — A PDF a post links (not only attaches) now reaches search, and leaves it once no post in search still holds it, on the queue, Index All, expiry and delete paths.
 - **D322** — The sweep only ever touches the plugin's own ids, so a source sharing the site key survives Index All, the sweep and Delete All; Health counts its documents.
 - **D323** — Without WooCommerce the copilot block names this site, offers no kit unless switched on, and a plan stages the types, guides and availability field the block names.
+- **D324** — The search block reads a month, next week, tomorrow or this month from a sentence and filters the agenda's date with no language model.
 
 ## Track T — Releases and links match what the site describes
 

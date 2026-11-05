@@ -443,6 +443,13 @@ Turing. Only an amount marked as money counts: "under 2 kg" is left alone. A siz
 the same way ("size M", "tamanho 42") on a facet whose field or name says size, and only
 when that value is one the site's products have: "size XXXL" sets nothing.
 
+A period is read the same way, on a date field that has a period facet (an agenda's first):
+"em novembro", "in March 2027", "next week", "semana que vem", "amanhã", "this month". A
+month with no year is the next one to come on an agenda and the last one gone on past dates.
+"May" and "March" need "in", "em" or a year beside them, since both are also verbs. So
+"debates em novembro" on an agenda filters the event dates to November with no language
+model, and searches "debates".
+
 A site with its own search blocks turns the block off:
 
 ```php

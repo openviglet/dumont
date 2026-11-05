@@ -287,22 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.163 Periods read from a sentence (D324)
-
-**Found by D316.** The search block reads a price and a size in code (`readPrice`,
-`readSize`, `public/search-block.js` 776-796, 948, 1033) but nothing reads a period:
-`dateWords` (665-667) holds only backward words (today, yesterday, last, passado,
-último…), with no next, próximo, tomorrow, amanhã, fim de semana or month names, so "em
-novembro" is not even treated as a sentence and nl-filters is never asked.
-
-**What to build.** Future and month words in `dateWords` (en, pt_BR), and a code-side
-`readPeriod` that maps "next week", "this month", "em novembro" onto the mapped date
-field's period facet (D307's agenda set), the agenda counterpart of `readPrice`, applied
-or suggested like the others.
-
-**Done when:** "debates em novembro" on an agenda filters the event dates to November
-with no language model.
-
 ### XLIX.164 A second demo for education and culture (D325)
 
 **Found by D316.** Every shipped non-commerce feature (period sets, leaving search,
