@@ -119,6 +119,8 @@ The connector never invents values. A record missing a `mandatory` field is not 
 | reached the end of the API | Removed from the index (the normal sweep). |
 | stopped at `maxPages`, a call budget, or a failed call | Kept. The run publishes what it fetched and removes nothing. |
 
+A rate limit is not a failed call at first. When the API answers 429 or 503, the walk waits for the `Retry-After` it sent (ten seconds when it sent none, five minutes at most) and asks again, up to three times. Only a limit that outlasts those retries fails the call. The retries are not counted against the call budget.
+
 ### Incremental sources
 
 An API with a tight budget may never return everything in one run, so the sweep would never run and stale records would stay in the index. Declare the source incremental:
@@ -133,18 +135,28 @@ With `incremental` set, a run never sweeps. The connector stores when it last sa
 
 ## OAI-PMH repositories
 
-A catalog source can harvest any OAI-PMH 2.0 repository instead of a JSON API: DSpace, EPrints, an OJS journal, Tainacan or Koha. Set `oaiPmhBaseUrl` to the repository's OAI endpoint (for example `https://repo.example.org/server/oai/request`), and leave out the manifest. Two optional fields narrow it:
+A catalog source can harvest any OAI-PMH 2.0 repository instead of a JSON API: DSpace, EPrints, an OJS journal, Tainacan or Koha. In the console, open the source's **Connection** tab and fill the **OAI-PMH repository** card: **Base URL** is the repository's OAI endpoint (for example `https://repo.example.org/server/oai/request`). A source uses either a base URL or a JSON API manifest, never both: the form refuses to save one with both, and so does the API. Through the API or an import file the same settings are `oaiPmhBaseUrl` and the fields below.
 
-| Field | Default | What it does |
-|---|---|---|
-| `oaiPmhMetadataPrefix` | `oai_dc` | The metadata format asked for. Only its Dublin Core (`dc:`) elements are read. |
-| `oaiPmhSet` | none | One OAI set (a collection) to harvest instead of the whole repository. |
+| Form field | API field | Default | What it does |
+|---|---|---|---|
+| Metadata prefix | `oaiPmhMetadataPrefix` | `oai_dc` | The metadata format asked for. Only its Dublin Core (`dc:`) elements are read. |
+| Set | `oaiPmhSet` | none | One OAI set (a collection) to harvest instead of the whole repository. |
+| Full text from PDFs | `oaiPmhFullText` | off | Also read each record's PDF and add its text to `text`. See below. |
 
-Each run follows `resumptionToken` to the end. The first run harvests everything and sweeps like any source. Later runs ask only for what changed since the last complete harvest (`from`, as a day), and do not sweep. A record the repository marks deleted leaves the index on that run. A repository that keeps no deletion records never reports them, so its removals leave on the next full harvest. Changing the address, the format or the set starts over with a full harvest.
+Each run follows `resumptionToken` to the end. The first run harvests everything and sweeps like any source. Later runs ask only for what changed since the last complete harvest (`from`, as a day), and do not sweep. A record the repository marks deleted leaves the index on that run. A repository that keeps no deletion records never reports them, so its removals leave on the next full harvest. Changing the address, the format, the set or the full-text switch starts over with a full harvest.
 
 Dublin Core becomes these fields: `title`, `text` (the descriptions), `authors`, `subjects`, `date` (when it reads as a date, else `dateText`), `type`, `publisher`, `language`, `relations` and `url`. The `url` is the record's handle or DOI link when it has one, else its first web address. Nothing is filled in that the record does not hold. A repository that answers 429 or 503 is retried after its `Retry-After`, up to three times.
 
-For now an OAI-PMH source is created through the REST API or an import file; the console's source form does not show these fields yet.
+### Full text
+
+With **Full text from PDFs** on, the connector looks at each record's `dc:identifier` and `dc:relation` values for web addresses on the repository's own host, the host of the base URL. Addresses ending in `.pdf` are tried first, then the others, at most three per record. The first one that answers with a PDF (served as `application/pdf`, or a generic binary from a `.pdf` address) has its text appended to `text`, after the descriptions. A landing page is closed without being read.
+
+- **Same host only.** An address on any other host is never fetched, and neither is a redirect that leaves the host.
+- **Capped.** A PDF over 50 MiB is not read, and its text is cut at one million characters.
+- **Polite.** Downloads are spaced one second apart, and a 429 or 503 is retried after its `Retry-After`, like the harvest.
+- **Never fatal.** A PDF that fails or holds no text leaves the record as its metadata describes it.
+
+Full text costs a request per address tried, so a large repository takes longer to harvest. It is off by default.
 
 ---
 

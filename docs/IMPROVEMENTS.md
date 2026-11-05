@@ -398,26 +398,28 @@ Name variants ("Bosso, Bruno", "Antonio Prado") are D310's to resolve, not this 
 **Done when:** an item's author, year, community and a sentence of its full text are
 searchable, and withdrawing it removes it on the next run.
 
-### LII.2 A generic OAI-PMH source (D315)
+### LII.3 Public URLs and landing-page PDFs for OAI-PMH records (D321)
 
-**Where it came from.** Filed beside the DSpace source, from the same FESPSP work.
-Repositories (DSpace of any version, EPrints), OJS journals and catalogues (Tainacan,
-Koha) all speak OAI-PMH 2.0; few share a REST API. Dumont has no XML harvesting at all
-(no `ListRecords`, no `resumptionToken`), and the paged-JSON machinery (D92) parses JSON
-only. This line is the base the DSpace source (D314) builds on.
+**Where it came from.** D315's live check harvested two pages from a real OJS journal
+(revistas.usp.br/rce, 200 records) and from demo.dspace.org (199 records, one deleted).
+Both harvested, but two things came out wrong:
 
-**What Dumont should do.** An `oai-pmh` source plugin on `DumStructuredSource`, reusing its sweep, incremental and run-note contract as it is:
-- **harvest** with `ListRecords`, following `resumptionToken`, `metadataPrefix` `oai_dc` by default and others (`dim`, `mods`, `qdc`) per source; `Identify` first, storing `granularity`;
-- **incremental** with `from=<last run's responseDate>`, and `set` to restrict to collections, named through `ListSets`;
-- **deletion:** `<header status="deleted">` removes the document; `deletedRecord=no` or `transient` gets a full re-list with the sweep at a configured interval;
-- **mapping:** Dublin Core to typed fields, overridable per source; the URL picked from `dc:identifier` by rule (handle, DOI);
-- **full text**, optional: a same-host PDF in `dc:identifier` or `dc:relation`.
+- **A private address as the record's URL.** On the DSpace demo the `url` rule
+  (`DumOaiPmhSource`: a handle or DOI link first, else the first http(s) identifier) picked
+  `http://10.17.50.146:4000/handle/123456789/4970`, an internal host the repository leaked
+  into its Dublin Core. A visitor can't open it.
+- **No PDF text from OJS.** With `oaiPmhFullText` on, nothing was extracted from either
+  site: OJS links the article page (`article/view/{id}`), whose PDF sits at
+  `article/download/{id}/{galley}`, and DSpace's `/handle/` pages answered 403.
 
-**Shared seams to lift first, not copy:** Tika extraction lives only in `assets-commons`
-with no cap (`BodyContentHandler(-1)`), and the `Pacer` is private to
-`DumJsonApiSource`, which ends a walk on any 429 and never reads `Retry-After`. Move
-both into `connector-commons`, with a size cap and `Retry-After`, plus a source-level
-User-Agent.
+**What to build.**
+1. In the URL rule, skip addresses whose host is a private, loopback or link-local IP or a
+   bare hostname without a dot, and prefer one on the base URL's own host; fall back to the
+   next candidate.
+2. For full text, learn the PDF from the landing page instead of guessing: fetch the
+   same-host `article/view` (OJS) or `/items/{uuid}` (DSpace 7) page, read its
+   `citation_pdf_url` meta tag (both systems emit it), and fetch that when it is on the same
+   host. The size caps and pacing stay as they are.
 
-**Done when:** an OJS demo journal and a DSpace demo instance both index through
-configuration only, and a deleted record leaves the index on the next incremental run.
+**Done when:** the DSpace demo's records carry no private URL, and an OJS article's PDF
+words find it, both checked live as in D315.

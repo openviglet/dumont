@@ -33,6 +33,7 @@ import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiMani
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonApiSource;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFullTextFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhSource;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhState;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
@@ -74,11 +75,12 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
     private final DumJsonFetcher jsonFetcher;
     private final DumCatalogJsonApiStates jsonApiStates;
     private final DumOaiPmhFetcher oaiPmhFetcher;
+    private final DumOaiPmhFullTextFetcher oaiPmhFullTextFetcher;
 
     public DumCatalogSourceProvider(DumCatalogSourceRepository sourceRepository,
             DumCatalogFetcher fetcher, DumRecipeLibrary recipeLibrary, DumHtmlFetcher htmlFetcher,
             DumJsonFetcher jsonFetcher, DumCatalogJsonApiStates jsonApiStates,
-            DumOaiPmhFetcher oaiPmhFetcher) {
+            DumOaiPmhFetcher oaiPmhFetcher, DumOaiPmhFullTextFetcher oaiPmhFullTextFetcher) {
         this.sourceRepository = sourceRepository;
         this.fetcher = fetcher;
         this.recipeLibrary = recipeLibrary;
@@ -86,6 +88,7 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
         this.jsonFetcher = jsonFetcher;
         this.jsonApiStates = jsonApiStates;
         this.oaiPmhFetcher = oaiPmhFetcher;
+        this.oaiPmhFullTextFetcher = oaiPmhFullTextFetcher;
     }
 
     @Override
@@ -197,7 +200,8 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
 
     /**
      * The OAI-PMH source a base URL declares (roadmap <strong>D315</strong>), bound to this source's
-     * name, sites and locale, keeping its watermark on the source's own row.
+     * name, sites and locale, keeping its watermark on the source's own row, and reading each
+     * record's PDF when the source has full text on.
      *
      * @throws IllegalArgumentException when the base URL is not an http(s) URL
      */
@@ -205,6 +209,7 @@ public class DumCatalogSourceProvider implements DumStructuredSourceProvider {
         return DumOaiPmhSource.builder(source.getOaiPmhBaseUrl(), oaiPmhFetcher)
                 .metadataPrefix(source.getOaiPmhMetadataPrefix())
                 .set(source.getOaiPmhSet())
+                .fullText(Boolean.TRUE.equals(source.getOaiPmhFullText()) ? oaiPmhFullTextFetcher : null)
                 .sourceName(source.getName())
                 .providerName(DumCatalogPlugin.PROVIDER_NAME)
                 .siteNames(source.getTurSNSites() == null ? List.of() : List.copyOf(source.getTurSNSites()))

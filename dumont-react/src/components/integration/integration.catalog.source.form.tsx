@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { TurIntegrationCatalogSource } from "@/models/integration/integration-catalog-source.model";
 import { TurIntegrationCatalogSourceService } from "@/services/integration/integration-catalog-source.service";
-import { IconApi, IconBuildingBank, IconPlugConnected, IconSettings } from "@tabler/icons-react";
+import { IconApi, IconBuildingBank, IconLibrary, IconPlugConnected, IconSettings } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import { AdaptiveFormHeader } from "@/components/bento/adaptive-form-header";
 import { useEffect, useMemo } from "react";
@@ -25,6 +25,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
+import { FormItemTwoColumns } from "../ui/form-item-two-columns";
+import { GradientSwitch } from "../ui/gradient-switch";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 
 const MANIFEST_PLACEHOLDER = `{
@@ -45,6 +47,11 @@ function isJsonObjectOrBlank(text: string | undefined): boolean {
   } catch {
     return false;
   }
+}
+
+/** Blank, or an http(s) URL — what the OAI-PMH base URL field accepts. */
+function isHttpUrlOrBlank(text: string | undefined): boolean {
+  return !text?.trim() || /^https?:\/\/\S+$/i.test(text.trim());
 }
 
 /** The catalog source publishes to a single SN site; the form edits it as one `site` field. */
@@ -223,9 +230,10 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                   control={form.control}
                   name="catalogUrl"
                   rules={{
-                    // A JSON API manifest (D92) replaces the catalog URL, so one of the two is enough.
+                    // A JSON API manifest (D92) or an OAI-PMH repository (D315) replaces the catalog
+                    // URL, so any one of the three is enough.
                     validate: (url, values) =>
-                      Boolean(url?.trim() || values.jsonApiManifest?.trim()) ||
+                      Boolean(url?.trim() || values.jsonApiManifest?.trim() || values.oaiPmhBaseUrl?.trim()) ||
                       t("forms.catalogSource.catalogUrlOrManifestRequired"),
                   }}
                   render={({ field }) => (
@@ -306,6 +314,84 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                       <FormDescription>{t("forms.catalogSource.jsonApiSecretsDesc")}</FormDescription>
                       <FormMessage />
                     </FormItem>
+                  )}
+                />
+              </SectionCard.Content>
+            </SectionCard>
+
+            <SectionCard variant="amber">
+              <SectionCard.Header icon={IconLibrary} title={t("forms.catalogSource.oaiPmh")} description={t("forms.catalogSource.oaiPmhDesc")} />
+              <SectionCard.Content>
+                <FormField
+                  control={form.control}
+                  name="oaiPmhBaseUrl"
+                  rules={{
+                    validate: (url, values) => {
+                      if (!isHttpUrlOrBlank(url)) return t("forms.catalogSource.oaiPmhBaseUrlInvalid");
+                      // The API refuses a source with both bindings; say so before the round trip.
+                      if (url?.trim() && values.jsonApiManifest?.trim()) return t("forms.catalogSource.oaiPmhOrManifest");
+                      return true;
+                    },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("forms.catalogSource.oaiPmhBaseUrl")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value ?? ""} placeholder="https://repositorio.example.edu/oai/request" type="text" />
+                      </FormControl>
+                      <FormDescription>{t("forms.catalogSource.oaiPmhBaseUrlDesc")}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="oaiPmhMetadataPrefix"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("forms.catalogSource.oaiPmhMetadataPrefix")}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ""} placeholder="oai_dc" type="text" />
+                        </FormControl>
+                        <FormDescription>{t("forms.catalogSource.oaiPmhMetadataPrefixDesc")}</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="oaiPmhSet"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("forms.catalogSource.oaiPmhSet")}</FormLabel>
+                        <FormControl>
+                          <Input {...field} value={field.value ?? ""} placeholder="com_123456789_1" type="text" />
+                        </FormControl>
+                        <FormDescription>{t("forms.catalogSource.oaiPmhSetDesc")}</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="oaiPmhFullText"
+                  render={({ field }) => (
+                    <FormItemTwoColumns className="rounded-lg border p-4">
+                      <FormItemTwoColumns.Left className="space-y-0.5">
+                        <FormItemTwoColumns.Label className="text-base">{t("forms.catalogSource.oaiPmhFullText")}</FormItemTwoColumns.Label>
+                        <FormItemTwoColumns.Description>{t("forms.catalogSource.oaiPmhFullTextDesc")}</FormItemTwoColumns.Description>
+                      </FormItemTwoColumns.Left>
+                      <FormItemTwoColumns.Right>
+                        <FormControl>
+                          <GradientSwitch aria-label={t("forms.catalogSource.oaiPmhFullText")} checked={field.value ?? false} onCheckedChange={field.onChange} />
+                        </FormControl>
+                      </FormItemTwoColumns.Right>
+                    </FormItemTwoColumns>
                   )}
                 />
               </SectionCard.Content>

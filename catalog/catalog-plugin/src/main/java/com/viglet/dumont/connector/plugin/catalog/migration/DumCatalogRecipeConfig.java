@@ -22,7 +22,9 @@ import org.springframework.context.annotation.Configuration;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumHttpJsonFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumJsonFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumHttpOaiPmhFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumHttpOaiPmhFullTextFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFetcher;
+import com.viglet.dumont.connector.commons.spi.structured.oaipmh.DumOaiPmhFullTextFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.recipe.DumRecipeLibrary;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumHtmlFetcher;
 import com.viglet.dumont.connector.commons.spi.structured.strategy.DumJsoupFetcher;
@@ -65,5 +67,14 @@ public class DumCatalogRecipeConfig {
     @Bean
     DumOaiPmhFetcher dumCatalogOaiPmhFetcher() {
         return new DumHttpOaiPmhFetcher();
+    }
+
+    /**
+     * What an OAI-PMH source with full text on (D315) reads its records' PDFs with: the
+     * repository's own host only, 50 MiB and one million characters per document at most.
+     */
+    @Bean
+    DumOaiPmhFullTextFetcher dumCatalogOaiPmhFullTextFetcher() {
+        return new DumHttpOaiPmhFullTextFetcher();
     }
 }

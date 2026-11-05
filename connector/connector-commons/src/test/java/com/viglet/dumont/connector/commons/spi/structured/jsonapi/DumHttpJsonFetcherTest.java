@@ -24,8 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sun.net.httpserver.HttpServer;
+import com.viglet.dumont.connector.commons.http.DumHttpRetry;
 
 /** The JDK client behind a JSON API source (roadmap D92), against an in-process server. */
 class DumHttpJsonFetcherTest {
@@ -42,6 +47,8 @@ class DumHttpJsonFetcherTest {
     private final AtomicReference<String> body = new AtomicReference<>();
     private final AtomicReference<String> auth = new AtomicReference<>();
     private final AtomicReference<String> contentType = new AtomicReference<>();
+    private final AtomicInteger limitedAnswers = new AtomicInteger();
+    private final List<Long> sleeps = new ArrayList<>();
 
     @BeforeEach
     void start() throws IOException {
@@ -54,6 +61,15 @@ class DumHttpJsonFetcherTest {
             respond(exchange, 200, "{\"results\": []}");
         });
         server.createContext("/fail", exchange -> respond(exchange, 503, "down"));
+        // Answers 429 with Retry-After: 4 as many times as limitedAnswers says, then a page.
+        server.createContext("/limited", exchange -> {
+            if (limitedAnswers.getAndDecrement() > 0) {
+                exchange.getResponseHeaders().add("Retry-After", "4");
+                respond(exchange, 429, "slow down");
+            } else {
+                respond(exchange, 200, "{\"results\": [{\"id\": 1, \"title\": \"a\"}]}");
+            }
+        });
         server.start();
     }
 
@@ -83,11 +99,40 @@ class DumHttpJsonFetcherTest {
 
     @Test
     void aNon2xxStatusFailsWithoutLeakingTheQuery() {
-        IOException e = assertThrows(IOException.class, () -> new DumHttpJsonFetcher()
+        IOException e = assertThrows(IOException.class, () -> fetcher(0)
                 .fetch(new DumJsonApiRequest("GET", url("/fail?app_key=secret"), Map.of(), null)));
 
         assertTrue(e.getMessage().contains("HTTP 503"));
         assertFalse(e.getMessage().contains("secret"), "the API key in the query is not logged");
+    }
+
+    @Test
+    void aRateLimitIsWaitedOutRatherThanEndingTheWalk() {
+        // D315: a 429 used to end the walk incomplete; now the Retry-After is honoured first.
+        limitedAnswers.set(2);
+        DumJsonApiManifest manifest = DumJsonApiManifest.parse("""
+                {"name": "jobs", "request": {"url": "%s"}, "records": "results", "id": "id",
+                 "fields": [{"name": "title", "type": "TEXT", "mandatory": true}]}
+                """.formatted(url("/limited")));
+        DumJsonApiSource source = DumJsonApiSource.builder(manifest, fetcher(3)).sourceName("jobs").build();
+
+        assertEquals(List.of("1"), source.discover());
+        assertTrue(source.discoveryComplete());
+        assertEquals(List.of(4_000L, 4_000L), sleeps, "slept what Retry-After asked, without real waiting");
+    }
+
+    @Test
+    void aRateLimitThatOutlastsTheRetriesStillFails() {
+        limitedAnswers.set(10);
+
+        IOException e = assertThrows(IOException.class, () -> fetcher(1)
+                .fetch(new DumJsonApiRequest("GET", url("/limited"), Map.of(), null)));
+        assertTrue(e.getMessage().contains("HTTP 429"), e.getMessage());
+        assertEquals(1, sleeps.size());
+    }
+
+    private DumHttpJsonFetcher fetcher(int maxRetries) {
+        return new DumHttpJsonFetcher(HttpClient.newHttpClient(), new DumHttpRetry(sleeps::add, maxRetries));
     }
 
     private String url(String path) {

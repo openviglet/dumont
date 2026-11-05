@@ -59,6 +59,7 @@ public class DumCatalogExchangeProcess {
     private static final String OAI_PMH_BASE_URL = "oaiPmhBaseUrl";
     private static final String OAI_PMH_METADATA_PREFIX = "oaiPmhMetadataPrefix";
     private static final String OAI_PMH_SET = "oaiPmhSet";
+    private static final String OAI_PMH_FULL_TEXT = "oaiPmhFullText";
 
     private final DumCatalogSourceRepository sourceRepository;
 
@@ -86,6 +87,9 @@ public class DumCatalogExchangeProcess {
             json.putOpt(OAI_PMH_BASE_URL, source.getOaiPmhBaseUrl());
             json.putOpt(OAI_PMH_METADATA_PREFIX, source.getOaiPmhMetadataPrefix());
             json.putOpt(OAI_PMH_SET, source.getOaiPmhSet());
+            if (Boolean.TRUE.equals(source.getOaiPmhFullText())) {
+                json.put(OAI_PMH_FULL_TEXT, true);
+            }
             array.put(json);
         }
         return array.toString(2);
@@ -151,6 +155,7 @@ public class DumCatalogExchangeProcess {
             source.setOaiPmhBaseUrl(json.optString(OAI_PMH_BASE_URL, null));
             source.setOaiPmhMetadataPrefix(json.optString(OAI_PMH_METADATA_PREFIX, null));
             source.setOaiPmhSet(json.optString(OAI_PMH_SET, null));
+            source.setOaiPmhFullText(json.optBoolean(OAI_PMH_FULL_TEXT, false));
         }
         sourceRepository.save(source);
         log.info("Imported catalog source '{}'", name);

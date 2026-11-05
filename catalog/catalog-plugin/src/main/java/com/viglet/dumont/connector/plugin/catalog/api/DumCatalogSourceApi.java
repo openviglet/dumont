@@ -120,14 +120,18 @@ public class DumCatalogSourceApi {
         existing.setJsonApiSecrets(catalogSource.getJsonApiSecrets());
         // An OAI-PMH binding (D315). The watermark is the harvest's own, but it only means anything
         // for the repository, format and set that set it: pointing elsewhere starts a full harvest.
+        // So does turning full text on or off, or the records harvested before keep the old text.
+        boolean fullText = Boolean.TRUE.equals(catalogSource.getOaiPmhFullText());
         if (!Objects.equals(existing.getOaiPmhBaseUrl(), catalogSource.getOaiPmhBaseUrl())
                 || !Objects.equals(existing.getOaiPmhMetadataPrefix(), catalogSource.getOaiPmhMetadataPrefix())
-                || !Objects.equals(existing.getOaiPmhSet(), catalogSource.getOaiPmhSet())) {
+                || !Objects.equals(existing.getOaiPmhSet(), catalogSource.getOaiPmhSet())
+                || Boolean.TRUE.equals(existing.getOaiPmhFullText()) != fullText) {
             existing.setOaiPmhWatermark(null);
         }
         existing.setOaiPmhBaseUrl(catalogSource.getOaiPmhBaseUrl());
         existing.setOaiPmhMetadataPrefix(catalogSource.getOaiPmhMetadataPrefix());
         existing.setOaiPmhSet(catalogSource.getOaiPmhSet());
+        existing.setOaiPmhFullText(fullText);
         try {
             DumCatalogSourceProvider.validateJsonApi(existing);
             DumCatalogSourceProvider.validateOaiPmh(existing);

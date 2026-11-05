@@ -94,7 +94,7 @@ class DumCatalogMigrationTest {
         return new DumCatalogSourceProvider(repository, catalogFetcher, library, htmlFetcher,
                 request -> "[]",
                 name -> new com.viglet.dumont.connector.commons.spi.structured.jsonapi.DumInMemoryJsonApiState(),
-                url -> "");
+                url -> "", (url, host) -> java.util.Optional.empty());
     }
 
     @Test

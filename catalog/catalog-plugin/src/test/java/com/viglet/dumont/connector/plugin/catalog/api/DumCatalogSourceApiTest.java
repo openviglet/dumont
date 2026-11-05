@@ -127,6 +127,26 @@ class DumCatalogSourceApiTest {
     }
 
     @Test
+    void turningFullTextOnSavesItAndRestartsTheHarvest() {
+        DumCatalogSource existing = DumCatalogSource.builder().id("a").oaiPmhBaseUrl("https://repo.example/oai")
+                .oaiPmhWatermark("2026-11-01T10:00:00Z").build();
+        when(repository.findById("a")).thenReturn(Optional.of(existing));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        DumCatalogSourceRequest req = new DumCatalogSourceRequest();
+        req.setName("repo");
+        req.setOaiPmhBaseUrl("https://repo.example/oai");
+
+        api.catalogSourceUpdate("a", req);
+        assertThat(existing.getOaiPmhFullText()).isFalse();
+        assertThat(existing.getOaiPmhWatermark()).as("nothing changed, the harvest goes on").isNotNull();
+
+        req.setOaiPmhFullText(true);
+        api.catalogSourceUpdate("a", req);
+        assertThat(existing.getOaiPmhFullText()).isTrue();
+        assertThat(existing.getOaiPmhWatermark()).as("records harvested before lack the text").isNull();
+    }
+
+    @Test
     void updateNotFound() {
         when(repository.findById("a")).thenReturn(Optional.empty());
         assertThat(api.catalogSourceUpdate("a", new DumCatalogSourceRequest()).getStatusCode())

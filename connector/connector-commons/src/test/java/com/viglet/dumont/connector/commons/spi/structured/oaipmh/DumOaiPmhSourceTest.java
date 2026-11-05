@@ -274,6 +274,75 @@ class DumOaiPmhSourceTest {
     }
 
     @Test
+    void fullTextIsOffUnlessAsked() {
+        DumOaiPmhSource source = source(pages(listRecords("2026-11-01T10:00:00Z", null, record("oai:repo:1",
+                "One", "<dc:description>Abstract.</dc:description>"
+                        + "<dc:identifier>https://repo.example/bitstream/1/paper.pdf</dc:identifier>"))),
+                new DumInMemoryOaiPmhState(), null);
+        source.discover();
+
+        assertEquals("Abstract.", source.extract("oai:repo:1").orElseThrow().values().get("text"));
+    }
+
+    @Test
+    void fullTextAppendsASameHostPdfAfterTheDescription() {
+        List<String> fetched = new ArrayList<>();
+        DumOaiPmhSource source = DumOaiPmhSource.builder(BASE, recording(pages(listRecords(
+                "2026-11-01T10:00:00Z", null, record("oai:repo:1", "One",
+                        "<dc:description>Abstract.</dc:description>"
+                                + "<dc:identifier>https://repo.example/items/1</dc:identifier>"
+                                + "<dc:identifier>https://mirror.example/paper.pdf</dc:identifier>"
+                                + "<dc:relation>https://REPO.example/bitstream/1/paper.PDF</dc:relation>")))))
+                .sourceName("repo").fullText((url, host) -> {
+                    fetched.add(url + " @ " + host);
+                    return url.endsWith(".PDF") ? Optional.of("Body of the paper.") : Optional.empty();
+                }).build();
+        source.discover();
+
+        DumStructuredRecord r = source.extract("oai:repo:1").orElseThrow();
+        assertEquals("Abstract.\n\nBody of the paper.", r.values().get("text"));
+        assertEquals(List.of("https://REPO.example/bitstream/1/paper.PDF @ repo.example"), fetched,
+                "the .pdf on the repository's host is tried first; the other host never");
+        assertEquals("dc:description + fulltext:https://REPO.example/bitstream/1/paper.PDF",
+                r.provenance().get("text").selector());
+    }
+
+    @Test
+    void fullTextFallsBackToTheOtherSameHostUrlsAndSurvivesAFailure() {
+        List<String> fetched = new ArrayList<>();
+        DumOaiPmhSource source = DumOaiPmhSource.builder(BASE, recording(pages(listRecords(
+                "2026-11-01T10:00:00Z", null, record("oai:repo:1", "One",
+                        "<dc:identifier>https://repo.example/bitstream/1/broken.pdf</dc:identifier>"
+                                + "<dc:identifier>https://repo.example/items/1</dc:identifier>"
+                                + "<dc:relation>https://repo.example/download/1</dc:relation>")))))
+                .sourceName("repo").fullText((url, host) -> {
+                    fetched.add(url);
+                    if (url.endsWith("broken.pdf")) {
+                        throw new IOException("HTTP 500");
+                    }
+                    return url.endsWith("/download/1") ? Optional.of("Served as application/pdf.")
+                            : Optional.empty();
+                }).build();
+        source.discover();
+
+        DumStructuredRecord r = source.extract("oai:repo:1").orElseThrow();
+        assertEquals("Served as application/pdf.", r.values().get("text"));
+        assertEquals(List.of("https://repo.example/bitstream/1/broken.pdf", "https://repo.example/items/1",
+                "https://repo.example/download/1"), fetched);
+    }
+
+    @Test
+    void fullTextCandidatesAreSameHostHttpPdfFirstAndBounded() {
+        DumOaiPmhResponse.Item item = new DumOaiPmhResponse.Item("oai:repo:1", null, false, java.util.Map.of(
+                "identifier", List.of("oai:repo:1", "https://repo.example/a", "ftp://repo.example/b.pdf",
+                        "https://repo.example.evil/c.pdf", "https://repo.example/d.pdf"),
+                "relation", List.of("https://repo.example/e", "https://repo.example/f", "not a url")));
+
+        assertEquals(List.of("https://repo.example/d.pdf", "https://repo.example/a", "https://repo.example/e"),
+                DumOaiPmhSource.fullTextCandidates(item, "repo.example"));
+    }
+
+    @Test
     void refusesABaseUrlThatIsNotHttp() {
         assertThrows(IllegalArgumentException.class,
                 () -> DumOaiPmhSource.builder("ftp://repo.example/oai", url -> "").sourceName("r").build());

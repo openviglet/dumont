@@ -25,10 +25,8 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,6 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import com.viglet.dumont.connector.commons.http.DumHttpRetry;
 
 /** The JDK client behind an OAI-PMH source (roadmap D315), against an in-process server. */
 class DumHttpOaiPmhFetcherTest {
@@ -94,17 +93,8 @@ class DumHttpOaiPmhFetcherTest {
         assertEquals(List.of(), sleeps);
     }
 
-    @Test
-    void retryAfterIsCappedAndDefaultsWhenUnreadable() {
-        assertEquals(Duration.ofSeconds(30), DumHttpOaiPmhFetcher.retryAfter(Optional.of(" 30 ")));
-        assertEquals(DumHttpOaiPmhFetcher.MAX_WAIT, DumHttpOaiPmhFetcher.retryAfter(Optional.of("86400")));
-        assertEquals(DumHttpOaiPmhFetcher.DEFAULT_WAIT,
-                DumHttpOaiPmhFetcher.retryAfter(Optional.of("Wed, 21 Oct 2026 07:28:00 GMT")));
-        assertEquals(DumHttpOaiPmhFetcher.DEFAULT_WAIT, DumHttpOaiPmhFetcher.retryAfter(Optional.empty()));
-    }
-
     private DumHttpOaiPmhFetcher fetcher(int maxRetries) {
-        return new DumHttpOaiPmhFetcher(HttpClient.newHttpClient(), sleeps::add, maxRetries);
+        return new DumHttpOaiPmhFetcher(HttpClient.newHttpClient(), new DumHttpRetry(sleeps::add, maxRetries));
     }
 
     private String url(String path) {

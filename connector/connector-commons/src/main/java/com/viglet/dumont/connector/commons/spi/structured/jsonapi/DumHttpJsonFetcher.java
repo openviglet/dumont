@@ -23,10 +23,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+import com.viglet.dumont.connector.commons.http.DumHttpRetry;
+
 /**
  * The JDK {@link HttpClient} behind a {@link DumJsonApiSource} (roadmap <strong>D92</strong>). Sends
  * {@code Accept: application/json} unless the manifest names its own, and treats any non-2xx status
- * as a failure so a source never parses an error page as an empty result.
+ * as a failure so a source never parses an error page as an empty result. A {@code 429} or
+ * {@code 503} is first waited out through the shared {@link DumHttpRetry} (roadmap D315), so a
+ * provider's rate limit pauses the walk instead of ending it.
  *
  * @author Alexandre Oliveira
  * @since 2026.3.1
@@ -37,6 +41,7 @@ public final class DumHttpJsonFetcher implements DumJsonFetcher {
     private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(2);
 
     private final HttpClient client;
+    private final DumHttpRetry retry;
 
     public DumHttpJsonFetcher() {
         this(HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT)
@@ -44,7 +49,13 @@ public final class DumHttpJsonFetcher implements DumJsonFetcher {
     }
 
     public DumHttpJsonFetcher(HttpClient client) {
+        this(client, new DumHttpRetry());
+    }
+
+    /** @param retry how a 429/503 is waited out; a test passes one with a recording sleeper */
+    public DumHttpJsonFetcher(HttpClient client, DumHttpRetry retry) {
         this.client = client;
+        this.retry = retry;
     }
 
     @Override
@@ -66,21 +77,15 @@ public final class DumHttpJsonFetcher implements DumJsonFetcher {
         }
         try {
             HttpResponse<String> response =
-                    client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+                    retry.send(client, builder.build(), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() / 100 != 2) {
                 throw new IOException("HTTP %d from %s".formatted(response.statusCode(),
-                        redact(request.url())));
+                        DumHttpRetry.redact(request.url())));
             }
             return response.body();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IOException("Interrupted fetching " + redact(request.url()), e);
+            throw new IOException("Interrupted fetching " + DumHttpRetry.redact(request.url()), e);
         }
-    }
-
-    /** The URL without its query, which is where an API key usually travels. */
-    static String redact(String url) {
-        int query = url.indexOf('?');
-        return query < 0 ? url : url.substring(0, query) + "?…";
     }
 }

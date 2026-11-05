@@ -73,6 +73,8 @@ Apache Tika supports text extraction from a broad range of formats:
 
 Files that Tika cannot extract text from are silently skipped.
 
+Two caps keep one runaway file from exhausting memory: a file larger than 100 MiB is not parsed, and text past ten million characters is cut there. Either way the file is still indexed with its name, path and metadata.
+
 ---
 
 ## CLI Parameters

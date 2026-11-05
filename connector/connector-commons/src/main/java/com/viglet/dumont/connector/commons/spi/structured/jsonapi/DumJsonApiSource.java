@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.LongSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import com.viglet.dumont.connector.commons.http.DumPacer;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSchema;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
@@ -59,6 +59,12 @@ import lombok.extern.slf4j.Slf4j;
  * each end the walk <em>complete</em>. A page cap, the run's call cap, or a failed call end it
  * <em>incomplete</em>: {@link #discoveryComplete()} then answers {@code false}, and the plugin
  * finishes the run standalone so the records this run never reached are not deindexed.
+ *
+ * <p>
+ * <strong>Rate limits.</strong> A {@code 429} or {@code 503} is waited out in the fetcher, through
+ * the shared {@link com.viglet.dumont.connector.commons.http.DumHttpRetry} (roadmap D315): the walk
+ * pauses for the {@code Retry-After} the provider sent and goes on, and only a limit that outlasts
+ * the bounded retries fails the call and ends the walk incomplete.
  *
  * <p>
  * <strong>Budgets and increments.</strong> Day, week and month allowances are counted in the
@@ -86,7 +92,7 @@ public final class DumJsonApiSource implements DumStructuredSource {
     private final Locale locale;
     private final Map<String, String> secrets;
     private final DumJsonFetcher fetcher;
-    private final Pacer pacer;
+    private final DumPacer pacer;
     private final DumJsonApiState state;
     private final Clock clock;
     private final DumJsonPath recordsPath;
@@ -443,40 +449,6 @@ public final class DumJsonApiSource implements DumStructuredSource {
         }
     }
 
-    /** Spaces calls so no minute holds more than the manifest allows. */
-    @FunctionalInterface
-    public interface Pacer {
-        /** Blocks until a call spaced {@code minIntervalMs} after the previous one may go. */
-        void awaitTurn(long minIntervalMs);
-
-        /** A pacer over the wall clock that sleeps the remainder of the interval. */
-        static Pacer sleeping() {
-            return sleeping(System::currentTimeMillis, ms -> {
-                try {
-                    Thread.sleep(ms);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
-        }
-
-        /** A pacer over a given clock and sleep, so a test can run it without waiting. */
-        static Pacer sleeping(LongSupplier clock, java.util.function.LongConsumer sleep) {
-            long[] last = {Long.MIN_VALUE};
-            return minIntervalMs -> {
-                long now = clock.getAsLong();
-                if (last[0] != Long.MIN_VALUE && minIntervalMs > 0) {
-                    long wait = last[0] + minIntervalMs - now;
-                    if (wait > 0) {
-                        sleep.accept(wait);
-                        now += wait;
-                    }
-                }
-                last[0] = now;
-            };
-        }
-    }
-
     public static final class Builder {
         private final DumJsonApiManifest manifest;
         private final DumJsonFetcher fetcher;
@@ -485,7 +457,7 @@ public final class DumJsonApiSource implements DumStructuredSource {
         private Collection<String> siteNames = List.of();
         private Locale locale = Locale.US;
         private Map<String, String> secrets = Map.of();
-        private Pacer pacer = Pacer.sleeping();
+        private DumPacer pacer = DumPacer.sleeping();
         private DumJsonApiState state = new DumInMemoryJsonApiState();
         private Clock clock = Clock.systemUTC();
 
@@ -526,8 +498,9 @@ public final class DumJsonApiSource implements DumStructuredSource {
             return this;
         }
 
-        public Builder pacer(Pacer pacer) {
-            this.pacer = pacer == null ? Pacer.sleeping() : pacer;
+        /** Spaces calls so no minute holds more than the manifest allows. */
+        public Builder pacer(DumPacer pacer) {
+            this.pacer = pacer == null ? DumPacer.sleeping() : pacer;
             return this;
         }
 

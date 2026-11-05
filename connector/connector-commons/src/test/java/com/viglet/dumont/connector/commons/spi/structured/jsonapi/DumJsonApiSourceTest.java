@@ -41,6 +41,7 @@ import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
+import com.viglet.dumont.connector.commons.http.DumPacer;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredRecord;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSource;
 import com.viglet.dumont.connector.commons.spi.structured.DumStructuredSourcePlugin;
@@ -233,7 +234,7 @@ class DumJsonApiSourceTest {
     void thePacerSpacesCalls() {
         long[] now = {1_000};
         List<Long> sleeps = new ArrayList<>();
-        DumJsonApiSource.Pacer pacer = DumJsonApiSource.Pacer.sleeping(() -> now[0], ms -> {
+        DumPacer pacer = DumPacer.sleeping(() -> now[0], ms -> {
             sleeps.add(ms);
             now[0] += ms;
         });

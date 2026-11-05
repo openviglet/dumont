@@ -144,6 +144,13 @@ public class DumCatalogSource implements Serializable {
     private String oaiPmhSet;
 
     /**
+     * Whether each OAI-PMH record's text also carries the text of its PDF, read from the
+     * repository's own host only. Off unless set; nullable so the column joins an existing table.
+     */
+    @Column(name = "oai_pmh_full_text")
+    private Boolean oaiPmhFullText;
+
+    /**
      * The {@code responseDate} of the last complete OAI-PMH harvest, the next run's {@code from}.
      * Written by the harvest, never by the API or an import.
      */

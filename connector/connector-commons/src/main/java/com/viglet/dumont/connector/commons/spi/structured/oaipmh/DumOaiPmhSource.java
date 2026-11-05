@@ -17,6 +17,8 @@
 package com.viglet.dumont.connector.commons.spi.structured.oaipmh;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -85,6 +87,14 @@ import lombok.extern.slf4j.Slf4j;
  * already an http(s) URL — a handle or DOI link when the record has one, else the first — never
  * one built from the OAI identifier.
  *
+ * <p>
+ * <strong>Full text.</strong> Off unless a {@link DumOaiPmhFullTextFetcher} is given. With one,
+ * {@link #extract(String)} looks at the record's {@code dc:identifier} and {@code dc:relation}
+ * values that are http(s) URLs on the base URL's own host — never another host — trying those that
+ * end in {@code .pdf} first and at most {@value #MAX_FULL_TEXT_PROBES} in all, and appends the first
+ * PDF text it gets to {@code text}, after the description. A failed or empty fetch leaves the
+ * record as the metadata alone describes it.
+ *
  * @author Alexandre Oliveira
  * @since 2026.3.1
  */
@@ -113,7 +123,8 @@ public final class DumOaiPmhSource implements DumStructuredSource {
                     .description("dc:title").build())
             .field(DumStructuredField.builder(TEXT).type(TurSEFieldType.TEXT)
                     .embeddingRole(DumEmbeddingRole.BODY)
-                    .description("dc:description, every value").build())
+                    .description("dc:description, every value; then a same-host PDF's text when full text is on")
+                    .build())
             .field(DumStructuredField.builder(AUTHORS).multiValued(true).facet(true)
                     .description("dc:creator").build())
             .field(DumStructuredField.builder(SUBJECTS).multiValued(true).facet(true)
@@ -134,6 +145,9 @@ public final class DumOaiPmhSource implements DumStructuredSource {
                     .description("dc:relation").build())
             .build();
 
+    /** The most same-host URLs one record's full text is looked for at. */
+    static final int MAX_FULL_TEXT_PROBES = 3;
+
     private static final Pattern YEAR = Pattern.compile("\\d{4}");
     private static final Pattern YEAR_MONTH = Pattern.compile("\\d{4}-\\d{2}");
     private static final Pattern DAY = Pattern.compile("\\d{4}-\\d{2}-\\d{2}");
@@ -150,6 +164,8 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     private final DumOaiPmhFetcher fetcher;
     private final DumOaiPmhState state;
     private final boolean incrementalEnabled;
+    private final DumOaiPmhFullTextFetcher fullText;
+    private final String host;
 
     private final List<String> notes = new ArrayList<>();
     private final Set<String> gone = new LinkedHashSet<>();
@@ -169,6 +185,8 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         this.fetcher = builder.fetcher;
         this.state = builder.state;
         this.incrementalEnabled = builder.incremental;
+        this.fullText = builder.fullText;
+        this.host = URI.create(this.baseUrl).getHost();
     }
 
     public static Builder builder(String baseUrl, DumOaiPmhFetcher fetcher) {
@@ -246,9 +264,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         }
         DumStructuredRecord.Builder rec = DumStructuredRecord.builder(contentId, SCHEMA);
         rec.set(TITLE, item.values("title").stream().findFirst().orElse(null), provenance("title"));
-        List<String> descriptions = item.values("description");
-        rec.set(TEXT, descriptions.isEmpty() ? null : String.join("\n\n", descriptions),
-                provenance("description"));
+        setText(rec, item);
         rec.set(AUTHORS, item.values("creator"), provenance("creator"));
         rec.set(SUBJECTS, item.values("subject"), provenance("subject"));
         List<String> dates = item.values("date");
@@ -265,6 +281,74 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         rec.set(URL, url(item.values("identifier")).orElse(null), provenance("identifier"));
         rec.set(RELATIONS, item.values("relation"), provenance("relation"));
         return Optional.of(rec.build());
+    }
+
+    /** {@code text}: every description, then the full text of a same-host PDF when that is on. */
+    private void setText(DumStructuredRecord.Builder rec, DumOaiPmhResponse.Item item) {
+        List<String> parts = new ArrayList<>(item.values("description"));
+        String locator = parts.isEmpty() ? null : "dc:description";
+        Optional<FullText> found = fullText(item);
+        if (found.isPresent()) {
+            parts.add(found.get().text());
+            locator = (locator == null ? "" : locator + " + ") + "fulltext:" + found.get().url();
+        }
+        rec.set(TEXT, parts.isEmpty() ? null : String.join("\n\n", parts),
+                locator == null ? provenance("description") : DumFieldProvenance.oaiPmh(locator));
+    }
+
+    private Optional<FullText> fullText(DumOaiPmhResponse.Item item) {
+        if (fullText == null) {
+            return Optional.empty();
+        }
+        for (String url : fullTextCandidates(item, host)) {
+            try {
+                Optional<String> text = fullText.text(url, host).filter(t -> !t.isBlank());
+                if (text.isPresent()) {
+                    return Optional.of(new FullText(url, text.get()));
+                }
+            } catch (IOException | RuntimeException e) {
+                log.info("OAI-PMH source '{}' read no full text for '{}' from {}: {}", sourceName,
+                        item.identifier(), url, e.getMessage());
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * The record's {@code dc:identifier} and {@code dc:relation} values a full text may be read
+     * from: http(s) URLs on {@code host}, those ending in {@code .pdf} first, at most
+     * {@link #MAX_FULL_TEXT_PROBES}.
+     */
+    static List<String> fullTextCandidates(DumOaiPmhResponse.Item item, String host) {
+        List<String> values = new ArrayList<>(item.values("identifier"));
+        values.addAll(item.values("relation"));
+        List<URI> onHost = values.stream().map(String::strip).distinct()
+                .map(DumOaiPmhSource::uri).flatMap(Optional::stream)
+                .filter(uri -> isOnHost(uri, host)).toList();
+        List<String> ordered = new ArrayList<>();
+        onHost.stream().filter(DumOaiPmhSource::endsWithPdf).map(URI::toString).forEach(ordered::add);
+        onHost.stream().filter(uri -> !endsWithPdf(uri)).map(URI::toString).forEach(ordered::add);
+        return ordered.size() > MAX_FULL_TEXT_PROBES ? ordered.subList(0, MAX_FULL_TEXT_PROBES) : ordered;
+    }
+
+    private static Optional<URI> uri(String value) {
+        try {
+            return Optional.of(new URI(value));
+        } catch (URISyntaxException e) {
+            return Optional.empty();
+        }
+    }
+
+    private static boolean isOnHost(URI uri, String host) {
+        return host != null && uri.getHost() != null && uri.getHost().equalsIgnoreCase(host)
+                && ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()));
+    }
+
+    private static boolean endsWithPdf(URI uri) {
+        return uri.getPath() != null && uri.getPath().toLowerCase(Locale.ROOT).endsWith(".pdf");
+    }
+
+    private record FullText(String url, String text) {
     }
 
     private static DumFieldProvenance provenance(String element) {
@@ -450,6 +534,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
         private Locale locale = Locale.US;
         private DumOaiPmhState state = new DumInMemoryOaiPmhState();
         private boolean incremental = true;
+        private DumOaiPmhFullTextFetcher fullText;
 
         private Builder(String baseUrl, DumOaiPmhFetcher fetcher) {
             if (baseUrl == null || !(baseUrl.strip().regionMatches(true, 0, "http://", 0, 7)
@@ -508,6 +593,15 @@ public final class DumOaiPmhSource implements DumStructuredSource {
          */
         public Builder incremental(boolean incremental) {
             this.incremental = incremental;
+            return this;
+        }
+
+        /**
+         * Reads each record's full text through {@code fullText}, from PDFs on the base URL's own
+         * host. {@code null}, the default, leaves full text off.
+         */
+        public Builder fullText(DumOaiPmhFullTextFetcher fullText) {
+            this.fullText = fullText;
             return this;
         }
 

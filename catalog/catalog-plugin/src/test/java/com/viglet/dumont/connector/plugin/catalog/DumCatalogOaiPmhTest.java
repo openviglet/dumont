@@ -61,13 +61,16 @@ class DumCatalogOaiPmhTest {
                   <metadata><oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
                       xmlns:dc="http://purl.org/dc/elements/1.1/">
                     <dc:title>Soil carbon</dc:title>
+                    <dc:description>Abstract.</dc:description>
                     <dc:identifier>http://hdl.handle.net/123/1</dc:identifier>
+                    <dc:identifier>https://repo.example/bitstream/123/1/thesis.pdf</dc:identifier>
                   </oai_dc:dc></metadata></record>
               </ListRecords>
             </OAI-PMH>
             """;
 
     private final List<String> urls = new ArrayList<>();
+    private final List<String> fullTextUrls = new ArrayList<>();
 
     @Test
     void aRepositorySourceHarvestsThroughThePluginAndKeepsItsWatermarkOnTheRow() {
@@ -89,6 +92,26 @@ class DumCatalogOaiPmhTest {
         new DumCatalogPlugin(second, provider(repository)).indexAll("repo");
         assertThat(urls.getFirst()).endsWith("&from=2026-11-01");
         assertThat(second.standalone).as("an incremental harvest never sweeps").isTrue();
+    }
+
+    @Test
+    void fullTextIsReadOnlyWhenTheSourceAsksForIt() {
+        DumCatalogSource source = repo();
+        DumCatalogSourceRepository repository = repositoryWith(source);
+
+        CapturingContext off = new CapturingContext();
+        new DumCatalogPlugin(off, provider(repository)).indexAll("repo");
+        assertThat(off.published.getFirst().getAttributes()).containsEntry("text", "Abstract.");
+        assertThat(fullTextUrls).isEmpty();
+
+        source.setOaiPmhFullText(true);
+        source.setOaiPmhWatermark(null);
+        CapturingContext on = new CapturingContext();
+        new DumCatalogPlugin(on, provider(repository)).indexAll("repo");
+        assertThat(on.published.getFirst().getAttributes().get("text").toString())
+                .startsWith("Abstract.").endsWith("The thesis itself.");
+        assertThat(fullTextUrls).containsExactly(
+                "https://repo.example/bitstream/123/1/thesis.pdf @ repo.example");
     }
 
     @Test
@@ -118,6 +141,7 @@ class DumCatalogOaiPmhTest {
     void anExportCarriesTheBindingButNotTheWatermark() {
         DumCatalogSource source = repo();
         source.setOaiPmhWatermark("2026-11-01T10:00:00Z");
+        source.setOaiPmhFullText(true);
         DumCatalogSourceRepository repository = mock(DumCatalogSourceRepository.class);
         when(repository.findAll()).thenReturn(List.of(source));
 
@@ -126,6 +150,7 @@ class DumCatalogOaiPmhTest {
 
         assertThat(exported.getString("oaiPmhBaseUrl")).isEqualTo(BASE);
         assertThat(exported.getString("oaiPmhSet")).isEqualTo("theses");
+        assertThat(exported.getBoolean("oaiPmhFullText")).isTrue();
         assertThat(exported.toString()).doesNotContain("2026-11-01");
     }
 
@@ -135,7 +160,8 @@ class DumCatalogOaiPmhTest {
         when(repository.findByName("repo")).thenReturn(Optional.empty());
 
         new DumCatalogExchangeProcess(repository).importFromString("""
-                [{"name": "repo", "turSNSites": ["acervo"], "oaiPmhBaseUrl": "%s", "oaiPmhSet": "theses"}]
+                [{"name": "repo", "turSNSites": ["acervo"], "oaiPmhBaseUrl": "%s", "oaiPmhSet": "theses",
+                  "oaiPmhFullText": true}]
                 """.formatted(BASE));
 
         ArgumentCaptor<DumCatalogSource> saved = ArgumentCaptor.forClass(DumCatalogSource.class);
@@ -143,6 +169,7 @@ class DumCatalogOaiPmhTest {
         assertThat(saved.getValue().getOaiPmhBaseUrl()).isEqualTo(BASE);
         assertThat(saved.getValue().getOaiPmhSet()).isEqualTo("theses");
         assertThat(saved.getValue().getOaiPmhMetadataPrefix()).isNull();
+        assertThat(saved.getValue().getOaiPmhFullText()).isTrue();
     }
 
     // --- helpers -------------------------------------------------------------------------------
@@ -153,6 +180,9 @@ class DumCatalogOaiPmhTest {
                 url -> {
                     urls.add(url);
                     return PAGE;
+                }, (url, host) -> {
+                    fullTextUrls.add(url + " @ " + host);
+                    return Optional.of("The thesis itself.");
                 });
     }
 
