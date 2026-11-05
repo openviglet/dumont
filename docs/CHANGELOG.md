@@ -782,6 +782,7 @@
 - **D332** — A spent AI budget is recorded from Turing's 429 with its reset date and shown on Health, and the copilot and search block say answers are paused instead of failing.
 - **D333** — Each agenda period ends a second before the next starts, so an event dated today is Today and never Past, and tomorrow's is never Today.
 - **D335** — A background reindex asks the site for its own next step over a signed loopback, and Health steps an idle run, so a started reindex finishes on a site nobody visits.
+- **D310 (plugin side)** — An opt-in turns on Turing's entity extraction, the People, Organisations and Places facets are labelled and offered, name variants sync to a thesaurus, and the editor panel lists the names.
 
 ## Track T — Releases and links match what the site describes
 

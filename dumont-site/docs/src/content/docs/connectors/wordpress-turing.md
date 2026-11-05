@@ -15,6 +15,7 @@ generative ones against your Turing and names, for each, the block a visitor mee
 | Search as you type | **Turing search** block; the instant search (Ctrl+K and the theme's search box) | No |
 | Filters from the catalog | **Turing search** block: the facets your field mapping declares | No |
 | Popular searches | **Turing search** block, with "Show popular searches" on | No |
+| [People, organisations and places](/docs/connectors/wordpress/#fields-and-facets) | **Turing search** block: facets of the names each post holds, with "Find people, organisations and places in posts" on | Yes |
 | An answer with its sources | **Turing search** block, with "Answer questions from this site's content" on | Yes |
 | Filters a sentence names | **Turing search** block, with "Suggest the filters a sentence names" on | Yes |
 | Related content | **Related content** block, or after the content of chosen post types | No |

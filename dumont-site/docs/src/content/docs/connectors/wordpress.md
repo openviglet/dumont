@@ -235,6 +235,43 @@ step. Run a reindex afterwards so existing posts carry the new fields.
 
 With nothing configured, every public custom taxonomy is mapped as a facet.
 
+**People, organisations and places.** Names live in a post's text, not in its fields, so no
+mapping can reach them. Turn on **Settings → Search → Generative AI → Find people,
+organisations and places in posts** and Turing's language model reads each post as it is
+indexed and lists the people, organisations and places it names. Turing keeps a name only
+when the text holds it, and writes it to one of three facet fields: `entity_person`,
+`entity_organization` and `entity_place`. The section of that name on the **Fields** screen
+gives each one its facet label (*People*, *Organisations*, *Places* by default) and an
+**Offered** box. The **Turing search** block then offers the ones you keep as facets beside
+the others, under those labels, and its filter chips use them too.
+
+- It needs **Generative AI** on as well: the names are found by the language model of the
+  site's AI agent in Turing (its Default AI Agent, unless one was chosen in Turing's console).
+  With generative AI off, nothing is asked and the facets are not offered. The Fields section
+  says which setting is missing.
+- Each post indexed is a call to the language model, counted in the site's AI spend in Turing.
+  Turing keeps what it found in memory by text, so a post re-sent unchanged is not read again
+  while Turing still holds it.
+- The setting goes to Turing with the fields: on the next indexing run, or when the Fields
+  screen is saved. Posts indexed before get their names once they are reindexed. Turning it
+  off here tells Turing to stop, as long as generative AI is still on.
+- If the model fails, the post is indexed without names.
+
+**Name variants** (same Settings card) folds the ways a name is written into one facet value.
+Write one name per line, the name to show first and then its variants after a `|`, separated
+by `;`:
+
+```text
+Marta Vilar | Vilar, Marta; M. Vilar
+Fundação Aurora | Aurora
+```
+
+Saving sends them to Turing's Thesaurus, in a thesaurus of the plugin's own named after the site
+key, selected for the SN site. A post that writes *Vilar, Marta* is then listed under *Marta
+Vilar*. Settings shows how many names were saved, or why Turing refused them. An API key bound to
+a partition of a shared SN site cannot write the Thesaurus, so on such a key add the names in
+Turing's Thesaurus instead. Posts already indexed follow once reindexed.
+
 **WooCommerce.** With WooCommerce active and `product` among the indexed types, a product
 offers its shop fields as sources: **Product: Price**, **Regular price**, **Sale price**,
 **Stock status**, **SKU** and **Average rating**. With nothing configured a product sends
@@ -474,6 +511,11 @@ error shows on hover), *Excluded* or *Not published*. The block editor has a **S
 panel with the same state, **Exclude from search** and **Reindex now**. A reindex Turing
 refuses shows Turing's own reason under the state, so a refused document reads differently
 from Turing being down.
+
+With **Find people, organisations and places in posts** on, the panel's **Names in this post**
+lists, under each facet's label, the names Turing holds for the indexed post. It only shows
+them: Turing has no way to keep one name off one post, so to change them, change the text and
+reindex.
 
 The same panel's **Assist** section helps while writing, and changes nothing on its own:
 
