@@ -13,8 +13,8 @@ delivers their content to [Viglet Turing](https://github.com/openviglet/turing),
 Solr or Elasticsearch. It runs on your own servers, is built with Java 21 and Spring Boot,
 and is extended through plugins.
 
-> 🌐 **Product page:** [openviglet.github.io/dumont](https://openviglet.github.io/dumont/) ·
-> 📚 **Documentation:** [openviglet.github.io/dumont/docs](https://openviglet.github.io/dumont/docs/) ·
+> 🌐 **Product page:** [dumont.viglet.org](https://dumont.viglet.org/) ·
+> 📚 **Documentation:** [dumont.viglet.org/docs](https://dumont.viglet.org/docs/) ·
 > 🔎 **Search on top:** [Viglet Turing](https://github.com/openviglet/turing)
 
 ## Who it is for
@@ -299,4 +299,4 @@ Apache License 2.0: see the [LICENSE](LICENSE) file.
 ---
 
 Built by the [Viglet](https://www.viglet.org) Team ·
-**[openviglet.github.io/dumont](https://openviglet.github.io/dumont/)**
+**[dumont.viglet.org](https://dumont.viglet.org/)**

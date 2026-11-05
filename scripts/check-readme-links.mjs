@@ -1,6 +1,7 @@
 // D254: no README in the repository points at Dumont's old homes. The product site and its
-// documentation live at openviglet.github.io/dumont; www.viglet.org/dumont is a copy whose
-// canonical names that site, and docs.viglet.org/dumont only redirects. A README that links
+// documentation live at dumont.viglet.org; www.viglet.org/dumont is a copy whose
+// canonical names that site, and docs.viglet.org/dumont and openviglet.github.io/dumont only
+// redirect. A README that links
 // either keeps the old address alive for readers, crawlers and AI assistants.
 //
 //   node scripts/check-readme-links.mjs
@@ -12,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join( fileURLToPath( import.meta.url ), '..', '..' );
 const skip = new Set( [ 'node_modules', '.git', 'dist', 'target', 'build', 'vendor' ] );
-const refused = /\b(?:www\.|docs\.)?viglet\.org\/dumont\b/i;
+const refused = /\b(?:(?:www\.|docs\.)?viglet\.org|openviglet\.github\.io)\/dumont\b/i;
 
 /**
  * Every README under a folder: README.md, README.txt, readme.txt, whatever the case.
@@ -45,7 +46,7 @@ const found = readmes( root ).flatMap( ( file ) =>
 
 if ( found.length ) {
 	process.stderr.write(
-		'README links to an old Dumont home; use https://openviglet.github.io/dumont/ instead:\n' +
+		'README links to an old Dumont home; use https://dumont.viglet.org/ instead:\n' +
 			found.map( ( line ) => `  ${ line }\n` ).join( '' )
 	);
 	process.exit( 1 );

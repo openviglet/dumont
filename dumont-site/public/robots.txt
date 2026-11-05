@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://openviglet.github.io/dumont/sitemap.xml
+Sitemap: https://dumont.viglet.org/sitemap.xml

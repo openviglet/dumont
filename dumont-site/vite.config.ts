@@ -4,8 +4,8 @@ import path from "path";
 import { defineConfig } from "vite";
 import { BASE } from "./src/lib/site-links";
 
-// A GitHub project page, served under openviglet.github.io/dumont/, so every
-// asset path carries the base.
+// Served at the root of dumont.viglet.org; the base comes from site-links so a
+// move to a sub-path is one edit there.
 export default defineConfig({
   base: BASE,
   plugins: [react(), tailwindcss()],

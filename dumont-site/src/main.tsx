@@ -6,7 +6,7 @@ import { BASE } from "@/lib/site-links";
 import "./index.css";
 
 // The route is derived from the URL: the same trivial rule the server used, read
-// below the base the site is served at ("/dumont/aem/" is the route "/aem").
+// below the base the site is served at (at the domain root the base is "/", so this is the pathname itself).
 const container = document.getElementById("root")!;
 const tree = (
   <React.StrictMode>

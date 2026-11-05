@@ -20,7 +20,7 @@ import { pageToMarkdown } from "./markdown.mjs";
 const distDir = resolve(process.cwd(), "dist");
 const serverEntry = resolve(process.cwd(), "dist-ssr", "entry-server.js");
 
-// SITE_URL is the published root, base included ("https://openviglet.github.io/dumont/").
+// SITE_URL is the published root, base included ("https://dumont.viglet.org/").
 const { render, routes, BASE, SITE_URL } = await import(pathToFileURL(serverEntry).href);
 const template = readFileSync(resolve(distDir, "index.html"), "utf-8");
 
@@ -56,7 +56,7 @@ function assertSlashedLinks(text, where) {
   const bad = [];
   const re = new RegExp(String.raw`(?:href="|\]\(|<loc>)(?:${origin})?(/[^"#?)<\s]*)`, "g");
   for (const m of text.matchAll(re)) {
-    // Routes are declared without the base the site is served under ("/dumont/aem" is "/aem").
+    // Routes are declared without the base the site is served under (with a base of "/dumont/", "/dumont/aem" is "/aem").
     if (m[1].startsWith(BASE) && routePaths.has(`/${m[1].slice(BASE.length)}`)) bad.push(m[1]);
   }
   if (bad.length) {
@@ -69,8 +69,8 @@ function assertSlashedLinks(text, where) {
 
 /**
  * A BreadcrumbList for every page below the landing one. Without it Google builds the result's
- * breadcrumb from the URL and drops `dumont`, so a page reads "openviglet.github.io › aem" as
- * though it belonged to the host. The docs area emits its own (docs/src/components/Head.astro).
+ * breadcrumb from the URL alone ("dumont.viglet.org › aem"), naming no product. The docs area
+ * emits its own (docs/src/components/Head.astro).
  */
 function breadcrumbJsonLd(route, canonical) {
   if (route.path === "/") return "";

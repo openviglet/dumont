@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://openviglet.github.io/dumont/</loc>
+    <loc>https://dumont.viglet.org/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/aem/</loc>
+    <loc>https://dumont.viglet.org/aem/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/wordpress/</loc>
+    <loc>https://dumont.viglet.org/wordpress/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/connectors/</loc>
+    <loc>https://dumont.viglet.org/connectors/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/trust/</loc>
+    <loc>https://dumont.viglet.org/trust/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/marketplace/wknd/</loc>
+    <loc>https://dumont.viglet.org/marketplace/wknd/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/marketplace/wknd-eds/</loc>
+    <loc>https://dumont.viglet.org/marketplace/wknd-eds/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/marketplace/celestial-gallery/</loc>
+    <loc>https://dumont.viglet.org/marketplace/celestial-gallery/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/marketplace/retro-arcade/</loc>
+    <loc>https://dumont.viglet.org/marketplace/retro-arcade/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://openviglet.github.io/dumont/marketplace/wikipedia/</loc>
+    <loc>https://dumont.viglet.org/marketplace/wikipedia/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

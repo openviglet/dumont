@@ -20,7 +20,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parse } from "node-html-parser";
 
 const site = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-// The published root, base included ("https://openviglet.github.io/dumont/"), from the
+// The published root, base included ("https://dumont.viglet.org/"), from the
 // SSR bundle the prerender read it from. Paths below are site paths ("/docs/x"), so the
 // root loses its slash before one is appended.
 const { SITE_URL } = await import(pathToFileURL(join(site, "dist-ssr", "entry-server.js")).href);

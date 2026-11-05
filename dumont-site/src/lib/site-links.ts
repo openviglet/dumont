@@ -5,13 +5,13 @@
  */
 
 /**
- * The site is a GitHub project page, served under /dumont/ on openviglet.github.io
- * rather than at the root of a domain. The Vite base, the Astro base, every
- * canonical and every in-site href are built from these two, so a move is an edit
- * here.
+ * The site is served at the root of its own domain, dumont.viglet.org (a GitHub
+ * Pages custom domain, so the old project-page address redirects here). The Vite
+ * base, the Astro base, every canonical and every in-site href are built from
+ * these two, so a move is an edit here.
  */
-export const SITE_ORIGIN = "https://openviglet.github.io";
-export const BASE = "/dumont/";
+export const SITE_ORIGIN = "https://dumont.viglet.org";
+export const BASE = "/";
 export const SITE_URL = `${SITE_ORIGIN}${BASE}`;
 
 /** A path of this site ("/aem/", "/#how") under the base it is served at. */
@@ -49,7 +49,7 @@ export interface SiteLinkGroup {
   items: SiteLink[];
 }
 
-// Hrefs are anchored at the site's base ("/dumont/#…") so they keep working from
+// Hrefs are anchored at the site's base ("/#…") so they keep working from
 // any page: the browser navigates home and scrolls to the section.
 export const NAV_LINKS: SiteLink[] = [{ label: "Docs", href: LINKS.docs }];
 

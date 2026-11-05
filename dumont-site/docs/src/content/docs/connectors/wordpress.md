@@ -106,7 +106,7 @@ Then open **Viglet Turing Search → Setup**.
 
 ## Connect to Turing
 
-![The Setup page](/dumont/docs/img/screenshots/dumont-wordpress-setup.png)
+![The Setup page](/docs/img/screenshots/dumont-wordpress-setup.png)
 
 **Viglet Turing Search → Setup** takes the connection, then **Save and test the connection** checks
 it one step at a time and stops at the first failure, naming it:
@@ -179,7 +179,7 @@ custom fields can be added on the Settings page.
 
 ### Fields and facets
 
-![The Fields page](/dumont/docs/img/screenshots/dumont-wordpress-fields.png)
+![The Fields page](/docs/img/screenshots/dumont-wordpress-fields.png)
 
 **Viglet Turing Search → Fields** maps, per post type, what else becomes its own Turing field:
 
@@ -310,7 +310,7 @@ sources**.
 
 A post and an archive record use the same field for the author, the date and the snippet:
 Turing's own `author`, `publication_date` and `abstract`, which the
-[catalog connector](/dumont/docs/connectors/catalog/) sends for OAI-PMH and DSpace records
+[catalog connector](/docs/connectors/catalog/) sends for OAI-PMH and DSpace records
 too. So a thesis and a post by the same person share one author facet value, and both show
 a date and a snippet on their cards. The plugin declares `author` with several values, for a
 thesis's co-authors. A site provisioned by an older version, where `author` held one value,
@@ -383,7 +383,7 @@ The same operations answer over REST under `viglet-dumont/v1/`: `status`, `index
 | **Health** | Published versus indexed per type, the running reindex and the last one, the queue, its last run, the last 50 events |
 | **Settings** | Post types, categories, tags, comments, custom fields, exclusions, batch size, search |
 
-![The Health page](/dumont/docs/img/screenshots/dumont-wordpress-health.png)
+![The Health page](/docs/img/screenshots/dumont-wordpress-health.png)
 
 **Health** has **Retry failed** and **Send queue now**, and lists every send, removal,
 provisioning, sweep and reindex with its error when it failed. While a reindex runs, its
@@ -428,7 +428,7 @@ The same panel's **Assist** section helps while writing, and changes nothing on 
   language. **Use this excerpt** fills the excerpt field; the post changes only when you
   save it. **Draft another** asks again. Turing needs a default language model for it.
 
-![The Search column in the post list](/dumont/docs/img/screenshots/dumont-wordpress-posts.png)
+![The Search column in the post list](/docs/img/screenshots/dumont-wordpress-posts.png)
 
 **Viglet Turing Search → Insights** shows what visitors searched for in the last 24 hours, 7 days,
 30 days or all time, read from Turing's search metrics with the stored API key: the top
@@ -483,7 +483,7 @@ search page. **Instant search layout** picks how it looks:
 
 ### The Turing search block
 
-![The Turing search block](/dumont/docs/img/screenshots/dumont-wordpress-search-block.png)
+![The Turing search block](/docs/img/screenshots/dumont-wordpress-search-block.png)
 
 The **Turing search** block is a complete search UI for any page. It has a box with
 suggestions, "did you mean", the mapped facets, results and pages. It is built with the
@@ -610,7 +610,7 @@ reach Turing at another address than the server does, set `VIGLET_DUMONT_PUBLIC_
 
 ## Try it in your browser
 
-[Open the demo store in WordPress Playground](https://playground.wordpress.net/?blueprint-url=https%3A%2F%2Fopenviglet.github.io%2Fdumont%2Fplayground%2Fblueprint.json).
+[Open the demo store in WordPress Playground](https://playground.wordpress.net/?blueprint-url=https%3A%2F%2Fdumont.viglet.org%2Fplayground%2Fblueprint.json).
 WordPress, WooCommerce, the plugin and the Tarnfell store start in your browser, with nothing
 to install, and search a hosted Viglet Turing. The first load takes two or three minutes
 while the catalog is created. The plugin runs in demo mode: it reads the hosted index and
@@ -632,7 +632,7 @@ store in Portuguese and in reais, Recanto da Serra, at `http://localhost:38083`
 (`run-docker.cmd demo en` or `demo pt` starts one). Its `/showcase/` page holds
 every Turing block, and `?tour=1` on any of its pages marks each feature with its chapter in
 the [shopper's story](https://github.com/openviglet/dumont/blob/2026.3/wordpress/demo/story.md)
-that the [WordPress page](https://openviglet.github.io/dumont/wordpress/) walks through. Set `OPENAI_API_KEY` before
+that the [WordPress page](https://dumont.viglet.org/wordpress/) walks through. Set `OPENAI_API_KEY` before
 starting it to turn on the answers, the catalog copilot and the Site assistant; without it
 they stay hidden. On Linux and macOS, `sh bin/run-docker.sh demo` does the same (it
 provisions Turing through PowerShell, `pwsh`), and `demo reset en` or `demo reset pt` deletes

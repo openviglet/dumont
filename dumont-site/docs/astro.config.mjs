@@ -1,4 +1,4 @@
-// The documentation area, at https://openviglet.github.io/dumont/docs.
+// The documentation area, at https://dumont.viglet.org/docs.
 //
 // A second build beside the site rather than more routes in it: the site is a prerendered
 // landing page with no sidebar, no per-page contents and no search, and Starlight is those
@@ -28,7 +28,7 @@ export default defineConfig({
   root: realpathSync(fileURLToPath(new URL(".", import.meta.url))),
   site: SITE_ORIGIN,
   // Astro rewrites the links it generates, not ones typed by hand: an absolute href written
-  // into a page must carry /dumont/docs itself or it 404s in production alone.
+  // into a page must carry /docs itself or it 404s in production alone.
   base: `${BASE}docs`,
   // Inside the site's dist/, because the deploy copies that one directory. `vite build` empties
   // dist/, so this build runs *last* in dumont-site's `build` — earlier, the step after it
