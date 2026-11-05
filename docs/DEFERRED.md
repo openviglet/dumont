@@ -29,6 +29,7 @@
 - ⏸ **D311** (deps: D305 ✅) **The instant overlay is a flat list of six results with no type, date, image, answer or zero state** — set aside (The local Turing agent has no embedding model to check answers.): Left: an Explore row, Continue in the assistant (D312), and the answer strip checked live. → §XLIX.153
 - ⏸ **D312** (deps: —) **The search answer and the Site assistant do not share context: a follow-up starts over** — set aside (Answers and chat are off locally: the agent has no embedding model.): A visitor who wants to ask one more thing after the answer loses the question, the answer and its sources. → §XLIX.154
 - ⏸ **D313** (deps: D305 ✅) **The Site assistant renders only text and citations: a Turing chat flow's choices, forms and slots cannot run in it** — set aside (Chat is off locally: the agent has no embedding model.): Guided conversations built in Turing's console never reach a WordPress site. → §XLIX.155
+- ⏸ **D310** (deps: —) **WordPress documents carry no people or themes: who and what a post names never becomes a facet** — set aside (Local Turing predates T1228; no LLM.): Left: see Turing extract a post's person and place and fold a variant, on an image with T1228 and an LLM. → §XLIX.152
 
 ## Track T — Releases and links match what the site describes
 
