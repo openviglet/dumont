@@ -770,6 +770,7 @@
 - **D317** — npm run check:i18n and CI regenerate the .pot and fail, naming the string, when it is out of date or a string lacks a pt_BR translation.
 - **D319** — A PDF a post links (not only attaches) now reaches search, and leaves it once no post in search still holds it, on the queue, Index All, expiry and delete paths.
 - **D322** — The sweep only ever touches the plugin's own ids, so a source sharing the site key survives Index All, the sweep and Delete All; Health counts its documents.
+- **D323** — Without WooCommerce the copilot block names this site, offers no kit unless switched on, and a plan stages the types, guides and availability field the block names.
 
 ## Track T — Releases and links match what the site describes
 

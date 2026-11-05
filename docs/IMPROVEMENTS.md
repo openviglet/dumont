@@ -287,25 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.162 A copilot that is not a shop's (D323)
-
-**Found by D316.** The copilot block reads as a shop on any site: its title "Ask the
-catalog", description and `shop` keyword (`blocks/copilot/block.json` 5-9), its defaults
-("Looking through the catalog…", "Nothing in the catalog matches that.", `render.php`
-18, 47-70), the editor copy (`copilot-block-editor.js` 36-76) and the AI status labels
-(`viglet-dumont.php` 101, 108). Its kit is on by default (`render.php` 19, 92-95) and
-hard-codes `productTypes:['product']`, `guideTypes:['post']` and `stock_status`
-(`public/copilot.js` 36-41), so on a site with no WooCommerce it shows "Plan a kit" and
-can never stage anything.
-
-**What to build.** Neutral default strings ("Ask this site") with the shop wording only
-while WooCommerce is active; the kit on by default only with WooCommerce; the staged
-types, guide types and availability field as block attributes, so a school stages
-courses or events and cites pages.
-
-**Done when:** on a site without WooCommerce the block names no catalog, shows no kit,
-and a kit set to stage `event` stages events.
-
 ### XLIX.163 Periods read from a sentence (D324)
 
 **Found by D316.** The search block reads a price and a size in code (`readPrice`,

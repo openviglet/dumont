@@ -449,9 +449,12 @@ A site with its own search blocks turns the block off:
 add_filter( 'viglet_dumont_register_blocks', '__return_false' );
 ```
 
-### The Ask the catalog block
+### The Ask this site block
 
-The **Ask the catalog** block is a conversation with Turing's catalog copilot. A visitor
+The **Ask this site** block is a conversation with Turing's copilot. It speaks as the site
+does: on a WooCommerce shop it is headed **Ask the catalog** and offers a kit of products;
+anywhere else it is headed **Ask this site**, names no catalog, and offers a plan only when
+switched on. A visitor
 asks in plain words, and the answer comes from this site's content and cites the items it
 used. On a WooCommerce shop each cited product shows the shop's price and an **Add to cart**
 button; the copilot never puts anything in the cart by itself. The block appears only when
@@ -481,6 +484,19 @@ attributes:
 
 The kit needs a Turing that has the kit call (`POST /api/sn/{site}/copilot/kit`), which
 2026.3.6 does not, and the **Stock** field mapped, which a WooCommerce site has by default.
+
+**A plan on a site that is not a shop.** Turn on **Offer a plan** in the block's settings
+and say, under **What the plan uses**, what it works with:
+
+| Setting | What it takes | Blank means |
+|---|---|---|
+| Types it proposes | Indexed types, comma-separated, e.g. `course, event` | Products on a shop; any type elsewhere |
+| Types it cites as guides | Indexed types, e.g. `page` | Posts on a shop; none elsewhere |
+| Availability field | An indexed field saying whether an item can be taken, e.g. `seats_left` | `stock_status` on a shop; none elsewhere |
+
+The mode is then **Make a plan** and its button **Build my plan**. A school that stages
+`event` gets the events a plan needs, grouped by need, as links; there is no cart, and an
+item Turing marks unavailable reads **Unavailable**.
 
 ### Building your own search on the SDK
 
