@@ -209,3 +209,54 @@ and produtos/dumont.md): the release, the names on the files and the links in th
 trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
+
+### LII.5 Catalog API under the Key, as the other sources (D339)
+
+**Found by D314.** Creating an OAI-PMH source from a script
+(`catalog/dspace-dev/e2e.py`) with the connector's `Key` header was refused until the
+script fetched `/api/csrf`, kept its cookie and sent the token, which changes after each
+write. `DumWebConfiguration` exempts the `db`, `wc` and `assets` source APIs from CSRF
+for Key-authenticated calls, but not `/api/v2/catalog/**`.
+
+**What to build.** The same CSRF exemption for the catalog source API (and any other
+plugin API that a Key-holding client writes), checked by a test that walks the
+registered `/api/v2/**` controllers so the next plugin cannot be missed again.
+
+**Done when:** `POST /api/v2/catalog/source` with only the `Key` header creates a
+source, and a test fails when a plugin API is left out of the exemption.
+
+### LII.6 A structured source's manifest that converges a new or older site (D340)
+
+**Found by D314.** Pointing the catalog connector's DSpace profile at a fresh SN site,
+the manifest it posts was refused with 400 "seInstanceId is required": it names no
+search engine instance, so Turing cannot create the site. On an existing site whose
+`author` and `type` were single-valued with no facet, the same manifest (which declares
+them multi-valued facets) was refused with 409, a breaking change with no migration
+declared, and the site stayed as it was. `catalog/dspace-dev/e2e.py` works around both
+by creating the site first and posting a second manifest carrying `RECREATE` migrations.
+
+**What to build.** The structured-source provisioning (the SPI's manifest builder) names
+the SE instance, as the WordPress plugin does when Turing asks for one (the first
+enabled instance), and declares a `RECREATE` migration for each field whose cardinality
+or type its schema needs (as the plugin does for `author`, D326), then reports Turing's
+refusal on the source's run record rather than only in the log.
+
+**Done when:** a DSpace source pointed at a site that does not exist, and at one holding
+a single-valued `author`, indexes its items on the first run with no manual step.
+
+### LII.7 Index All that trusts Turing, not the ledger, and says when the queue blocks (D341)
+
+**Found by D314.** Two things met while running the catalog connector against the local
+DSpace:
+
+- `indexAll` skipped every item its ledger had already marked as sent, though the SN site had been recreated in between and held none of them; only the synchronous `reindex/{name}/all` sent them again.
+- With the disk above 90%, the embedded Artemis broker blocks producers: the run stopped after "Draining N jobs from buffer" with no error, holding the HTTP thread, until the connector was moved to another disk.
+
+**What to build.** Index All checks what the site holds for the source (a count, or the
+ids the sweep already lists) and treats a ledger entry Turing does not have as unsent;
+and a producer blocked by the broker's disk or memory limit fails the run with that
+reason on its run record and the console, instead of waiting forever, with the threshold
+named in the docs.
+
+**Done when:** Index All on an emptied site sends every item again, and a run against a
+full disk ends failed with "the queue's disk is over its limit".
