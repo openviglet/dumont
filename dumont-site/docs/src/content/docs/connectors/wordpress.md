@@ -381,6 +381,18 @@ answer, WordPress searches its database as before. The plugin's older results pa
 facets, for classic themes) remains available as **Results page → The plugin's results
 page**.
 
+### The instant search
+
+With **Instant search from anywhere** on, Ctrl+K (⌘K on a Mac) and the theme's own search
+box open a search that answers as the visitor types, and Enter takes the query to the full
+search page. **Instant search layout** picks how it looks:
+
+- **A list of titles**: the first six results, each with its date and address.
+- **Immersive**: up to twelve results grouped by type ("Posts", "Pages", "PDF files"), each
+  with its image, date and first card field, and a **See all** per type that opens the
+  results page filtered to that type. Before anything is typed it lists this browser's
+  recent searches. On a phone it fills the screen.
+
 ### The Turing search block
 
 ![The Turing search block](/dumont/docs/img/screenshots/dumont-wordpress-search-block.png)
