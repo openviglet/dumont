@@ -762,6 +762,7 @@
 - **D305** — Per type, a mapped DATE field and image field replace the card's date and image, the overlay shows that date and the first card field, and viglet_dumont_result_card filters server cards.
 - **D306** — A scoped block names its scope under the box with a whole-site link, a box-only block carries it to the search page as scope[], and popular chips step aside inside a scope.
 - **D307** — Date range facets pick their periods: Past, Agenda (today, next 7 days, this month, upcoming, past) or eight of their own (design §XLIX.149 superseded: no /WEEK: next 7 days; spans are T1224).
+- **D308** — A type's Leaves search on DATE field takes a post out of search when it passes, by a scheduled event, and a later date brings it back; viglet_dumont_should_index decides the rest.
 
 ## Track T — Releases and links match what the site describes
 

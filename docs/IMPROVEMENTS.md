@@ -170,27 +170,6 @@ unknown sibling key; template mode scoped.
 **Done when:** the `network` spec has site A listing B and finding B's documents, and B
 (not listing A) finding only its own, in every search mode.
 
-### XLIX.150 Documents that leave search on a date (D308)
-
-**Where it came from.** FESPSP's job openings (`vaga`) carry `fespsp_vaga_ate`, the last
-day to apply; after it the theme drops the opening from its own list, but the post stays
-published, so the plugin keeps it in the index and the search keeps offering an opening
-nobody can apply to. Calls for papers and enrolment windows have the same shape. The
-plugin reindexes only on `save_post`, `delete_post` and stickiness changes, and offers
-no "should this be indexed" filter beyond `_viglet_dumont_exclude` (a theme cron
-flipping it is the workaround to avoid). Turing has no document expiry window either
-(checked: nothing in SN code or CHANGELOG).
-
-**What the plugin should do.**
-- In Fields, a per-type "Leaves search on" choice: none (default) or a mapped DATE field.
-- On index, a document whose date is past is deleted instead of sent; one in the future is sent and a single WP-Cron event (`viglet_dumont_expire`, args post id) is scheduled for that moment, rescheduled or cleared when the post is saved again.
-- A daily sweep catches what a missed cron left (`wp dumont sweep` already compares; it should apply the rule too).
-- The editor panel (post state) says "Leaves search on 12/11" and, after it, "Out of search: the date has passed".
-- A filter `viglet_dumont_should_index( bool $index, WP_Post $post )` beside it, for the rules a field cannot express.
-
-**Done when:** an opening whose date is yesterday is not found, and moving the date
-forward and saving brings it back.
-
 ### XLIX.151 PDF text in the index (D309)
 
 **Where it came from.** Much of what FESPSP visitors look for lives in PDFs: the

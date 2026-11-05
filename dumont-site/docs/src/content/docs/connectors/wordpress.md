@@ -234,6 +234,16 @@ A post is left out when its type is off, when its ID is in **Exclude Posts/Pages
 (Settings), or when **Exclude from search** is on in its editor panel
 (`_viglet_dumont_exclude` meta).
 
+A post can also leave search on a date: in **Fields**, **Leaves search on** picks one of
+the type's `DATE` fields (a job opening's last day to apply, say). Once that date has passed
+the post is taken out of search, at that moment, with no one saving it. A date with no time
+of day lasts to the end of that day. Move the date forward and save, and the post is back.
+The editor panel says when a post leaves search, and **Out of search: the date has passed**
+afterwards. `wp dumont sweep` applies the same rule.
+
+For a rule no field can express, the `viglet_dumont_should_index` filter (`$index`,
+`$post`) has the last word on whether a post is in search.
+
 ---
 
 ## Several sites, one SN site
