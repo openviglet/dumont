@@ -786,6 +786,7 @@
 - **D318** — A search block asks Turing's autocomplete with its scope (site keys and fixed filters), so a box scoped to pages never suggests a term only posts hold.
 - **D334** — Fields reads only the other sources' documents through a negative filter on the plugin's own (Turing T1233), so however many posts a site has, their types are found.
 - **D337** — Related across sibling sites asks similar inside the scope (one site_key per site with fqi.op=OR, Turing T1235), so the nearest neighbours across sites come back without an over-fetch.
+- **D336** — The overlay's answer and the assistant say answers are paused until the reset date, read from the 429 (SDK 2026.3.17, T1234) or from the record the site keeps.
 
 ## Track T — Releases and links match what the site describes
 

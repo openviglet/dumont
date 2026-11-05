@@ -495,10 +495,13 @@ was already sent.
 **When the AI budget runs out.** Turing can cap what a site spends on AI. Once the cap is
 reached, Turing refuses every AI call until the budget resets. While that lasts:
 
-- The **Ask this site** block says *Answers are paused for now; search still works.* rather
-  than that the site could not answer.
-- The **Turing search** block shows the same line where the answer would be. Search and
-  its results are unaffected.
+- The **Ask this site** block says *Answers are paused until* and the reset date, *search
+  still works*, rather than that the site could not answer. It reads the date from Turing's
+  refusal (with `@viglet/turing-sdk` 2026.3.17 or later).
+- The **Turing search** block, the instant search's answer and the **Site assistant** show
+  the same line where the answer would be. They name the date once this site has seen the
+  budget run out (the first refusal is reported to WordPress, which asks Turing itself), and
+  say *for now* before that. Search and its results are unaffected.
 - A sentence whose filters cannot be read is searched as typed.
 - **Health**'s **AI features** card shows *AI budget exhausted until* and the reset date
   (or *for now* when Turing names none), with Turing's own explanation, and **Check AI

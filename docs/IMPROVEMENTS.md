@@ -246,23 +246,6 @@ proven by the a11y specs; pt_BR ships with it.
 **Done when:** a seeded two-step flow with a choice and a form runs end to end in the
 block, at 390 and 1280px.
 
-### XLIX.175 Paused answers on every AI surface (D336)
-
-**Found by D332.** A 429 `quota-exhausted` now reads as "Answers are paused for now;
-search still works." on the copilot and the search block's answer panel, and the browser
-reports it so Health shows the reset date (`isAiPaused`, `reportAiPaused` in
-`public/search.js`). The overlay's instant answer (`public/overlay.js`) and the Site
-assistant (`public/assistant.js`) still hide or say nothing, and no surface can tell a
-visitor when answers come back: the SDK's `TuringHttpError` drops the response body, so
-`resetsAt` never reaches the browser (Turing T1234).
-
-**What to build.** The same paused line, from PHP state, on the overlay's answer and the
-assistant's reply, with the report; once T1234 ships, read `error.problem.resetsAt` and
-say "until <date>" on every surface.
-
-**Done when:** with the quota spent, the overlay and the assistant say answers are
-paused until the reset date.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +
