@@ -287,18 +287,6 @@ them, file the gap in Turing's roadmap first and wait on it.
 
 **Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
-### XLIX.169 The panel shows why a reindex failed (D330)
-
-**Found by D316.** The editor panel's "Reindex now" shows "Failed" with no reason: on
-failure the server answers 502 with `describe()` (state, label, detail) and no `message`
-(`class-viglet-dumont-post-state.php` 474-497), while the panel prints `error.message`,
-which is empty (`src/admin/js/editor-panel.js` 267-268, 283-284).
-
-**What to build.** The panel renders the error's own `label` and `detail` (Turing's
-reason), and the server adds a `message` to the 502 so any client gets one.
-
-**Done when:** a reindex refused by Turing shows Turing's reason in the panel.
-
 ### XLIX.170 Reindex in the background, resumable (D331)
 
 **Found by D316.** Index All from Settings runs its batches in the browser tab

@@ -373,7 +373,9 @@ provisioning and sweep with its error when it failed.
 
 The post lists gain a **Search** column: *Indexed 2 mins ago*, *Queued*, *Failed* (the
 error shows on hover), *Excluded* or *Not published*. The block editor has a **Search**
-panel with the same state, **Exclude from search** and **Reindex now**.
+panel with the same state, **Exclude from search** and **Reindex now**. A reindex Turing
+refuses shows Turing's own reason under the state, so a refused document reads differently
+from Turing being down.
 
 The same panel's **Assist** section helps while writing, and changes nothing on its own:
 

@@ -777,6 +777,7 @@
 - **D327** — Cards read the first value of a document's type, and Fields lists other sources' types with a label, card date and image, so an Article record shows its own badge and date.
 - **D328** — Page reads wait three seconds for Turing and a read with no answer marks it down for a minute, so a hung Turing costs one page a few seconds and the next ones nothing.
 - **D329** — Stopped edits raise an admin notice linking to Health, and the queue replays them once a ping or send goes through, so an outage longer than the retries ends with every edit in search.
+- **D330** — A refused Reindex now shows the post's state and Turing's reason in the editor panel, and the 502 carries a message for any client.
 
 ## Track T — Releases and links match what the site describes
 
