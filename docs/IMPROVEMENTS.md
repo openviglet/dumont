@@ -170,28 +170,6 @@ unknown sibling key; template mode scoped.
 **Done when:** the `network` spec has site A listing B and finding B's documents, and B
 (not listing A) finding only its own, in every search mode.
 
-### XLIX.148 Fixed filters on the search block (D306)
-
-**Where it came from.** FESPSP wants section boxes: "Buscar na agenda" on `/eventos/`,
-"Buscar na Editora", "Buscar nas notícias". Each searches only its slice (`type:evento`,
-`editora:<slug>`, `type:post`) and show it as the context, not as a filter the visitor
-removed by mistake. The `viglet-dumont/search` block has no attribute for a fixed
-filter: `fq[]` comes only from the URL and the facets, so a scoped box today means a
-link with `?fq[]=type:evento` that the visitor can clear and that leaks into shared
-URLs.
-
-**What the plugin should do.** A block attribute `filters` (array of `field:value`, editable in the sidebar as "Always filter by", picking from the mapped facets and `type`) that:
-- is applied on every request the block makes, server render included, and on autocomplete and nl-filters (sent as `filters`, which T1213 already accepts);
-- is not shown as a removable chip; the box can show it as a scope label ("em Agenda") with a link "buscar no site todo" to the site's search page with the same `q`;
-- composes with the federated set of site keys when that ships;
-- leaves trending chips scoped too (top terms whose results still match the scope), or hides them when that costs a call per chip.
-
-Box-only use (D208) carries the scope to the results page as a URL scope parameter,
-never as a plain `fq[]`, so the results page shows it the same way.
-
-**Done when:** a page holding `{"filters":["type:page"]}` never lists a post, with and
-without JavaScript.
-
 ### XLIX.149 Period sets for date range facets (D307)
 
 **Where it came from.** FESPSP's agenda (`evento` type) maps its start date as DATE with
@@ -409,6 +387,23 @@ so a task sees it before committing.
 
 **Done when:** adding `__( 'Something new', 'viglet-turing-search' )` without
 translating it fails the gate, naming the string.
+
+### XLIX.158 Suggestions inside the block's scope (D318)
+
+**Where it came from.** D306 gave the search block fixed filters ("Always filter by")
+and kept every search, the first paint and nl-filters inside them. The box's suggestions
+are the one read left out: `createSiteAutoComplete()` (`public/search.js`) asks Turing's
+autocomplete with the query alone, so a box scoped to `type:event` suggests terms only
+posts and pages hold, and picking one finds nothing in the scope.
+
+**What to build.** Turing's autocomplete endpoint reads `fq[]` like search does
+(`TurSNSiteAutoCompleteAPI` takes the filter operators). Check whether the SDK's
+`createAutoComplete` passes filters; if it does, give `createSiteAutoComplete()` a
+filters argument and have the block pass `blockScope()` (search-block.js), so the site
+key (D303) and the block's fixed filters both scope the suggestions. If the SDK drops
+them, file the gap in Turing's roadmap first and wait on it.
+
+**Done when:** a block set to `type:page` suggests no term that appears only in posts.
 
 ## L The documentation area
 

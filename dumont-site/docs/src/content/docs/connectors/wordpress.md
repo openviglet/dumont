@@ -363,7 +363,10 @@ reads `?q=` (or `?s=`), so a page holding it can serve as the site's search page
 set to `type:event` searches only events, and one set to a mapped facet's value
 (`publisher:sociology`) only what carries it. Each filter is `field:value`. Every search
 the block makes stays inside them, the first page drawn on the server included. Visitors
-never see them as a filter they can remove, and they never appear in the page's address.
+never see them as a filter they can remove. Under the box a line names the scope ("In
+Events") with a **Search the whole site** link to the site's search page, keeping the query.
+A scoped block with only a search box takes its scope to the search page, where the same
+line shows. A scoped block shows no popular searches, since they may find nothing inside it.
 
 With **Suggest the filters a sentence names** on, a search that reads as a sentence ("posts
 about php from last year") also asks Turing's natural-language filters which filters it
