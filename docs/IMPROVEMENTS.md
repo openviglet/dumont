@@ -246,23 +246,6 @@ proven by the a11y specs; pt_BR ships with it.
 **Done when:** a seeded two-step flow with a choice and a form runs end to end in the
 block, at 390 and 1280px.
 
-### XLIX.173 Foreign types through one negative filter (D334)
-
-**Found by D327.** `Viglet_Dumont_Mapping::discover_foreign()` lists the `type` values
-other sources sent under the site key. Turing returns no results for a negative filter
-(`fq[]=-source_apps:wordpress`), so the method counts the key's documents minus the
-plugin's own and, when any remain, pages the site's documents 100 at a time up to 2,000,
-skipping its own. On a site with more documents a foreign type that Turing orders late
-is never seen; the docs say so.
-
-**What to build.** Once Turing T1233 honours negative filter queries, ask once with
-`fq[]=site_key:<key>&fq[]=-source_apps:<app>` and read the types from that answer (paged
-over foreign documents only, or from a facet on `type` if Turing offers one), and drop
-the 2,000 ceiling and its note in the docs.
-
-**Done when:** a foreign type present only after the first 2,000 documents is listed in
-Fields.
-
 ### XLIX.175 Paused answers on every AI surface (D336)
 
 **Found by D332.** A 429 `quota-exhausted` now reads as "Answers are paused for now;

@@ -225,7 +225,11 @@ custom fields can be added on the Settings page.
   fields its documents carry (`defense_date`, say) and an **Image on cards** from their
   text fields. This changes how they look, never what is indexed. A record with several
   types, `["Article", "Thesis"]`, is shown as its first. The section appears once Turing
-  holds such a document; the screen reads up to 2,000 of the site's documents to find them.
+  holds such a document. The screen asks Turing for the other sources' documents only,
+  leaving the plugin's own posts out with a negative filter, so however many posts the site
+  has, the first 2,000 records from other sources are what it reads. This needs a Turing that
+  honours a negative filter (2026.3 builds after T1233); an older one also returns the posts,
+  which the screen skips.
 
 **In Turing** says where each field stands: *In Turing*, *Added on the next save*, or
 *Conflict* when Turing already holds the field with another type. **Preview document**

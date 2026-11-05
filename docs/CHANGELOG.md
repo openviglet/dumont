@@ -784,6 +784,7 @@
 - **D335** — A background reindex asks the site for its own next step over a signed loopback, and Health steps an idle run, so a started reindex finishes on a site nobody visits.
 - **D310 (plugin side)** — An opt-in turns on Turing's entity extraction, the People, Organisations and Places facets are labelled and offered, name variants sync to a thesaurus, and the editor panel lists the names.
 - **D318** — A search block asks Turing's autocomplete with its scope (site keys and fixed filters), so a box scoped to pages never suggests a term only posts hold.
+- **D334** — Fields reads only the other sources' documents through a negative filter on the plugin's own (Turing T1233), so however many posts a site has, their types are found.
 
 ## Track T — Releases and links match what the site describes
 
