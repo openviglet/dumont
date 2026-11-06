@@ -143,21 +143,6 @@ trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
 
-### LII.5 Catalog API under the Key, as the other sources (D339)
-
-**Found by D314.** Creating an OAI-PMH source from a script
-(`catalog/dspace-dev/e2e.py`) with the connector's `Key` header was refused until the
-script fetched `/api/csrf`, kept its cookie and sent the token, which changes after each
-write. `DumWebConfiguration` exempts the `db`, `wc` and `assets` source APIs from CSRF
-for Key-authenticated calls, but not `/api/v2/catalog/**`.
-
-**What to build.** The same CSRF exemption for the catalog source API (and any other
-plugin API that a Key-holding client writes), checked by a test that walks the
-registered `/api/v2/**` controllers so the next plugin cannot be missed again.
-
-**Done when:** `POST /api/v2/catalog/source` with only the `Key` header creates a
-source, and a test fails when a plugin API is left out of the exemption.
-
 ### LII.6 A structured source's manifest that converges a new or older site (D340)
 
 **Found by D314.** Pointing the catalog connector's DSpace profile at a fresh SN site,

@@ -10,6 +10,8 @@
 
 package com.viglet.dumont.connector.config;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +42,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import com.viglet.dumont.connector.config.security.DumAuthenticationEntryPoint;
 import com.viglet.dumont.connector.config.security.DumCsrfCookieFilter;
@@ -132,20 +135,7 @@ public class DumWebConfiguration {
                 http.csrf(csrf -> csrf
                                 .csrfTokenRepository(csrfTokenRepository)
                                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                                .ignoringRequestMatchers(
-                                                mvc.matcher("/api/v2/integration/**"),
-                                                mvc.matcher("/api/v2/connector/**"),
-                                                mvc.matcher("/api/v2/aem/**"),
-                                                mvc.matcher("/api/v2/db/**"),
-                                                mvc.matcher("/api/v2/wc/**"),
-                                                mvc.matcher("/api/v2/assets/**"),
-                                                mvc.matcher(ERROR_PATH),
-                                                mvc.matcher(LOGOUT_PATH),
-                                                mvc.matcher(BACK_CHANNEL_LOGOUT_PATH),
-                                                mvc.matcher(LOGIN_PATH),
-                                                mvc.matcher(SETUP_PATH),
-                                                mvc.matcher("/login/oauth2/**"),
-                                                mvc.matcher("/oauth2/**")))
+                                .ignoringRequestMatchers(csrfExemptions()))
                                 .addFilterAfter(new DumCsrfCookieFilter(), BasicAuthenticationFilter.class);
 
                 boolean oauth2Available = clientRegistrationRepository.getIfAvailable() != null;
@@ -240,6 +230,42 @@ public class DumWebConfiguration {
                                         .logoutSuccessUrl("/login"));
                 }
                 return http.build();
+        }
+
+        /**
+         * The requests CSRF protection skips. Static so a test can evaluate the real list.
+         */
+        static RequestMatcher[] csrfExemptions() {
+                PathPatternRequestMatcher.Builder paths = PathPatternRequestMatcher.withDefaults();
+                return new RequestMatcher[] {
+                                // D339: a call carrying the Key is credentialed by it, and a
+                                // browser never attaches it on its own, so CSRF guards nothing
+                                // there. Path-free, so a plugin API added later is covered
+                                // (catalog, eds and plugins were missing from the list below).
+                                DumWebConfiguration::carriesApiKey,
+                                paths.matcher("/api/v2/integration/**"),
+                                paths.matcher("/api/v2/connector/**"),
+                                paths.matcher("/api/v2/aem/**"),
+                                paths.matcher("/api/v2/db/**"),
+                                paths.matcher("/api/v2/wc/**"),
+                                paths.matcher("/api/v2/assets/**"),
+                                paths.matcher(ERROR_PATH),
+                                paths.matcher(LOGOUT_PATH),
+                                paths.matcher(BACK_CHANNEL_LOGOUT_PATH),
+                                paths.matcher(LOGIN_PATH),
+                                paths.matcher(SETUP_PATH),
+                                paths.matcher("/login/oauth2/**"),
+                                paths.matcher("/oauth2/**") };
+        }
+
+        /**
+         * Whether the request presents the {@code Key} credential, as header or query
+         * parameter — the same two places {@link DumApiKeyFilter} reads. A wrong Key is
+         * still refused with 422 by that filter; this only skips the CSRF token.
+         */
+        static boolean carriesApiKey(HttpServletRequest request) {
+                return request.getHeader(DumApiKeyFilter.API_KEY_HEADER) != null
+                                || request.getParameter(DumApiKeyFilter.API_KEY_HEADER) != null;
         }
 
         @Bean

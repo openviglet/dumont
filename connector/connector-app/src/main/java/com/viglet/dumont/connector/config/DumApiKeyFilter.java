@@ -41,7 +41,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class DumApiKeyFilter extends OncePerRequestFilter {
 
-    private static final String API_KEY_HEADER = "Key";
+    static final String API_KEY_HEADER = "Key";
     private static final String ROLE_ADMIN = "ROLE_ADMIN";
     private static final String API_KEY_PRINCIPAL = "api-key";
 

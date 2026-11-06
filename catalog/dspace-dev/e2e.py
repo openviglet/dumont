@@ -130,15 +130,12 @@ def facet(result, name):
 
 def run(args):
     turing, dumont = local(args.turing), local(args.dumont)
-    # Dumont checks the Key on every /api call and, under /api/v2/catalog, a CSRF token on every
-    # write: the token from /api/csrf, sent back as its header beside the XSRF-TOKEN cookie the
-    # same call set. A write rotates it, so each one asks again.
-    api = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    # The Key is the whole credential: a call carrying it needs no CSRF token (D339).
+    api = urllib.request.build_opener()
     key = {"Key": args.key}
 
     def write(method, path, body=None):
-        csrf = request(api, "GET", dumont + "/api/csrf", headers=key)
-        return request(api, method, dumont + path, body, dict(key, **{csrf["headerName"]: csrf["token"]}))
+        return request(api, method, dumont + path, body, key)
 
     source = {
         "name": SOURCE_NAME,
