@@ -101,100 +101,33 @@ route returns nothing a caller could use to act as Dumont.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.83 Releases deployed to the plugin directory (D227)
+### XLIX.177 The WordPress pages point at Turing (D346)
 
-WordPress.org never reads GitHub: an approved plugin gets its own SVN repository at
-`plugins.svn.wordpress.org/viglet-turing-search` (the slug since D273), and what it
-holds is the package, not the history. So the monorepo stays the source and no separate
-repository is needed; the directory becomes one more target of the `wordpress-v*` tag.
+The plugin never went through Dumont: its PHP client sends content straight to Turing.
+Turing's T1251 to T1260 move the plugin, its docs, the Playground demo and the release
+into the Turing repository (Block CT there), with a page of its own at
+turing.viglet.org/wordpress, the address the video already ends on. Dumont keeps a
+pointer, not the product:
 
-The `release` job in `wordpress-plugin.yml` already builds the `viglet-turing-search/`
-folder through `bin/build-zip.sh`, which refuses a tag that disagrees with the plugin
-header or the readme's Stable tag. A step after it commits that folder to `trunk/`,
-copies it to `tags/<version>`, and sends the directory's banners, icon and screenshots
-to `assets/` from a folder kept outside the package.
-`10up/action-wordpress-plugin-deploy` does this from a subfolder through `BUILD_DIR`;
-the SVN credentials live in repository secrets.
+- `dumont-site/src/pages/wordpress.tsx` gives way to a redirect to turing.viglet.org/wordpress/, the reverse of today's redirect, and `/playground/*` redirects to turing.viglet.org/playground/ for a transition, since shared Playground links may be in circulation.
+- `wordpress-tile.tsx` stays on the landing and connectors pages, now with the YouTube video (a click-to-load youtube-nocookie facade) and a line saying the plugin is part of Viglet Turing, linking there.
+- `site-links.ts` (`wordpressDocs`, `wordpressDemo`, `wordpressPlayground`), the nav and footer entries, `sitemap.xml`, `llms.txt` and `changelog.json` point at Turing, and `public/wordpress/chapter-*.webp` leaves with the page.
+- `connectors/wordpress.md` and `wordpress-turing.md` become short stubs linking to the Turing docs page; the sidebar keeps one entry.
+- The README, `intro.md`, `index.mdx`, `architecture.md`, `connectors/overview.md`, `catalog.md`, `developer-guide.md`, `core-concepts.md` and the two diagrams present WordPress as a Turing integration, not a Dumont connector.
 
-The first submission is manual and outside this task: a wordpress.org account uploads
-the zip, the review team approves it, and only then does SVN exist.
+Done when no Dumont page links a Dumont-hosted WordPress asset.
 
-Done when a `wordpress-v*` tag updates the directory listing with no step by hand.
+### XLIX.178 Remove the plugin from this repository (D347)
 
-### XLIX.125 The video embedded from YouTube, with its transcript (D282)
-
-**What happens.** D246 shipped with its criterion open: the video is neither attached to
-a release nor embedded anywhere. Its plan was to embed the release asset, but GitHub
-serves a release asset as a download, not a stream, so a `<video>` pointing at it loads
-badly. The video goes to YouTube instead, published by Alexandre on the Viglet channel,
-and the plugin's pages embed that.
-
-**What it should do.**
-- This site's WordPress page and the plugin's docs page embed the English YouTube video,
-  with the transcript (the narration of D278) as text below it: assistants and search read
-  text, not video.
-- The plugin README carries `story-30s.mp4` (under 1 MB) as an inline player, uploaded
-  through GitHub's editor.
-- The release workflow attaches `story.mp4`, `story-30s.mp4` and the caption files to the
-  plugin release, for anyone who wants the file.
-- `src/readme.txt` carries the YouTube link, which the wordpress.org directory embeds once
-  the plugin is listed (D227).
-- The pt-BR video is linked from the English description and the reverse, and is not
-  embedded on the English pages.
-
-**Done when.** The site page and the docs play the English video with captions and show
-its transcript, the README plays the 30 s cut, the release carries the files, and the
-D246 criterion is met.
-
-### XLIX.154 From the search answer into the assistant and back (D312)
-
-**Where it came from.** On a client's site the search answer (D166) and the Site
-assistant (D175) are separate: a visitor who reads the answer to "como funciona a
-biblioteca" and wants "and on Saturdays?" must start over. The answer runs its own
-`createAnswerController` with its own conversation (`search-block.js` 528); the
-assistant runs `createChatController` and cannot be opened with turns already in it. Nor
-does an assistant answer citing many documents link to the results page.
-
-**Nothing is missing in Turing.** `ConversationRequest.messages` already becomes the
-chat's `history`, and the SDK's chat controller takes `initialMessages`
-(`controllers/chat.ts` 257). The gap is the plugin's alone.
-
-**What the plugin should do.**
-- **Search → assistant:** under the answer, "Continue in the assistant" opens the assistant (floating or the page's block) seeded through `initialMessages` with the query and the answer as the first exchange. The assistant gains a small open-with-turns API the answer calls.
-- **Assistant → search:** when an answer cites more than three documents, or the visitor asks to "see everything", a link opens the results page with the query and, where the citations share a type, that filter.
-- **One session** (`TUR_SESSION`) across both, so the answer's helpful signal and the chat's are one trail; prove the cookie is shared rather than assume it.
-
-Same in the overlay and the results page.
-
-**Done when:** a follow-up typed after "Continue in the assistant" is answered with the
-first question's context, and an assistant answer with many sources links to the
-matching results page.
-
-### XLIX.155 Turing chat flows in the Site assistant (D313)
-
-**Where it came from.** A client wants its site assistant immersive, with guided
-conversations built as Turing chat flows: a tour through the school's near-century of
-history with choices, and an orientation flow ("I want to study / research / work here")
-routing to the right pages. Turing runs flows (`genai/flow`: forms with `select` fields,
-slots, flow-select; endpoints `/form-submit`, `/flow-select`, `/slots` in
-`TurSNSiteGenAiAPI`), and `@viglet/turing-sdk` exports `postSiteFlowSelect`,
-`postSiteFormSubmit`, `fetchSiteChatSlots` and the `TurChat…` response types, with
-`submitForm` and `resetFlow` on the chat controller. The plugin's assistant
-(`public/assistant.js`) renders only streamed text, citations and the `navigate` tool.
-
-**What the plugin should do.** The assistant renders what a flow sends:
-- **choices** as buttons, typed answers still accepted;
-- **forms** as native labelled fields with validation, sent through `submitForm` only when the visitor submits;
-- **slot prompts** with label and allowed values;
-- **cards** for cited documents with the card fields D305 adds, so a history tour shows a photo and its source;
-- **a flow menu**: block attribute `flows` offered as starting chips beside the suggested questions;
-- **handoff** shown as "a person will answer" when the flow sends one, hidden otherwise.
-
-Each turn is announced, focus moves to the first control, and keyboard-only use is
-proven by the a11y specs; pt_BR ships with it.
-
-**Done when:** a seeded two-step flow with a choice and a form runs end to end in the
-block, at 390 and 1280px.
+Once Turing's T1252 (the move, with history, through git filter-repo) and T1255 (the
+ported workflow) have landed, this repository stops carrying a second copy that would
+drift. `wordpress/` is removed whole, with `.github/workflows/wordpress-plugin.yml`, the
+Playground step of `publish-github-pages.yml` (around lines 117-126) and any root script
+or ignore entry that only served it. The OAI-PMH comments that mention sharing field
+names with WordPress (`DumOaiPmhSource.java:115` and its test) stay, since they describe
+a field contract, not the plugin. The four open Track S lines (D227, D282, D312, D313)
+were retired as superseded by the Turing tasks, and Track S's history stays in this
+CHANGELOG. Done when grep for `wordpress/` finds no build, workflow or script path.
 
 ## L The documentation area
 

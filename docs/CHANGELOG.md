@@ -787,6 +787,10 @@
 - **D334** — Fields reads only the other sources' documents through a negative filter on the plugin's own (Turing T1233), so however many posts a site has, their types are found.
 - **D337** — Related across sibling sites asks similar inside the scope (one site_key per site with fqi.op=OR, Turing T1235), so the nearest neighbours across sites come back without an over-fetch.
 - **D336** — The overlay's answer and the assistant say answers are paused until the reset date, read from the 429 (SDK 2026.3.17, T1234) or from the record the site keeps.
+- 🗑 **D227** — abandoned: Moved with the plugin to the Turing repository, where Turing T1260 takes over the wordpress.org release.
+- 🗑 **D312** — abandoned: Moved with the plugin to the Turing repository, where Turing T1258 takes it over.
+- 🗑 **D313** — abandoned: Moved with the plugin to the Turing repository, where Turing T1259 takes it over.
+- 🗑 **D282** — superseded by D346: The Dumont tile carries the video under D346; the site page, docs, README and release go to Turing T1251 and T1257.
 
 ## Track T — Releases and links match what the site describes
 

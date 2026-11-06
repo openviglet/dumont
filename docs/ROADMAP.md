@@ -115,10 +115,8 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D227** (deps: D225 ✅, D226 ✅, WordPress.org: first review approved and SVN access granted) **A release tag publishes the zip on GitHub only, so the plugin cannot be found or updated from wp-admin** — Sites update plugins from the directory, and a hand-run SVN commit per release gets skipped. → §XLIX.83
-- 📋 **D282** (deps: D276 ✅, D278 ✅, English video published on YouTube by Alexandre) **The video is not on the site, the docs, the README or the release** — A release asset downloads instead of streaming, so the pages embed YouTube and carry the transcript that search reads. → §XLIX.125
-- 📋 **D312** (deps: —) **The search answer and the Site assistant do not share context: a follow-up starts over** — A visitor who wants to ask one more thing after the answer loses the question, the answer and its sources. → §XLIX.154
-- 📋 **D313** (deps: D305 ✅) **The Site assistant renders only text and citations: a Turing chat flow's choices, forms and slots cannot run in it** — Guided conversations built in Turing's console never reach a WordPress site. → §XLIX.155
+- 📋 **D346** (deps: Turing T1251, T1254 and T1256 shipped) **Dumont's site and docs still present the WordPress plugin, its demo and its docs as Dumont's** — The plugin moved to Turing, so Dumont keeps one tile with the video and redirects the rest there. → §XLIX.177
+- 📋 **D347** (deps: D346, Turing T1252 and T1255 shipped) **The wordpress/ directory, its workflow and its Playground build step remain after the plugin moved to Turing** — Two copies of one plugin drift, and a fix landed here would never reach a release. → §XLIX.178
 
 ## Track T — Releases and links match what the site describes
 
@@ -131,6 +129,12 @@ This track has no remaining pending tasks.
 - 📋 **D343** (deps: —) **A run keeps reading the source while every delivery to Turing fails, instead of stopping** — An AEM crawl with Turing down walks every page and enqueues batches that all fail, with no breaker or health check (Turing #80). → §LII.9
 - 📋 **D344** (deps: —) **The AEM oncePattern never takes effect, since nothing writes the once flag, and cannot mean N times** — Paths meant to be indexed once are indexed on every run, and there is no way to index them a fixed number of times (Turing #93). → §LII.10
 - 📋 **D345** (deps: —) **The indexing state can only be cleared by a full reindex, and only on AEM and DB sources** — An operator cannot reset a Web Crawler or Assets source, or clear the ledger without starting a run (Turing #117). → §LII.11
+
+## Done when — D346
+
+- **The video is not on the site, the docs, the README or the release** The Dumont tile
+  carries the video under D346; the site page, docs, README and release go to Turing
+  T1251 and T1257.
 
 ## Non-goals (do NOT add as tasks)
 
