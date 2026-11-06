@@ -115,14 +115,14 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D346** (deps: Turing T1251, T1254 and T1256 shipped) **Dumont's site and docs still present the WordPress plugin, its demo and its docs as Dumont's** — The plugin moved to Turing, so Dumont keeps one tile with the video and redirects the rest there. → §XLIX.177
-- 📋 **D347** (deps: D346, Turing T1252 and T1255 shipped) **The wordpress/ directory, its workflow and its Playground build step remain after the plugin moved to Turing** — Two copies of one plugin drift, and a fix landed here would never reach a release. → §XLIX.178
+- 📋 **D346** (deps: —) **Dumont's site and docs still present the WordPress plugin, its demo and its docs as Dumont's** — The plugin moved to Turing, so Dumont keeps one tile with the video and redirects the rest there. → §XLIX.177
+- 📋 **D347** (deps: D346) **The wordpress/ directory, its workflow and its Playground build step remain after the plugin moved to Turing** — Two copies of one plugin drift, and a fix landed here would never reach a release. → §XLIX.178
 
 ## Track T — Releases and links match what the site describes
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D340** (deps: Turing T1241) **A structured source's manifest neither creates its SN site nor migrates a field held with another cardinality** — A first run against a new site answers 400, and against an older one 409, so nothing is indexed until someone fixes Turing by hand. → §LII.6
+- 📋 **D340** (deps: —) **A structured source's manifest neither creates its SN site nor migrates a field held with another cardinality** — A first run against a new site answers 400, and against an older one 409, so nothing is indexed until someone fixes Turing by hand. → §LII.6
 - 📋 **D341** (deps: —) **indexAll skips items its ledger marked sent even when Turing lost them, and a full disk stalls the run with no error** — A site recreated or emptied stays empty after Index All, and a run blocked by Artemis holds its HTTP thread silently. → §LII.7
 - 📋 **D342** (deps: —) **A Web Crawler or EDS run never checks its SN site or locale, and the sites list reads Turing unreachable as no sites** — A run against a missing site fails batch by batch with no reason on the run record, and the form cannot say Turing is down (Turing #65). → §LII.8
 - 📋 **D343** (deps: —) **A run keeps reading the source while every delivery to Turing fails, instead of stopping** — An AEM crawl with Turing down walks every page and enqueues batches that all fail, with no breaker or health check (Turing #80). → §LII.9
