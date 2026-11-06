@@ -25,6 +25,12 @@ In the console, open **Catalog Sources** and create a source:
 
 Saving checks the manifest. If it does not parse, or it uses a secret that is not set, the save is refused with the reason. Use **Index All** to run the source, or let the scheduler run it.
 
+The Semantic Navigation site does not have to exist. Before a full run sends any record, it declares the source's fields to Viglet Turing:
+
+- **A site that does not exist** is created on the first enabled search engine instance Viglet Turing lists.
+- **A field the site holds with another type or cardinality** is recreated as the source declares it. For example, a new site's template has a single-valued `author`, and the DSpace profile declares `author` with several values. The run then indexes into the recreated field.
+- **Anything Viglet Turing still refuses** is recorded as a warning on the run, and the records are indexed into the site's current schema.
+
 ---
 
 ## Manifest reference
@@ -147,7 +153,7 @@ Each run follows `resumptionToken` to the end. The first run harvests everything
 
 Dublin Core becomes these fields: `title`, `text` (the descriptions), `abstract` (the first description), `author` (every creator), `subjects`, `publication_date` (when it reads as a date, else `dateText`), `type`, `publisher`, `language`, `relations` and `url`.
 
-`author`, `publication_date` and `abstract` are Turing's own names for the author, the date and the snippet, the ones a WordPress post carries too. An SN site that holds both a WordPress site and a repository therefore has one author facet, one date that result cards, the Newest sort and period facets read, and one snippet. The [WordPress plugin](/docs/connectors/wordpress/) declares `author` with several values, as the connector does. The `url` is the record's handle or DOI link when it has one, else a web address on the repository's own host, else its first web address. An address a visitor cannot open is never used: one on a private, loopback or link-local IP, or on a name without a dot such as `intranet`, which some repositories leak into their records. Nothing is filled in that the record does not hold. A repository that answers 429 or 503 is retried after its `Retry-After`, up to three times.
+`author`, `publication_date` and `abstract` are Turing's own names for the author, the date and the snippet, the ones a WordPress post carries too. An SN site that holds both a WordPress site and a repository therefore has one author facet, one date that result cards, the Newest sort and period facets read, and one snippet. The [WordPress plugin](/docs/connectors/wordpress/) declares `author` with several values, as the connector does, so a site whose `author` holds one value is migrated on the first run (see [Creating a source](#creating-a-source)). The `url` is the record's handle or DOI link when it has one, else a web address on the repository's own host, else its first web address. An address a visitor cannot open is never used: one on a private, loopback or link-local IP, or on a name without a dot such as `intranet`, which some repositories leak into their records. Nothing is filled in that the record does not hold. A repository that answers 429 or 503 is retried after its `Retry-After`, up to three times.
 
 ### Full text
 

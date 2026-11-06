@@ -122,7 +122,6 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D340** (deps: —) **A structured source's manifest neither creates its SN site nor migrates a field held with another cardinality** — A first run against a new site answers 400, and against an older one 409, so nothing is indexed until someone fixes Turing by hand. → §LII.6
 - 📋 **D341** (deps: —) **indexAll skips items its ledger marked sent even when Turing lost them, and a full disk stalls the run with no error** — A site recreated or emptied stays empty after Index All, and a run blocked by Artemis holds its HTTP thread silently. → §LII.7
 - 📋 **D342** (deps: —) **A Web Crawler or EDS run never checks its SN site or locale, and the sites list reads Turing unreachable as no sites** — A run against a missing site fails batch by batch with no reason on the run record, and the form cannot say Turing is down (Turing #65). → §LII.8
 - 📋 **D343** (deps: —) **A run keeps reading the source while every delivery to Turing fails, instead of stopping** — An AEM crawl with Turing down walks every page and enqueues batches that all fail, with no breaker or health check (Turing #80). → §LII.9

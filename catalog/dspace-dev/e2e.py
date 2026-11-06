@@ -1,7 +1,7 @@
 """End-to-end check of the catalog connector's DSpace profile (roadmap D314) against the local
 DSpace of this folder, through the real connector into a local Viglet Turing.
 
-  python e2e.py turing-setup               # creates the SN site, prints a new Turing API key
+  python e2e.py turing-setup               # prints a new Turing API key
   python e2e.py run --key <key>            # source over the Dumont API, harvest, then the checks
 
 `run` expects the Dumont connector on --dumont (default http://localhost:30130), started with
@@ -69,36 +69,9 @@ def turing_setup(turing, password, site):
 
     request(opener, "POST", turing + "/api/login", {"username": "admin", "password": password},
             {"X-XSRF-TOKEN": xsrf()})
-    # The connector converges the site's fields through Turing's manifest, but that call cannot
-    # create a site: a new one needs the search engine instance, which only an admin session sees.
-    engines = request(opener, "GET", turing + "/api/se", headers={"X-XSRF-TOKEN": xsrf()}) or []
-    engine = next((e for e in engines if e.get("enabled")), engines[0] if engines else None)
-    if engine is None:
-        sys.exit("No search engine instance in this Turing.")
-    request(opener, "POST", turing + "/api/sn/manifest", {
-        "name": site, "description": "Local DSpace (Dumont catalog/dspace-dev)",
-        "seInstanceId": engine["id"], "locales": [LOCALE],
-        "fields": [
-            {"name": "site_key", "type": "STRING", "mandatory": False, "multiValued": False,
-             "facet": True, "facetName": {LOCALE: "Site"}},
-        ],
-    }, {"X-XSRF-TOKEN": xsrf()})
-    # A new site's own author and type are single-valued, non-facet fields. The DSpace schema
-    # declares both multi-valued facets, and the connector's manifest declares no migration, so
-    # Turing refuses the whole manifest as a breaking change (409) and the site keeps them as
-    # they were. A second call flips them with the RECREATE migration Turing asks for; in the
-    # creating call above, the same migration answers 500.
-    def facet(name, label):
-        return {"name": name, "type": "STRING", "mandatory": False, "multiValued": True, "facet": True,
-                "description": label, "facetName": {LOCALE: label}}
-
-    result = request(opener, "POST", turing + "/api/sn/manifest", {
-        "name": site, "locales": [LOCALE],
-        "fields": [facet("author", "Author"), facet("type", "Type")],
-        "migrations": [{"field": "author", "action": "RECREATE"}, {"field": "type", "action": "RECREATE"}],
-    }, {"X-XSRF-TOKEN": xsrf()})
-    print(f"SN site '{site}' ({LOCALE}) is provisioned; migrated: {result.get('fieldsMigrated')}",
-          file=sys.stderr)
+    # No site is created here: the connector's first run creates it on Turing's first enabled
+    # search engine instance and recreates the fields the template holds with another
+    # cardinality, such as author (D340).
     token = request(opener, "POST", turing + "/api/dev/token",
                     {"title": "dumont-dspace-dev", "description": "catalog/dspace-dev e2e"},
                     {"X-XSRF-TOKEN": xsrf()})
@@ -237,7 +210,7 @@ def main():
     parser.add_argument("--turing", default="http://localhost:2700")
     parser.add_argument("--site", default="LumenRepository", help="the SN site to index into")
     sub = parser.add_subparsers(dest="command", required=True)
-    setup = sub.add_parser("turing-setup", help="create the SN site and mint a Turing API key")
+    setup = sub.add_parser("turing-setup", help="mint a Turing API key")
     setup.add_argument("--password", default="dumont-dev", help="Turing's admin password")
     go = sub.add_parser("run", help="create the source, harvest, check")
     go.add_argument("--key", required=True, help="the Turing API key the connector was started with")

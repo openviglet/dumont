@@ -805,3 +805,4 @@
 - **D321** — An OAI-PMH record's URL skips private and dotless hosts, and full text follows a page's citation_pdf_url on the same site (www. aside): OJS articles now yield their PDF text.
 - **D338** — catalog/dspace-dev runs a DSpace 8.5 backend seeded with nine fictional items (PDF full text, withdrawn and private ones) and fills its OAI index; e2e.py harvests it into Turing.
 - **D339** — A call carrying the connector's Key skips CSRF on every API, so a script writes catalog, eds or any later plugin source with the Key alone.
+- **D340** — A structured source's first run creates its missing SN site on Turing's first enabled SE instance and recreates fields held with another cardinality; the DSpace e2e passes on a new site.

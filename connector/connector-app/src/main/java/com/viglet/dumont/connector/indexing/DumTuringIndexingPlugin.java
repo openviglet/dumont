@@ -20,12 +20,21 @@ package com.viglet.dumont.connector.indexing;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
@@ -57,12 +66,24 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
     
     private final String turingUrl;
     private final String turingApiKey;
+    private final Function<TurSNManifest, TurSNManifestResult> provisioner;
+    private final Supplier<Optional<String>> seInstanceLookup;
 
+    @Autowired
     public DumTuringIndexingPlugin(@Value("${turing.url}") String turingUrl,
             @Value("${turing.apiKey}") String turingApiKey) {
+        this(turingUrl, turingApiKey, null, null);
+        log.info("Initialized Turing indexing plugin with URL: {}", turingUrl);
+    }
+
+    /** The manifest transport and the SE-instance lookup are the seams a test replaces. */
+    DumTuringIndexingPlugin(String turingUrl, String turingApiKey,
+            Function<TurSNManifest, TurSNManifestResult> provisioner,
+            Supplier<Optional<String>> seInstanceLookup) {
         this.turingUrl = turingUrl;
         this.turingApiKey = turingApiKey;
-        log.info("Initialized Turing indexing plugin with URL: {}", turingUrl);
+        this.provisioner = provisioner != null ? provisioner : m -> getTurSNServer().provision(m);
+        this.seInstanceLookup = seInstanceLookup != null ? seInstanceLookup : this::firstSeInstance;
     }
 
     @Override
@@ -91,36 +112,131 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
      * inferred at index time. Refusing to index would take a working index offline over a schema
      * drift the operator may not be able to resolve at that moment, so the failure is reported
      * loudly, naming the fields that would have had to be rewritten, and the documents still flow.
+     * <p>
+     * Two refusals are answered rather than reported (D340), each at most once, so the first run
+     * against a new or older site indexes with no manual step:
+     * <ul>
+     * <li>a site that does not exist and so needs a search-engine instance (400): the call is made
+     * again on the first enabled instance Turing lists, as the WordPress plugin does;</li>
+     * <li>a field the site holds with another type or cardinality (409): the call is made again
+     * declaring {@code RECREATE} for exactly the fields Turing named. The source's schema is what
+     * every document of this run carries, and this is a full run, so the field is refilled by the
+     * documents that follow.</li>
+     * </ul>
      */
     @Override
     public Optional<String> provision(DumIndexingSchema schema) {
-        TurSNManifest manifest = manifest(schema);
-        try {
-            TurSNManifestResult result = getTurSNServer().provision(manifest);
-            if (result.isNoOp()) {
-                log.debug("Site '{}' schema already matches the {} declared field(s), {} custom "
-                        + "facet(s) and {} custom sort(s)", schema.siteName(), schema.fields().size(),
-                        schema.customFacets().size(), schema.customSorts().size());
-            } else {
-                log.info("Provisioned site '{}' (created={}) from {} declared field(s); custom facets "
-                        + "changed: {}; custom sorts changed: {}", result.siteName(),
-                        result.siteCreated(), schema.fields().size(), result.customFacetsChanged(),
-                        result.customSortsChanged());
+        Attempt attempt = new Attempt(null, Set.of());
+        while (true) {
+            try {
+                logProvisioned(schema, provisioner.apply(manifest(schema, attempt.seInstanceId(),
+                        attempt.recreate())));
+                return Optional.empty();
+            } catch (TurSNManifestException e) {
+                Optional<Attempt> next = retry(schema, attempt, e);
+                if (next.isEmpty()) {
+                    return Optional.of(refusal(schema, e));
+                }
+                attempt = next.get();
             }
-            return Optional.empty();
-        } catch (TurSNManifestException e) {
-            if (e.isMigrationRequired()) {
-                log.error("Site '{}' schema needs a declared migration — indexing continues with the "
-                        + "site's current schema. Breaking change(s): {}", schema.siteName(),
-                        e.getBreakingChanges());
-                return Optional.of("site '%s' kept its current schema: the declared one needs a migration (%s)"
-                        .formatted(schema.siteName(), e.getBreakingChanges()));
-            }
-            log.error("Could not provision site '{}': {} — indexing continues with the site's "
-                    + "current schema", schema.siteName(), e.getMessage(), e);
-            return Optional.of("site '%s' was not provisioned: %s".formatted(schema.siteName(),
-                    e.getMessage()));
         }
+    }
+
+    /** What one provisioning call names beyond the schema: the instance and the fields to recreate. */
+    private record Attempt(String seInstanceId, Set<String> recreate) {
+    }
+
+    /**
+     * The call that answers this refusal, or none when it is to be reported. Each answer is given
+     * once: the instance is named only while none is, and the fields are recreated only while none
+     * is, so the loop ends after at most three calls.
+     */
+    private Optional<Attempt> retry(DumIndexingSchema schema, Attempt attempt, TurSNManifestException e) {
+        if (attempt.seInstanceId() == null && needsSeInstance(e)) {
+            Optional<String> instance = seInstanceLookup.get();
+            instance.ifPresentOrElse(
+                    id -> log.info("Site '{}' does not exist; creating it on search engine instance {}",
+                            schema.siteName(), id),
+                    () -> log.error("Site '{}' does not exist and Turing lists no search engine "
+                            + "instance to create it on", schema.siteName()));
+            return instance.map(id -> new Attempt(id, attempt.recreate()));
+        }
+        if (e.isMigrationRequired() && attempt.recreate().isEmpty() && !e.getBreakingChanges().isEmpty()) {
+            Set<String> fields = new LinkedHashSet<>();
+            e.getBreakingChanges().forEach(change -> fields.add(change.field()));
+            log.warn("Site '{}' holds field(s) {} with another type or cardinality than the source "
+                    + "declares; recreating them: {}", schema.siteName(), fields, e.getBreakingChanges());
+            return Optional.of(new Attempt(attempt.seInstanceId(), fields));
+        }
+        return Optional.empty();
+    }
+
+    private static void logProvisioned(DumIndexingSchema schema, TurSNManifestResult result) {
+        if (result.isNoOp()) {
+            log.debug("Site '{}' schema already matches the {} declared field(s), {} custom "
+                    + "facet(s) and {} custom sort(s)", schema.siteName(), schema.fields().size(),
+                    schema.customFacets().size(), schema.customSorts().size());
+        } else {
+            log.info("Provisioned site '{}' (created={}) from {} declared field(s); migrated: {}; "
+                    + "custom facets changed: {}; custom sorts changed: {}", result.siteName(),
+                    result.siteCreated(), schema.fields().size(), result.fieldsMigrated(),
+                    result.customFacetsChanged(), result.customSortsChanged());
+        }
+    }
+
+    private static String refusal(DumIndexingSchema schema, TurSNManifestException e) {
+        if (e.isMigrationRequired()) {
+            log.error("Site '{}' schema needs a declared migration — indexing continues with the "
+                    + "site's current schema. Breaking change(s): {}", schema.siteName(),
+                    e.getBreakingChanges());
+            return "site '%s' kept its current schema: the declared one needs a migration (%s)"
+                    .formatted(schema.siteName(), e.getBreakingChanges());
+        }
+        log.error("Could not provision site '{}': {} — indexing continues with the site's "
+                + "current schema", schema.siteName(), e.getMessage(), e);
+        return "site '%s' was not provisioned: %s".formatted(schema.siteName(), e.getMessage());
+    }
+
+    /** Turing's 400 for a manifest naming a site that does not exist, and no instance to create it on. */
+    static boolean needsSeInstance(TurSNManifestException e) {
+        return e.getStatusCode() == 400 && e.getMessage() != null && e.getMessage().contains("seInstanceId");
+    }
+
+    /**
+     * The search-engine instance a new site is created on: the first enabled one Turing lists
+     * ({@code GET /api/se}), or the first at all when none says it is enabled.
+     */
+    private Optional<String> firstSeInstance() {
+        try {
+            List<Map<String, Object>> instances = RestClient.builder()
+                    .baseUrl(turingUrl)
+                    .defaultHeader("Key", turingApiKey)
+                    .build()
+                    .get().uri("/api/se")
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {
+                    });
+            return chooseSeInstance(instances);
+        } catch (RestClientException e) {
+            log.warn("Could not list Turing's search engine instances at {}: {}", turingUrl, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    static Optional<String> chooseSeInstance(List<Map<String, Object>> instances) {
+        if (instances == null || instances.isEmpty()) {
+            return Optional.empty();
+        }
+        Map<String, Object> chosen = instances.stream()
+                .filter(DumTuringIndexingPlugin::isEnabled)
+                .findFirst()
+                .orElse(instances.getFirst());
+        return Optional.ofNullable(chosen.get("id")).map(String::valueOf);
+    }
+
+    private static boolean isEnabled(Map<String, Object> instance) {
+        Object enabled = instance.get("enabled");
+        return enabled instanceof Boolean b ? b : enabled instanceof Number n && n.intValue() != 0;
     }
 
     /**
@@ -128,10 +244,19 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
      * fields; the builder sends none when none is declared, which leaves the site's own untouched.
      */
     static TurSNManifest manifest(DumIndexingSchema schema) {
+        return manifest(schema, null, Set.of());
+    }
+
+    /** The same, naming the instance a new site is created on and the fields to recreate (D340). */
+    static TurSNManifest manifest(DumIndexingSchema schema, String seInstanceId, Set<String> recreate) {
         TurSNManifest.Builder builder = TurSNManifest.builder()
                 .name(schema.siteName())
                 .locale(schema.locale())
                 .fields(schema.fields());
+        if (seInstanceId != null) {
+            builder.seInstanceId(seInstanceId);
+        }
+        recreate.forEach(builder::recreate);
         schema.customFacets().forEach(builder::customFacet);
         schema.customSorts().forEach(builder::customSort);
         return builder.build();

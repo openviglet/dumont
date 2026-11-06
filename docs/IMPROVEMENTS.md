@@ -143,25 +143,6 @@ trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
 
-### LII.6 A structured source's manifest that converges a new or older site (D340)
-
-**Found by D314.** Pointing the catalog connector's DSpace profile at a fresh SN site,
-the manifest it posts was refused with 400 "seInstanceId is required": it names no
-search engine instance, so Turing cannot create the site. On an existing site whose
-`author` and `type` were single-valued with no facet, the same manifest (which declares
-them multi-valued facets) was refused with 409, a breaking change with no migration
-declared, and the site stayed as it was. `catalog/dspace-dev/e2e.py` works around both
-by creating the site first and posting a second manifest carrying `RECREATE` migrations.
-
-**What to build.** The structured-source provisioning (the SPI's manifest builder) names
-the SE instance, as the WordPress plugin does when Turing asks for one (the first
-enabled instance), and declares a `RECREATE` migration for each field whose cardinality
-or type its schema needs (as the plugin does for `author`, D326), then reports Turing's
-refusal on the source's run record rather than only in the log.
-
-**Done when:** a DSpace source pointed at a site that does not exist, and at one holding
-a single-valued `author`, indexes its items on the first run with no manual step.
-
 ### LII.7 Index All that trusts Turing, not the ledger, and says when the queue blocks (D341)
 
 **Found by D314.** Two things met while running the catalog connector against the local

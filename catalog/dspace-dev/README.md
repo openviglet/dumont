@@ -76,16 +76,16 @@ It goes through the real connector: the Dumont connector app with the catalog pl
 `loader.path`, a catalog source created over `/api/v2/catalog/source`, and its `indexAll`.
 
 1. Viglet Turing on http://localhost:2700. The one in `wordpress/docker-compose.yml` will do
-   (admin password `dumont-dev`). Create the SN site `LumenRepository` and mint an API key:
+   (admin password `dumont-dev`). Mint an API key:
 
    ```bash
    python e2e.py turing-setup > turing.key
    ```
 
-   The connector cannot create the site itself: its manifest carries no search engine
-   instance. A new site's `author` and `type` are single-valued and not facets, and the
-   connector's manifest declares no migration, so Turing would refuse it whole (409).
-   `turing-setup` flips both fields first, with a `RECREATE` migration in a second manifest call.
+   The SN site needs no setup. The connector's first run creates `LumenRepository` on Turing's
+   first enabled search engine instance, and recreates the fields a new site's template holds
+   with another cardinality: `author` and `type` are single-valued there, and the DSpace schema
+   declares them multi-valued facets.
 
 2. Build and start the connector with the catalog plugin, from the repository root:
 
