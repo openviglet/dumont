@@ -127,6 +127,10 @@ This track has no remaining pending tasks.
 - 📋 **D339** (deps: —) **A catalog source cannot be written with the Key alone: its API demands a CSRF token the db, wc and assets APIs skip** — A script holding the connector's Key must fetch /api/csrf and a cookie, and the token turns over on every write. → §LII.5
 - 📋 **D340** (deps: Turing T1241) **A structured source's manifest neither creates its SN site nor migrates a field held with another cardinality** — A first run against a new site answers 400, and against an older one 409, so nothing is indexed until someone fixes Turing by hand. → §LII.6
 - 📋 **D341** (deps: —) **indexAll skips items its ledger marked sent even when Turing lost them, and a full disk stalls the run with no error** — A site recreated or emptied stays empty after Index All, and a run blocked by Artemis holds its HTTP thread silently. → §LII.7
+- 📋 **D342** (deps: —) **A Web Crawler or EDS run never checks its SN site or locale, and the sites list reads Turing unreachable as no sites** — A run against a missing site fails batch by batch with no reason on the run record, and the form cannot say Turing is down (Turing #65). → §LII.8
+- 📋 **D343** (deps: —) **A run keeps reading the source while every delivery to Turing fails, instead of stopping** — An AEM crawl with Turing down walks every page and enqueues batches that all fail, with no breaker or health check (Turing #80). → §LII.9
+- 📋 **D344** (deps: —) **The AEM oncePattern never takes effect, since nothing writes the once flag, and cannot mean N times** — Paths meant to be indexed once are indexed on every run, and there is no way to index them a fixed number of times (Turing #93). → §LII.10
+- 📋 **D345** (deps: —) **The indexing state can only be cleared by a full reindex, and only on AEM and DB sources** — An operator cannot reset a Web Crawler or Assets source, or clear the ledger without starting a run (Turing #117). → §LII.11
 
 ## Non-goals (do NOT add as tasks)
 

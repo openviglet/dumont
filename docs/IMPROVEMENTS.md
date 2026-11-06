@@ -260,3 +260,94 @@ named in the docs.
 
 **Done when:** Index All on an emptied site sends every item again, and a run against a
 full disk ends failed with "the queue's disk is over its limit".
+
+### LII.8 Connector feedback when Turing cannot take the run (Turing #65) (D342)
+
+**Where it came from.** GitHub issue openviglet/turing#65 (2024, from when the
+connectors lived in Turing): a connector that cannot index into a Turing SN site gives
+no feedback; only Turing's log says why.
+
+**What happens today.** The structured-source connectors (AEM, DB, Assets, Catalog) send
+a manifest before the first document (`DumStructuredSourcePlugin` →
+`DumTuringIndexingPlugin.provision()`), so a missing site is created and a refused
+manifest lands on the run record as a warning. Two gaps remain:
+
+- The Web Crawler (`DumWCPlugin`) and EDS (`DumEDSPlugin`) implement `DumConnectorPlugin` directly and never check the site or the locale; a run against a site or locale Turing lacks sends everything and fails batch by batch.
+- `DumConnectorTuringSitesApi.listSites()` turns any connection error into an empty list, so the console cannot tell "Turing unreachable" from "no sites".
+
+**What to build.** Before the first batch, the Web Crawler and EDS runs check (or
+provision, as the structured sources do) the target site and locale and stop with that
+reason on the run record when they are missing. `listSites` answers an error with the
+cause (unreachable, 401, 404) instead of `[]`, and the source form shows it.
+
+**Done when:** a Web Crawler run against a site that does not exist ends with "SN site X
+not found" on its run record before any batch is sent, and the source form shows "Turing
+unreachable" when Turing is down.
+
+### LII.9 A run stops when Turing is unreachable (Turing #80) (D343)
+
+**Where it came from.** GitHub issue openviglet/turing#80 (2024): the AEM connector must
+stop indexing when Turing is unavailable.
+
+**What happens today.** Nothing is lost: `DumTuringIndexingPlugin.index()` throws
+`DumIndexingDeliveryException` on a failed delivery, `DumConnectorProcessQueue` records
+it (`recordDeliveryFailure` clears those documents' checksums so the next run resends
+them) and marks the run partial. But the crawl is never told. Delivery is asynchronous
+through the JMS queue, with no failure counter, circuit breaker or health check, so the
+AEM traversal keeps reading every page and enqueuing batches that all fail; a failed
+`provision()` also logs and goes on.
+
+**What to build.** A run-level breaker shared by every connector: after N consecutive
+failed deliveries (or a failed provision), the run checks Turing's health and, while it
+stays unreachable, stops reading the source and ends `failed` with "Turing unreachable
+at <url>" on its run record and the console. The documents not sent keep their cleared
+checksums, so the next run resends them. N and the wait are configurable, with defaults
+named in the docs.
+
+**Done when:** an AEM run started with Turing down stops reading the source after the
+first failed batches, ends failed with that reason, and a run after Turing returns sends
+every document the failed run did not.
+
+### LII.10 AEM once pattern that works, and counts (Turing #93) (D344)
+
+**Where it came from.** GitHub issue openviglet/turing#93 (2024): improve the AEM "once"
+regex pattern so matching content is reindexed N times rather than exactly once.
+
+**What happens today.** The once rule is a yes/no gate:
+`AemNodeNavigator.shouldProcessNode` skips a path only when `isOnce(config)` is true and
+the path matches `oncePattern` (`DumAemCommonsUtils.isNotOnceConfig`). `isOnce` reads a
+`DumAemPluginSystem` row keyed `<id>/once` (`DumAemSourceService`), and no code ever
+writes that row; the only writer of `DumAemPluginSystem` is the journal cursor. So
+`oncePattern` never takes effect unless someone inserts the row by hand. There is no
+count of how often a path was indexed.
+
+**What to build.** First make "once" work: mark the source after a full run, so the next
+runs skip paths matching `oncePattern`. Then generalise it to a count: `onceTimes`
+(default 1) and a per-source count of completed full runs, so matching paths are indexed
+in the first N runs and skipped after; resetting the source (or Reindex all) starts the
+count again. Show the setting and the current count on the AEM source form.
+
+**Done when:** with `oncePattern` set and `onceTimes` 2, matching pages are sent in the
+first two runs and skipped in the third, and an IT covers it.
+
+### LII.11 Clear a source's indexing state (Turing #117) (D345)
+
+**Where it came from.** GitHub issue openviglet/turing#117 (2025): a button in the
+connector UI to clean the indexing-state table (the old `turindexing`, now the ledger).
+
+**What happens today.** The ledger can only be wiped as part of a reindex: "Reindex all"
+(`GET /api/v2/connector/reindex/{name}/all` → `DumConnectorRunService.start`) calls
+`indexingService.deleteByProviderAndSource(...)` and starts a full run, and per-id
+reindex deletes those rows. The button exists for AEM and DB only; EDS has its own
+clear-and-reindex; the Web Crawler and Assets have neither. There is no way to clear the
+state without starting a run, and `DumConnectorApi` exposes no delete on the ledger.
+
+**What to build.** `DELETE /api/v2/connector/{name}/source/{source}/ledger` that removes
+the source's ledger rows (refused while a run is in progress), and a "Clear indexing
+state" action next to "Reindex all" on every source page (AEM, DB, Web Crawler, Assets,
+EDS, Catalog), with a confirmation that says the next run sends everything again. D341
+(Index All trusting Turing over the ledger) is the complementary fix; this one gives the
+operator the explicit control.
+
+**Done when:** clearing a Web Crawler source's state leaves its ledger empty without
+starting a run, and the next run sends every page.
