@@ -57,7 +57,8 @@ export default function IntegrationInstanceEdsSourcePage() {
   // The EDS plugin owns a source by its title (DumEDSPlugin.ownsSource).
   const clearState = useClearIndexingState({
     integrationId: id,
-    source: edsSource.title,
+    // D349: the id, which is what the EDS runs file their ledger rows under.
+    source: edsSource.id ?? "",
     label: edsSource.title,
     disabled: isActionDisabled,
   });

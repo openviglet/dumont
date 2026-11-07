@@ -16,10 +16,12 @@
 package com.viglet.dumont.connector.plugin.eds;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
+import com.viglet.dumont.connector.plugin.eds.persistence.model.DumEDSSource;
 import com.viglet.dumont.connector.plugin.eds.persistence.repository.DumEDSSourceRepository;
 import com.viglet.dumont.connector.plugin.eds.state.DumEDSCrawlStateService;
 
@@ -45,7 +47,18 @@ public class DumEDSPlugin implements DumConnectorPlugin {
     /** D345: without its crawl state, the next run fetches every page instead of skipping unchanged ones. */
     @Override
     public void resetState(String source) {
-        dumEDSSourceRepository.findByTitle(source).ifPresent(crawlStateService::deleteAll);
+        find(source).ifPresent(crawlStateService::deleteAll);
+    }
+
+    /**
+     * D349: the source a connector-level call names. Its runs file the ledger under the id, so the
+     * id is the name the console passes; the title is still accepted for callers written before.
+     */
+    private Optional<DumEDSSource> find(String source) {
+        if (source == null) {
+            return Optional.empty();
+        }
+        return dumEDSSourceRepository.findById(source).or(() -> dumEDSSourceRepository.findByTitle(source));
     }
 
     @Override
@@ -60,12 +73,12 @@ public class DumEDSPlugin implements DumConnectorPlugin {
 
     @Override
     public boolean ownsSource(String source) {
-        return dumEDSSourceRepository.findByTitle(source).isPresent();
+        return find(source).isPresent();
     }
 
     @Override
     public void indexAll(String source) {
-        dumEDSSourceRepository.findByTitle(source).ifPresent(dumEDSPluginProcess::start);
+        find(source).ifPresent(dumEDSPluginProcess::start);
     }
 
     @Override
