@@ -39,11 +39,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.viglet.dumont.connector.batch.DumQueueDiskFullException;
 import com.viglet.dumont.connector.batch.JobItemBatchProcessor;
 import com.viglet.dumont.connector.chain.JobProcessingChain;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
+import com.viglet.dumont.commons.indexing.DumIndexingStatus;
+import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
@@ -102,6 +105,44 @@ public class DumConnectorContextImpl implements DumConnectorContext {
         return indexingPlugin.provision(schema);
     }
 
+    /**
+     * D341: the index, not the ledger, says what was sent. A row whose id is absent from the
+     * inventory of any site the source publishes to is deleted, so the strategy chain reads the
+     * item as new and indexes it. {@code NOT_PROCESSED} rows are left alone: they are repair
+     * requests already waiting to be sent.
+     */
+    @Override
+    public boolean forgetUnindexed(String source, String provider, Collection<String> sites) {
+        if (sites == null || sites.isEmpty()) {
+            return false;
+        }
+        Map<String, Set<String>> indexedBySite = new HashMap<>();
+        for (String site : sites) {
+            Optional<List<DumIndexInventoryEntry>> inventory = indexingPlugin.inventory(site, source);
+            if (inventory.isEmpty()) {
+                log.warn("Source '{}': site '{}' cannot report what it holds, so the ledger is kept "
+                        + "as it is and unchanged items are skipped", source, site);
+                return false;
+            }
+            Set<String> ids = new HashSet<>();
+            inventory.get().forEach(entry -> ids.add(entry.id()));
+            indexedBySite.put(site, ids);
+        }
+        List<DumConnectorIndexingModel> lost = indexingService.getAllBySourceAndProvider(source, provider)
+                .stream()
+                .filter(row -> row.getStatus() != DumIndexingStatus.NOT_PROCESSED)
+                .filter(row -> row.getObjectId() != null)
+                .filter(row -> indexedBySite.values().stream().anyMatch(ids -> !ids.contains(row.getObjectId())))
+                .toList();
+        if (!lost.isEmpty()) {
+            log.warn("Source '{}': {} item(s) the ledger holds as sent are not in the index of {}; "
+                    + "this run sends them again", source,
+                    lost.stream().map(DumConnectorIndexingModel::getObjectId).distinct().count(), sites);
+            indexingService.deleteAll(lost);
+        }
+        return !lost.isEmpty() || indexedBySite.values().stream().anyMatch(Set::isEmpty);
+    }
+
     @Override
     public List<String> getObjectIdByDependency(String source, String provider,
             List<String> dependenciesObjectIdList) {
@@ -142,7 +183,19 @@ public class DumConnectorContextImpl implements DumConnectorContext {
         // Flush pending items BEFORE acquiring the write lock. The JMS send may
         // block on Artemis producer flow control; holding the write lock during
         // that wait blocks every addJobItem call in producer threads.
-        batchProcessor.flush();
+        boolean sweep = !standalone;
+        try {
+            batchProcessor.flush();
+        } catch (DumQueueDiskFullException e) {
+            // D341: the batch never reached the queue, so the run is partial and must not sweep:
+            // deindexing what this run "did not see" would remove what it could not send. A run
+            // already finishing standalone recorded its own outcome, which names this cause.
+            log.error("Run of source '{}' stopped: {}", source, e.getMessage());
+            if (sweep) {
+                recordRunOutcome(session, true, List.of("stopped: " + e.getMessage()));
+            }
+            sweep = false;
+        }
 
         ReadWriteLock lock = getLock(source);
         lock.writeLock().lock();
@@ -150,7 +203,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
             // Handle deindexing if not standalone — queues delete jobs in the
             // buffer and updates the DB, but no longer flushes (flush happens
             // after the lock is released).
-            if (!standalone) {
+            if (sweep) {
                 deIndexObjects(session);
             }
 
@@ -159,7 +212,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
 
             // Save indexing stats if tracked. A standalone finish that recorded an outcome (D96) is
             // a tracked run that stopped short, and its row is what says so.
-            if (!standalone || indexingService.hasRunOutcome(source, session.getProviderName())) {
+            if (sweep || indexingService.hasRunOutcome(source, session.getProviderName())) {
                 indexingService.completeIndexingStats(session.getSource(),
                         session.getProviderName());
             }
@@ -172,7 +225,7 @@ public class DumConnectorContextImpl implements DumConnectorContext {
         }
 
         // Final flush for delete jobs queued during deindex — outside the lock.
-        if (!standalone) {
+        if (sweep) {
             batchProcessor.flush();
         }
     }

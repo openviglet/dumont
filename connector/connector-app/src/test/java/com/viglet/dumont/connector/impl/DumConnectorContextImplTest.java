@@ -17,6 +17,7 @@ package com.viglet.dumont.connector.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,9 +37,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.viglet.dumont.connector.batch.DumQueueDiskFullException;
 import com.viglet.dumont.connector.batch.JobItemBatchProcessor;
 import com.viglet.dumont.connector.chain.JobProcessingChain;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
+import com.viglet.dumont.commons.indexing.DumIndexingStatus;
+import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
 import com.viglet.dumont.connector.commons.domain.DumJobItemWithSession;
 import com.viglet.dumont.connector.commons.plugin.DumIndexingPlugin;
@@ -100,6 +105,60 @@ class DumConnectorContextImplTest {
         verify(indexingPlugin, never()).provision(any());
     }
 
+    private static DumConnectorIndexingModel row(String objectId, DumIndexingStatus status) {
+        return DumConnectorIndexingModel.builder().objectId(objectId).status(status).build();
+    }
+
+    /** D341: an emptied site forgets every row, so Index All sends every item again. */
+    @Test
+    void forgetUnindexedDropsTheRowsTheIndexLost() {
+        DumConnectorIndexingModel kept = row("a", DumIndexingStatus.INDEXED);
+        DumConnectorIndexingModel lost = row("b", DumIndexingStatus.PREPARE_UNCHANGED);
+        DumConnectorIndexingModel repair = row("c", DumIndexingStatus.NOT_PROCESSED);
+        when(indexingPlugin.inventory("Site", "src"))
+                .thenReturn(Optional.of(List.of(new DumIndexInventoryEntry("a", null, null))));
+        when(indexingService.getAllBySourceAndProvider("src", "CATALOG"))
+                .thenReturn(List.of(kept, lost, repair));
+
+        assertThat(context.forgetUnindexed("src", "CATALOG", List.of("Site"))).isTrue();
+
+        verify(indexingService).deleteAll(List.of(lost));
+    }
+
+    /** D341: a site holding nothing of the source asks for everything, even with no row to forget. */
+    @Test
+    void anEmptySiteAsksForEverythingWithNothingToForget() {
+        when(indexingPlugin.inventory("Site", "src")).thenReturn(Optional.of(List.of()));
+        when(indexingService.getAllBySourceAndProvider("src", "CATALOG")).thenReturn(List.of());
+
+        assertThat(context.forgetUnindexed("src", "CATALOG", List.of("Site"))).isTrue();
+
+        verify(indexingService, never()).deleteAll(any());
+    }
+
+    /** D341: an index that agrees with the ledger changes nothing. */
+    @Test
+    void anAgreeingIndexForgetsNothing() {
+        when(indexingPlugin.inventory("Site", "src"))
+                .thenReturn(Optional.of(List.of(new DumIndexInventoryEntry("a", null, null))));
+        when(indexingService.getAllBySourceAndProvider("src", "CATALOG"))
+                .thenReturn(List.of(row("a", DumIndexingStatus.INDEXED)));
+
+        assertThat(context.forgetUnindexed("src", "CATALOG", List.of("Site"))).isFalse();
+
+        verify(indexingService, never()).deleteAll(any());
+    }
+
+    /** D341: an unreadable index is not an empty one — the ledger stays as it is. */
+    @Test
+    void forgetUnindexedKeepsTheLedgerWhenTheIndexCannotAnswer() {
+        when(indexingPlugin.inventory("Site", "src")).thenReturn(Optional.empty());
+
+        assertThat(context.forgetUnindexed("src", "CATALOG", List.of("Site"))).isFalse();
+
+        verify(indexingService, never()).deleteAll(any());
+    }
+
     private static DumJobItemWithSession jobItem(String id) {
         Map<String, Object> attrs = new HashMap<>();
         if (id != null) {
@@ -154,6 +213,24 @@ class DumConnectorContextImplTest {
         verify(batchProcessor, times(1)).flush();
         verify(indexingService, never()).completeIndexingStats(any(), any());
         verify(indexingService).finishProcessing("wknd");
+    }
+
+    /** D341: a full disk ends the run partial with the reason, unswept, and releases its lock. */
+    @Test
+    void aRefusedFlushEndsTheRunPartialWithoutTheSweep() {
+        DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
+        doThrow(new DumQueueDiskFullException("the queue's disk is over its limit: 97% used"))
+                .when(batchProcessor).flush();
+        when(indexingService.hasRunOutcome("wknd", "turing")).thenReturn(true);
+
+        context.finishIndexing(session, false);
+
+        verify(indexingService).recordRunOutcome("wknd", "turing", true,
+                List.of("stopped: the queue's disk is over its limit: 97% used"), List.of());
+        verify(indexingService, never()).getShouldBeDeIndexedList(any());
+        verify(indexingService).completeIndexingStats("wknd", "turing");
+        verify(indexingService).finishProcessing("wknd");
+        verify(batchProcessor, times(1)).flush();
     }
 
     @Test

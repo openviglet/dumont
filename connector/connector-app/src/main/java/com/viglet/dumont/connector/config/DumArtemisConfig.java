@@ -41,6 +41,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class DumArtemisConfig implements ArtemisConfigurationCustomizer {
 
+    /**
+     * The disk usage, in percent, past which the broker blocks producers. A send is refused
+     * before it reaches that wait (D341, {@code DumQueueDiskGuard}).
+     */
+    public static final int MAX_DISK_USAGE = 95;
+
     private static final long ONE_GB = 1024L * 1024L * 1024L;
     private static final long FIVE_HUNDRED_MB = 512L * 1024L * 1024L;
     private static final int TEN_MB = 10 * 1024 * 1024;
@@ -48,7 +54,7 @@ public class DumArtemisConfig implements ArtemisConfigurationCustomizer {
     @Override
     public void customize(Configuration configuration) {
         configuration.setGlobalMaxSize(ONE_GB);
-        configuration.setMaxDiskUsage(95);
+        configuration.setMaxDiskUsage(MAX_DISK_USAGE);
 
         AddressSettings settings = new AddressSettings()
                 .setMaxSizeBytes(FIVE_HUNDRED_MB)

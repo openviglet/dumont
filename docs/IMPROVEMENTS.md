@@ -143,23 +143,6 @@ trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
 
-### LII.7 Index All that trusts Turing, not the ledger, and says when the queue blocks (D341)
-
-**Found by D314.** Two things met while running the catalog connector against the local
-DSpace:
-
-- `indexAll` skipped every item its ledger had already marked as sent, though the SN site had been recreated in between and held none of them; only the synchronous `reindex/{name}/all` sent them again.
-- With the disk above 90%, the embedded Artemis broker blocks producers: the run stopped after "Draining N jobs from buffer" with no error, holding the HTTP thread, until the connector was moved to another disk.
-
-**What to build.** Index All checks what the site holds for the source (a count, or the
-ids the sweep already lists) and treats a ledger entry Turing does not have as unsent;
-and a producer blocked by the broker's disk or memory limit fails the run with that
-reason on its run record and the console, instead of waiting forever, with the threshold
-named in the docs.
-
-**Done when:** Index All on an emptied site sends every item again, and a run against a
-full disk ends failed with "the queue's disk is over its limit".
-
 ### LII.8 Connector feedback when Turing cannot take the run (Turing #65) (D342)
 
 **Where it came from.** GitHub issue openviglet/turing#65 (2024, from when the
@@ -250,3 +233,24 @@ operator the explicit control.
 
 **Done when:** clearing a Web Crawler source's state leaves its ledger empty without
 starting a run, and the next run sends every page.
+
+### LII.12 A JSON API source that refills what the site lost (D348)
+
+**Found by D341.** Before a full run, the structured plugin now forgets the ledger rows
+of ids the index lost and calls `listEverything()` on the source, so the run sends them
+again. The OAI-PMH source honours it by harvesting without its watermark. The JSON API
+source does not: with an `incremental` block (expiry), a run reads what its call budget
+allows and reports the rest through `unchangedIds()`, which only keeps those ids alive.
+After the site is emptied, those ids are neither re-fetched nor sent, and they stay
+missing until the source happens to read them again.
+
+**What to build.** `DumJsonApiSource.listEverything()` stops reporting `unchangedIds()`
+for this run, and walks its pages from the start, spending the budget as usual. Ids the
+budget does not reach stay missing and are named in a run note ("N items the site lost
+wait for a later run"), so the next runs keep going until the site holds every id. The
+seen-state that drives `unchangedIds()` must not record an id as current while the site
+lacks it.
+
+**Done when:** a JSON API source with expiry, pointed at an emptied site, refills it
+over one or more runs, and each run that stops short names how many lost items are still
+waiting.

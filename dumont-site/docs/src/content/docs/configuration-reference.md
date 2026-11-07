@@ -153,7 +153,7 @@ The values are restored from the stored run history at startup, so a restart doe
 | `spring.artemis.broker-url` | `localhost:61616` | Broker URL when using `native` mode |
 | `spring.artemis.embedded.enabled` | `true` | Enable the embedded broker |
 | `spring.artemis.embedded.persistent` | `true` | Persist queue messages to disk (survives restarts) |
-| `spring.artemis.embedded.data-directory` | `store/queue` | Directory for persisted queue data |
+| `spring.artemis.embedded.data-directory` | `store/queue` | Directory for persisted queue data. A run stops with a recorded reason when this disk is 95% full ([Queue](/docs/getting-started/core-concepts/#stage-4-queue)) |
 | `spring.artemis.embedded.queues` | `connector-indexing.queue` | Queue name created on startup |
 
 ### Indexing Configuration

@@ -185,6 +185,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     private final Set<String> gone = new LinkedHashSet<>();
     private Map<String, DumOaiPmhResponse.Item> recordsById;
     private String from;
+    private boolean everything;
     private boolean complete;
     private int calls;
 
@@ -249,6 +250,12 @@ public final class DumOaiPmhSource implements DumStructuredSource {
     public synchronized boolean incremental() {
         records();
         return from != null;
+    }
+
+    /** D341: this run harvests from the start, whatever the watermark says. */
+    @Override
+    public synchronized void listEverything() {
+        everything = true;
     }
 
     /** The identifiers the repository reported deleted during this harvest. */
@@ -472,9 +479,7 @@ public final class DumOaiPmhSource implements DumStructuredSource {
 
     private Map<String, DumOaiPmhResponse.Item> harvest() {
         Map<String, DumOaiPmhResponse.Item> found = new LinkedHashMap<>();
-        if (incrementalEnabled) {
-            from = state.watermark().map(DumOaiPmhSource::day).orElse(null);
-        }
+        from = harvestFrom();
         Set<String> tokens = new HashSet<>();
         String firstResponseDate = null;
         String url = firstUrl();
@@ -507,6 +512,17 @@ public final class DumOaiPmhSource implements DumStructuredSource {
             state.watermark(firstResponseDate);
         }
         return found;
+    }
+
+    /**
+     * The day this harvest asks from: the watermark's, when the source is incremental and this run
+     * was not asked to list everything (D341); else none, which harvests from the start.
+     */
+    private String harvestFrom() {
+        if (!incrementalEnabled || everything) {
+            return null;
+        }
+        return state.watermark().map(DumOaiPmhSource::day).orElse(null);
     }
 
     /** A later record for the same identifier wins, deleted or not. */

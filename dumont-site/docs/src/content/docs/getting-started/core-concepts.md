@@ -66,6 +66,8 @@ Every Job Item passes through a chain of **Processing Strategies**, evaluated in
 
 The strategy chain uses **checksum-based change detection**: each document's content is hashed, and the hash is compared against the last indexed version. Only documents that have actually changed are re-indexed.
 
+Before a full run of a structured source (Catalog, JSON API, OAI-PMH), Viglet Dumont asks Viglet Turing which of the source's documents each site holds. A document the connector recorded as sent but the site does not hold is sent again, not skipped as unchanged, so **Index All** refills a site that was recreated or emptied. An OAI-PMH source then harvests from the start rather than from its last harvest. If the site cannot say what it holds, the run skips unchanged documents as before.
+
 ### Stage 3: Batching
 
 Accepted Job Items are collected by the **Batch Processor** into groups (default: 50 items per batch). This reduces the number of messages sent to the queue and improves indexing throughput.
@@ -77,6 +79,8 @@ When a batch reaches its configured size, or when the connector signals it has f
 The batch is sent to **Apache Artemis** (embedded JMS message queue). The queue decouples extraction from delivery: if the search engine is temporarily unavailable, messages wait in the queue and are delivered when the connection is restored.
 
 Queue messages are persisted to disk (`store/queue/`) and survive application restarts.
+
+The embedded queue stops taking messages when the disk that holds `store/queue/` is **95% full**. Viglet Dumont checks the disk before each batch. On a disk at or over that limit, the run stops and records why ("the queue's disk is over its limit") instead of waiting. A run stopped this way is partial, so it removes nothing from the index. Free space or move `spring.artemis.embedded.data-directory` to another disk, then run again.
 
 ### Stage 5: Delivery
 

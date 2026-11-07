@@ -355,6 +355,12 @@ public abstract class DumStructuredSourcePlugin implements DumConnectorPlugin {
         // Declare the schema before the first document (D63): the backend creates the fields as
         // declared instead of inferring each one from whichever value arrives first.
         provisionSchema(structuredSource);
+        // D341: an item the ledger holds as sent but the index lost is sent again, not skipped —
+        // and an incremental source lists everything, or it would never list that item again.
+        if (dumConnectorContext.forgetUnindexed(source, structuredSource.getProviderName(),
+                structuredSource.getSiteNames())) {
+            structuredSource.listEverything();
+        }
         // Cross-source resolution (D109): each keyed record publishes as its canonical document.
         DumResolutionRun resolution = resolutionRun(structuredSource);
         DumConnectorSession session = newSession(structuredSource, resolution);

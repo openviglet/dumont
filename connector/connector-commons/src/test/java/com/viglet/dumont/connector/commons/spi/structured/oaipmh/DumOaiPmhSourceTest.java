@@ -139,6 +139,22 @@ class DumOaiPmhSourceTest {
         assertEquals(Optional.of("2026-11-04T07:30:00Z"), state.watermark());
     }
 
+    /** D341: a run asked to list everything harvests from the start, and sweeps like a full one. */
+    @Test
+    void aRunAskedToListEverythingIgnoresTheWatermark() {
+        DumInMemoryOaiPmhState state = new DumInMemoryOaiPmhState();
+        state.watermark("2026-11-01T10:00:00Z");
+        DumOaiPmhSource source = source(pages(listRecords("2026-11-05T10:00:00Z", null,
+                record("oai:repo:1", "One"))), state, null);
+
+        source.listEverything();
+        source.discover();
+
+        assertEquals(BASE + "?verb=ListRecords&metadataPrefix=oai_dc", urls.getFirst());
+        assertFalse(source.incremental());
+        assertEquals(Optional.of("2026-11-05T10:00:00Z"), state.watermark());
+    }
+
     @Test
     void aSourceThatIsNotIncrementalHarvestsInFullEveryRun() {
         DumInMemoryOaiPmhState state = new DumInMemoryOaiPmhState();

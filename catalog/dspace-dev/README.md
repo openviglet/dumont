@@ -98,9 +98,9 @@ It goes through the real connector: the Dumont connector app with the catalog pl
    ```
 
    Run it from a scratch directory if you would rather not have its `store/` folder (H2 database,
-   queue, logs) in the repository root. Put that directory on a drive under 90% full: above
-   that, the embedded Artemis queue blocks every send, and a run stops silently after
-   "Draining N jobs from buffer".
+   queue, logs) in the repository root. Put that directory on a drive under 95% full: at that
+   point the embedded queue takes no more messages, and the run stops with "the queue's disk is
+   over its limit".
 
 3. Run the check:
 
@@ -110,8 +110,8 @@ It goes through the real connector: the Dumont connector app with the catalog pl
 
    It creates the source `lumen-dspace` (DSpace profile, full text on, site key `lumen`) bound to
    the SN site `LumenRepository` and starts its `indexAll`. On a rerun it updates the source and
-   calls `/api/v2/connector/reindex/lumen-dspace/all` instead, because `indexAll` skips items the
-   connector's ledger already holds as sent. Then it waits for the site to settle and checks:
+   calls `/api/v2/connector/reindex/lumen-dspace/all` instead, so every document the checks read
+   was written by this run (`indexAll` would send again only what the site lost). Then it waits for the site to settle and checks:
 
    - only the six live items are indexed;
    - the thesis is found by a title word (`mycorrhizal`) and by its PDF-only word (`quillbramble`);

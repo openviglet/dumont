@@ -23,6 +23,7 @@ import static com.viglet.dumont.connector.constant.DumConnectorConstants.CONNECT
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -53,12 +54,21 @@ public class JobItemBatchProcessor {
     private final List<DumJobItemWithSession> buffer = new ArrayList<>();
     private final JmsMessagingTemplate jmsMessagingTemplate;
     private final int batchSize;
+    private final DumQueueDiskGuard diskGuard;
 
+    @Autowired
     public JobItemBatchProcessor(
             @Value("${dumont.job.size:50}") int batchSize,
-            JmsMessagingTemplate jmsMessagingTemplate) {
+            JmsMessagingTemplate jmsMessagingTemplate,
+            DumQueueDiskGuard diskGuard) {
         this.batchSize = batchSize;
         this.jmsMessagingTemplate = jmsMessagingTemplate;
+        this.diskGuard = diskGuard;
+    }
+
+    /** A processor whose queue disk is never read: for tests that do not exercise it. */
+    JobItemBatchProcessor(int batchSize, JmsMessagingTemplate jmsMessagingTemplate) {
+        this(batchSize, jmsMessagingTemplate, null);
     }
 
     /**
@@ -141,6 +151,10 @@ public class JobItemBatchProcessor {
     }
 
     private void sendBatch(List<DumJobItemWithSession> drained) {
+        // D341: before anything is marked as sent, refuse a send the broker would block on forever.
+        if (diskGuard != null) {
+            diskGuard.check();
+        }
         TurSNJobItems itemsToSend = new TurSNJobItems();
         for (DumJobItemWithSession buffered : drained) {
             // D69: the session that produced the item, never the one that asked for the drain —

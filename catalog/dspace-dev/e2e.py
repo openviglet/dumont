@@ -131,9 +131,9 @@ def run(args):
         source_id = write("POST", "/api/v2/catalog/source", source)["id"]
         print(f"Created catalog source {SOURCE_NAME} ({source_id})")
     if existing:
-        # A rerun reindexes: indexAll would skip every item the connector's ledger already holds
-        # as sent, even when the site lost it (or did not exist when it was sent). This call
-        # returns only when the run has, so it gets the whole indexing budget.
+        # A rerun reindexes, so every check reads documents written by this run: indexAll would
+        # send again only what the site lost (D341). This call returns only when the run has,
+        # so it gets the whole indexing budget.
         request(api, "GET", f"{dumont}/api/v2/connector/reindex/{SOURCE_NAME}/all", headers=key,
                 timeout=args.timeout)
         print("reindex/all started; waiting for the SN site to settle...")

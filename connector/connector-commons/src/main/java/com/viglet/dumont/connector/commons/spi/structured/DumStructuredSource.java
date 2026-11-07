@@ -86,6 +86,16 @@ public interface DumStructuredSource {
     }
 
     /**
+     * Asks this run's {@link #discover()} to list every item, not only what changed (roadmap
+     * <strong>D341</strong>). Called before discovery when the index lost items the connector's
+     * ledger held as sent: a source that asks only for changes would never list them again. A
+     * source that always lists everything has nothing to do, which is the default.
+     */
+    default void listEverything() {
+        // Every run already lists everything.
+    }
+
+    /**
      * For an {@link #incremental()} source, the ids gone long enough to deindex, read once after a
      * run's extraction. Defaults to none.
      */

@@ -43,6 +43,26 @@ public interface DumConnectorContext {
     }
 
     /**
+     * Forgets the ledger rows of ids the index does not hold (roadmap <strong>D341</strong>), so the
+     * full run about to start sends them again instead of skipping them as unchanged. A site that
+     * was recreated or emptied would otherwise stay empty after Index All, because the ledger still
+     * says every item was sent. Called before a full run only; when the index cannot report what it
+     * holds for a site, nothing is forgotten.
+     *
+     * <p>
+     * A no-op by default: a context with no ledger has nothing to forget.
+     *
+     * @param source   the source about to run
+     * @param provider the connector provider, for the ledger lookup
+     * @param sites    the sites the source publishes to
+     * @return whether the index lacks anything of this source — a row was forgotten, or a site
+     *         holds none of its documents — so an incremental source must list everything this run
+     */
+    default boolean forgetUnindexed(String source, String provider, Collection<String> sites) {
+        return false;
+    }
+
+    /**
      * Deindexes an explicitly named set of ids (roadmap <strong>D68</strong>), so a deliberate
      * repair — an operator applying an audit's orphan report — goes through the same delete job and
      * the same queue as the deindex a finished run performs, instead of deleting behind the
