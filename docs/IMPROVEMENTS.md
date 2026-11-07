@@ -187,3 +187,23 @@ lacks it.
 **Done when:** a JSON API source with expiry, pointed at an emptied site, refills it
 over one or more runs, and each run that stops short names how many lost items are still
 waiting.
+
+### LII.13 One name for an EDS source at the connector level (D349)
+
+**Found by D345.** `DumEDSPlugin.ownsSource` and `indexAll` look the source up by its
+**title** (`findByTitle`), so every connector-level call names an EDS source by title:
+`/api/v2/connector/index/{title}/all`, `reindex/{title}/all` and the D345 `DELETE
+ledger/{title}`. But `DumEDSPluginProcess.run` opens its session with `source.getId()`,
+so the ledger, the run record and the deindex sweep all file EDS rows under the **id**.
+The two never meet: Reindex all and Clear indexing state delete the rows of a source
+named by title, which hold nothing, and leave the real rows in place. The crawl state is
+unaffected, since `resetState` resolves the entity first.
+
+**What to build.** One name for an EDS source at the connector level. The cheapest fix
+that keeps existing ledgers is `ownsSource` and `indexAll` (and `resetState`) accepting
+the id as well as the title, with the console calling the connector API by id, as the
+Web Crawler does. Alternatively the session takes the title, which needs a migration of
+the rows already filed under ids.
+
+**Done when:** Reindex all and Clear indexing state on an EDS source empty the rows its
+runs wrote, checked by a test that runs the source and then clears it.

@@ -17,6 +17,7 @@ package com.viglet.dumont.connector.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -196,7 +197,38 @@ class DumConnectorApiTest {
         when(plugin.getProviderName()).thenReturn("turing");
         assertThat(api.reindexAll("free").getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(indexingService).deleteByProviderAndSource("turing", "free");
+        verify(plugin).resetState("free");
         verify(plugin).indexAll("free");
+    }
+
+    /** D345: clearing a source's state empties its ledger and its plugin's state, and starts no run. */
+    @Test
+    void clearStateEmptiesTheLedgerWithoutARun() {
+        when(pluginRegistry.findBySource("site")).thenReturn(Optional.of(plugin));
+        when(indexingService.tryStartProcessing("site")).thenReturn(true);
+        when(plugin.getProviderName()).thenReturn("WEB-CRAWLER");
+
+        var response = api.clearState("site");
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).containsEntry("status", "cleared");
+        verify(indexingService).deleteByProviderAndSource("WEB-CRAWLER", "site");
+        verify(plugin).resetState("site");
+        verify(indexingService).finishProcessing("site");
+        verify(plugin, never()).indexAll(any());
+        verify(indexingService, never()).trackIndexingStart(any(), any(), any());
+    }
+
+    /** D345: refused while a run holds the source, and for a source nobody manages. */
+    @Test
+    void clearStateIsRefusedDuringARunAndForAnUnknownSource() {
+        when(pluginRegistry.findBySource("busy")).thenReturn(Optional.of(plugin));
+        when(indexingService.tryStartProcessing("busy")).thenReturn(false);
+        assertThat(api.clearState("busy").getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        verify(indexingService, never()).deleteByProviderAndSource(any(), any());
+
+        when(pluginRegistry.findBySource("nobody")).thenReturn(Optional.empty());
+        assertThat(api.clearState("nobody").getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test

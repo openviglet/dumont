@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.plugin.eds.persistence.repository.DumEDSSourceRepository;
+import com.viglet.dumont.connector.plugin.eds.state.DumEDSCrawlStateService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,11 +33,19 @@ public class DumEDSPlugin implements DumConnectorPlugin {
 
     private final DumEDSSourceRepository dumEDSSourceRepository;
     private final DumEDSPluginProcess dumEDSPluginProcess;
+    private final DumEDSCrawlStateService crawlStateService;
 
     public DumEDSPlugin(DumEDSSourceRepository dumEDSSourceRepository,
-            DumEDSPluginProcess dumEDSPluginProcess) {
+            DumEDSPluginProcess dumEDSPluginProcess, DumEDSCrawlStateService crawlStateService) {
         this.dumEDSSourceRepository = dumEDSSourceRepository;
         this.dumEDSPluginProcess = dumEDSPluginProcess;
+        this.crawlStateService = crawlStateService;
+    }
+
+    /** D345: without its crawl state, the next run fetches every page instead of skipping unchanged ones. */
+    @Override
+    public void resetState(String source) {
+        dumEDSSourceRepository.findByTitle(source).ifPresent(crawlStateService::deleteAll);
     }
 
     @Override

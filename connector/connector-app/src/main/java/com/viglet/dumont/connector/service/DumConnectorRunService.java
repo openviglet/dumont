@@ -47,12 +47,35 @@ public class DumConnectorRunService {
         try {
             if (operation == OperationType.REINDEX_ALL) {
                 indexingService.deleteByProviderAndSource(plugin.getProviderName(), source);
+                // D345: and what the plugin keeps beside the ledger, or the run would skip again.
+                plugin.resetState(source);
             }
             indexingService.trackIndexingStart(source, plugin.getProviderName(), operation);
             plugin.indexAll(source);
         } catch (RuntimeException e) {
             indexingService.finishProcessing(source);
             throw e;
+        }
+        return RunStart.STARTED;
+    }
+
+    /**
+     * Clears a source's indexing state without starting a run (roadmap <strong>D345</strong>): its
+     * ledger rows and what its plugin keeps beside them. Takes the same run lock a run does, so it
+     * is refused while one is in progress and no run can start halfway through it.
+     *
+     * @return {@link RunStart#ALREADY_RUNNING} when a run holds the source, else
+     *         {@link RunStart#STARTED} once the state is cleared
+     */
+    public RunStart clearState(DumConnectorPlugin plugin, String source) {
+        if (!indexingService.tryStartProcessing(source)) {
+            return RunStart.ALREADY_RUNNING;
+        }
+        try {
+            indexingService.deleteByProviderAndSource(plugin.getProviderName(), source);
+            plugin.resetState(source);
+        } finally {
+            indexingService.finishProcessing(source);
         }
         return RunStart.STARTED;
     }

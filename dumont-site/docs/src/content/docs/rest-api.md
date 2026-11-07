@@ -76,6 +76,22 @@ Deletes the existing index and reindexes all content from the source.
 
 ---
 
+### Clear Indexing State
+
+```
+DELETE /api/v2/connector/ledger/{name}
+```
+
+Forgets what Viglet Dumont recorded about the source's past runs, without starting a run and without removing anything from the index. That covers the source's ledger rows, the Web Crawler's and EDS's conditional-fetch state, and the AEM once pattern's count. The next run sends every document again. Reindex all clears the same state before it starts.
+
+| Parameter | Location | Description |
+|---|---|---|
+| `name` | Path | Source name |
+
+**Response:** `{"status": "cleared"}`. `404` when no connector plugin manages the source, `409` while a run of it is in progress.
+
+---
+
 ### Reindex Specific Content
 
 ```

@@ -62,4 +62,15 @@ public interface DumConnectorPlugin {
     default List<EnvironmentInfo> resolveEnvironments(String source, String objectId) {
         return List.of();
     }
+
+    /**
+     * Forgets what this plugin keeps about past runs of {@code source} beside the connector's
+     * ledger (roadmap <strong>D345</strong>), so the next run reads and sends everything: the Web
+     * Crawler's and EDS's conditional-fetch state, the AEM once pattern's count. Called when an
+     * operator clears the source's indexing state and on Reindex all, never while a run holds the
+     * source. A plugin that keeps nothing of its own does nothing, the default.
+     */
+    default void resetState(String source) {
+        // Nothing kept beside the ledger.
+    }
 }

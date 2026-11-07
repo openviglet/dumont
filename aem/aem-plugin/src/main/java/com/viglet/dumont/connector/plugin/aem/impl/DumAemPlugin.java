@@ -155,6 +155,12 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
         return failureRatioThreshold;
     }
 
+    /** D345: clearing the source's state starts the once pattern's count again (D344). */
+    @Override
+    public void resetState(String source) {
+        sourceService.getDumAemSourceByName(source).ifPresent(sourceService::resetOnce);
+    }
+
     /**
      * Index every enabled environment of a source under one session (so the deindex sweep in
      * {@code finishIndexing} sees both), capturing coverage/preview/provenance once from the primary
@@ -234,6 +240,9 @@ public class DumAemPlugin extends DumStructuredSourcePlugin {
             return;
         }
         dumConnectorContext.finishIndexing(session, false);
+        // D344: a complete run counts toward the once pattern's onceTimes — on this path too, not
+        // only the legacy one, or the connector API's Index All would never advance the count.
+        sourceService.recordFullRun(aemSource);
         DumPreviewSnapshot baseline = snapshot.build();
         previewSnapshotStore.save(source, baseline);
         coverageHistoryStore.recordSnapshot(source, baseline.documents().size(),

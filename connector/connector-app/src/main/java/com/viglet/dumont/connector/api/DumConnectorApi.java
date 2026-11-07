@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -162,6 +163,24 @@ public class DumConnectorApi {
     @GetMapping("reindex/{name}/all")
     public ResponseEntity<Map<String, String>> reindexAll(@PathVariable String name) {
         return startRun(name, OperationType.REINDEX_ALL);
+    }
+
+    /**
+     * Clears a source's indexing state without starting a run (D345): the next run sends
+     * everything again. 404 for a source no plugin manages, 409 while a run holds it.
+     */
+    @DeleteMapping("ledger/{name}")
+    public ResponseEntity<Map<String, String>> clearState(@PathVariable String name) {
+        Optional<DumConnectorPlugin> owner = pluginRegistry.findBySource(name);
+        if (owner.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(statusUnknownSource(name));
+        }
+        if (runService.clearState(owner.get(), name) == RunStart.ALREADY_RUNNING) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(statusAlreadyRunning());
+        }
+        Map<String, String> status = new HashMap<>();
+        status.put(STATUS_KEY, "cleared");
+        return ResponseEntity.ok(status);
     }
 
     @PostMapping("reindex/{name}")

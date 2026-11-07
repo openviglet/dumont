@@ -24,15 +24,28 @@ import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.commons.plugin.DumConnectorPlugin;
 import com.viglet.dumont.connector.plugin.webcrawler.persistence.repository.DumWCSourceRepository;
+import com.viglet.dumont.connector.plugin.webcrawler.state.DumWCCrawlStateService;
 
 @Component("wc")
 public class DumWCPlugin implements DumConnectorPlugin {
     private final DumWCSourceRepository dumWCSourceRepository;
     private final DumWCPluginProcess dumWCPluginProcess;
+    private final DumWCCrawlStateService crawlStateService;
 
-    public DumWCPlugin(DumWCSourceRepository dumWCSourceRepository, DumWCPluginProcess dumWCPluginProcess) {
+    public DumWCPlugin(DumWCSourceRepository dumWCSourceRepository, DumWCPluginProcess dumWCPluginProcess,
+            DumWCCrawlStateService crawlStateService) {
         this.dumWCSourceRepository = dumWCSourceRepository;
         this.dumWCPluginProcess = dumWCPluginProcess;
+        this.crawlStateService = crawlStateService;
+    }
+
+    /**
+     * D345: without its conditional-fetch validators (D12), the next crawl fetches every URL instead
+     * of taking a 304 for the unchanged ones — which is what "send everything again" needs.
+     */
+    @Override
+    public void resetState(String source) {
+        dumWCSourceRepository.findById(source).ifPresent(crawlStateService::deleteAll);
     }
 
     @Override
