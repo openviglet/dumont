@@ -12,6 +12,22 @@ export interface TuringSNSiteField {
   type: string;
 }
 
+/** Why Turing's sites could not be listed (D342): the connector answers 502 with this reason. */
+export type SitesUnavailableReason = "unreachable" | "unauthorized" | "not_found" | "error";
+
+/**
+ * The reason a failed `query()` carries. Any failure the connector did not explain (the
+ * connector itself unreachable, say) reads as `error`, never as an empty list.
+ */
+export function sitesUnavailableReason(error: unknown): SitesUnavailableReason {
+  const reason = axios.isAxiosError(error)
+    ? (error.response?.data as { reason?: string } | undefined)?.reason
+    : undefined;
+  return reason === "unreachable" || reason === "unauthorized" || reason === "not_found"
+    ? reason
+    : "error";
+}
+
 export class TurIntegrationTuringSitesService {
   private integrationId: string;
   private readonly axiosInstance: AxiosInstance;

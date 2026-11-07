@@ -6,7 +6,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  sitesUnavailableReason,
   TurIntegrationTuringSitesService,
+  type SitesUnavailableReason,
   type TuringSNSite,
 } from "@/services/integration/integration-turing-sites.service";
 import { useEffect, useMemo, useState } from "react";
@@ -28,6 +30,9 @@ export function SNSiteSelect({
   const { t } = useTranslation();
   const [sites, setSites] = useState<TuringSNSite[]>([]);
   const [loading, setLoading] = useState(true);
+  // D342: why the list is empty when Turing could not be asked, so "Turing is down" is not read
+  // as "no sites".
+  const [unavailable, setUnavailable] = useState<SitesUnavailableReason | null>(null);
 
   const service = useMemo(
     () => new TurIntegrationTuringSitesService(integrationId),
@@ -45,7 +50,10 @@ export function SNSiteSelect({
     service
       .query()
       .then(setSites)
-      .catch(() => setSites([]))
+      .catch((error: unknown) => {
+        setSites([]);
+        setUnavailable(sitesUnavailableReason(error));
+      })
       .finally(() => setLoading(false));
   }, [service]);
 
@@ -66,7 +74,12 @@ export function SNSiteSelect({
             {site.name}
           </SelectItem>
         ))}
-        {!loading && sites.length === 0 && (
+        {!loading && unavailable && (
+          <div role="alert" className="px-2 py-1.5 text-sm text-destructive">
+            {t(`forms.wizard.sitesUnavailable.${unavailable}`)}
+          </div>
+        )}
+        {!loading && !unavailable && sites.length === 0 && (
           <div className="px-2 py-1.5 text-sm text-muted-foreground">
             {t("forms.wizard.noSitesFound")}
           </div>

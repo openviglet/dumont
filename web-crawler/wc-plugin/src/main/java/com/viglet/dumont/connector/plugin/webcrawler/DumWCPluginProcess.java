@@ -184,6 +184,17 @@ public class DumWCPluginProcess {
         // than dropping out of the report.
         this.coverage = new DumWCCoverageAccumulator(declaredFieldNames(dumWCSource));
         DumConnectorSession dumConnectorSession = getSource(dumWCSource);
+        // D342: a site or locale Turing lacks ends the run here, with that reason on its record,
+        // instead of after a crawl whose every batch Turing refuses.
+        Optional<String> missing = dumConnectorContext.missingSite(dumWCSource.getTurSNSites(),
+                dumWCSource.getLocale());
+        if (missing.isPresent()) {
+            log.error("Crawl of source '{}' not started: {}", dumWCSource.getId(), missing.get());
+            dumConnectorContext.recordRunOutcome(dumConnectorSession, true,
+                    List.of("not started: " + missing.get()));
+            dumConnectorContext.finishIndexing(dumConnectorSession, true);
+            return;
+        }
         dumWCFileExtensionRepository.findByDumWCSource(dumWCSource)
                 .ifPresent(source -> source.forEach(dumWCFileExtension -> this.notAllowExtensions
                         .add(dumWCFileExtension.getExtension())));

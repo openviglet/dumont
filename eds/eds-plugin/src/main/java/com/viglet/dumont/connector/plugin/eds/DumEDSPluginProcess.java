@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -130,7 +131,18 @@ public class DumEDSPluginProcess {
         MDC.put(MDC_SOURCE, source.getTitle() == null ? source.getId() : source.getTitle());
         DumConnectorSession session = new DumConnectorSession(source.getId(),
                 DumEDSJobItemBuilder.PROVIDER_NAME, source.getLocale());
+        boolean finishSweeping = sweep;
         try {
+            // D342: a site or locale Turing lacks ends the run before discovery, with that reason
+            // on its record — and never sweeps, since nothing was sent.
+            Optional<String> missing = connectorContext.missingSite(source.getTurSNSites(),
+                    source.getLocale());
+            if (missing.isPresent()) {
+                log.error("EDS run of source '{}' not started: {}", source.getId(), missing.get());
+                connectorContext.recordRunOutcome(session, true, List.of("not started: " + missing.get()));
+                finishSweeping = false;
+                return List.of();
+            }
             List<DumEDSDiscoveredPage> discovered = discoverAndFilter(source);
             Map<String, DumEDSCrawlState> priorStates = crawlStateService.loadByPath(source);
 
@@ -151,7 +163,7 @@ public class DumEDSPluginProcess {
             pushToIndexingPipeline(source, session, phase.fetched());
             return phase.fetched();
         } finally {
-            connectorContext.finishIndexing(session, !sweep);
+            connectorContext.finishIndexing(session, !finishSweeping);
             MDC.remove(MDC_PHASE);
             MDC.remove(MDC_SOURCE);
         }

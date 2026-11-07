@@ -18,6 +18,7 @@ package com.viglet.dumont.connector.commons;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import com.viglet.dumont.connector.commons.domain.DumConnectorIndexing;
@@ -60,6 +61,20 @@ public interface DumConnectorContext {
      */
     default boolean forgetUnindexed(String source, String provider, Collection<String> sites) {
         return false;
+    }
+
+    /**
+     * Why a run cannot publish to its sites (roadmap <strong>D342</strong>): one does not exist in
+     * the search backend, or lacks the run's locale. A connector that does not provision its site
+     * asks this before its first batch and, given a reason, ends the run with it instead of sending
+     * batches the backend refuses one by one. Empty by default and whenever the backend cannot say.
+     *
+     * @param sites  the sites the run publishes to
+     * @param locale the run's locale, or {@code null} when each document carries its own
+     * @return the first reason found
+     */
+    default Optional<String> missingSite(Collection<String> sites, Locale locale) {
+        return Optional.empty();
     }
 
     /**

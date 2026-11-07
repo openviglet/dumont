@@ -109,6 +109,18 @@ class DumConnectorContextImplTest {
         return DumConnectorIndexingModel.builder().objectId(objectId).status(status).build();
     }
 
+    /** D342: the first site the backend says cannot take the run names why. */
+    @Test
+    void missingSiteAsksEverySiteAndAnswersTheFirstReason() {
+        when(indexingPlugin.missingSite("A", Locale.US)).thenReturn(Optional.empty());
+        when(indexingPlugin.missingSite("B", Locale.US))
+                .thenReturn(Optional.of("SN site 'B' not found in Viglet Turing"));
+
+        assertThat(context.missingSite(List.of("A", "B"), Locale.US))
+                .contains("SN site 'B' not found in Viglet Turing");
+        assertThat(context.missingSite(null, Locale.US)).isEmpty();
+    }
+
     /** D341: an emptied site forgets every row, so Index All sends every item again. */
     @Test
     void forgetUnindexedDropsTheRowsTheIndexLost() {

@@ -122,7 +122,6 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D342** (deps: —) **A Web Crawler or EDS run never checks its SN site or locale, and the sites list reads Turing unreachable as no sites** — A run against a missing site fails batch by batch with no reason on the run record, and the form cannot say Turing is down (Turing #65). → §LII.8
 - 📋 **D343** (deps: —) **A run keeps reading the source while every delivery to Turing fails, instead of stopping** — An AEM crawl with Turing down walks every page and enqueues batches that all fail, with no breaker or health check (Turing #80). → §LII.9
 - 📋 **D344** (deps: —) **The AEM oncePattern never takes effect, since nothing writes the once flag, and cannot mean N times** — Paths meant to be indexed once are indexed on every run, and there is no way to index them a fixed number of times (Turing #93). → §LII.10
 - 📋 **D345** (deps: —) **The indexing state can only be cleared by a full reindex, and only on AEM and DB sources** — An operator cannot reset a Web Crawler or Assets source, or clear the ledger without starting a run (Turing #117). → §LII.11

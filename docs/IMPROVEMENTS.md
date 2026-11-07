@@ -143,29 +143,6 @@ trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
 
-### LII.8 Connector feedback when Turing cannot take the run (Turing #65) (D342)
-
-**Where it came from.** GitHub issue openviglet/turing#65 (2024, from when the
-connectors lived in Turing): a connector that cannot index into a Turing SN site gives
-no feedback; only Turing's log says why.
-
-**What happens today.** The structured-source connectors (AEM, DB, Assets, Catalog) send
-a manifest before the first document (`DumStructuredSourcePlugin` →
-`DumTuringIndexingPlugin.provision()`), so a missing site is created and a refused
-manifest lands on the run record as a warning. Two gaps remain:
-
-- The Web Crawler (`DumWCPlugin`) and EDS (`DumEDSPlugin`) implement `DumConnectorPlugin` directly and never check the site or the locale; a run against a site or locale Turing lacks sends everything and fails batch by batch.
-- `DumConnectorTuringSitesApi.listSites()` turns any connection error into an empty list, so the console cannot tell "Turing unreachable" from "no sites".
-
-**What to build.** Before the first batch, the Web Crawler and EDS runs check (or
-provision, as the structured sources do) the target site and locale and stop with that
-reason on the run record when they are missing. `listSites` answers an error with the
-cause (unreachable, 401, 404) instead of `[]`, and the source form shows it.
-
-**Done when:** a Web Crawler run against a site that does not exist ends with "SN site X
-not found" on its run record before any batch is sent, and the source form shows "Turing
-unreachable" when Turing is down.
-
 ### LII.9 A run stops when Turing is unreachable (Turing #80) (D343)
 
 **Where it came from.** GitHub issue openviglet/turing#80 (2024): the AEM connector must

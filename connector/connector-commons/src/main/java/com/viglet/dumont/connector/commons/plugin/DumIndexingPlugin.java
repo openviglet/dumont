@@ -17,6 +17,7 @@
 package com.viglet.dumont.connector.commons.plugin;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
@@ -79,6 +80,22 @@ public interface DumIndexingPlugin {
      * @return the indexed documents, or empty when the backend cannot report them
      */
     default Optional<List<DumIndexInventoryEntry>> inventory(String siteName, String source) {
+        return Optional.empty();
+    }
+
+    /**
+     * Why a run cannot publish to {@code siteName} in {@code locale} (roadmap <strong>D342</strong>):
+     * the site does not exist, or it has no such locale. Asked before a run that does not provision
+     * its site sends anything, so the run stops with that reason instead of failing batch by batch.
+     * <p>
+     * Empty when the site can take the run, and also when the backend cannot say: a backend that
+     * cannot be asked is a delivery problem the run meets on its own, not a missing site.
+     *
+     * @param siteName the site the run publishes to
+     * @param locale   the locale it publishes in, or {@code null} when each document carries its own
+     * @return the reason, e.g. "SN site 'X' not found in Viglet Turing"
+     */
+    default Optional<String> missingSite(String siteName, Locale locale) {
         return Optional.empty();
     }
 }

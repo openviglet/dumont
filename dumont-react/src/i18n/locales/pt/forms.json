@@ -935,6 +935,12 @@
       "selectSite": "Selecione um site...",
       "loadingSites": "Carregando sites...",
       "noSitesFound": "Nenhum site encontrado no Turing.",
+      "sitesUnavailable": {
+        "unreachable": "O Viglet Turing não responde. Verifique se ele está no ar e se turing.url aponta para ele.",
+        "unauthorized": "O Viglet Turing recusou a chave de API do conector (turing.apiKey).",
+        "not_found": "O Viglet Turing não tem a API de Semantic Navigation em turing.url.",
+        "error": "O Viglet Turing não conseguiu listar seus sites. O log do conector diz por quê."
+      },
       "defaultLocaleDesc": "O idioma padrão para conteúdo sem um caminho de idioma específico.",
       "noSitesConfigured": "Nenhuma instância Author ou Publish configurada.",
       "stepFieldMapping": "Mapeamento de Campos",

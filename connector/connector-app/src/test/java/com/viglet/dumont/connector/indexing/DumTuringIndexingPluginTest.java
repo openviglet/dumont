@@ -201,6 +201,29 @@ class DumTuringIndexingPluginTest {
         assertTrue(plugin.provision(sample()).orElseThrow().contains("seInstanceId"));
     }
 
+    /** D342: a missing site, then a missing locale, are named; a site that has both passes. */
+    @Test
+    void aMissingSiteOrLocaleIsNamed() {
+        List<Map<String, Object>> sites = List.of(Map.of("id", "1", "name", "Sample"));
+        List<Map<String, Object>> locales = List.of(Map.of("language", "en_US"));
+
+        assertEquals(Optional.of("SN site 'Other' not found in Viglet Turing"),
+                DumTuringIndexingPlugin.missingSite("Other", Locale.US, sites, () -> locales));
+        assertEquals(Optional.of("SN site 'sample' has no locale pt_BR in Viglet Turing"),
+                DumTuringIndexingPlugin.missingSite("sample", Locale.of("pt", "BR"), sites, () -> locales));
+        assertEquals(Optional.empty(),
+                DumTuringIndexingPlugin.missingSite("Sample", Locale.US, sites, () -> locales));
+        assertEquals(Optional.empty(),
+                DumTuringIndexingPlugin.missingSite("Sample", null, sites, List::of));
+    }
+
+    /** D342: a Turing that cannot be asked does not read as a missing site. */
+    @Test
+    void anUnreachableTuringIsNotAMissingSite() {
+        assertEquals(Optional.empty(), new DumTuringIndexingPlugin("http://localhost:1", "key")
+                .missingSite("Sample", Locale.US));
+    }
+
     @Test
     void theFirstEnabledInstanceIsChosenElseTheFirst() {
         assertEquals(Optional.of("b"), DumTuringIndexingPlugin.chooseSeInstance(List.of(

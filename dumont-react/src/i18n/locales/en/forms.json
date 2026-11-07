@@ -935,6 +935,12 @@
       "selectSite": "Select a site...",
       "loadingSites": "Loading sites...",
       "noSitesFound": "No sites found in Turing.",
+      "sitesUnavailable": {
+        "unreachable": "Viglet Turing is unreachable. Check that it is running and that turing.url points at it.",
+        "unauthorized": "Viglet Turing refused the connector's API key (turing.apiKey).",
+        "not_found": "Viglet Turing has no Semantic Navigation API at turing.url.",
+        "error": "Viglet Turing could not list its sites. The connector log says why."
+      },
       "defaultLocaleDesc": "The default language for content without a specific locale path.",
       "noSitesConfigured": "No Author or Publish instance configured.",
       "stepFieldMapping": "Field Mapping",

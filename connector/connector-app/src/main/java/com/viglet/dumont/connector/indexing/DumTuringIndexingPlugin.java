@@ -22,6 +22,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -206,12 +207,58 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
      * The search-engine instance a new site is created on: the first enabled one Turing lists
      * ({@code GET /api/se}), or the first at all when none says it is enabled.
      */
+    private RestClient turing() {
+        return RestClient.builder().baseUrl(turingUrl).defaultHeader("Key", turingApiKey).build();
+    }
+
+    /**
+     * D342: the site is looked up by name among Turing's SN sites, then its locales. Turing
+     * answers a missing site's locale list with an empty list, so the site is checked first. A
+     * Turing that cannot be asked answers nothing here: that is a delivery failure, not a missing
+     * site.
+     */
+    @Override
+    public Optional<String> missingSite(String siteName, Locale locale) {
+        try {
+            RestClient turing = turing();
+            List<Map<String, Object>> sites = turing.get().uri("/api/sn").retrieve()
+                    .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {
+                    });
+            return missingSite(siteName, locale, sites, () -> turing.get()
+                    .uri("/api/sn/name/{siteName}/locale", siteName).retrieve()
+                    .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {
+                    }));
+        } catch (RestClientException e) {
+            log.warn("Could not check SN site '{}' at {}: {}", siteName, turingUrl, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    static Optional<String> missingSite(String siteName, Locale locale, List<Map<String, Object>> sites,
+            Supplier<List<Map<String, Object>>> locales) {
+        boolean exists = sites != null && sites.stream()
+                .anyMatch(site -> siteName.equalsIgnoreCase(String.valueOf(site.get("name"))));
+        if (!exists) {
+            return Optional.of("SN site '%s' not found in Viglet Turing".formatted(siteName));
+        }
+        if (locale == null) {
+            return Optional.empty();
+        }
+        List<Map<String, Object>> held = locales.get();
+        boolean hasLocale = held != null && held.stream()
+                .anyMatch(entry -> sameLocale(locale, entry.get("language")));
+        return hasLocale ? Optional.empty()
+                : Optional.of("SN site '%s' has no locale %s in Viglet Turing".formatted(siteName, locale));
+    }
+
+    private static boolean sameLocale(Locale locale, Object language) {
+        return language != null
+                && locale.toString().equalsIgnoreCase(String.valueOf(language).replace('-', '_'));
+    }
+
     private Optional<String> firstSeInstance() {
         try {
-            List<Map<String, Object>> instances = RestClient.builder()
-                    .baseUrl(turingUrl)
-                    .defaultHeader("Key", turingApiKey)
-                    .build()
+            List<Map<String, Object>> instances = turing()
                     .get().uri("/api/se")
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {

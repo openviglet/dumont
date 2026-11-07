@@ -45,6 +45,10 @@ graph TD
 8. Add new, unvisited URLs to the crawl queue
 9. Repeat until no more URLs remain
 
+Before the first fetch, the crawl checks that every Semantic Navigation site it publishes to exists in Viglet Turing and has the source's locale. If one does not, the crawl does not start, and its run record says why, for example `not started: SN site 'Docs' not found in Viglet Turing`. Create the site or the locale, or fix the source, then run again. EDS sources run the same check. If Viglet Turing cannot be reached for the check, the crawl starts anyway.
+
+When Viglet Turing is down, the source form's site list shows why ("Viglet Turing is unreachable", or that it refused the connector's API key) instead of an empty list.
+
 ---
 
 ## Key Features

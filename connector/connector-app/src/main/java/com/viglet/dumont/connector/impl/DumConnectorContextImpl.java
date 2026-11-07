@@ -144,6 +144,17 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     }
 
     @Override
+    public Optional<String> missingSite(Collection<String> sites, Locale locale) {
+        if (sites == null) {
+            return Optional.empty();
+        }
+        return sites.stream()
+                .map(site -> indexingPlugin.missingSite(site, locale))
+                .flatMap(Optional::stream)
+                .findFirst();
+    }
+
+    @Override
     public List<String> getObjectIdByDependency(String source, String provider,
             List<String> dependenciesObjectIdList) {
         if (dependenciesObjectIdList == null || dependenciesObjectIdList.isEmpty()) {
