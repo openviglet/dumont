@@ -115,27 +115,6 @@ trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
 
-### LII.12 A JSON API source that refills what the site lost (D348)
-
-**Found by D341.** Before a full run, the structured plugin now forgets the ledger rows
-of ids the index lost and calls `listEverything()` on the source, so the run sends them
-again. The OAI-PMH source honours it by harvesting without its watermark. The JSON API
-source does not: with an `incremental` block (expiry), a run reads what its call budget
-allows and reports the rest through `unchangedIds()`, which only keeps those ids alive.
-After the site is emptied, those ids are neither re-fetched nor sent, and they stay
-missing until the source happens to read them again.
-
-**What to build.** `DumJsonApiSource.listEverything()` stops reporting `unchangedIds()`
-for this run, and walks its pages from the start, spending the budget as usual. Ids the
-budget does not reach stay missing and are named in a run note ("N items the site lost
-wait for a later run"), so the next runs keep going until the site holds every id. The
-seen-state that drives `unchangedIds()` must not record an id as current while the site
-lacks it.
-
-**Done when:** a JSON API source with expiry, pointed at an emptied site, refills it
-over one or more runs, and each run that stops short names how many lost items are still
-waiting.
-
 ### LII.13 One name for an EDS source at the connector level (D349)
 
 **Found by D345.** `DumEDSPlugin.ownsSource` and `indexAll` look the source up by its

@@ -119,7 +119,6 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D348** (deps: —) **A JSON API source with expiry never refills a site that lost its documents** — It ignores listEverything and keeps lost ids alive as unchanged, so an emptied site stays short until the source reads them again. → §LII.12
 - 📋 **D349** (deps: —) **The connector API names an EDS source by title while its runs file ledger rows under its id** — Reindex all and Clear indexing state on an EDS source delete rows that do not exist and leave the real ones. → §LII.13
 
 ## Non-goals (do NOT add as tasks)

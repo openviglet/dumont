@@ -814,3 +814,4 @@
 - **D343** — After 3 failed deliveries in a row and no answer from Turing, a run's next document is refused, so any connector stops reading; its finish records why and never sweeps.
 - **D344** — AEM oncePattern works and counts: completed full runs are tallied, matching paths index for the first onceTimes runs and skip after, and the form shows and resets the count.
 - **D345** — Every source page (AEM, DB, Web Crawler, Assets, EDS, Catalog) offers Clear indexing state in its menu, confirmed, calling the ledger endpoint without starting a run.
+- 🗑 **D348** — abandoned: The premise was false: DumJsonApiSource reports no unchangedIds and walks from page one every run, so once D341 forgets lost ledger rows a run resends all its budget reaches.
