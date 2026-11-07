@@ -75,7 +75,7 @@ docker compose down -v && docker compose up -d && ./seed.sh
 It goes through the real connector: the Dumont connector app with the catalog plugin on its
 `loader.path`, a catalog source created over `/api/v2/catalog/source`, and its `indexAll`.
 
-1. Viglet Turing on http://localhost:2700. The one in `wordpress/docker-compose.yml` will do
+1. Viglet Turing on http://localhost:2700. The one in the Viglet Turing repository's `wordpress/docker-compose.yml` will do
    (admin password `dumont-dev`). Mint an API key:
 
    ```bash

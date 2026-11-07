@@ -793,6 +793,7 @@
 - 🗑 **D282** — superseded by D346: The Dumont tile carries the video under D346; the site page, docs, README and release go to Turing T1251 and T1257.
 - **D346** — Dumont's /wordpress/ and /playground/ redirect to turing.viglet.org, the tile carries the click-to-load video and links Turing, and the docs and README present WordPress as a Turing integration.
   checked **The video is not on the site, the docs, the README or the release** The Dumont tile carries the video under D346; the site page, docs, README and release go to Turing T1251 and T1257.
+- **D347** — The plugin lives only in Viglet Turing: wordpress/, its release workflow and the Pages Playground step are gone, and no build, workflow or script path names wordpress/.
 
 ## Track T — Releases and links match what the site describes
 

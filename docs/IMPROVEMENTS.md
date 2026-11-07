@@ -101,18 +101,6 @@ route returns nothing a caller could use to act as Dumont.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.178 Remove the plugin from this repository (D347)
-
-Once Turing's T1252 (the move, with history, through git filter-repo) and T1255 (the
-ported workflow) have landed, this repository stops carrying a second copy that would
-drift. `wordpress/` is removed whole, with `.github/workflows/wordpress-plugin.yml`, the
-Playground step of `publish-github-pages.yml` (around lines 117-126) and any root script
-or ignore entry that only served it. The OAI-PMH comments that mention sharing field
-names with WordPress (`DumOaiPmhSource.java:115` and its test) stay, since they describe
-a field contract, not the plugin. The four open Track S lines (D227, D282, D312, D313)
-were retired as superseded by the Turing tasks, and Track S's history stays in this
-CHANGELOG. Done when grep for `wordpress/` finds no build, workflow or script path.
-
 ## L The documentation area
 
 The end-user documentation moves from vigletdocs into this repository, as an Astro +

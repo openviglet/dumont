@@ -115,8 +115,6 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D347** (deps: D346 ✅) **The wordpress/ directory, its workflow and its Playground build step remain after the plugin moved to Turing** — Two copies of one plugin drift, and a fix landed here would never reach a release. → §XLIX.178
-
 ## Track T — Releases and links match what the site describes
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
