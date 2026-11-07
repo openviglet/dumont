@@ -162,6 +162,7 @@ The values are restored from the stored run history at startup, so a restart doe
 |---|---|---|
 | `dumont.indexing.provider` | `turing` | Output target: `turing`, `solr`, or `elasticsearch` |
 | `dumont.indexing.job.batch-size` | `50` | Number of Job Items per batch before queue delivery |
+| `dumont.delivery.breaker.failures` | `3` | Deliveries to the backend that may fail in a row before Viglet Dumont checks whether the backend answers (5-second timeout). If it does not, the run stops reading its source, records `stopped: Viglet Turing unreachable at <url>` and removes nothing from the index. The documents it could not send go out on the next run. A backend that answers but refuses batches does not stop the run |
 | `dumont.indexing.provision` | `true` | Send each source's declared field schema to the backend before its first document, so fields are created as declared rather than inferred from whichever value arrives first. A rejected schema is logged and indexing continues with the site's current schema. Turing only: other backends have no declarative schema endpoint |
 
 ### Extraction Resilience

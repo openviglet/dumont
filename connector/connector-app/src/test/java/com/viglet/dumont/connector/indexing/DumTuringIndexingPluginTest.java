@@ -217,6 +217,13 @@ class DumTuringIndexingPluginTest {
                 DumTuringIndexingPlugin.missingSite("Sample", null, sites, List::of));
     }
 
+    /** D343: a Turing that does not answer is named as down. */
+    @Test
+    void anUnreachableTuringIsReportedDown() {
+        assertEquals(Optional.of("Viglet Turing unreachable at http://localhost:1"),
+                new DumTuringIndexingPlugin("http://localhost:1", "key").unreachable());
+    }
+
     /** D342: a Turing that cannot be asked does not read as a missing site. */
     @Test
     void anUnreachableTuringIsNotAMissingSite() {

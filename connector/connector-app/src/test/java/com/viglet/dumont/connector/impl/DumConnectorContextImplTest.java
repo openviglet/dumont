@@ -16,6 +16,7 @@
 package com.viglet.dumont.connector.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -38,6 +39,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.viglet.dumont.connector.batch.DumQueueDiskFullException;
+import com.viglet.dumont.connector.commons.plugin.DumRunStoppedException;
+import com.viglet.dumont.connector.queue.DumDeliveryBreaker;
 import com.viglet.dumont.connector.batch.JobItemBatchProcessor;
 import com.viglet.dumont.connector.chain.JobProcessingChain;
 import com.viglet.dumont.connector.commons.DumConnectorSession;
@@ -107,6 +110,33 @@ class DumConnectorContextImplTest {
 
     private static DumConnectorIndexingModel row(String objectId, DumIndexingStatus status) {
         return DumConnectorIndexingModel.builder().objectId(objectId).status(status).build();
+    }
+
+    /**
+     * D343: once the backend is down, the run's next document is refused with the reason, and its
+     * finish neither sweeps nor reads clean — even when the connector asked for a sweeping finish.
+     */
+    @Test
+    void aStoppedRunRefusesItsNextDocumentAndFinishesWithoutTheSweep() {
+        when(indexingPlugin.unreachable()).thenReturn(Optional.of("Viglet Turing unreachable at http://t"));
+        DumDeliveryBreaker breaker = new DumDeliveryBreaker(indexingPlugin, 1);
+        DumConnectorContextImpl stopping = new DumConnectorContextImpl(indexingService, batchProcessor,
+                processingChain, indexingPlugin, true, breaker);
+        DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
+        breaker.failed("wknd");
+
+        assertThatThrownBy(() -> stopping.addJobItem(new DumJobItemWithSession(
+                new TurSNJobItem(TurSNJobAction.CREATE, List.of("Sample"), Locale.US, Map.of("id", "a")),
+                session, Set.of(), false)))
+                .isInstanceOf(DumRunStoppedException.class)
+                .hasMessage("Viglet Turing unreachable at http://t");
+
+        stopping.finishIndexing(session, false);
+
+        verify(indexingService).recordRunOutcome("wknd", "turing", true,
+                List.of("stopped: Viglet Turing unreachable at http://t"), List.of());
+        verify(indexingService, never()).getShouldBeDeIndexedList(any());
+        assertThat(breaker.stopped("wknd")).isEmpty();
     }
 
     /** D342: the first site the backend says cannot take the run names why. */

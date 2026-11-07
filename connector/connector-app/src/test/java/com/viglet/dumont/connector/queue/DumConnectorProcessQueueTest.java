@@ -67,7 +67,7 @@ class DumConnectorProcessQueueTest {
                 return "TURING";
             }
         };
-        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(refusing, indexingService);
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(refusing, indexingService, new DumDeliveryBreaker(refusing, 3));
         DumConnectorSession session = new DumConnectorSession("jobs", "turing", Locale.US);
         TurSNJobItems items = new TurSNJobItems();
         for (String id : List.of("job-1", "job-2")) {
@@ -116,7 +116,7 @@ class DumConnectorProcessQueueTest {
     @Test
     void groundsEmptyAttributesBeforeIndexingRegardlessOfConnector() {
         CapturingPlugin plugin = new CapturingPlugin();
-        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService);
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService, new DumDeliveryBreaker(plugin, 3));
 
         // A loose-map job item, as a non-structured connector (web crawler / AEM) would build it.
         Map<String, Object> attributes = new HashMap<>();
@@ -146,7 +146,7 @@ class DumConnectorProcessQueueTest {
     @DisplayName("a document's log names the same source at every status it passes through (D71)")
     void theTrailSurvivesTheQueueAndComesOffBeforeIndexing() {
         CapturingPlugin plugin = new CapturingPlugin();
-        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService);
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService, new DumDeliveryBreaker(plugin, 3));
         DumConnectorSession session = new DumConnectorSession("wknd", "turing", Locale.US);
 
         Map<String, Object> attributes = new HashMap<>();
@@ -193,7 +193,7 @@ class DumConnectorProcessQueueTest {
     @Test
     void emptyJobIsIgnored() {
         CapturingPlugin plugin = new CapturingPlugin();
-        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService);
+        DumConnectorProcessQueue queue = new DumConnectorProcessQueue(plugin, indexingService, new DumDeliveryBreaker(plugin, 3));
 
         queue.receiveAndSendToDumont(new TurSNJobItems());
 

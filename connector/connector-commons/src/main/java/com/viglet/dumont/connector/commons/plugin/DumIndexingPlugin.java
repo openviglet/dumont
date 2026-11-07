@@ -98,4 +98,15 @@ public interface DumIndexingPlugin {
     default Optional<String> missingSite(String siteName, Locale locale) {
         return Optional.empty();
     }
+
+    /**
+     * Why the backend cannot be reached right now (roadmap <strong>D343</strong>), asked once
+     * deliveries have failed several times in a row, so a run stops reading its source only when
+     * the backend is down and not when it refused one batch's content.
+     *
+     * @return the reason, e.g. "Viglet Turing unreachable at http://...", or empty when it answers
+     */
+    default Optional<String> unreachable() {
+        return Optional.empty();
+    }
 }

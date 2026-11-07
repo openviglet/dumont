@@ -36,10 +36,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.viglet.dumont.connector.batch.DumQueueDiskFullException;
+import com.viglet.dumont.connector.commons.plugin.DumRunStoppedException;
+import com.viglet.dumont.connector.queue.DumDeliveryBreaker;
 import com.viglet.dumont.connector.batch.JobItemBatchProcessor;
 import com.viglet.dumont.connector.chain.JobProcessingChain;
 import com.viglet.dumont.connector.commons.DumConnectorContext;
@@ -76,20 +79,32 @@ public class DumConnectorContextImpl implements DumConnectorContext {
     private final JobProcessingChain processingChain;
     private final DumIndexingPlugin indexingPlugin;
     private final boolean provisionEnabled;
+    private final DumDeliveryBreaker breaker;
     private final Map<String, ConcurrentLinkedQueue<DumJobItemWithSession>> queuesBySource = new ConcurrentHashMap<>();
     private final Map<String, ReadWriteLock> locksBySource = new ConcurrentHashMap<>();
 
+    @Autowired
     public DumConnectorContextImpl(
             DumConnectorIndexingService indexingService,
             JobItemBatchProcessor batchProcessor,
             JobProcessingChain processingChain,
             DumIndexingPlugin indexingPlugin,
-            @Value("${dumont.indexing.provision:true}") boolean provisionEnabled) {
+            @Value("${dumont.indexing.provision:true}") boolean provisionEnabled,
+            DumDeliveryBreaker breaker) {
         this.indexingService = indexingService;
         this.batchProcessor = batchProcessor;
         this.processingChain = processingChain;
         this.indexingPlugin = indexingPlugin;
         this.provisionEnabled = provisionEnabled;
+        this.breaker = breaker;
+    }
+
+    /** A context whose breaker never opens: for tests that do not exercise it. */
+    DumConnectorContextImpl(DumConnectorIndexingService indexingService,
+            JobItemBatchProcessor batchProcessor, JobProcessingChain processingChain,
+            DumIndexingPlugin indexingPlugin, boolean provisionEnabled) {
+        this(indexingService, batchProcessor, processingChain, indexingPlugin, provisionEnabled,
+                new DumDeliveryBreaker(indexingPlugin, Integer.MAX_VALUE));
     }
 
     /**
@@ -176,6 +191,12 @@ public class DumConnectorContextImpl implements DumConnectorContext {
         if (dumJobItemWithSession.turSNJobItem() != null &&
                 dumJobItemWithSession.turSNJobItem().getId() != null) {
             String source = dumJobItemWithSession.session().getSource();
+            // D343: a run whose deliveries stopped landing because the backend is down stops
+            // reading its source here, with the reason its record will carry.
+            Optional<String> stopped = breaker.stopped(source);
+            if (stopped.isPresent()) {
+                throw new DumRunStoppedException(stopped.get());
+            }
             log.info("Adding {} object to payload for source '{}'.",
                     dumJobItemWithSession.turSNJobItem().getId(), source);
             getQueue(source).offer(dumJobItemWithSession);
@@ -207,6 +228,17 @@ public class DumConnectorContextImpl implements DumConnectorContext {
             }
             sweep = false;
         }
+        // D343: a run the breaker stopped did not read the whole source, so it must not sweep,
+        // whichever finish its connector asked for. A run already finishing standalone recorded
+        // its own outcome, which names the stop.
+        Optional<String> stopped = breaker.stopped(source);
+        if (stopped.isPresent()) {
+            if (sweep) {
+                recordRunOutcome(session, true, List.of("stopped: " + stopped.get()));
+            }
+            sweep = false;
+        }
+        breaker.reset(source);
 
         ReadWriteLock lock = getLock(source);
         lock.writeLock().lock();

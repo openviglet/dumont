@@ -19,6 +19,7 @@
 package com.viglet.dumont.connector.indexing;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,8 +35,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.viglet.dumont.connector.commons.domain.DumIndexInventoryEntry;
 import com.viglet.dumont.connector.commons.domain.DumIndexingSchema;
@@ -65,6 +68,8 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "dumont.indexing.provider", havingValue = "turing", matchIfMissing = true)
 public class DumTuringIndexingPlugin implements DumIndexingPlugin {
     
+    private static final Duration HEALTH_TIMEOUT = Duration.ofSeconds(5);
+
     private final String turingUrl;
     private final String turingApiKey;
     private final Function<TurSNManifest, TurSNManifestResult> provisioner;
@@ -207,6 +212,30 @@ public class DumTuringIndexingPlugin implements DumIndexingPlugin {
      * The search-engine instance a new site is created on: the first enabled one Turing lists
      * ({@code GET /api/se}), or the first at all when none says it is enabled.
      */
+    /**
+     * D343: asked only after deliveries failed in a row. Turing's public discovery endpoint, with
+     * short timeouts: no answer, or a server error, is down; any other answer means Turing is up and
+     * refused the batches for what they held.
+     */
+    @Override
+    public Optional<String> unreachable() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(HEALTH_TIMEOUT);
+        factory.setReadTimeout(HEALTH_TIMEOUT);
+        try {
+            RestClient.builder().baseUrl(turingUrl).requestFactory(factory).build()
+                    .get().uri("/api/discovery").retrieve().toBodilessEntity();
+            return Optional.empty();
+        } catch (RestClientResponseException e) {
+            return e.getStatusCode().is5xxServerError()
+                    ? Optional.of("Viglet Turing at %s answers %d".formatted(turingUrl,
+                            e.getStatusCode().value()))
+                    : Optional.empty();
+        } catch (RestClientException e) {
+            return Optional.of("Viglet Turing unreachable at %s".formatted(turingUrl));
+        }
+    }
+
     private RestClient turing() {
         return RestClient.builder().baseUrl(turingUrl).defaultHeader("Key", turingApiKey).build();
     }

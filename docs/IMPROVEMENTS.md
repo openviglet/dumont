@@ -143,30 +143,6 @@ trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
 
-### LII.9 A run stops when Turing is unreachable (Turing #80) (D343)
-
-**Where it came from.** GitHub issue openviglet/turing#80 (2024): the AEM connector must
-stop indexing when Turing is unavailable.
-
-**What happens today.** Nothing is lost: `DumTuringIndexingPlugin.index()` throws
-`DumIndexingDeliveryException` on a failed delivery, `DumConnectorProcessQueue` records
-it (`recordDeliveryFailure` clears those documents' checksums so the next run resends
-them) and marks the run partial. But the crawl is never told. Delivery is asynchronous
-through the JMS queue, with no failure counter, circuit breaker or health check, so the
-AEM traversal keeps reading every page and enqueuing batches that all fail; a failed
-`provision()` also logs and goes on.
-
-**What to build.** A run-level breaker shared by every connector: after N consecutive
-failed deliveries (or a failed provision), the run checks Turing's health and, while it
-stays unreachable, stops reading the source and ends `failed` with "Turing unreachable
-at <url>" on its run record and the console. The documents not sent keep their cleared
-checksums, so the next run resends them. N and the wait are configurable, with defaults
-named in the docs.
-
-**Done when:** an AEM run started with Turing down stops reading the source after the
-first failed batches, ends failed with that reason, and a run after Turing returns sends
-every document the failed run did not.
-
 ### LII.10 AEM once pattern that works, and counts (Turing #93) (D344)
 
 **Where it came from.** GitHub issue openviglet/turing#93 (2024): improve the AEM "once"

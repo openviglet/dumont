@@ -48,11 +48,13 @@ import lombok.extern.slf4j.Slf4j;
 public class DumConnectorProcessQueue {
     private final DumIndexingPlugin indexingPlugin;
     private final DumConnectorIndexingService indexingService;
+    private final DumDeliveryBreaker breaker;
 
     public DumConnectorProcessQueue(DumIndexingPlugin indexingPlugin,
-            DumConnectorIndexingService indexingService) {
+            DumConnectorIndexingService indexingService, DumDeliveryBreaker breaker) {
         this.indexingPlugin = indexingPlugin;
         this.indexingService = indexingService;
+        this.breaker = breaker;
         log.info("DumConnectorProcessQueue initialized with indexing provider: {}",
                 indexingPlugin.getProviderName());
     }
@@ -106,12 +108,15 @@ public class DumConnectorProcessQueue {
         }
         try {
             indexingPlugin.index(turSNJobItems);
+            createdBySource.keySet().forEach(breaker::delivered);
         } catch (DumIndexingDeliveryException e) {
             // Not rethrown: the rollback would undo the very marks that make the next run resend.
             createdBySource.forEach((source, ids) -> {
                 int marked = indexingService.recordDeliveryFailure(source, ids, e.getMessage());
                 log.error("Batch for source '{}' was not delivered to {} ({}): {} document(s) marked "
                         + "for resending", source, indexingPlugin.getProviderName(), e.getMessage(), marked);
+                // D343: and the run that is still reading this source hears about it.
+                breaker.failed(source);
             });
         }
     }
