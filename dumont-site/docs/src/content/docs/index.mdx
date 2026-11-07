@@ -1,6 +1,6 @@
 ---
 title: Viglet Dumont
-description: "Index Adobe AEM, websites, WordPress, databases and file systems into enterprise search. Install, configure and run the open-source Viglet Dumont connectors."
+description: "Index Adobe AEM, websites, databases and file systems into enterprise search. Install, configure and run the open-source Viglet Dumont connectors."
 tableOfContents: false
 ---
 
@@ -14,7 +14,7 @@ export const VERSION = "2026.3";
 
 <Pill>v{VERSION}</Pill> <Pill>Open Source</Pill> <Pill>Apache 2.0</Pill>
 
-**Viglet Dumont** is an open-source data extraction platform. It connects your content (websites, databases, file systems, AEM, WordPress, and paged JSON APIs) to **Viglet Turing** and other search engines through a reliable, asynchronous processing pipeline.
+**Viglet Dumont** is an open-source data extraction platform. It connects your content (websites, databases, file systems, AEM, and paged JSON APIs) to **Viglet Turing** and other search engines through a reliable, asynchronous processing pipeline. WordPress is covered by Viglet Turing itself: its [WordPress plugin](https://turing.viglet.org/docs/integrations/wordpress/) sends content straight to Viglet Turing, without Dumont.
 
 <SectionLabel>Key Capabilities</SectionLabel>
 
@@ -30,9 +30,6 @@ export const VERSION = "2026.3";
   </FeatureCard>
   <FeatureCard icon="📦" title="AEM Connector">
     Index on-premise, AMS and Cloud Service instances (author or publish tier) with delta tracking, locale mapping and a schema per content type.
-  </FeatureCard>
-  <FeatureCard icon="📝" title="WordPress Connector">
-    Index posts, pages and custom post types into Turing, with taxonomies and custom fields as facets, WP-CLI, and a search block for block themes.
   </FeatureCard>
   <FeatureCard icon="🔗" title="JSON API Sources">
     Index a job board, product catalog or partner feed from a JSON manifest: paging, daily and monthly call budgets, field mapping and expiry for sources a budget never lets you read in full, with no Java code.
@@ -70,7 +67,7 @@ export const VERSION = "2026.3";
   <NavCard icon="🗄️" title="Database Connector" description="JDBC queries against Oracle, PostgreSQL, MariaDB, MySQL: CLI and integrated modes" href="connectors/database/" />
   <NavCard icon="📁" title="FileSystem Connector" description="Directory traversal with Apache Tika text extraction, OCR and metadata mapping" href="connectors/filesystem/" />
   <NavCard icon="📦" title="AEM Connector" description="Author, publish and Cloud Service delivery, delta tracking, locale mapping and custom extensions" href="connectors/aem/" />
-  <NavCard icon="📝" title="WordPress Connector" description="Posts, pages and custom content types from WordPress installations" href="connectors/wordpress/" />
+  <NavCard icon="📝" title="WordPress (Viglet Turing)" description="The WordPress plugin is part of Viglet Turing and sends content to it directly, without Dumont" href="https://turing.viglet.org/docs/integrations/wordpress/" />
   <NavCard icon="🔗" title="Catalog & JSON API" description="Normalized catalog feeds and paged JSON APIs declared as manifests, with call budgets and expiry" href="connectors/catalog/" />
 </CardGrid>
 

@@ -23,9 +23,11 @@ Dumont ships with five connectors:
 | **Database** | JDBC databases | Executes SQL queries and maps each result row to a document |
 | **FileSystem** | Local/network directories | Walks directory trees, extracts text from files via Apache Tika |
 | **AEM** | Adobe Experience Manager | Reads content from AEM author/publish instances via the JCR API |
-| **WordPress** | WordPress sites | Pulls posts, pages, and custom content types from WordPress installations |
+| **Catalog & JSON API** | Catalog feeds and JSON APIs | Reads normalized catalog feeds and paged JSON APIs declared as manifests, with call budgets and expiry |
 
 Each connector implements the `DumConnectorPlugin` interface and provides three operations: **crawl** (full extraction), **indexAll** (re-index a source), and **indexById** (index specific documents by ID).
+
+WordPress is not among them: the WordPress plugin is part of Viglet Turing and sends content to it directly, without Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
 
 ---
 

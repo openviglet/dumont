@@ -117,8 +117,8 @@ try {
             { slug: "connectors/aem" },
             { slug: "aem-event-listener" },
             { slug: "connectors/catalog" },
+            // The plugin is part of Viglet Turing: one entry, a stub pointing at its docs there.
             { slug: "connectors/wordpress" },
-            { slug: "connectors/wordpress-turing" },
           ],
         },
         { slug: "developer-guide" },

@@ -8,7 +8,7 @@
 [![Spring Boot 4.x](https://img.shields.io/badge/Spring%20Boot-4.x-green)](https://spring.io/projects/spring-boot)
 
 **Viglet Dumont** is an open source **Data Exchange Platform**: it connects your content
-sources (Adobe Experience Manager, WordPress, databases, file systems and web sites) and
+sources (Adobe Experience Manager, databases, file systems and web sites) and
 delivers their content to [Viglet Turing](https://github.com/openviglet/turing), Apache
 Solr or Elasticsearch. It runs on your own servers, is built with Java 21 and Spring Boot,
 and is extended through plugins.
@@ -21,8 +21,10 @@ and is extended through plugins.
 
 Teams that need the content of a CMS, a database or a set of sites in a search index, and
 kept there: new pages indexed, changed pages updated, removed pages taken out. If you are
-adding search to an **Adobe AEM** site (on-premise, AMS or AEM as a Cloud Service) or to
-**WordPress**, Dumont is the part that reads the content and keeps the index in step with it.
+adding search to an **Adobe AEM** site (on-premise, AMS or AEM as a Cloud Service), Dumont is
+the part that reads the content and keeps the index in step with it. For **WordPress** and
+WooCommerce, use the plugin that is part of Viglet Turing: it sends content straight to Viglet
+Turing, without Dumont ([turing.viglet.org/wordpress](https://turing.viglet.org/wordpress/)).
 
 Dumont is the way in; [Viglet Turing](https://github.com/openviglet/turing) is the search
 and AI chat on top. You can also use Dumont alone, with your own Solr or Elasticsearch.
@@ -34,7 +36,6 @@ and AI chat on top. You can also use Dumont alone, with your own Solr or Elastic
   - Relational Databases (JDBC)
   - File Systems
   - Web Crawlers
-  - WordPress
   
 - **Flexible Search Engine Support**: Index content to your preferred search platform
   - Viglet Turing (default)
@@ -96,8 +97,11 @@ and AI chat on top. You can also use Dumont alone, with your own Solr or Elastic
 | `db` | Database (JDBC) connector |
 | `filesystem` | File system connector |
 | `web-crawler` | Web crawler connector |
-| `wordpress` | WordPress plugin: queued indexing into Turing, typed facets, WP-CLI, admin screens and a search block ([`wordpress/README.md`](wordpress/README.md)) |
 | `dumont-react` | Web console (React + Vite), built into the connector's static resources |
+
+The WordPress plugin is part of Viglet Turing, not Dumont: see
+[Viglet Turing for WordPress](https://turing.viglet.org/wordpress/) and
+[its docs](https://turing.viglet.org/docs/integrations/wordpress/).
 
 ## 🛠️ Prerequisites
 
@@ -226,10 +230,10 @@ cd web-crawler/wc-sample
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Data Sources                              │
-│  ┌─────┐  ┌─────┐  ┌─────────┐  ┌───────────┐  ┌───────────┐   │
-│  │ AEM │  │ DB  │  │ Files   │  │ Web Pages │  │ WordPress │   │
-│  └──┬──┘  └──┬──┘  └────┬────┘  └─────┬─────┘  └─────┬─────┘   │
+│                        Data Sources                             │
+│  ┌─────┐  ┌─────┐  ┌─────────┐  ┌───────────┐  ┌────────────┐   │
+│  │ AEM │  │ DB  │  │ Files   │  │ Web Pages │  │ JSON APIs  │   │
+│  └──┬──┘  └──┬──┘  └────┬────┘  └─────┬─────┘  └─────┬──────┘   │
 └─────┼────────┼──────────┼─────────────┼──────────────┼──────────┘
       │        │          │             │              │
       └────────┴──────────┴──────┬──────┴──────────────┘

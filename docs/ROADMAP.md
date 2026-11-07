@@ -115,8 +115,7 @@ This track has no remaining pending tasks.
 
 ## Track S — The WordPress connector plugin
 
-- 📋 **D346** (deps: —) **Dumont's site and docs still present the WordPress plugin, its demo and its docs as Dumont's** — The plugin moved to Turing, so Dumont keeps one tile with the video and redirects the rest there. → §XLIX.177
-- 📋 **D347** (deps: D346) **The wordpress/ directory, its workflow and its Playground build step remain after the plugin moved to Turing** — Two copies of one plugin drift, and a fix landed here would never reach a release. → §XLIX.178
+- 📋 **D347** (deps: D346 ✅) **The wordpress/ directory, its workflow and its Playground build step remain after the plugin moved to Turing** — Two copies of one plugin drift, and a fix landed here would never reach a release. → §XLIX.178
 
 ## Track T — Releases and links match what the site describes
 
@@ -124,12 +123,6 @@ This track has no remaining pending tasks.
 
 - 📋 **D348** (deps: —) **A JSON API source with expiry never refills a site that lost its documents** — It ignores listEverything and keeps lost ids alive as unchanged, so an emptied site stays short until the source reads them again. → §LII.12
 - 📋 **D349** (deps: —) **The connector API names an EDS source by title while its runs file ledger rows under its id** — Reindex all and Clear indexing state on an EDS source delete rows that do not exist and leave the real ones. → §LII.13
-
-## Done when — D346
-
-- **The video is not on the site, the docs, the README or the release** The Dumont tile
-  carries the video under D346; the site page, docs, README and release go to Turing
-  T1251 and T1257.
 
 ## Non-goals (do NOT add as tasks)
 

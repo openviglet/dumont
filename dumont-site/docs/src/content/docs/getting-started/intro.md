@@ -5,7 +5,7 @@ description: Viglet Dumont is an open-source data extraction platform that conne
 
 **Viglet Dumont** is an open-source data extraction platform. It connects your content (wherever it lives) to [Viglet Turing](https://docs.viglet.org/turing) for indexing and search.
 
-Think of Dumont as the bridge between your content sources and the search engine. It crawls websites, queries databases, scans file systems, reads AEM repositories, and pulls from WordPress, then delivers every document to Turing through a reliable, asynchronous pipeline.
+Think of Dumont as the bridge between your content sources and the search engine. It crawls websites, queries databases, scans file systems and reads AEM repositories, then delivers every document to Turing through a reliable, asynchronous pipeline.
 
 ---
 
@@ -27,9 +27,9 @@ The **FileSystem Connector** walks a directory tree, extracts text from PDFs, Wo
 
 The **AEM Connector** indexes content from Adobe Experience Manager author and publish instances, supporting content fragments, delta tracking, locale mapping, and custom extension points for your specific AEM setup.
 
-### Integrate with WordPress
+### WordPress: part of Viglet Turing
 
-The **WordPress Connector** is a WordPress plugin that indexes posts, pages, and custom post types directly into Turing. It keeps the index in step with every edit, turns taxonomies and custom fields into facets, and answers the site's search from Turing, block themes included.
+WordPress is not a Dumont source. The WordPress and WooCommerce plugin is part of **Viglet Turing**: it runs inside WordPress and sends content straight to Viglet Turing, without Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
 
 ### Send to any search engine
 
@@ -45,7 +45,6 @@ graph LR
     DB["🗄️ Databases"]
     FS["📁 File Systems"]
     AEM["📦 AEM"]
-    WP["📝 WordPress"]
 
     DUM["Dumont\n(Connectors + Pipeline)"]
 
@@ -55,7 +54,6 @@ graph LR
     DB --> DUM
     FS --> DUM
     AEM --> DUM
-    WP --> DUM
 
     DUM -->|"REST API\n+ Message Queue"| TUR
 ```
@@ -70,7 +68,7 @@ These are the main building blocks you will work with in Dumont. You do not need
 
 | Concept | What it is | Learn more |
 |---|---|---|
-| **Connector** | A component that extracts content from a specific source type (web, database, files, AEM, WordPress) | [Connectors](/docs/connectors/overview/) |
+| **Connector** | A component that extracts content from a specific source type (web, database, files, AEM, JSON APIs) | [Connectors](/docs/connectors/overview/) |
 | **Indexing Plugin** | The output adapter that delivers documents to a search engine, Turing (default), Apache Solr, or Elasticsearch | [Indexing Plugins](/docs/indexing-plugins/) |
 | **Job Item** | A single document being processed through the pipeline, with fields, metadata, and an action (index, de-index, update) | [Core Concepts](/docs/getting-started/core-concepts/) |
 | **Batch Processor** | Groups individual job items into configurable batches (default: 50) for efficient queue delivery | [Core Concepts](/docs/getting-started/core-concepts/) |
@@ -103,7 +101,7 @@ Not sure where to start? Here is a suggested path depending on what you want to 
 → Go to [AEM Connector](/docs/connectors/aem/).
 
 **I want to index WordPress content**
-→ Go to [WordPress Connector](/docs/connectors/wordpress/).
+→ The WordPress plugin is part of Viglet Turing: go to [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
 
 **I want to send content to Solr or Elasticsearch directly**
 → Go to [Indexing Plugins](/docs/indexing-plugins/).

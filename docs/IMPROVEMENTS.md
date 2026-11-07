@@ -101,22 +101,6 @@ route returns nothing a caller could use to act as Dumont.
 
 ## XLIX The WordPress connector plugin
 
-### XLIX.177 The WordPress pages point at Turing (D346)
-
-The plugin never went through Dumont: its PHP client sends content straight to Turing.
-Turing's T1251 to T1260 move the plugin, its docs, the Playground demo and the release
-into the Turing repository (Block CT there), with a page of its own at
-turing.viglet.org/wordpress, the address the video already ends on. Dumont keeps a
-pointer, not the product:
-
-- `dumont-site/src/pages/wordpress.tsx` gives way to a redirect to turing.viglet.org/wordpress/, the reverse of today's redirect, and `/playground/*` redirects to turing.viglet.org/playground/ for a transition, since shared Playground links may be in circulation.
-- `wordpress-tile.tsx` stays on the landing and connectors pages, now with the YouTube video (a click-to-load youtube-nocookie facade) and a line saying the plugin is part of Viglet Turing, linking there.
-- `site-links.ts` (`wordpressDocs`, `wordpressDemo`, `wordpressPlayground`), the nav and footer entries, `sitemap.xml`, `llms.txt` and `changelog.json` point at Turing, and `public/wordpress/chapter-*.webp` leaves with the page.
-- `connectors/wordpress.md` and `wordpress-turing.md` become short stubs linking to the Turing docs page; the sidebar keeps one entry.
-- The README, `intro.md`, `index.mdx`, `architecture.md`, `connectors/overview.md`, `catalog.md`, `developer-guide.md`, `core-concepts.md` and the two diagrams present WordPress as a Turing integration, not a Dumont connector.
-
-Done when no Dumont page links a Dumont-hosted WordPress asset.
-
 ### XLIX.178 Remove the plugin from this repository (D347)
 
 Once Turing's T1252 (the move, with history, through git filter-repo) and T1255 (the

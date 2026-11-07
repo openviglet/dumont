@@ -692,7 +692,7 @@
 - **D236** — The e2e seed installs a test-stack mu-plugin that hides core's update nag, so the admin axe checks pass whatever core has released (design §XLIX.86 recorded in `wordpress/README.md`).
 - **D203** — Each How it works marker now carries its chapter in demo/story.md, so the tour walks the demo in the story's order; the pt_BR run is D244 (design §XLIX.59 recorded in `wordpress/demo/story.md`).
 - **D204** — npm run story:video also writes a 29-second cut, and both videos carry English and pt_BR caption tracks; voice and publishing are D246 (design §XLIX.60 recorded in `wordpress/bin/story-video.mjs`).
-- **D197** — The site's /wordpress page tells the plugin as the story's chapters, each with a still from the recording; video embeds are D246 (design §XLIX.53 recorded in `dumont-site/src/pages/wordpress.tsx`).
+- **D197** — The site's /wordpress page told the plugin as the story's chapters, each with a still from the recording; video embeds are D246 (the page moved to Viglet Turing under D346).
 - **D237** — In Playground, the plugin and its connection check name the cause when Turing is unreachable instead of reporting Playground's own HTTP 400.
 - **D238** — VIGLET_DUMONT_DEMO runs the plugin keyless: nothing is queued or written to Turing, keyed screens hide, and the check confirms a PUBLIC site by search.
 - **D240** — Build my kit ticks only the first product the shop can sell in each stage, so the cart gets one item per need; colours are left to D245.
@@ -791,6 +791,8 @@
 - 🗑 **D312** — abandoned: Moved with the plugin to the Turing repository, where Turing T1258 takes it over.
 - 🗑 **D313** — abandoned: Moved with the plugin to the Turing repository, where Turing T1259 takes it over.
 - 🗑 **D282** — superseded by D346: The Dumont tile carries the video under D346; the site page, docs, README and release go to Turing T1251 and T1257.
+- **D346** — Dumont's /wordpress/ and /playground/ redirect to turing.viglet.org, the tile carries the click-to-load video and links Turing, and the docs and README present WordPress as a Turing integration.
+  checked **The video is not on the site, the docs, the README or the release** The Dumont tile carries the video under D346; the site page, docs, README and release go to Turing T1251 and T1257.
 
 ## Track T — Releases and links match what the site describes
 

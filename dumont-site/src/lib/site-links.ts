@@ -21,12 +21,10 @@ export const LINKS = {
   docs: sitePath("/docs/"),
   install: sitePath("/docs/installation-guide/"),
   rest: sitePath("/docs/rest-api/"),
-  wordpressDocs: sitePath("/docs/connectors/wordpress/"),
-  wordpressDemo: sitePath("/docs/connectors/wordpress/#try-it-locally"),
-  // The demo store in WordPress Playground (D239): the blueprint the Pages workflow publishes.
-  wordpressPlayground: `https://playground.wordpress.net/?blueprint-url=${encodeURIComponent(
-    `${SITE_URL}playground/blueprint.json`,
-  )}`,
+  // The WordPress plugin is part of Viglet Turing: its page, docs and Playground demo live there.
+  wordpress: "https://turing.viglet.org/wordpress/",
+  wordpressDocs: "https://turing.viglet.org/docs/integrations/wordpress/",
+  wordpressPlayground: "https://turing.viglet.org/playground/",
   repo: "https://github.com/openviglet/dumont",
   license: "https://github.com/openviglet/dumont/blob/HEAD/LICENSE",
   roadmap: "https://github.com/openviglet/dumont/blob/HEAD/docs/ROADMAP.md",
@@ -61,7 +59,6 @@ export const NAV_GROUPS: SiteLinkGroup[] = [
     label: "Connectors",
     items: [
       { label: "Adobe Experience Manager", href: sitePath("/aem/") },
-      { label: "WordPress and WooCommerce", href: sitePath("/wordpress/") },
       { label: "Edge Delivery Services", href: sitePath("/connectors/#eds") },
       { label: "Databases (JDBC)", href: sitePath("/connectors/#database") },
       { label: "Web crawler", href: sitePath("/connectors/#web-crawler") },
@@ -91,7 +88,6 @@ export const FOOTER_COLUMNS: SiteLinkGroup[] = [
     label: "Connectors",
     items: [
       { label: "Adobe Experience Manager", href: sitePath("/aem/") },
-      { label: "WordPress and WooCommerce", href: sitePath("/wordpress/") },
       { label: "Edge Delivery Services", href: sitePath("/connectors/#eds") },
       { label: "Databases (JDBC)", href: sitePath("/connectors/#database") },
       { label: "Web crawler", href: sitePath("/connectors/#web-crawler") },

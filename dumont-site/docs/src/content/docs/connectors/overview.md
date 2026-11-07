@@ -1,6 +1,6 @@
 ---
 title: "Connectors Overview"
-description: "Overview of all Viglet Dumont connectors: web crawler, database, filesystem, AEM, and WordPress."
+description: "Overview of all Viglet Dumont connectors: web crawler, database, filesystem, AEM, and catalog and JSON APIs."
 ---
 
 Connectors are the components that extract content from external sources and feed it into the Viglet Dumont processing pipeline. Each connector specializes in a specific type of content source and knows how to navigate, extract, and map content into Job Items that the pipeline can process.
@@ -16,7 +16,8 @@ Connectors are the components that extract content from external sources and fee
 | [**Catalog & JSON API**](/docs/connectors/catalog/) | Normalized catalog feeds and paged JSON APIs | **Java Plugin**: loaded via `-Dloader.path` | `catalog-plugin.jar` |
 | [**Database**](/docs/connectors/database/) | JDBC databases | **Standalone Java CLI**: runs independently | `dumont-db-indexer.jar` |
 | [**FileSystem**](/docs/connectors/filesystem/) | Local/network directories | **Standalone Java CLI**: runs independently | `dumont-filesystem-indexer.jar` |
-| [**WordPress**](/docs/connectors/wordpress/) | WordPress sites | **PHP Plugin**: installed inside WordPress | `viglet-dumont/` |
+
+WordPress is not a Dumont connector: the WordPress plugin is part of Viglet Turing and sends content to it directly, without Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
 
 ---
 
@@ -206,7 +207,6 @@ Every connector needs at least these pieces of information:
 | **AEM** | JSON file + Turing Admin Console | `export/` directory + [Turing → Integration](https://docs.viglet.org/turing/integration-aem) |
 | **Database** | CLI parameters | Command-line: see [Database Connector](/docs/connectors/database/) |
 | **FileSystem** | CLI parameters | Command-line: see [FileSystem Connector](/docs/connectors/filesystem/) |
-| **WordPress** | WordPress Admin UI, WP-CLI or environment variables | WordPress → Viglet Turing Search → Setup: see [WordPress Connector](/docs/connectors/wordpress/) |
 
 ---
 

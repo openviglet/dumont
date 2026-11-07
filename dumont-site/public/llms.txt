@@ -8,7 +8,6 @@ Every page of this site has a Markdown twin at `<path>.md` (the home page at `/i
 
 - [Home](https://dumont.viglet.org/index.md): what Dumont does, the four ways an index drifts, connectors, trust, AI, samples, self-hosting
 - [Dumont for AEM](https://dumont.viglet.org/aem.md): on-prem, AMS, AEM as a Cloud Service and Edge Delivery Services; fragments; Adobe I/O Events, OSGi bundle, journal poller
-- [Dumont for WordPress and WooCommerce](https://dumont.viglet.org/wordpress.md): the plugin, told as one shopper's visit to the demo store: popular searches, filters from a sentence, cited answers, comparison, a shopping copilot that builds a kit, checkout, and search insights
 - [Connectors](https://dumont.viglet.org/connectors.md): every source and target, source inference, the plugin SPI
 - [An index you can trust](https://dumont.viglet.org/trust.md): safe finish, audit, orphan reports, coverage and drift, provenance, Prometheus metrics
 
@@ -19,6 +18,7 @@ Every page of this site has a Markdown twin at `<path>.md` (the home page at `/i
 - Run: `docker run -p 30130:30130 ghcr.io/openviglet/dumont-ce:latest`, console at http://localhost:30130. Prometheus on management port 30131.
 - AI features (source inference, coverage summaries, LLM classification) call the LLM configured in Turing; Dumont holds no model or provider keys. Classification is off by default.
 - Not a crawler farm, not a warehouse ETL, and no AI that publishes on its own.
+- WordPress and WooCommerce are not a Dumont source: the WordPress plugin is part of Viglet Turing and sends content to it directly. See [Viglet Turing for WordPress](https://turing.viglet.org/wordpress/) and [its docs](https://turing.viglet.org/docs/integrations/wordpress/).
 
 ## Marketplace
 

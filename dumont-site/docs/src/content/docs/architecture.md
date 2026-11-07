@@ -23,7 +23,7 @@ Each numbered block is detailed in its own diagram below.
 
 ## ① Connectors: How Content Enters the Pipeline
 
-Connectors extract content and feed it into the pipeline. They come in three forms: Java plugins, standalone CLI tools, and the WordPress PHP plugin.
+Connectors extract content and feed it into the pipeline. They come in two forms: Java plugins and standalone CLI tools.
 
 ![Dumont: Connector Types](/docs/img/diagrams/dumont-connectors.svg)
 
@@ -31,9 +31,8 @@ Connectors extract content and feed it into the pipeline. They come in three for
 |---|---|---|
 | **Java Plugins** | Web Crawler, AEM, Catalog & JSON API | Loaded into `dumont-connector.jar` via `-Dloader.path`, one plugin per JVM |
 | **Standalone CLI** | Database, FileSystem | Separate JARs that connect to a running Dumont instance via REST API |
-| **PHP Plugin** | WordPress | Installed inside WordPress: sends content directly to Turing, bypasses Dumont |
 
-For details on each connector, see [Connectors Overview](/docs/connectors/overview/).
+For details on each connector, see [Connectors Overview](/docs/connectors/overview/). WordPress is not a Dumont connector: the WordPress plugin is part of Viglet Turing and sends content to it directly ([Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/)).
 
 ---
 
@@ -122,7 +121,6 @@ See [Content Audit configuration](/docs/configuration-reference/#content-audit),
 | **FileSystem** | `filesystem` | Apache Tika text extraction, OCR, metadata mapping |
 | **AEM** | `aem` | Author servlets (infinity.json, QueryBuilder) or publish delivery APIs (model.json), tags, delta tracking, custom extensions |
 | **Catalog & JSON API** | `catalog` | Normalized catalog feeds, and paged JSON APIs run from a manifest (paging, call budgets, incremental expiry) |
-| **WordPress** | `wordpress` | PHP plugin inside WordPress: queued indexing with retry, typed fields and facets provisioned in Turing, WP-CLI, and a search block on the Turing JS SDK |
 | **Commons** | `commons` | Shared models, interfaces, utilities |
 | **AEM Commons** | `aem-commons` | AEM extension interfaces, component extractors, content types and versioned recipes (published to Maven Central) |
 | **DB Commons** | `db-commons` | DB extension interface (published to Maven Central) |

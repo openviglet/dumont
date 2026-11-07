@@ -73,8 +73,7 @@ dumont/
 │   ├── aem-plugin/             # AEM connector plugin (loaded via -Dloader.path)
 │   ├── aem-server/             # AEM server-side integration
 │   └── aem-plugin-sample/      # Example custom AEM extensions (WKND site)
-├── dumont-react/               # The console: React app, built into connector-app's static resources
-└── wordpress/                  # WordPress PHP plugin
+└── dumont-react/               # The console: React app, built into connector-app's static resources
 ```
 
 ---
