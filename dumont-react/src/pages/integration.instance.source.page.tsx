@@ -1,6 +1,7 @@
 ﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationSourceForm } from "@/components/integration/integration.source.form";
 import { AemSourceWizard } from "@/components/integration/wizard/aem-source-wizard";
+import { useClearIndexingState } from "@/components/integration/use-clear-indexing-state";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { TurIntegrationConnectorService } from "@/services/integration/integration-connector.service";
 
@@ -73,6 +74,12 @@ export default function IntegrationInstanceSourcePage() {
   }
 
   const isActionDisabled = isNew || !integrationAemSource.id;
+  const clearState = useClearIndexingState({
+    integrationId: id,
+    source: integrationAemSource.name,
+    label: integrationAemSource.name,
+    disabled: isActionDisabled,
+  });
 
   async function onIndexAll() {
     setIndexingAll(true);
@@ -169,6 +176,7 @@ export default function IntegrationInstanceSourcePage() {
       dryScanning={dryScanning}
       reindexingAll={reindexingAll}
       indexingAll={indexingAll}
+      clearState={clearState}
     />
   )
 }

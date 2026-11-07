@@ -36,6 +36,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { RagStatusBadge } from "../rag-status-badge";
 import { DialogDelete } from "../dialog.delete";
+import type { ClearIndexingState } from "./use-clear-indexing-state";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientButton } from "../ui/gradient-button";
 import { GradientSwitch } from "../ui/gradient-switch";
@@ -63,13 +64,15 @@ interface Props {
   dryScanning?: boolean;
   reindexingAll?: boolean;
   indexingAll?: boolean;
+  /** Clear indexing state: listed beside Reindex all, its confirmation rendered in the header. */
+  clearState?: ClearIndexingState;
 }
 const turLocaleService = new TurLocaleService();
 export const IntegrationSourceForm: React.FC<Props> = ({
   value, isNew, integrationId, sourceId, tab, onSourceUpdated,
   onDelete, onExport, open, setOpen,
   onDryScan, onReindexAll, onIndexAll,
-  indexingDisabled, dryScanning, reindexingAll, indexingAll,
+  indexingDisabled, dryScanning, reindexingAll, indexingAll, clearState,
 }) => {
   const { t } = useTranslation();
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(integrationId), [integrationId]);
@@ -178,16 +181,20 @@ export const IntegrationSourceForm: React.FC<Props> = ({
             ...(onExport ? [{ label: t("forms.importExport.export"), icon: IconDownload, onSelect: onExport }] : []),
             ...(onDryScan ? [{ label: t("integration.sources.dryScan"), icon: IconEye, onSelect: onDryScan, disabled: indexingDisabled || dryScanning }] : []),
             ...(onReindexAll ? [{ label: t("integration.sources.reindexAll"), icon: IconRefresh, onSelect: onReindexAll, disabled: indexingDisabled || reindexingAll }] : []),
+            ...(clearState ? [clearState.menuAction] : []),
             ...(onIndexAll ? [{ label: t("integration.sources.indexAll"), icon: IconUpload, onSelect: onIndexAll, disabled: indexingDisabled || indexingAll }] : []),
             ...(open !== undefined && onDelete && setOpen
               ? [{ label: t("forms.formActions.delete"), icon: IconTrash, onSelect: () => setOpen(true), tone: "destructive" as const }]
               : []),
           ]}
           actions={
-            /* Rendered without its own trigger — the menu item above is what opens it. */
-            open !== undefined && onDelete && setOpen ? (
-              <DialogDelete trigger={null} feature={t("integration.sources.title")} name={form.watch("name") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
-            ) : undefined
+            /* Rendered without their own triggers — the menu items above are what open them. */
+            <>
+              {open !== undefined && onDelete && setOpen && (
+                <DialogDelete trigger={null} feature={t("integration.sources.title")} name={form.watch("name") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
+              )}
+              {clearState?.dialog}
+            </>
           }
         />
         <Tabs value={tab} onValueChange={handleTabChange}>

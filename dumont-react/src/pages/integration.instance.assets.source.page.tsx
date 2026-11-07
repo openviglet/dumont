@@ -1,5 +1,6 @@
 ﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationAssetsSourceForm } from "@/components/integration/integration.assets.source.form";
+import { useClearIndexingState } from "@/components/integration/use-clear-indexing-state";
 import { GradientButton } from "@/components/ui/gradient-button";
 import type { TurIntegrationAssetsSource } from "@/models/integration/integration-assets-source.model";
 import { TurIntegrationAssetsSourceService } from "@/services/integration/integration-assets-source.service";
@@ -35,6 +36,13 @@ export default function IntegrationInstanceAssetsSourcePage() {
     setOpen(false);
   }
 
+  const clearState = useClearIndexingState({
+    integrationId: id,
+    source: source.name,
+    label: source.name,
+    disabled: isNew || !source.id,
+  });
+
   async function onIndexAll() {
     setIndexingAll(true);
     try { await service.indexAll(source); toast.success(t("integration.assetsSources.indexingStarted", { name: source.name })); }
@@ -52,6 +60,7 @@ export default function IntegrationInstanceAssetsSourcePage() {
       onDelete={onDelete}
       open={open}
       setOpen={setOpen}
+      clearState={clearState}
       headerActions={
         <GradientButton type="button" variant="outline" size="sm" onClick={onIndexAll} disabled={isNew || !source.id} loading={indexingAll}>
           {t("integration.assetsSources.indexAll")}

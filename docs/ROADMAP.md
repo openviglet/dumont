@@ -122,7 +122,6 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- ⏳ **D345** (deps: —) **The indexing state can only be cleared by a full reindex, and only on AEM and DB sources** — The console still lacks a Clear indexing state action, with its confirmation, on the AEM, DB, Web Crawler, Assets, EDS and Catalog source pages. → §LII.11
 - 📋 **D348** (deps: —) **A JSON API source with expiry never refills a site that lost its documents** — It ignores listEverything and keeps lost ids alive as unchanged, so an emptied site stays short until the source reads them again. → §LII.12
 - 📋 **D349** (deps: —) **The connector API names an EDS source by title while its runs file ledger rows under its id** — Reindex all and Clear indexing state on an EDS source delete rows that do not exist and leave the real ones. → §LII.13
 
@@ -131,13 +130,6 @@ This track has no remaining pending tasks.
 - **The video is not on the site, the docs, the README or the release** The Dumont tile
   carries the video under D346; the site page, docs, README and release go to Turing
   T1251 and T1257.
-
-## Done when — D345
-
-- **Every source page offers Clear indexing state** The AEM, DB, Web Crawler, Assets,
-  EDS and Catalog source pages each show the action beside Reindex all, confirm that the
-  next run sends everything again, and call DELETE /api/v2/connector/ledger/{name}; a
-  page test covers one of them.
 
 ## Non-goals (do NOT add as tasks)
 

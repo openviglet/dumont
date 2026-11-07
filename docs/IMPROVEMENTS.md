@@ -143,30 +143,6 @@ trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
 
-### LII.11 Clear a source's indexing state (Turing #117) (D345)
-
-**Where it came from.** GitHub issue openviglet/turing#117 (2025): a button in the
-connector UI to clean the indexing-state table (the old `turindexing`, now the ledger).
-
-**What happens today.** The ledger can only be wiped as part of a reindex: "Reindex all"
-(`GET /api/v2/connector/reindex/{name}/all` → `DumConnectorRunService.start`) calls
-`indexingService.deleteByProviderAndSource(...)` and starts a full run, and per-id
-reindex deletes those rows. The button exists for AEM and DB only; EDS has its own
-clear-and-reindex; the Web Crawler and Assets have neither. There is no way to clear the
-state without starting a run, and `DumConnectorApi` exposes no delete on the ledger.
-
-**What to build.** `DELETE /api/v2/connector/{name}/source/{source}/ledger` that removes
-the source's ledger rows (refused while a run is in progress), and a "Clear indexing
-state" action next to "Reindex all" on every source page (AEM, DB, Web Crawler, Assets,
-EDS, Catalog), with a confirmation that says the next run sends everything again. The
-same call, and Reindex all, resets each connector's own run state through a plugin hook:
-the AEM once pattern's count (D344, `DumAemSourceService.resetOnce`) starts again. D341
-(Index All trusting Turing over the ledger) is the complementary fix; this one gives the
-operator the explicit control.
-
-**Done when:** clearing a Web Crawler source's state leaves its ledger empty without
-starting a run, and the next run sends every page.
-
 ### LII.12 A JSON API source that refills what the site lost (D348)
 
 **Found by D341.** Before a full run, the structured plugin now forgets the ledger rows

@@ -8,6 +8,14 @@
     "notLoaded": "Integration instance is not loaded.",
     "deleted": "The {{name}} Integration Instance was deleted",
     "notDeleted": "The {{name}} Integration Instance was not deleted",
+    "clearState": {
+      "action": "Clear indexing state",
+      "confirmTitle": "Clear indexing state?",
+      "confirmDescription": "Dumont forgets what it already sent from {{name}}. The next run sends every document again. Nothing is removed from the index, and no run starts now.",
+      "cleared": "Indexing state of {{name}} cleared. The next run sends every document again.",
+      "runInProgress": "A run is in progress for {{name}}. Wait for it to finish, then clear the state.",
+      "failed": "Could not clear the indexing state of {{name}}"
+    },
     "nav": {
       "settings": "Settings",
       "sources": "AEM Sources",

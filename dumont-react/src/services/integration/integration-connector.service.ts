@@ -53,6 +53,18 @@ export class TurIntegrationConnectorService {
     return data;
   }
 
+  /**
+   * Clears what the connector remembers of `source` — its ledger rows and the plugin's own run
+   * state — without starting a run (D345). The next run sends every document again; nothing is
+   * removed from the index. 404 for a source no plugin owns, 409 while a run holds it.
+   */
+  async clearState(source: string): Promise<DumConnectorStatusResponse> {
+    const { data } = await this.axiosInstance.delete<DumConnectorStatusResponse>(
+      `${this.connectorUrl}/ledger/${encodeURIComponent(source)}`,
+    );
+    return data;
+  }
+
   async auditSource(source: string): Promise<DumConnectorStatusResponse> {
     const { data } = await this.axiosInstance.get<DumConnectorStatusResponse>(
       `${this.connectorUrl}/audit/${source}`,

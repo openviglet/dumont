@@ -484,10 +484,11 @@ Maps content language codes to repository paths.
 
 ### Source Actions
 
-Each source has two action buttons available in the Turing admin console:
+Each source has these actions in the Viglet Turing admin console:
 
 - **Index All**: triggers a full indexing run for all content in this source
 - **Reindex All**: forces a full reindexation, replacing all previously indexed content
+- **Clear indexing state** (in the `⋮` menu): forgets what Viglet Dumont recorded about past runs (which documents were sent, and the Once Pattern count) without starting a run or removing anything from the index, so the next run sends every document again. It is refused while a run is in progress. Every source type has it: AEM, Database, Web Crawler, Assets, EDS and Catalog
 
 ---
 

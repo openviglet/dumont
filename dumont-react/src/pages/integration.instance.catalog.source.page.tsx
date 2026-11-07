@@ -1,5 +1,6 @@
 ﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationCatalogSourceForm } from "@/components/integration/integration.catalog.source.form";
+import { useClearIndexingState } from "@/components/integration/use-clear-indexing-state";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationCatalogSourceService } from "@/services/integration/integration-catalog-source.service";
 
@@ -49,6 +50,12 @@ export default function IntegrationInstanceCatalogSourcePage() {
   }
 
   const isActionDisabled = isNew || !integrationCatalogSource.id;
+  const clearState = useClearIndexingState({
+    integrationId: id,
+    source: integrationCatalogSource.name,
+    label: integrationCatalogSource.name,
+    disabled: isActionDisabled,
+  });
 
   async function onIndexAll() {
     setIndexingAll(true);
@@ -77,6 +84,7 @@ export default function IntegrationInstanceCatalogSourcePage() {
       onDelete={onDelete}
       open={open}
       setOpen={setOpen}
+      clearState={clearState}
       headerActions={
         <GradientButton type="button" variant="outline" size="sm" onClick={onIndexAll} disabled={isActionDisabled} loading={indexingAll}>
           {t("integration.catalogSources.indexAll")}

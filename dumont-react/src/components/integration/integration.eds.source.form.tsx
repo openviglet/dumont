@@ -35,6 +35,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
+import type { ClearIndexingState } from "./use-clear-indexing-state";
 import { SNSiteSelect } from "./sn-site-select";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 
@@ -54,6 +55,8 @@ interface Props {
   indexing?: boolean;
   reindexing?: boolean;
   dryScanning?: boolean;
+  /** Clear indexing state: listed beside Reindex all, its confirmation rendered in the header. */
+  clearState?: ClearIndexingState;
 }
 
 export const IntegrationEdsSourceForm: React.FC<Props> = ({
@@ -72,6 +75,7 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
   indexing,
   reindexing,
   dryScanning,
+  clearState,
 }) => {
   const { t } = useTranslation();
   const service = useMemo(
@@ -151,23 +155,27 @@ export const IntegrationEdsSourceForm: React.FC<Props> = ({
           menuActions={[
             ...(onDryScan ? [{ label: t("integration.edsSources.dryScan"), icon: IconEye, onSelect: onDryScan, disabled: indexingDisabled || dryScanning }] : []),
             ...(onReindex ? [{ label: t("integration.edsSources.reindexAll"), icon: IconRefresh, onSelect: onReindex, disabled: indexingDisabled || reindexing }] : []),
+            ...(clearState ? [clearState.menuAction] : []),
             ...(onIndex ? [{ label: t("integration.edsSources.indexAll"), icon: IconUpload, onSelect: onIndex, disabled: indexingDisabled || indexing }] : []),
             ...(open !== undefined && onDelete && setOpen
               ? [{ label: t("forms.formActions.delete"), icon: IconTrash, onSelect: () => setOpen(true), tone: "destructive" as const }]
               : []),
           ]}
           actions={
-            /* Rendered without its own trigger — the menu item above is what opens it. */
-            open !== undefined && onDelete && setOpen ? (
-              <DialogDelete
-                trigger={null}
-                feature={t("integration.edsSources.title")}
-                name={form.watch("title") || ""}
-                onDelete={onDelete}
-                open={open}
-                setOpen={setOpen}
-              />
-            ) : undefined
+            /* Rendered without their own triggers — the menu items above are what open them. */
+            <>
+              {open !== undefined && onDelete && setOpen && (
+                <DialogDelete
+                  trigger={null}
+                  feature={t("integration.edsSources.title")}
+                  name={form.watch("title") || ""}
+                  onDelete={onDelete}
+                  open={open}
+                  setOpen={setOpen}
+                />
+              )}
+              {clearState?.dialog}
+            </>
           }
         />
         <Tabs value={tab} onValueChange={handleTabChange}>

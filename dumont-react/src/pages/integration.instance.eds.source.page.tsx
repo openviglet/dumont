@@ -1,5 +1,6 @@
 ﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationEdsSourceForm } from "@/components/integration/integration.eds.source.form";
+import { useClearIndexingState } from "@/components/integration/use-clear-indexing-state";
 import type { TurIntegrationEdsSource } from "@/models/integration/integration-eds-source.model";
 import { TurIntegrationEdsSourceService } from "@/services/integration/integration-eds-source.service";
 import { toast } from "@viglet/viglet-design-system";
@@ -53,6 +54,13 @@ export default function IntegrationInstanceEdsSourcePage() {
   }
 
   const isActionDisabled = isNew || !edsSource.id;
+  // The EDS plugin owns a source by its title (DumEDSPlugin.ownsSource).
+  const clearState = useClearIndexingState({
+    integrationId: id,
+    source: edsSource.title,
+    label: edsSource.title,
+    disabled: isActionDisabled,
+  });
 
   async function onIndex() {
     setIndexing(true);
@@ -124,6 +132,7 @@ export default function IntegrationInstanceEdsSourcePage() {
       dryScanning={dryScanning}
       reindexing={reindexing}
       indexing={indexing}
+      clearState={clearState}
     />
   );
 }

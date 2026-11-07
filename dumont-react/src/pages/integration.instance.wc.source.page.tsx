@@ -1,5 +1,6 @@
 ﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationWcSourceForm } from "@/components/integration/integration.wc.source.form";
+import { useClearIndexingState } from "@/components/integration/use-clear-indexing-state";
 import { GradientButton } from "@/components/ui/gradient-button";
 import type { TurIntegrationWcSource } from "@/models/integration/integration-wc-source.model";
 import { TurIntegrationWcSourceService } from "@/services/integration/integration-wc-source.service";
@@ -45,6 +46,13 @@ export default function IntegrationInstanceWcSourcePage() {
   }
 
   const isActionDisabled = isNew || !wcSource.id;
+  // The Web Crawler plugin owns a source by its id (DumWCPlugin.ownsSource), not its title.
+  const clearState = useClearIndexingState({
+    integrationId: id,
+    source: wcSource.id,
+    label: wcSource.title,
+    disabled: isActionDisabled,
+  });
 
   async function onCrawl() {
     setCrawling(true);
@@ -69,6 +77,7 @@ export default function IntegrationInstanceWcSourcePage() {
       onDelete={onDelete}
       open={open}
       setOpen={setOpen}
+      clearState={clearState}
       headerActions={
         <GradientButton type="button" variant="outline" size="sm" onClick={onCrawl} disabled={isActionDisabled} loading={crawling}>
           {t("integration.wcSources.crawl")}

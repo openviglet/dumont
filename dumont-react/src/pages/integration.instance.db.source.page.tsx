@@ -1,5 +1,6 @@
 ﻿import { ROUTES } from "@/app/routes.const";
 import { IntegrationDbSourceForm } from "@/components/integration/integration.db.source.form";
+import { useClearIndexingState } from "@/components/integration/use-clear-indexing-state";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { TurIntegrationDbSourceService } from "@/services/integration/integration-db-source.service";
 
@@ -50,6 +51,12 @@ export default function IntegrationInstanceDbSourcePage() {
   }
 
   const isActionDisabled = isNew || !integrationDbSource.id;
+  const clearState = useClearIndexingState({
+    integrationId: id,
+    source: integrationDbSource.name,
+    label: integrationDbSource.name,
+    disabled: isActionDisabled,
+  });
 
   async function onIndexAll() {
     setIndexingAll(true);
@@ -95,6 +102,7 @@ export default function IntegrationInstanceDbSourcePage() {
       onDelete={onDelete}
       open={open}
       setOpen={setOpen}
+      clearState={clearState}
       headerActions={
         <>
           <GradientButton type="button" variant="outline" size="sm" onClick={onReindexAll} disabled={isActionDisabled} loading={reindexingAll}>

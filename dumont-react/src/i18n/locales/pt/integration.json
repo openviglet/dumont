@@ -8,6 +8,14 @@
     "notLoaded": "A instância de integração não está carregada.",
     "deleted": "A Instância de Integração {{name}} foi excluída",
     "notDeleted": "A Instância de Integração {{name}} não foi excluída",
+    "clearState": {
+      "action": "Limpar estado de indexação",
+      "confirmTitle": "Limpar o estado de indexação?",
+      "confirmDescription": "O Dumont esquece o que já enviou de {{name}}. A próxima execução envia todos os documentos de novo. Nada é removido do índice e nenhuma execução começa agora.",
+      "cleared": "Estado de indexação de {{name}} limpo. A próxima execução envia todos os documentos de novo.",
+      "runInProgress": "Há uma execução em andamento para {{name}}. Aguarde o fim dela e limpe o estado depois.",
+      "failed": "Não foi possível limpar o estado de indexação de {{name}}"
+    },
     "nav": {
       "settings": "Configurações",
       "sources": "Fontes AEM",

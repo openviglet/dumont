@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
+import type { ClearIndexingState } from "./use-clear-indexing-state";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
@@ -26,9 +27,11 @@ interface Props {
   open?: boolean;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   headerActions?: React.ReactNode;
+  /** Clear indexing state: offered behind the header's `⋮`, its confirmation rendered in the header. */
+  clearState?: ClearIndexingState;
 }
 
-export const IntegrationAssetsSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onDelete, open, setOpen, headerActions }) => {
+export const IntegrationAssetsSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onDelete, open, setOpen, headerActions, clearState }) => {
   const { t } = useTranslation();
   const service = useMemo(() => new TurIntegrationAssetsSourceService(integrationId), [integrationId]);
   const form = useForm<TurIntegrationAssetsSource>({ defaultValues: value });
@@ -65,12 +68,14 @@ export const IntegrationAssetsSourceForm: React.FC<Props> = ({ value, isNew, int
           onCancel={() => navigate(sourceInstanceRoute)}
           dirty={isNew || form.formState.isDirty}
           titleMissing={!form.watch("name")?.trim()}
+          menuActions={clearState ? [clearState.menuAction] : undefined}
           actions={
             <>
             {open !== undefined && onDelete && setOpen && (
               <DialogDelete feature={t("integration.assetsSources.title")} name={form.watch("name") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
             )}
             {headerActions}
+            {clearState?.dialog}
             </>
           }
         />

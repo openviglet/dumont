@@ -21,6 +21,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
+import type { ClearIndexingState } from "./use-clear-indexing-state";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 
 interface Props {
@@ -33,9 +34,11 @@ interface Props {
   open?: boolean;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   headerActions?: React.ReactNode;
+  /** Clear indexing state: offered behind the header's `⋮`, its confirmation rendered in the header. */
+  clearState?: ClearIndexingState;
 }
 
-export const IntegrationWcSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onDelete, open, setOpen, headerActions }) => {
+export const IntegrationWcSourceForm: React.FC<Props> = ({ value, isNew, integrationId, sourceId, tab, onDelete, open, setOpen, headerActions, clearState }) => {
   const { t } = useTranslation();
   const service = useMemo(() => new TurIntegrationWcSourceService(integrationId), [integrationId]);
   const form = useForm<TurIntegrationWcSource>({ defaultValues: value });
@@ -85,12 +88,14 @@ export const IntegrationWcSourceForm: React.FC<Props> = ({ value, isNew, integra
           onCancel={() => navigate(sourceInstanceRoute)}
           dirty={isNew || form.formState.isDirty}
           titleMissing={!form.watch("title")?.trim()}
+          menuActions={clearState ? [clearState.menuAction] : undefined}
           actions={
             <>
             {open !== undefined && onDelete && setOpen && (
               <DialogDelete feature={t("integration.wcSources.title")} name={form.watch("title") || ""} onDelete={onDelete} open={open} setOpen={setOpen} />
             )}
             {headerActions}
+            {clearState?.dialog}
             </>
           }
         />
