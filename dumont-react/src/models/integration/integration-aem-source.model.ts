@@ -22,6 +22,8 @@ export type TurIntegrationAemSource = {
   contentType: string;
   subType: string;
   oncePattern: string;
+  /** D344: full runs that index the once pattern's paths before later runs skip them (1 when unset). */
+  onceTimes?: number | null;
   defaultLocale: string;
   localeClass: string;
   deltaClass: string;

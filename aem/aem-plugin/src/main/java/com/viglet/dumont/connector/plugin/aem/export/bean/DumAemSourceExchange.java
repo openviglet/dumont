@@ -39,6 +39,7 @@ public class DumAemSourceExchange {
     private String indexConditionClass;
     private String endpoint;
     private String oncePattern;
+    private Integer onceTimes;
     private String username;
     private String password;
     private String rootPath;

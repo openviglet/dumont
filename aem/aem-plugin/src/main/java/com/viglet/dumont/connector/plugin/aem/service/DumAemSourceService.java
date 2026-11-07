@@ -1,6 +1,7 @@
 package com.viglet.dumont.connector.plugin.aem.service;
 
 import static com.viglet.dumont.connector.aem.commons.DumAemConstants.AEM;
+import static com.viglet.dumont.connector.aem.commons.DumAemConstants.ONCE;
 
 import java.util.List;
 import java.util.Optional;
@@ -68,10 +69,77 @@ public class DumAemSourceService {
         return AEM;
     }
 
+    /**
+     * Whether paths matching the source's {@code oncePattern} are skipped now (D344): the source has
+     * completed its {@code onceTimes} full runs (1 when unset). A row from before D344 carries only
+     * the flag, which meant "done".
+     */
     public boolean isOnce(DumAemConfiguration configuration) {
-        return dumAemPluginSystemRepository
-                .findByConfig(DumAemCommonsUtils.configOnce(configuration))
-                .map(DumAemPluginSystem::isBooleanValue).orElse(false);
+        Optional<DumAemPluginSystem> row = dumAemPluginSystemRepository
+                .findByConfig(DumAemCommonsUtils.configOnce(configuration));
+        if (row.isEmpty()) {
+            return false;
+        }
+        if (row.get().getStringValue() == null) {
+            return row.get().isBooleanValue();
+        }
+        return onceRuns(row.get()) >= onceTimes(getDumAemSourceById(configuration.getId()).orElse(null));
+    }
+
+    /** The full runs counted toward {@code onceTimes}, and how many there are to count. */
+    public record OnceProgress(int runs, int times) {
+    }
+
+    public OnceProgress onceProgress(DumAemSource source) {
+        int runs = dumAemPluginSystemRepository.findByConfig(onceConfig(source))
+                .map(DumAemSourceService::onceRuns).orElse(0);
+        return new OnceProgress(runs, onceTimes(source));
+    }
+
+    /**
+     * Counts one completed full run toward {@code onceTimes} (D344). Only a source with an
+     * {@code oncePattern} counts, and the count stops at the target, so raising {@code onceTimes}
+     * later indexes the pattern's paths again for the difference.
+     */
+    public void recordFullRun(DumAemSource source) {
+        if (StringUtils.isBlank(source.getOncePattern())) {
+            return;
+        }
+        String config = onceConfig(source);
+        DumAemPluginSystem row = dumAemPluginSystemRepository.findByConfig(config)
+                .orElseGet(() -> new DumAemPluginSystem().setConfig(config));
+        int times = onceTimes(source);
+        int runs = Math.min(onceRuns(row) + 1, times);
+        dumAemPluginSystemRepository.save(row.setStringValue(Integer.toString(runs))
+                .setBooleanValue(runs >= times));
+        log.info("AEM source '{}': full run {} of {} that index the once pattern's paths",
+                source.getName(), runs, times);
+    }
+
+    /** Starts the count again, so the once pattern's paths are indexed for another {@code onceTimes} runs. */
+    public void resetOnce(DumAemSource source) {
+        dumAemPluginSystemRepository.findByConfig(onceConfig(source))
+                .ifPresent(dumAemPluginSystemRepository::delete);
+    }
+
+    private static String onceConfig(DumAemSource source) {
+        return "%s/%s".formatted(source.getId(), ONCE);
+    }
+
+    private static int onceRuns(DumAemPluginSystem row) {
+        if (row.getStringValue() == null) {
+            return row.isBooleanValue() ? Integer.MAX_VALUE : 0;
+        }
+        try {
+            return Integer.parseInt(row.getStringValue());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static int onceTimes(DumAemSource source) {
+        Integer times = source == null ? null : source.getOnceTimes();
+        return times == null || times < 1 ? 1 : times;
     }
 
     /**

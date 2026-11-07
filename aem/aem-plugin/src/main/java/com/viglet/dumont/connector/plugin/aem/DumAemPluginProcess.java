@@ -169,7 +169,11 @@ public class DumAemPluginProcess {
         public void indexAll(DumAemSource source) {
                 DumAemSession session = sessionService.getDumAemSession(source, false);
                 IndexingCommand command = commandFactory.createIndexAllCommand(session);
-                executor.executeExclusive(command);
+                // D344: a full run that ran to the end counts toward the once pattern's onceTimes.
+                // One skipped as already running, or one that threw, does not.
+                if (executor.executeExclusive(command)) {
+                        sourceService.recordFullRun(source);
+                }
         }
 
         /**

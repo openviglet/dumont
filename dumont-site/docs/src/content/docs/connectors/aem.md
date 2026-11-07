@@ -455,7 +455,8 @@ Controls incremental indexing: how the connector detects which content has chang
 
 | Field | Description |
 |---|---|
-| Once Pattern | Pattern used to identify content that should only be indexed once |
+| Once Pattern | Regular expression for paths that only a limited number of full runs index, such as an archive that no longer changes. Paths that match are indexed until the source has completed **Once Pattern Runs** full runs, and later runs skip them |
+| Once Pattern Runs | How many full runs index the Once Pattern's paths (empty means 1). The field shows how many have completed. **Start the count again** indexes those paths for that many more runs. A run that fails or is skipped because one is already running does not count |
 | Delta Class | Fully-qualified Java class name responsible for detecting changed content since the last run (see [Extending AEM](/docs/extending-aem/) for custom implementations) |
 
 ### Author / Publish

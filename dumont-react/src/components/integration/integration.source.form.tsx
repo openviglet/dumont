@@ -37,6 +37,7 @@ import { useNavigate } from "react-router-dom";
 import { RagStatusBadge } from "../rag-status-badge";
 import { DialogDelete } from "../dialog.delete";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
+import { GradientButton } from "../ui/gradient-button";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
 import { AttributeSpecificationList } from "./attribute.specification.list";
@@ -72,6 +73,21 @@ export const IntegrationSourceForm: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(integrationId), [integrationId]);
+  // D344: how far the once pattern has gone, stored against the source it answers for, so an
+  // answer for another source is never shown and nothing has to be reset when the source changes.
+  const [onceAnswer, setOnceProgress] = useState<{ id: string; runs: number; times: number } | null>(null);
+  const onceProgress = !isNew && onceAnswer?.id === sourceId ? onceAnswer : null;
+  useEffect(() => {
+    if (isNew || !sourceId) return;
+    void (async () => {
+      try {
+        const progress = await turIntegrationAemSourceService.onceProgress(sourceId);
+        setOnceProgress({ id: sourceId, ...progress });
+      } catch {
+        // No progress to show: the field's own description stands.
+      }
+    })();
+  }, [isNew, sourceId, turIntegrationAemSourceService]);
   const sanitize = (src: TurIntegrationAemSource): TurIntegrationAemSource => ({
     ...src,
     name: src.name ?? "",
@@ -82,6 +98,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
     contentType: src.contentType ?? "",
     subType: src.subType ?? "",
     oncePattern: src.oncePattern ?? "",
+    onceTimes: src.onceTimes ?? null,
     defaultLocale: src.defaultLocale ?? "",
     localeClass: src.localeClass ?? "",
     deltaClass: src.deltaClass ?? "",
@@ -373,7 +390,47 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                       <FormControl>
                         <Input {...field} placeholder=".*" type="text" />
                       </FormControl>
-                      <FormDescription>{t("forms.integrationSource.oncePattern")}</FormDescription>
+                      <FormDescription>{t("forms.wizard.oncePatternDesc")}</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="onceTimes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("forms.integrationSource.onceTimes")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          placeholder="1"
+                          value={field.value ?? ""}
+                          onChange={(event) =>
+                            field.onChange(event.target.value === "" ? null : Number(event.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {onceProgress
+                          ? t("forms.integrationSource.onceProgress", onceProgress)
+                          : t("forms.integrationSource.onceTimesDesc")}
+                      </FormDescription>
+                      {onceProgress && onceProgress.runs > 0 && sourceId && (
+                        <GradientButton
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            void turIntegrationAemSourceService.resetOnce(sourceId).then((progress) =>
+                              setOnceProgress({ id: sourceId, ...progress }),
+                            );
+                          }}
+                        >
+                          {t("forms.integrationSource.onceReset")}
+                        </GradientButton>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}

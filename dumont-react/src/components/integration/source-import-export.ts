@@ -53,6 +53,7 @@ interface ExchangeSource {
   username?: string;
   password?: string;
   oncePattern?: string;
+  onceTimes?: number;
   author?: boolean;
   publish?: boolean;
   authorSNSite?: string;
@@ -165,6 +166,7 @@ function mapExchangeSource(src: ExchangeSource): Partial<TurIntegrationAemSource
     contentType: src.contentType ?? "",
     subType: src.subType ?? "",
     oncePattern: src.oncePattern ?? "",
+    onceTimes: src.onceTimes ?? null,
     defaultLocale: src.defaultLocale ?? "",
     localeClass: src.localeClass ?? "",
     deltaClass: src.deltaClass ?? "",
@@ -196,6 +198,7 @@ export function exportSourceToJson(source: TurIntegrationAemSource): string {
     username: source.username,
     password: source.password,
     oncePattern: source.oncePattern || undefined,
+    onceTimes: source.onceTimes ?? undefined,
     author: source.author,
     publish: source.publish,
     authorSNSite: source.authorSNSite || undefined,

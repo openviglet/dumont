@@ -809,3 +809,4 @@
 - **D341** — Index All sends again what the site lost (an emptied site refills, OAI-PMH harvests from the start), and a queue disk at 95% ends the run partial with that reason.
 - **D342** — Web Crawler and EDS runs stop before sending when their SN site or locale is missing, with the reason on the run record, and the site list says why Turing could not answer.
 - **D343** — After 3 failed deliveries in a row and no answer from Turing, a run's next document is refused, so any connector stops reading; its finish records why and never sweeps.
+- **D344** — AEM oncePattern works and counts: completed full runs are tallied, matching paths index for the first onceTimes runs and skip after, and the form shows and resets the count.

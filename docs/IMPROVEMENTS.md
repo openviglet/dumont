@@ -143,28 +143,6 @@ trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
 
-### LII.10 AEM once pattern that works, and counts (Turing #93) (D344)
-
-**Where it came from.** GitHub issue openviglet/turing#93 (2024): improve the AEM "once"
-regex pattern so matching content is reindexed N times rather than exactly once.
-
-**What happens today.** The once rule is a yes/no gate:
-`AemNodeNavigator.shouldProcessNode` skips a path only when `isOnce(config)` is true and
-the path matches `oncePattern` (`DumAemCommonsUtils.isNotOnceConfig`). `isOnce` reads a
-`DumAemPluginSystem` row keyed `<id>/once` (`DumAemSourceService`), and no code ever
-writes that row; the only writer of `DumAemPluginSystem` is the journal cursor. So
-`oncePattern` never takes effect unless someone inserts the row by hand. There is no
-count of how often a path was indexed.
-
-**What to build.** First make "once" work: mark the source after a full run, so the next
-runs skip paths matching `oncePattern`. Then generalise it to a count: `onceTimes`
-(default 1) and a per-source count of completed full runs, so matching paths are indexed
-in the first N runs and skipped after; resetting the source (or Reindex all) starts the
-count again. Show the setting and the current count on the AEM source form.
-
-**Done when:** with `oncePattern` set and `onceTimes` 2, matching pages are sent in the
-first two runs and skipped in the third, and an IT covers it.
-
 ### LII.11 Clear a source's indexing state (Turing #117) (D345)
 
 **Where it came from.** GitHub issue openviglet/turing#117 (2025): a button in the
@@ -180,7 +158,9 @@ state without starting a run, and `DumConnectorApi` exposes no delete on the led
 **What to build.** `DELETE /api/v2/connector/{name}/source/{source}/ledger` that removes
 the source's ledger rows (refused while a run is in progress), and a "Clear indexing
 state" action next to "Reindex all" on every source page (AEM, DB, Web Crawler, Assets,
-EDS, Catalog), with a confirmation that says the next run sends everything again. D341
+EDS, Catalog), with a confirmation that says the next run sends everything again. The
+same call, and Reindex all, resets each connector's own run state through a plugin hook:
+the AEM once pattern's count (D344, `DumAemSourceService.resetOnce`) starts again. D341
 (Index All trusting Turing over the ledger) is the complementary fix; this one gives the
 operator the explicit control.
 

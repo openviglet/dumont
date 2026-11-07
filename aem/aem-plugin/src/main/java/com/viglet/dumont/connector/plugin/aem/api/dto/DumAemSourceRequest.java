@@ -51,6 +51,7 @@ public class DumAemSourceRequest {
     private String contentType;
     private String subType;
     private String oncePattern;
+    private Integer onceTimes;
     private Locale defaultLocale;
     private String localeClass;
     private String deltaClass;

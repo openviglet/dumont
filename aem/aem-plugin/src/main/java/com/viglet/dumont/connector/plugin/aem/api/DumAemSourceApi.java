@@ -162,6 +162,7 @@ public class DumAemSourceApi {
                 .contentType(request.getContentType())
                 .subType(request.getSubType())
                 .oncePattern(request.getOncePattern())
+                .onceTimes(request.getOnceTimes())
                 .defaultLocale(request.getDefaultLocale())
                 .localeClass(request.getLocaleClass())
                 .deltaClass(request.getDeltaClass())

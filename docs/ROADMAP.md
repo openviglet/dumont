@@ -122,7 +122,6 @@ This track has no remaining pending tasks.
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
 
-- 📋 **D344** (deps: —) **The AEM oncePattern never takes effect, since nothing writes the once flag, and cannot mean N times** — Paths meant to be indexed once are indexed on every run, and there is no way to index them a fixed number of times (Turing #93). → §LII.10
 - 📋 **D345** (deps: —) **The indexing state can only be cleared by a full reindex, and only on AEM and DB sources** — An operator cannot reset a Web Crawler or Assets source, or clear the ledger without starting a run (Turing #117). → §LII.11
 - 📋 **D348** (deps: —) **A JSON API source with expiry never refills a site that lost its documents** — It ignores listEverything and keeps lost ids alive as unchanged, so an emptied site stays short until the source reads them again. → §LII.12
 

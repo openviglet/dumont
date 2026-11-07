@@ -81,6 +81,22 @@ export class TurIntegrationAemSourceService {
     );
   }
 
+  /** D344: the full runs that indexed the once pattern's paths so far, of `onceTimes`. */
+  async onceProgress(id: string): Promise<{ runs: number; times: number }> {
+    const { data } = await this.axiosInstance.get<{ runs: number; times: number }>(
+      `${this.aemUrl}/${id}/once`
+    );
+    return data;
+  }
+
+  /** D344: starts the once count again, so the pattern's paths are indexed for `onceTimes` more runs. */
+  async resetOnce(id: string): Promise<{ runs: number; times: number }> {
+    const { data } = await this.axiosInstance.delete<{ runs: number; times: number }>(
+      `${this.aemUrl}/${id}/once`
+    );
+    return data;
+  }
+
   async testConnection(payload: {
     endpoint: string;
     username: string;

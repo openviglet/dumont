@@ -75,6 +75,12 @@ public class DumAemSource implements Serializable {
         private String subType;
         @Column
         private String oncePattern;
+        /**
+         * D344: how many full runs index the paths {@link #oncePattern} matches before later runs
+         * skip them. Absent means 1, the original "once".
+         */
+        @Column
+        private Integer onceTimes;
         @Column
         private Locale defaultLocale;
         @Column
