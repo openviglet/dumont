@@ -7,7 +7,7 @@
 # Examples:
 #   ./bin/dumont-webcrawler.sh
 #   ./bin/dumont-webcrawler.sh -Xmx1g
-#   ./bin/dumont-webcrawler.sh -Xmx1g -- --server.port=30131
+#   ./bin/dumont-webcrawler.sh -Xmx1g -- --server.port=2722
 # --------------------------------------------------------------------------
 set -euo pipefail
 

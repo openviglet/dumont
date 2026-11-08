@@ -4,7 +4,7 @@ DSpace of this folder, through the real connector into a local Viglet Turing.
   python e2e.py turing-setup               # prints a new Turing API key
   python e2e.py run --key <key>            # source over the Dumont API, harvest, then the checks
 
-`run` expects the Dumont connector on --dumont (default http://localhost:30130), started with
+`run` expects the Dumont connector on --dumont (default http://localhost:2720), started with
 the catalog plugin and turing.apiKey=<key>. It creates (or updates) the catalog source
 "lumen-dspace" with the DSpace profile, starts its indexAll (a reindex when the source already
 existed), waits for the SN site to settle,
@@ -214,7 +214,7 @@ def main():
     setup.add_argument("--password", default="dumont-dev", help="Turing's admin password")
     go = sub.add_parser("run", help="create the source, harvest, check")
     go.add_argument("--key", required=True, help="the Turing API key the connector was started with")
-    go.add_argument("--dumont", default="http://localhost:30130")
+    go.add_argument("--dumont", default="http://localhost:2720")
     go.add_argument("--timeout", type=int, default=300, help="seconds to wait for indexing")
     args = parser.parse_args()
     if args.command == "turing-setup":

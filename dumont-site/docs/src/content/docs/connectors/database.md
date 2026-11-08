@@ -98,7 +98,7 @@ WHERE p.active = 1
 
 ```bash
 java -cp dumont-db.jar com.viglet.dumont.db.DumDbImportTool \
-  --server http://localhost:30130 \
+  --server http://localhost:2720 \
   --api-key your-api-key \
   --driver org.mariadb.jdbc.Driver \
   --connect "jdbc:mariadb://localhost:3306/shop?user=reader&password=secret" \

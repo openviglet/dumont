@@ -103,7 +103,7 @@ The **Database** and **FileSystem** connectors are **standalone command-line too
 ```bash
 # Database import (standalone JAR)
 java -cp dumont-db-indexer.jar com.viglet.dumont.connector.db.DumDbImportTool \
-  --server http://localhost:30130 \
+  --server http://localhost:2720 \
   --api-key <API_KEY> \
   --driver org.mariadb.jdbc.Driver \
   --connect "jdbc:mariadb://localhost:3306/products" \
@@ -114,7 +114,7 @@ java -cp dumont-db-indexer.jar com.viglet.dumont.connector.db.DumDbImportTool \
 # FileSystem import (standalone JAR)
 java -cp dumont-filesystem-indexer.jar com.viglet.dumont.filesystem.DumFSImportTool \
   --source-dir /mnt/shared/documents \
-  --server http://localhost:30130 \
+  --server http://localhost:2720 \
   --api-key <API_KEY> \
   --site InternalDocs
 ```
@@ -131,7 +131,7 @@ The AEM and Web Crawler connector plugins can be managed through the **Turing Ad
 2. Navigate to **Enterprise Search → Integration**
 3. Click **New** to create a new integration instance
 4. Set the **Integration Type** (AEM or Web Crawler)
-5. Set the **Endpoint** to the URL of your Dumont connector instance (e.g., `http://localhost:30130`)
+5. Set the **Endpoint** to the URL of your Dumont connector instance (e.g., `http://localhost:2720`)
 6. Enable the integration
 
 Once connected, the Turing console provides a graphical interface for:

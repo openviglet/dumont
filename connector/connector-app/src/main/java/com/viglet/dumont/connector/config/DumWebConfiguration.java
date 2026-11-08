@@ -89,7 +89,7 @@ public class DumWebConfiguration {
         private String issuerUri;
         @Value("${spring.security.oauth2.client.registration.keycloak.client-id:''}")
         private String clientId;
-        @Value("${dumont.url:http://localhost:30130}")
+        @Value("${dumont.url:http://localhost:2720}")
         private String dumontUrl;
         @Value("${server.servlet.session.cookie.name:JSESSIONID}")
         private String sessionCookieName;

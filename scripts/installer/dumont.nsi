@@ -455,7 +455,7 @@ Section "Dumont Core" SecCore
 
     FileWrite $0 "$\r$\n"
     FileWrite $0 "# Server port (use different ports for multiple connector instances)$\r$\n"
-    FileWrite $0 "server.port=30130$\r$\n"
+    FileWrite $0 "server.port=2720$\r$\n"
     FileClose $0
 
     ; Bin scripts (common)

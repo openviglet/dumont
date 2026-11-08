@@ -55,7 +55,7 @@ export function Flow() {
               <VigletLogo identifier="dumont" size={40} />
               <div>
                 <p className="font-extrabold">Viglet Dumont</p>
-                <p className="font-mono text-xs text-[#86a5a1]">Spring Boot 4 · Java 21 · port 30130</p>
+                <p className="font-mono text-xs text-[#86a5a1]">Spring Boot 4 · Java 21 · port 2720</p>
               </div>
             </div>
             <ol className="mt-5 grid grid-cols-2 gap-2 font-mono text-xs sm:grid-cols-3">

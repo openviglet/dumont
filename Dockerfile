@@ -55,7 +55,7 @@ COPY --from=build /plugins/ /app/libs/
 RUN mkdir -p /app/store && chown -R java:java /app
 USER java
 VOLUME ["/app/store"]
-EXPOSE 30130
+EXPOSE 2720
 ENV JAVA_OPTS="-Xmx512m -Xms512m"
 ENV DEBUG_OPTS=""
 # LOADER_PATH points PropertiesLauncher at the bundled connector plugins.

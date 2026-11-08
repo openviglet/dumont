@@ -1,5 +1,5 @@
 server:
-  port: 30130
+  port: 2720
   servlet:
     session:
       cookie:
@@ -12,7 +12,7 @@ turing:
     endpoint: http://localhost:8983
 
 dumont:
-  url: http://localhost:30130
+  url: http://localhost:2720
   allowedOrigins: "http://localhost:5173,http://localhost:2700"
   multi-tenant: false
   # Authentication / permission model.
@@ -203,7 +203,7 @@ spring:
 # their own so the scrape target is never the public one. Only the prometheus endpoint is exposed.
 management:
   server:
-    port: 30131
+    port: 2721
   endpoints:
     web:
       exposure:

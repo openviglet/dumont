@@ -47,7 +47,7 @@ cd connector/connector-app
 mvn spring-boot:run
 ```
 
-The application starts at `http://localhost:30130`.
+The application starts at `http://localhost:2720`.
 
 ---
 

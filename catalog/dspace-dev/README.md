@@ -13,7 +13,7 @@ Only the backend runs. There is no Angular UI.
 | Administrator | `admin@lumen.test` / `Lumen-dev-2026` |
 
 Postgres and Solr are not published to the host. Port 18080 keeps clear of Viglet Turing (2700),
-the WordPress stacks (8080, 8091, 38082-38086) and Dumont (30130).
+the WordPress stacks (8080, 8091, 38082-38086) and Dumont (2720).
 
 ## Files
 

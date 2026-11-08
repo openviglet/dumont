@@ -278,7 +278,7 @@ The event listeners are configured in AEM via **OSGi Configuration** (AEM → We
 | Setting | Description |
 |---|---|
 | **Enabled** | Toggle to enable/disable automatic indexing |
-| **Host** | Dumont connector URL (e.g., `http://dumont-server:30130`) |
+| **Host** | Dumont connector URL (e.g., `http://dumont-server:2720`) |
 | **Config Name** | Source name configured in the Dumont connector |
 
 ### HTTP Payload
@@ -286,7 +286,7 @@ The event listeners are configured in AEM via **OSGi Configuration** (AEM → We
 When an event fires, the bundle sends:
 
 ```
-POST http://dumont-server:30130/api/v2/aem/index/{configName}
+POST http://dumont-server:2720/api/v2/aem/index/{configName}
 Content-Type: application/json
 
 {
@@ -313,7 +313,7 @@ the same thing whichever way it arrives.
 Register this URL as the webhook of an event registration, one per source:
 
 ```
-POST https://dumont-server:30130/api/v2/aem/webhook/{source}
+POST https://dumont-server:2720/api/v2/aem/webhook/{source}
 ```
 
 Adobe verifies the registration with a `GET` carrying a `challenge` query parameter, which the same
@@ -384,7 +384,7 @@ You can trigger indexing manually via HTTP (Postman, curl, etc.):
 ### Index Specific Paths
 
 ```bash
-curl -X POST http://localhost:30130/api/v2/aem/index/WKND \
+curl -X POST http://localhost:2720/api/v2/aem/index/WKND \
   -H "Content-Type: application/json" \
   -d '{
     "paths": ["/content/wknd/us/en/about"],
@@ -396,7 +396,7 @@ curl -X POST http://localhost:30130/api/v2/aem/index/WKND \
 ### Deindex Specific Paths
 
 ```bash
-curl -X POST http://localhost:30130/api/v2/aem/index/WKND \
+curl -X POST http://localhost:2720/api/v2/aem/index/WKND \
   -H "Content-Type: application/json" \
   -d '{
     "paths": ["/content/wknd/us/en/old-page"],

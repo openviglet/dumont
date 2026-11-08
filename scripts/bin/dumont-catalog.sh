@@ -7,7 +7,7 @@
 # Examples:
 #   ./bin/dumont-catalog.sh
 #   ./bin/dumont-catalog.sh -Xmx1g
-#   ./bin/dumont-catalog.sh -Xmx1g -- --server.port=30131
+#   ./bin/dumont-catalog.sh -Xmx1g -- --server.port=2722
 # --------------------------------------------------------------------------
 set -euo pipefail
 

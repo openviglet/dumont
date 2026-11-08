@@ -47,7 +47,7 @@ spring:
       default-destination: connector-indexing.queue
 
 server:
-  port: ${PORT:30130}
+  port: ${PORT:2720}
 
 dumont:
   indexing:
@@ -86,7 +86,7 @@ logging:
 
 | Property | Default | Description |
 |---|---|---|
-| `server.port` | `30130` | HTTP port for the Dumont application |
+| `server.port` | `2720` | HTTP port for the Dumont application |
 
 ### Admin Account
 
@@ -114,7 +114,7 @@ Each source's last run is published for Prometheus at `/actuator/prometheus`. Th
 
 | Property | Default | Description |
 |---|---|---|
-| `management.server.port` | `30131` | Port that serves `/actuator/prometheus`. |
+| `management.server.port` | `2721` | Port that serves `/actuator/prometheus`. |
 
 Every metric carries the `source` and `provider` labels:
 
@@ -392,7 +392,7 @@ turing:
   apiKey: your-turing-api-token
 
 server:
-  port: 30130
+  port: 2720
 ```
 
 ---

@@ -100,7 +100,7 @@ Two caps keep one runaway file from exhausting memory: a file larger than 100 Mi
 ```bash
 java -cp dumont-fs.jar com.viglet.dumont.filesystem.DumFSImportTool \
   --source-dir /mnt/shared/documents \
-  --server http://localhost:30130 \
+  --server http://localhost:2720 \
   --api-key your-api-key \
   --site InternalDocs \
   --locale en_US \

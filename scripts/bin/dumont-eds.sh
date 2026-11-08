@@ -7,7 +7,7 @@
 # Examples:
 #   ./bin/dumont-eds.sh
 #   ./bin/dumont-eds.sh -Xmx1g
-#   ./bin/dumont-eds.sh -Xmx1g -- --server.port=30132
+#   ./bin/dumont-eds.sh -Xmx1g -- --server.port=2723
 # --------------------------------------------------------------------------
 set -euo pipefail
 

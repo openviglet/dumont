@@ -36,21 +36,21 @@ Quick Start
    Start a connector (Windows):
      bin\dumont-aem.bat
 
-3. Open http://localhost:30130 in your browser.
+3. Open http://localhost:2720 in your browser.
 
 Running Multiple Connectors Simultaneously
 -------------------------------------------
 Only ONE plugin can be active per JVM instance. To run multiple connectors
 at the same time, start them on different ports:
 
-  # AEM on port 30130 (default)
+  # AEM on port 2720 (default)
   ./bin/dumont-aem.sh
 
-  # Web Crawler on port 30131
-  ./bin/dumont-webcrawler.sh -- --server.port=30131
+  # Web Crawler on port 2722
+  ./bin/dumont-webcrawler.sh -- --server.port=2722
 
-  # Database on port 30132
-  ./bin/dumont-db.sh -- --server.port=30132
+  # Database on port 2723
+  ./bin/dumont-db.sh -- --server.port=2723
 
 Documentation
 -------------

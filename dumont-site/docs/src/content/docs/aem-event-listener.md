@@ -110,7 +110,7 @@ Contents:
 ```json
 {
   "enabled": true,
-  "host": "$[env:DUMONT_CONNECTOR_HOST;default=http://localhost:30130]",
+  "host": "$[env:DUMONT_CONNECTOR_HOST;default=http://localhost:2720]",
   "configName": "$[env:DUMONT_CONFIG_NAME;default=WKND]"
 }
 ```
@@ -196,7 +196,7 @@ After deployment, the configuration can be managed in **AEM → Tools → Operat
 | Property | Default | Description |
 |---|---|---|
 | **Enabled** | `false` | Toggle event-driven indexing on/off |
-| **Host** | `http://localhost:30130` | Dumont connector URL |
+| **Host** | `http://localhost:2720` | Dumont connector URL |
 | **Config Name** | `WKND` | Source name in the Dumont connector |
 
 ---
@@ -207,9 +207,9 @@ For AEM as a Cloud Service, set these variables in Cloud Manager:
 
 | Variable | Environment | Value |
 |---|---|---|
-| `DUMONT_CONNECTOR_HOST` | Dev | `http://dev-dumont:30130` |
-| `DUMONT_CONNECTOR_HOST` | Stage | `http://stage-dumont:30130` |
-| `DUMONT_CONNECTOR_HOST` | Prod | `http://prod-dumont:30130` |
+| `DUMONT_CONNECTOR_HOST` | Dev | `http://dev-dumont:2720` |
+| `DUMONT_CONNECTOR_HOST` | Stage | `http://stage-dumont:2720` |
+| `DUMONT_CONNECTOR_HOST` | Prod | `http://prod-dumont:2720` |
 | `DUMONT_CONFIG_NAME` | All | `WKND` (or your source name) |
 
 ---

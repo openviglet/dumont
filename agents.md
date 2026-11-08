@@ -24,7 +24,7 @@ Each file has one job — keep them in sync and never duplicate content:
 3. Keep entries terse: implementation detail belongs in code/commits, not the docs.
 
 ### Project Structure
-- **connector/connector-app**: Spring Boot 4 backend (Java 21), main application — runs on port 30130
+- **connector/connector-app**: Spring Boot 4 backend (Java 21), main application — runs on port 2720
 - **connector/connector-commons**: Connector API interfaces and common classes
 - **dumont-react**: React + TypeScript frontend (Vite, Tailwind CSS v4, shadcn/ui, Module Federation)
 - **dumont-site**: the public site, dumont.viglet.org (served at the domain root, a GitHub Pages custom domain; origin and base declared once in `src/lib/site-links.ts`; prerendered Vite + React, published by `publish-github-pages.yml` with the marketplace samples under `/marketplace/`). Copy lives in `src/lib/site-content.ts`, links in `src/lib/site-links.ts`; the end-user docs are its `/docs` area (`dumont-site/docs/`, Astro + Starlight). Every claim must be something the code does — see `dumont-site/README.md`
@@ -131,7 +131,7 @@ All implement `DumIndexingPlugin` interface, loaded via `@ConditionalOnProperty`
 ### Key Properties (`application.yaml`)
 | Property | Default | Purpose |
 |----------|---------|---------|
-| `server.port` | 30130 | Application port |
+| `server.port` | 2720 | Application port |
 | `turing.url` | http://localhost:2700 | Turing ES URL |
 | `turing.apiKey` | (required) | API Key for Turing + incoming request auth |
 | `dumont.indexing.provider` | turing | Search backend: turing, solr, elasticsearch |
@@ -140,7 +140,7 @@ All implement `DumIndexingPlugin` interface, loaded via `@ConditionalOnProperty`
 | `dumont.cron` | - | Scheduled job cron |
 | `dumont.scheduler.enabled` | false | Enable scheduler |
 | `dumont.reactive.indexing` | false | Enable reactive indexing |
-| `management.server.port` | 30131 | Serves `/actuator/prometheus` only (run outcomes as `dumont_run_*` metrics, D136); never the public port |
+| `management.server.port` | 2721 | Serves `/actuator/prometheus` only (run outcomes as `dumont_run_*` metrics, D136); never the public port |
 
 ### System Info Endpoint
 - `GET /api/v2/connector/system-info` — returns app version, Java, OS, memory, disk, indexing config
@@ -496,7 +496,7 @@ Extracted service that encapsulates LLM summary generation with cache:
 ## Deployment
 
 ### Default Configuration
-- Port: 30130
+- Port: 2720
 - Database: H2 embedded (`./store/db/dumontDB`)
 - Queue: Artemis embedded (`store/queue/`)
 - Logs: `store/logs/dum-connector.log`

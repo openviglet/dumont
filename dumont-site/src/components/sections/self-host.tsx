@@ -21,7 +21,7 @@ const FACTS = [
     icon: Gauge,
     title: "Observable from day one",
     description:
-      "Prometheus metrics on the management port (30131), a webhook for warnings, and an optional MongoDB or Redis store for the indexing log.",
+      "Prometheus metrics on the management port (2721), a webhook for warnings, and an optional MongoDB or Redis store for the indexing log.",
   },
 ];
 
@@ -31,7 +31,7 @@ const COMPOSE = `services:
   dumont:
     image: ghcr.io/openviglet/dumont-ce:latest
     ports:
-      - 30130:30130
+      - 2720:2720
     volumes:
       - ./store:/app/store
     environment:
@@ -78,7 +78,7 @@ export function SelfHost() {
             <p className="mt-6 text-sm font-semibold">Or with Turing beside it:</p>
             <CodeBlock caption="docker-compose.yaml" code={COMPOSE} className="mt-2" />
             <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-              Then open <code className="font-mono">http://localhost:30130</code>. Standalone
+              Then open <code className="font-mono">http://localhost:2720</code>. Standalone
               jars, a Windows installer and an AppImage are described in the{" "}
               <a href={LINKS.install} className="font-semibold text-primary hover:underline">
                 installation guide

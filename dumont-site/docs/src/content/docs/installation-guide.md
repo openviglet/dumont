@@ -59,7 +59,7 @@ Pull the pre-built image published to the GitHub Container Registry (`ghcr.io`) 
 
 ```bash
 docker pull ghcr.io/openviglet/dumont-ce:latest
-docker run -p 30130:30130 ghcr.io/openviglet/dumont-ce:latest
+docker run -p 2720:2720 ghcr.io/openviglet/dumont-ce:latest
 ```
 
 :::tip[Image tags]
@@ -220,7 +220,7 @@ Create `/appl/viglet/dumont/aem/dumont-connector.properties`:
 ```properties
 turing.url=http://localhost:2700
 turing.apiKey=<YOUR_TURING_API_KEY>
-server.port=30130
+server.port=2720
 ```
 
 ### Systemd Service File
@@ -260,12 +260,12 @@ Since only one connector plugin is supported per JVM, run separate services for 
 
 ```
 /appl/viglet/dumont/
-├── aem/                           # AEM connector (port 30130)
+├── aem/                           # AEM connector (port 2720)
 │   ├── dumont-connector.jar
 │   ├── dumont-connector.properties
 │   └── libs/
 │       └── aem-plugin.jar
-└── webcrawler/                    # Web Crawler connector (port 30131)
+└── webcrawler/                    # Web Crawler connector (port 2722)
     ├── dumont-connector.jar
     ├── dumont-connector.properties
     └── libs/
@@ -284,7 +284,7 @@ The **Database** and **FileSystem** connectors are **standalone CLI tools**: the
 
 ```bash
 java -cp dumont-db-indexer.jar com.viglet.dumont.connector.db.DumDbImportTool \
-  --server http://localhost:30130 \
+  --server http://localhost:2720 \
   --api-key <API_KEY> \
   --driver org.mariadb.jdbc.Driver \
   --connect "jdbc:mariadb://localhost:3306/products" \
@@ -298,7 +298,7 @@ java -cp dumont-db-indexer.jar com.viglet.dumont.connector.db.DumDbImportTool \
 ```bash
 java -cp dumont-filesystem-indexer.jar com.viglet.dumont.filesystem.DumFSImportTool \
   --source-dir /mnt/shared/documents \
-  --server http://localhost:30130 \
+  --server http://localhost:2720 \
   --api-key <API_KEY> \
   --site InternalDocs \
   --locale en_US
@@ -317,7 +317,7 @@ services:
   dumont:
     image: ghcr.io/openviglet/dumont-ce:latest
     ports:
-      - "30130:30130"
+      - "2720:2720"
     environment:
       TURING_URL: http://turing:2700
       TURING_APIKEY: <YOUR_API_KEY>
@@ -348,7 +348,7 @@ services:
 After starting Dumont, verify it is running:
 
 ```bash
-curl http://localhost:30130/api/v2/connector/status
+curl http://localhost:2720/api/v2/connector/status
 ```
 
 A successful response confirms the service is up and ready to accept connector configurations.

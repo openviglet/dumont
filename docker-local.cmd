@@ -14,13 +14,13 @@ REM    docker-local.cmd --no-run   Build the image only
 REM
 REM  Optional environment variables:
 REM    IMAGE_NAME      Image repo/name   (default: openviglet/dumont-ce)
-REM    DUMONT_PORT     Host port         (default: 30130)
+REM    DUMONT_PORT     Host port         (default: 2720)
 REM    TURING_APIKEY   API key for the container (default: local-dev)
 REM ============================================================================
 
 SET "ROOT=%~dp0"
 IF "%IMAGE_NAME%"=="" SET "IMAGE_NAME=openviglet/dumont-ce"
-IF "%DUMONT_PORT%"=="" SET "DUMONT_PORT=30130"
+IF "%DUMONT_PORT%"=="" SET "DUMONT_PORT=2720"
 IF "%TURING_APIKEY%"=="" SET "TURING_APIKEY=local-dev"
 SET "TAG=local"
 SET "CONTAINER=dumont-connector-local"
@@ -52,7 +52,7 @@ ECHO [2/2] Starting container %CONTAINER% on port %DUMONT_PORT%
 ECHO ========================================
 docker rm -f "%CONTAINER%" >nul 2>&1
 docker run -d --name "%CONTAINER%" ^
-    -p "%DUMONT_PORT%:30130" ^
+    -p "%DUMONT_PORT%:2720" ^
     -e "TURING_APIKEY=%TURING_APIKEY%" ^
     -v dumont-local-store:/app/store ^
     "%IMAGE_NAME%:%TAG%"

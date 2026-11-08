@@ -138,7 +138,7 @@ Pass the fully-qualified class name with the `--class-name` parameter:
 java -cp dumont-db-indexer.jar:my-db-extensions.jar \
   com.viglet.dumont.connector.db.DumDbImportTool \
   --class-name com.example.ext.MyDbCustom \
-  --server http://localhost:30130 \
+  --server http://localhost:2720 \
   --api-key <API_KEY> \
   --driver org.mariadb.jdbc.Driver \
   --connect "jdbc:mariadb://localhost:3306/shop" \
@@ -204,7 +204,7 @@ mvn clean package
 java -cp dumont-db-indexer.jar:target/my-db-extensions-1.0.0.jar \
   com.viglet.dumont.connector.db.DumDbImportTool \
   --class-name com.example.ext.MyDbCustom \
-  --server http://localhost:30130 \
+  --server http://localhost:2720 \
   --api-key <API_KEY> \
   ...
 ```

@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/sections/site-footer";
 import { Trust } from "@/components/sections/trust";
 import { CallToAction } from "@/components/sections/cta";
 
-const METRICS = `# GET http://dumont:30131/actuator/prometheus
+const METRICS = `# GET http://dumont:2721/actuator/prometheus
 dumont_run_last_status{source="wknd",provider="turing"}        1
 dumont_run_last_finished_seconds{source="wknd",provider="turing"}
 dumont_run_last_duration_seconds{source="wknd",provider="turing"}
