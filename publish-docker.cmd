@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 REM ============================================================================
 REM publish-docker.cmd — Build the Viglet Dumont ES Docker image LOCALLY and
-REM push it to the GitHub Container Registry (ghcr.io/openviglet/dumont-ce).
+REM push it to the GitHub Container Registry (ghcr.io/openviglet/dumont).
 REM
 REM Unlike .github/workflows/publish-docker.yml (which runs Maven INSIDE the
 REM container), this builds the jars on the HOST using your authenticated ~/.m2
@@ -25,7 +25,7 @@ REM   publish-docker.cmd --nobuild  Skip the Maven build; reuse the existing jar
 REM ============================================================================
 
 set "REGISTRY=ghcr.io"
-set "IMAGE_NAME=openviglet/dumont-ce"
+set "IMAGE_NAME=openviglet/dumont"
 set "IMAGE=%REGISTRY%/%IMAGE_NAME%"
 set "JAR=connector\connector-app\target\dumont-connector.jar"
 

@@ -79,7 +79,7 @@ jobs:
       - name: Deploy Version
         env:
           GH_TOKEN: ${{ secrets.GH_PKG_TOKEN }}
-          # D252: openviglet/dumont-ce no longer resolves; releases live on the product repository.
+          # D252: the openviglet/dumont-ce repository no longer resolves; releases live on the product repository.
           RELEASE_REPO: openviglet/dumont
           RELEASE_COMMIT: ${{ steps.bump.outputs.commit }}
         run: |
@@ -125,7 +125,7 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
-  # D252: every release also publishes ghcr.io/openviglet/dumont-ce from the released commit,
+  # D252: every release also publishes ghcr.io/openviglet/dumont from the released commit,
   # so the image can no longer drift months behind the release, as it did in 2026.
   docker:
     needs: publish

@@ -29,7 +29,7 @@ const FACTS = [
 // run needs: Turing for the index, Dumont pointed at it.
 const COMPOSE = `services:
   dumont:
-    image: ghcr.io/openviglet/dumont-ce:latest
+    image: ghcr.io/openviglet/dumont:latest
     ports:
       - 2720:2720
     volumes:

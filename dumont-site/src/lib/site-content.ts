@@ -33,7 +33,7 @@ import {
 
 export { LINKS };
 
-export const DOCKER_RUN = "docker run -p 2720:2720 ghcr.io/openviglet/dumont-ce:latest";
+export const DOCKER_RUN = "docker run -p 2720:2720 ghcr.io/openviglet/dumont:latest";
 
 /* ── Sources and targets ─────────────────────────────────────────────── */
 

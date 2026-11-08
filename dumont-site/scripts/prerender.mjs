@@ -198,7 +198,7 @@ const manifest = {
   product: {
     docs: `${SITE_URL}docs/`,
     source: "https://github.com/openviglet/dumont",
-    image: "ghcr.io/openviglet/dumont-ce:latest",
+    image: "ghcr.io/openviglet/dumont:latest",
     marketplace: `${SITE_URL}marketplace/`,
   },
 };

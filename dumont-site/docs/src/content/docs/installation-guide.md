@@ -58,8 +58,8 @@ In addition:
 Pull the pre-built image published to the GitHub Container Registry (`ghcr.io`) by the **Publish Docker Image** GitHub Action:
 
 ```bash
-docker pull ghcr.io/openviglet/dumont-ce:latest
-docker run -p 2720:2720 ghcr.io/openviglet/dumont-ce:latest
+docker pull ghcr.io/openviglet/dumont:latest
+docker run -p 2720:2720 ghcr.io/openviglet/dumont:latest
 ```
 
 :::tip[Image tags]
@@ -315,7 +315,7 @@ A full stack with Dumont, Turing, Solr, and MariaDB:
 ```yaml
 services:
   dumont:
-    image: ghcr.io/openviglet/dumont-ce:latest
+    image: ghcr.io/openviglet/dumont:latest
     ports:
       - "2720:2720"
     environment:

@@ -31,7 +31,7 @@ export const LINKS = {
   changelog: "https://github.com/openviglet/dumont/blob/HEAD/docs/CHANGELOG.md",
   strategy: "https://github.com/openviglet/dumont/blob/HEAD/docs/STRATEGY.md",
   issues: "https://github.com/openviglet/dumont/issues",
-  image: "https://github.com/orgs/openviglet/packages/container/package/dumont-ce",
+  image: "https://github.com/orgs/openviglet/packages/container/package/dumont",
   turing: "https://turing.viglet.org",
   shio: "https://shio.viglet.org",
   viglet: "https://www.viglet.org",

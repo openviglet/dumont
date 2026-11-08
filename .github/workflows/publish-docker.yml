@@ -11,8 +11,8 @@
 #   - snapshot: a manual dispatch with no version tags `<branch>-snapshot` plus
 #     the commit sha. It never touches `latest` or a version tag, because the
 #     branch's pom names the LAST release and would overwrite its image.
-# The image keeps the name dumont-ce until a rename is decided for the whole
-# suite, so whoever pulls ghcr.io/openviglet/dumont-ce keeps getting updates.
+# The image was published as dumont-ce until 2026.3; it is now ghcr.io/openviglet/dumont,
+# named after the product repository. dumont-ce is no longer updated.
 
 name: Publish Docker Image
 
@@ -37,7 +37,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: openviglet/dumont-ce
+  IMAGE_NAME: openviglet/dumont
 
 jobs:
   docker:
