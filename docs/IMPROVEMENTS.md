@@ -57,6 +57,139 @@ partial degradation visible and the sidecar→native parity gate (D11) measurabl
 manual, and D16 (field-level provenance) made every published field traceable — all shipped,
 completing the trust track. Track F (semantics) follows the RAG maturity on the Turing side.
 
+### I.2 Full product names across the public site (D350)
+
+Review of 2026-11-08: published pages and current source, compared with viglet.org.
+hero.tsx and FOOTER_BLURB use Turing ES; site-links.ts renders With Turing and Shio and
+Dumont for AEM. The published docs title still ends in Viglet Dumont DEP.
+
+Apply the owner decision in hub docs/STRATEGY.md section I.7 to dumont-site/src,
+dumont-site/docs, accessible labels, titles, descriptions, OG assets, JSON-LD, llms.txt
+and generated Markdown twins. Always use Viglet Turing, Viglet Dumont and Viglet Shio,
+including repeated mentions. Share typed product identity data rather than maintaining
+shorter display aliases. Keep stable slugs, package names, commands, code identifiers,
+filenames and historical release records intact; classify these exceptions explicitly.
+Ensure the product identity remains visible on small screens by changing layout rather
+than abbreviating. Category labels remain separate from names.
+
+Acceptance: scan rendered visitor text and machine-readable outputs, not only source
+literals; report each intentional technical exception. Review desktop and 390-pixel
+navigation, long headings, buttons and docs search results. No backend renames or
+technical API changes.
+
+### I.3 A consistent visual contract with viglet.org (D351)
+
+Review of 2026-11-08: published pages and current source, compared with viglet.org.
+dumont-site/src/components/sections/hero.tsx uses a rounded metadata chip, hardcoded
+dark surfaces, gradient text, grid and animated orbs; the hub uses neutral surfaces and
+plain typographic metadata. Header product highlights also use pills.
+
+Adopt the hub typography roles, title scale, content gutters, spacing, button hierarchy,
+borders and focus treatment. Use released @viglet/viglet-design-system tokens/components
+where applicable and a thin compatible Astro mapping for documentation; inspect actual
+exports before designing an adapter. Preserve teal as the product accent. Replace
+decorative chips with plain eyebrow text, separators or ordinary navigation links. Keep
+genuine filter selections and status controls functional. Consolidate a reusable product
+hero for marketing subpages; documentation keeps its reading sidebar and article layout
+while sharing brand tokens. Avoid permanent dark heroes in light mode and remove
+decorative motion that competes with the product evidence.
+
+Acceptance: compare home, one solution page, a feature page, docs overview and article
+at 390/768/1440 pixels, light/dark and reduced motion. Preserve real demos, code
+examples, contrast, keyboard focus and original URLs. No framework migration or forced
+orange product branding.
+
+### I.4 Navigation, installation and release destinations (D352)
+
+Review of 2026-11-08: published pages and current source, compared with viglet.org.
+site-links.ts already defines install but the header Get started goes to the docs
+overview, and Changelog points to the internal GitHub task ledger. The hub already
+offers /dumont/download/ and /dumont/release-notes/ using the product release feed.
+
+Define one typed destination map used by marketing navigation, footer, CTAs and Astro
+overrides. Separate Try/Explore, Install, Documentation, Release notes, Source and
+Portfolio by their actual job. Get started should reach an actionable supported setup
+path with prerequisites and a first-success check; Documentation may keep the overview.
+Keep GitHub Source on openviglet/dumont; label the development roadmap separately from
+user release notes. Use existing hub download/release pages and product documentation
+instead of adding another release ledger or installation authority. Replace
+retired-domain references with verified current destinations, preserving inbound routes
+and anchors. The return to viglet.org and product identity must remain discoverable in
+mobile menus and docs.
+
+Acceptance: follow every primary CTA from home, a depth page and docs in a fresh
+browser, including narrow-screen menus and keyboard use; verify response status and
+destination content rather than URL spelling alone. Check release-feed availability and
+no circular hub/product redirects. Do not deploy or rewrite historical published slugs.
+
+### I.5 A focused home page with product-specific depth (D353)
+
+Review of 2026-11-08: published pages and current source, compared with viglet.org. At
+390 CSS pixels the published home measured 20,950 pixels tall. The illustrative
+RunReport is a useful account of index drift, but the home combines connector inventory,
+trust mechanisms, AI, WordPress and installation. The opening chip lists AEM, Solr and
+Elasticsearch without naming Viglet Turing.
+
+Lead with reliable source-to-index ingestion, the real sources and supported
+destinations, one labelled run example, and a first-connector path. Keep AEM as a strong
+dedicated solution and retain alternatives to Viglet Turing without turning the hero
+into a technology list. Preserve information by linking to its authoritative page
+instead of repeating the same inventory. Maintain existing anchor destinations with
+concise summaries when sections move. Align the short product descriptor with the hub
+but retain product-specific examples and technical depth. Give every retained section a
+decision it helps the visitor make.
+
+Acceptance: provide a before/after section map and walk a newcomer through what the
+product does, whom it serves, evidence and the next action without reading the whole
+page. Re-measure page length under the same viewport as supporting evidence, not as a
+conversion target. No invented testimonials, unsupported performance claims, deleted
+routes or promised conversion uplift; any outcome measurement needs later observation.
+
+### I.6 WordPress ownership and cross-product handoff (D354)
+
+Review of 2026-11-08: published pages and current source, compared with viglet.org. The
+published docs sidebar still lists WordPress inside Connectors, although the overview
+and site-content.ts correctly state direct integration with Viglet Turing. site-links.ts
+retains wordpressPlayground pointing to /playground/ on the Viglet Turing host: that
+path returned 404, while /wp-demo/ returned 200. That constant is not currently rendered
+by the marketing tile.
+
+Move WordPress discovery to a clearly named Viglet Turing integration handoff instead of
+presenting it as a Viglet Dumont connector. Preserve old documentation URLs as short
+explanatory pages or redirects with usable fallback links. Keep the visible marketing
+tile linked directly to the Viglet Turing product page and canonical plugin docs. Remove
+the unused invalid demo constant or point it to the canonical /wp-demo/ entry only if a
+consumer needs it. Do not create a second plugin, duplicate instructions or operate the
+WordPress demo from this project. Coordinate with existing T1256 deployment cleanup
+rather than filing a duplicate migration task.
+
+Acceptance: compare the published wording, linked documentation and source capability;
+assert the corrected boundary in generated HTML and machine-readable text.
+
+### I.7 Rendered brand and journey regression coverage (D355)
+
+Review of 2026-11-08: published pages and current source, compared with viglet.org. The
+sampled home and docs routes returned 200 at 1440/390 pixels without document-wide
+overflow or page errors. That is a healthy baseline, not a whole-site accessibility
+certification. Existing dumont-site build checks do not assert the new cross-site brand
+contract.
+
+Extend existing tests rather than adding a parallel framework. Enumerate generated
+marketing routes and representative documentation templates; verify full product names
+with technical exceptions, title/canonical/OG/JSON-LD/llms consistency, internal anchors
+and the destination map. Add Playwright coverage at 390/768/1440 pixels, both themes,
+reduced motion, keyboard navigation, menu opening/closing and focus return. Inspect
+actual screenshots for clipping, readability and decorative chips; do not substitute a
+CSS-class assertion for visual review. Test consent fresh, denied and withdrawn without
+loosening it to simplify the layout, and preserve demo failure states. Separate
+deterministic build checks from retry-bounded external-link checks so network resets are
+reported as inconclusive, not product regressions.
+
+Acceptance: run the existing site/docs build gates plus the new checks and retain
+representative screenshots and a route-result report. A later production smoke verifies
+deployed output; local success alone never claims deployment. No performance-score or
+conversion guarantees.
+
 ## IX. Cross-cutting decisions & restrictions
 
 These constrain every task above:

@@ -29,3 +29,6 @@
 ## Track T — Releases and links match what the site describes
 
 ## Track U — Academic repositories as sources (DSpace, OAI-PMH)
+
+## Track D — Adoption & authoring
+
