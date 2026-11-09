@@ -34,7 +34,7 @@ export function TrustPage() {
           title={
             <>
               Sending documents is the easy half.{" "}
-              <span className="text-gradient">Viglet Dumont also checks them.</span>
+              <span className="text-primary">Viglet Dumont also checks them.</span>
             </>
           }
           lead="It keeps a record of every item it sent, compares that record with what the index holds and with what the source still has, and reports the differences before it acts on them."

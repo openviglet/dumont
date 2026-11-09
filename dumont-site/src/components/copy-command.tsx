@@ -30,20 +30,22 @@ export function CopyCommand({
         // inline-flex keeps it a compact pill on desktop; max-w-full caps it to
         // the parent so a long command can't push the page wider on mobile; the
         // command itself scrolls horizontally instead (min-w-0 lets it shrink).
-        "inline-flex max-w-full items-center gap-3 rounded-lg border border-white/15 bg-black/30 px-4 py-2.5 font-mono text-sm text-[#d9f0ec] backdrop-blur",
+        // It sits on the page's own ground in either theme, so it takes the theme's
+        // tokens rather than assuming a dark band behind it.
+        "inline-flex max-w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5 font-mono text-sm text-foreground",
         className
       )}
     >
-      <span className="shrink-0 select-none text-[#5eead4]">$</span>
+      <span className="shrink-0 select-none text-primary">$</span>
       <code className="min-w-0 overflow-x-auto whitespace-nowrap">{command}</code>
       <button
         type="button"
         onClick={onCopy}
         aria-label="Copy command"
-        className="ml-1 shrink-0 rounded-md p-1 text-[#86a5a1] transition-colors hover:bg-white/10 hover:text-white"
+        className="ml-1 shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
         {copied ? (
-          <Check className="size-4 text-emerald-400" />
+          <Check className="size-4 text-primary" />
         ) : (
           <Copy className="size-4" />
         )}

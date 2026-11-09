@@ -192,6 +192,7 @@
 - **D350** — dumont-site and its docs name Viglet Turing, Viglet Dumont and Viglet Shio in full in copy, metadata, OG, JSON-LD and llms.txt, from a typed PRODUCTS map; the 390px header keeps the name.
   checked **Evidence and boundary are verified** Re-read the cited source and rendered routes, satisfy the acceptance checks in the design, and preserve technical identifiers and existing URLs.
   checked **The hub contract survives the change** Review full names, relevant light/dark and mobile layouts, and links to installation, documentation and the portfolio; retain the product-specific behavior.
+- **D351 (surfaces and chips)** — Heroes, AEM band, CTA and flow panel sit on theme-aware neutral ground with no grid, orbs or gradient text; eyebrows, nav and docs metadata are plain text, not pills.
 
 ## Track E — Data quality & trust
 

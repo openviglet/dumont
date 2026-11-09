@@ -58,7 +58,7 @@ export function AemPage() {
           title={
             <>
               AEM content in your search index,{" "}
-              <span className="text-gradient">the moment it is published</span>
+              <span className="text-primary">the moment it is published</span>
             </>
           }
           lead="Pages, Content Fragments, Experience Fragments and assets, read through AEM's own APIs and kept in step through replication events. For AEM on-prem, Managed Services, AEM as a Cloud Service and Edge Delivery Services."
@@ -69,12 +69,7 @@ export function AemPage() {
                 Install it <ArrowRight className="size-4" />
               </a>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white dark:bg-white/10"
-            >
+            <Button asChild size="lg" variant="outline">
               <a href={sitePath("/marketplace/wknd/")}>See the WKND sample</a>
             </Button>
           </div>

@@ -64,27 +64,6 @@
 }
 
 @layer components {
-  /* Faint grid used in the dark hero / CTA bands */
-  .grid-bg {
-    background-image: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0.05) 1px,
-        transparent 1px
-      ),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 44px 44px;
-    -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 35%, transparent 78%);
-    mask-image: radial-gradient(120% 90% at 50% 0%, #000 35%, transparent 78%);
-  }
-
-  .text-gradient {
-    background: linear-gradient(110deg, #ccfbf1, #5eead4 45%, #7dd3fc);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-  }
-
   /* The scanline sheen on a terminal panel: one pixel row every three. */
   .scanlines::after {
     content: "";
@@ -97,31 +76,6 @@
       transparent 1px 3px
     );
   }
-}
-
-@keyframes orb-float-a {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(40px, 30px);
-  }
-}
-@keyframes orb-float-b {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(-40px, 40px);
-  }
-}
-.animate-orb-a {
-  animation: orb-float-a 14s ease-in-out infinite;
-}
-.animate-orb-b {
-  animation: orb-float-b 16s ease-in-out infinite;
 }
 
 /* The block cursor at the end of a terminal transcript. */
@@ -143,8 +97,6 @@
   html {
     scroll-behavior: auto;
   }
-  .animate-orb-a,
-  .animate-orb-b,
   .animate-caret {
     animation: none;
   }

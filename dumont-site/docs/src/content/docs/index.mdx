@@ -7,12 +7,12 @@ tableOfContents: false
 import CardGrid from "../../components/CardGrid.astro";
 import FeatureCard from "../../components/FeatureCard.astro";
 import NavCard from "../../components/NavCard.astro";
-import Pill from "../../components/Pill.astro";
+import Meta from "../../components/Meta.astro";
 import SectionLabel from "../../components/SectionLabel.astro";
 
 export const VERSION = "2026.3";
 
-<Pill>v{VERSION}</Pill> <Pill>Open Source</Pill> <Pill>Apache 2.0</Pill>
+<Meta items={[`v${VERSION}`, "Open source", "Apache 2.0"]} />
 
 **Viglet Dumont** is an open-source data extraction platform. It connects your content (websites, databases, file systems, AEM, and paged JSON APIs) to **Viglet Turing** and other search engines through a reliable, asynchronous processing pipeline. WordPress is covered by Viglet Turing itself: its [WordPress plugin](https://turing.viglet.org/docs/integrations/wordpress/) sends content straight to Viglet Turing, without Viglet Dumont.
 

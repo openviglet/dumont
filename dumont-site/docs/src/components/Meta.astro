@@ -1,0 +1,10 @@
+---
+// Plain metadata above a page's opening paragraph (a version, a licence), set as
+// the marketing site's eyebrow is: text in the product accent, never a chip.
+interface Props {
+  items: string[];
+}
+const { items } = Astro.props;
+---
+
+<p class="dm-meta not-content">{items.join(" · ")}</p>

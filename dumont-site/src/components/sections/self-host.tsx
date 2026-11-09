@@ -74,7 +74,7 @@ export function SelfHost() {
 
           <div>
             <p className="text-sm font-semibold">Try it in one line:</p>
-            <CopyCommand command={DOCKER_RUN} className="mt-2 border-border bg-card text-foreground" />
+            <CopyCommand command={DOCKER_RUN} className="mt-2" />
             <p className="mt-6 text-sm font-semibold">Or with Viglet Turing beside it:</p>
             <CodeBlock caption="docker-compose.yaml" code={COMPOSE} className="mt-2" />
             <p className="mt-3 text-xs leading-relaxed text-muted-foreground">

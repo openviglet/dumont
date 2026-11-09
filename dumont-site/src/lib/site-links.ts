@@ -25,9 +25,11 @@ export const sitePath = (path: string) => BASE + path.replace(/^\//, "");
  * (`turing`, `dumont.indexing.provider`, ...) are technical and stay as they are.
  */
 export const PRODUCTS = {
-  turing: { fullName: "Viglet Turing", href: "https://turing.viglet.org" },
-  dumont: { fullName: "Viglet Dumont", href: SITE_URL },
-  shio: { fullName: "Viglet Shio", href: "https://shio.viglet.org" },
+  // `category` is viglet.org's own label for each, shown beside the name and never
+  // folded into it (the "DEP" that used to end the name now lives here).
+  turing: { fullName: "Viglet Turing", category: "Enterprise Search", href: "https://turing.viglet.org" },
+  dumont: { fullName: "Viglet Dumont", category: "Data Exchange Platform", href: SITE_URL },
+  shio: { fullName: "Viglet Shio", category: "Agent-ready CMS", href: "https://shio.viglet.org" },
 } as const;
 
 export const LINKS = {

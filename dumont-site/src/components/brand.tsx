@@ -63,12 +63,13 @@ export function TableScroll({
 }
 
 /**
- * Gradient eyebrow above a heading. Monospaced on purpose — it is the site's
+ * Eyebrow above a heading: plain text in the product accent, as viglet.org sets
+ * its labels, never a chip or gradient. Monospaced on purpose: it is the site's
  * one persistent nod to the surface the product is actually operated from.
  */
 export function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-block bg-gradient-to-r from-[#0f766e] to-[#38bdf8] bg-clip-text font-mono text-xs font-bold tracking-[0.12em] text-transparent uppercase">
+    <span className="inline-block font-mono text-xs font-bold tracking-[0.12em] text-primary uppercase">
       {children}
     </span>
   );

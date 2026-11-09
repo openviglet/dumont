@@ -127,20 +127,6 @@ samp {
   color: var(--foreground);
 }
 
-.site-nav-pill {
-  border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
-  background: color-mix(in oklab, var(--primary) 10%, transparent);
-  border-radius: 9999px;
-  padding: 0.2rem 0.75rem;
-  font-family: var(--sl-font-mono);
-  font-weight: 700;
-}
-
-.site-nav .site-nav-pill,
-.site-nav .site-nav-pill:hover {
-  color: var(--primary);
-}
-
 .site-nav-group {
   position: relative;
 }
@@ -272,16 +258,14 @@ samp {
 }
 
 /* ---------- cards for an index page ---------- */
-.dm-pill {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
-  background: var(--accent);
-  color: var(--accent-foreground);
-  border-radius: 9999px;
-  padding: 0.1rem 0.75rem;
+.dm-meta {
+  margin: 0;
+  color: var(--primary);
+  font-family: var(--sl-font-mono);
   font-size: var(--sl-text-xs);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .dm-grid {

@@ -49,26 +49,25 @@ export function Flow() {
 
           <ArrowRight className="mx-auto hidden size-6 self-center text-muted-foreground/50 lg:block" aria-hidden />
 
-          <div className="relative isolate overflow-hidden rounded-2xl border border-white/10 bg-[#081615] p-5 text-[#e8f5f3]">
-            <div className="grid-bg pointer-events-none absolute inset-0 -z-10" />
+          <div className="rounded-2xl border border-primary/40 bg-primary/5 p-5">
             <div className="flex items-center gap-3">
               <VigletLogo identifier="dumont" size={40} />
               <div>
                 <p className="font-extrabold">Viglet Dumont</p>
-                <p className="font-mono text-xs text-[#86a5a1]">Spring Boot 4 · Java 21 · port 2720</p>
+                <p className="font-mono text-xs text-muted-foreground">Spring Boot 4 · Java 21 · port 2720</p>
               </div>
             </div>
             <ol className="mt-5 grid grid-cols-2 gap-2 font-mono text-xs sm:grid-cols-3">
               {STAGES.map((s, i) => (
                 <li
                   key={s}
-                  className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-2 text-[#b5d0cc]"
+                  className="rounded-lg border border-border bg-card px-2.5 py-2 text-foreground"
                 >
-                  <span className="text-[#5eead4]">{i + 1}</span> {s}
+                  <span className="text-primary">{i + 1}</span> {s}
                 </li>
               ))}
             </ol>
-            <p className="mt-4 text-xs leading-relaxed text-[#86a5a1]">
+            <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
               An embedded, persistent Artemis queue between extraction and indexing, so a
               slow target backs work up instead of losing it.
             </p>

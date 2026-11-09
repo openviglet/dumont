@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, ArrowUpRight, ChevronDown, Layers, Menu, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -50,7 +50,7 @@ export function SiteNav() {
           </a>
           <a
             href={LINKS.viglet}
-            className="hidden items-center gap-1 rounded-full border border-border/60 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-muted-foreground transition-colors hover:border-border hover:text-foreground sm:inline-flex"
+            className="hidden items-center gap-1 border-l border-border pl-2.5 text-xs font-semibold whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
           >
             part of viglet.org
             <ArrowUpRight className="size-3" />
@@ -68,12 +68,12 @@ export function SiteNav() {
             </a>
           ))}
           {/* AEM is the deepest connector and the audience most likely to be
-              looking for one, so it gets a pill instead of a dropdown row. */}
+              looking for one, so it gets a top-level link instead of a dropdown
+              row: an ordinary link, as viglet.org's nav has no highlight pills. */}
           <a
             href={NAV_AEM.href}
-            className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-sm font-bold whitespace-nowrap text-primary transition-colors hover:border-primary/50 hover:bg-primary/15"
+            className="text-sm font-semibold whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground"
           >
-            <Layers className="size-3.5" />
             {NAV_AEM.label}
           </a>
           {NAV_GROUPS.map((group) => (

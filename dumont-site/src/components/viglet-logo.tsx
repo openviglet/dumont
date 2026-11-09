@@ -1,4 +1,4 @@
-import { sitePath } from "@/lib/site-links";
+import { PRODUCTS, sitePath } from "@/lib/site-links";
 
 /**
  * VigletLogo: product mark.
@@ -18,11 +18,9 @@ export const PRODUCT_COLORS: Record<string, string> = {
   turing: "#4169E1", // royalblue
 };
 
-const PRODUCT_NAMES: Record<string, string> = {
-  dumont: "Viglet Dumont",
-  shio: "Viglet Shio",
-  turing: "Viglet Turing",
-};
+const PRODUCT_NAMES: Record<string, string> = Object.fromEntries(
+  Object.entries(PRODUCTS).map(([id, product]) => [id, product.fullName])
+);
 
 interface VigletLogoProps {
   readonly identifier: string;

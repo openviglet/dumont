@@ -11,14 +11,11 @@ export function CallToAction() {
     // this identically.
     <section className="py-20" data-md-skip>
       <Container>
-        <div className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-[#081615] px-6 py-16 text-center text-white">
-          <div className="grid-bg pointer-events-none absolute inset-0 -z-10" />
-          <div className="animate-orb-a pointer-events-none absolute -top-24 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,#14b8a6,transparent_70%)] opacity-40 blur-[70px]" />
-
+        <div className="rounded-3xl border border-border bg-muted/40 px-6 py-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             Point it at one source this afternoon.
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-base text-[#a9c4c0] sm:text-lg">
+          <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground sm:text-lg">
             One container, a console in English or Portuguese, and a dry scan that shows what
             would be indexed before anything is. Apache 2.0, with the roadmap in the
             repository.
@@ -30,20 +27,10 @@ export function CallToAction() {
                 Install it <ArrowRight className="size-4" />
               </a>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white dark:bg-white/10"
-            >
+            <Button asChild size="lg" variant="outline">
               <a href={sitePath("/#marketplace")}>Start from a sample</a>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="ghost"
-              className="text-[#a9c4c0] hover:bg-white/10 hover:text-white"
-            >
+            <Button asChild size="lg" variant="ghost">
               <a href={LINKS.repo} target="_blank" rel="noreferrer">
                 Read the source
               </a>

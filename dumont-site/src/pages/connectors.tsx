@@ -18,7 +18,7 @@ export function ConnectorsPage() {
           title={
             <>
               Six kinds of source,{" "}
-              <span className="text-gradient">one way to run them</span>
+              <span className="text-primary">one way to run them</span>
             </>
           }
           lead="Every connector has a console screen, REST endpoints for create, update, export and import, and a JSON export package seeded on first boot. They all go through the same queue, checksums, safe finish and audit."
