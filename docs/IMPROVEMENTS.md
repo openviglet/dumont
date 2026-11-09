@@ -85,31 +85,6 @@ at 390/768/1440 pixels, light/dark and reduced motion. Preserve real demos, code
 examples, contrast, keyboard focus and original URLs. No framework migration or forced
 orange product branding.
 
-### I.5 A focused home page with product-specific depth (D353)
-
-Review of 2026-11-08: published pages and current source, compared with viglet.org. At
-390 CSS pixels the published home measured 20,950 pixels tall. The illustrative
-RunReport is a useful account of index drift, but the home combines connector inventory,
-trust mechanisms, AI, WordPress and installation. The opening chip lists AEM, Solr and
-Elasticsearch without naming Viglet Turing.
-
-Lead with reliable source-to-index ingestion, the real sources and supported
-destinations, one labelled run example, and a first-connector path. Keep AEM as a strong
-dedicated solution and retain alternatives to Viglet Turing without turning the hero
-into a technology list. Preserve information by linking to its authoritative page
-instead of repeating the same inventory. Maintain existing anchor destinations with
-concise summaries when sections move. Align the short product descriptor with the hub
-but retain product-specific examples and technical depth. Give every retained section a
-decision it helps the visitor make.
-
-Acceptance: provide a before/after section map and walk a newcomer through what the
-product does, whom it serves, evidence and the next action without reading the whole
-page. Re-measure page length under the same viewport as supporting evidence, not as a
-conversion target. No invented testimonials, unsupported performance claims (fix the
-universal docs getting-started/intro.md:34 'Send to any search engine': three targets
-only), deleted routes or promised conversion uplift; any outcome measurement needs later
-observation.
-
 ### I.6 WordPress ownership and cross-product handoff (D354)
 
 Review of 2026-11-08: published pages and current source, compared with viglet.org. The

@@ -4,7 +4,7 @@ import { Container, Eyebrow } from "@/components/brand";
 import { CopyCommand } from "@/components/copy-command";
 import { RunReport } from "@/components/run-report";
 import { DOCKER_RUN } from "@/lib/site-content";
-import { DESTINATIONS, sitePath } from "@/lib/site-links";
+import { DESTINATIONS, PRODUCTS, sitePath } from "@/lib/site-links";
 
 const PROMISES = [
   "A failed run never empties the index",
@@ -23,7 +23,7 @@ export function Hero() {
     <section id="top" className="border-b border-border bg-background">
       <Container className="grid grid-cols-1 items-center gap-12 py-16 md:py-20 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="min-w-0">
-          <Eyebrow>Open source · Self-hosted · AEM · Solr · Elasticsearch</Eyebrow>
+          <Eyebrow>{PRODUCTS.dumont.category} · Open source · Self-hosted</Eyebrow>
 
           <h1 className="mt-4 text-4xl font-extrabold leading-[1.08] tracking-tight md:text-5xl">
             Your content in your search index.{" "}

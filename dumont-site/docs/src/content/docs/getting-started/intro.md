@@ -31,7 +31,7 @@ The **AEM Connector** indexes content from Adobe Experience Manager author and p
 
 WordPress is not a Viglet Dumont source. The WordPress and WooCommerce plugin is part of **Viglet Turing**: it runs inside WordPress and sends content straight to Viglet Turing, without Viglet Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
 
-### Send to any search engine
+### Send to Viglet Turing, Apache Solr or Elasticsearch
 
 Beyond Viglet Turing, Viglet Dumont can deliver content directly to **Apache Solr** or **Elasticsearch** via pluggable indexing adapters, no Viglet Turing required.
 

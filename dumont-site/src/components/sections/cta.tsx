@@ -1,8 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/brand";
-import { CopyCommand } from "@/components/copy-command";
-import { DOCKER_RUN, LINKS } from "@/lib/site-content";
+import { LINKS } from "@/lib/site-content";
 import { sitePath } from "@/lib/site-links";
 
 export function CallToAction() {
@@ -35,10 +34,6 @@ export function CallToAction() {
                 Read the source
               </a>
             </Button>
-          </div>
-
-          <div className="mt-8 flex justify-center">
-            <CopyCommand command={DOCKER_RUN} />
           </div>
         </div>
       </Container>

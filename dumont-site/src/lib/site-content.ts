@@ -2,12 +2,10 @@ import type { LucideIcon } from "lucide-react";
 import { LINKS, sitePath } from "./site-links";
 import {
   Activity,
-  BookOpen,
   Boxes,
   Braces,
   Database,
   FileSearch,
-  FileStack,
   FolderTree,
   Gauge,
   GitCompareArrows,
@@ -17,7 +15,6 @@ import {
   ListChecks,
   Plug,
   Radar,
-  ScrollText,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -420,41 +417,5 @@ export const NON_GOALS: { title: string; body: string }[] = [
     title: "AI that publishes on its own",
     body:
       "The LLM drafts sources and suggests labels. It never decides on its own what goes into your index or what comes out of it.",
-  },
-];
-
-/* ── Resources ───────────────────────────────────────────────────────── */
-
-export interface ResourceCard {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  href: string;
-}
-
-export const RESOURCES: ResourceCard[] = [
-  {
-    icon: BookOpen,
-    title: "Documentation",
-    description: "Installation, every connector, configuration reference and the REST API.",
-    href: LINKS.docs,
-  },
-  {
-    icon: ScrollText,
-    title: "Strategy",
-    description: "What Viglet Dumont is betting on, and what it deliberately is not trying to be.",
-    href: LINKS.strategy,
-  },
-  {
-    icon: FileStack,
-    title: "Development roadmap",
-    description: "The open backlog, task by task. Shipped versions are in the release notes on viglet.org.",
-    href: LINKS.roadmap,
-  },
-  {
-    icon: Plug,
-    title: "Source",
-    description: "Apache 2.0, Spring Boot 4 on Java 21, a React 19 console. Issues welcome.",
-    href: LINKS.repo,
   },
 ];

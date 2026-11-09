@@ -6,7 +6,7 @@ Every page of this site has a Markdown twin at `<path>.md` (the home page at `/i
 
 ## Pages
 
-- [Home](https://dumont.viglet.org/index.md): what Viglet Dumont does, the four ways an index drifts, connectors, trust, AI, samples, self-hosting
+- [Home](https://dumont.viglet.org/index.md): what Viglet Dumont does, the four ways an index drifts and the check for each, sources and engines, AEM, AI, samples, fit beside Viglet Turing and Viglet Shio, self-hosting
 - [Viglet Dumont for AEM](https://dumont.viglet.org/aem.md): on-prem, AMS, AEM as a Cloud Service and Edge Delivery Services; fragments; Adobe I/O Events, OSGi bundle, journal poller
 - [Connectors](https://dumont.viglet.org/connectors.md): every source and target, source inference, the plugin SPI
 - [An index you can trust](https://dumont.viglet.org/trust.md): safe finish, audit, orphan reports, coverage and drift, provenance, Prometheus metrics

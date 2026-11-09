@@ -4,7 +4,9 @@ import { reopenConsent } from "@/lib/analytics";
 
 export function SiteFooter() {
   return (
-    <footer className="bg-[#061110] text-[#86a5a1]">
+    // `id="resources"`: the home's resources grid repeated these columns, so its anchor
+    // lands here (D353).
+    <footer id="resources" className="bg-[#061110] text-[#86a5a1]">
       <Container className="py-14">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div>

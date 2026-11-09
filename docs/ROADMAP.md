@@ -121,20 +121,10 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
-- 📋 **D353** (deps: D350 ✅) **The home page repeats technical detail before visitors can choose their next step** — Shorten the evaluation path and move depth into existing pages without removing evidence, stable URLs or useful technical documentation. → §I.5
 - 📋 **D354** (deps: —) **WordPress remains under Connectors even though its plugin belongs entirely to Viglet Turing** — Keep legacy entry points useful while making the product boundary unambiguous and removing stale demo destinations. → §I.6
-- 📋 **D355** (deps: D350 ✅, D351 ✅, D352 ✅, D353, D354) **No acceptance check compares the product site with the revised hub contract** — Validate the rendered brand and journeys across routes, themes and small screens so future site changes cannot silently undo the alignment. → §I.7
+- 📋 **D355** (deps: D350 ✅, D351 ✅, D352 ✅, D353 ✅, D354) **No acceptance check compares the product site with the revised hub contract** — Validate the rendered brand and journeys across routes, themes and small screens so future site changes cannot silently undo the alignment. → §I.7
 
 ## Done when — D351
-
-- **Evidence and boundary are verified** Re-read the cited source and rendered routes,
-  satisfy the acceptance checks in the design, and preserve technical identifiers and
-  existing URLs.
-- **The hub contract survives the change** Review full names, relevant light/dark and
-  mobile layouts, and links to installation, documentation and the portfolio; retain the
-  product-specific behavior.
-
-## Done when — D353
 
 - **Evidence and boundary are verified** Re-read the cited source and rendered routes,
   satisfy the acceptance checks in the design, and preserve technical identifiers and

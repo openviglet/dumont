@@ -6,7 +6,7 @@ import { sitePath } from "@/lib/site-links";
 /**
  * The argument of the site, in four pairs. A visitor who has run a search
  * index recognises at least one of the failures, and the answer next to it is
- * what makes Dumont a product rather than a pipe.
+ * what makes Viglet Dumont a product rather than a pipe.
  */
 export function Problems() {
   return (
@@ -35,7 +35,9 @@ export function Problems() {
           ))}
         </div>
 
-        <div className="mt-8 text-center">
+        {/* `#trust` lands here since the trust cards moved to /trust/ (D353): each
+            answer above is one of those checks, and the link below is the rest. */}
+        <div id="trust" className="mt-8 scroll-mt-24 text-center">
           <a
             href={sitePath("/trust/")}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"

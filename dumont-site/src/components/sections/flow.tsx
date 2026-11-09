@@ -28,7 +28,9 @@ export function Flow() {
         />
 
         <div className="grid items-stretch gap-5 lg:grid-cols-[1fr_auto_1.1fr_auto_1fr] [&>*]:min-w-0">
-          <div className="rounded-2xl border border-border bg-card p-5">
+          {/* `#connectors` lands here since the connector cards moved to /connectors/
+              (D353): the list below is their summary, one link per connector. */}
+          <div id="connectors" className="scroll-mt-24 rounded-2xl border border-border bg-card p-5">
             <p className="flex items-center gap-2 text-xs font-bold tracking-wide text-muted-foreground uppercase">
               <Layers className="size-3.5" /> Sources
             </p>
@@ -45,6 +47,12 @@ export function Flow() {
                 </li>
               ))}
             </ul>
+            <a
+              href={sitePath("/connectors/")}
+              className="mt-3 inline-flex items-center gap-1 px-2 text-sm font-semibold text-primary hover:underline"
+            >
+              What each connector reads <ArrowRight className="size-3.5" />
+            </a>
           </div>
 
           <ArrowRight className="mx-auto hidden size-6 self-center text-muted-foreground/50 lg:block" aria-hidden />

@@ -156,6 +156,7 @@ export const FOOTER_COLUMNS: SiteLinkGroup[] = [
       DESTINATIONS.releaseNotes,
       DESTINATIONS.source,
       DESTINATIONS.roadmap,
+      { label: "Strategy", href: LINKS.strategy },
     ],
   },
   {
