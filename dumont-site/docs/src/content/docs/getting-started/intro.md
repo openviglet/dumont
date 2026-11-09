@@ -3,7 +3,7 @@ title: "What is Viglet Dumont?"
 description: Viglet Dumont is an open-source data extraction platform that connects your content sources to Viglet Turing for indexing and search.
 ---
 
-**Viglet Dumont** is an open-source data extraction platform. It connects your content (wherever it lives) to [Viglet Turing](https://docs.viglet.org/turing) for indexing and search.
+**Viglet Dumont** is an open-source data extraction platform. It connects your content (wherever it lives) to [Viglet Turing](https://turing.viglet.org/) for indexing and search.
 
 Think of Viglet Dumont as the bridge between your content sources and the search engine. It crawls websites, queries databases, scans file systems and reads AEM repositories, then delivers every document to Viglet Turing through a reliable, asynchronous pipeline.
 

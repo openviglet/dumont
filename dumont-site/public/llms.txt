@@ -30,8 +30,4 @@ Every page of this site has a Markdown twin at `<path>.md` (the home page at `/i
 
 ## Links
 
-- [Documentation](https://dumont.viglet.org/docs/): every page has a Markdown twin; [the index of them](https://dumont.viglet.org/docs/llms.txt)
-- [Installation guide](https://dumont.viglet.org/docs/installation-guide.md)
-- [Source](https://github.com/openviglet/dumont)
-- [Viglet Turing](https://turing.viglet.org)
-- [Viglet Shio](https://shio.viglet.org)
+- Written at build from `src/lib/site-links.ts`, the destinations every page links.

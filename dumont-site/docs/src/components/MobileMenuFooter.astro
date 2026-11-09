@@ -2,10 +2,10 @@
 // Under 50rem the header nav is hidden, so the menu Starlight opens there carries the
 // site's links instead, above its own theme and language pickers.
 import Default from "@astrojs/starlight/components/MobileMenuFooter.astro";
-import { NAV_AEM, NAV_GROUPS } from "../../../src/lib/site-links";
+import { DESTINATIONS, NAV_AEM, NAV_GROUPS, PRODUCTS } from "../../../src/lib/site-links";
 ---
 
-<nav class="site-nav-mobile" aria-label="Viglet Dumont">
+<nav class="site-nav-mobile" aria-label={PRODUCTS.dumont.fullName}>
   <a href={NAV_AEM.href}>{NAV_AEM.label}</a>
   {
     NAV_GROUPS.map((group) => (
@@ -17,5 +17,6 @@ import { NAV_AEM, NAV_GROUPS } from "../../../src/lib/site-links";
       </div>
     ))
   }
+  <a href={DESTINATIONS.portfolio.href}>{DESTINATIONS.portfolio.label}</a>
 </nav>
 <Default />

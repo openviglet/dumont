@@ -85,33 +85,6 @@ at 390/768/1440 pixels, light/dark and reduced motion. Preserve real demos, code
 examples, contrast, keyboard focus and original URLs. No framework migration or forced
 orange product branding.
 
-### I.4 Navigation, installation and release destinations (D352)
-
-Review of 2026-11-08: published pages and current source, compared with viglet.org.
-site-links.ts already defines install but only cta.tsx, self-host.tsx and aem.tsx use
-it; the header Get started goes to /#self-host (site-nav.tsx:104) and the hero Docs
-button to the docs overview, and Changelog points to the internal GitHub task ledger.
-The hub already offers /dumont/download/ and /dumont/release-notes/ using the product
-release feed.
-
-Define one typed destination map used by marketing navigation, footer, CTAs and Astro
-overrides. Separate Try/Explore, Install, Documentation, Release notes, Source and
-Portfolio by their actual job. Get started should reach an actionable supported setup
-path with prerequisites and a first-success check; Documentation may keep the overview.
-Keep GitHub Source on openviglet/dumont; label the development roadmap separately from
-user release notes. Use existing hub download/release pages and product documentation
-instead of adding another release ledger or installation authority. Replace
-retired-domain references with verified current destinations (15 docs.viglet.org/turing
-links in 8 docs pages; the hand-written llms.txt Links, generated from the map);
-dumont.viglet.org/docs stays canonical, D235 redirected docs.viglet.org/dumont. Extend
-check-readme-links.mjs to them, preserving inbound routes and anchors. The return to
-viglet.org and product identity must remain discoverable in mobile menus and docs.
-
-Acceptance: follow every primary CTA from home, a depth page and docs in a fresh
-browser, including narrow-screen menus and keyboard use; verify response status and
-destination content rather than URL spelling alone. Check release-feed availability and
-no circular hub/product redirects. Do not deploy or rewrite historical published slugs.
-
 ### I.5 A focused home page with product-specific depth (D353)
 
 Review of 2026-11-08: published pages and current source, compared with viglet.org. At

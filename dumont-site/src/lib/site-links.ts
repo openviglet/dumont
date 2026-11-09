@@ -32,30 +32,54 @@ export const PRODUCTS = {
   shio: { fullName: "Viglet Shio", category: "Agent-ready CMS", href: "https://shio.viglet.org" },
 } as const;
 
+export interface SiteLink {
+  label: string;
+  href: string;
+}
+
+/**
+ * Where each step of a visitor's journey goes, named by its job (D352) and read by
+ * the header, the footer, the calls to action, the docs' Astro overrides and the
+ * Links section the prerender writes into llms.txt, so the steps cannot drift apart.
+ *
+ * Release notes and downloads are viglet.org's pages, fed by this site's
+ * changelog.json: there is one release ledger and it is not the GitHub task ledger,
+ * which is the development roadmap and is labelled as one.
+ */
+export const DESTINATIONS = {
+  /** Try it now: the one-container run, on the home page. */
+  explore: { label: "Run it", href: sitePath("/#self-host") },
+  /** A supported setup path: prerequisites, install, and the check that it runs. */
+  getStarted: { label: "Get started", href: sitePath("/docs/installation-guide/") },
+  docs: { label: "Documentation", href: sitePath("/docs/") },
+  download: { label: "Download", href: "https://www.viglet.org/dumont/download/" },
+  releaseNotes: { label: "Release notes", href: "https://www.viglet.org/dumont/release-notes/" },
+  source: { label: "Source", href: "https://github.com/openviglet/dumont" },
+  roadmap: {
+    label: "Development roadmap",
+    href: "https://github.com/openviglet/dumont/blob/HEAD/docs/ROADMAP.md",
+  },
+  portfolio: { label: "Part of viglet.org", href: "https://www.viglet.org/" },
+} as const satisfies Record<string, SiteLink>;
+
 export const LINKS = {
-  docs: sitePath("/docs/"),
-  install: sitePath("/docs/installation-guide/"),
+  docs: DESTINATIONS.docs.href,
+  install: DESTINATIONS.getStarted.href,
   rest: sitePath("/docs/rest-api/"),
   // The WordPress plugin is part of Viglet Turing: its page, docs and Playground demo live there.
   wordpress: "https://turing.viglet.org/wordpress/",
   wordpressDocs: "https://turing.viglet.org/docs/integrations/wordpress/",
   wordpressPlayground: "https://turing.viglet.org/playground/",
-  repo: "https://github.com/openviglet/dumont",
+  repo: DESTINATIONS.source.href,
   license: "https://github.com/openviglet/dumont/blob/HEAD/LICENSE",
-  roadmap: "https://github.com/openviglet/dumont/blob/HEAD/docs/ROADMAP.md",
-  changelog: "https://github.com/openviglet/dumont/blob/HEAD/docs/CHANGELOG.md",
+  roadmap: DESTINATIONS.roadmap.href,
   strategy: "https://github.com/openviglet/dumont/blob/HEAD/docs/STRATEGY.md",
   issues: "https://github.com/openviglet/dumont/issues",
   image: "https://github.com/orgs/openviglet/packages/container/package/dumont",
   turing: PRODUCTS.turing.href,
   shio: PRODUCTS.shio.href,
-  viglet: "https://www.viglet.org",
+  viglet: DESTINATIONS.portfolio.href,
 } as const;
-
-export interface SiteLink {
-  label: string;
-  href: string;
-}
 
 export interface SiteLinkGroup {
   label: string;
@@ -64,7 +88,7 @@ export interface SiteLinkGroup {
 
 // Hrefs are anchored at the site's base ("/#…") so they keep working from
 // any page: the browser navigates home and scrolls to the section.
-export const NAV_LINKS: SiteLink[] = [{ label: "Docs", href: LINKS.docs }];
+export const NAV_LINKS: SiteLink[] = [{ label: "Docs", href: DESTINATIONS.docs.href }];
 
 /** AEM is the deepest connector, so the nav gives it a pill of its own. */
 export const NAV_AEM: SiteLink = { label: "For AEM", href: sitePath("/aem/") };
@@ -126,12 +150,44 @@ export const FOOTER_COLUMNS: SiteLinkGroup[] = [
   {
     label: "Open and inspectable",
     items: [
-      { label: "Documentation", href: LINKS.docs },
-      { label: "Source", href: LINKS.repo },
-      { label: "Roadmap", href: LINKS.roadmap },
-      { label: "Changelog", href: LINKS.changelog },
-      { label: PRODUCTS.turing.fullName, href: LINKS.turing },
-      { label: PRODUCTS.shio.fullName, href: LINKS.shio },
+      DESTINATIONS.getStarted,
+      DESTINATIONS.docs,
+      DESTINATIONS.download,
+      DESTINATIONS.releaseNotes,
+      DESTINATIONS.source,
+      DESTINATIONS.roadmap,
     ],
   },
+  {
+    label: "The Viglet portfolio",
+    items: [
+      { label: PRODUCTS.turing.fullName, href: LINKS.turing },
+      { label: PRODUCTS.shio.fullName, href: LINKS.shio },
+      { label: "viglet.org", href: DESTINATIONS.portfolio.href },
+    ],
+  },
+];
+
+/**
+ * The Links section of llms.txt, written by the prerender from the same map the
+ * pages read (D352): an agent following it lands where a visitor would.
+ */
+export const LLMS_LINKS: { label: string; href: string; note?: string }[] = [
+  {
+    ...DESTINATIONS.docs,
+    href: `${SITE_ORIGIN}${DESTINATIONS.docs.href}`,
+    note: `every page has a Markdown twin; [the index of them](${SITE_ORIGIN}${DESTINATIONS.docs.href}llms.txt)`,
+  },
+  {
+    label: "Installation guide",
+    href: `${SITE_ORIGIN}${DESTINATIONS.getStarted.href.replace(/\/$/, ".md")}`,
+    note: "prerequisites, install and the check that it runs",
+  },
+  { ...DESTINATIONS.download, note: "on viglet.org: the container image and release artefacts" },
+  { ...DESTINATIONS.releaseNotes, note: "on viglet.org, from this site's changelog.json" },
+  DESTINATIONS.source,
+  { ...DESTINATIONS.roadmap, note: "the open backlog, not release notes" },
+  { label: PRODUCTS.turing.fullName, href: PRODUCTS.turing.href },
+  { label: PRODUCTS.shio.fullName, href: PRODUCTS.shio.href },
+  { label: "viglet.org", href: DESTINATIONS.portfolio.href, note: "the Viglet portfolio" },
 ];

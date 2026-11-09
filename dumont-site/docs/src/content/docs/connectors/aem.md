@@ -559,8 +559,8 @@ Need custom attribute extractors, delta date logic, or content processors? See [
 |---|---|
 | [AEM Event Listener](/docs/aem-event-listener/) | Install the OSGi event listener bundle inside AEM for real-time indexing |
 | [Extending the AEM Connector](/docs/extending-aem/) | Custom attribute extractors, content processors, and configuration JSON reference |
-| [Viglet Turing: Integration](https://docs.viglet.org/turing/integration) | General integration management: monitoring, indexing stats, and system information |
-| [Viglet Turing: AEM Connector](https://docs.viglet.org/turing/integration-aem) | AEM integration overview from the Viglet Turing perspective |
-| [Viglet Turing: Semantic Navigation](https://docs.viglet.org/turing/semantic-navigation) | Configure the SN Sites that receive indexed content |
+| [Viglet Turing: Integration](https://turing.viglet.org/docs/integration/) | General integration management: monitoring, indexing stats, and system information |
+| [Viglet Turing: AEM Connector](https://turing.viglet.org/docs/integration-aem/) | AEM integration overview from the Viglet Turing perspective |
+| [Viglet Turing: Semantic Navigation](https://turing.viglet.org/docs/semantic-navigation/) | Configure the SN Sites that receive indexed content |
 
 ---

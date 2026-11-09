@@ -202,4 +202,4 @@ Viglet Dumont + PostgreSQL
 | [Connectors Overview](/docs/connectors/overview/) | All connectors and deployment types |
 | [Indexing Plugins](/docs/indexing-plugins/) | Viglet Turing, Solr, Elasticsearch output targets |
 | [Installation Guide](/docs/installation-guide/) | Setup with `-Dloader.path` and systemd |
-| [Viglet Turing: Architecture](https://docs.viglet.org/turing/architecture-overview) | Search-side architecture: indexing reception, search flow, and deployment topologies |
+| [Viglet Turing: Architecture](https://turing.viglet.org/docs/architecture-overview/) | Search-side architecture: indexing reception, search flow, and deployment topologies |

@@ -21,7 +21,7 @@ const distDir = resolve(process.cwd(), "dist");
 const serverEntry = resolve(process.cwd(), "dist-ssr", "entry-server.js");
 
 // SITE_URL is the published root, base included ("https://dumont.viglet.org/").
-const { render, routes, BASE, SITE_URL } = await import(pathToFileURL(serverEntry).href);
+const { render, routes, BASE, LLMS_LINKS, SITE_URL } = await import(pathToFileURL(serverEntry).href);
 const template = readFileSync(resolve(distDir, "index.html"), "utf-8");
 
 /** Replace the first match of `re` in `text`, or throw so a drift fails the build. */
@@ -217,13 +217,25 @@ const mdBytes = index.reduce((n, r) => n + r.bytes.markdown, 0);
  * build instead of publishing a stale figure.
  */
 const llmsPath = resolve(distDir, "llms.txt");
+const llmsLinks = LLMS_LINKS.map(
+  (link) => `- [${link.label}](${link.href})${link.note ? `: ${link.note}` : ""}`
+).join("\n");
 writeFileSync(
   llmsPath,
+  // The Links section is written from src/lib/site-links.ts (D352), the map every page's
+  // calls to action read, so the file an agent follows cannot point somewhere a visitor
+  // is not sent. It is the file's last section.
   replaceOrThrow(
-    readFileSync(llmsPath, "utf-8"),
-    /\d+ KB of Markdown against \d+ KB of HTML/,
-    `${Math.round(mdBytes / 1024)} KB of Markdown against ${Math.round(htmlBytes / 1024)} KB of HTML`,
-    "the Markdown-versus-HTML size pair",
+    replaceOrThrow(
+      readFileSync(llmsPath, "utf-8"),
+      /\d+ KB of Markdown against \d+ KB of HTML/,
+      `${Math.round(mdBytes / 1024)} KB of Markdown against ${Math.round(htmlBytes / 1024)} KB of HTML`,
+      "the Markdown-versus-HTML size pair",
+      "llms.txt"
+    ),
+    /## Links\n[\s\S]*$/,
+    `## Links\n\n${llmsLinks}\n`,
+    "the Links section",
     "llms.txt"
   ),
   "utf-8"

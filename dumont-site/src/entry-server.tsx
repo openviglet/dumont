@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 // The scripts after the build (prerender, docs-twins) read where the site is
 // served from here, so the origin and base are declared once, in site-links.
-export { BASE, SITE_URL } from "@/lib/site-links";
+export { BASE, LLMS_LINKS, SITE_URL } from "@/lib/site-links";
 
 export interface PrerenderRoute {
   /** URL path (also the output directory under dist/). */

@@ -447,8 +447,8 @@ export const RESOURCES: ResourceCard[] = [
   },
   {
     icon: FileStack,
-    title: "Roadmap and changelog",
-    description: "The open backlog and every shipped task, one line each, with its commit.",
+    title: "Development roadmap",
+    description: "The open backlog, task by task. Shipped versions are in the release notes on viglet.org.",
     href: LINKS.roadmap,
   },
   {

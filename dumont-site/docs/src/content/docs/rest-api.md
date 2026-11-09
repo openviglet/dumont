@@ -623,4 +623,4 @@ Returns an empty AEM source model for reference.
 |---|---|
 | [AEM Connector](/docs/connectors/aem/) | AEM indexing flow, event listeners, and manual triggering |
 | [Connectors Overview](/docs/connectors/overview/) | All connectors and how they're managed |
-| [Viglet Turing: Integration](https://docs.viglet.org/turing/integration) | Viglet Turing admin console for managing connectors |
+| [Viglet Turing: Integration](https://turing.viglet.org/docs/integration/) | Viglet Turing admin console for managing connectors |

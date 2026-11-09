@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Container, Logo } from "@/components/brand";
-import { LINKS, NAV_AEM, NAV_GROUPS, NAV_LINKS, PRODUCTS, sitePath } from "@/lib/site-links";
+import { DESTINATIONS, LINKS, NAV_AEM, NAV_GROUPS, NAV_LINKS, PRODUCTS, sitePath } from "@/lib/site-links";
 import { cn } from "@/lib/utils";
 
 export function SiteNav() {
@@ -104,8 +104,8 @@ export function SiteNav() {
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <Button asChild size="sm">
-            <a href={sitePath("/#self-host")}>
-              Get started
+            <a href={DESTINATIONS.getStarted.href}>
+              {DESTINATIONS.getStarted.label}
               <ArrowRight className="hidden size-4 sm:block" />
             </a>
           </Button>

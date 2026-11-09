@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Container, Eyebrow } from "@/components/brand";
 import { CopyCommand } from "@/components/copy-command";
 import { RunReport } from "@/components/run-report";
-import { DOCKER_RUN, LINKS } from "@/lib/site-content";
-import { sitePath } from "@/lib/site-links";
+import { DOCKER_RUN } from "@/lib/site-content";
+import { DESTINATIONS, sitePath } from "@/lib/site-links";
 
 const PROMISES = [
   "A failed run never empties the index",
@@ -43,15 +43,15 @@ export function Hero() {
 
           <div className="mt-7 flex flex-wrap gap-3">
             <Button asChild size="lg">
-              <a href="#self-host">
-                Run it <ArrowRight className="size-4" />
+              <a href={DESTINATIONS.explore.href}>
+                {DESTINATIONS.explore.label} <ArrowRight className="size-4" />
               </a>
             </Button>
             <Button asChild size="lg" variant="outline">
               <a href={sitePath("/aem/")}>Viglet Dumont for AEM</a>
             </Button>
             <Button asChild size="lg" variant="ghost">
-              <a href={LINKS.docs}>Docs</a>
+              <a href={DESTINATIONS.docs.href}>{DESTINATIONS.docs.label}</a>
             </Button>
           </div>
 

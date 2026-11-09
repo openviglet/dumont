@@ -230,4 +230,4 @@ For AEM as a Cloud Service, set these variables in Cloud Manager:
 | [AEM Connector](/docs/connectors/aem/) | How the connector processes AEM content (infinity.json, tags, model.json) |
 | [Extending the AEM Connector](/docs/extending-aem/) | Custom extensions, configuration JSON, and Maven dependencies |
 | [Installation Guide](/docs/installation-guide/) | Deploying Viglet Dumont connector with the AEM plugin |
-| [Viglet Turing: AEM Integration](https://docs.viglet.org/turing/integration-aem) | Managing AEM indexing via the Viglet Turing admin console |
+| [Viglet Turing: AEM Integration](https://turing.viglet.org/docs/integration-aem/) | Managing AEM indexing via the Viglet Turing admin console |

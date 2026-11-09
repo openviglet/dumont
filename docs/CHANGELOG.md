@@ -193,6 +193,9 @@
   checked **Evidence and boundary are verified** Re-read the cited source and rendered routes, satisfy the acceptance checks in the design, and preserve technical identifiers and existing URLs.
   checked **The hub contract survives the change** Review full names, relevant light/dark and mobile layouts, and links to installation, documentation and the portfolio; retain the product-specific behavior.
 - **D351 (surfaces and chips)** — Heroes, AEM band, CTA and flow panel sit on theme-aware neutral ground with no grid, orbs or gradient text; eyebrows, nav and docs metadata are plain text, not pills.
+- **D352** — One DESTINATIONS map drives nav, footer, CTAs, docs menus and llms.txt: Get started opens the install guide, release notes and downloads are the hub's, and retired doc links are refused.
+  checked **Evidence and boundary are verified** Re-read the cited source and rendered routes, satisfy the acceptance checks in the design, and preserve technical identifiers and existing URLs.
+  checked **The hub contract survives the change** Review full names, relevant light/dark and mobile layouts, and links to installation, documentation and the portfolio; retain the product-specific behavior.
 
 ## Track E — Data quality & trust
 

@@ -142,9 +142,9 @@ Once connected, the Viglet Turing console provides a graphical interface for:
 - Viewing indexing statistics and status
 - Running double-check consistency validation
 
-For full details on the Integration UI (including monitoring, indexing stats, and double-check) see the [Viglet Turing Integration documentation](https://docs.viglet.org/turing/integration).
+For full details on the Integration UI (including monitoring, indexing stats, and double-check) see the [Viglet Turing Integration documentation](https://turing.viglet.org/docs/integration/).
 
-For AEM-specific configuration (sources, content types, author/publish, delta tracking, locales, indexing rules) see [Viglet Turing AEM Connector documentation](https://docs.viglet.org/turing/integration-aem).
+For AEM-specific configuration (sources, content types, author/publish, delta tracking, locales, indexing rules) see [Viglet Turing AEM Connector documentation](https://turing.viglet.org/docs/integration-aem/).
 
 ---
 
@@ -203,8 +203,8 @@ Every connector needs at least these pieces of information:
 
 | Connector | Configuration Method | Where |
 |---|---|---|
-| **Web Crawler** | Viglet Turing Admin Console | [Viglet Turing → Integration](https://docs.viglet.org/turing/integration) |
-| **AEM** | JSON file + Viglet Turing Admin Console | `export/` directory + [Viglet Turing → Integration](https://docs.viglet.org/turing/integration-aem) |
+| **Web Crawler** | Viglet Turing Admin Console | [Viglet Turing → Integration](https://turing.viglet.org/docs/integration/) |
+| **AEM** | JSON file + Viglet Turing Admin Console | `export/` directory + [Viglet Turing → Integration](https://turing.viglet.org/docs/integration-aem/) |
 | **Database** | CLI parameters | Command-line: see [Database Connector](/docs/connectors/database/) |
 | **FileSystem** | CLI parameters | Command-line: see [FileSystem Connector](/docs/connectors/filesystem/) |
 
