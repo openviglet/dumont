@@ -85,28 +85,6 @@ at 390/768/1440 pixels, light/dark and reduced motion. Preserve real demos, code
 examples, contrast, keyboard focus and original URLs. No framework migration or forced
 orange product branding.
 
-### I.6 WordPress ownership and cross-product handoff (D354)
-
-Review of 2026-11-08: published pages and current source, compared with viglet.org. The
-published docs sidebar still lists WordPress inside Connectors
-(docs/astro.config.mjs:121; the connectors/wordpress.md and wordpress-turing.md stubs
-already hand off), although the overview and site-content.ts correctly state direct
-integration with Viglet Turing. site-links.ts retains wordpressPlayground pointing to
-/playground/ on the Viglet Turing host: that path returned 404, while /wp-demo/ returned
-200. That constant is not currently rendered by the marketing tile, but public/playground/index.html still redirects visitors to that 404; point it at /wp-demo/.
-
-Move WordPress discovery to a clearly named Viglet Turing integration handoff instead of
-presenting it as a Viglet Dumont connector. Preserve old documentation URLs as short
-explanatory pages or redirects with usable fallback links. Keep the visible marketing
-tile linked directly to the Viglet Turing product page and canonical plugin docs. Remove
-the unused invalid demo constant or point it to the canonical /wp-demo/ entry only if a
-consumer needs it. Do not create a second plugin, duplicate instructions or operate the
-WordPress demo from this project. Coordinate with existing T1256 deployment cleanup
-rather than filing a duplicate migration task.
-
-Acceptance: compare the published wording, linked documentation and source capability;
-assert the corrected boundary in generated HTML and machine-readable text.
-
 ### I.7 Rendered brand and journey regression coverage (D355)
 
 Review of 2026-11-08: published pages and current source, compared with viglet.org. The

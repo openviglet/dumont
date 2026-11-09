@@ -117,9 +117,14 @@ try {
             { slug: "connectors/aem" },
             { slug: "aem-event-listener" },
             { slug: "connectors/catalog" },
-            // The plugin is part of Viglet Turing: one entry, a stub pointing at its docs there.
-            { slug: "connectors/wordpress" },
           ],
+        },
+        // WordPress is not a Viglet Dumont connector: the plugin is part of Viglet Turing and
+        // sends to it directly (D354). It keeps its old URL as a handoff page, under a group
+        // that says whose it is.
+        {
+          label: "Viglet Turing integrations",
+          items: [{ slug: "connectors/wordpress", label: "WordPress (part of Viglet Turing)" }],
         },
         { slug: "developer-guide" },
         { slug: "rest-api" },

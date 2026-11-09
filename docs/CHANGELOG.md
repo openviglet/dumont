@@ -199,6 +199,9 @@
 - **D353** — Home sections each answer one newcomer question; repeated grids moved to their pages, anchors kept; 390px height 21,218 to 14,956 (design §I.5 recorded in `dumont-site/src/pages/landing.tsx`).
   checked **Evidence and boundary are verified** Re-read the cited source and rendered routes, satisfy the acceptance checks in the design, and preserve technical identifiers and existing URLs.
   checked **The hub contract survives the change** Review full names, relevant light/dark and mobile layouts, and links to installation, documentation and the portfolio; retain the product-specific behavior.
+- **D354** — WordPress sits under a Viglet Turing integrations group in docs, its old URL is a handoff page, the tile links product and plugin docs, and /playground/ now redirects to the live /wp-demo/.
+  checked **Evidence and boundary are verified** Re-read the cited source and rendered routes, satisfy the acceptance checks in the design, and preserve technical identifiers and existing URLs.
+  checked **The hub contract survives the change** Review full names, relevant light/dark and mobile layouts, and links to installation, documentation and the portfolio; retain the product-specific behavior.
 
 ## Track E — Data quality & trust
 

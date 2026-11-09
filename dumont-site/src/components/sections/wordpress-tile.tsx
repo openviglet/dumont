@@ -10,7 +10,7 @@ import { LINKS, WORDPRESS_TILE } from "@/lib/site-content";
  * not its to claim. Its page lives on turing.viglet.org; this tile points there.
  */
 export function WordPressTile() {
-  const { title, body, partOf, cta } = WORDPRESS_TILE;
+  const { title, body, partOf, cta, docs } = WORDPRESS_TILE;
   return (
     <section className="pb-20">
       <Container>
@@ -28,6 +28,14 @@ export function WordPressTile() {
                 className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
               >
                 {cta}
+                <ArrowUpRight className="size-3.5" />
+              </a>{" "}
+              &middot;{" "}
+              <a
+                href={LINKS.wordpressDocs}
+                className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+              >
+                {docs}
                 <ArrowUpRight className="size-3.5" />
               </a>
             </p>

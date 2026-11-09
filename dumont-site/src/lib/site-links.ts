@@ -66,10 +66,9 @@ export const LINKS = {
   docs: DESTINATIONS.docs.href,
   install: DESTINATIONS.getStarted.href,
   rest: sitePath("/docs/rest-api/"),
-  // The WordPress plugin is part of Viglet Turing: its page, docs and Playground demo live there.
+  // The WordPress plugin is part of Viglet Turing: its page, docs and demo store live there.
   wordpress: "https://turing.viglet.org/wordpress/",
   wordpressDocs: "https://turing.viglet.org/docs/integrations/wordpress/",
-  wordpressPlayground: "https://turing.viglet.org/playground/",
   repo: DESTINATIONS.source.href,
   license: "https://github.com/openviglet/dumont/blob/HEAD/LICENSE",
   roadmap: DESTINATIONS.roadmap.href,

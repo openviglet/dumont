@@ -297,6 +297,7 @@ export const WORDPRESS_TILE = {
   body: "A plugin that indexes posts, pages and WooCommerce products into Viglet Turing and puts search, filters from a sentence, cited answers and a shopping copilot on the site. It runs inside WordPress and sends content straight to Viglet Turing, without Viglet Dumont.",
   partOf: "The plugin is part of Viglet Turing.",
   cta: "Viglet Turing for WordPress",
+  docs: "Plugin documentation",
   video: {
     // The demo store video in Portuguese (pt-BR), the cut turing.viglet.org/wordpress/ plays.
     id: "UVoQXGcd-aI",
