@@ -59,24 +59,26 @@ completing the trust track. Track F (semantics) follows the RAG maturity on the 
 
 ### I.3 A consistent visual contract with viglet.org (D351)
 
-Review of 2026-11-08: published pages and current source, compared with viglet.org.
-dumont-site/src/components/sections/hero.tsx uses a rounded metadata chip, hardcoded
-dark surfaces, gradient text, grid and animated orbs; the hub uses neutral surfaces and
-plain typographic metadata. Header product highlights also use pills.
+Surfaces and chips landed (hero, page hero, AEM band, CTA, flow panel, nav and docs
+metadata). Left: the tokens and fonts.
 
-Adopt the hub typography roles, title scale, content gutters, spacing, button hierarchy,
-borders and focus treatment. dumont-site and its docs do not depend on
-@viglet/viglet-design-system (only dumont-react does, ^2026.3.24), so this adds a
-dependency: map its tokens.css and fonts.css variables into src/tokens.css, which docs
-already reads via customCss, rather than the ./styles Tailwind bundle, which overrides
-arbitrary responsive utilities in the cascade. Use its ./site components where
-applicable and a thin compatible Astro mapping for documentation; inspect actual exports
-before designing an adapter. Preserve teal as the product accent. Replace decorative
-chips with plain eyebrow text, separators or ordinary navigation links. Keep genuine
-filter selections and status controls functional. Consolidate a reusable product hero
-for marketing subpages; documentation keeps its reading sidebar and article layout while
-sharing brand tokens. Avoid permanent dark heroes in light mode and remove decorative
-motion that competes with the product evidence.
+dumont-site does not depend on @viglet/viglet-design-system. Its tokens.css already
+aliases the shadcn names (--background, --primary, --ring, ...) onto --vg-*, so
+src/tokens.css becomes an import plus Dumont's keys: --vg-primary-base and -dark with
+their foregrounds, --vg-accent-from/-to/-text/-text-dark and the --vg-brand set, all
+teal; the hand-made green-grey neutrals go, so the ground is the hub's. fonts.css brings
+Inter for UI and Plus Jakarta Sans as --font-brand on h1/h2, as viglet.org sets them;
+JetBrains Mono is not bundled and keeps its Google Fonts link. Docs read the same file
+through customCss, so they follow with no second edit. Use tokens.css and fonts.css, not
+the ./styles Tailwind bundle, which overrides arbitrary responsive utilities.
+
+Blocked on install (2026-11-09): pnpm add in dumont-site fails with
+ERR_PNPM_EXOTIC_SUBDEP. xlsx is a required peer of the design system, and the workspace
+overrides xlsx to the SheetJS CDN tarball (D134), which blockExoticSubdeps refuses for a
+package that does not declare it. dumont-react declares that tarball directly. Do not
+relax blockExoticSubdeps and do not add xlsx to a site that never uses it: the fix is
+the design system listing xlsx under peerDependenciesMeta as optional, as it already
+does for @resvg/resvg-js and react-router-dom.
 
 Acceptance: compare home, one solution page, a feature page, docs overview and article
 at 390/768/1440 pixels, light/dark and reduced motion. Preserve real demos, code

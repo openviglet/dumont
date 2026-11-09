@@ -32,3 +32,4 @@
 
 ## Track D — Adoption & authoring
 
+- ⏸ **D351** (deps: D350 ✅) **Product pages retain decorative chips and hero styling absent from the revised hub** — set aside (Waits on the design system making its xlsx peer optional.): Key the design system's tokens and fonts into src/tokens.css for the site and docs. → §I.3
