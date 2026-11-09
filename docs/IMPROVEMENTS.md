@@ -85,34 +85,6 @@ at 390/768/1440 pixels, light/dark and reduced motion. Preserve real demos, code
 examples, contrast, keyboard focus and original URLs. No framework migration or forced
 orange product branding.
 
-### I.7 Rendered brand and journey regression coverage (D355)
-
-Review of 2026-11-08: published pages and current source, compared with viglet.org. The
-sampled home and docs routes returned 200 at 1440/390 pixels without document-wide
-overflow or page errors. That is a healthy baseline, not a whole-site accessibility
-certification. Existing dumont-site build checks do not assert the new cross-site brand
-contract.
-
-dumont-site has no tests; extend its gates (tsc, starlight-links-validator,
-scripts/check-readme-links.mjs) rather than adding a parallel framework. Enumerate
-generated marketing routes and representative documentation templates; verify full
-product names with technical exceptions, title/canonical/OG/JSON-LD/llms consistency,
-internal anchors and the destination map. Add Playwright, absent from the workspace,
-pinned exactly (@vitest/browser-playwright on the vitest 5.0.5 dumont-react uses), at
-390/768/1440 pixels, both themes, reduced motion, keyboard navigation, menu
-opening/closing and focus return. Inspect actual screenshots for clipping, readability
-and decorative chips; do not substitute a CSS-class assertion for visual review. Test
-consent fresh, denied and withdrawn without loosening it to simplify the layout, and
-preserve demo failure states. Separate deterministic build checks from retry-bounded
-external-link checks so network resets are reported as inconclusive, not product
-regressions.
-
-Acceptance: source checks run in validate.yml (push/PR, beside README links), output
-checks in the build:site that dispatch-only publish-github-pages.yml runs; run the
-existing gates plus the new checks and retain representative screenshots and a
-route-result report. A later production smoke verifies deployed output; local success
-alone never claims deployment. No performance-score or conversion guarantees.
-
 ## IX. Cross-cutting decisions & restrictions
 
 These constrain every task above:

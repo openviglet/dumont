@@ -3,3 +3,5 @@ dist
 dist-ssr
 *.local
 .vite
+# check-rendered.mjs output: screenshots and report.md (D355)
+.checks

@@ -55,6 +55,18 @@ that map, and no retired destination (docs.viglet.org) shipping. It never touche
 the network. `scripts/check-readme-links.mjs` at the repository root checks the
 same retired domains in the sources, on every push.
 
+Two checks run after a build rather than in it, and the Pages workflow runs both:
+
+- `pnpm run check:rendered` serves `dist/` and opens it in Chromium
+  (`playwright-core`, pinned exactly; `pnpm exec playwright-core install chromium` once):
+  every route and three docs templates at 390/768/1440 px in both themes with reduced
+  motion, Get started by keyboard, both phone menus (Escape closes, focus returns),
+  consent fresh, declined and withdrawn, and the WordPress video facade. Screenshots
+  and `report.md` land in `.checks/`; look at them, the script cannot judge a layout.
+- `pnpm run check:external-links` fetches every off-site link three times with a
+  backoff. A 404 or 410 fails; a reset, a timeout or a bot-wary 403 is reported as
+  inconclusive, because the network is not the site.
+
 The site is served at the root of its own domain, dumont.viglet.org (a GitHub
 Pages custom domain; `public/CNAME` names it). `SITE_ORIGIN` and `BASE` in
 `src/lib/site-links.ts` are the one declaration of that: the Vite base, the

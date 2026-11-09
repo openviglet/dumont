@@ -121,18 +121,7 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
-- ⏳ **D355** (deps: D350 ✅, D351 ✅, D352 ✅, D353 ✅, D354 ✅) **No acceptance check compares the product site with the revised hub contract** — Add pinned Playwright: 390/768/1440, both themes, reduced motion, menus and focus return, consent states, kept screenshots, retry-bounded external links. → §I.7
-
 ## Done when — D351
-
-- **Evidence and boundary are verified** Re-read the cited source and rendered routes,
-  satisfy the acceptance checks in the design, and preserve technical identifiers and
-  existing URLs.
-- **The hub contract survives the change** Review full names, relevant light/dark and
-  mobile layouts, and links to installation, documentation and the portfolio; retain the
-  product-specific behavior.
-
-## Done when — D355
 
 - **Evidence and boundary are verified** Re-read the cited source and rendered routes,
   satisfy the acceptance checks in the design, and preserve technical identifiers and

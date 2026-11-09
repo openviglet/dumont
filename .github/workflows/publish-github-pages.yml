@@ -57,9 +57,33 @@ jobs:
       - name: Install workspace deps
         run: pnpm install --frozen-lockfile
 
-      # tsc -b → vite build → vite build --ssr → prerender → og-image → the /docs area.
+      # tsc -b → vite build → vite build --ssr → prerender → og-image → the /docs area →
+      # docs twins → the hub contract on dist/ (check-hub-contract.mjs, D355).
       - name: Build the site
         run: pnpm run build:site
+
+      # The hub contract as a browser sees it (D355): every route at 390/768/1440 in both
+      # themes, keyboard, phone menus, consent and the video facade. The browser is the one
+      # the pinned playwright-core expects.
+      - name: Check the rendered site
+        working-directory: dumont-site
+        run: |
+          pnpm exec playwright-core install --with-deps chromium
+          pnpm run check:rendered
+
+      # Off-site links, three tries each: a 404 fails, a network reset is reported as
+      # inconclusive and does not.
+      - name: Check external links
+        working-directory: dumont-site
+        run: pnpm run check:external-links
+
+      - name: Keep the screenshots and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dumont-site-checks
+          path: dumont-site/.checks/
+          if-no-files-found: ignore
 
       # Each sample's `package` script starts with an `npm install`, which a pnpm
       # workspace member refuses; the workspace install above already did it, so

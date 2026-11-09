@@ -38,7 +38,9 @@ export function ConnectorsPage() {
               {TARGETS.map((t) => (
                 <article key={t.property} className="rounded-2xl border border-border bg-card p-6">
                   <h3 className="font-bold">{t.name}</h3>
-                  <p className="mt-1 font-mono text-xs text-primary">
+                  {/* A property name has no spaces, so it is allowed to break anywhere: at
+                      768px three columns are narrower than it (D355). */}
+                  <p className="mt-1 font-mono text-xs [overflow-wrap:anywhere] text-primary">
                     dumont.indexing.provider={t.property}
                   </p>
                   <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t.note}</p>
