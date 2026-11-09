@@ -202,6 +202,7 @@
 - **D354** — WordPress sits under a Viglet Turing integrations group in docs, its old URL is a handoff page, the tile links product and plugin docs, and /playground/ now redirects to the live /wp-demo/.
   checked **Evidence and boundary are verified** Re-read the cited source and rendered routes, satisfy the acceptance checks in the design, and preserve technical identifiers and existing URLs.
   checked **The hub contract survives the change** Review full names, relevant light/dark and mobile layouts, and links to installation, documentation and the portfolio; retain the product-specific behavior.
+- **D355 (output checks)** — build now fails on a bare product name, title/canonical/OG/JSON-LD drift, a dead link or fragment, a CTA off DESTINATIONS, or a retired domain in dist/.
 
 ## Track E — Data quality & trust
 

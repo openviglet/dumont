@@ -114,8 +114,8 @@ jobs:
 
           find _site -name index.html | sort
 
-      # The WordPress Playground demo moved to Viglet Turing with the plugin (D347):
-      # turing.viglet.org/playground/ builds it, and this site's /playground/ redirects there.
+      # The WordPress demo moved to Viglet Turing with the plugin (D347): it is served at
+      # turing.viglet.org/wp-demo/, and this site's /playground/ redirects there (D354).
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

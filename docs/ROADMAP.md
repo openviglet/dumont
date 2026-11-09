@@ -121,7 +121,7 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
-- 📋 **D355** (deps: D350 ✅, D351 ✅, D352 ✅, D353 ✅, D354 ✅) **No acceptance check compares the product site with the revised hub contract** — Validate the rendered brand and journeys across routes, themes and small screens so future site changes cannot silently undo the alignment. → §I.7
+- ⏳ **D355** (deps: D350 ✅, D351 ✅, D352 ✅, D353 ✅, D354 ✅) **No acceptance check compares the product site with the revised hub contract** — Add pinned Playwright: 390/768/1440, both themes, reduced motion, menus and focus return, consent states, kept screenshots, retry-bounded external links. → §I.7
 
 ## Done when — D351
 

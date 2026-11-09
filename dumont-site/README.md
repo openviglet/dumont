@@ -45,6 +45,16 @@ its render, `/docs/llms.txt` indexes them (and fails the build if
 `manifest.json`. Site links to the docs come from `LINKS` in
 `src/lib/site-links.ts` and stay on this site.
 
+`scripts/check-hub-contract.mjs` runs last and holds what this site agrees on with
+viglet.org, read from the built `dist/`: every product named in full (`PRODUCTS`;
+the deliberate exceptions are listed in the script, each with its reason), title,
+canonical, Open Graph and JSON-LD agreeing per page, every in-site link and
+`#fragment` resolving, the header's Get started, release notes, download and the
+way back to viglet.org going where `DESTINATIONS` says, `llms.txt`'s Links being
+that map, and no retired destination (docs.viglet.org) shipping. It never touches
+the network. `scripts/check-readme-links.mjs` at the repository root checks the
+same retired domains in the sources, on every push.
+
 The site is served at the root of its own domain, dumont.viglet.org (a GitHub
 Pages custom domain; `public/CNAME` names it). `SITE_ORIGIN` and `BASE` in
 `src/lib/site-links.ts` are the one declaration of that: the Vite base, the
