@@ -13,9 +13,9 @@ Viglet Dumont is a modular data extraction platform that runs connectors indepen
 
 ## System Overview
 
-The system has three layers: content sources on the left, the Dumont pipeline in the center, and search engines on the right.
+The system has three layers: content sources on the left, the Viglet Dumont pipeline in the center, and search engines on the right.
 
-![Dumont: High-Level Architecture](/docs/img/diagrams/dumont-architecture.svg)
+![Viglet Dumont: High-Level Architecture](/docs/img/diagrams/dumont-architecture.svg)
 
 Each numbered block is detailed in its own diagram below.
 
@@ -25,14 +25,14 @@ Each numbered block is detailed in its own diagram below.
 
 Connectors extract content and feed it into the pipeline. They come in two forms: Java plugins and standalone CLI tools.
 
-![Dumont: Connector Types](/docs/img/diagrams/dumont-connectors.svg)
+![Viglet Dumont: Connector Types](/docs/img/diagrams/dumont-connectors.svg)
 
 | Type | Connectors | How they connect |
 |---|---|---|
 | **Java Plugins** | Web Crawler, AEM, Catalog & JSON API | Loaded into `dumont-connector.jar` via `-Dloader.path`, one plugin per JVM |
-| **Standalone CLI** | Database, FileSystem | Separate JARs that connect to a running Dumont instance via REST API |
+| **Standalone CLI** | Database, FileSystem | Separate JARs that connect to a running Viglet Dumont instance via REST API |
 
-For details on each connector, see [Connectors Overview](/docs/connectors/overview/). WordPress is not a Dumont connector: the WordPress plugin is part of Viglet Turing and sends content to it directly ([Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/)).
+For details on each connector, see [Connectors Overview](/docs/connectors/overview/). WordPress is not a Viglet Dumont connector: the WordPress plugin is part of Viglet Turing and sends content to it directly ([Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/)).
 
 ---
 
@@ -40,14 +40,14 @@ For details on each connector, see [Connectors Overview](/docs/connectors/overvi
 
 Once a connector produces a Job Item, it passes through a multi-stage pipeline before reaching the search engine.
 
-![Dumont: Pipeline Detail](/docs/img/diagrams/dumont-pipeline-detail.svg)
+![Viglet Dumont: Pipeline Detail](/docs/img/diagrams/dumont-pipeline-detail.svg)
 
 | Stage | Component | What it does |
 |---|---|---|
 | **①** | **Job Item** | A single document with fields, an action (INDEX / DELETE), and a locale |
 | **②** | **Processing Strategies** | Priority chain: deindex (P10) → ignore rules (P20) → index new (P30) → reindex changed (P40) → skip unchanged (P50) |
 | **③** | **Batch Processor + Queue** | Groups items into batches of 50, sends to Apache Artemis persistent queue |
-| **④** | **Indexing Plugin** | Delivers to Turing (default), Apache Solr, or Elasticsearch |
+| **④** | **Indexing Plugin** | Delivers to Viglet Turing (default), Apache Solr, or Elasticsearch |
 
 The **Indexing DB** stores checksums and status for every processed document, enabling incremental indexing on subsequent runs.
 
@@ -59,7 +59,7 @@ For the conceptual explanation of each stage, see [Core Concepts, The Processing
 
 The complete sequence from content source to search engine:
 
-![Dumont, Indexing Flow](/docs/img/diagrams/dumont-indexing-flow.svg)
+![Viglet Dumont, Indexing Flow](/docs/img/diagrams/dumont-indexing-flow.svg)
 
 ---
 
@@ -67,7 +67,7 @@ The complete sequence from content source to search engine:
 
 A pipeline that finished without error is not proof the index is right. A write can fail after the
 ledger recorded it, a delete can be lost, and a run cut short can make content that was never read
-look like content that was removed. Dumont treats both halves of that as first-class: it checks its
+look like content that was removed. Viglet Dumont treats both halves of that as first-class: it checks its
 own work, and it refuses to delete on weak evidence.
 
 | Mechanism | What it protects against |
@@ -115,7 +115,7 @@ See [Content Audit configuration](/docs/configuration-reference/#content-audit),
 | **Processing Strategies** | `connector/strategy` | Priority-based chain: index, re-index, de-index, ignore, or skip |
 | **Batch Processor** | `connector/batch` | Thread-safe buffer that groups Job Items before queue delivery |
 | **Message Queue** | `connector/queue` | JMS listener on Apache Artemis: delegates to indexing plugins |
-| **Indexing Plugins** | `connector/indexing` | Output adapters: Turing, Apache Solr, Elasticsearch |
+| **Indexing Plugins** | `connector/indexing` | Output adapters: Viglet Turing, Apache Solr, Elasticsearch |
 | **Web Crawler** | `web-crawler` | JSoup, URL filtering, authentication, locale detection |
 | **Database** | `db` | JDBC queries, batch chunking, multi-database support |
 | **FileSystem** | `filesystem` | Apache Tika text extraction, OCR, metadata mapping |
@@ -124,7 +124,7 @@ See [Content Audit configuration](/docs/configuration-reference/#content-audit),
 | **Commons** | `commons` | Shared models, interfaces, utilities |
 | **AEM Commons** | `aem-commons` | AEM extension interfaces, component extractors, content types and versioned recipes (published to Maven Central) |
 | **DB Commons** | `db-commons` | DB extension interface (published to Maven Central) |
-| **Console** | `dumont-react` | The web interface: React 19 + Vite, served by the connector and also mountable inside Turing |
+| **Console** | `dumont-react` | The web interface: React 19 + Vite, served by the connector and also mountable inside Viglet Turing |
 
 ---
 
@@ -161,10 +161,10 @@ mid-task loses nothing.
 | **Database** | H2 (dev) / PostgreSQL (prod) | Indexing state, checksums, config |
 | **HTML Parsing** | JSoup 1.22.1 | Web Crawler |
 | **Text Extraction** | Apache Tika 3.2.3 | FileSystem: PDF, DOCX, images (OCR) |
-| **Search Clients** | Turing Java SDK, SolrJ 10.0.0, ES Client 9.3.2 | One active per deployment |
+| **Search Clients** | Viglet Turing Java SDK, SolrJ 10.0.0, ES Client 9.3.2 | One active per deployment |
 | **Build** | Apache Maven | Multi-module project |
 | **Console** | React 19, Vite, Tailwind CSS v4 | Built into the connector's static resources |
-| **Console components** | `@viglet/viglet-design-system` | Shared with Viglet Turing and Shio, so the three look like one product |
+| **Console components** | `@viglet/viglet-design-system` | Shared with Viglet Turing and Viglet Shio, so the three look like one product |
 
 ---
 
@@ -173,21 +173,21 @@ mid-task loses nothing.
 ### Development
 
 ```
-Dumont (H2 embedded + Artemis embedded)
-    → Turing (http://localhost:2700)
+Viglet Dumont (H2 embedded + Artemis embedded)
+    → Viglet Turing (http://localhost:2700)
 ```
 
 ### Production
 
 ```
-Dumont + PostgreSQL
-    → Turing + Apache Solr
+Viglet Dumont + PostgreSQL
+    → Viglet Turing + Apache Solr
 ```
 
-### Direct Indexing (without Turing)
+### Direct Indexing (without Viglet Turing)
 
 ```
-Dumont + PostgreSQL
+Viglet Dumont + PostgreSQL
     → Apache Solr (direct via SolrJ)
     → Elasticsearch (direct via ES Client)
 ```
@@ -200,6 +200,6 @@ Dumont + PostgreSQL
 |---|---|
 | [Core Concepts](/docs/getting-started/core-concepts/) | Pipeline stages, strategies, and change detection |
 | [Connectors Overview](/docs/connectors/overview/) | All connectors and deployment types |
-| [Indexing Plugins](/docs/indexing-plugins/) | Turing, Solr, Elasticsearch output targets |
+| [Indexing Plugins](/docs/indexing-plugins/) | Viglet Turing, Solr, Elasticsearch output targets |
 | [Installation Guide](/docs/installation-guide/) | Setup with `-Dloader.path` and systemd |
-| [Turing: Architecture](https://docs.viglet.org/turing/architecture-overview) | Search-side architecture: indexing reception, search flow, and deployment topologies |
+| [Viglet Turing: Architecture](https://docs.viglet.org/turing/architecture-overview) | Search-side architecture: indexing reception, search flow, and deployment topologies |

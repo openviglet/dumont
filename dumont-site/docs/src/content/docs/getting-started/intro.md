@@ -5,11 +5,11 @@ description: Viglet Dumont is an open-source data extraction platform that conne
 
 **Viglet Dumont** is an open-source data extraction platform. It connects your content (wherever it lives) to [Viglet Turing](https://docs.viglet.org/turing) for indexing and search.
 
-Think of Dumont as the bridge between your content sources and the search engine. It crawls websites, queries databases, scans file systems and reads AEM repositories, then delivers every document to Turing through a reliable, asynchronous pipeline.
+Think of Viglet Dumont as the bridge between your content sources and the search engine. It crawls websites, queries databases, scans file systems and reads AEM repositories, then delivers every document to Viglet Turing through a reliable, asynchronous pipeline.
 
 ---
 
-## What can you do with Dumont?
+## What can you do with Viglet Dumont?
 
 ### Crawl websites
 
@@ -29,11 +29,11 @@ The **AEM Connector** indexes content from Adobe Experience Manager author and p
 
 ### WordPress: part of Viglet Turing
 
-WordPress is not a Dumont source. The WordPress and WooCommerce plugin is part of **Viglet Turing**: it runs inside WordPress and sends content straight to Viglet Turing, without Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
+WordPress is not a Viglet Dumont source. The WordPress and WooCommerce plugin is part of **Viglet Turing**: it runs inside WordPress and sends content straight to Viglet Turing, without Viglet Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
 
 ### Send to any search engine
 
-Beyond Turing, Dumont can deliver content directly to **Apache Solr** or **Elasticsearch** via pluggable indexing adapters, no Turing required.
+Beyond Viglet Turing, Viglet Dumont can deliver content directly to **Apache Solr** or **Elasticsearch** via pluggable indexing adapters, no Viglet Turing required.
 
 ---
 
@@ -46,9 +46,9 @@ graph LR
     FS["📁 File Systems"]
     AEM["📦 AEM"]
 
-    DUM["Dumont\n(Connectors + Pipeline)"]
+    DUM["Viglet Dumont\n(Connectors + Pipeline)"]
 
-    TUR["Turing\n(Search + GenAI)"]
+    TUR["Viglet Turing\n(Search + GenAI)"]
 
     WEB --> DUM
     DB --> DUM
@@ -58,18 +58,18 @@ graph LR
     DUM -->|"REST API\n+ Message Queue"| TUR
 ```
 
-Content flows from its original source through Dumont connectors, into an internal message queue for reliable processing, and out to the search engine, where it becomes immediately searchable.
+Content flows from its original source through Viglet Dumont connectors, into an internal message queue for reliable processing, and out to the search engine, where it becomes immediately searchable.
 
 ---
 
 ## Key concepts
 
-These are the main building blocks you will work with in Dumont. You do not need to understand all of them before getting started: come back to each one as you need it.
+These are the main building blocks you will work with in Viglet Dumont. You do not need to understand all of them before getting started: come back to each one as you need it.
 
 | Concept | What it is | Learn more |
 |---|---|---|
 | **Connector** | A component that extracts content from a specific source type (web, database, files, AEM, JSON APIs) | [Connectors](/docs/connectors/overview/) |
-| **Indexing Plugin** | The output adapter that delivers documents to a search engine, Turing (default), Apache Solr, or Elasticsearch | [Indexing Plugins](/docs/indexing-plugins/) |
+| **Indexing Plugin** | The output adapter that delivers documents to a search engine, Viglet Turing (default), Apache Solr, or Elasticsearch | [Indexing Plugins](/docs/indexing-plugins/) |
 | **Job Item** | A single document being processed through the pipeline, with fields, metadata, and an action (index, de-index, update) | [Core Concepts](/docs/getting-started/core-concepts/) |
 | **Batch Processor** | Groups individual job items into configurable batches (default: 50) for efficient queue delivery | [Core Concepts](/docs/getting-started/core-concepts/) |
 | **Message Queue** | Apache Artemis (embedded): decouples connector extraction from indexing delivery for reliability and throughput | [Architecture](/docs/architecture/) |
@@ -82,10 +82,10 @@ These are the main building blocks you will work with in Dumont. You do not need
 
 Not sure where to start? Here is a suggested path depending on what you want to do:
 
-**I want to understand how Dumont works**
+**I want to understand how Viglet Dumont works**
 → Read [Core Concepts](/docs/getting-started/core-concepts/) first, then [Architecture](/docs/architecture/).
 
-**I want to install Dumont**
+**I want to install Viglet Dumont**
 → Go to the [Installation Guide](/docs/installation-guide/).
 
 **I want to crawl a website**
@@ -97,7 +97,7 @@ Not sure where to start? Here is a suggested path depending on what you want to 
 **I want to index files from a directory**
 → Go to [FileSystem Connector](/docs/connectors/filesystem/).
 
-**I want to connect AEM to Turing**
+**I want to connect AEM to Viglet Turing**
 → Go to [AEM Connector](/docs/connectors/aem/).
 
 **I want to index WordPress content**

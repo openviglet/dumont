@@ -14,7 +14,7 @@ export const VERSION = "2026.3";
 
 <Pill>v{VERSION}</Pill> <Pill>Open Source</Pill> <Pill>Apache 2.0</Pill>
 
-**Viglet Dumont** is an open-source data extraction platform. It connects your content (websites, databases, file systems, AEM, and paged JSON APIs) to **Viglet Turing** and other search engines through a reliable, asynchronous processing pipeline. WordPress is covered by Viglet Turing itself: its [WordPress plugin](https://turing.viglet.org/docs/integrations/wordpress/) sends content straight to Viglet Turing, without Dumont.
+**Viglet Dumont** is an open-source data extraction platform. It connects your content (websites, databases, file systems, AEM, and paged JSON APIs) to **Viglet Turing** and other search engines through a reliable, asynchronous processing pipeline. WordPress is covered by Viglet Turing itself: its [WordPress plugin](https://turing.viglet.org/docs/integrations/wordpress/) sends content straight to Viglet Turing, without Viglet Dumont.
 
 <SectionLabel>Key Capabilities</SectionLabel>
 
@@ -35,10 +35,10 @@ export const VERSION = "2026.3";
     Index a job board, product catalog or partner feed from a JSON manifest: paging, daily and monthly call budgets, field mapping and expiry for sources a budget never lets you read in full, with no Java code.
   </FeatureCard>
   <FeatureCard icon="🔌" title="Multi-Target Indexing">
-    Deliver content to Turing (default), Apache Solr or Elasticsearch via pluggable indexing adapters.
+    Deliver content to Viglet Turing (default), Apache Solr or Elasticsearch via pluggable indexing adapters.
   </FeatureCard>
   <FeatureCard icon="🪄" title="Guided Onboarding">
-    Point the wizard at a URL: Dumont infers the source's shape and field manifest, you correct the draft, and a dry run shows exactly what would be indexed (coverage, skipped records and a diff) before anything is written.
+    Point the wizard at a URL: Viglet Dumont infers the source's shape and field manifest, you correct the draft, and a dry run shows exactly what would be indexed (coverage, skipped records and a diff) before anything is written.
   </FeatureCard>
   <FeatureCard icon="🧩" title="Structured Sources">
     Model a source by its schema, not as a link spider: declared fields sent to the index ahead of the documents, values grounded rather than guessed, and coverage tracked so a layout change cannot silently drop a field.
@@ -55,7 +55,7 @@ export const VERSION = "2026.3";
 
 <CardGrid min="180px">
   <NavCard eyebrow="Step 01" title="Install" description="Docker, standalone JAR or build from source" href="installation-guide/" />
-  <NavCard eyebrow="Step 02" title="Configure" description="application.yaml, Turing connection and queue" href="configuration-reference/" />
+  <NavCard eyebrow="Step 02" title="Configure" description="application.yaml, Viglet Turing connection and queue" href="configuration-reference/" />
   <NavCard eyebrow="Step 03" title="Understand" description="Connectors, pipeline, strategies and job items" href="getting-started/core-concepts/" />
   <NavCard eyebrow="Step 04" title="Connect" description="Choose a connector and start indexing content" href="connectors/overview/" />
 </CardGrid>
@@ -67,7 +67,7 @@ export const VERSION = "2026.3";
   <NavCard icon="🗄️" title="Database Connector" description="JDBC queries against Oracle, PostgreSQL, MariaDB, MySQL: CLI and integrated modes" href="connectors/database/" />
   <NavCard icon="📁" title="FileSystem Connector" description="Directory traversal with Apache Tika text extraction, OCR and metadata mapping" href="connectors/filesystem/" />
   <NavCard icon="📦" title="AEM Connector" description="Author, publish and Cloud Service delivery, delta tracking, locale mapping and custom extensions" href="connectors/aem/" />
-  <NavCard icon="📝" title="WordPress (Viglet Turing)" description="The WordPress plugin is part of Viglet Turing and sends content to it directly, without Dumont" href="https://turing.viglet.org/docs/integrations/wordpress/" />
+  <NavCard icon="📝" title="WordPress (Viglet Turing)" description="The WordPress plugin is part of Viglet Turing and sends content to it directly, without Viglet Dumont" href="https://turing.viglet.org/docs/integrations/wordpress/" />
   <NavCard icon="🔗" title="Catalog & JSON API" description="Normalized catalog feeds and paged JSON APIs declared as manifests, with call budgets and expiry" href="connectors/catalog/" />
 </CardGrid>
 
@@ -76,7 +76,7 @@ export const VERSION = "2026.3";
 <CardGrid min="260px">
   <NavCard icon="🏗️" title="Architecture Overview" description="Component diagram, data flow, module structure, tech stack and deployment topologies" href="architecture/" />
   <NavCard icon="🧩" title="Core Concepts" description="Connectors, job items, processing strategies, change detection and indexing status" href="getting-started/core-concepts/" />
-  <NavCard icon="🔌" title="Indexing Plugins" description="Deliver content to Turing, Apache Solr or Elasticsearch via pluggable adapters" href="indexing-plugins/" />
+  <NavCard icon="🔌" title="Indexing Plugins" description="Deliver content to Viglet Turing, Apache Solr or Elasticsearch via pluggable adapters" href="indexing-plugins/" />
 </CardGrid>
 
 <SectionLabel>Technical Reference</SectionLabel>

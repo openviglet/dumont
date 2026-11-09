@@ -189,6 +189,9 @@
 - **D233** — Every site, console and README docs link points at /docs; each docs page has a .md twin and sits in the sitemap, manifest and llms.txt (design §L.4 recorded in `dumont-site/README.md`).
 - **D234** — The shipping skill and agents.md put a user-facing page in dumont-site/docs, same commit; vigletdocs says the docs moved (design §L.5 recorded in `.claude/skills/dumont-roadmap-docs/SKILL.md`).
 - **D235** — All 20 docs.viglet.org/dumont pages redirect to their /docs counterpart, docs-dumont left the vigletdocs build, and Turing docs and blog link the new pages.
+- **D350** — dumont-site and its docs name Viglet Turing, Viglet Dumont and Viglet Shio in full in copy, metadata, OG, JSON-LD and llms.txt, from a typed PRODUCTS map; the 390px header keeps the name.
+  checked **Evidence and boundary are verified** Re-read the cited source and rendered routes, satisfy the acceptance checks in the design, and preserve technical identifiers and existing URLs.
+  checked **The hub contract survives the change** Review full names, relevant light/dark and mobile layouts, and links to installation, documentation and the portfolio; retain the product-specific behavior.
 
 ## Track E — Data quality & trust
 

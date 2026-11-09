@@ -5,7 +5,7 @@ description: Build Viglet Dumont from source, understand the project structure, 
 
 Whether you're building custom extensions, contributing to the project, or integrating Viglet Dumont into your CI/CD pipeline, this guide has everything you need.
 
-Dumont is fully open-source at [github.com/openviglet/dumont](https://github.com/openviglet/dumont). All contributions are welcome.
+Viglet Dumont is fully open-source at [github.com/openviglet/dumont](https://github.com/openviglet/dumont). All contributions are welcome.
 
 ---
 
@@ -18,7 +18,7 @@ Dumont is fully open-source at [github.com/openviglet/dumont](https://github.com
 | **Database** | H2 (dev) · PostgreSQL (prod) |
 | **HTML Parsing** | JSoup 1.22.1 |
 | **Text Extraction** | Apache Tika 3.2.3 |
-| **Search Clients** | Turing Java SDK · SolrJ · ES Client |
+| **Search Clients** | Viglet Turing Java SDK · SolrJ · ES Client |
 | **Console** | React 19 · TypeScript · Vite · Tailwind CSS v4 |
 | **Console components** | `@viglet/viglet-design-system` |
 | **Build** | Apache Maven (backend) · pnpm (console) |
@@ -80,7 +80,7 @@ dumont/
 
 ## Extension Points
 
-Dumont provides extension points at multiple levels:
+Viglet Dumont provides extension points at multiple levels:
 
 ### Connector-Level Extensions
 
@@ -134,7 +134,7 @@ for every structured source:
 The schema can also declare **custom facets**, which are named buckets over one of its fields
 such as "posted in the last 7 days", and **custom sorts**, which are named sorts of one or more
 levels such as "closing soonest": a date ascending, with documents that have no date last. Both
-are sent with the fields, so a Turing site gets them on the first run without a console step, and
+are sent with the fields, so a Viglet Turing site gets them on the first run without a console step, and
 a search selects a custom sort by passing its name as `sort`. A schema that declares none leaves
 the site's own facets and sorts alone. A facet or a sort level over a field the schema does not
 declare is refused when the schema is built.
@@ -192,7 +192,7 @@ Register your plugin as a Spring `@Component` with `@ConditionalOnProperty(name 
 
 Strategies are evaluated in priority order for each Job Item:
 
-![Dumont, Processing Strategy Flow](/docs/img/diagrams/dumont-strategy-flow.svg)
+![Viglet Dumont, Processing Strategy Flow](/docs/img/diagrams/dumont-strategy-flow.svg)
 
 To add a custom strategy, implement the strategy interface and assign a priority between the existing ones.
 
@@ -253,20 +253,20 @@ Two details worth knowing before a build surprises you:
   instead of trusting the exit code.
 
 The console runs in two places. Standalone it is served by the connector itself; inside
-Viglet Turing it is mounted as a Module Federation remote, and Turing supplies the surrounding
+Viglet Turing it is mounted as a Module Federation remote, and Viglet Turing supplies the surrounding
 chrome. Pages are written once and work in both: a fixed `local` integration id stands in for the
-one Turing would pass, and an axios interceptor strips it from API calls.
+one Viglet Turing would pass, and an axios interceptor strips it from API calls.
 
 ### Shared components
 
 Buttons, dialogs, tables, form controls and page chrome come from
-`@viglet/viglet-design-system`, the component library Dumont shares with Viglet Turing and
+`@viglet/viglet-design-system`, the component library Viglet Dumont shares with Viglet Turing and
 Viglet Shio. Import from it rather than writing a local copy: a copy drifts, and the three
 products stop looking like one.
 
 CI enforces this. `pnpm run lint:ds` fails the build when a component is declared here under a
 name the design system already exports, and each finding names the import that replaces it. Where
-a collision is deliberate (Dumont's `AppFooter` renders Dumont's own version and links, and
+a collision is deliberate (Viglet Dumont's `AppFooter` renders Viglet Dumont's own version and links, and
 merely shares a name), annotate the declaration with the reason:
 
 ```ts
@@ -276,7 +276,7 @@ merely shares a name), annotate the declaration with the reason:
 ### Two generations of chrome
 
 Console surfaces are being moved to *bento* (the design system's newer visual language, the same
-one Turing uses), one page at a time. Both generations serve at once:
+one Viglet Turing uses), one page at a time. Both generations serve at once:
 
 | Tree | Path | Chrome |
 |---|---|---|

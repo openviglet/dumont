@@ -29,10 +29,10 @@ The connector JAR is built with Spring Boot's **ZIP layout** (PropertiesLauncher
 
 ## Installing Java
 
-Dumont requires Java.
+Viglet Dumont requires Java.
 
 :::note
-Dumont only supports **Java 21** or later.
+Viglet Dumont only supports **Java 21** or later.
 :::
 
 Set the `JAVA_HOME` environment variable and add `$JAVA_HOME/bin` to your `PATH`.
@@ -51,7 +51,7 @@ In addition:
 
 ---
 
-## Installing Dumont
+## Installing Viglet Dumont
 
 ### Option 1: Docker (fastest)
 
@@ -101,7 +101,7 @@ cp web-crawler/wc-plugin/target/web-crawler-plugin.jar /appl/viglet/dumont/serve
 
 ## Starting with a Connector Plugin
 
-The key to running Dumont is the `-Dloader.path` JVM property. It tells Spring Boot's PropertiesLauncher where to find the connector plugin JARs.
+The key to running Viglet Dumont is the `-Dloader.path` JVM property. It tells Spring Boot's PropertiesLauncher where to find the connector plugin JARs.
 
 ### With AEM Plugin
 
@@ -150,7 +150,7 @@ You can point to a directory or a specific JAR: `-Dloader.path=libs` or `-Dloade
 
 ## Database Configuration
 
-By default, Dumont uses **H2** as its embedded database for tracking indexing state. For production, replace with PostgreSQL.
+By default, Viglet Dumont uses **H2** as its embedded database for tracking indexing state. For production, replace with PostgreSQL.
 
 ### H2 (default: development only)
 
@@ -183,7 +183,7 @@ java -Dloader.path=libs \
 
 ## Connecting to Viglet Turing
 
-Dumont sends content to Turing by default. Configure the connection:
+Viglet Dumont sends content to Viglet Turing by default. Configure the connection:
 
 ```yaml
 turing:
@@ -191,10 +191,10 @@ turing:
   apiKey: <YOUR_TURING_API_KEY>
 ```
 
-Create an API Token in **Turing → Administration → API Tokens** and use it as the `apiKey` value.
+Create an API Token in **Viglet Turing → Administration → API Tokens** and use it as the `apiKey` value.
 
 :::caution[API Token Required]
-Dumont cannot send content to Turing without a valid API Token. Create one in the Turing admin console before starting Dumont.
+Viglet Dumont cannot send content to Viglet Turing without a valid API Token. Create one in the Viglet Turing admin console before starting Viglet Dumont.
 :::
 
 ---
@@ -278,7 +278,7 @@ Create a separate systemd service for each (e.g., `dumont-aem.service`, `dumont-
 
 ## Standalone Connectors (Database & FileSystem)
 
-The **Database** and **FileSystem** connectors are **standalone CLI tools**: they do not run as plugins inside the connector application. Instead, they connect to a running Dumont instance via its REST API.
+The **Database** and **FileSystem** connectors are **standalone CLI tools**: they do not run as plugins inside the connector application. Instead, they connect to a running Viglet Dumont instance via its REST API.
 
 ### Database Connector
 
@@ -310,7 +310,7 @@ These tools run independently and can be scheduled via cron jobs or CI/CD pipeli
 
 ## Docker Compose
 
-A full stack with Dumont, Turing, Solr, and MariaDB:
+A full stack with Viglet Dumont, Viglet Turing, Solr, and MariaDB:
 
 ```yaml
 services:
@@ -345,7 +345,7 @@ services:
 
 ## Verifying the Installation
 
-After starting Dumont, verify it is running:
+After starting Viglet Dumont, verify it is running:
 
 ```bash
 curl http://localhost:2720/api/v2/connector/status
@@ -363,7 +363,7 @@ A complete production deployment with two connectors:
 /appl/viglet/dumont/
 ├── aem/                                # AEM connector instance
 │   ├── dumont-connector.jar            # Pipeline engine
-│   ├── dumont-connector.properties     # Turing URL, API key, port
+│   ├── dumont-connector.properties     # Viglet Turing URL, API key, port
 │   ├── libs/
 │   │   └── aem-plugin.jar             # AEM connector plugin
 │   └── store/                          # Auto-created at runtime

@@ -17,7 +17,7 @@ Connectors are the components that extract content from external sources and fee
 | [**Database**](/docs/connectors/database/) | JDBC databases | **Standalone Java CLI**: runs independently | `dumont-db-indexer.jar` |
 | [**FileSystem**](/docs/connectors/filesystem/) | Local/network directories | **Standalone Java CLI**: runs independently | `dumont-filesystem-indexer.jar` |
 
-WordPress is not a Dumont connector: the WordPress plugin is part of Viglet Turing and sends content to it directly, without Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
+WordPress is not a Viglet Dumont connector: the WordPress plugin is part of Viglet Turing and sends content to it directly, without Viglet Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
 
 ---
 
@@ -71,7 +71,7 @@ All connectors implement the `DumConnectorPlugin` interface:
 
 ## Connector Plugins vs. Standalone Tools
 
-Dumont connectors are distributed in two forms:
+Viglet Dumont connectors are distributed in two forms:
 
 ### Connector Plugins (AEM, Web Crawler)
 
@@ -98,7 +98,7 @@ Only **one connector plugin** can be loaded per JVM instance. To run multiple co
 
 ### Standalone CLI Tools (Database, FileSystem)
 
-The **Database** and **FileSystem** connectors are **standalone command-line tools**, separate JARs that run independently and connect to a running Dumont instance via REST API:
+The **Database** and **FileSystem** connectors are **standalone command-line tools**, separate JARs that run independently and connect to a running Viglet Dumont instance via REST API:
 
 ```bash
 # Database import (standalone JAR)
@@ -125,16 +125,16 @@ These tools can be scheduled via cron jobs or CI/CD pipelines.
 
 ## Managing Connectors via the Viglet Turing Console
 
-The AEM and Web Crawler connector plugins can be managed through the **Turing Admin Console**. To connect a running `dumont-connector.jar` instance to the Turing UI:
+The AEM and Web Crawler connector plugins can be managed through the **Viglet Turing Admin Console**. To connect a running `dumont-connector.jar` instance to the Viglet Turing UI:
 
-1. Open the Turing Admin Console
+1. Open the Viglet Turing Admin Console
 2. Navigate to **Enterprise Search → Integration**
 3. Click **New** to create a new integration instance
 4. Set the **Integration Type** (AEM or Web Crawler)
-5. Set the **Endpoint** to the URL of your Dumont connector instance (e.g., `http://localhost:2720`)
+5. Set the **Endpoint** to the URL of your Viglet Dumont connector instance (e.g., `http://localhost:2720`)
 6. Enable the integration
 
-Once connected, the Turing console provides a graphical interface for:
+Once connected, the Viglet Turing console provides a graphical interface for:
 
 - Configuring sources, content types, and field mappings
 - Triggering full indexing and re-indexing operations
@@ -142,9 +142,9 @@ Once connected, the Turing console provides a graphical interface for:
 - Viewing indexing statistics and status
 - Running double-check consistency validation
 
-For full details on the Integration UI (including monitoring, indexing stats, and double-check) see the [Turing Integration documentation](https://docs.viglet.org/turing/integration).
+For full details on the Integration UI (including monitoring, indexing stats, and double-check) see the [Viglet Turing Integration documentation](https://docs.viglet.org/turing/integration).
 
-For AEM-specific configuration (sources, content types, author/publish, delta tracking, locales, indexing rules) see [Turing AEM Connector documentation](https://docs.viglet.org/turing/integration-aem).
+For AEM-specific configuration (sources, content types, author/publish, delta tracking, locales, indexing rules) see [Viglet Turing AEM Connector documentation](https://docs.viglet.org/turing/integration-aem).
 
 ---
 
@@ -154,7 +154,7 @@ Writing a source configuration by hand means reading the site's markup, picking 
 guessing at field types. The console does that first pass for you and then lets you check it before
 anything is indexed.
 
-**1. Propose.** Give the **AI Source Inference** wizard a URL. Dumont fetches a sample, works out
+**1. Propose.** Give the **AI Source Inference** wizard a URL. Viglet Dumont fetches a sample, works out
 what shape the source is (a `sitemap.xml`, a listing page whose links go to detail pages, or a
 table where each row is a record) and proposes a draft: the extraction strategy plus a field
 manifest with a type per field.
@@ -177,7 +177,7 @@ real run uses, and reports what indexing *would* do:
 It writes nothing. On a source's first onboarding there is no baseline, so everything reads as
 added.
 
-**4. Index.** Only when you confirm the draft does Dumont materialise it into a live source and
+**4. Index.** Only when you confirm the draft does Viglet Dumont materialise it into a live source and
 index it. A proposal is never published on its own.
 
 The same three steps are available over HTTP; see the
@@ -193,7 +193,7 @@ Every connector needs at least these pieces of information:
 |---|---|
 | **Source** | Where to read content (URL, connection string, directory path, AEM endpoint) |
 | **Credentials** | Authentication (username/password, API key, or none) |
-| **Target SN Site** | The Turing Semantic Navigation Site that will receive the content |
+| **Target SN Site** | The Viglet Turing Semantic Navigation Site that will receive the content |
 | **Locale** | The language/country code for the content (e.g., `en_US`) |
 | **Field Mapping** | How source fields map to search index fields |
 
@@ -203,8 +203,8 @@ Every connector needs at least these pieces of information:
 
 | Connector | Configuration Method | Where |
 |---|---|---|
-| **Web Crawler** | Turing Admin Console | [Turing → Integration](https://docs.viglet.org/turing/integration) |
-| **AEM** | JSON file + Turing Admin Console | `export/` directory + [Turing → Integration](https://docs.viglet.org/turing/integration-aem) |
+| **Web Crawler** | Viglet Turing Admin Console | [Viglet Turing → Integration](https://docs.viglet.org/turing/integration) |
+| **AEM** | JSON file + Viglet Turing Admin Console | `export/` directory + [Viglet Turing → Integration](https://docs.viglet.org/turing/integration-aem) |
 | **Database** | CLI parameters | Command-line: see [Database Connector](/docs/connectors/database/) |
 | **FileSystem** | CLI parameters | Command-line: see [FileSystem Connector](/docs/connectors/filesystem/) |
 

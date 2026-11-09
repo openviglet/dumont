@@ -57,30 +57,6 @@ partial degradation visible and the sidecar→native parity gate (D11) measurabl
 manual, and D16 (field-level provenance) made every published field traceable — all shipped,
 completing the trust track. Track F (semantics) follows the RAG maturity on the Turing side.
 
-### I.2 Full product names across the public site (D350)
-
-Review of 2026-11-08: published pages and current source, compared with viglet.org.
-hero.tsx and FOOTER_BLURB use Turing ES; site-links.ts renders With Turing and Shio;
-hero.tsx and aem-band.tsx render Dumont for AEM. The published docs title still ends in
-Viglet Dumont DEP.
-
-Apply the owner decision in hub docs/STRATEGY.md section I.7 to dumont-site/src
-(site-content.ts:138 and :391 name Viglet Turing ES), index.html, package.json
-description, scripts/docs-twins.mjs:124 and render-readme.mjs:357 (Viglet Dumont DEP),
-public/*.html stubs, dumont-site/docs, accessible labels, titles, descriptions, OG
-assets, JSON-LD, llms.txt and generated Markdown twins. Always use Viglet Turing, Viglet
-Dumont and Viglet Shio, including repeated mentions. Share typed product identity data
-rather than maintaining shorter display aliases. Keep stable slugs, package names,
-commands, code identifiers, filenames and historical release records intact; classify
-these exceptions explicitly. Ensure the product identity remains visible on small
-screens by changing layout rather than abbreviating. Category labels remain separate
-from names.
-
-Acceptance: scan rendered visitor text and machine-readable outputs, not only source
-literals; report each intentional technical exception. Review desktop and 390-pixel
-navigation, long headings, buttons and docs search results. No backend renames or
-technical API changes.
-
 ### I.3 A consistent visual contract with viglet.org (D351)
 
 Review of 2026-11-08: published pages and current source, compared with viglet.org.

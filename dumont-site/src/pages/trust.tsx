@@ -34,7 +34,7 @@ export function TrustPage() {
           title={
             <>
               Sending documents is the easy half.{" "}
-              <span className="text-gradient">Dumont also checks them.</span>
+              <span className="text-gradient">Viglet Dumont also checks them.</span>
             </>
           }
           lead="It keeps a record of every item it sent, compares that record with what the index holds and with what the source still has, and reports the differences before it acts on them."
@@ -44,7 +44,7 @@ export function TrustPage() {
           <Container className="max-w-3xl">
             <SectionHeader
               eyebrow="The safe finish"
-              title="When Dumont will not delete anything"
+              title="When Viglet Dumont will not delete anything"
               description="Removing documents is the one step that can make search worse than doing nothing, so it is the step with the most conditions."
             />
             <ul className="space-y-3">

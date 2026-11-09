@@ -16,15 +16,15 @@ The AEM connector receives indexing requests, then accesses AEM to traverse the 
 sequenceDiagram
     participant AEM as AEM Instance
     participant EVT as AEM Event Listener<br/>(OSGi Bundle)
-    participant API as Dumont Connector<br/>(AEM Plugin)
-    participant SE as Turing
+    participant API as Viglet Dumont Connector<br/>(AEM Plugin)
+    participant SE as Viglet Turing
 
     Note over AEM,EVT: Option 1: Automatic (Event-Driven)
     AEM->>EVT: Page published / modified / deleted
     EVT->>API: POST /api/v2/aem/index/{source}<br/>{paths, event}
 
     Note over API: Option 2: Manual (Postman / curl)
-    Note over API: Option 3: Turing Admin Console<br/>(Integration → Indexing Manager)
+    Note over API: Option 3: Viglet Turing Admin Console<br/>(Integration → Indexing Manager)
 
     API->>AEM: GET {path}.infinity.json
     AEM-->>API: Full JCR node tree (JSON)
@@ -141,7 +141,7 @@ For each page, the connector fetches tags:
 GET http://localhost:4502/content/wknd/us/en/my-page/jcr:content.tags.json
 ```
 
-Tags are **automatically converted to facets** in the search index, no manual configuration needed. Each tag becomes a filterable value in the Turing facet panel.
+Tags are **automatically converted to facets** in the search index, no manual configuration needed. Each tag becomes a filterable value in the Viglet Turing facet panel.
 
 ### 3. Fetch Model JSON (Optional: Requires Configuration)
 
@@ -175,7 +175,7 @@ For each page, the connector:
 - Applies **attribute mappings** from the configuration (global attributes + model-specific source→target mappings)
 - Runs **custom extension classes** (if configured via `className`)
 - Creates a **Job Item** for both author and publish environments (if enabled)
-- Sends the Job Item through the Viglet Dumont pipeline to Turing
+- Sends the Job Item through the Viglet Dumont pipeline to Viglet Turing
 
 ---
 
@@ -197,9 +197,9 @@ Dependency processing runs **only on standalone (incremental) indexing**, it is 
 %%{init: {'theme': 'base', 'themeVariables': {'fontSize': '13px', 'actorBkg': '#dbeafe', 'actorBorder': '#4A90D9', 'actorTextColor': '#1a1a1a', 'activationBkgColor': '#ede9fe', 'activationBorderColor': '#9B6EC5', 'noteBkgColor': '#dcfce7', 'noteBorderColor': '#50B86C', 'noteTextColor': '#1a1a1a', 'signalColor': '#333', 'signalTextColor': '#333'}}}%%
 sequenceDiagram
     participant EVT as AEM Event Listener<br/>(or Manual API)
-    participant API as Dumont Connector
+    participant API as Viglet Dumont Connector
     participant DB as Indexing Store
-    participant SE as Turing
+    participant SE as Viglet Turing
 
     EVT->>API: POST /api/v2/aem/index/{source}<br/>{paths: ["/content/wknd/.../header"]}
     API->>SE: Index the updated path(s)
@@ -250,11 +250,11 @@ Every standalone index operation performs an extra lookup plus a second indexing
 
 ## AEM Server-Side Bundle (Event Listeners)
 
-The `aem-server` module is an **OSGi bundle installed inside AEM**. It provides event listeners that automatically notify the Dumont connector when content changes.
+The `aem-server` module is an **OSGi bundle installed inside AEM**. It provides event listeners that automatically notify the Viglet Dumont connector when content changes.
 
 ### Events Captured
 
-| Event Listener | OSGi Topic | Trigger | Path Filter | Dumont Action |
+| Event Listener | OSGi Topic | Trigger | Path Filter | Viglet Dumont Action |
 |---|---|---|---|---|
 | `DumAemPageEventHandler` | `com/day/cq/wcm/api/page` | Page created / modified | n/a | `INDEXING` |
 | `DumAemPageReplicationEventHandler` | `com/day/cq/replication` | Page **activated** (published) | excludes `/content/dam/*` | `PUBLISHING` |
@@ -278,8 +278,8 @@ The event listeners are configured in AEM via **OSGi Configuration** (AEM → We
 | Setting | Description |
 |---|---|
 | **Enabled** | Toggle to enable/disable automatic indexing |
-| **Host** | Dumont connector URL (e.g., `http://dumont-server:2720`) |
-| **Config Name** | Source name configured in the Dumont connector |
+| **Host** | Viglet Dumont connector URL (e.g., `http://dumont-server:2720`) |
+| **Config Name** | Source name configured in the Viglet Dumont connector |
 
 ### HTTP Payload
 
@@ -361,7 +361,7 @@ already indexed is harmless (indexing a path is idempotent), while skipping one 
 | `dumont.aem.journal.max-pages-per-poll` | `20` | Pages followed in one poll, so a large backlog drains across polls |
 | `dumont.aem.journal.client-id` | – | OAuth Server-to-Server API Key (Client ID) |
 | `dumont.aem.journal.client-secret` | – | OAuth Server-to-Server Client Secret |
-| `dumont.aem.journal.sources.<source>` | – | Journal URL for that Dumont source |
+| `dumont.aem.journal.sources.<source>` | – | Journal URL for that Viglet Dumont source |
 
 :::tip[Run both]
 The webhook stays the low-latency route: an editor publishes and the page is indexed within
@@ -417,7 +417,7 @@ curl -X POST http://localhost:2720/api/v2/aem/index/WKND \
 
 ## Source Configuration
 
-Each AEM source defines connection details, content scope, author/publish environments, locale mappings, and delta tracking. Sources are configured in the **Turing Admin Console** under **Enterprise Search → Integration → [your AEM instance] → Sources**.
+Each AEM source defines connection details, content scope, author/publish environments, locale mappings, and delta tracking. Sources are configured in the **Viglet Turing Admin Console** under **Enterprise Search → Integration → [your AEM instance] → Sources**.
 
 For the JSON configuration file used by custom extensions (attributes, models, locale paths), see [Extending the AEM Connector](/docs/extending-aem/#aem-configuration-json).
 
@@ -461,7 +461,7 @@ Controls incremental indexing: how the connector detects which content has chang
 
 ### Author / Publish
 
-Configures which AEM environments are indexed and how they map to Turing Semantic Navigation Sites.
+Configures which AEM environments are indexed and how they map to Viglet Turing Semantic Navigation Sites.
 
 | Field | Description |
 |---|---|
@@ -494,7 +494,7 @@ Each source has these actions in the Viglet Turing admin console:
 
 ## Indexing Rules
 
-Indexing Rules allow you to filter content during indexing, for example, to exclude error pages or draft content before it reaches the search index. Rules are configured in the **Turing Admin Console** under **Enterprise Search → Integration → [your AEM instance] → Indexing Rules**.
+Indexing Rules allow you to filter content during indexing, for example, to exclude error pages or draft content before it reaches the search index. Rules are configured in the **Viglet Turing Admin Console** under **Enterprise Search → Integration → [your AEM instance] → Indexing Rules**.
 
 | Field | Description |
 |---|---|
@@ -511,7 +511,7 @@ Indexing Rules allow you to filter content during indexing, for example, to excl
 
 ## Indexing Manager
 
-The Indexing Manager provides a stepper form in the **Turing Admin Console** for targeting specific documents for manual operations.
+The Indexing Manager provides a stepper form in the **Viglet Turing Admin Console** for targeting specific documents for manual operations.
 
 | Operation | Description | Colour |
 |---|---|---|
@@ -559,8 +559,8 @@ Need custom attribute extractors, delta date logic, or content processors? See [
 |---|---|
 | [AEM Event Listener](/docs/aem-event-listener/) | Install the OSGi event listener bundle inside AEM for real-time indexing |
 | [Extending the AEM Connector](/docs/extending-aem/) | Custom attribute extractors, content processors, and configuration JSON reference |
-| [Turing: Integration](https://docs.viglet.org/turing/integration) | General integration management: monitoring, indexing stats, and system information |
-| [Turing: AEM Connector](https://docs.viglet.org/turing/integration-aem) | AEM integration overview from the Turing perspective |
-| [Turing: Semantic Navigation](https://docs.viglet.org/turing/semantic-navigation) | Configure the SN Sites that receive indexed content |
+| [Viglet Turing: Integration](https://docs.viglet.org/turing/integration) | General integration management: monitoring, indexing stats, and system information |
+| [Viglet Turing: AEM Connector](https://docs.viglet.org/turing/integration-aem) | AEM integration overview from the Viglet Turing perspective |
+| [Viglet Turing: Semantic Navigation](https://docs.viglet.org/turing/semantic-navigation) | Configure the SN Sites that receive indexed content |
 
 ---

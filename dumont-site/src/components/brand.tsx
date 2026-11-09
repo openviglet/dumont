@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { VigletLogo } from "@/components/viglet-logo";
+import { PRODUCTS } from "@/lib/site-links";
 
 /** The Viglet Dumont cube mark plus the wordmark. */
 export function Logo({
@@ -15,7 +16,7 @@ export function Logo({
   return (
     <span className={cn("inline-flex items-center gap-2 font-extrabold", className)}>
       <VigletLogo identifier="dumont" size={size} />
-      {showWord && <span>Viglet Dumont</span>}
+      {showWord && <span>{PRODUCTS.dumont.fullName}</span>}
     </span>
   );
 }

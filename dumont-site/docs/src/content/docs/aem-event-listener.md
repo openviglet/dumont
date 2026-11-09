@@ -1,28 +1,28 @@
 ---
 title: "AEM Event Listener Setup"
-description: Install the Dumont AEM event listener bundle inside AEM as a Cloud Service for real-time content synchronization.
+description: Install the Viglet Dumont AEM event listener bundle inside AEM as a Cloud Service for real-time content synchronization.
 ---
 
-This guide explains how to install the Dumont AEM event listener bundle inside your AEM as a Cloud Service instance. Once installed, AEM automatically notifies the Dumont connector whenever content is published, modified, or deleted, enabling real-time search index synchronization.
+This guide explains how to install the Viglet Dumont AEM event listener bundle inside your AEM as a Cloud Service instance. Once installed, AEM automatically notifies the Viglet Dumont connector whenever content is published, modified, or deleted, enabling real-time search index synchronization.
 
 ---
 
 ## What Gets Installed
 
-The Dumont AEM Server module (`aem-server`) deploys three artifacts into AEM:
+The Viglet Dumont AEM Server module (`aem-server`) deploys three artifacts into AEM:
 
 | Artifact | Type | Purpose |
 |---|---|---|
 | `aem-dumont.structure` | Content package | Creates the `/apps/turing` repository structure |
 | `aem-dumont.config` | Content package | Deploys the OSGi configuration (host, configName, enabled) |
-| `aem-dumont.core` | OSGi bundle | Event handlers that listen for page/asset changes and send HTTP requests to Dumont |
+| `aem-dumont.core` | OSGi bundle | Event handlers that listen for page/asset changes and send HTTP requests to Viglet Dumont |
 
 ---
 
 ## Prerequisites
 
 - An AEM as a Cloud Service environment (dev, stage, or prod)
-- A running Dumont connector instance with the AEM plugin (accessible from AEM)
+- A running Viglet Dumont connector instance with the AEM plugin (accessible from AEM)
 - Access to your AEM project's Git repository (for Cloud Manager pipeline deployment)
 - Java 11+ and Maven 3.6+ for local builds
 
@@ -34,11 +34,11 @@ AEM as a Cloud Service does not support direct bundle installation via the Felix
 
 ## Option 1: Add to an Existing AEM Project
 
-If you already have an AEM as a Cloud Service project (created from the [AEM Project Archetype](https://experienceleague.adobe.com/docs/experience-manager-core-components/using/developing/archetype/overview.html)), you can integrate the Dumont event listeners into it.
+If you already have an AEM as a Cloud Service project (created from the [AEM Project Archetype](https://experienceleague.adobe.com/docs/experience-manager-core-components/using/developing/archetype/overview.html)), you can integrate the Viglet Dumont event listeners into it.
 
 ### Step 1: Copy the Source Files
 
-From the [Dumont repository](https://github.com/openviglet/dumont), copy these directories into your AEM project:
+From the [Viglet Dumont repository](https://github.com/openviglet/dumont), copy these directories into your AEM project:
 
 ```
 From: dumont/aem/aem-server/core/src/main/java/com/viglet/dumont/aem/server/
@@ -118,8 +118,8 @@ Contents:
 | Property | Description |
 |---|---|
 | `enabled` | `true` to activate event-driven indexing, `false` to disable |
-| `host` | URL of the Dumont connector instance (with AEM plugin) |
-| `configName` | AEM source name configured in the Dumont connector |
+| `host` | URL of the Viglet Dumont connector instance (with AEM plugin) |
+| `configName` | AEM source name configured in the Viglet Dumont connector |
 
 :::tip[Cloud Manager Environment Variables]
 Use `$[env:VAR_NAME;default=value]` syntax to configure different values per environment (dev, stage, prod) without changing code. Set the variables in **Cloud Manager → Environments → Environment Variables**.
@@ -173,9 +173,9 @@ For the full archetype reference, see [Adobe's archetype documentation](https://
 
 ---
 
-## Option 3: Use the Standalone Dumont AEM Server Module
+## Option 3: Use the Standalone Viglet Dumont AEM Server Module
 
-You can also build and deploy the `aem-server` module directly from the Dumont repository:
+You can also build and deploy the `aem-server` module directly from the Viglet Dumont repository:
 
 ```bash
 git clone https://github.com/openviglet/dumont.git
@@ -191,13 +191,13 @@ The `-PautoInstallPackage` profile installs directly to a local AEM SDK instance
 
 ## OSGi Configuration Properties
 
-After deployment, the configuration can be managed in **AEM → Tools → Operations → Web Console → Configuration** (search for "Dumont"):
+After deployment, the configuration can be managed in **AEM → Tools → Operations → Web Console → Configuration** (search for `Dumont Indexer Configuration`, the bundle's own label):
 
 | Property | Default | Description |
 |---|---|---|
 | **Enabled** | `false` | Toggle event-driven indexing on/off |
-| **Host** | `http://localhost:2720` | Dumont connector URL |
-| **Config Name** | `WKND` | Source name in the Dumont connector |
+| **Host** | `http://localhost:2720` | Viglet Dumont connector URL |
+| **Config Name** | `WKND` | Source name in the Viglet Dumont connector |
 
 ---
 
@@ -218,7 +218,7 @@ For AEM as a Cloud Service, set these variables in Cloud Manager:
 
 1. **Check bundle status:** AEM → Tools → Operations → Web Console → Bundles → search "dumont": should be **Active**
 2. **Check configuration:** Web Console → Configuration → search "TurAemIndexer": verify host and configName
-3. **Test:** Publish a page in AEM and check the Dumont connector logs for incoming requests
+3. **Test:** Publish a page in AEM and check the Viglet Dumont connector logs for incoming requests
 4. **Monitor:** In Viglet Turing → Integration → Monitoring, filter by your AEM source to see indexing events
 
 ---
@@ -229,5 +229,5 @@ For AEM as a Cloud Service, set these variables in Cloud Manager:
 |---|---|
 | [AEM Connector](/docs/connectors/aem/) | How the connector processes AEM content (infinity.json, tags, model.json) |
 | [Extending the AEM Connector](/docs/extending-aem/) | Custom extensions, configuration JSON, and Maven dependencies |
-| [Installation Guide](/docs/installation-guide/) | Deploying Dumont connector with the AEM plugin |
-| [Turing: AEM Integration](https://docs.viglet.org/turing/integration-aem) | Managing AEM indexing via the Turing admin console |
+| [Installation Guide](/docs/installation-guide/) | Deploying Viglet Dumont connector with the AEM plugin |
+| [Viglet Turing: AEM Integration](https://docs.viglet.org/turing/integration-aem) | Managing AEM indexing via the Viglet Turing admin console |

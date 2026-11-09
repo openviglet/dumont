@@ -17,10 +17,10 @@ export function Marketplace() {
           title={
             <>
               One sample per connector,{" "}
-              <span className="text-primary">ready to import into Turing</span>
+              <span className="text-primary">ready to import into Viglet Turing</span>
             </>
           }
-          description="Each sample is a search front end plus the Turing export it needs. Download the package, import it, point the connector at the source, and you have a working search to take apart."
+          description="Each sample is a search front end plus the Viglet Turing export it needs. Download the package, import it, point the connector at the source, and you have a working search to take apart."
         />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

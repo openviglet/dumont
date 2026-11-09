@@ -67,7 +67,7 @@ The standalone Database Connector accepts the following command-line parameters:
 | `--connect` | Yes | n/a | JDBC connection string |
 | `--query` / `-q` | Yes | n/a | SQL query or `file://path/to/query.sql` |
 | `--site` | Yes | n/a | Target Semantic Navigation Site name |
-| `--server` / `-s` | Yes | n/a | Dumont server URL |
+| `--server` / `-s` | Yes | n/a | Viglet Dumont server URL |
 | `--api-key` / `-a` | Yes | n/a | API key for authentication |
 | `--locale` | No | `en_US` | Default locale for documents |
 | `--chunk` / `-z` | No | *(varies)* | Batch size for processing |

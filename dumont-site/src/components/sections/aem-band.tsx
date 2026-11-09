@@ -40,7 +40,7 @@ export function AemBand() {
         <div className="mt-10 flex justify-center">
           <Button asChild size="lg">
             <a href={sitePath("/aem/")}>
-              Dumont for AEM <ArrowRight className="size-4" />
+              Viglet Dumont for AEM <ArrowRight className="size-4" />
             </a>
           </Button>
         </div>

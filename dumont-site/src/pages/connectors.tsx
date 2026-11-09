@@ -32,7 +32,7 @@ export function ConnectorsPage() {
             <SectionHeader
               eyebrow="Targets"
               title="Where the documents go"
-              description="One property chooses the engine. Schema provisioning and the index audit need the target to answer back, which today only Turing does."
+              description="One property chooses the engine. Schema provisioning and the index audit need the target to answer back, which today only Viglet Turing does."
             />
             <div className="grid gap-5 md:grid-cols-3">
               {TARGETS.map((t) => (
@@ -57,7 +57,7 @@ export function ConnectorsPage() {
               <h3 className="mt-4 font-bold">Not sure how to model a source?</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 Source inference takes a URL and drafts the source and its fields with the
-                LLM configured in Turing. A dry run shows the coverage and a diff; nothing is
+                LLM configured in Viglet Turing. A dry run shows the coverage and a diff; nothing is
                 indexed until someone confirms the draft.
               </p>
             </article>

@@ -5,7 +5,7 @@ The public site for **Viglet Dumont**, published to
 `.github/workflows/publish-github-pages.yml`.
 
 Stack: **Vite + React 19 + TypeScript + Tailwind CSS v4 + shadcn/ui**, the same
-conventions as `shio-site` in the Shio repository. It is standalone: no
+conventions as `shio-site` in the Viglet Shio repository. It is standalone: no
 backend, no runtime data. Everything on the page is static and prerendered.
 
 ## Develop
@@ -64,7 +64,7 @@ uses it to render each marketplace sample's README into
 
 Connectors are table stakes, so the page does not lead with them. It leads with
 the outcome (an index that stays correct after launch) and the four ways an
-index drifts, then shows how Dumont answers each: checksummed runs, a safe
+index drifts, then shows how Viglet Dumont answers each: checksummed runs, a safe
 finish that never de-indexes on a bad run, a nightly audit, orphan reports a
 person applies, and per-field coverage and drift. AEM has its own page because
 it is the deepest connector and the audience most likely to be looking for one.

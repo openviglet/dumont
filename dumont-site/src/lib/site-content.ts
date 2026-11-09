@@ -135,9 +135,9 @@ export interface Target {
 
 export const TARGETS: Target[] = [
   {
-    name: "Viglet Turing ES",
+    name: "Viglet Turing",
     property: "turing",
-    note: "The default. Dumont sends the field schema before the first document and audits what Turing holds.",
+    note: "The default. Viglet Dumont sends the field schema before the first document and audits what Viglet Turing holds.",
   },
   {
     name: "Apache Solr",
@@ -210,8 +210,8 @@ export const TRUST: TrustFeature[] = [
     icon: ListChecks,
     title: "A nightly audit, against the index itself",
     body:
-      "On a cron you choose (03:00 by default) Dumont lists what the target holds and compares it with the source. Missing or stale documents are queued again.",
-    detail: "Index inventory is read from Turing; on Solr and Elasticsearch the audit is not available yet.",
+      "On a cron you choose (03:00 by default) Viglet Dumont lists what the target holds and compares it with the source. Missing or stale documents are queued again.",
+    detail: "Index inventory is read from Viglet Turing; on Solr and Elasticsearch the audit is not available yet.",
   },
   {
     id: "orphans",
@@ -227,7 +227,7 @@ export const TRUST: TrustFeature[] = [
     title: "Coverage and drift, per field",
     body:
       "For each source, the share of documents that carry each field, and how that changed since the last run. A field that stops arriving is a number on a screen, not a support ticket.",
-    detail: "An optional summary of the coverage report is written by the LLM configured in Turing.",
+    detail: "An optional summary of the coverage report is written by the LLM configured in Viglet Turing.",
   },
   {
     id: "provenance",
@@ -235,7 +235,7 @@ export const TRUST: TrustFeature[] = [
     title: "Field-level provenance",
     body:
       "Each document can carry where each of its fields came from, so a wrong value in search leads back to the extractor and the source item that produced it.",
-    detail: "Plus a validation that compares what Dumont recorded as sent with what the index actually holds.",
+    detail: "Plus a validation that compares what Viglet Dumont recorded as sent with what the index actually holds.",
   },
   {
     id: "metrics",
@@ -297,7 +297,7 @@ export const AEM_POINTS: { icon: LucideIcon; title: string; body: string }[] = [
  */
 export const WORDPRESS_TILE = {
   title: "WordPress and WooCommerce",
-  body: "A plugin that indexes posts, pages and WooCommerce products into Viglet Turing and puts search, filters from a sentence, cited answers and a shopping copilot on the site. It runs inside WordPress and sends content straight to Viglet Turing, without Dumont.",
+  body: "A plugin that indexes posts, pages and WooCommerce products into Viglet Turing and puts search, filters from a sentence, cited answers and a shopping copilot on the site. It runs inside WordPress and sends content straight to Viglet Turing, without Viglet Dumont.",
   partOf: "The plugin is part of Viglet Turing.",
   cta: "Viglet Turing for WordPress",
   video: {
@@ -317,9 +317,9 @@ export const AI_POINTS: { title: string; body: string }[] = [
       "Point source inference at a URL and an LLM drafts the source and its fields. A dry run shows coverage and a diff, and nothing is indexed until someone accepts the draft.",
   },
   {
-    title: "No model inside Dumont",
+    title: "No model inside Viglet Dumont",
     body:
-      "Every AI feature calls the LLM you configured in Turing, with Turing's cache. Dumont holds no provider keys and no prompts of its own to keep current.",
+      "Every AI feature calls the LLM you configured in Viglet Turing, with Viglet Turing's cache. Viglet Dumont holds no provider keys and no prompts of its own to keep current.",
   },
   {
     title: "Enrichment is opt-in and bounded",
@@ -329,7 +329,7 @@ export const AI_POINTS: { title: string; body: string }[] = [
   {
     title: "Grounding-safe output",
     body:
-      "An empty field is left out, never sent as an empty string, and fields map onto Turing's title, abstract and text embedding roles, so a RAG answer cites real content.",
+      "An empty field is left out, never sent as an empty string, and fields map onto Viglet Turing's title, abstract and text embedding roles, so a RAG answer cites real content.",
   },
 ];
 
@@ -348,7 +348,7 @@ export const SAMPLES: Sample[] = [
     slug: "wknd",
     title: "WKND",
     source: "AEM",
-    body: "Adobe's adventure-travel reference site, indexed from AEM, with a search front end on Turing.",
+    body: "Adobe's adventure-travel reference site, indexed from AEM, with a search front end on Viglet Turing.",
   },
   {
     slug: "wknd-eds",
@@ -388,9 +388,9 @@ export const SUITE = [
   },
   {
     id: "turing",
-    name: "Viglet Turing ES",
+    name: "Viglet Turing",
     role: "Search and RAG over it",
-    body: "Semantic Navigation, facets, spotlights and generative answers grounded in what Dumont indexed.",
+    body: "Semantic Navigation, facets, spotlights and generative answers grounded in what Viglet Dumont indexed.",
     href: LINKS.turing,
   },
   {
@@ -409,12 +409,12 @@ export const NON_GOALS: { title: string; body: string }[] = [
   {
     title: "A crawler farm",
     body:
-      "If the job is scraping thousands of hostile sites behind JavaScript, use Scrapy or Playwright. Dumont's crawler is for sites you are allowed to index, read politely.",
+      "If the job is scraping thousands of hostile sites behind JavaScript, use Scrapy or Playwright. Viglet Dumont's crawler is for sites you are allowed to index, read politely.",
   },
   {
     title: "A warehouse ETL",
     body:
-      "Airbyte and Fivetran move rows into warehouses. Dumont moves documents into a search index and watches that the index stays true to the source.",
+      "Airbyte and Fivetran move rows into warehouses. Viglet Dumont moves documents into a search index and watches that the index stays true to the source.",
   },
   {
     title: "AI that publishes on its own",
@@ -442,7 +442,7 @@ export const RESOURCES: ResourceCard[] = [
   {
     icon: ScrollText,
     title: "Strategy",
-    description: "What Dumont is betting on, and what it deliberately is not trying to be.",
+    description: "What Viglet Dumont is betting on, and what it deliberately is not trying to be.",
     href: LINKS.strategy,
   },
   {

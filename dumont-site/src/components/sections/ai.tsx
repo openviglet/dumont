@@ -14,7 +14,7 @@ export function Ai() {
               <span className="text-primary">You decide what gets indexed.</span>
             </>
           }
-          description="Dumont uses AI for the slow, fiddly parts: working out the shape of a new source, summarising a coverage report, labelling content. None of it writes to your index without a person or a rule you set."
+          description="Viglet Dumont uses AI for the slow, fiddly parts: working out the shape of a new source, summarising a coverage report, labelling content. None of it writes to your index without a person or a rule you set."
         />
 
         <div className="grid gap-5 md:grid-cols-2">

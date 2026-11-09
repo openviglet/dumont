@@ -24,13 +24,13 @@ export const routes: PrerenderRoute[] = [
     path: "/",
     title: "Viglet Dumont: open-source connectors that keep your search index correct",
     description:
-      "Open-source, self-hosted connectors from Adobe Experience Manager, Edge Delivery Services, JDBC databases, file shares, web sites and JSON APIs into Turing ES, Solr or Elasticsearch. Checksummed incremental runs, a nightly audit against the index, deletions that wait for review, and field coverage and drift per source.",
+      "Open-source, self-hosted connectors from Adobe Experience Manager, Edge Delivery Services, JDBC databases, file shares, web sites and JSON APIs into Viglet Turing, Solr or Elasticsearch. Checksummed incremental runs, a nightly audit against the index, deletions that wait for review, and field coverage and drift per source.",
   },
   {
     path: "/aem",
     title: "AEM search connector for on-prem, AMS and Cloud Service | Viglet Dumont",
     description:
-      "Index Adobe Experience Manager pages, Content Fragments, Experience Fragments and assets into Turing ES, Solr or Elasticsearch. Reads AEM as a Cloud Service through delivery APIs with no author credential, reindexes every page that embeds a changed fragment, and hears about changes through Adobe I/O Events, an OSGi bundle or a journal poller.",
+      "Index Adobe Experience Manager pages, Content Fragments, Experience Fragments and assets into Viglet Turing, Solr or Elasticsearch. Reads AEM as a Cloud Service through delivery APIs with no author credential, reindexes every page that embeds a changed fragment, and hears about changes through Adobe I/O Events, an OSGi bundle or a journal poller.",
   },
   {
     path: "/connectors",

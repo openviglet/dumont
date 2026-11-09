@@ -17,6 +17,19 @@ export const SITE_URL = `${SITE_ORIGIN}${BASE}`;
 /** A path of this site ("/aem/", "/#how") under the base it is served at. */
 export const sitePath = (path: string) => BASE + path.replace(/^\//, "");
 
+/**
+ * The three products, named as viglet.org names them (hub STRATEGY I.7): every
+ * visitor-facing mention uses the full name, including repeated ones. There is
+ * deliberately no short display name to reach for; a layout that cannot fit the
+ * full name wraps instead. Slugs, package names, commands and code identifiers
+ * (`turing`, `dumont.indexing.provider`, ...) are technical and stay as they are.
+ */
+export const PRODUCTS = {
+  turing: { fullName: "Viglet Turing", href: "https://turing.viglet.org" },
+  dumont: { fullName: "Viglet Dumont", href: SITE_URL },
+  shio: { fullName: "Viglet Shio", href: "https://shio.viglet.org" },
+} as const;
+
 export const LINKS = {
   docs: sitePath("/docs/"),
   install: sitePath("/docs/installation-guide/"),
@@ -32,8 +45,8 @@ export const LINKS = {
   strategy: "https://github.com/openviglet/dumont/blob/HEAD/docs/STRATEGY.md",
   issues: "https://github.com/openviglet/dumont/issues",
   image: "https://github.com/orgs/openviglet/packages/container/package/dumont",
-  turing: "https://turing.viglet.org",
-  shio: "https://shio.viglet.org",
+  turing: PRODUCTS.turing.href,
+  shio: PRODUCTS.shio.href,
   viglet: "https://www.viglet.org",
 } as const;
 
@@ -74,14 +87,17 @@ export const NAV_GROUPS: SiteLinkGroup[] = [
       { label: "An index you can trust", href: sitePath("/trust/") },
       { label: "AI, where it helps", href: sitePath("/#ai") },
       { label: "Marketplace samples", href: sitePath("/#marketplace") },
-      { label: "With Turing and Shio", href: sitePath("/#suite") },
+      {
+        label: `With ${PRODUCTS.turing.fullName} and ${PRODUCTS.shio.fullName}`,
+        href: sitePath("/#suite"),
+      },
       { label: "Self-host", href: sitePath("/#self-host") },
     ],
   },
 ];
 
 export const FOOTER_BLURB =
-  "Open-source connectors from AEM, Edge Delivery Services, databases, files, web sites and JSON APIs into Turing ES, Solr or Elasticsearch, with an audit that keeps the index true to the source.";
+  `Open-source connectors from AEM, Edge Delivery Services, databases, files, web sites and JSON APIs into ${PRODUCTS.turing.fullName}, Solr or Elasticsearch, with an audit that keeps the index true to the source.`;
 
 export const FOOTER_COLUMNS: SiteLinkGroup[] = [
   {
@@ -112,8 +128,8 @@ export const FOOTER_COLUMNS: SiteLinkGroup[] = [
       { label: "Source", href: LINKS.repo },
       { label: "Roadmap", href: LINKS.roadmap },
       { label: "Changelog", href: LINKS.changelog },
-      { label: "Viglet Turing", href: LINKS.turing },
-      { label: "Viglet Shio", href: LINKS.shio },
+      { label: PRODUCTS.turing.fullName, href: LINKS.turing },
+      { label: PRODUCTS.shio.fullName, href: LINKS.shio },
     ],
   },
 ];

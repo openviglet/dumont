@@ -33,13 +33,13 @@ export function Hero() {
 
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-[#a9c4c0]">
             Viglet Dumont connects AEM, Edge Delivery Services, databases, file shares,
-            web sites and JSON APIs to Turing ES, Solr or Elasticsearch. Then it keeps
+            web sites and JSON APIs to Viglet Turing, Solr or Elasticsearch. Then it keeps
             checking: what changed, what disappeared, which field stopped arriving.
           </p>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#86a5a1]">
             Getting documents into an index is a weekend script. Keeping the index true to
             the source for years, through outages, template changes and unpublished
-            pages, is the part Dumont is built for.
+            pages, is the part Viglet Dumont is built for.
           </p>
 
           <div className="mt-7 flex flex-wrap gap-3">
@@ -54,7 +54,7 @@ export function Hero() {
               variant="outline"
               className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white dark:bg-white/10"
             >
-              <a href={sitePath("/aem/")}>Dumont for AEM</a>
+              <a href={sitePath("/aem/")}>Viglet Dumont for AEM</a>
             </Button>
             <Button
               asChild

@@ -43,9 +43,9 @@ export default defineConfig({
     starlight({
       // A broken internal link or anchor fails the build, the way Docusaurus failed it.
       plugins: [starlightLinksValidator()],
-      title: "Viglet Dumont DEP",
+      title: "Viglet Dumont",
       description:
-        "How to install, configure and run Dumont: the connectors, the indexing plugins and the REST API.",
+        "How to install, configure and run Viglet Dumont: the connectors, the indexing plugins and the REST API.",
       // The site's own icon, served at its root: Starlight's default would need a second copy
       // in a public/ here, which is a file that drifts from the one the site ships.
       favicon: `${SITE_URL}favicon.svg`,

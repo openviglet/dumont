@@ -3,7 +3,7 @@
   "private": true,
   "version": "2026.3.1",
   "type": "module",
-  "description": "Public site of Viglet Dumont DEP (dumont.viglet.org), the open-source connector platform that moves content from AEM, databases, files and the web into Turing ES, Solr or Elasticsearch.",
+  "description": "Public site of Viglet Dumont (dumont.viglet.org), the open-source connector platform that moves content from AEM, databases, files and the web into Viglet Turing, Solr or Elasticsearch.",
   "homepage": "https://dumont.viglet.org/",
   "repository": {
     "type": "git",

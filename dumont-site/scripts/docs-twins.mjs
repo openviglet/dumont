@@ -121,7 +121,7 @@ written.sort((a, b) => a.path.localeCompare(b.path));
 writeFileSync(
   join(built, "llms.txt"),
   [
-    "# Viglet Dumont DEP documentation",
+    "# Viglet Dumont documentation",
     "",
     "> Every page of the documentation has a Markdown twin at `<path>.md`, converted from the same render as the page.",
     "",

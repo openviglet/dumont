@@ -121,21 +121,11 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
-- 📋 **D350** (deps: —) **Public product names still alternate between full names and abbreviations** — Apply the hub naming decision to visible copy and machine-readable output so each product remains the same identifiable entity. → §I.2
-- 📋 **D351** (deps: D350) **Product pages retain decorative chips and hero styling absent from the revised hub** — Use the hub visual grammar across marketing and documentation while preserving the product accent and the function of each page. → §I.3
-- 📋 **D352** (deps: D350) **Getting started and resource links do not express the same journey as the hub** — Give evaluation, installation, documentation and release history explicit destinations and a reliable route back to the portfolio. → §I.4
-- 📋 **D353** (deps: D350) **The home page repeats technical detail before visitors can choose their next step** — Shorten the evaluation path and move depth into existing pages without removing evidence, stable URLs or useful technical documentation. → §I.5
+- 📋 **D351** (deps: D350 ✅) **Product pages retain decorative chips and hero styling absent from the revised hub** — Use the hub visual grammar across marketing and documentation while preserving the product accent and the function of each page. → §I.3
+- 📋 **D352** (deps: D350 ✅) **Getting started and resource links do not express the same journey as the hub** — Give evaluation, installation, documentation and release history explicit destinations and a reliable route back to the portfolio. → §I.4
+- 📋 **D353** (deps: D350 ✅) **The home page repeats technical detail before visitors can choose their next step** — Shorten the evaluation path and move depth into existing pages without removing evidence, stable URLs or useful technical documentation. → §I.5
 - 📋 **D354** (deps: —) **WordPress remains under Connectors even though its plugin belongs entirely to Viglet Turing** — Keep legacy entry points useful while making the product boundary unambiguous and removing stale demo destinations. → §I.6
-- 📋 **D355** (deps: D350, D351, D352, D353, D354) **No acceptance check compares the product site with the revised hub contract** — Validate the rendered brand and journeys across routes, themes and small screens so future site changes cannot silently undo the alignment. → §I.7
-
-## Done when — D350
-
-- **Evidence and boundary are verified** Re-read the cited source and rendered routes,
-  satisfy the acceptance checks in the design, and preserve technical identifiers and
-  existing URLs.
-- **The hub contract survives the change** Review full names, relevant light/dark and
-  mobile layouts, and links to installation, documentation and the portfolio; retain the
-  product-specific behavior.
+- 📋 **D355** (deps: D350 ✅, D351, D352, D353, D354) **No acceptance check compares the product site with the revised hub contract** — Validate the rendered brand and journeys across routes, themes and small screens so future site changes cannot silently undo the alignment. → §I.7
 
 ## Done when — D351
 

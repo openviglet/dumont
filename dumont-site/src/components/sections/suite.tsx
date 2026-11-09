@@ -11,11 +11,11 @@ export function Suite() {
           eyebrow="The Viglet suite"
           title={
             <>
-              Dumont fills the index.{" "}
-              <span className="text-primary">Turing answers from it.</span>
+              Viglet Dumont fills the index.{" "}
+              <span className="text-primary">Viglet Turing answers from it.</span>
             </>
           }
-          description="Dumont works on its own against Solr or Elasticsearch. With Turing it does more: it provisions the field schema before the first document, audits the index, and borrows Turing's LLM for every AI feature."
+          description="Viglet Dumont works on its own against Solr or Elasticsearch. With Viglet Turing it does more: it provisions the field schema before the first document, audits the index, and borrows Viglet Turing's LLM for every AI feature."
         />
 
         <div className="grid gap-5 md:grid-cols-3">
@@ -42,7 +42,7 @@ export function Suite() {
         </div>
 
         <div className="mx-auto mt-16 max-w-4xl">
-          <h3 className="text-center text-xl font-extrabold tracking-tight">Where Dumont is the wrong tool</h3>
+          <h3 className="text-center text-xl font-extrabold tracking-tight">Where Viglet Dumont is the wrong tool</h3>
           <p className="mt-2 text-center text-sm text-muted-foreground">
             Written down in the strategy, so nobody has to find out by trying.
           </p>

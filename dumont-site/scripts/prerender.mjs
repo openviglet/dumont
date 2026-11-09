@@ -75,7 +75,7 @@ function assertSlashedLinks(text, where) {
 function breadcrumbJsonLd(route, canonical) {
   if (route.path === "/") return "";
   const items = [
-    { name: "Dumont", item: SITE_URL },
+    { name: "Viglet Dumont", item: SITE_URL },
     { name: route.title.replace(/\s*\|\s*Viglet Dumont$/, ""), item: canonical },
   ];
   const json = JSON.stringify({

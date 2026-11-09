@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Container, Logo } from "@/components/brand";
-import { LINKS, NAV_AEM, NAV_GROUPS, NAV_LINKS, sitePath } from "@/lib/site-links";
+import { LINKS, NAV_AEM, NAV_GROUPS, NAV_LINKS, PRODUCTS, sitePath } from "@/lib/site-links";
 import { cn } from "@/lib/utils";
 
 export function SiteNav() {
@@ -40,11 +40,13 @@ export function SiteNav() {
           : "border-b border-transparent bg-background/60"
       )}
     >
-      <Container className="flex h-16 items-center gap-4">
+      <Container className="flex h-16 items-center gap-3 sm:gap-4">
         <div className="flex shrink-0 items-center gap-2.5">
-          <a href={sitePath("/")} className="text-base" aria-label="Viglet Dumont home">
+          {/* The full name stays visible at every width (hub STRATEGY I.7): a phone
+              gets a smaller mark and type, never the mark alone. */}
+          <a href={sitePath("/")} className="text-sm sm:text-base" aria-label={`${PRODUCTS.dumont.fullName} home`}>
             <Logo className="hidden sm:inline-flex" />
-            <Logo showWord={false} className="sm:hidden" />
+            <Logo size={26} className="gap-1.5 sm:hidden" />
           </a>
           <a
             href={LINKS.viglet}
@@ -100,11 +102,11 @@ export function SiteNav() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <Button asChild size="sm">
             <a href={sitePath("/#self-host")}>
               Get started
-              <ArrowRight className="size-4" />
+              <ArrowRight className="hidden size-4 sm:block" />
             </a>
           </Button>
           <ModeToggle />

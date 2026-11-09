@@ -20,7 +20,7 @@ export function Problems() {
               <span className="text-primary">They drift.</span>
             </>
           }
-          description="The four ways a search index goes wrong after launch, and what Dumont does about each one."
+          description="The four ways a search index goes wrong after launch, and what Viglet Dumont does about each one."
         />
 
         <div className="grid gap-5 md:grid-cols-2">
@@ -40,7 +40,7 @@ export function Problems() {
             href={sitePath("/trust/")}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
           >
-            Everything Dumont checks after a run <ArrowRight className="size-4" />
+            Everything Viglet Dumont checks after a run <ArrowRight className="size-4" />
           </a>
         </div>
       </Container>

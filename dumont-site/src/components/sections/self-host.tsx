@@ -36,7 +36,7 @@ const COMPOSE = `services:
       - ./store:/app/store
     environment:
       TURING_URL: http://turing:2700
-      TURING_APIKEY: <your Turing API key>
+      TURING_APIKEY: <your Viglet Turing API key>
   turing:
     image: ghcr.io/openviglet/turing:latest
     ports:
@@ -54,7 +54,7 @@ export function SelfHost() {
               <span className="text-primary">next to your content</span>
             </>
           }
-          description="Connectors need to reach the systems they read, which usually means inside your network. Dumont is one image you run there; there is no hosted tier."
+          description="Connectors need to reach the systems they read, which usually means inside your network. Viglet Dumont is one image you run there; there is no hosted tier."
         />
 
         <div className="grid items-start gap-8 lg:grid-cols-[1fr_1fr] [&>*]:min-w-0">
@@ -75,7 +75,7 @@ export function SelfHost() {
           <div>
             <p className="text-sm font-semibold">Try it in one line:</p>
             <CopyCommand command={DOCKER_RUN} className="mt-2 border-border bg-card text-foreground" />
-            <p className="mt-6 text-sm font-semibold">Or with Turing beside it:</p>
+            <p className="mt-6 text-sm font-semibold">Or with Viglet Turing beside it:</p>
             <CodeBlock caption="docker-compose.yaml" code={COMPOSE} className="mt-2" />
             <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
               Then open <code className="font-mono">http://localhost:2720</code>. Standalone

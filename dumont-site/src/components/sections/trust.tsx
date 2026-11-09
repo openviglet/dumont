@@ -17,7 +17,7 @@ export function Trust({ detailed = false }: { detailed?: boolean }) {
                 <span className="text-primary">and still trust on Monday</span>
               </>
             }
-            description="Most connectors stop when the documents are sent. Dumont keeps a record of what it sent, compares it with what the index holds, and tells you when the two disagree."
+            description="Most connectors stop when the documents are sent. Viglet Dumont keeps a record of what it sent, compares it with what the index holds, and tells you when the two disagree."
           />
         )}
 

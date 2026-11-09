@@ -15,7 +15,7 @@ A **Connector** is a component that knows how to extract content from a specific
 2. **Extracts** documents according to its configuration
 3. **Emits** each document as a **Job Item** into the processing pipeline
 
-Dumont ships with five connectors:
+Viglet Dumont ships with five connectors:
 
 | Connector | Source | How it works |
 |---|---|---|
@@ -27,7 +27,7 @@ Dumont ships with five connectors:
 
 Each connector implements the `DumConnectorPlugin` interface and provides three operations: **crawl** (full extraction), **indexAll** (re-index a source), and **indexById** (index specific documents by ID).
 
-WordPress is not among them: the WordPress plugin is part of Viglet Turing and sends content to it directly, without Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
+WordPress is not among them: the WordPress plugin is part of Viglet Turing and sends content to it directly, without Viglet Dumont. See [Viglet Turing for WordPress](https://turing.viglet.org/docs/integrations/wordpress/).
 
 ---
 
@@ -40,7 +40,7 @@ A **Job Item** is a single document moving through the pipeline. It contains:
 - **Provider**: which connector produced this item
 - **Locale**: the language/country of the content (e.g., `en_US`, `pt_BR`)
 
-Job Items are the universal data format inside Dumont. Every connector produces them, every strategy evaluates them, and every indexing plugin consumes them.
+Job Items are the universal data format inside Viglet Dumont. Every connector produces them, every strategy evaluates them, and every indexing plugin consumes them.
 
 ---
 
@@ -48,7 +48,7 @@ Job Items are the universal data format inside Dumont. Every connector produces 
 
 When a connector extracts a document, it does not send it directly to the search engine. Instead, the document passes through a multi-stage pipeline designed for reliability, efficiency, and flexibility.
 
-![Dumont, Processing Pipeline](/docs/img/diagrams/dumont-pipeline.svg)
+![Viglet Dumont, Processing Pipeline](/docs/img/diagrams/dumont-pipeline.svg)
 
 ### Stage 1: Extraction
 
@@ -86,11 +86,11 @@ The embedded queue stops taking messages when the disk that holds `store/queue/`
 
 ### Stage 5: Delivery
 
-The **Indexing Plugin** consumes messages from the queue and delivers them to the configured search engine. Dumont supports three output targets:
+The **Indexing Plugin** consumes messages from the queue and delivers them to the configured search engine. Viglet Dumont supports three output targets:
 
 | Plugin | Target | Description |
 |---|---|---|
-| **Turing** (default) | Viglet Turing | Uses the Turing Java SDK to deliver documents via REST API |
+| **Viglet Turing** (default) | Viglet Turing | Uses the Viglet Turing Java SDK to deliver documents via REST API |
 | **Solr** | Apache Solr | Uses SolrJ to add documents directly to a Solr collection |
 | **Elasticsearch** | Elasticsearch | Uses the Elasticsearch Java Client for bulk indexing |
 
@@ -112,7 +112,7 @@ Indexing Rules are configured per source in the admin console and are evaluated 
 
 ## Change Detection
 
-Dumont tracks every document it has processed using a persistent indexing database. For each document, it stores:
+Viglet Dumont tracks every document it has processed using a persistent indexing database. For each document, it stores:
 
 - **Object ID**: the unique identifier from the source
 - **Checksum**: a CRC32 hash of the document's content
@@ -129,7 +129,7 @@ This mechanism enables efficient **incremental indexing**, only changed content 
 
 An indexing run that reports success is not the same thing as an index you can trust. A selector
 that stops matching, a write that fails after the ledger recorded it, a run killed halfway: each
-leaves the pipeline reporting nothing wrong. Dumont surfaces all three.
+leaves the pipeline reporting nothing wrong. Viglet Dumont surfaces all three.
 
 ### Field coverage and drift
 
@@ -198,7 +198,7 @@ Every document's journey through the pipeline is tracked with a status code:
 | I want to... | Go to |
 |---|---|
 | Understand the full system architecture | [Architecture](/docs/architecture/) |
-| Install Dumont | [Installation Guide](/docs/installation-guide/) |
+| Install Viglet Dumont | [Installation Guide](/docs/installation-guide/) |
 | Configure a Web Crawler | [Web Crawler Connector](/docs/connectors/web-crawler/) |
 | Index a database | [Database Connector](/docs/connectors/database/) |
 | Understand the indexing plugins | [Indexing Plugins](/docs/indexing-plugins/) |

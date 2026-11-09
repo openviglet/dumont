@@ -34,7 +34,7 @@ const CHANNELS = [
   },
   {
     name: "The AEM-side bundle",
-    body: "An OSGi bundle installed in AEM sends page and Content Fragment replication events to Dumont. For instances where Adobe I/O Events is not an option.",
+    body: "An OSGi bundle installed in AEM sends page and Content Fragment replication events to Viglet Dumont. For instances where Adobe I/O Events is not an option.",
   },
   {
     name: "The journal poller",
@@ -54,7 +54,7 @@ export function AemPage() {
       <SiteNav />
       <main className="flex-1">
         <PageHero
-          eyebrow="Dumont for Adobe Experience Manager"
+          eyebrow="Viglet Dumont for Adobe Experience Manager"
           title={
             <>
               AEM content in your search index,{" "}
@@ -157,7 +157,7 @@ export function AemPage() {
                 <CodeBlock caption="where events go" code={WEBHOOK} />
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
                   When the event is for a shared Experience Fragment or Content Fragment,
-                  Dumont works out every page that embeds it and reindexes those too, so a
+                  Viglet Dumont works out every page that embeds it and reindexes those too, so a
                   changed footer or product description reaches search without a full
                   reindex.
                 </p>

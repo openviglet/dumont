@@ -86,7 +86,7 @@ logging:
 
 | Property | Default | Description |
 |---|---|---|
-| `server.port` | `2720` | HTTP port for the Dumont application |
+| `server.port` | `2720` | HTTP port for the Viglet Dumont application |
 
 ### Admin Account
 
@@ -106,7 +106,7 @@ A run can finish and still carry a warning: a source reports something an operat
 
 | Property | Default | Description |
 |---|---|---|
-| `dumont.alerts.webhook-url` | *(unset)* | URL that receives a JSON `POST` when a source's run starts carrying a warning (`event`, `source`, `provider`, `operationType`, `endTime`, `documentCount`, `partial`, `warnings`). Sent once when a source goes from healthy to warned, not on every warned run. The Turing API key is never sent. Unset, nothing is sent. |
+| `dumont.alerts.webhook-url` | *(unset)* | URL that receives a JSON `POST` when a source's run starts carrying a warning (`event`, `source`, `provider`, `operationType`, `endTime`, `documentCount`, `partial`, `warnings`). Sent once when a source goes from healthy to warned, not on every warned run. The Viglet Turing API key is never sent. Unset, nothing is sent. |
 
 ### Run Metrics (Prometheus)
 
@@ -163,7 +163,7 @@ The values are restored from the stored run history at startup, so a restart doe
 | `dumont.indexing.provider` | `turing` | Output target: `turing`, `solr`, or `elasticsearch` |
 | `dumont.indexing.job.batch-size` | `50` | Number of Job Items per batch before queue delivery |
 | `dumont.delivery.breaker.failures` | `3` | Deliveries to the backend that may fail in a row before Viglet Dumont checks whether the backend answers (5-second timeout). If it does not, the run stops reading its source, records `stopped: Viglet Turing unreachable at <url>` and removes nothing from the index. The documents it could not send go out on the next run. A backend that answers but refuses batches does not stop the run |
-| `dumont.indexing.provision` | `true` | Send each source's declared field schema to the backend before its first document, so fields are created as declared rather than inferred from whichever value arrives first. A rejected schema is logged and indexing continues with the site's current schema. Turing only: other backends have no declarative schema endpoint |
+| `dumont.indexing.provision` | `true` | Send each source's declared field schema to the backend before its first document, so fields are created as declared rather than inferred from whichever value arrives first. A rejected schema is logged and indexing continues with the site's current schema. Viglet Turing only: other backends have no declarative schema endpoint |
 
 ### Extraction Resilience
 
@@ -194,15 +194,15 @@ review and apply yourself, through [the orphan endpoints](/docs/rest-api/#orphan
 |---|---|---|
 | `dumont.audit.cron` | `0 0 3 * * *` | Cron for the scheduled content audit. `-` disables it |
 | `dumont.audit.cron.zone` | `UTC` | Timezone the cron is evaluated in |
-| `dumont.audit.index.enabled` | `true` | Also compare against the search index. Requires a backend that can enumerate what it holds. Turing can; Solr and Elasticsearch report nothing and the comparison is skipped |
+| `dumont.audit.index.enabled` | `true` | Also compare against the search index. Requires a backend that can enumerate what it holds. Viglet Turing can; Solr and Elasticsearch report nothing and the comparison is skipped |
 | `dumont.audit.index.orphanTtl` | `PT24H` | How long an orphan report stays applicable (ISO-8601 duration). Past it, applying is refused and a fresh audit must re-establish the report. `PT0S` or below switches expiry off |
 
-### Turing Connection
+### Viglet Turing Connection
 
 | Property | Default | Description |
 |---|---|---|
-| `turing.url` | `http://localhost:2700` | Base URL of the Turing instance |
-| `turing.apiKey` | `""` | API Token for authenticating with Turing |
+| `turing.url` | `http://localhost:2700` | Base URL of the Viglet Turing instance |
+| `turing.apiKey` | `""` | API Token for authenticating with Viglet Turing |
 
 ### Solr Direct Connection
 
@@ -242,7 +242,7 @@ See [AEM Connector → Adobe I/O Events](/docs/connectors/aem/#adobe-io-events).
 | `dumont.aem.journal.client-secret` | – | OAuth Server-to-Server Client Secret used for the journal |
 | `dumont.aem.journal.ims-url` | `https://ims-na1.adobelogin.com/ims/token/v3` | Adobe IMS token endpoint |
 | `dumont.aem.journal.scopes` | `openid,AdobeID,adobeio_api,event_receiver_api` | Scopes requested for the token |
-| `dumont.aem.journal.sources.<source>` | – | Journal URL of the event registration, per Dumont source name |
+| `dumont.aem.journal.sources.<source>` | – | Journal URL of the event registration, per Viglet Dumont source name |
 
 ### AEM Fetch Strategy
 
@@ -259,11 +259,11 @@ Configured per source in the console, not by property: see [AEM Connector → Fe
 | Property | Default | Description |
 |---|---|---|
 | `logging.file.name` | `store/logs/dum-connector.log` | Log file path |
-| `logging.level.com.viglet` | `INFO` | Log level for Dumont application code |
+| `logging.level.com.viglet` | `INFO` | Log level for Viglet Dumont application code |
 
 ### Indexing Log
 
-Separate from the application log above. Every document Dumont processes leaves a row per status
+Separate from the application log above. Every document Viglet Dumont processes leaves a row per status
 it passes through (prepared, sent to the queue, delivered to the search engine), each naming the
 document, the source that produced it and the run it belonged to. Queried through
 [the Logging API](/docs/rest-api/#logging-api).
@@ -357,7 +357,7 @@ history means a quiet connector.
 These warnings always reach the file and the console, never the store being complained about, so
 a MongoDB outage does not swallow the notice that MongoDB is down.
 
-One default is Dumont's rather than the driver's. Where `dumont.mongodb.uri` does not set
+One default is Viglet Dumont's rather than the driver's. Where `dumont.mongodb.uri` does not set
 `serverSelectionTimeoutMS`, the indexing log applies **5000 ms** in place of the driver's 30 s, so
 that a MongoDB which is down makes `logging/status` answer in five seconds rather than holding the
 request open for half a minute. Set the option explicitly in the URI to choose your own:

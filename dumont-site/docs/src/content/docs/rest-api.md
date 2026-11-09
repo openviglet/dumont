@@ -431,7 +431,7 @@ Returns indexing operation statistics (start time, document count, duration, thr
 GET /api/v2/connector/system-info
 ```
 
-Returns runtime system information consumed by the Turing Integration → System Information page:
+Returns runtime system information consumed by the Viglet Turing Integration → System Information page:
 
 - Application name and version
 - Java version, vendor, and JVM details
@@ -623,4 +623,4 @@ Returns an empty AEM source model for reference.
 |---|---|
 | [AEM Connector](/docs/connectors/aem/) | AEM indexing flow, event listeners, and manual triggering |
 | [Connectors Overview](/docs/connectors/overview/) | All connectors and how they're managed |
-| [Turing: Integration](https://docs.viglet.org/turing/integration) | Turing admin console for managing connectors |
+| [Viglet Turing: Integration](https://docs.viglet.org/turing/integration) | Viglet Turing admin console for managing connectors |

@@ -2,16 +2,16 @@
 /**
  * Starlight's own head, plus a BreadcrumbList. Without one, Google builds the result's breadcrumb
  * from the URL alone ("dumont.viglet.org › docs"), naming no product. The trail is
- * Dumont › Docs › page.
+ * Viglet Dumont › Docs › page.
  */
 import Default from "@astrojs/starlight/components/Head.astro";
 
-import { SITE_ORIGIN, SITE_URL } from "../../../src/lib/site-links.ts";
+import { PRODUCTS, SITE_ORIGIN, SITE_URL } from "../../../src/lib/site-links.ts";
 
 const docsHome = `${SITE_URL}docs/`;
 const url = new URL(Astro.url.pathname, SITE_ORIGIN).href;
 const items = [
-  { name: "Dumont", item: SITE_URL },
+  { name: PRODUCTS.dumont.fullName, item: SITE_URL },
   { name: "Docs", item: docsHome },
 ];
 if (url !== docsHome) items.push({ name: Astro.locals.starlightRoute.entry.data.title, item: url });

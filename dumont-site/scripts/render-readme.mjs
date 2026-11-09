@@ -72,7 +72,7 @@ const html = `<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${escapeHtml(title)} — Dumont Marketplace</title>
+    <title>${escapeHtml(title)} — Viglet Dumont Marketplace</title>
     <meta
       name="description"
       content="${escapeHtml(title)} — a ready-to-use connector sample from the Viglet Dumont Marketplace."
@@ -333,7 +333,7 @@ const html = `<!doctype html>
     <section class="hero">
       <div class="hero-inner">
         <nav class="crumbs">
-          <a href="../../">Dumont</a>
+          <a href="../../">Viglet Dumont</a>
           <span class="sep">/</span>
           <a href="../../#marketplace">Marketplace</a>
           <span class="sep">/</span>
@@ -354,7 +354,7 @@ ${bodyHtml}
       </article>
     </main>
     <footer>
-      <span>Viglet Dumont DEP — Data Exchange Platform</span>
+      <span>Viglet Dumont — Data Exchange Platform</span>
       <span>
         <a href="https://github.com/openviglet/dumont/issues">Report an issue</a>
         &nbsp;·&nbsp;
