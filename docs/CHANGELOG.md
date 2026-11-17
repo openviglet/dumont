@@ -830,3 +830,6 @@
 - **D345** — Every source page (AEM, DB, Web Crawler, Assets, EDS, Catalog) offers Clear indexing state in its menu, confirmed, calling the ledger endpoint without starting a run.
 - 🗑 **D348** — abandoned: The premise was false: DumJsonApiSource reports no unchangedIds and walks from page one every run, so once D341 forgets lost ledger rows a run resends all its budget reaches.
 - **D349** — An EDS source is named by the id its runs file the ledger under: the plugin resolves id or title, and the console clears by id, so Clear indexing state and Reindex all reach the real rows.
+
+## Track V — Document text extraction for downstream processing
+

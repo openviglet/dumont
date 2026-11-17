@@ -142,3 +142,54 @@ and produtos/dumont.md): the release, the names on the files and the links in th
 trail the site and the 2026.3 line.
 
 ## LII Academic repositories as sources (DSpace, OAI-PMH)
+
+## LIII Document text extraction for downstream processing
+
+Consumers that classify documents or extract fields from them need text page by page and
+OCR spent only where a page has no text layer.
+
+### LIII.1 Text extraction loses page boundaries (D356)
+
+Met while designing the document classification service (`d:\Git\vilt\classification`),
+which receives files through the Dumont assets connector and needs text page by page.
+
+`DumTextExtractor.extract(...)` (connector-commons, D315) returns one `Extraction` whose
+`text` is the whole document as a single string from Tika's `BodyContentHandler`. Page
+boundaries are gone by then, so a consumer cannot:
+
+- send only the first pages of a long contract to a classifier;
+- cite the page a value was read from, which grounding a field requires;
+- run OCR only on the pages that have no text layer (see the OCR line in this track);
+- report per-page outcome (text layer, OCR'd, empty, failed).
+
+Expected: an opt-in page mode, e.g. `extractPages(Path)` returning `List<Page>(number,
+text, source = TEXT_LAYER | OCR | NONE, ocrConfidence)` plus the document-level
+`Outcome`. Tika's PDF parser already emits a `<div class="page">` per page through the
+XHTML SAX stream, so a page-aware content handler can split there; Office formats can
+stay a single page. The current `extract` stays as it is for indexing.
+
+No workaround written yet: the classification service will wait on this line rather than
+parse PDFs with its own PDFBox copy.
+
+### LIII.2 OCR is not decided per page (D357)
+
+Met while designing the document classification service (`d:\Git\vilt\classification`),
+which will read large folders of contracts and invoices through the assets connector.
+
+`DumFileUtils.configure(ParseContext)` (assets-commons) sets
+`PDFParserConfig.setExtractInlineImages(true)` and a default `TesseractOCRConfig` for
+every parse. The effect is OCR on every image embedded in every PDF: logos, signatures
+and stamps in a born-digital contract are OCR'd although the page already has a text
+layer, while the cost of a scanned page and a digital one is not told apart. On a bulk
+run OCR dominates the time per document.
+
+Expected:
+
+- OCR decided per page: Tika's PDF OCR strategy `AUTO` (OCR a page only when its text
+  layer is short or mostly unmapped Unicode), with the thresholds configurable per source;
+- inline-image extraction off by default, on per source when someone asks for it;
+- Tesseract language configurable per source (`por+eng` for Brazilian documents), and the
+  render DPI as well;
+- the outcome says which pages were OCR'd, so a run record shows the OCR cost.
+
+No workaround written yet: the classification service will depend on this line.

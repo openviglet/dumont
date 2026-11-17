@@ -121,6 +121,11 @@ This track has no remaining pending tasks.
 
 ## Track D — Adoption & authoring
 
+## Track V — Document text extraction for downstream processing
+
+- 📋 **D356** (deps: —) **DumTextExtractor returns one string per document, so a consumer cannot tell which page a passage came from** — Classifiers and field extractors cannot send only the pages they need, cite a page as evidence, or OCR pages one by one. → §LIII.1
+- 📋 **D357** (deps: D356) **The assets connector OCRs every embedded image in every PDF, including born-digital pages that already have text** — Bulk runs over contracts and invoices spend most of their time on OCR that adds nothing, and scanned pages cost the same as digital ones. → §LIII.2
+
 ## Done when — D351
 
 - **Evidence and boundary are verified** Re-read the cited source and rendered routes,
