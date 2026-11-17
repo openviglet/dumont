@@ -193,3 +193,33 @@ Expected:
 - the outcome says which pages were OCR'd, so a run record shows the OCR cost.
 
 No workaround written yet: the classification service will depend on this line.
+
+## LIV Enrichment by external services
+
+Enrichers that hand a record to an external service, such as a document classifier, and
+wait for its answer without holding the run.
+
+### LIV.1 No asynchronous enrichment (D358)
+
+Met while designing Minos, the document classification service
+(`d:\Git\vilt\classification`, task CL48), which Dumont's assets connector is meant to
+call for every new or changed file.
+
+The natural hook is a `DumEnricher` in the `DumEnrichmentChain`: it runs after
+extraction and before publish, and its contributions are grounded through the schema.
+But `enrich(source, record)` is synchronous and returns the contributions in the same
+call. Classifying a document can take seconds to minutes (page OCR, several model calls,
+an escalation), so a synchronous enricher holds the run on each record, and a timeout
+publishes the document without its classification.
+
+Expected: an asynchronous enrichment path, for example:
+
+- an enricher may answer "pending" with a correlation id instead of contributions;
+- Dumont keeps the record (or its id) as pending and continues the run;
+- the external service calls back (or Dumont polls) with the contributions;
+- Dumont merges them through the same schema-bound builder, publishes the record, and the
+  run record shows how many are still pending and for how long;
+- a pending record that never gets an answer is published without the contributions after
+  a configurable time, or held, per source.
+
+No workaround written yet: Minos waits on this line for its Dumont integration.

@@ -126,6 +126,10 @@ This track has no remaining pending tasks.
 - 📋 **D356** (deps: —) **DumTextExtractor returns one string per document, so a consumer cannot tell which page a passage came from** — Classifiers and field extractors cannot send only the pages they need, cite a page as evidence, or OCR pages one by one. → §LIII.1
 - 📋 **D357** (deps: D356) **The assets connector OCRs every embedded image in every PDF, including born-digital pages that already have text** — Bulk runs over contracts and invoices spend most of their time on OCR that adds nothing, and scanned pages cost the same as digital ones. → §LIII.2
 
+## Track W — Enrichment by external services
+
+- 📋 **D358** (deps: —) **A DumEnricher must answer synchronously, so a slow external enrichment holds the run on every record** — Document classification with OCR and model calls takes seconds to minutes per file, which a crawl cannot wait for record by record. → §LIV.1
+
 ## Done when — D351
 
 - **Evidence and boundary are verified** Re-read the cited source and rendered routes,
