@@ -232,22 +232,6 @@ of per-source downloads, hand-edited files and API calls. These lines close the 
 from the console's export to a working import, and keep a source name from breaking the
 run it keys.
 
-### LV.1 Console export carries no id (D359)
-
-The source page's Export action builds `{ "sources": [ ... ] }` in the browser
-(`source-import-export.ts`, `exportSourceToJson`) and leaves `id` out. The first-start
-import (`DumAemOnStartupJpa` reading `export/*.json`) calls
-`DumAemExchangeProcess.importFromFile`, which filters sources with
-`dumAemSourceRepository.findById(exchange.getId())`. A null id makes Spring Data throw
-`IllegalArgumentException`; `importFromFile` only catches Jackson exceptions, so the
-error reaches the `ApplicationRunner`.
-
-Expected: the import accepts a source without an id (it mints one, and skips a source
-whose name already exists), and the console export also writes the id so a re-import on
-the same instance is idempotent.
-
-Workaround until then: add an `"id"` to every entry of `sources` by hand.
-
 ### LV.2 No AEM export or import endpoint (D360)
 
 `DumDbSourceApi` and `DumWCSourceApi` expose `GET .../export` (a zip holding

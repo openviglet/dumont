@@ -189,6 +189,9 @@ function mapExchangeSource(src: ExchangeSource): Partial<TurIntegrationAemSource
 
 export function exportSourceToJson(source: TurIntegrationAemSource): string {
   const exchangeSource: ExchangeSource = {
+    // D359: the id travels so the first-start import of this file recognises the source on a
+    // second run; the console's own import strips it (stripAemSourceIds) before creating.
+    id: source.id || undefined,
     name: source.name,
     defaultLocale: source.defaultLocale || undefined,
     localeClass: source.localeClass || undefined,

@@ -837,3 +837,4 @@
 
 ## Track X — Source configuration moves between instances
 
+- **D359** — A source exported without an id, from the console or by hand, now imports on first start with a generated id, and a source whose name already exists is skipped; the console export also carries the id.
