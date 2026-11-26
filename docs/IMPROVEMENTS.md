@@ -232,17 +232,6 @@ of per-source downloads, hand-edited files and API calls. These lines close the 
 from the console's export to a working import, and keep a source name from breaking the
 run it keys.
 
-### LV.2 No AEM export or import endpoint (D360)
-
-`DumDbSourceApi` and `DumWCSourceApi` expose `GET .../export` (a zip holding
-`export.json`) and `POST .../import` (multipart). The AEM plugin has the same
-`exportObject` and `importFromMultipartFile` methods in `DumAemExchangeProcess`, but
-`DumAemSourceApi` maps neither.
-
-Expected: `GET /api/v2/aem/source/export` and `POST /api/v2/aem/source/import`, same
-shape as DB and WC. The exported `export.json` is the file the first-start import reads,
-so it can be dropped into `export/` on a new instance unchanged.
-
 ### LV.4 Source names accept whitespace (D361)
 
 The AEM source form, the AEM wizard, the DB source form and the assets source form only

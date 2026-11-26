@@ -838,3 +838,4 @@
 ## Track X — Source configuration moves between instances
 
 - **D359** — A source exported without an id, from the console or by hand, now imports on first start with a generated id, and a source whose name already exists is skipped; the console export also carries the id.
+- **D360** — GET /api/v2/aem/source/export downloads every AEM source as a zip holding export.json, and POST /api/v2/aem/source/import takes that zip or a plain .json back, like the DB and web-crawler plugins.
