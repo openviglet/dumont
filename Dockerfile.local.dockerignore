@@ -1,0 +1,24 @@
+# Per-Dockerfile ignore for Dockerfile.local (BuildKit uses <dockerfile>.dockerignore
+# in preference to .dockerignore). The runtime-only image needs ONLY the host-built
+# jars, so exclude everything else and keep the build context tiny.
+# (Re-including a nested file requires un-ignoring each parent directory, and the
+# last matching rule wins, so the connector block must follow the generic one.)
+*
+
+# Every connector plugin, by shape rather than by name (D91): `<connector>/*-plugin`
+# modules, whose shaded jar is `target/*-plugin.jar`. Samples end in `-sample`.
+!*/
+*/*
+!*/*-plugin/
+*/*-plugin/*
+!*/*-plugin/target/
+*/*-plugin/target/*
+!*/*-plugin/target/*-plugin.jar
+# maven-shade's unshaded leftover matches the glob too; it must not reach /app/libs.
+*/*-plugin/target/original-*
+
+!connector/connector-app/
+connector/connector-app/*
+!connector/connector-app/target/
+connector/connector-app/target/*
+!connector/connector-app/target/dumont-connector.jar
