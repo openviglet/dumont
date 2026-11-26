@@ -17,7 +17,6 @@ import { GradientButton } from "../ui/gradient-button";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { SectionCard } from "../ui/section-card";
 import { sourceNameHasNoWhitespace } from "@/lib/source-name";
-"use client"
 
 interface Props {
   value: TurIntegrationAssetsSource;

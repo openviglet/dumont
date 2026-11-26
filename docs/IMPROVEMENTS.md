@@ -2,17 +2,20 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU5 Frontend lint has no config
+### §DU5 Frontend lint debt held in named files
 
-`dumont-react/package.json` declares `"lint": "eslint ."` and depends on ESLint 10 with
-`eslint-plugin-react-hooks` and `eslint-plugin-react-refresh`, but the 2026.2 tree has
-no `eslint.config.js`. ESLint 9+ reads only the flat config, so `npm run lint` exits 2
-with "couldn't find an eslint.config file" before checking a single file. Found while
-gating DU1: the frontend gate is `tsc -b` alone.
+`dumont-react/eslint.config.js` (ported from Dumont 2026.3) makes `npm run lint` a
+working gate: it exits 0 with warnings only. The first half fixed the small errors and
+turned five rules off in named files, the inherited debt of a console that had never
+been linted.
 
-Dumont 2026.3 has `dumont-react/eslint.config.js`. Port it, run `npm run lint`, and fix
-or explicitly disable what it reports in the 2026.2 sources, so the gate is green and
-stays one.
+Left: empty those lists, one rule per commit. `react-hooks/set-state-in-effect` (19
+files) and `react-hooks/exhaustive-deps` (15 files, mostly a missing `t` or a service
+built from `id`) carry the bulk. Then `@typescript-eslint/no-explicit-any` (6 files),
+`react-hooks/purity` (`Date.now()` as the initial state in the indexing-stats page) and
+`react-hooks/refs` (the avatar picker). Fix a file, delete its line from the list, and
+delete a block once it is empty rather than keep it at zero. Dumont 2026.3 D53, D54 and
+D56 cleared the same rules and are the reference for each pattern.
 
 ### §DU6 Source names unchecked on the server
 

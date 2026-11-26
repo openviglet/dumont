@@ -45,6 +45,9 @@ export function useDiscovery(): DumDiscoveryAPI | undefined {
       .catch(() => {
         // discovery failed — keep undefined, components fall back to defaults
       });
+    return () => {
+      alive = false;
+    };
   }, [data]);
 
   return data;

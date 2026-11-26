@@ -35,7 +35,6 @@ import { AttributeSpecificationList } from "./attribute.specification.list";
 import { DynamicSourceLocales } from "./dynamic.source.locale";
 import { PluginModelList } from "./plugin.model.list";
 import { sourceNameHasNoWhitespace } from "@/lib/source-name";
-"use client"
 
 interface Props {
   value: TurIntegrationAemSource;

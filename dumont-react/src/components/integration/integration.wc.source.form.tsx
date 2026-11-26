@@ -23,7 +23,6 @@ import { useNavigate } from "react-router-dom";
 import { DialogDelete } from "../dialog.delete";
 import { GradientButton } from "../ui/gradient-button";
 import { SectionCard } from "../ui/section-card";
-"use client"
 
 interface Props {
   value: TurIntegrationWcSource;

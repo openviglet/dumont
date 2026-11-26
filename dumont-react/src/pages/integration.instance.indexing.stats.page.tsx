@@ -77,8 +77,6 @@ export default function IntegrationInstanceIndexingStatsPage() {
             setStats(data);
             setCountBySource(counts);
             setLastUpdated(Date.now());
-            if (!isSilent) {
-            }
         } catch {
             if (!isSilent) setError(t("integration.indexingStats.loadFailed"));
         }
