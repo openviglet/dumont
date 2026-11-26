@@ -53,7 +53,8 @@ import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourc
 @DataJpaTest
 @EntityScan(basePackages = "com.viglet.dumont.connector.plugin.aem.persistence.model")
 @EnableJpaRepositories(basePackages = "com.viglet.dumont.connector.plugin.aem.persistence.repository")
-@Import({ DumAemSourceApi.class, DumAemSourceMapperImpl.class })
+@Import({ DumAemSourceApi.class, DumAemSourceMapperImpl.class,
+        com.viglet.dumont.connector.plugin.aem.export.DumAemExchangeProcess.class })
 @DisplayName("DumAemSourceApi Integration Tests")
 class DumAemSourceApiIT {
 
@@ -68,6 +69,9 @@ class DumAemSourceApiIT {
 
     @Autowired
     private DumAemSourceRepository sourceRepository;
+
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
 
     @Nested
     @DisplayName("Create (POST) Tests")
@@ -155,7 +159,7 @@ class DumAemSourceApiIT {
             DumAemSource saved = api.dumAemSourceAdd(newWkndSource());
 
             DumAemSource patch = DumAemSource.builder()
-                    .name("WKND Updated")
+                    .name("WKND-Updated")
                     .endpoint("http://localhost:9999")
                     .username("admin2")
                     .build();
@@ -166,7 +170,7 @@ class DumAemSourceApiIT {
             DumAemSource body = response.getBody();
             assertNotNull(body);
             assertEquals(saved.getId(), body.getId(), "id must not be changed by update");
-            assertEquals("WKND Updated", body.getName());
+            assertEquals("WKND-Updated", body.getName());
             assertEquals("http://localhost:9999", body.getEndpoint());
         }
 
@@ -223,10 +227,19 @@ class DumAemSourceApiIT {
         @DisplayName("Should preserve cq:tags source-attr name across update cycles")
         void shouldPreserveCqTagsAfterUpdate() {
             DumAemSource saved = api.dumAemSourceAdd(newWkndSource());
+            entityManager.flush();
+            entityManager.clear();
 
+            // simulate UI round-trip: read, mutate an unrelated field, send back. The body of a
+            // real PUT is a detached copy parsed from JSON (DU13): sending back the managed
+            // instance itself made the update clear the very collection it was copying from.
             DumAemSource fetched = api.dumAemSourceGet(saved.getId());
-            // simulate UI round-trip: read, mutate an unrelated field, send back
-            fetched.setName("WKND Renamed");
+            fetched.getLocalePaths().size();
+            fetched.getAttributeSpecifications().size();
+            fetched.getModels().forEach(model -> model.getTargetAttrs()
+                    .forEach(targetAttr -> targetAttr.getSourceAttrs().size()));
+            entityManager.clear();
+            fetched.setName("WKND-Renamed");
 
             ResponseEntity<DumAemSource> response = api.dumAemSourceUpdate(saved.getId(), fetched);
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -239,6 +252,40 @@ class DumAemSourceApiIT {
             assertEquals(CQ_TAGS, tagsSource.getName(),
                     "round-trip update must not erase the cq:tags name (regression guard)");
             assertEquals(CONTENT_TAGS_CLASS, tagsSource.getClassName());
+        }
+    }
+
+    @Nested
+    @DisplayName("DU9/DU13: replacing import against the database")
+    class ReplaceTests {
+
+        @Autowired
+        private com.viglet.dumont.connector.plugin.aem.export.DumAemExchangeProcess exchangeProcess;
+
+        @Test
+        @DisplayName("replace deletes what the file does not name and recreates the rest under the same names")
+        void shouldReplaceEverySourceInOneTransaction() {
+            api.dumAemSourceAdd(newWkndSource());
+            api.dumAemSourceAdd(minimalSource("LEGACY"));
+            entityManager.flush();
+
+            var exported = com.viglet.dumont.connector.plugin.aem.export.bean.DumAemSourceExchange.builder()
+                    .id("an-id-from-another-instance")
+                    .name("WKND")
+                    .endpoint("http://author.invalid:4502")
+                    .build();
+            var plan = exchangeProcess.replaceAemSources(
+                    new com.viglet.dumont.connector.plugin.aem.export.bean.DumAemExchange(List.of(exported)));
+            entityManager.flush();
+            entityManager.clear();
+
+            assertEquals(List.of("WKND"), plan.overwrite());
+            assertEquals(List.of("LEGACY"), plan.remove());
+            List<DumAemSource> all = sourceRepository.findAll();
+            assertEquals(1, all.size());
+            assertEquals("WKND", all.get(0).getName());
+            assertEquals("http://author.invalid:4502", all.get(0).getEndpoint());
+            assertTrue(all.get(0).getModels().isEmpty(), "the file's source carries no models, so none survive");
         }
     }
 

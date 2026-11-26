@@ -172,6 +172,19 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- DU13: surefire's defaults skip *IT, so the JPA integration test never ran and broke
+                 twice without anyone seeing. It is a @DataJpaTest on H2 and needs nothing external. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
