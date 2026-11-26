@@ -280,7 +280,13 @@
       "importSuccess": "Configuration imported successfully.",
       "importFailed": "Failed to parse JSON file. Check the format.",
       "importApplied": "Configuration imported. Review the fields and proceed.",
-      "exportSuccess": "Configuration exported."
+      "exportSuccess": "Configuration exported.",
+      "exportAll": "Export all (ZIP)",
+      "importZip": "Import ZIP",
+      "exportAllSuccess": "Sources exported.",
+      "exportAllFailed": "Could not export the sources.",
+      "importZipSuccess": "Sources imported.",
+      "importZipFailed": "Could not import the file. Check that it is a zip exported from this source list."
     },
     "duration": {
       "milliseconds": "Milliseconds",

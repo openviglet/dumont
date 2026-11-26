@@ -80,4 +80,19 @@ export class TurIntegrationDbSourceService {
       `${this.connectorUrl}/${source.name}/reindexAll`
     );
   }
+
+  /** Every source of this kind as the zip the plugin's export writes (roadmap DU4). */
+  async exportAll(): Promise<Blob> {
+    const { data } = await this.axiosInstance.get<Blob>(`${this.dbUrl}/export`, {
+      responseType: "blob",
+    });
+    return data;
+  }
+
+  /** Puts back a zip written by {@link exportAll}, here or on another instance. */
+  async importAll(file: File): Promise<void> {
+    const form = new FormData();
+    form.append("file", file);
+    await this.axiosInstance.post(`${this.dbUrl}/import`, form);
+  }
 }

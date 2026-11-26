@@ -1,5 +1,6 @@
 import { ROUTES } from "@/app/routes.const";
 import { BlankSlate } from "@/components/blank-slate";
+import { useSourceExchange } from "@/components/integration/source-exchange";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
@@ -24,6 +25,9 @@ export default function IntegrationInstanceDbSourceListPage() {
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
   }, [id]);
 
+  const reload = () => turIntegrationDbSourceService.query().then(setIntegrationDbSources);
+  const exchange = useSourceExchange(turIntegrationDbSourceService, "db-sources", reload);
+
   const gridItemList = useGridAdapter(integrationDbSources, {
     name: "name",
     description: "description",
@@ -31,22 +35,25 @@ export default function IntegrationInstanceDbSourceListPage() {
   });
   return (
     <LoadProvider checkIsNotUndefined={integrationDbSources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/db-source`}>
+      {exchange.input}
       {gridItemList.length > 0 ? (<>
         <SubPageHeader icon={IconDatabase} name={t("integration.dbSources.title")}
           feature={t("integration.dbSources.feature")}
           description={t("integration.dbSources.description")} />
         <GridList gridItemList={gridItemList}>
           <GridList.NewButton to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/db-source/new`} label={t("integration.dbSources.feature")} />
+          <GridList.Action>{exchange.menuItems}</GridList.Action>
         </GridList>
 
-      </>) : (
+      </>) : (<>
         <BlankSlate
           icon={IconDatabase}
           title={t("integration.dbSources.blankTitle")}
           description={t("integration.dbSources.blankDescription")}
           buttonText={t("integration.dbSources.newSource")}
           urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/db-source/new`} />
-      )}
+        {exchange.emptyImport}
+      </>)}
     </LoadProvider>
   )
 }

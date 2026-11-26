@@ -1,5 +1,6 @@
 import { ROUTES } from "@/app/routes.const";
 import { BlankSlate } from "@/components/blank-slate";
+import { useSourceExchange } from "@/components/integration/source-exchange";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
@@ -23,6 +24,9 @@ export default function IntegrationInstanceWcSourceListPage() {
       .catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
   }, [id]);
 
+  const reload = () => service.query().then(setSources);
+  const exchange = useSourceExchange(service, "wc-sources", reload);
+
   const gridItemList = useGridAdapter(sources, {
     name: "title",
     description: "url",
@@ -31,20 +35,23 @@ export default function IntegrationInstanceWcSourceListPage() {
 
   return (
     <LoadProvider checkIsNotUndefined={sources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/wc-source`}>
+      {exchange.input}
       {gridItemList.length > 0 ? (<>
         <SubPageHeader icon={IconGlobe} name={t("integration.wcSources.title")}
           feature={t("integration.wcSources.feature")}
           description={t("integration.wcSources.description")} />
         <GridList gridItemList={gridItemList}>
           <GridList.NewButton to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/wc-source/new`} label={t("integration.wcSources.feature")} />
+          <GridList.Action>{exchange.menuItems}</GridList.Action>
         </GridList>
-      </>) : (
+      </>) : (<>
         <BlankSlate icon={IconGlobe}
           title={t("integration.wcSources.blankTitle")}
           description={t("integration.wcSources.blankDescription")}
           buttonText={t("integration.wcSources.newSource")}
           urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/wc-source/new`} />
-      )}
+        {exchange.emptyImport}
+      </>)}
     </LoadProvider>
   )
 }

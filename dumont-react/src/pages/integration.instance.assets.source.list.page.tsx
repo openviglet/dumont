@@ -1,5 +1,6 @@
 import { ROUTES } from "@/app/routes.const";
 import { BlankSlate } from "@/components/blank-slate";
+import { useSourceExchange } from "@/components/integration/source-exchange";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
@@ -23,6 +24,9 @@ export default function IntegrationInstanceAssetsSourceListPage() {
       .catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
   }, [id]);
 
+  const reload = () => service.query().then(setSources);
+  const exchange = useSourceExchange(service, "assets-sources", reload);
+
   const gridItemList = useGridAdapter(sources, {
     name: "name", description: "sourceDir",
     url: (item) => `${ROUTES.INTEGRATION_INSTANCE}/${id}/assets-source/${item.id}`
@@ -30,14 +34,17 @@ export default function IntegrationInstanceAssetsSourceListPage() {
 
   return (
     <LoadProvider checkIsNotUndefined={sources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/assets-source`}>
+      {exchange.input}
       {gridItemList.length > 0 ? (<>
         <SubPageHeader icon={IconFolder} name={t("integration.assetsSources.title")} feature={t("integration.assetsSources.feature")} description={t("integration.assetsSources.description")} />
         <GridList gridItemList={gridItemList}>
           <GridList.NewButton to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/assets-source/new`} label={t("integration.assetsSources.feature")} />
+          <GridList.Action>{exchange.menuItems}</GridList.Action>
         </GridList>
-      </>) : (
+      </>) : (<>
         <BlankSlate icon={IconFolder} title={t("integration.assetsSources.blankTitle")} description={t("integration.assetsSources.blankDescription")} buttonText={t("integration.assetsSources.newSource")} urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/assets-source/new`} />
-      )}
+        {exchange.emptyImport}
+      </>)}
     </LoadProvider>
   )
 }

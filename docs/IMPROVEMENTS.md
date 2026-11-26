@@ -2,18 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU4 No export-all or import in the source lists
-
-The AEM, DB and web-crawler source lists show the sources and a New action (the AEM list
-also imports one source from a JSON file). The DB and WC export/import endpoints exist,
-and DU2 adds the AEM pair, but nothing in the console calls them: the only console
-export is the per-source JSON on the AEM source page.
-
-Expected: each list gets an "Export all (ZIP)" action that downloads the zip from its
-`/export` endpoint and an "Import ZIP" action, also on the empty list, that uploads a
-zip to its `/import` endpoint and then reloads the list. Same change as Dumont 2026.3
-D362.
-
 ### §DU5 Frontend lint has no config
 
 `dumont-react/package.json` declares `"lint": "eslint ."` and depends on ESLint 10 with
@@ -40,3 +28,20 @@ Build: one check in connector-commons, called on create and update by each sourc
 and by the import paths. The API answers 400 with a message naming the rule; an import
 logs and skips the source rather than failing the whole file. Web-crawler sources are
 keyed by id and stay out of scope.
+
+### §DU7 Federation type declarations fail
+
+`npm run compile:build` in `dumont-react` prints `[ Module Federation DTS ] Error:
+Failed to generate type declaration (#TYPE-001)` on every run and still exits 0, so the
+failure is easy to miss. Reproduced with the command the plugin names (`npx tsc
+--project node_modules/.federation/tsconfig.<hash>.json`): the generated tsconfig sets
+no `jsx`, so every `.tsx` the exposed module reaches fails with TS6142, and the
+design-system and tabler typings add TS2307 and TS2305. Found while gating DU4; the
+app's own `tsc -b` is clean.
+
+What it costs: the remote publishes no type declarations, so turing-react, the host that
+mounts Dumont, consumes it untyped.
+
+Build: give the `@module-federation/vite` plugin's `dts` option a tsconfig that inherits
+the app's (`compilerOptions.jsx`, `skipLibCheck`), or turn `dts` off explicitly when the
+host does not consume the types. Then the build prints no DTS error.

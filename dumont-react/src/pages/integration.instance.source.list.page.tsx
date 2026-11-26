@@ -4,6 +4,7 @@ import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
 import { importSourceFromJson } from "@/components/integration/source-import-export";
+import { useSourceExchange } from "@/components/integration/source-exchange";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
@@ -27,6 +28,9 @@ export default function IntegrationInstanceSourceListPage() {
       setIntegrationAemSources(sources);
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
   }, [id]);
+
+  const reload = () => turIntegrationAemSourceService.query().then(setIntegrationAemSources);
+  const exchange = useSourceExchange(turIntegrationAemSourceService, "aem-sources", reload);
 
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -92,6 +96,7 @@ export default function IntegrationInstanceSourceListPage() {
         title={t("forms.importExport.import")}
         onChange={handleFileChange}
       />
+      {exchange.input}
       {gridItemList.length > 0 ? (<>
         <SubPageHeader icon={IconGitCommit} name={t("integration.sources.title")}
           feature={t("integration.sources.feature")}
@@ -103,17 +108,19 @@ export default function IntegrationInstanceSourceListPage() {
               <IconUpload className="size-4 mr-2" />
               {t("forms.importExport.import")}
             </DropdownMenuItem>
+            {exchange.menuItems}
           </GridList.Action>
         </GridList>
 
-      </>) : (
+      </>) : (<>
         <BlankSlate
           icon={IconGitCommit}
           title={t("integration.sources.blankTitle")}
           description={t("integration.sources.blankDescription")}
           buttonText={t("integration.sources.newSource")}
           urlNew={`${ROUTES.INTEGRATION_INSTANCE}/${id}/source/new`} />
-      )}
+        {exchange.emptyImport}
+      </>)}
     </LoadProvider>
   )
 }
