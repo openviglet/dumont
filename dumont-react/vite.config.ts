@@ -69,6 +69,29 @@ export default defineConfig({
         "@viglet/viglet-design-system/i18n": { singleton: true, requiredVersion: "*" },
         "@viglet/viglet-design-system/floating-formulas-bg": { singleton: true, requiredVersion: "*" },
       },
+      /*
+       * DU7 — the type declarations the host consumes (ported from Dumont 2026.3 D49).
+       *
+       * Every build printed `#TYPE-001` and exited 0, so the remote shipped no types across the
+       * federation boundary. The generated DTS config extended the root `tsconfig.json`, a
+       * solution file (`files: []` plus references) with no `jsx`, so every `.tsx` failed.
+       */
+      dts: {
+        // `outputDir` is honoured by the DTS plugin but missing from the bundled options type,
+        // so the object is widened here rather than the option dropped.
+        generateTypes: {
+          // The real compiler options live here; the root config only points at projects.
+          tsConfigPath: "./tsconfig.app.json",
+          // `import.meta.env` is declared in `vite-env.d.ts`, which nothing imports, and the
+          // generated config lists its files explicitly.
+          additionalFilesToCompile: ["src/vite-env.d.ts"],
+          // Outside `build.outDir`: that is the connector's `public/`, which `emptyOutDir` wipes
+          // after the generator has written into it.
+          outputDir: "mf-types",
+          // Fail the build when the generator reports an error, instead of printing and exiting 0.
+          abortOnError: true,
+        } as Record<string, unknown>,
+      },
     }),
   ],
   server: {

@@ -1,3 +1,6 @@
 node_modules
 dist
 *.local
+
+# DU7 - generated federated type declarations (build artefact)
+mf-types/
