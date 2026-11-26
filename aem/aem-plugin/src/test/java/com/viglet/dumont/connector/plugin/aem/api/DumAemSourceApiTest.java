@@ -399,7 +399,7 @@ class DumAemSourceApiTest {
             org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
                     .mock(org.springframework.web.multipart.MultipartFile.class);
 
-            var result = api.importSources(file, null);
+            var result = api.importSources(file, null, false);
 
             verify(dumAemExchangeProcess).importFromMultipartFile(file,
                     com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.ADD);
@@ -412,7 +412,7 @@ class DumAemSourceApiTest {
             org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
                     .mock(org.springframework.web.multipart.MultipartFile.class);
 
-            api.importSources(file, "replace");
+            api.importSources(file, "replace", false);
 
             verify(dumAemExchangeProcess).importFromMultipartFile(file,
                     com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.REPLACE);
@@ -429,13 +429,40 @@ class DumAemSourceApiTest {
 
             var refused = org.junit.jupiter.api.Assertions.assertThrows(
                     org.springframework.web.server.ResponseStatusException.class,
-                    () -> api.importSources(file, "replace"));
+                    () -> api.importSources(file, "replace", false));
             assertEquals(HttpStatus.BAD_REQUEST, refused.getStatusCode());
 
             var unknown = org.junit.jupiter.api.Assertions.assertThrows(
                     org.springframework.web.server.ResponseStatusException.class,
-                    () -> api.importSources(file, "overwrite"));
+                    () -> api.importSources(file, "overwrite", false));
             assertEquals(HttpStatus.BAD_REQUEST, unknown.getStatusCode());
+        }
+
+        @Test
+        @DisplayName("DU10: dryRun answers the replace plan and imports nothing")
+        void shouldAnswerThePlanOnADryRun() {
+            org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
+                    .mock(org.springframework.web.multipart.MultipartFile.class);
+            var plan = new com.viglet.dumont.connector.commons.exchange.DumSourceReplacePlan(
+                    List.of("wknd"), List.of(), List.of("legacy"), List.of());
+            when(dumAemExchangeProcess.planFromMultipartFile(file)).thenReturn(plan);
+
+            var result = api.importSources(file, "replace", true);
+
+            assertSame(plan, result.getBody());
+            verify(dumAemExchangeProcess, org.mockito.Mockito.never()).importFromMultipartFile(any(), any());
+        }
+
+        @Test
+        @DisplayName("DU10: dryRun without mode=replace answers 400")
+        void shouldRefuseADryRunOfAnAddingImport() {
+            org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
+                    .mock(org.springframework.web.multipart.MultipartFile.class);
+
+            var refused = org.junit.jupiter.api.Assertions.assertThrows(
+                    org.springframework.web.server.ResponseStatusException.class,
+                    () -> api.importSources(file, null, true));
+            assertEquals(HttpStatus.BAD_REQUEST, refused.getStatusCode());
         }
     }
 

@@ -174,12 +174,22 @@ public class DumWCSourceApi {
     /**
      * Imports a zip or plain {@code .json} export. {@code mode=add} (the default) skips sources that
      * exist; {@code mode=replace} makes the file the whole set (roadmap DU9). A refused file answers
-     * 400 with the reason, and nothing is changed.
+     * 400 with the reason, and nothing is changed. With {@code dryRun=true} (replace only, roadmap
+     * DU10) nothing is written: the answer is what the replace would create, overwrite, remove, and
+     * which names it would refuse.
      */
     public ResponseEntity<Object> importSources(@RequestParam("file") MultipartFile file,
-            @RequestParam(name = "mode", required = false) String mode) {
+            @RequestParam(name = "mode", required = false) String mode,
+            @RequestParam(name = "dryRun", defaultValue = "false") boolean dryRun) {
         try {
-            dumWCExchangeProcess.importFromMultipartFile(file, DumSourceImportMode.of(mode));
+            DumSourceImportMode importMode = DumSourceImportMode.of(mode);
+            if (dryRun) {
+                if (importMode != DumSourceImportMode.REPLACE) {
+                    throw new DumSourceImportException("dryRun previews mode=replace only.");
+                }
+                return ResponseEntity.ok(dumWCExchangeProcess.planFromMultipartFile(file));
+            }
+            dumWCExchangeProcess.importFromMultipartFile(file, importMode);
         } catch (DumSourceImportException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }

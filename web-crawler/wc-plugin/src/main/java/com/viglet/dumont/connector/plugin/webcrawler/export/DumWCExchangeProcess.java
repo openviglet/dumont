@@ -170,6 +170,22 @@ public class DumWCExchangeProcess {
 
     /** An uploaded zip, imported in {@code mode} (roadmap DU9). */
     public void importFromMultipartFile(MultipartFile multipartFile, DumSourceImportMode mode) {
+        withExportFile(multipartFile, exportFile -> {
+            importFromFile(exportFile, mode);
+            return null;
+        });
+    }
+
+    /**
+     * What replacing with the uploaded file would do (roadmap DU10): the file is read and matched by
+     * the same code the replace runs, and nothing is written.
+     */
+    public DumSourceReplacePlan planFromMultipartFile(MultipartFile multipartFile) {
+        return withExportFile(multipartFile, this::planFromFile);
+    }
+
+    /** Runs {@code action} on the upload's {@code export.json}, and cleans up what was extracted. */
+    private <T> T withExportFile(MultipartFile multipartFile, java.util.function.Function<File, T> action) {
         File extractFolder = DumSpringUtils.extractZipFile(multipartFile);
         File parentExtractFolder = null;
         if (!(new File(extractFolder, EXPORT_FILE).exists())
@@ -183,7 +199,7 @@ public class DumWCExchangeProcess {
         }
         File exportFile = new File(extractFolder.getAbsolutePath().concat(File.separator + EXPORT_FILE));
         try {
-            importFromFile(exportFile, mode);
+            return action.apply(exportFile);
         } finally {
             try {
                 FileUtils.deleteDirectory(extractFolder);
@@ -245,6 +261,17 @@ public class DumWCExchangeProcess {
             importWCSource(exchange);
         }
         return plan;
+    }
+
+    /** What replacing with {@code exportFile} would do (roadmap DU10), without writing anything. */
+    public DumSourceReplacePlan planFromFile(File exportFile) {
+        DumWCExchange exchange;
+        try {
+            exchange = new ObjectMapper().readValue(exportFile, DumWCExchange.class);
+        } catch (RuntimeException e) {
+            throw new DumSourceImportException("The file could not be read as a source export.", e);
+        }
+        return planReplace(exchange.getSources() == null ? List.<DumWCSourceExchange>of() : List.copyOf(exchange.getSources()));
     }
 
     /** What replacing the web-crawler sources with {@code sources} would do, without writing anything. */

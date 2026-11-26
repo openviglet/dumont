@@ -189,10 +189,25 @@ public class DumAemExchangeProcess {
 
     /** An uploaded zip or plain {@code .json}, imported in {@code mode} (roadmap DU9). */
     public void importFromMultipartFile(MultipartFile multipartFile, DumSourceImportMode mode) {
+        withExportFile(multipartFile, exportFile -> {
+            importFromFile(exportFile, mode);
+            return null;
+        });
+    }
+
+    /**
+     * What replacing with the uploaded file would do (roadmap DU10): the file is read and matched by
+     * the same code the replace runs, and nothing is written.
+     */
+    public DumSourceReplacePlan planFromMultipartFile(MultipartFile multipartFile) {
+        return withExportFile(multipartFile, this::planFromFile);
+    }
+
+    /** Runs {@code action} on the upload's {@code export.json}, and cleans up what was extracted. */
+    private <T> T withExportFile(MultipartFile multipartFile, java.util.function.Function<File, T> action) {
         String originalName = multipartFile.getOriginalFilename();
         if (originalName != null && originalName.toLowerCase(java.util.Locale.ROOT).endsWith(".json")) {
-            importFromJsonUpload(multipartFile, mode);
-            return;
+            return withJsonUpload(multipartFile, action);
         }
         File extractFolder = DumSpringUtils.extractZipFile(multipartFile);
         File parentExtractFolder = null;
@@ -207,7 +222,7 @@ public class DumAemExchangeProcess {
         }
         File exportFile = new File(extractFolder.getAbsolutePath().concat(File.separator + EXPORT_FILE));
         try {
-            importFromFile(exportFile, mode);
+            return action.apply(exportFile);
         } finally {
             try {
                 FileUtils.deleteDirectory(extractFolder);
@@ -224,19 +239,16 @@ public class DumAemExchangeProcess {
      * A plain {@code .json} upload: the per-source file the console's Export writes, or an
      * {@code export.json} taken out of its zip. It is read through the same path as the zip.
      */
-    private void importFromJsonUpload(MultipartFile multipartFile, DumSourceImportMode mode) {
+    private <T> T withJsonUpload(MultipartFile multipartFile, java.util.function.Function<File, T> action) {
         File tmpFile = null;
         try {
             java.nio.file.Path tmpDir = Paths.get(System.getProperty("user.dir"), "store", "tmp");
             Files.createDirectories(tmpDir);
             tmpFile = tmpDir.resolve("aem-import-" + UUID.randomUUID() + ".json").toFile();
             multipartFile.transferTo(tmpFile);
-            importFromFile(tmpFile, mode);
+            return action.apply(tmpFile);
         } catch (IOException e) {
-            if (mode == DumSourceImportMode.REPLACE) {
-                throw new DumSourceImportException("The uploaded file could not be read.", e);
-            }
-            log.error(e.getMessage(), e);
+            throw new DumSourceImportException("The uploaded file could not be read.", e);
         } finally {
             FileUtils.deleteQuietly(tmpFile);
         }
@@ -294,6 +306,18 @@ public class DumAemExchangeProcess {
             importAemSource(dumAemExchange);
         }
         return plan;
+    }
+
+    /** What replacing with {@code exportFile} would do (roadmap DU10), without writing anything. */
+    public DumSourceReplacePlan planFromFile(File exportFile) {
+        DumAemExchange exchange;
+        try {
+            exchange = JsonMapper.builder()
+                    .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false).build().readValue(exportFile, DumAemExchange.class);
+        } catch (RuntimeException e) {
+            throw new DumSourceImportException("The file could not be read as a source export.", e);
+        }
+        return planReplace(exchange.getSources() == null ? List.<DumAemSourceExchange>of() : List.copyOf(exchange.getSources()));
     }
 
     /** What replacing the AEM sources with {@code sources} would do, without writing anything. */

@@ -354,6 +354,28 @@ class DumAemExchangeProcessTest {
         }
 
         @Test
+        @DisplayName("DU10: the dry run reads the file and matches names, writing nothing")
+        void shouldPlanAReplaceWithoutWriting() throws Exception {
+            File export = File.createTempFile("aem-plan", ".json");
+            export.deleteOnExit();
+            java.nio.file.Files.writeString(export.toPath(),
+                    "{ \"sources\": [ { \"name\": \"wknd\" }, { \"name\": \"news\" } ] }");
+            DumAemSource existing = createDumAemSource();
+            existing.setName("news");
+            DumAemSource legacy = createDumAemSource();
+            legacy.setName("legacy");
+            when(dumAemSourceRepository.findAll()).thenReturn(List.of(existing, legacy));
+
+            var plan = exchangeProcess.planFromFile(export);
+
+            assertEquals(List.of("wknd"), plan.create());
+            assertEquals(List.of("news"), plan.overwrite());
+            assertEquals(List.of("legacy"), plan.remove());
+            verify(dumAemSourceRepository, never()).deleteAll();
+            verify(dumAemSourceRepository, never()).save(any());
+        }
+
+        @Test
         @DisplayName("Should import attribute specifications")
         void shouldImportAttributeSpecifications() {
             // Given

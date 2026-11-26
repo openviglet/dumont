@@ -2,18 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU10 Dry run of a replacing import
-
-DU9's `replace` deletes every source the file does not name and overwrites the rest, so
-the console has to say what a file will do before it does it, and today no endpoint can
-answer that without writing.
-
-Build: `POST .../import?mode=replace&dryRun=true` on each source API reads the file and
-answers `{ "create": [names], "overwrite": [names], "remove": [names], "invalid":
-[names] }` without touching the repository. It shares the matching code with the real
-import, so the preview and the write cannot disagree about which source is which. A file
-it cannot read answers 400 with the reason.
-
 ### §DU11 Plain JSON for every source import
 
 DU2 made the AEM import read a plain `.json` (`importFromJsonUpload` in
