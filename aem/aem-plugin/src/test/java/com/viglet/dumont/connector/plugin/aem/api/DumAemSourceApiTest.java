@@ -265,7 +265,7 @@ class DumAemSourceApiTest {
 
             // Then
             assertNotNull(result.getBody());
-            assertEquals("Updated Name", result.getBody().getName());
+            assertEquals("updated-name", result.getBody().getName());
         }
     }
 
@@ -322,6 +322,32 @@ class DumAemSourceApiTest {
             // Then
             assertNotNull(result);
             verify(dumAemSourceRepository, times(1)).save(source);
+        }
+
+        @Test
+        @DisplayName("DU6: a name with whitespace is refused with 400 and nothing is saved")
+        void shouldRefuseANameWithWhitespace() {
+            DumAemSource source = createDumAemSource("new-source");
+            source.setName("wknd site");
+
+            org.springframework.web.server.ResponseStatusException refused = org.junit.jupiter.api.Assertions
+                    .assertThrows(org.springframework.web.server.ResponseStatusException.class,
+                            () -> api.dumAemSourceAdd(source));
+
+            assertEquals(HttpStatus.BAD_REQUEST, refused.getStatusCode());
+            verify(dumAemSourceRepository, org.mockito.Mockito.never()).save(any());
+        }
+
+        @Test
+        @DisplayName("DU6: an update to a name with whitespace is refused with 400")
+        void shouldRefuseAnUpdateToANameWithWhitespace() {
+            DumAemSource source = createDumAemSource("source-1");
+            source.setName("wknd site");
+
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    org.springframework.web.server.ResponseStatusException.class,
+                    () -> api.dumAemSourceUpdate(source.getId(), source));
+            verify(dumAemSourceRepository, org.mockito.Mockito.never()).save(any());
         }
     }
 
@@ -383,7 +409,7 @@ class DumAemSourceApiTest {
     private DumAemSource createDumAemSource(String id) {
         return DumAemSource.builder()
                 .id(id)
-                .name("Test Source " + id)
+                .name("test-source-" + id)
                 .endpoint("http://localhost:4502")
                 .localePaths(new HashSet<>())
                 .build();
@@ -392,7 +418,7 @@ class DumAemSourceApiTest {
     private DumAemSource createUpdatedDumAemSource(String id) {
         return DumAemSource.builder()
                 .id(id)
-                .name("Updated Source " + id)
+                .name("updated-source-" + id)
                 .endpoint("http://localhost:4503")
                 .localePaths(new HashSet<>())
                 .build();
@@ -401,7 +427,7 @@ class DumAemSourceApiTest {
     private DumAemSource createFullyUpdatedDumAemSource(String id) {
         return DumAemSource.builder()
                 .id(id)
-                .name("Updated Name")
+                .name("updated-name")
                 .endpoint("http://localhost:4503")
                 .username("admin")
                 .password("admin123")

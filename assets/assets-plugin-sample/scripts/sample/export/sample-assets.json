@@ -2,7 +2,7 @@
   "sources": [
     {
       "id": "",
-      "name": "Celestial Gallery",
+      "name": "celestial-gallery",
       "description": "Space photography and astronomical assets from the Celestial Gallery collection.",
       "sourceDir": "/opt/celestial-gallery",
       "prefixFromReplace": "/opt/celestial-gallery",

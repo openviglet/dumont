@@ -287,6 +287,21 @@ class DumAemExchangeProcessTest {
         }
 
         @Test
+        @DisplayName("DU6: a source whose name holds whitespace is skipped, and the rest of the file still imports")
+        void shouldSkipASourceWhoseNameHasWhitespace() {
+            DumAemSourceExchange spaced = DumAemSourceExchange.builder().name("wknd site").build();
+            DumAemSourceExchange plain = DumAemSourceExchange.builder().name("wknd").build();
+            when(dumAemSourceRepository.findByName("wknd")).thenReturn(Optional.empty());
+            ArgumentCaptor<DumAemSource> saved = ArgumentCaptor.forClass(DumAemSource.class);
+            when(dumAemSourceRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+            exchangeProcess.importAemSource(new DumAemExchange(List.of(spaced, plain)));
+
+            verify(dumAemSourceRepository, times(1)).save(any());
+            assertEquals("wknd", saved.getValue().getName());
+        }
+
+        @Test
         @DisplayName("Should import attribute specifications")
         void shouldImportAttributeSpecifications() {
             // Given
@@ -332,7 +347,7 @@ class DumAemExchangeProcessTest {
     private List<DumAemSource> createDumAemSources() {
         DumAemSource source = DumAemSource.builder()
                 .id("source-1")
-                .name("Test Source")
+                .name("test-source")
                 .endpoint("http://localhost:4502")
                 .attributeSpecifications(new HashSet<>())
                 .build();
@@ -342,7 +357,7 @@ class DumAemExchangeProcessTest {
     private DumAemSource createDumAemSource() {
         return DumAemSource.builder()
                 .id("source-1")
-                .name("Test Source")
+                .name("test-source")
                 .endpoint("http://localhost:4502")
                 .build();
     }
@@ -354,7 +369,7 @@ class DumAemExchangeProcessTest {
                     "sources": [
                         {
                             "id": "source-1",
-                            "name": "Test Source",
+                            "name": "test-source",
                             "endpoint": "http://localhost:4502",
                             "attributes": [],
                             "models": [],
@@ -372,7 +387,7 @@ class DumAemExchangeProcessTest {
     private DumAemExchange createDumAemExchange() {
         DumAemSourceExchange sourceExchange = DumAemSourceExchange.builder()
                 .id("source-1")
-                .name("Test Source")
+                .name("test-source")
                 .endpoint("http://localhost:4502")
                 .attributes(new ArrayList<>())
                 .models(new ArrayList<>())
@@ -391,7 +406,7 @@ class DumAemExchangeProcessTest {
 
         DumAemSourceExchange sourceExchange = DumAemSourceExchange.builder()
                 .id("source-1")
-                .name("Test Source")
+                .name("test-source")
                 .endpoint("http://localhost:4502")
                 .attributes(List.of(attribExchange))
                 .models(new ArrayList<>())
@@ -419,7 +434,7 @@ class DumAemExchangeProcessTest {
 
         DumAemSourceExchange sourceExchange = DumAemSourceExchange.builder()
                 .id("source-1")
-                .name("Test Source")
+                .name("test-source")
                 .endpoint("http://localhost:4502")
                 .attributes(new ArrayList<>())
                 .models(List.of(modelExchange))

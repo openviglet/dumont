@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.viglet.dumont.connector.commons.DumSourceNames;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.assets.export.bean.DumAssetsExchange;
 import com.viglet.dumont.connector.plugin.assets.export.bean.DumAssetsSourceExchange;
@@ -111,10 +112,19 @@ public class DumAssetsExchangeProcess {
             DumAssetsExchange exchange = mapper.readValue(exportFile, DumAssetsExchange.class);
             if (exchange.getSources() != null && !exchange.getSources().isEmpty()) {
                 exchange.getSources().stream()
+                        .filter(s -> hasValidName(s.getName()))
                         .filter(s -> s.getId() == null || s.getId().isEmpty() || repository.findById(s.getId()).isEmpty())
                         .forEach(this::importSource);
             }
         } catch (StreamReadException | DatabindException | JacksonIOException e) { log.error(e.getMessage(), e); }
+    }
+
+    private boolean hasValidName(String name) {
+        if (DumSourceNames.isValid(name)) {
+            return true;
+        }
+        log.warn("Skipping the source {}: {}", name, DumSourceNames.RULE);
+        return false;
     }
 
     private void importSource(DumAssetsSourceExchange s) {

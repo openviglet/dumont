@@ -2,7 +2,7 @@
   "sources": [
     {
       "id": "",
-      "name": "Sample MariaDB",
+      "name": "sample-mariadb",
       "description": "Sample database source importing RNA families from the Rfam public database.",
       "driver": "org.mariadb.jdbc.Driver",
       "url": "jdbc:mariadb://mysql-rfam-public.ebi.ac.uk:4497/Rfam",
@@ -23,7 +23,7 @@
     },
     {
       "id": "",
-      "name": "Retro Arcade Games",
+      "name": "retro-arcade-games",
       "description": "Classic arcade game catalog from a PostgreSQL database.",
       "driver": "org.postgresql.Driver",
       "url": "jdbc:postgresql://localhost:5432/arcadedb",

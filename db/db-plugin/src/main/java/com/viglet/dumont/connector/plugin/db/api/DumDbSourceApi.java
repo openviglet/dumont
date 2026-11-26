@@ -34,6 +34,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.viglet.dumont.connector.commons.DumSourceNames;
 import com.viglet.dumont.connector.plugin.db.DumDbPluginProcess;
 import com.viglet.dumont.connector.plugin.db.export.DumDbExchangeProcess;
 import com.viglet.dumont.connector.plugin.db.persistence.model.DumDbSource;
@@ -94,6 +97,9 @@ public class DumDbSourceApi {
         if (dumDbSource.getId() != null && !id.equals(dumDbSource.getId())) {
             return ResponseEntity.badRequest().build();
         }
+        if (!DumSourceNames.isValid(dumDbSource.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DumSourceNames.RULE);
+        }
 
         return dumDbSourceRepository.findById(id).map(existing -> {
             existing.setName(dumDbSource.getName());
@@ -143,6 +149,9 @@ public class DumDbSourceApi {
     @PostMapping
     @Operation(summary = "Create a DB Source")
     public DumDbSource dumDbSourceAdd(@RequestBody DumDbSource dumDbSource) {
+        if (!DumSourceNames.isValid(dumDbSource.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DumSourceNames.RULE);
+        }
         return dumDbSourceRepository.save(dumDbSource);
     }
 

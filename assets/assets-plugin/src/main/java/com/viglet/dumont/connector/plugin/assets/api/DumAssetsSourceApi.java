@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.viglet.dumont.connector.commons.DumSourceNames;
 import com.viglet.dumont.connector.plugin.assets.DumAssetsPluginProcess;
 import com.viglet.dumont.connector.plugin.assets.export.DumAssetsExchangeProcess;
 import com.viglet.dumont.connector.plugin.assets.persistence.model.DumAssetsSource;
@@ -50,6 +53,7 @@ public class DumAssetsSourceApi {
     @Transactional @PutMapping("/{id}") @Operation(summary = "Update an Assets Source")
     public ResponseEntity<DumAssetsSource> update(@PathVariable String id, @RequestBody DumAssetsSource source) {
         if (source.getId() != null && !id.equals(source.getId())) return ResponseEntity.badRequest().build();
+        requireValidName(source);
         return repository.findById(id).map(e -> {
             e.setName(source.getName()); e.setDescription(source.getDescription());
             e.setSourceDir(source.getSourceDir()); e.setPrefixFromReplace(source.getPrefixFromReplace());
@@ -70,7 +74,16 @@ public class DumAssetsSourceApi {
     }
 
     @PostMapping @Operation(summary = "Create an Assets Source")
-    public DumAssetsSource create(@RequestBody DumAssetsSource source) { return repository.save(source); }
+    public DumAssetsSource create(@RequestBody DumAssetsSource source) {
+        requireValidName(source);
+        return repository.save(source);
+    }
+
+    private static void requireValidName(DumAssetsSource source) {
+        if (!DumSourceNames.isValid(source.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DumSourceNames.RULE);
+        }
+    }
 
     @GetMapping("/{id}/indexAll") @Operation(summary = "Index all files from an Assets Source")
     public ResponseEntity<Object> indexAll(@PathVariable String id) {

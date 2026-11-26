@@ -35,6 +35,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.viglet.dumont.connector.commons.DumSourceNames;
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
 import com.viglet.dumont.connector.plugin.aem.export.DumAemExchangeProcess;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
@@ -122,6 +125,9 @@ public class DumAemSourceApi {
         if (dumAemSource.getId() != null && !id.equals(dumAemSource.getId())) {
             return ResponseEntity.badRequest().build();
         }
+        if (!DumSourceNames.isValid(dumAemSource.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DumSourceNames.RULE);
+        }
 
         return dumAemSourceRepository.findById(id).map(dumAemSourceEdit -> {
             dumAemSourceMapper.update(dumAemSourceEdit, dumAemSource);
@@ -185,6 +191,9 @@ public class DumAemSourceApi {
     @Operation(summary = "Create a AEM Source")
     @PostMapping
     public DumAemSource dumAemSourceAdd(@RequestBody DumAemSource dumAemSource) {
+        if (!DumSourceNames.isValid(dumAemSource.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DumSourceNames.RULE);
+        }
         dumAemSource.getLocalePaths().forEach(localePath -> localePath.setDumAemSource(dumAemSource));
         dumAemSource.getAttributeSpecifications().forEach(spec -> spec.setDumAemSource(dumAemSource));
         dumAemSource.getModels().forEach(model -> wireModelHierarchy(model, dumAemSource));

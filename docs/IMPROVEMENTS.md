@@ -2,21 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU6 Source names unchecked on the server
-
-DU3 made the four console forms that set a source name (AEM source, AEM wizard, DB,
-assets) refuse whitespace through `sourceNameHasNoWhitespace` in
-`dumont-react/src/lib/source-name.ts`. Nothing on the server checks it: `POST
-/api/v2/aem/source`, `/api/v2/db/source`, `/api/v2/assets/source`, the AEM `POST
-/import` added by DU2 and the first-start import of `export/*.json` all save a name with
-a space, and that source then fails on `/api/v2/connector/index/{name}` and the other
-name-keyed URLs.
-
-Build: one check in connector-commons, called on create and update by each source API
-and by the import paths. The API answers 400 with a message naming the rule; an import
-logs and skips the source rather than failing the whole file. Web-crawler sources are
-keyed by id and stay out of scope.
-
 ### §DU7 Federation type declarations fail
 
 `npm run compile:build` in `dumont-react` prints `[ Module Federation DTS ] Error:

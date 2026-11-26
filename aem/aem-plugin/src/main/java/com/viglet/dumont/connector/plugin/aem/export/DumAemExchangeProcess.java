@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.viglet.dumont.connector.commons.DumSourceNames;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemAttribExchange;
 import com.viglet.dumont.connector.plugin.aem.export.bean.DumAemExchange;
@@ -268,6 +269,9 @@ public class DumAemExchangeProcess {
      * whose name already exists is skipped, so importing the same file twice creates nothing twice.
      */
     private boolean isNewSource(DumAemSourceExchange exchange) {
+        if (!hasValidName(exchange.getName())) {
+            return false;
+        }
         if (exchange.getId() != null && exchange.getId().isBlank()) {
             exchange.setId(null);
         }
@@ -280,6 +284,14 @@ public class DumAemExchangeProcess {
             return false;
         }
         return true;
+    }
+
+    private boolean hasValidName(String name) {
+        if (DumSourceNames.isValid(name)) {
+            return true;
+        }
+        log.warn("Skipping the source {}: {}", name, DumSourceNames.RULE);
+        return false;
     }
 
     private void setModels(DumAemSourceExchange dumAemSourceExchange, DumAemSource dumAemSource) {

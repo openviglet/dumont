@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.viglet.dumont.connector.commons.DumSourceNames;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.db.export.bean.DumDbExchange;
 import com.viglet.dumont.connector.plugin.db.export.bean.DumDbSourceExchange;
@@ -187,10 +188,19 @@ public class DumDbExchangeProcess {
     public void importDbSources(DumDbExchange dumDbExchange) {
         dumDbExchange.getSources()
                 .stream()
+                .filter(sourceExchange -> hasValidName(sourceExchange.getName()))
                 .filter(sourceExchange -> sourceExchange.getId() == null
                         || sourceExchange.getId().isEmpty()
                         || dumDbSourceRepository.findById(sourceExchange.getId()).isEmpty())
                 .forEach(this::importSource);
+    }
+
+    private boolean hasValidName(String name) {
+        if (DumSourceNames.isValid(name)) {
+            return true;
+        }
+        log.warn("Skipping the source {}: {}", name, DumSourceNames.RULE);
+        return false;
     }
 
     private void importSource(DumDbSourceExchange sourceExchange) {
