@@ -108,8 +108,31 @@ public class DumAssetsExchangeProcess {
         return withExportFile(multipartFile, this::planFromFile);
     }
 
+    /**
+     * A plain {@code .json} upload (roadmap DU11): an {@code export.json} taken out of its zip, read
+     * through the same path as the zip.
+     */
+    private <T> T withJsonUpload(MultipartFile multipartFile, java.util.function.Function<File, T> action) {
+        File tmpFile = null;
+        try {
+            java.nio.file.Path tmpDir = java.nio.file.Paths.get(System.getProperty("user.dir"), "store", "tmp");
+            java.nio.file.Files.createDirectories(tmpDir);
+            tmpFile = tmpDir.resolve("assets-import-" + java.util.UUID.randomUUID() + ".json").toFile();
+            multipartFile.transferTo(tmpFile);
+            return action.apply(tmpFile);
+        } catch (IOException e) {
+            throw new DumSourceImportException("The uploaded file could not be read.", e);
+        } finally {
+            FileUtils.deleteQuietly(tmpFile);
+        }
+    }
+
     /** Runs {@code action} on the upload's {@code export.json}, and cleans up what was extracted. */
     private <T> T withExportFile(MultipartFile multipartFile, java.util.function.Function<File, T> action) {
+        String originalName = multipartFile.getOriginalFilename();
+        if (originalName != null && originalName.toLowerCase(java.util.Locale.ROOT).endsWith(".json")) {
+            return withJsonUpload(multipartFile, action);
+        }
         File extractFolder = DumSpringUtils.extractZipFile(multipartFile);
         File parentExtractFolder = null;
         if (!(new File(extractFolder, EXPORT_FILE).exists())

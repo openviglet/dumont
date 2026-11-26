@@ -282,11 +282,11 @@
       "importApplied": "Configuration imported. Review the fields and proceed.",
       "exportSuccess": "Configuration exported.",
       "exportAll": "Export all (ZIP)",
-      "importZip": "Import ZIP",
+      "importZip": "Import ZIP or JSON",
       "exportAllSuccess": "Sources exported.",
       "exportAllFailed": "Could not export the sources.",
       "importZipSuccess": "Sources imported.",
-      "importZipFailed": "Could not import the file. Check that it is a zip exported from this source list."
+      "importZipFailed": "Could not import the file. Check that it is a zip or export.json exported from this source list."
     },
     "duration": {
       "milliseconds": "Milliseconds",

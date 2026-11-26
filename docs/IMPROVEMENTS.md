@@ -2,17 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU11 Plain JSON for every source import
-
-DU2 made the AEM import read a plain `.json` (`importFromJsonUpload` in
-`DumAemExchangeProcess`): the per-source file the console exports, or an `export.json`
-taken out of its zip. The DB, web-crawler and assets `importFromMultipartFile` still
-unzip whatever arrives, so a `.json` upload fails, and the console's Import ZIP
-(`source-exchange.tsx`) only accepts `.zip`.
-
-Build: the same `.json` branch in the three other exchange processes, and the console's
-file input accepting `.zip,.json`. Same `{ "sources": [...] }` shape as `export.json`.
-
 ### §DU12 Replace-all import in the console
 
 With DU9, DU10 and DU11 the server can replace every source of a connector type from one

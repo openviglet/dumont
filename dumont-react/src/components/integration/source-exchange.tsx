@@ -58,7 +58,7 @@ export function useSourceExchange(
     <input
       ref={inputRef}
       type="file"
-      accept=".zip"
+      accept=".zip,.json"
       className="hidden"
       aria-label={t("forms.importExport.importZip")}
       title={t("forms.importExport.importZip")}

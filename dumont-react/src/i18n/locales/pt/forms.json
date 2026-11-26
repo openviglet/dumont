@@ -282,11 +282,11 @@
       "importApplied": "Configuração importada. Revise os campos e prossiga.",
       "exportSuccess": "Configuração exportada.",
       "exportAll": "Exportar tudo (ZIP)",
-      "importZip": "Importar ZIP",
+      "importZip": "Importar ZIP ou JSON",
       "exportAllSuccess": "Fontes exportadas.",
       "exportAllFailed": "Não foi possível exportar as fontes.",
       "importZipSuccess": "Fontes importadas.",
-      "importZipFailed": "Não foi possível importar o arquivo. Verifique se é um zip exportado desta lista de fontes."
+      "importZipFailed": "Não foi possível importar o arquivo. Verifique se é um zip ou export.json exportado desta lista de fontes."
     },
     "duration": {
       "milliseconds": "Milissegundos",
