@@ -2,21 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU5 Frontend lint debt held in named files
-
-`dumont-react/eslint.config.js` (ported from Dumont 2026.3) makes `npm run lint` a
-working gate: it exits 0 with warnings only. The first half fixed the small errors and
-turned five rules off in named files, the inherited debt of a console that had never
-been linted.
-
-Left: empty those lists, one rule per commit. `react-hooks/set-state-in-effect` (19
-files) and `react-hooks/exhaustive-deps` (15 files, mostly a missing `t` or a service
-built from `id`) carry the bulk. Then `@typescript-eslint/no-explicit-any` (6 files),
-`react-hooks/purity` (`Date.now()` as the initial state in the indexing-stats page) and
-`react-hooks/refs` (the avatar picker). Fix a file, delete its line from the list, and
-delete a block once it is empty rather than keep it at zero. Dumont 2026.3 D53, D54 and
-D56 cleared the same rules and are the reference for each pattern.
-
 ### §DU6 Source names unchecked on the server
 
 DU3 made the four console forms that set a source name (AEM source, AEM wizard, DB,
@@ -48,3 +33,18 @@ mounts Dumont, consumes it untyped.
 Build: give the `@module-federation/vite` plugin's `dts` option a tsconfig that inherits
 the app's (`compilerOptions.jsx`, `skipLibCheck`), or turn `dts` off explicitly when the
 host does not consume the types. Then the build prints no DTS error.
+
+### §DU8 Hooks lint debt in named files
+
+`dumont-react/eslint.config.js` (ported from Dumont 2026.3) makes `npm run lint` a
+working gate: it exits 0 with warnings only. The inherited debt of a console that had
+never been linted is held as rules turned off in named files; `no-explicit-any`,
+`purity` and `refs` are already cleared and their lists deleted.
+
+Left: two lists, one rule per commit. `react-hooks/set-state-in-effect` (19 files) is
+mostly a fetch-then-set effect or state derived from props;
+`react-hooks/exhaustive-deps` (15 files) is mostly a missing `t`, or a service built
+from `id` that has to move into a `useMemo` before an honest array stops refetching
+forever. Fix a file, delete its line from the list, and delete the block once it is
+empty rather than keep it at zero. Dumont 2026.3 D53 and D56 cleared the same two rules
+and are the reference for each pattern.

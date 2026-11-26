@@ -100,6 +100,11 @@ function AdvancedSettings({ form }: Readonly<{ form: ReturnType<typeof useForm<I
   );
 }
 
+/** A dynamic-field entry is a plain string or, from some inputs, a `{ value }` wrapper. */
+function unwrapFieldValue(v: unknown): unknown {
+  return typeof v === "object" && v !== null && "value" in v ? (v as { value: unknown }).value : v;
+}
+
 export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManagerFormProps> = ({
   integrationId,
   mode,
@@ -128,7 +133,7 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
   const step1Done = !!watchSource;
   const step2Done = !!selectedAttribute;
   const step3Done = Array.isArray(watchValues) && watchValues.some(
-    (v: any) => (typeof v === "object" && v !== null && "value" in v ? v.value : v)?.toString().trim(),
+    (v) => String(unwrapFieldValue(v) ?? "").trim(),
   );
 
   async function onSubmit(data: IndexingManagerFormValues) {
@@ -144,7 +149,7 @@ export const IntegrationIndexingManagerForm: React.FC<IntegrationIndexingManager
 
       const payload: TurIntegrationIndexingManager = {
         attribute: data.attribute.toUpperCase() as "ID" | "URL",
-        paths: data.values.map((v: any) => typeof v === "object" && v !== null && "value" in v ? v.value : v),
+        paths: data.values.map((v) => unwrapFieldValue(v) as string),
         event: mode,
         ...(isRecursive && { recursive: true }),
       };

@@ -1,5 +1,5 @@
 import { IconCheck, IconDice5, IconPalette, IconSearch } from "@tabler/icons-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -84,14 +84,15 @@ export function DiceBearAvatarPicker({
   const [seed, setSeed] = useState(defaultSeed || generateRandomSeed());
   const [previewSeeds, setPreviewSeeds] = useState<string[]>([]);
   const [selectedUrl, setSelectedUrl] = useState("");
-  const imgKeyRef = useRef(0);
+  // Bumped on shuffle so the preview images remount; state, not a ref, because render reads it.
+  const [imgKey, setImgKey] = useState(0);
 
   const debouncedSeed = useDebounce(seed, 400);
 
   const generatePreviewSeeds = useCallback(() => {
     const seeds = Array.from({ length: 12 }, () => generateRandomSeed());
     setPreviewSeeds(seeds);
-    imgKeyRef.current += 1;
+    setImgKey((k) => k + 1);
   }, []);
 
   useEffect(() => {
@@ -243,7 +244,7 @@ export function DiceBearAvatarPicker({
                 const isActive = url === selectedUrl;
                 return (
                   <button
-                    key={`${s}-${imgKeyRef.current}`}
+                    key={`${s}-${imgKey}`}
                     type="button"
                     onClick={() => setSelectedUrl(url)}
                     className={cn(

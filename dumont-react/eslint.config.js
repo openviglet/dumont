@@ -66,10 +66,10 @@ export default tseslint.config(
    * DU5 — inherited debt, held as NAMED FILES and not as a ceiling.
    *
    * This config arrived against a console that had never been linted. The small errors were
-   * fixed with it; these five rules carried the rest. Each is off only in the files listed: a
+   * fixed with it; these rules carried the rest. Each is off only in the files listed: a
    * new violation anywhere else fails by name, and clearing a file means deleting its line
    * here, which is a diff somebody reviews. When a list is empty, delete its block rather than
-   * keep it at zero. Emptying them is the remainder of DU5.
+   * keep it at zero. Emptying them is DU8.
    */
   {
     files: [
@@ -114,24 +114,5 @@ export default tseslint.config(
       "src/pages/integration.instance.wc.source.list.page.tsx",
     ],
     rules: { "react-hooks/exhaustive-deps": "off" },
-  },
-  {
-    files: [
-      "src/components/grid.list.tsx",
-      "src/components/integration/dynamic.source.locale.tsx",
-      "src/components/integration/integration.indexing.manager.form.tsx",
-      "src/components/integration/wizard/aem-source-wizard.tsx",
-      "src/hooks/use-grid-adapter.ts",
-      "src/services/integration/integration-connector.service.ts",
-    ],
-    rules: { "@typescript-eslint/no-explicit-any": "off" },
-  },
-  {
-    files: ["src/pages/integration.instance.indexing.stats.page.tsx"],
-    rules: { "react-hooks/purity": "off" },
-  },
-  {
-    files: ["src/components/dicebear-avatar-picker.tsx"],
-    rules: { "react-hooks/refs": "off" },
   },
 )

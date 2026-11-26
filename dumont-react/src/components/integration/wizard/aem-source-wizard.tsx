@@ -125,14 +125,14 @@ export function AemSourceWizard({
     try {
       const data = form.getValues();
       // Strip empty ids so JPA generates new UUIDs (persist) instead of merge
-      delete (data as any).id;
-      data.localePaths?.forEach((lp: any) => delete lp.id);
-      data.attributeSpecifications?.forEach((spec: any) => delete spec.id);
-      data.models?.forEach((model: any) => {
-        delete model.id;
-        model.targetAttrs?.forEach((ta: any) => {
-          delete ta.id;
-          ta.sourceAttrs?.forEach((sa: any) => delete sa.id);
+      delete (data as { id?: string }).id;
+      data.localePaths?.forEach((lp) => delete (lp as { id?: string }).id);
+      data.attributeSpecifications?.forEach((spec) => delete (spec as { id?: string }).id);
+      data.models?.forEach((model) => {
+        delete (model as { id?: string }).id;
+        model.targetAttrs?.forEach((ta) => {
+          delete (ta as { id?: string }).id;
+          ta.sourceAttrs?.forEach((sa) => delete (sa as { id?: string }).id);
         });
       });
       const result = await turIntegrationAemSourceService.create(data);

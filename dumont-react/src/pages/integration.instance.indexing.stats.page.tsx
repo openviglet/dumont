@@ -65,7 +65,7 @@ export default function IntegrationInstanceIndexingStatsPage() {
     }, [id]);
 
     const [refreshInterval, setRefreshInterval] = useState(5000);
-    const [lastUpdated, setLastUpdated] = useState(Date.now());
+    const [lastUpdated, setLastUpdated] = useState(() => Date.now());
 
     const fetchData = useCallback(async (isSilent = false) => {
         if (!statsService || !id) return;

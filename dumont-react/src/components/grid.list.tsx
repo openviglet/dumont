@@ -96,7 +96,7 @@ const GridListComponent: React.FC<Props> = ({ gridItemList, children }) => {
     const actions: { key: string; render: () => ReactNode }[] = [];
     React.Children.forEach(children, (child) => {
         if (!React.isValidElement(child)) return;
-        if ((child.type as any)?.displayName === "GridListNewButton") {
+        if ((child.type as { displayName?: string })?.displayName === "GridListNewButton") {
             const { to, label } = child.props as NewButtonProps;
             actions.push({
                 key: `new-${label}`,
@@ -107,7 +107,7 @@ const GridListComponent: React.FC<Props> = ({ gridItemList, children }) => {
                     </DropdownMenuItem>
                 ),
             });
-        } else if ((child.type as any)?.displayName === "GridListAction") {
+        } else if ((child.type as { displayName?: string })?.displayName === "GridListAction") {
             const { children: actionChildren } = child.props as ActionProps;
             actions.push({
                 key: `action-${actions.length}`,

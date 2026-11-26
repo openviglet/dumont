@@ -25,22 +25,22 @@ export class TurIntegrationConnectorService {
     return data;
   }
 
-  async indexAll(source: string): Promise<any> {
-    const { data } = await this.axiosInstance.get<any>(
+  async indexAll(source: string): Promise<unknown> {
+    const { data } = await this.axiosInstance.get<unknown>(
       `${this.connectorUrl}/index/${source}/all`,
     );
     return data;
   }
 
-  async reindexAll(source: string): Promise<any> {
-    const { data } = await this.axiosInstance.get<any>(
+  async reindexAll(source: string): Promise<unknown> {
+    const { data } = await this.axiosInstance.get<unknown>(
       `${this.connectorUrl}/reindex/${source}/all`,
     );
     return data;
   }
 
-  async auditSource(source: string): Promise<any> {
-    const { data } = await this.axiosInstance.get<any>(
+  async auditSource(source: string): Promise<unknown> {
+    const { data } = await this.axiosInstance.get<unknown>(
       `${this.connectorUrl}/audit/${source}`,
     );
     return data;

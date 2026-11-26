@@ -27,12 +27,12 @@ export function useGridAdapter<T>(
 
     const resolveId = (item: T) => {
       if (!config.id) {
-        return (item as any).id;
+        return String((item as { id?: string | number }).id ?? "");
       }
       if (typeof config.id === "function") {
-        return config.id(item);
+        return String(config.id(item));
       }
-      return item[config.id] as any;
+      return String(item[config.id] ?? "");
     };
 
     return data.map((item) => ({
