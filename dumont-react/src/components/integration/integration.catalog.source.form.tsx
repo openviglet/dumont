@@ -29,6 +29,7 @@ import type { ClearIndexingState } from "./use-clear-indexing-state";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
+import { sourceNameRules } from "@/lib/source-name";
 
 const MANIFEST_PLACEHOLDER = `{
   "name": "jobs",
@@ -165,7 +166,7 @@ export const IntegrationCatalogSourceForm: React.FC<Props> = ({ value, isNew, in
                 <FormField
                   control={form.control}
                   name="name"
-                  rules={{ required: t("forms.common.nameRequired") }}
+                  rules={sourceNameRules(t)}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("forms.common.name")}</FormLabel>

@@ -132,7 +132,6 @@ This track has no remaining pending tasks.
 
 ## Track X — Source configuration moves between instances
 
-- 📋 **D361** (deps: —) **The console accepts a source name containing spaces, and that source then fails to index** — The name is the source key in index, reindex, audit and monitoring URLs, so an operator learns the rule only after a run fails. → §LV.4
 - 📋 **D362** (deps: D359 ✅, D360 ✅) **The source lists offer no export-all or import action, so the export endpoints are reachable only by API calls** — An operator moving a configuration between environments has no way in the console to take every source out or put a file of them back in. → §LV.3
 
 ## Done when — D351

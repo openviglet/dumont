@@ -232,18 +232,6 @@ of per-source downloads, hand-edited files and API calls. These lines close the 
 from the console's export to a working import, and keep a source name from breaking the
 run it keys.
 
-### LV.4 Source names accept whitespace (D361)
-
-The AEM source form, the AEM wizard, the DB source form and the assets source form only
-check that the name is present. The name is then used as the path segment of
-`/api/v2/connector/index/{name}`, `reindex/{name}`, `audit/{source}` and the monitoring
-endpoints, and a name with a space fails there. Web-crawler sources are keyed by id;
-their title is display-only.
-
-Expected: every form that sets a source name refuses whitespace with a message that says
-why, before the source is saved. A backend check on save is the follow-up that also
-covers the API and the first-start import.
-
 ### LV.3 No export-all or import in the source lists (D362)
 
 The AEM, DB and web-crawler source lists show the sources and a New action. The DB and

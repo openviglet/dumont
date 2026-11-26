@@ -44,6 +44,7 @@ import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system
 import { AttributeSpecificationList } from "./attribute.specification.list";
 import { DynamicSourceLocales } from "./dynamic.source.locale";
 import { PluginModelList } from "./plugin.model.list";
+import { sourceNameRules } from "@/lib/source-name";
 
 interface Props {
   value: TurIntegrationAemSource;
@@ -230,7 +231,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                 <FormField
                   control={form.control}
                   name="name"
-                  rules={{ required: t("forms.integration.nameRequired") }}
+                  rules={sourceNameRules(t, t("forms.integration.nameRequired"))}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("forms.common.name")}</FormLabel>

@@ -56,7 +56,8 @@
       "field": "Field",
       "condition": "Condition",
       "close": "Close",
-      "nameRequired": "Name is required."
+      "nameRequired": "Name is required.",
+      "nameNoSpaces": "The name cannot contain spaces: it identifies the source in indexing and monitoring URLs. Use - or _ instead."
     },
     "llm": {
       "settings": "Language model settings.",

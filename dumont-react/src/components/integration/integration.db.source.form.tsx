@@ -29,6 +29,7 @@ import { DialogDelete } from "../dialog.delete";
 import type { ClearIndexingState } from "./use-clear-indexing-state";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientSwitch } from "../ui/gradient-switch";
+import { sourceNameRules } from "@/lib/source-name";
 
 interface Props {
   value: TurIntegrationDbSource;
@@ -139,7 +140,7 @@ export const IntegrationDbSourceForm: React.FC<Props> = ({ value, isNew, integra
                 <FormField
                   control={form.control}
                   name="name"
-                  rules={{ required: t("forms.common.nameRequired") }}
+                  rules={sourceNameRules(t)}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("forms.common.name")}</FormLabel>

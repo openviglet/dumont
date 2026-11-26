@@ -16,6 +16,7 @@ import type { ClearIndexingState } from "./use-clear-indexing-state";
 import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { AdaptiveSectionCard as SectionCard } from "@viglet/viglet-design-system/bento";
+import { sourceNameRules } from "@/lib/source-name";
 
 interface Props {
   value: TurIntegrationAssetsSource;
@@ -90,7 +91,7 @@ export const IntegrationAssetsSourceForm: React.FC<Props> = ({ value, isNew, int
             <SectionCard variant="blue">
               <SectionCard.Header icon={IconSettings} title={t("forms.assetsSource.general")} description={t("forms.assetsSource.generalDesc")} />
               <SectionCard.Content>
-                <FormField control={form.control} name="name" rules={{ required: t("forms.common.nameRequired") }}
+                <FormField control={form.control} name="name" rules={sourceNameRules(t)}
                   render={({ field }) => (<FormItem><FormLabel>{t("forms.common.name")}</FormLabel><FormControl><Input {...field} placeholder={t("forms.assetsSource.namePlaceholder")} type="text" /></FormControl><FormDescription>{t("forms.assetsSource.nameDesc")}</FormDescription><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="description"
                   render={({ field }) => (<FormItem><FormLabel>{t("forms.common.description")}</FormLabel><FormControl><Input {...field} placeholder={t("forms.assetsSource.descriptionPlaceholder")} type="text" /></FormControl><FormMessage /></FormItem>)} />
