@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -47,6 +48,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
+import com.viglet.dumont.connector.plugin.aem.export.DumAemExchangeProcess;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSourceLocalePath;
@@ -74,6 +76,9 @@ class DumAemSourceApiTest {
     @Mock
     private DumAemPluginProcess dumAemPluginProcess;
 
+    @Mock
+    private DumAemExchangeProcess dumAemExchangeProcess;
+
     private DumAemSourceMapper dumAemSourceMapper;
 
     private DumAemSourceApi api;
@@ -87,7 +92,8 @@ class DumAemSourceApiTest {
                 dumAemAttributeSpecificationRepository,
                 dumAemPluginModelRepository,
                 dumAemPluginProcess,
-                dumAemSourceMapper);
+                dumAemSourceMapper,
+                dumAemExchangeProcess);
     }
 
     @Nested
@@ -344,6 +350,34 @@ class DumAemSourceApiTest {
         return List.of(
                 createDumAemSource("source-1"),
                 createDumAemSource("source-2"));
+    }
+
+    @Nested
+    @DisplayName("DU2: export and import")
+    class ExportImportTests {
+
+        @Test
+        @DisplayName("GET /export hands back the exchange process's zip stream")
+        void shouldDelegateExport() {
+            jakarta.servlet.http.HttpServletResponse response = org.mockito.Mockito
+                    .mock(jakarta.servlet.http.HttpServletResponse.class);
+            org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody body = out -> { };
+            when(dumAemExchangeProcess.exportObject(response)).thenReturn(body);
+
+            assertSame(body, api.exportSources(response));
+        }
+
+        @Test
+        @DisplayName("POST /import passes the upload to the exchange process")
+        void shouldDelegateImport() {
+            org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
+                    .mock(org.springframework.web.multipart.MultipartFile.class);
+
+            var result = api.importSources(file);
+
+            verify(dumAemExchangeProcess).importFromMultipartFile(file);
+            assertEquals(200, result.getStatusCode().value());
+        }
     }
 
     private DumAemSource createDumAemSource(String id) {

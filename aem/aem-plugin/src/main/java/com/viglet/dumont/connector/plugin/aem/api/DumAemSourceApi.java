@@ -30,9 +30,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.viglet.dumont.connector.plugin.aem.DumAemPluginProcess;
+import com.viglet.dumont.connector.plugin.aem.export.DumAemExchangeProcess;
 import com.viglet.dumont.connector.plugin.aem.mapper.DumAemSourceMapper;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemPluginModel;
 import com.viglet.dumont.connector.plugin.aem.persistence.model.DumAemSource;
@@ -43,6 +47,7 @@ import com.viglet.dumont.connector.plugin.aem.persistence.repository.DumAemSourc
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -56,19 +61,22 @@ public class DumAemSourceApi {
     private final DumAemPluginModelRepository dumAemPluginModelRepository;
     private final DumAemPluginProcess dumAemPluginProcess;
     private final DumAemSourceMapper dumAemSourceMapper;
+    private final DumAemExchangeProcess dumAemExchangeProcess;
 
     public DumAemSourceApi(DumAemSourceRepository dumAemSourceRepository,
             DumAemSourceLocalePathRepository dumAemSourceLocalePathRepository,
             DumAemAttributeSpecificationRepository dumAemAttributeSpecificationRepository,
             DumAemPluginModelRepository dumAemPluginModelRepository,
             DumAemPluginProcess dumAemPluginProcess,
-            DumAemSourceMapper dumAemSourceMapper) {
+            DumAemSourceMapper dumAemSourceMapper,
+            DumAemExchangeProcess dumAemExchangeProcess) {
         this.dumAemSourceRepository = dumAemSourceRepository;
         this.dumAemSourceLocalePathRepository = dumAemSourceLocalePathRepository;
         this.dumAemAttributeSpecificationRepository = dumAemAttributeSpecificationRepository;
         this.dumAemPluginModelRepository = dumAemPluginModelRepository;
         this.dumAemPluginProcess = dumAemPluginProcess;
         this.dumAemSourceMapper = dumAemSourceMapper;
+        this.dumAemExchangeProcess = dumAemExchangeProcess;
     }
 
     @GetMapping
@@ -187,6 +195,23 @@ public class DumAemSourceApi {
     @GetMapping("{id}/indexAll")
     public ResponseEntity<Object> sourceIndexAll(@PathVariable String id) {
         dumAemPluginProcess.indexAllByIdAsync(id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Every AEM source as a zip holding {@code export.json} (roadmap <strong>DU2</strong>): the same
+     * file the first-start import reads from {@code export/}, so it seeds another instance unchanged.
+     */
+    @GetMapping("/export")
+    @Operation(summary = "Export all AEM Sources")
+    public StreamingResponseBody exportSources(HttpServletResponse response) {
+        return dumAemExchangeProcess.exportObject(response);
+    }
+
+    @PostMapping("/import")
+    @Operation(summary = "Import AEM Sources from ZIP")
+    public ResponseEntity<Object> importSources(@RequestParam("file") MultipartFile file) {
+        dumAemExchangeProcess.importFromMultipartFile(file);
         return ResponseEntity.ok().build();
     }
 }

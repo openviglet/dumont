@@ -2,18 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU2 No AEM export or import endpoint
-
-`DumDbSourceApi` and `DumWCSourceApi` expose `GET .../export` (a zip holding
-`export.json`) and `POST .../import` (multipart). The AEM plugin has the same
-`exportObject` and `importFromMultipartFile` methods in `DumAemExchangeProcess`, but
-`DumAemSourceApi` maps neither.
-
-Expected: `GET /api/v2/aem/source/export` and `POST /api/v2/aem/source/import`, same
-shape as DB and WC; the import also accepts a plain `.json`. The exported `export.json`
-is the file the first-start import reads, so it can be dropped into `export/` on a new
-instance unchanged. Same change as Dumont 2026.3 D360.
-
 ### §DU3 Source names accept whitespace
 
 The AEM source form, the AEM wizard, the DB source form and the assets source form only

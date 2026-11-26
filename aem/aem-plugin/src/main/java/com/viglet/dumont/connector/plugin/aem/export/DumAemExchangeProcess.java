@@ -179,6 +179,11 @@ public class DumAemExchangeProcess {
     }
 
     public void importFromMultipartFile(MultipartFile multipartFile) {
+        String originalName = multipartFile.getOriginalFilename();
+        if (originalName != null && originalName.toLowerCase(java.util.Locale.ROOT).endsWith(".json")) {
+            importFromJsonUpload(multipartFile);
+            return;
+        }
         File extractFolder = DumSpringUtils.extractZipFile(multipartFile);
         File parentExtractFolder = null;
         if (!(new File(extractFolder, EXPORT_FILE).exists())
@@ -199,6 +204,25 @@ public class DumAemExchangeProcess {
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * A plain {@code .json} upload: the per-source file the console's Export writes, or an
+     * {@code export.json} taken out of its zip. It is read through the same path as the zip.
+     */
+    private void importFromJsonUpload(MultipartFile multipartFile) {
+        File tmpFile = null;
+        try {
+            java.nio.file.Path tmpDir = Paths.get(System.getProperty("user.dir"), "store", "tmp");
+            Files.createDirectories(tmpDir);
+            tmpFile = tmpDir.resolve("aem-import-" + UUID.randomUUID() + ".json").toFile();
+            multipartFile.transferTo(tmpFile);
+            importFromFile(tmpFile);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            FileUtils.deleteQuietly(tmpFile);
         }
     }
 
