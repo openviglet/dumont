@@ -132,8 +132,6 @@ This track has no remaining pending tasks.
 
 ## Track X — Source configuration moves between instances
 
-- 📋 **D362** (deps: D359 ✅, D360 ✅) **The source lists offer no export-all or import action, so the export endpoints are reachable only by API calls** — An operator moving a configuration between environments has no way in the console to take every source out or put a file of them back in. → §LV.3
-
 ## Done when — D351
 
 - **Evidence and boundary are verified** Re-read the cited source and rendered routes,

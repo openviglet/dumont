@@ -280,7 +280,11 @@
       "importSuccess": "Configuração importada com sucesso.",
       "importFailed": "Falha ao interpretar o arquivo JSON. Verifique o formato.",
       "importApplied": "Configuração importada. Revise os campos e prossiga.",
-      "exportSuccess": "Configuração exportada."
+      "exportSuccess": "Configuração exportada.",
+      "exportAll": "Exportar tudo (ZIP)",
+      "importArchive": "Importar ZIP",
+      "exportAllFailed": "Não foi possível exportar as fontes.",
+      "importArchiveFailed": "Não foi possível importar o arquivo. Use um ZIP exportado desta lista."
     },
     "duration": {
       "milliseconds": "Milissegundos",

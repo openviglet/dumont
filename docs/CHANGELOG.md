@@ -840,3 +840,4 @@
 - **D359** — A source exported without an id, from the console or by hand, now imports on first start with a generated id, and a source whose name already exists is skipped; the console export also carries the id.
 - **D360** — GET /api/v2/aem/source/export downloads every AEM source as a zip holding export.json, and POST /api/v2/aem/source/import takes that zip or a plain .json back, like the DB and web-crawler plugins.
 - **D361** — The AEM source form and wizard, the DB, assets and catalog source forms refuse a name with whitespace before saving, and say it is the key in indexing and monitoring URLs.
+- **D362** — The AEM, DB and web-crawler source lists offer Export all (ZIP) and Import ZIP, also on an empty list, against each plugin's own export and import, and reload after an import.

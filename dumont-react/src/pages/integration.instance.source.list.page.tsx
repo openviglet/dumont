@@ -5,12 +5,14 @@ import { LoadProvider } from "@/components/loading-provider";
 import { BentoEmptyState } from "@viglet/viglet-design-system/bento";
 import { GradientButtonLink } from "@viglet/viglet-design-system/router";
 import { useAemSourceImport } from "@/components/integration/use-aem-source-import";
+import { SourceArchiveImportButton, SourceArchiveInput, SourceArchiveMenuItems } from "@/components/integration/source-archive-actions";
+import { useSourceArchive } from "@/components/integration/use-source-archive";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { IconGitCommit, IconUpload } from "@tabler/icons-react";
-import { useMemo, useEffect, useState } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
@@ -36,6 +38,13 @@ export default function IntegrationInstanceSourceListPage() {
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
   }, [id, turIntegrationAemSourceService, t]);
 
+  // D362: every source at once, as the zip the first-start import also reads.
+  const reload = useCallback(async () => {
+    setIntegrationAemSources(await turIntegrationAemSourceService.query());
+  }, [turIntegrationAemSourceService]);
+  const archive = useSourceArchive(`/v2/integration/${id}/aem/source`, "aem-sources.zip", reload);
+  const { fileInputRef: archiveInputRef, onFileChange: onArchiveFileChange } = archive;
+
   const gridItemList = useGridAdapter(integrationAemSources, {
     name: "name",
     description: "endpoint",
@@ -52,6 +61,7 @@ export default function IntegrationInstanceSourceListPage() {
         title={t("forms.importExport.import")}
         onChange={handleFileChange}
       />
+      <SourceArchiveInput inputRef={archiveInputRef} onChange={onArchiveFileChange} />
       {gridItemList.length > 0 ? (<>
         <AdaptivePageHeader icon={IconGitCommit} name={t("integration.sources.title")}
           feature={t("integration.sources.feature")}
@@ -63,6 +73,7 @@ export default function IntegrationInstanceSourceListPage() {
               <IconUpload className="size-4 mr-2" />
               {t("forms.importExport.import")}
             </DropdownMenuItem>
+            <SourceArchiveMenuItems archive={archive} />
           </GridList.Action>
         </GridList>
 
@@ -72,9 +83,12 @@ export default function IntegrationInstanceSourceListPage() {
           title={t("integration.sources.blankTitle")}
           description={t("integration.sources.blankDescription")}
           action={
-            <GradientButtonLink to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/source/new`}>
-              {t("integration.sources.newSource")}
-            </GradientButtonLink>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <GradientButtonLink to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/source/new`}>
+                {t("integration.sources.newSource")}
+              </GradientButtonLink>
+              <SourceArchiveImportButton archive={archive} />
+            </div>
           } />
       )}
     </LoadProvider>

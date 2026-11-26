@@ -231,13 +231,3 @@ or seeding a new install through the first-start import of export/*.json) is tod
 of per-source downloads, hand-edited files and API calls. These lines close the path
 from the console's export to a working import, and keep a source name from breaking the
 run it keys.
-
-### LV.3 No export-all or import in the source lists (D362)
-
-The AEM, DB and web-crawler source lists show the sources and a New action. The DB and
-WC export/import endpoints exist, and D360 adds the AEM pair, but nothing in the console
-calls them: the only console export is the per-source JSON on the AEM source page.
-
-Expected: each list gets an "Export all" action that downloads the zip from its
-`/export` endpoint and an "Import" action that uploads a zip to its `/import` endpoint,
-then reloads the list.
