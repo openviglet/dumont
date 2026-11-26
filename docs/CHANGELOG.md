@@ -1,3 +1,5 @@
 # Shipped Ledger
 
 ## Block A — Source configuration moves between instances
+
+- ✅ **DU1** **An AEM source JSON exported from the console has no id, so the first-start import of export/*.json fails on it** — The first-start import now accepts a source with no id, minting one and skipping a name that exists, and the console export writes the id so a re-import is idempotent.

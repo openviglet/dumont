@@ -2,23 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU1 Console export carries no id
-
-The source page's Export action builds `{ "sources": [ ... ] }` in the browser
-(`source-import-export.ts`, `exportSourceToJson`) and leaves `id` out. The first-start
-import (`DumAemOnStartupJpa` reading `export/*.json`) calls
-`DumAemExchangeProcess.importFromFile`, which filters sources with
-`dumAemSourceRepository.findById(exchange.getId())`. A null id makes Spring Data throw
-`IllegalArgumentException`; `importFromFile` only catches Jackson exceptions, so the
-error reaches the `ApplicationRunner`.
-
-Expected: the import accepts a source without an id (it mints one, and skips a source
-whose name already exists), and the console export also writes the id so a re-import on
-the same instance is idempotent.
-
-Same change as Dumont 2026.3 D359. Workaround until then: add an `"id"` to every entry
-of `sources` by hand.
-
 ### §DU2 No AEM export or import endpoint
 
 `DumDbSourceApi` and `DumWCSourceApi` expose `GET .../export` (a zip holding
@@ -54,3 +37,15 @@ Expected: each list gets an "Export all (ZIP)" action that downloads the zip fro
 `/export` endpoint and an "Import ZIP" action, also on the empty list, that uploads a
 zip to its `/import` endpoint and then reloads the list. Same change as Dumont 2026.3
 D362.
+
+### §DU5 Frontend lint has no config
+
+`dumont-react/package.json` declares `"lint": "eslint ."` and depends on ESLint 10 with
+`eslint-plugin-react-hooks` and `eslint-plugin-react-refresh`, but the 2026.2 tree has
+no `eslint.config.js`. ESLint 9+ reads only the flat config, so `npm run lint` exits 2
+with "couldn't find an eslint.config file" before checking a single file. Found while
+gating DU1: the frontend gate is `tsc -b` alone.
+
+Dumont 2026.3 has `dumont-react/eslint.config.js`. Port it, run `npm run lint`, and fix
+or explicitly disable what it reports in the 2026.2 sources, so the gate is green and
+stays one.

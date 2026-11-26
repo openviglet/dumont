@@ -18,10 +18,13 @@
 package com.viglet.dumont.connector.plugin.aem.export;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +44,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -239,6 +243,47 @@ class DumAemExchangeProcessTest {
 
             // Then
             verify(dumAemSourceRepository, times(1)).save(any());
+        }
+
+        @Test
+        @DisplayName("DU1: a source the console exported without an id is imported with a generated one")
+        void shouldImportASourceWithoutId() {
+            DumAemSourceExchange exported = DumAemSourceExchange.builder()
+                    .name("wknd")
+                    .endpoint("http://author.invalid:4502")
+                    .build();
+            when(dumAemSourceRepository.findByName("wknd")).thenReturn(Optional.empty());
+            ArgumentCaptor<DumAemSource> saved = ArgumentCaptor.forClass(DumAemSource.class);
+            when(dumAemSourceRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+            assertDoesNotThrow(() -> exchangeProcess.importAemSource(new DumAemExchange(List.of(exported))));
+
+            verify(dumAemSourceRepository, never()).findById(any());
+            assertEquals("wknd", saved.getValue().getName());
+            assertNull(saved.getValue().getId(), "the id is left to the generator");
+        }
+
+        @Test
+        @DisplayName("DU1: a blank id is treated as no id")
+        void shouldTreatABlankIdAsNoId() {
+            DumAemSourceExchange exported = DumAemSourceExchange.builder().id(" ").name("wknd").build();
+            when(dumAemSourceRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            exchangeProcess.importAemSource(new DumAemExchange(List.of(exported)));
+
+            verify(dumAemSourceRepository, never()).findById(any());
+            verify(dumAemSourceRepository, times(1)).save(any());
+        }
+
+        @Test
+        @DisplayName("DU1: a source whose name already exists is skipped, so a second import creates nothing")
+        void shouldSkipASourceWhoseNameExists() {
+            DumAemSourceExchange exported = DumAemSourceExchange.builder().name("wknd").build();
+            when(dumAemSourceRepository.findByName("wknd")).thenReturn(Optional.of(createDumAemSource()));
+
+            exchangeProcess.importAemSource(new DumAemExchange(List.of(exported)));
+
+            verify(dumAemSourceRepository, never()).save(any());
         }
 
         @Test

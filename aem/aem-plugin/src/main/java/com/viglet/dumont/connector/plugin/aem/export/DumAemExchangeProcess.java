@@ -229,12 +229,33 @@ public class DumAemExchangeProcess {
     private void setSources(DumAemExchange dumAemExchange) {
         dumAemExchange.getSources()
                 .stream()
-                .filter(dumAemSourceExchange -> dumAemSourceRepository.findById(dumAemSourceExchange.getId()).isEmpty())
+                .filter(this::isNewSource)
                 .forEach(dumAemSourceExchange -> {
                     DumAemSource source = setSource(dumAemSourceExchange);
                     setFacetNames(dumAemSourceExchange, source);
                     setModels(dumAemSourceExchange, source);
                 });
+    }
+
+    /**
+     * Whether an exported source still has to be created here (roadmap <strong>DU1</strong>). A
+     * file the console's per-source Export wrote carries no id, and Spring Data refuses a null id,
+     * so the id is looked up only when present; a source without one gets a generated id, and one
+     * whose name already exists is skipped, so importing the same file twice creates nothing twice.
+     */
+    private boolean isNewSource(DumAemSourceExchange exchange) {
+        if (exchange.getId() != null && exchange.getId().isBlank()) {
+            exchange.setId(null);
+        }
+        if (exchange.getId() != null && dumAemSourceRepository.findById(exchange.getId()).isPresent()) {
+            log.info("AEM source {} ({}) already exists, skipping it", exchange.getName(), exchange.getId());
+            return false;
+        }
+        if (exchange.getName() != null && dumAemSourceRepository.findByName(exchange.getName()).isPresent()) {
+            log.info("An AEM source named {} already exists, skipping it", exchange.getName());
+            return false;
+        }
+        return true;
     }
 
     private void setModels(DumAemSourceExchange dumAemSourceExchange, DumAemSource dumAemSource) {
