@@ -231,3 +231,64 @@ or seeding a new install through the first-start import of export/*.json) is tod
 of per-source downloads, hand-edited files and API calls. These lines close the path
 from the console's export to a working import, and keep a source name from breaking the
 run it keys.
+
+## LVI Replacing every source from one file
+
+Four lines that let an operator make an instance's sources match one exported file, with
+a warning before anything is overwritten or removed.
+
+### LVI.1 Import that replaces every source (D363)
+
+Every source import (`POST /api/v2/{aem,db,wc,assets}/source/import`, the console's
+Import ZIP from D362, and the first-start import) only adds: a source whose id or name
+already exists is skipped (`isNewSource` in `DumAemExchangeProcess`, the `findById`
+filters in the DB, web-crawler and assets exchange processes). Nothing can make an
+instance's sources match a file.
+
+Build: a `mode` parameter on each import, `add` (today's behaviour, the default) and
+`replace`. In `replace` the file is the whole set for that connector type: a source
+whose name matches one in the file is overwritten in place, keeping its id so indexing
+state and monitoring history stay attached; a source in the file with no match is
+created; an existing source the file does not name is deleted. One transaction per
+connector type, so a file that fails halfway changes nothing. A name with whitespace
+(the rule D361 holds in the console) refuses the whole file in `replace`, never
+half-applied. The first-start import keeps `add`. Same change as Dumont 2026.2 DU9.
+
+### LVI.2 Dry run of a replacing import (D364)
+
+D363's `replace` deletes every source the file does not name and overwrites the rest, so
+the console has to say what a file will do before it does it, and today no endpoint can
+answer that without writing.
+
+Build: `POST .../import?mode=replace&dryRun=true` on each source API reads the file and
+answers `{ "create": [names], "overwrite": [names], "remove": [names], "invalid":
+[names] }` without touching the repository. It shares the matching code with the real
+import, so the preview and the write cannot disagree about which source is which. A file
+it cannot read answers 400 with the reason. Same change as Dumont 2026.2 DU10.
+
+### LVI.3 Plain JSON for every source import (D365)
+
+D360 made the AEM import read a plain `.json` (`importFromJsonUpload` in
+`DumAemExchangeProcess`): the per-source file the console exports, or an `export.json`
+taken out of its zip. The DB, web-crawler and assets `importFromMultipartFile` still
+unzip whatever arrives, so a `.json` upload fails, and the console's Import ZIP
+(`SourceArchiveInput` in `source-archive-actions.tsx`) only accepts `.zip`.
+
+Build: the same `.json` branch in the three other exchange processes, and the archive
+input accepting `.zip,.json`. Same `{ "sources": [...] }` shape as `export.json`. Same
+change as Dumont 2026.2 DU11.
+
+### LVI.4 Replace-all import in the console (D366)
+
+With D363, D364 and D365 the server can replace every source of a connector type from
+one JSON file, but the source lists only offer Import ZIP (D362), which adds.
+
+Build: an "Import and replace all" action next to Import ZIP, through `useSourceArchive`
+and `SourceArchiveMenuItems`, in the AEM, DB and web-crawler lists, and in the assets
+list, which has no archive actions yet. Picking a `.json` or `.zip` calls the dry run
+first and opens a destructive confirmation dialog that says plainly that every existing
+source of this type will be overwritten or removed, and lists what the dry run returned:
+how many are created, overwritten and removed, with the removed names spelled out. An
+invalid name blocks the confirm button. Confirming calls `mode=replace` and reloads the
+list; cancelling writes nothing. Import ZIP keeps adding only. Strings in en and pt, and
+a case in `test/source-archive.test.tsx`. Same change as Dumont 2026.2 DU12.

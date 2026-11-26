@@ -132,6 +132,11 @@ This track has no remaining pending tasks.
 
 ## Track X — Source configuration moves between instances
 
+- 📋 **D363** (deps: —) **A source import can only add, so a file cannot overwrite the sources an instance already has** — Every import skips a source whose id or name exists, so making an environment match a file means deleting sources by hand first. → §LVI.1
+- 📋 **D364** (deps: D363) **No source API can say what an import would create, overwrite or remove before it writes** — A replacing import deletes what the file does not name, and the console cannot warn about it without a preview. → §LVI.2
+- 📋 **D365** (deps: —) **The DB, web-crawler and assets imports and the console's Import ZIP refuse a plain JSON file** — Only the AEM import reads a .json since D360, so the export.json the others write must be zipped again before it can go back in. → §LVI.3
+- 📋 **D366** (deps: D363, D364, D365) **The source lists cannot replace every source from a JSON file, nor warn that everything will be overwritten** — An operator syncing environments has only the adding import in the console, with no confirmation of what gets removed. → §LVI.4
+
 ## Done when — D351
 
 - **Evidence and boundary are verified** Re-read the cited source and rendered routes,
