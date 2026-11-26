@@ -17,6 +17,8 @@
 
 package com.viglet.dumont.connector.plugin.db.api;
 
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportMode;
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportException;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -170,8 +172,18 @@ public class DumDbSourceApi {
 
     @PostMapping("/import")
     @Operation(summary = "Import DB Sources from ZIP")
-    public ResponseEntity<Object> importSources(@RequestParam("file") MultipartFile file) {
-        dumDbExchangeProcess.importFromMultipartFile(file);
+    /**
+     * Imports a zip or plain {@code .json} export. {@code mode=add} (the default) skips sources that
+     * exist; {@code mode=replace} makes the file the whole set (roadmap DU9). A refused file answers
+     * 400 with the reason, and nothing is changed.
+     */
+    public ResponseEntity<Object> importSources(@RequestParam("file") MultipartFile file,
+            @RequestParam(name = "mode", required = false) String mode) {
+        try {
+            dumDbExchangeProcess.importFromMultipartFile(file, DumSourceImportMode.of(mode));
+        } catch (DumSourceImportException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
         return ResponseEntity.ok().build();
     }
 }

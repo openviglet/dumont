@@ -302,6 +302,58 @@ class DumAemExchangeProcessTest {
         }
 
         @Test
+        @DisplayName("DU9: replace deletes every existing source, then creates the file's, ids left to the generator")
+        void shouldReplaceEverySource() {
+            DumAemSource existing = createDumAemSource();
+            existing.setName("legacy");
+            when(dumAemSourceRepository.findAll()).thenReturn(List.of(existing));
+            when(dumAemSourceRepository.findByName("wknd")).thenReturn(Optional.empty());
+            ArgumentCaptor<DumAemSource> saved = ArgumentCaptor.forClass(DumAemSource.class);
+            when(dumAemSourceRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+            DumAemSourceExchange exported = DumAemSourceExchange.builder().id("old-id").name("wknd").build();
+
+            var plan = exchangeProcess.replaceAemSources(new DumAemExchange(List.of(exported)));
+
+            org.mockito.InOrder order = org.mockito.Mockito.inOrder(dumAemSourceRepository);
+            order.verify(dumAemSourceRepository).deleteAll();
+            order.verify(dumAemSourceRepository).flush();
+            order.verify(dumAemSourceRepository).save(any());
+            assertEquals("wknd", saved.getValue().getName());
+            assertNull(saved.getValue().getId(), "the id is left to the generator");
+            assertEquals(List.of("wknd"), plan.create());
+            assertEquals(List.of("legacy"), plan.remove());
+        }
+
+        @Test
+        @DisplayName("DU9: replace refuses a file with an invalid name before deleting anything")
+        void shouldRefuseAReplaceWithAnInvalidName() {
+            when(dumAemSourceRepository.findAll()).thenReturn(List.of(createDumAemSource()));
+            DumAemSourceExchange spaced = DumAemSourceExchange.builder().name("wknd site").build();
+
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportException.class,
+                    () -> exchangeProcess.replaceAemSources(new DumAemExchange(List.of(spaced))));
+
+            verify(dumAemSourceRepository, never()).deleteAll();
+            verify(dumAemSourceRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("DU9: replace refuses an unreadable file instead of skipping it")
+        void shouldRefuseAnUnreadableFileWhenReplacing() throws Exception {
+            File broken = File.createTempFile("aem-replace", ".json");
+            broken.deleteOnExit();
+            java.nio.file.Files.writeString(broken.toPath(), "{ not json");
+
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportException.class,
+                    () -> exchangeProcess.importFromFile(broken,
+                            com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.REPLACE));
+
+            verify(dumAemSourceRepository, never()).deleteAll();
+        }
+
+        @Test
         @DisplayName("Should import attribute specifications")
         void shouldImportAttributeSpecifications() {
             // Given

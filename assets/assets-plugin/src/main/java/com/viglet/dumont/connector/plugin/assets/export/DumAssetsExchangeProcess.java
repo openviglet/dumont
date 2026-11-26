@@ -14,6 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.viglet.dumont.connector.commons.exchange.DumSourceReplacePlan;
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportMode;
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportException;
 import com.viglet.dumont.connector.commons.DumSourceNames;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.assets.export.bean.DumAssetsExchange;
@@ -86,6 +89,11 @@ public class DumAssetsExchangeProcess {
     }
 
     public void importFromMultipartFile(MultipartFile multipartFile) {
+        importFromMultipartFile(multipartFile, DumSourceImportMode.ADD);
+    }
+
+    /** An uploaded zip, imported in {@code mode} (roadmap DU9). */
+    public void importFromMultipartFile(MultipartFile multipartFile, DumSourceImportMode mode) {
         File extractFolder = DumSpringUtils.extractZipFile(multipartFile);
         File parentExtractFolder = null;
         if (!(new File(extractFolder, EXPORT_FILE).exists())
@@ -97,26 +105,83 @@ public class DumAssetsExchangeProcess {
                 }
             }
         }
-        importFromFile(new File(extractFolder, EXPORT_FILE));
         try {
-            FileUtils.deleteDirectory(extractFolder);
-            if (parentExtractFolder != null) FileUtils.deleteDirectory(parentExtractFolder);
-        } catch (IOException e) { log.error(e.getMessage(), e); }
+            importFromFile(new File(extractFolder, EXPORT_FILE), mode);
+        } finally {
+            try {
+                FileUtils.deleteDirectory(extractFolder);
+                if (parentExtractFolder != null) FileUtils.deleteDirectory(parentExtractFolder);
+            } catch (IOException e) { log.error(e.getMessage(), e); }
+        }
     }
 
     public void importFromFile(File exportFile) {
-        log.info("Importing {} file", exportFile);
+        importFromFile(exportFile, DumSourceImportMode.ADD);
+    }
+
+    /**
+     * Reads {@code exportFile} and imports it in {@code mode}. An unreadable file is logged and
+     * skipped when adding, and refuses the whole import when replacing, before anything is deleted.
+     */
+    public void importFromFile(File exportFile, DumSourceImportMode mode) {
+        log.info("Importing {} file ({})", exportFile, mode);
+        DumAssetsExchange exchange;
         try {
             ObjectMapper mapper = JsonMapper.builder()
                     .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false).build();
-            DumAssetsExchange exchange = mapper.readValue(exportFile, DumAssetsExchange.class);
-            if (exchange.getSources() != null && !exchange.getSources().isEmpty()) {
-                exchange.getSources().stream()
-                        .filter(s -> hasValidName(s.getName()))
-                        .filter(s -> s.getId() == null || s.getId().isEmpty() || repository.findById(s.getId()).isEmpty())
-                        .forEach(this::importSource);
+            exchange = mapper.readValue(exportFile, DumAssetsExchange.class);
+        } catch (StreamReadException | DatabindException | JacksonIOException e) {
+            if (mode == DumSourceImportMode.REPLACE) {
+                throw new DumSourceImportException("The file could not be read as a source export.", e);
             }
-        } catch (StreamReadException | DatabindException | JacksonIOException e) { log.error(e.getMessage(), e); }
+            log.error(e.getMessage(), e);
+            return;
+        }
+        if (mode == DumSourceImportMode.REPLACE) {
+            replaceSources(exchange);
+        } else {
+            importAssetsSources(exchange);
+        }
+    }
+
+    /** Adds the file's sources, skipping any whose id exists or whose name cannot be saved. */
+    public void importAssetsSources(DumAssetsExchange exchange) {
+        if (exchange.getSources() != null && !exchange.getSources().isEmpty()) {
+            exchange.getSources().stream()
+                    .filter(s -> hasValidName(s.getName()))
+                    .filter(s -> s.getId() == null || s.getId().isEmpty() || repository.findById(s.getId()).isEmpty())
+                    .forEach(this::importSource);
+        }
+    }
+
+    /**
+     * The file becomes the whole set of assets sources (roadmap DU9): every existing source is
+     * deleted and the file's are created, inside this class's transaction, so a failure leaves the
+     * instance as it was. A file holding a name that cannot be saved is refused before anything is
+     * deleted. Ids are left to the generator; names are kept, and indexing history is keyed by name.
+     */
+    public DumSourceReplacePlan replaceSources(DumAssetsExchange exchange) {
+        List<DumAssetsSourceExchange> sources = exchange.getSources() == null ? List.of()
+                : List.copyOf(exchange.getSources());
+        DumSourceReplacePlan plan = planReplace(sources);
+        if (!plan.isApplicable()) {
+            throw plan.refusal();
+        }
+        log.info("Replacing the assets sources: create {}, overwrite {}, remove {}", plan.create(),
+                plan.overwrite(), plan.remove());
+        repository.deleteAll();
+        repository.flush();
+        sources.forEach(source -> source.setId(null));
+        if (!sources.isEmpty()) {
+            importAssetsSources(exchange);
+        }
+        return plan;
+    }
+
+    /** What replacing the assets sources with {@code sources} would do, without writing anything. */
+    public DumSourceReplacePlan planReplace(List<DumAssetsSourceExchange> sources) {
+        return DumSourceReplacePlan.of(sources.stream().map(DumAssetsSourceExchange::getName).toList(),
+                repository.findAll().stream().map(DumAssetsSource::getName).toList(), true);
     }
 
     private boolean hasValidName(String name) {

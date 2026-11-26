@@ -399,10 +399,43 @@ class DumAemSourceApiTest {
             org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
                     .mock(org.springframework.web.multipart.MultipartFile.class);
 
-            var result = api.importSources(file);
+            var result = api.importSources(file, null);
 
-            verify(dumAemExchangeProcess).importFromMultipartFile(file);
+            verify(dumAemExchangeProcess).importFromMultipartFile(file,
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.ADD);
             assertEquals(200, result.getStatusCode().value());
+        }
+
+        @Test
+        @DisplayName("DU9: POST /import?mode=replace imports in replace mode")
+        void shouldDelegateAReplacingImport() {
+            org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
+                    .mock(org.springframework.web.multipart.MultipartFile.class);
+
+            api.importSources(file, "replace");
+
+            verify(dumAemExchangeProcess).importFromMultipartFile(file,
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.REPLACE);
+        }
+
+        @Test
+        @DisplayName("DU9: a refused import and an unknown mode answer 400")
+        void shouldAnswer400ForARefusedImport() {
+            org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
+                    .mock(org.springframework.web.multipart.MultipartFile.class);
+            org.mockito.Mockito.doThrow(new com.viglet.dumont.connector.commons.exchange.DumSourceImportException("no"))
+                    .when(dumAemExchangeProcess).importFromMultipartFile(file,
+                            com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.REPLACE);
+
+            var refused = org.junit.jupiter.api.Assertions.assertThrows(
+                    org.springframework.web.server.ResponseStatusException.class,
+                    () -> api.importSources(file, "replace"));
+            assertEquals(HttpStatus.BAD_REQUEST, refused.getStatusCode());
+
+            var unknown = org.junit.jupiter.api.Assertions.assertThrows(
+                    org.springframework.web.server.ResponseStatusException.class,
+                    () -> api.importSources(file, "overwrite"));
+            assertEquals(HttpStatus.BAD_REQUEST, unknown.getStatusCode());
         }
     }
 

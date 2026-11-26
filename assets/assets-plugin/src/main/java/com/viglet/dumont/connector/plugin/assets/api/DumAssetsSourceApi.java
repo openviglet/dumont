@@ -1,5 +1,7 @@
 package com.viglet.dumont.connector.plugin.assets.api;
 
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportMode;
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportException;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,7 +96,18 @@ public class DumAssetsSourceApi {
     public StreamingResponseBody export(HttpServletResponse response) { return exchangeProcess.exportObject(response); }
 
     @PostMapping("/import") @Operation(summary = "Import Assets Sources from ZIP")
-    public ResponseEntity<Object> importSources(@RequestParam("file") MultipartFile file) {
-        exchangeProcess.importFromMultipartFile(file); return ResponseEntity.ok().build();
+    /**
+     * Imports a zip or plain {@code .json} export. {@code mode=add} (the default) skips sources that
+     * exist; {@code mode=replace} makes the file the whole set (roadmap DU9). A refused file answers
+     * 400 with the reason, and nothing is changed.
+     */
+    public ResponseEntity<Object> importSources(@RequestParam("file") MultipartFile file,
+            @RequestParam(name = "mode", required = false) String mode) {
+        try {
+            exchangeProcess.importFromMultipartFile(file, DumSourceImportMode.of(mode));
+        } catch (DumSourceImportException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+        return ResponseEntity.ok().build();
     }
 }

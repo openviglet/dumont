@@ -2,23 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU9 Import that replaces every source
-
-Every source import (`POST /api/v2/{aem,db,wc,assets}/source/import`, the console's
-Import ZIP from DU4, and the first-start import) only adds: a source whose id or name
-already exists is skipped (`isNewSource` in `DumAemExchangeProcess`, the `findById`
-filters in the DB, web-crawler and assets exchange processes). Nothing can make an
-instance's sources match a file.
-
-Build: a `mode` parameter on each import, `add` (today's behaviour, the default) and
-`replace`. In `replace` the file is the whole set for that connector type: a source
-whose name matches one in the file is overwritten in place, keeping its id so indexing
-state and monitoring history stay attached; a source in the file with no match is
-created; an existing source the file does not name is deleted. One transaction per
-connector type, so a file that fails halfway changes nothing. The DU6 name rule still
-applies: a file holding an invalid name is refused whole in `replace`, never
-half-applied. The first-start import keeps `add`.
-
 ### §DU10 Dry run of a replacing import
 
 DU9's `replace` deletes every source the file does not name and overwrites the rest, so
@@ -55,3 +38,22 @@ lists what the dry run returned: how many are created, overwritten and removed, 
 removed names spelled out. An invalid name blocks the confirm button. Confirming calls
 `mode=replace` and reloads the list; cancelling writes nothing. The plain Import ZIP
 keeps adding only. Strings in en and pt.
+
+### §DU13 AEM JPA integration test never runs
+
+`aem/aem-plugin/src/test/.../api/DumAemSourceApiIT.java` is a `@DataJpaTest` that
+imports `DumAemSourceApi` and the mapper, but run on its own (`mvn -pl aem/aem-plugin
+test -Dtest=DumAemSourceApiIT`) it fails before any test: "Unable to find a
+@SpringBootConfiguration by searching packages upwards from the test". The plugin has no
+`@SpringBootApplication` in its package tree, and surefire's default includes skip
+`*IT`, so nothing ever ran it and nothing reported it.
+
+What it costs: the persistence behaviour the unit tests mock away is unchecked. DU9's
+replacing import (delete every source, flush, recreate under the same names in one
+transaction) is exactly the kind of change only a real JPA context proves, and it was
+gated by Mockito alone.
+
+Build: a minimal `@SpringBootConfiguration` + `@EnableAutoConfiguration` +
+`@EntityScan`/`@EnableJpaRepositories` test configuration in the plugin's test tree,
+then run the IT in the build (surefire include or failsafe), and add a replace case to
+it.

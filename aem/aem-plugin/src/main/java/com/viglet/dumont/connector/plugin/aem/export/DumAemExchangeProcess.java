@@ -62,6 +62,10 @@ import com.viglet.dumont.spring.utils.DumSpringUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.exc.JacksonIOException;
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportException;
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportMode;
+import com.viglet.dumont.connector.commons.exchange.DumSourceReplacePlan;
+
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.DeserializationFeature;
@@ -180,9 +184,14 @@ public class DumAemExchangeProcess {
     }
 
     public void importFromMultipartFile(MultipartFile multipartFile) {
+        importFromMultipartFile(multipartFile, DumSourceImportMode.ADD);
+    }
+
+    /** An uploaded zip or plain {@code .json}, imported in {@code mode} (roadmap DU9). */
+    public void importFromMultipartFile(MultipartFile multipartFile, DumSourceImportMode mode) {
         String originalName = multipartFile.getOriginalFilename();
         if (originalName != null && originalName.toLowerCase(java.util.Locale.ROOT).endsWith(".json")) {
-            importFromJsonUpload(multipartFile);
+            importFromJsonUpload(multipartFile, mode);
             return;
         }
         File extractFolder = DumSpringUtils.extractZipFile(multipartFile);
@@ -197,14 +206,17 @@ public class DumAemExchangeProcess {
             }
         }
         File exportFile = new File(extractFolder.getAbsolutePath().concat(File.separator + EXPORT_FILE));
-        importFromFile(exportFile);
         try {
-            FileUtils.deleteDirectory(extractFolder);
-            if (parentExtractFolder != null) {
-                FileUtils.deleteDirectory(parentExtractFolder);
+            importFromFile(exportFile, mode);
+        } finally {
+            try {
+                FileUtils.deleteDirectory(extractFolder);
+                if (parentExtractFolder != null) {
+                    FileUtils.deleteDirectory(parentExtractFolder);
+                }
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
             }
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
         }
     }
 
@@ -212,15 +224,18 @@ public class DumAemExchangeProcess {
      * A plain {@code .json} upload: the per-source file the console's Export writes, or an
      * {@code export.json} taken out of its zip. It is read through the same path as the zip.
      */
-    private void importFromJsonUpload(MultipartFile multipartFile) {
+    private void importFromJsonUpload(MultipartFile multipartFile, DumSourceImportMode mode) {
         File tmpFile = null;
         try {
             java.nio.file.Path tmpDir = Paths.get(System.getProperty("user.dir"), "store", "tmp");
             Files.createDirectories(tmpDir);
             tmpFile = tmpDir.resolve("aem-import-" + UUID.randomUUID() + ".json").toFile();
             multipartFile.transferTo(tmpFile);
-            importFromFile(tmpFile);
+            importFromFile(tmpFile, mode);
         } catch (IOException e) {
+            if (mode == DumSourceImportMode.REPLACE) {
+                throw new DumSourceImportException("The uploaded file could not be read.", e);
+            }
             log.error(e.getMessage(), e);
         } finally {
             FileUtils.deleteQuietly(tmpFile);
@@ -228,19 +243,63 @@ public class DumAemExchangeProcess {
     }
 
     public void importFromFile(File exportFile) {
-        log.info("Importing {} file", exportFile);
+        importFromFile(exportFile, DumSourceImportMode.ADD);
+    }
+
+    /**
+     * Reads {@code exportFile} and imports it in {@code mode}. An unreadable file is logged and
+     * skipped when adding, and refuses the whole import when replacing, before anything is deleted.
+     */
+    public void importFromFile(File exportFile, DumSourceImportMode mode) {
+        log.info("Importing {} file ({})", exportFile, mode);
+        DumAemExchange dumAemExchange;
         try {
             ObjectMapper mapper = JsonMapper.builder()
                     .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
                     .build();
-            DumAemExchange dumAemExchange = mapper.readValue(exportFile, DumAemExchange.class);
-            if (hasSource(dumAemExchange)) {
-                importAemSource(dumAemExchange);
-            }
+            dumAemExchange = mapper.readValue(exportFile, DumAemExchange.class);
         } catch (StreamReadException | DatabindException | JacksonIOException e) {
+            if (mode == DumSourceImportMode.REPLACE) {
+                throw new DumSourceImportException("The file could not be read as a source export.", e);
+            }
             log.error(e.getMessage(), e);
+            return;
         }
+        if (mode == DumSourceImportMode.REPLACE) {
+            replaceAemSources(dumAemExchange);
+        } else if (hasSource(dumAemExchange)) {
+            importAemSource(dumAemExchange);
+        }
+    }
 
+    /**
+     * The file becomes the whole set of AEM sources (roadmap DU9): every existing source is
+     * deleted and the file's are created, inside this class's transaction, so a failure leaves the
+     * instance as it was. A file holding a name that cannot be saved is refused before anything is
+     * deleted. Ids are left to the generator; names are kept, and indexing history is keyed by name.
+     */
+    public DumSourceReplacePlan replaceAemSources(DumAemExchange dumAemExchange) {
+        List<DumAemSourceExchange> sources = dumAemExchange.getSources() == null ? List.of()
+                : List.copyOf(dumAemExchange.getSources());
+        DumSourceReplacePlan plan = planReplace(sources);
+        if (!plan.isApplicable()) {
+            throw plan.refusal();
+        }
+        log.info("Replacing the AEM sources: create {}, overwrite {}, remove {}", plan.create(),
+                plan.overwrite(), plan.remove());
+        dumAemSourceRepository.deleteAll();
+        dumAemSourceRepository.flush();
+        sources.forEach(source -> source.setId(null));
+        if (!sources.isEmpty()) {
+            importAemSource(dumAemExchange);
+        }
+        return plan;
+    }
+
+    /** What replacing the AEM sources with {@code sources} would do, without writing anything. */
+    public DumSourceReplacePlan planReplace(List<DumAemSourceExchange> sources) {
+        return DumSourceReplacePlan.of(sources.stream().map(DumAemSourceExchange::getName).toList(),
+                dumAemSourceRepository.findAll().stream().map(DumAemSource::getName).toList(), true);
     }
 
     private static boolean hasSource(DumAemExchange dumAemExchange) {

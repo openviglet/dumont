@@ -19,6 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.viglet.dumont.connector.commons.exchange.DumSourceReplacePlan;
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportMode;
+import com.viglet.dumont.connector.commons.exchange.DumSourceImportException;
 import com.viglet.dumont.commons.utils.DumCommonsUtils;
 import com.viglet.dumont.connector.plugin.webcrawler.export.bean.DumWCAttribExchange;
 import com.viglet.dumont.connector.plugin.webcrawler.export.bean.DumWCExchange;
@@ -162,6 +165,11 @@ public class DumWCExchangeProcess {
     }
 
     public void importFromMultipartFile(MultipartFile multipartFile) {
+        importFromMultipartFile(multipartFile, DumSourceImportMode.ADD);
+    }
+
+    /** An uploaded zip, imported in {@code mode} (roadmap DU9). */
+    public void importFromMultipartFile(MultipartFile multipartFile, DumSourceImportMode mode) {
         File extractFolder = DumSpringUtils.extractZipFile(multipartFile);
         File parentExtractFolder = null;
         if (!(new File(extractFolder, EXPORT_FILE).exists())
@@ -174,24 +182,75 @@ public class DumWCExchangeProcess {
             }
         }
         File exportFile = new File(extractFolder.getAbsolutePath().concat(File.separator + EXPORT_FILE));
-        importFromFile(exportFile);
         try {
-            FileUtils.deleteDirectory(extractFolder);
-            if (parentExtractFolder != null) {
-                FileUtils.deleteDirectory(parentExtractFolder);
+            importFromFile(exportFile, mode);
+        } finally {
+            try {
+                FileUtils.deleteDirectory(extractFolder);
+                if (parentExtractFolder != null) {
+                    FileUtils.deleteDirectory(parentExtractFolder);
+                }
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
             }
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
         }
 
     }
 
     public void importFromFile(File exportFile) {
+        importFromFile(exportFile, DumSourceImportMode.ADD);
+    }
+
+    /**
+     * Reads {@code exportFile} and imports it in {@code mode}. When replacing, an unreadable file
+     * refuses the whole import before anything is deleted.
+     */
+    public void importFromFile(File exportFile, DumSourceImportMode mode) {
         ObjectMapper mapper = new ObjectMapper();
-        DumWCExchange dumWCExchange = mapper.readValue(exportFile, DumWCExchange.class);
-        if (dumWCExchange.getSources() != null && !dumWCExchange.getSources().isEmpty()) {
+        DumWCExchange dumWCExchange;
+        try {
+            dumWCExchange = mapper.readValue(exportFile, DumWCExchange.class);
+        } catch (RuntimeException e) {
+            if (mode == DumSourceImportMode.REPLACE) {
+                throw new DumSourceImportException("The file could not be read as a source export.", e);
+            }
+            throw e;
+        }
+        if (mode == DumSourceImportMode.REPLACE) {
+            replaceSources(dumWCExchange);
+        } else if (dumWCExchange.getSources() != null && !dumWCExchange.getSources().isEmpty()) {
             importWCSource(dumWCExchange);
         }
+    }
+
+    /**
+     * The file becomes the whole set of web-crawler sources (roadmap DU9): every existing source is
+     * deleted and the file's are created, inside this class's transaction, so a failure leaves the
+     * instance as it was. A file holding a name that cannot be saved is refused before anything is
+     * deleted. Ids are left to the generator; names are kept, and indexing history is keyed by name.
+     */
+    public DumSourceReplacePlan replaceSources(DumWCExchange exchange) {
+        List<DumWCSourceExchange> sources = exchange.getSources() == null ? List.of()
+                : List.copyOf(exchange.getSources());
+        DumSourceReplacePlan plan = planReplace(sources);
+        if (!plan.isApplicable()) {
+            throw plan.refusal();
+        }
+        log.info("Replacing the web-crawler sources: create {}, overwrite {}, remove {}", plan.create(),
+                plan.overwrite(), plan.remove());
+        dumWCSourceRepository.deleteAll();
+        dumWCSourceRepository.flush();
+        sources.forEach(source -> source.setId(null));
+        if (!sources.isEmpty()) {
+            importWCSource(exchange);
+        }
+        return plan;
+    }
+
+    /** What replacing the web-crawler sources with {@code sources} would do, without writing anything. */
+    public DumSourceReplacePlan planReplace(List<DumWCSourceExchange> sources) {
+        return DumSourceReplacePlan.of(sources.stream().map(DumWCSourceExchange::getTitle).toList(),
+                dumWCSourceRepository.findAll().stream().map(DumWCSource::getTitle).toList(), false);
     }
 
     public void importWCSource(DumWCExchange dumWCExchange) {
