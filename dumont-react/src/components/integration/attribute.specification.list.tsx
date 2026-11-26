@@ -22,7 +22,10 @@ export function AttributeSpecificationList({ source, onSourceUpdated }: Readonly
   const navigate = useNavigate();
   const { id, sourceId } = useParams() as { id: string; sourceId: string };
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
-  const specs = Array.isArray(source.attributeSpecifications) ? source.attributeSpecifications : [];
+  const specs = useMemo(
+    () => (Array.isArray(source.attributeSpecifications) ? source.attributeSpecifications : []),
+    [source.attributeSpecifications],
+  );
   const baseRoute = `${ROUTES.INTEGRATION_INSTANCE}/${id}/source/${sourceId}/specifications`;
 
   const handleAdd = useCallback(() => {

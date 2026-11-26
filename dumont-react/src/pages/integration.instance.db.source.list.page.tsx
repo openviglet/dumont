@@ -23,7 +23,7 @@ export default function IntegrationInstanceDbSourceListPage() {
     turIntegrationDbSourceService.query().then((sources) => {
       setIntegrationDbSources(sources);
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
-  }, [id]);
+  }, [turIntegrationDbSourceService, t]);
 
   const reload = () => turIntegrationDbSourceService.query().then(setIntegrationDbSources);
   const exchange = useSourceExchange(turIntegrationDbSourceService, "db-sources", reload);

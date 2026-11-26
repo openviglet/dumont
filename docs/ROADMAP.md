@@ -2,7 +2,7 @@
 
 ## Block A — Source configuration moves between instances
 
-- 📋 **DU8** (deps: —) **Two react-hooks rules are switched off in 31 named console files, so new violations there pass the lint gate** — set-state-in-effect and exhaustive-deps hold the rest of the lint debt DU5 left as named-file lists in eslint.config.js. → §DU8
+- ⏳ **DU8** (deps: —) **Two react-hooks rules are switched off in 31 named console files, so new violations there pass the lint gate** — react-hooks/set-state-in-effect is still off in 19 named files in eslint.config.js; empty that list and delete its block. → §DU8
 
 ## Done when — DU8
 

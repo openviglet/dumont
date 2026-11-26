@@ -22,7 +22,7 @@ export default function IntegrationInstanceWcSourceListPage() {
   useEffect(() => {
     service.query().then(setSources)
       .catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
-  }, [id]);
+  }, [service, t]);
 
   const reload = () => service.query().then(setSources);
   const exchange = useSourceExchange(service, "wc-sources", reload);

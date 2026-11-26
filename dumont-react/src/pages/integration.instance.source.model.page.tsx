@@ -89,7 +89,7 @@ export default function IntegrationInstanceSourceModelPage() {
         form.reset(emptyModel);
       }
     });
-  }, [id, sourceId, modelIndex]);
+  }, [turIntegrationAemSourceService, sourceId, isNew, index, form]);
 
   async function onSubmit(model: TurIntegrationAemPluginModel) {
     if (!source) return;

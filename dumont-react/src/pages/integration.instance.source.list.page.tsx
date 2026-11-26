@@ -27,7 +27,7 @@ export default function IntegrationInstanceSourceListPage() {
     turIntegrationAemSourceService.query().then((sources) => {
       setIntegrationAemSources(sources);
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
-  }, [id]);
+  }, [turIntegrationAemSourceService, t]);
 
   const reload = () => turIntegrationAemSourceService.query().then(setIntegrationAemSources);
   const exchange = useSourceExchange(turIntegrationAemSourceService, "aem-sources", reload);

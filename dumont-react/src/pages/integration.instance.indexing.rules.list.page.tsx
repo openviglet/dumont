@@ -7,14 +7,15 @@ import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationIndexingRule } from "@/models/integration/integration-indexing-rule.model";
 import { TurIntegrationIndexingRuleService } from "@/services/integration/integration-indexing-rule.service";
 import { IconGitCommit } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 export default function IntegrationInstanceIndexingRulesListPage() {
   const { id } = useParams<{ id: string }>();
   const [integrationIndexingRules, setIntegrationIndexingRules] = useState<TurIntegrationIndexingRule[]>();
-  const turIntegrationIndexingRuleService = new TurIntegrationIndexingRuleService(id || "");
+  // Memoised: built inline it is a new object on every render, and the effect below lists it.
+  const turIntegrationIndexingRuleService = useMemo(() => new TurIntegrationIndexingRuleService(id || ""), [id]);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
@@ -22,7 +23,7 @@ export default function IntegrationInstanceIndexingRulesListPage() {
     turIntegrationIndexingRuleService.query().then((rules) => {
       setIntegrationIndexingRules(rules);
     }).catch(() => setError(t("common.connectionError", { resource: "Integration service" })));
-  }, [id])
+  }, [turIntegrationIndexingRuleService, t])
   const gridItemList = useGridAdapter(integrationIndexingRules, {
     name: "name",
     description: "description",

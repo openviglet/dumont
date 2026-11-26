@@ -79,6 +79,22 @@ function buildItems(t: (key: string) => string): IndexingTabItem[] {
   ];
 }
 
+// Module level: constant tables, so the effect below does not have to list them.
+const tabPathMap: Record<IndexingTabMode, string> = {
+  INDEXING: "indexing",
+  DEINDEXING: "deindexing",
+  PUBLISHING: "publishing",
+  UNPUBLISHING: "unpublishing",
+};
+
+const pathTabMap: Record<string, IndexingTabMode> = Object.entries(tabPathMap).reduce(
+  (acc, [tab, path]) => {
+    acc[path] = tab as IndexingTabMode;
+    return acc;
+  },
+  {} as Record<string, IndexingTabMode>,
+);
+
 export default function IntegrationInstanceIndexAdminPage() {
   const { t } = useTranslation();
   const { id } = useParams() as { id: string };
@@ -88,21 +104,6 @@ export default function IntegrationInstanceIndexAdminPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const items = useMemo(() => buildItems(t), [t]);
-
-  const tabPathMap: Record<IndexingTabMode, string> = {
-    INDEXING: "indexing",
-    DEINDEXING: "deindexing",
-    PUBLISHING: "publishing",
-    UNPUBLISHING: "unpublishing",
-  };
-
-  const pathTabMap: Record<string, IndexingTabMode> = Object.entries(tabPathMap).reduce(
-    (acc, [tab, path]) => {
-      acc[path] = tab as IndexingTabMode;
-      return acc;
-    },
-    {} as Record<string, IndexingTabMode>,
-  );
 
   const pathSegment = location.pathname.split("/").pop();
   const initialTab: IndexingTabMode = pathTabMap[pathSegment ?? ""] || "INDEXING";

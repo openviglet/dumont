@@ -63,7 +63,7 @@ export default function IntegrationInstanceDoubleCheckPage() {
         }
       })
       .catch(() => setError(t("integration.doubleCheck.loadSourcesFailed")));
-  }, [id]);
+  }, [aemSourceService, id, t]);
 
   useEffect(() => {
     if (!doubleCheckService || !selectedSource) return;
@@ -84,7 +84,7 @@ export default function IntegrationInstanceDoubleCheckPage() {
       .then((data) => setUnprocessed(data))
       .catch(() => { })
       .finally(() => setLoadingUnprocessed(false));
-  }, [selectedSource, id]);
+  }, [doubleCheckService, selectedSource, t]);
 
   const handleIndex = useCallback(async (contentId: string) => {
     if (!doubleCheckService || !selectedSource) return;

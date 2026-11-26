@@ -83,7 +83,7 @@ export default function IntegrationInstanceSourceSpecPage() {
         form.reset(emptySpec);
       }
     });
-  }, [id, sourceId, specIndex]);
+  }, [turIntegrationAemSourceService, sourceId, isNew, index, form]);
 
   async function onSubmit(spec: TurIntegrationAemAttributeSpec) {
     if (!source) return;

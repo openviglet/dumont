@@ -21,7 +21,7 @@ export function PluginModelList({ source, onSourceUpdated }: Readonly<PluginMode
   const navigate = useNavigate();
   const { id, sourceId } = useParams() as { id: string; sourceId: string };
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
-  const models = Array.isArray(source.models) ? source.models : [];
+  const models = useMemo(() => (Array.isArray(source.models) ? source.models : []), [source.models]);
   const baseRoute = `${ROUTES.INTEGRATION_INSTANCE}/${id}/source/${sourceId}/models`;
 
   const handleAdd = useCallback(() => {

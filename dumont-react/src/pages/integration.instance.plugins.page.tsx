@@ -17,7 +17,7 @@ import {
 } from "@tabler/icons-react";
 import { toast } from "@viglet/viglet-design-system";
 import { type Locale, formatDistanceToNow } from "date-fns";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
@@ -62,17 +62,17 @@ export default function IntegrationInstancePluginsPage() {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const refresh = async () => {
+    const refresh = useCallback(async () => {
         try {
             setPlugins(await service.list());
         } catch {
             toast.error(t("integration.plugins.loadFailed"));
         }
-    };
+    }, [service, t]);
 
     useEffect(() => {
         refresh();
-    }, [id]);
+    }, [refresh]);
 
     const onPickFile = () => fileInputRef.current?.click();
 

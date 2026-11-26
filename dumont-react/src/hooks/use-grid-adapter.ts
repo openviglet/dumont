@@ -42,5 +42,15 @@ export function useGridAdapter<T>(
       url: config.url(item),
       icon: config.icon ? resolveField(item, config.icon) || null : null,
     }));
+    /*
+     * DU8 — keyed on the data alone, deliberately (as Dumont 2026.3 D56).
+     *
+     * Every caller passes `config` as an object literal, so it is a new object on every render:
+     * listing it would recompute this map each time and leave a `useMemo` that memoises nothing.
+     * What it holds (field names and a URL builder capturing the instance id) moves with `data`.
+     * Give this hook a genuinely dynamic config and that stops being true: memoise it at the call
+     * site rather than widening this array.
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see the note above
   }, [data]);
 }

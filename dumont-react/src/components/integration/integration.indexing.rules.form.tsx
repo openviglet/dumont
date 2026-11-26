@@ -129,6 +129,32 @@ interface IntegrationIndexingRulesFormProps {
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+type IndexingRuleFormShape = Omit<TurIntegrationIndexingRule, "values"> & {
+  values: { value: string }[];
+};
+
+// Every text/select field is coerced to a string so the inputs are controlled
+// from the first render — a Radix Select that starts with `value={undefined}`
+// would switch from uncontrolled to controlled when the rule arrives.
+const toFormShape = (rule: TurIntegrationIndexingRule): IndexingRuleFormShape => ({
+  ...rule,
+  name: rule.name ?? "",
+  description: rule.description ?? "",
+  source: rule.source ?? "",
+  attribute: rule.attribute ?? "",
+  ruleType: rule.ruleType ?? "",
+  values: (rule.values ?? []).map((v) =>
+    typeof v === "string" ? { value: v } : (v as { value: string })
+  ),
+});
+
+const fromFormShape = (data: IndexingRuleFormShape): TurIntegrationIndexingRule => ({
+  ...data,
+  values: (data.values ?? [])
+    .map((v) => v?.value)
+    .filter((v): v is string => typeof v === "string"),
+});
+
 export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesFormProps> = ({
   value,
   integrationId,
@@ -166,32 +192,6 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
   );
 
   // Internal form shape: values wrapped as { value: string } so useFieldArray can manage them
-  type IndexingRuleFormShape = Omit<TurIntegrationIndexingRule, "values"> & {
-    values: { value: string }[];
-  };
-
-  // Every text/select field is coerced to a string so the inputs are controlled
-  // from the first render — a Radix Select that starts with `value={undefined}`
-  // would switch from uncontrolled to controlled when the rule arrives.
-  const toFormShape = (rule: TurIntegrationIndexingRule): IndexingRuleFormShape => ({
-    ...rule,
-    name: rule.name ?? "",
-    description: rule.description ?? "",
-    source: rule.source ?? "",
-    attribute: rule.attribute ?? "",
-    ruleType: rule.ruleType ?? "",
-    values: (rule.values ?? []).map((v) =>
-      typeof v === "string" ? { value: v } : (v as { value: string })
-    ),
-  });
-
-  const fromFormShape = (data: IndexingRuleFormShape): TurIntegrationIndexingRule => ({
-    ...data,
-    values: (data.values ?? [])
-      .map((v) => v?.value)
-      .filter((v): v is string => typeof v === "string"),
-  });
-
   // Form setup with default values
   const form = useForm<IndexingRuleFormShape>({
     defaultValues: toFormShape(value)
@@ -433,7 +433,7 @@ export const IntegrationIndexingRulesForm: React.FC<IntegrationIndexingRulesForm
       console.error("Form submission error:", error);
       toast.error(t("forms.integrationRules.saveFailed"));
     }
-  }, [isNew, turIntegrationIndexingRuleService, navigate, form]);
+  }, [isNew, turIntegrationIndexingRuleService, navigate, form, integrationId, t]);
 
   // Keep the dropdown usable as soon as there is something to pick: only block
   // it while the first batch of options is still on its way.
