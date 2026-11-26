@@ -5,7 +5,6 @@ import { TurIntegrationAemSourceService } from "@/services/integration/integrati
 import { TurIntegrationConnectorService } from "@/services/integration/integration-connector.service";
 
 import { exportSourceToJson } from "@/components/integration/source-import-export";
-import type { BreadcrumbItem } from "@/contexts/breadcrumb.context";
 import { useSubPageBreadcrumb } from "@/hooks/use-sub-page-breadcrumb";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { toast } from "@viglet/viglet-design-system";
@@ -27,31 +26,25 @@ export default function IntegrationInstanceSourcePage() {
     authorURLPrefix: "", publishURLPrefix: "",
     localePaths: [], attributeSpecifications: [], models: [],
   });
-  const [isNew, setIsNew] = useState<boolean>(true);
+  // DU8 - derived, not state: `isNew` is a fact about the route, and correcting a `useState`
+  // seeded `true` from inside an effect rendered the wrong value first.
+  const isNew = sourceId === "new";
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
   const turIntegrationConnectorService = useMemo(() => new TurIntegrationConnectorService(id), [id]);
   const [open, setOpen] = useState(false);
   const [indexingAll, setIndexingAll] = useState(false);
   const [reindexingAll, setReindexingAll] = useState(false);
   const [dryScanning, setDryScanning] = useState(false);
-  const [breadcrumb, setBreadcrumb] = useState<BreadcrumbItem | undefined>(undefined);
   const { t } = useTranslation();
 
-  useSubPageBreadcrumb(breadcrumb);
+  // Derived from what the page shows; undefined defers it until the source has loaded.
+  useSubPageBreadcrumb(isNew ? t("forms.wizard.newSource") : integrationAemSource.name || undefined);
 
   useEffect(() => {
-    if (sourceId !== "new") {
-      turIntegrationAemSourceService.get(sourceId).then((source) => {
-        setIntegrationAemSource(source);
-        if (source.name) {
-          setBreadcrumb({ label: source.name });
-        }
-      });
-      setIsNew(false);
-    } else {
-      setBreadcrumb({ label: t("forms.wizard.newSource") });
+    if (!isNew) {
+      turIntegrationAemSourceService.get(sourceId).then(setIntegrationAemSource);
     }
-  }, [id, sourceId, turIntegrationAemSourceService, t]);
+  }, [id, sourceId, isNew, turIntegrationAemSourceService]);
 
   async function onDelete() {
     try {

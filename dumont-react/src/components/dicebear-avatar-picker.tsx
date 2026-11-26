@@ -72,6 +72,23 @@ interface DiceBearAvatarPickerProps {
   currentAvatarUrl?: string;
 }
 
+/** The style and seed encoded in a DiceBear URL, if it is one. */
+function parseDiceBearUrl(url?: string): { style: DiceBearStyle; seed: string } | null {
+  if (!url) return null;
+  const match = /dicebear\.com\/[\d.]+x\/([^/]+)\/svg\?seed=([^&]+)/.exec(url);
+  return match ? { style: match[1] as DiceBearStyle, seed: decodeURIComponent(match[2]) } : null;
+}
+
+const randomSeeds = () => Array.from({ length: 12 }, () => generateRandomSeed());
+
+/*
+ * DU8 (as Dumont 2026.3 D53) - the dialog mounts its body when it opens, so the body has no "on open" to react to.
+ *
+ * The picker used to seed its style, its seed and its previews from an effect watching `open` -
+ * three synchronous writes in an effect body, and a shape that had to remember to re-derive
+ * everything each time. Mounting on open makes those the body's *initial* state instead, which
+ * React computes once and nothing has to correct.
+ */
 export function DiceBearAvatarPicker({
   open,
   onOpenChange,
@@ -79,43 +96,70 @@ export function DiceBearAvatarPicker({
   defaultSeed = "",
   currentAvatarUrl,
 }: DiceBearAvatarPickerProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        {open && (
+          <AvatarPickerBody
+            onOpenChange={onOpenChange}
+            onSelect={onSelect}
+            defaultSeed={defaultSeed}
+            currentAvatarUrl={currentAvatarUrl}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AvatarPickerBody({
+  onOpenChange,
+  onSelect,
+  defaultSeed,
+  currentAvatarUrl,
+}: Readonly<Omit<DiceBearAvatarPickerProps, "open"> & { defaultSeed: string }>) {
   const { t } = useTranslation();
-  const [selectedStyle, setSelectedStyle] = useState<DiceBearStyle>("adventurer");
-  const [seed, setSeed] = useState(defaultSeed || generateRandomSeed());
-  const [previewSeeds, setPreviewSeeds] = useState<string[]>([]);
-  const [selectedUrl, setSelectedUrl] = useState("");
-  // Bumped on shuffle so the preview images remount; state, not a ref, because render reads it.
-  const [imgKey, setImgKey] = useState(0);
+  const [selectedStyle, setSelectedStyle] = useState<DiceBearStyle>(
+    () => parseDiceBearUrl(currentAvatarUrl)?.style ?? "adventurer",
+  );
+  const [seed, setSeed] = useState(
+    () => parseDiceBearUrl(currentAvatarUrl)?.seed ?? (defaultSeed || generateRandomSeed()),
+  );
+  const [previewSeeds, setPreviewSeeds] = useState<string[]>(randomSeeds);
+  /*
+   * DU8 (as Dumont 2026.3 D53) — a default the reader can override, stored against the default it overrode.
+   *
+   * `selectedUrl` used to be plain state that an effect re-pointed at the main preview whenever
+   * the style or seed changed — a synchronous write in an effect body, and one that silently
+   * discarded a pick the reader had just made. Recording which preview a pick was made against
+   * lets the render decide: the pick counts while the preview it belongs to is still current, and
+   * a new style or seed simply makes it stale.
+   */
+  const [picked, setPicked] = useState<{ against: string; url: string } | null>(null);
+  /*
+   * DU5 (as Dumont 2026.3 D48) — state, not a ref, because the render reads it.
+   *
+   * This counter forces the twelve preview images to remount on each shuffle, and it was a ref
+   * read straight into a `key`. Reading a ref during render is what `react-hooks/refs` refuses:
+   * a ref is not render state, so React is free to render without seeing the write, and the
+   * shuffle then silently reuses the old images.
+   */
+  const [shuffleCount, setShuffleCount] = useState(0);
 
   const debouncedSeed = useDebounce(seed, 400);
 
   const generatePreviewSeeds = useCallback(() => {
-    const seeds = Array.from({ length: 12 }, () => generateRandomSeed());
-    setPreviewSeeds(seeds);
-    setImgKey((k) => k + 1);
+    setPreviewSeeds(randomSeeds());
+    setShuffleCount((n) => n + 1);
   }, []);
-
-  useEffect(() => {
-    if (open) {
-      if (currentAvatarUrl) {
-        const match = currentAvatarUrl.match(/dicebear\.com\/[\d.]+x\/([^/]+)\/svg\?seed=([^&]+)/);
-        if (match) {
-          setSelectedStyle(match[1] as DiceBearStyle);
-          setSeed(decodeURIComponent(match[2]));
-        }
-      }
-      generatePreviewSeeds();
-    }
-  }, [open, currentAvatarUrl, generatePreviewSeeds]);
 
   const mainPreviewUrl = useMemo(
     () => buildDiceBearUrl(selectedStyle, debouncedSeed),
     [selectedStyle, debouncedSeed]
   );
 
-  useEffect(() => {
-    setSelectedUrl(mainPreviewUrl);
-  }, [mainPreviewUrl]);
+  // The pick counts only while the preview it was made against is still the current one.
+  const selectedUrl = picked?.against === mainPreviewUrl ? picked.url : mainPreviewUrl;
 
   const handleRandomize = () => {
     setSeed(generateRandomSeed());
@@ -132,8 +176,7 @@ export function DiceBearAvatarPicker({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+    <>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <IconPalette className="size-5" />
@@ -204,7 +247,7 @@ export function DiceBearAvatarPicker({
                     type="button"
                     onClick={() => {
                       setSelectedStyle(style.id);
-                      setSelectedUrl(url);
+                      setPicked({ against: mainPreviewUrl, url });
                     }}
                     className={cn(
                       "flex flex-col items-center gap-1 p-1.5 rounded-lg border-2 transition-all cursor-pointer hover:bg-accent",
@@ -244,9 +287,9 @@ export function DiceBearAvatarPicker({
                 const isActive = url === selectedUrl;
                 return (
                   <button
-                    key={`${s}-${imgKey}`}
+                    key={`${s}-${shuffleCount}`}
                     type="button"
-                    onClick={() => setSelectedUrl(url)}
+                    onClick={() => setPicked({ against: mainPreviewUrl, url })}
                     className={cn(
                       "aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 hover:shadow-md bg-muted",
                       isActive
@@ -268,7 +311,6 @@ export function DiceBearAvatarPicker({
           </Button>
           <Button onClick={handleConfirm}>{t("forms.avatarPicker.useThisAvatar")}</Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </>
   );
 }

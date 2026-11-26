@@ -106,18 +106,11 @@ export default function IntegrationInstanceIndexAdminPage() {
   const items = useMemo(() => buildItems(t), [t]);
 
   const pathSegment = location.pathname.split("/").pop();
-  const initialTab: IndexingTabMode = pathTabMap[pathSegment ?? ""] || "INDEXING";
-  const [selectedTab, setSelectedTab] = useState<IndexingTabMode>(initialTab);
-
-  useEffect(() => {
-    const path = location.pathname.split("/").pop();
-    const tab = pathTabMap[path ?? ""];
-    if (tab && tab !== selectedTab) setSelectedTab(tab);
-    else if (!tab && selectedTab !== "INDEXING") setSelectedTab("INDEXING");
-  }, [location.pathname, selectedTab]);
+  // DU8 - the tab is the URL, not state beside it that an effect kept in step: changing tab
+  // navigates, and the render reads whatever the router says.
+  const selectedTab: IndexingTabMode = pathTabMap[pathSegment ?? ""] || "INDEXING";
 
   const handleTabChange = (mode: IndexingTabMode) => {
-    setSelectedTab(mode);
     navigate(
       `/admin/integration/instance/${id}/indexing-manager/${tabPathMap[mode]}`,
     );

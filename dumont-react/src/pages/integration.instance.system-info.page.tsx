@@ -120,7 +120,9 @@ export default function IntegrationInstanceSystemInfoPage() {
 
     const [info, setInfo] = useState<ConnectorSystemInfo | null>(null);
     const [variables, setVariables] = useState<Record<string, string>>({});
-    const [isLoading, setIsLoading] = useState(true);
+    // DU8 - loading starts true only when there is something to load; the condition is known
+    // at first render, so it is not corrected from inside the effect.
+    const [isLoading, setIsLoading] = useState(() => Boolean(id && id !== "new"));
     const [status, setStatus] = useState<string>("DOWN");
     const [varSearch, setVarSearch] = useState("");
 
@@ -140,8 +142,6 @@ export default function IntegrationInstanceSystemInfoPage() {
                     toast.error("Failed to load connector system information.");
                 })
                 .finally(() => setIsLoading(false));
-        } else {
-            setIsLoading(false);
         }
     }, [id]);
 

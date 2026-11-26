@@ -37,10 +37,22 @@ export default function IntegrationInstanceDoubleCheckPage() {
 
   const [sources, setSources] = useState<TurIntegrationAemSource[]>([]);
   const [selectedSource, setSelectedSource] = useState<string>(NO_SOURCE);
-  const [doubleCheck, setDoubleCheck] = useState<TurIntegrationDoubleCheck | null>(null);
-  const [unprocessed, setUnprocessed] = useState<TurIntegrationMonitoring | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [loadingUnprocessed, setLoadingUnprocessed] = useState(false);
+  /*
+   * DU8 (as Dumont 2026.3 D53) - each answer carries the source it is about.
+   *
+   * The load effect used to reset five states on the way in (both results, both flags, the
+   * error), each a synchronous write in an effect body. Storing the source beside its result
+   * makes the resets unnecessary: a result for another source is not this source's answer, and
+   * "loading" is exactly not yet holding this source's result.
+   */
+  const [checked, setChecked] = useState<{
+    source: string;
+    doubleCheck: TurIntegrationDoubleCheck | null;
+  } | null>(null);
+  const [scanned, setScanned] = useState<{
+    source: string;
+    unprocessed: TurIntegrationMonitoring | null;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
 
@@ -65,25 +77,29 @@ export default function IntegrationInstanceDoubleCheckPage() {
       .catch(() => setError(t("integration.doubleCheck.loadSourcesFailed")));
   }, [aemSourceService, id, t]);
 
+  /** What is on screen, and whether it is about the source currently selected. */
+  const doubleCheck = checked?.source === selectedSource ? checked.doubleCheck : null;
+  const unprocessed = scanned?.source === selectedSource ? scanned.unprocessed : null;
+  const hasSource = Boolean(doubleCheckService) && selectedSource !== NO_SOURCE;
+  const loading = hasSource && checked?.source !== selectedSource;
+  const loadingUnprocessed = hasSource && scanned?.source !== selectedSource;
+
   useEffect(() => {
     if (!doubleCheckService || !selectedSource) return;
-    setLoading(true);
-    setLoadingUnprocessed(true);
-    setDoubleCheck(null);
-    setUnprocessed(null);
-    setError(null);
+    const source = selectedSource;
 
     doubleCheckService
-      .get(selectedSource)
-      .then((data) => setDoubleCheck(data))
-      .catch(() => setError(t("integration.doubleCheck.loadValidationFailed")))
-      .finally(() => setLoading(false));
+      .get(source)
+      .then((data) => setChecked({ source, doubleCheck: data }))
+      .catch(() => {
+        setChecked({ source, doubleCheck: null });
+        setError(t("integration.doubleCheck.loadValidationFailed"));
+      });
 
     doubleCheckService
-      .getUnprocessed(selectedSource)
-      .then((data) => setUnprocessed(data))
-      .catch(() => { })
-      .finally(() => setLoadingUnprocessed(false));
+      .getUnprocessed(source)
+      .then((data) => setScanned({ source, unprocessed: data }))
+      .catch(() => setScanned({ source, unprocessed: null }));
   }, [doubleCheckService, selectedSource, t]);
 
   const handleIndex = useCallback(async (contentId: string) => {
@@ -132,7 +148,14 @@ export default function IntegrationInstanceDoubleCheckPage() {
         {sources.length > 0 && (
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">{t("integration.doubleCheck.sourceLabel")}</span>
-            <Select value={selectedSource} onValueChange={setSelectedSource}>
+            <Select
+              value={selectedSource}
+              onValueChange={(value) => {
+                // The error belonged to the previous source; cleared here rather than in the effect.
+                setError(null);
+                setSelectedSource(value);
+              }}
+            >
               <SelectTrigger className="w-64 h-8 text-sm">
                 <SelectValue placeholder={t("integration.doubleCheck.selectSource")} />
               </SelectTrigger>

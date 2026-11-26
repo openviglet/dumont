@@ -12,18 +12,19 @@ export default function IntegrationInstanceWcSourcePage() {
   const navigate = useNavigate();
   const { id, sourceId, tab = "general" } = useParams() as { id: string, sourceId: string, tab?: string };
   const [wcSource, setWcSource] = useState<TurIntegrationWcSource>({} as TurIntegrationWcSource);
-  const [isNew, setIsNew] = useState<boolean>(true);
+  // DU8 - derived, not state: `isNew` is a fact about the route, and correcting a `useState`
+  // seeded `true` from inside an effect rendered the wrong value first.
+  const isNew = sourceId === "new";
   const service = useMemo(() => new TurIntegrationWcSourceService(id), [id]);
   const [open, setOpen] = useState(false);
   const [crawling, setCrawling] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (sourceId !== "new") {
+    if (!isNew) {
       service.get(sourceId).then(setWcSource);
-      setIsNew(false);
     }
-  }, [id, sourceId, service]);
+  }, [id, sourceId, isNew, service]);
 
   async function onDelete() {
     try {

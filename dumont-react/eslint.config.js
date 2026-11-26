@@ -63,36 +63,9 @@ export default tseslint.config(
   },
 
   /*
-   * DU5 — inherited debt, held as NAMED FILES and not as a ceiling.
-   *
-   * This config arrived against a console that had never been linted. The small errors were
-   * fixed with it; these rules carried the rest. Each is off only in the files listed: a
-   * new violation anywhere else fails by name, and clearing a file means deleting its line
-   * here, which is a diff somebody reviews. When a list is empty, delete its block rather than
-   * keep it at zero. Emptying them is DU8.
+   * No inherited-debt list here any more, and its absence is the point. DU5 and DU8 cleared the
+   * rules this config arrived turned off in named files, and each list was deleted rather than
+   * kept at zero: an empty list is an invitation to add a line to it. If a rule ever needs that
+   * treatment again, name the files and say why at each one.
    */
-  {
-    files: [
-      "src/app/console/admin-settings/admin.group.page.tsx",
-      "src/app/console/admin-settings/admin.role.page.tsx",
-      "src/app/console/admin-settings/admin.user.page.tsx",
-      "src/components/ai-summary-panel.tsx",
-      "src/components/dicebear-avatar-picker.tsx",
-      "src/components/integration/sn-site-select.tsx",
-      "src/components/integration/wizard/steps/step-field-mapping.tsx",
-      "src/hooks/use-connector-provider.ts",
-      "src/hooks/use-discovery.ts",
-      "src/pages/integration.instance.assets.source.page.tsx",
-      "src/pages/integration.instance.db.source.page.tsx",
-      "src/pages/integration.instance.double.check.page.tsx",
-      "src/pages/integration.instance.indexing.manager.page.tsx",
-      "src/pages/integration.instance.indexing.rules.page.tsx",
-      "src/pages/integration.instance.monitoring.item.page.tsx",
-      "src/pages/integration.instance.plugins.page.tsx",
-      "src/pages/integration.instance.source.page.tsx",
-      "src/pages/integration.instance.system-info.page.tsx",
-      "src/pages/integration.instance.wc.source.page.tsx",
-    ],
-    rules: { "react-hooks/set-state-in-effect": "off" },
-  },
 )

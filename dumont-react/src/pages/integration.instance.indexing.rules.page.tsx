@@ -15,15 +15,16 @@ export default function IntegrationInstanceIndexingRulePage() {
     () => new TurIntegrationIndexingRuleService(id || ""),
     [id]
   );
-  const [isNew, setIsNew] = useState<boolean>(true);
+  // DU8 - derived, not state: `isNew` is a fact about the route, and correcting a `useState`
+  // seeded `true` from inside an effect rendered the wrong value first.
+  const isNew = ruleId === "new";
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   useEffect(() => {
-    if (ruleId !== "new") {
+    if (!isNew) {
       turIntegrationIndexingRuleService.get(ruleId).then(setIntegrationIndexingRules);
-      setIsNew(false);
     }
-  }, [ruleId, turIntegrationIndexingRuleService]);
+  }, [ruleId, isNew, turIntegrationIndexingRuleService]);
   async function onDelete() {
     try {
       if (await turIntegrationIndexingRuleService.delete(integrationIndexingRules)) {

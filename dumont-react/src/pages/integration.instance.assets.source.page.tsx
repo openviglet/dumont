@@ -12,15 +12,17 @@ export default function IntegrationInstanceAssetsSourcePage() {
   const navigate = useNavigate();
   const { id, sourceId, tab = "general" } = useParams() as { id: string, sourceId: string, tab?: string };
   const [source, setSource] = useState<TurIntegrationAssetsSource>({} as TurIntegrationAssetsSource);
-  const [isNew, setIsNew] = useState<boolean>(true);
+  // DU8 - derived, not state: `isNew` is a fact about the route, and correcting a `useState`
+  // seeded `true` from inside an effect rendered the wrong value first.
+  const isNew = sourceId === "new";
   const service = useMemo(() => new TurIntegrationAssetsSourceService(id), [id]);
   const [open, setOpen] = useState(false);
   const [indexingAll, setIndexingAll] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (sourceId !== "new") { service.get(sourceId).then(setSource); setIsNew(false); }
-  }, [id, sourceId, service]);
+    if (!isNew) { service.get(sourceId).then(setSource); }
+  }, [id, sourceId, isNew, service]);
 
   async function onDelete() {
     try {

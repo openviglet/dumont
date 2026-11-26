@@ -8,13 +8,10 @@ import {
   IconFilter,
   IconStack2,
 } from "@tabler/icons-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import {
-  type AemSourcePreset,
-  getPresetByKey,
-} from "../aem-source-presets";
+import { getPresetByKey } from "../aem-source-presets";
 
 interface StepFieldMappingProps {
   form: UseFormReturn<TurIntegrationAemSource>;
@@ -39,23 +36,22 @@ export function StepFieldMapping({
   presetKey,
 }: Readonly<StepFieldMappingProps>) {
   const { t } = useTranslation();
-  const [specs, setSpecs] = useState<SpecToggle[]>([]);
-  const [preset, setPreset] = useState<AemSourcePreset | undefined>();
+  /*
+   * DU8 (as Dumont 2026.3 D53) - the preset is a lookup, and the toggles are a default the
+   * reader can override. Both used to be state an effect rewrote whenever `presetKey` changed;
+   * now the preset is computed and the toggles are stored against the preset they were made for,
+   * so switching preset makes them stale instead of needing a reset.
+   */
+  const preset = useMemo(() => getPresetByKey(presetKey), [presetKey]);
+  const defaultSpecs = useMemo<SpecToggle[]>(
+    () => preset?.attributeSpecifications.map((spec) => ({ spec, enabled: true })) ?? [],
+    [preset],
+  );
 
-  useEffect(() => {
-    const p = getPresetByKey(presetKey);
-    setPreset(p);
-    if (p) {
-      setSpecs(
-        p.attributeSpecifications.map((spec) => ({
-          spec,
-          enabled: true,
-        })),
-      );
-    } else {
-      setSpecs([]);
-    }
-  }, [presetKey]);
+  const [toggled, setToggled] = useState<{ forPreset: string; specs: SpecToggle[] } | null>(null);
+  const specs = toggled?.forPreset === presetKey ? toggled.specs : defaultSpecs;
+  /** Record a new toggle set against the preset it belongs to. */
+  const updateSpecs = (next: SpecToggle[]) => setToggled({ forPreset: presetKey, specs: next });
 
   const syncToForm = useCallback(
     (updatedSpecs: SpecToggle[]) => {
@@ -83,11 +79,9 @@ export function StepFieldMapping({
   }, [specs, syncToForm]);
 
   const toggleSpec = (index: number) => {
-    setSpecs((prev) => {
-      const next = [...prev];
-      next[index] = { ...next[index], enabled: !next[index].enabled };
-      return next;
-    });
+    const next = [...specs];
+    next[index] = { ...next[index], enabled: !next[index].enabled };
+    updateSpecs(next);
   };
 
   const enabledCount = specs.filter((s) => s.enabled).length;
@@ -119,7 +113,7 @@ export function StepFieldMapping({
                 type="button"
                 className="text-xs text-primary hover:underline cursor-pointer"
                 onClick={() =>
-                  setSpecs((prev) => prev.map((s) => ({ ...s, enabled: true })))
+                  updateSpecs(specs.map((s) => ({ ...s, enabled: true })))
                 }
               >
                 {t("forms.common.all")}

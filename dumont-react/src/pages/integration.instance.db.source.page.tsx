@@ -14,7 +14,9 @@ export default function IntegrationInstanceDbSourcePage() {
   const navigate = useNavigate();
   const { id, sourceId, tab = "general" } = useParams() as { id: string, sourceId: string, tab?: string };
   const [integrationDbSource, setIntegrationDbSource] = useState<TurIntegrationDbSource>({} as TurIntegrationDbSource);
-  const [isNew, setIsNew] = useState<boolean>(true);
+  // DU8 - derived, not state: `isNew` is a fact about the route, and correcting a `useState`
+  // seeded `true` from inside an effect rendered the wrong value first.
+  const isNew = sourceId === "new";
   const turIntegrationDbSourceService = useMemo(() => new TurIntegrationDbSourceService(id), [id]);
   const [open, setOpen] = useState(false);
   const [indexingAll, setIndexingAll] = useState(false);
@@ -22,13 +24,12 @@ export default function IntegrationInstanceDbSourcePage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (sourceId !== "new") {
+    if (!isNew) {
       turIntegrationDbSourceService.get(sourceId).then((source) => {
         setIntegrationDbSource(source);
       });
-      setIsNew(false);
     }
-  }, [id, sourceId, turIntegrationDbSourceService]);
+  }, [id, sourceId, isNew, turIntegrationDbSourceService]);
 
   async function onDelete() {
     try {

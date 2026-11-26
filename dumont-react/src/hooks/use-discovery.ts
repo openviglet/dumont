@@ -32,11 +32,15 @@ function fetchDiscovery(): Promise<DumDiscoveryAPI> {
 export function useDiscovery(): DumDiscoveryAPI | undefined {
   const [data, setData] = useState<DumDiscoveryAPI | undefined>(cached);
 
+  /*
+   * DU8 (as Dumont 2026.3 D53) — one path, whether the cache is warm or cold.
+   *
+   * There used to be a branch that read the cache and wrote it straight into state, which is a
+   * synchronous write in an effect body and depended on `data` to re-run — an effect that sets the
+   * value it watches. `fetchDiscovery` already answers a warm cache with a resolved promise, so
+   * going through it always defers the write by a microtask and the branch buys nothing.
+   */
   useEffect(() => {
-    if (cached) {
-      if (data !== cached) setData(cached);
-      return;
-    }
     let alive = true;
     fetchDiscovery()
       .then((d) => {
@@ -48,7 +52,7 @@ export function useDiscovery(): DumDiscoveryAPI | undefined {
     return () => {
       alive = false;
     };
-  }, [data]);
+  }, []);
 
   return data;
 }

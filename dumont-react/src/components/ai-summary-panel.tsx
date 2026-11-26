@@ -28,10 +28,9 @@ export function AiSummaryPanel({ endpoint, i18nPrefix }: Readonly<AiSummaryPanel
     const [isLoading, setIsLoading] = useState(true);
     const [canRegenerate, setCanRegenerate] = useState(false);
 
+    // DU8 - nothing is written before the first `await`: the reset lives in the regenerate
+    // handler, the one caller with something to clear (`isLoading` already starts true on mount).
     const fetchSummary = useCallback(async (regenerate = false) => {
-        setIsLoading(true);
-        setError(null);
-        setContent(null);
         try {
             const response = await axios.get<SummaryResponse>(
                 endpoint,
@@ -52,7 +51,8 @@ export function AiSummaryPanel({ endpoint, i18nPrefix }: Readonly<AiSummaryPanel
     }, [endpoint, i18nPrefix, t]);
 
     useEffect(() => {
-        fetchSummary();
+        // Awaited inside the effect, so every write happens after a suspension point.
+        void (async () => { await fetchSummary(); })();
     }, [fetchSummary]);
 
     return (
@@ -99,7 +99,12 @@ export function AiSummaryPanel({ endpoint, i18nPrefix }: Readonly<AiSummaryPanel
                     <GradientButton
                         type="button"
                         variant="outline"
-                        onClick={() => fetchSummary(true)}
+                        onClick={() => {
+                            setIsLoading(true);
+                            setError(null);
+                            setContent(null);
+                            fetchSummary(true);
+                        }}
                     >
                         <IconRefresh className="size-4" />
                         {t(`${i18nPrefix}.regenerate`)}

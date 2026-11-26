@@ -34,8 +34,9 @@ export function SNSiteSelect({
     [integrationId],
   );
 
+  // DU8 - `loading` starts true rather than being raised inside the effect: the list is fetched
+  // once per connector, so there is no refetch this loses a spinner for.
   useEffect(() => {
-    setLoading(true);
     service
       .query()
       .then(setSites)

@@ -13,24 +13,27 @@ import { toast } from "@viglet/viglet-design-system";
 
 const groupService = new DumGroupService();
 
+/** What the form starts from on the `new` route. Frozen so no caller can edit the shared value. */
+const EMPTY_GROUP: DumGroup = Object.freeze({ id: "", name: "", description: "", dumRoles: [], dumUsers: [] }) as DumGroup;
+
 export default function AdminGroupPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isNew = !id || id === "new";
-  const [group, setGroup] = useState<DumGroup>();
+  const [fetched, setFetched] = useState<DumGroup>();
   const [error, setError] = useState<string | null>(null);
+
+  // DU8 - a blank group is a value known at render, not a fetch result written from an effect.
+  const group = isNew ? EMPTY_GROUP : fetched;
 
   useSubPageBreadcrumb(isNew ? t("admin.groups.newGroup") : group?.name ?? "");
 
   useEffect(() => {
-    if (isNew) {
-      setGroup({ id: "", name: "", description: "", dumRoles: [], dumUsers: [] });
-      return;
-    }
+    if (isNew) return;
     groupService
       .get(id!)
-      .then(setGroup)
+      .then(setFetched)
       .catch(() => setError(t("admin.groups.loadFailed")));
   }, [id, isNew, t]);
 

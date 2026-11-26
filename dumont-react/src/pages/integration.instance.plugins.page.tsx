@@ -71,7 +71,9 @@ export default function IntegrationInstancePluginsPage() {
     }, [service, t]);
 
     useEffect(() => {
-        refresh();
+        // DU8 - awaited inside the effect: every write happens after a suspension point, which
+        // the rule cannot see across the `useCallback` boundary when the loader is called directly.
+        void (async () => { await refresh(); })();
     }, [refresh]);
 
     const onPickFile = () => fileInputRef.current?.click();
