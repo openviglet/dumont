@@ -16,6 +16,7 @@ import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientButton } from "../ui/gradient-button";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { SectionCard } from "../ui/section-card";
+import { sourceNameHasNoWhitespace } from "@/lib/source-name";
 "use client"
 
 interface Props {
@@ -86,7 +87,7 @@ export const IntegrationAssetsSourceForm: React.FC<Props> = ({ value, isNew, int
             <SectionCard variant="blue">
               <SectionCard.Header icon={IconSettings} title={t("forms.assetsSource.general")} description={t("forms.assetsSource.generalDesc")} />
               <SectionCard.Content>
-                <FormField control={form.control} name="name" rules={{ required: t("forms.common.nameRequired") }}
+                <FormField control={form.control} name="name" rules={{ required: t("forms.common.nameRequired"), validate: sourceNameHasNoWhitespace(t) }}
                   render={({ field }) => (<FormItem><FormLabel>{t("forms.common.name")}</FormLabel><FormControl><Input {...field} placeholder={t("forms.assetsSource.namePlaceholder")} type="text" /></FormControl><FormDescription>{t("forms.assetsSource.nameDesc")}</FormDescription><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="description"
                   render={({ field }) => (<FormItem><FormLabel>{t("forms.common.description")}</FormLabel><FormControl><Input {...field} placeholder={t("forms.assetsSource.descriptionPlaceholder")} type="text" /></FormControl><FormMessage /></FormItem>)} />

@@ -34,6 +34,7 @@ import { SectionCard } from "../ui/section-card";
 import { AttributeSpecificationList } from "./attribute.specification.list";
 import { DynamicSourceLocales } from "./dynamic.source.locale";
 import { PluginModelList } from "./plugin.model.list";
+import { sourceNameHasNoWhitespace } from "@/lib/source-name";
 "use client"
 
 interface Props {
@@ -207,7 +208,7 @@ export const IntegrationSourceForm: React.FC<Props> = ({
                 <FormField
                   control={form.control}
                   name="name"
-                  rules={{ required: t("forms.integration.nameRequired") }}
+                  rules={{ required: t("forms.integration.nameRequired"), validate: sourceNameHasNoWhitespace(t) }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("forms.common.name")}</FormLabel>

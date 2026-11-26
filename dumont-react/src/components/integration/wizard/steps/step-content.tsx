@@ -16,6 +16,7 @@ import {
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { AemPathBrowser } from "../../aem-path-browser";
+import { sourceNameHasNoWhitespace } from "@/lib/source-name";
 
 interface StepContentProps {
   form: UseFormReturn<TurIntegrationAemSource>;
@@ -89,7 +90,7 @@ export function StepContent({
       <FormField
         control={form.control}
         name="name"
-        rules={{ required: t("forms.common.nameRequired") }}
+        rules={{ required: t("forms.common.nameRequired"), validate: sourceNameHasNoWhitespace(t) }}
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t("forms.common.name")}</FormLabel>

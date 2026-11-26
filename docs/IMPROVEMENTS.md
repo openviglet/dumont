@@ -2,18 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU3 Source names accept whitespace
-
-The AEM source form, the AEM wizard, the DB source form and the assets source form only
-check that the name is present. The name is then used as the path segment of
-`/api/v2/connector/index/{name}`, `reindex/{name}`, `audit/{source}` and the monitoring
-endpoints, and a name with a space fails there. Web-crawler sources are keyed by id;
-their title is display-only.
-
-Expected: every form that sets a source name refuses whitespace with a message that says
-why, before the source is saved. A backend check on save is the follow-up that also
-covers the API and the first-start import. Same change as Dumont 2026.3 D361.
-
 ### §DU4 No export-all or import in the source lists
 
 The AEM, DB and web-crawler source lists show the sources and a New action (the AEM list
@@ -37,3 +25,18 @@ gating DU1: the frontend gate is `tsc -b` alone.
 Dumont 2026.3 has `dumont-react/eslint.config.js`. Port it, run `npm run lint`, and fix
 or explicitly disable what it reports in the 2026.2 sources, so the gate is green and
 stays one.
+
+### §DU6 Source names unchecked on the server
+
+DU3 made the four console forms that set a source name (AEM source, AEM wizard, DB,
+assets) refuse whitespace through `sourceNameHasNoWhitespace` in
+`dumont-react/src/lib/source-name.ts`. Nothing on the server checks it: `POST
+/api/v2/aem/source`, `/api/v2/db/source`, `/api/v2/assets/source`, the AEM `POST
+/import` added by DU2 and the first-start import of `export/*.json` all save a name with
+a space, and that source then fails on `/api/v2/connector/index/{name}` and the other
+name-keyed URLs.
+
+Build: one check in connector-commons, called on create and update by each source API
+and by the import paths. The API answers 400 with a message naming the rule; an import
+logs and skips the source rather than failing the whole file. Web-crawler sources are
+keyed by id and stay out of scope.

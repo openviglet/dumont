@@ -29,6 +29,7 @@ import { FormItemTwoColumns } from "../ui/form-item-two-columns";
 import { GradientButton } from "../ui/gradient-button";
 import { GradientSwitch } from "../ui/gradient-switch";
 import { SectionCard } from "../ui/section-card";
+import { sourceNameHasNoWhitespace } from "@/lib/source-name";
 "use client"
 
 interface Props {
@@ -133,7 +134,7 @@ export const IntegrationDbSourceForm: React.FC<Props> = ({ value, isNew, integra
                 <FormField
                   control={form.control}
                   name="name"
-                  rules={{ required: t("forms.common.nameRequired") }}
+                  rules={{ required: t("forms.common.nameRequired"), validate: sourceNameHasNoWhitespace(t) }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("forms.common.name")}</FormLabel>

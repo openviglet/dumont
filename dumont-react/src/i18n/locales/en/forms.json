@@ -56,7 +56,8 @@
       "field": "Field",
       "condition": "Condition",
       "close": "Close",
-      "nameRequired": "Name is required."
+      "nameRequired": "Name is required.",
+      "nameNoWhitespace": "Use no spaces: the name is part of the indexing and monitoring URLs."
     },
     "llm": {
       "settings": "Language model settings.",

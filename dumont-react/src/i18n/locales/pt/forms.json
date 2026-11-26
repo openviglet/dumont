@@ -56,7 +56,8 @@
       "field": "Campo",
       "condition": "Condição",
       "close": "Fechar",
-      "nameRequired": "Nome é obrigatório."
+      "nameRequired": "Nome é obrigatório.",
+      "nameNoWhitespace": "Não use espaços: o nome faz parte das URLs de indexação e monitoramento."
     },
     "llm": {
       "settings": "Configurações do modelo de linguagem.",
