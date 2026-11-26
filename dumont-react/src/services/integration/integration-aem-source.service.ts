@@ -1,3 +1,4 @@
+import type { SourceReplacePlan } from "@/models/integration/source-replace-plan.model";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import axios, { type AxiosInstance } from "axios";
 
@@ -134,5 +135,22 @@ export class TurIntegrationAemSourceService {
     const form = new FormData();
     form.append("file", file);
     await this.axiosInstance.post(`${this.aemUrl}/import`, form);
+  }
+
+  /** What replacing every source with `file` would do, writing nothing (roadmap DU10). */
+  async previewReplace(file: File): Promise<SourceReplacePlan> {
+    const form = new FormData();
+    form.append("file", file);
+    const { data } = await this.axiosInstance.post<SourceReplacePlan>(`${this.aemUrl}/import`, form, {
+      params: { mode: "replace", dryRun: true },
+    });
+    return data;
+  }
+
+  /** Makes `file` the whole set of sources of this type (roadmap DU9). */
+  async replaceAll(file: File): Promise<void> {
+    const form = new FormData();
+    form.append("file", file);
+    await this.axiosInstance.post(`${this.aemUrl}/import`, form, { params: { mode: "replace" } });
   }
 }

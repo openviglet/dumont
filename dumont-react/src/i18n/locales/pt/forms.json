@@ -286,7 +286,20 @@
       "exportAllSuccess": "Fontes exportadas.",
       "exportAllFailed": "Não foi possível exportar as fontes.",
       "importZipSuccess": "Fontes importadas.",
-      "importZipFailed": "Não foi possível importar o arquivo. Verifique se é um zip ou export.json exportado desta lista de fontes."
+      "importZipFailed": "Não foi possível importar o arquivo. Verifique se é um zip ou export.json exportado desta lista de fontes.",
+      "replaceAll": "Importar e substituir tudo",
+      "replaceTitle": "Substituir todas as fontes?",
+      "replaceWarning": "Todas as fontes existentes deste tipo serão sobrescritas pelo arquivo, e as que não estiverem nele serão apagadas. Isso não pode ser desfeito.",
+      "replaceCreate": "{{count}} a criar",
+      "replaceOverwrite": "{{count}} a sobrescrever",
+      "replaceRemove": "{{count}} a apagar",
+      "replaceRemovedNames": "Fontes que serão apagadas:",
+      "replaceInvalid": "O arquivo não pode ser importado: estes nomes estão vazios, repetidos ou têm espaços.",
+      "replaceConfirm": "Sobrescrever tudo",
+      "replaceCancel": "Cancelar",
+      "replaceSuccess": "Fontes substituídas.",
+      "replaceFailed": "Não foi possível substituir as fontes. Nada foi alterado.",
+      "replacePreviewFailed": "Não foi possível ler o arquivo. Verifique se é um zip ou export.json exportado desta lista de fontes."
     },
     "duration": {
       "milliseconds": "Milissegundos",
