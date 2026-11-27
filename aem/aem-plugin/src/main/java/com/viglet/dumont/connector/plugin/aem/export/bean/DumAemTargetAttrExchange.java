@@ -38,4 +38,12 @@ public class DumAemTargetAttrExchange {
     @Builder.Default
     @ManyToMany(mappedBy = "turAemTargetAttrExchange")
     private Collection<DumAemSourceAttrExchange> sourceAttrs = new HashSet<>();
+
+    /** A file that leaves {@code sourceAttrs} out reads as empty (roadmap DU17). */
+    public Collection<DumAemSourceAttrExchange> getSourceAttrs() {
+        if (sourceAttrs == null) {
+            sourceAttrs = new HashSet<>();
+        }
+        return sourceAttrs;
+    }
 }

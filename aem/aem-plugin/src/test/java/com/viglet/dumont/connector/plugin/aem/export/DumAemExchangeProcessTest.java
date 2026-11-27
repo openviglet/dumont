@@ -484,6 +484,29 @@ class DumAemExchangeProcessTest {
             verify(dumAemSourceRepository, never()).save(any());
         }
 
+        @Test
+        @DisplayName("DU17: a source that leaves out localePaths, attributes and models imports with them empty")
+        void shouldImportASourceWithoutCollections() throws Exception {
+            File minimal = File.createTempFile("aem-minimal", ".json");
+            minimal.deleteOnExit();
+            java.nio.file.Files.writeString(minimal.toPath(),
+                    "{ \"sources\": [ { \"name\": \"wknd\", \"endpoint\": \"http://aem\","
+                            + " \"models\": [ { \"type\": \"cq:Page\" } ] } ] }");
+            when(dumAemSourceRepository.findByName("wknd")).thenReturn(Optional.empty());
+            ArgumentCaptor<DumAemSource> saved = ArgumentCaptor.forClass(DumAemSource.class);
+            when(dumAemSourceRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+            when(dumAemModelRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            exchangeProcess.importFromFile(minimal,
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.REPLACE);
+
+            assertEquals("wknd", saved.getValue().getName());
+            verify(dumAemModelRepository, times(1)).save(any());
+            verify(dumAemSourceLocalePathRepository, never()).save(any());
+            verify(dumAemAttributeSpecificationRepository, never()).save(any());
+            verify(dumAemTargetAttributeRepository, never()).save(any());
+        }
+
         /** A mocked upload named like a zip, holding {@code json}: the content decides, not the name. */
         private org.springframework.web.multipart.MultipartFile singleSourceUpload(String json) throws Exception {
             byte[] bytes = json.getBytes(java.nio.charset.StandardCharsets.UTF_8);

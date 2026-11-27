@@ -56,4 +56,28 @@ public class DumAemSourceExchange {
     private Collection<DumAemModelExchange> models = new HashSet<>();
     @Builder.Default
     private Collection<DumAemSourceLocalePathExchange> localePaths = new HashSet<>();
+
+    // Roadmap DU17: Jackson creates this bean without the builder defaults, so a file that leaves
+    // a collection out reads as empty here rather than failing the import on a null.
+
+    public Collection<DumAemAttribExchange> getAttributes() {
+        if (attributes == null) {
+            attributes = new HashSet<>();
+        }
+        return attributes;
+    }
+
+    public Collection<DumAemModelExchange> getModels() {
+        if (models == null) {
+            models = new HashSet<>();
+        }
+        return models;
+    }
+
+    public Collection<DumAemSourceLocalePathExchange> getLocalePaths() {
+        if (localePaths == null) {
+            localePaths = new HashSet<>();
+        }
+        return localePaths;
+    }
 }

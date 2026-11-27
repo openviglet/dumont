@@ -37,4 +37,12 @@ public class DumAemModelExchange {
     private String className;
     @Builder.Default
     private Collection<DumAemTargetAttrExchange> targetAttrs = new HashSet<>();
+
+    /** A file that leaves {@code targetAttrs} out reads as empty (roadmap DU17). */
+    public Collection<DumAemTargetAttrExchange> getTargetAttrs() {
+        if (targetAttrs == null) {
+            targetAttrs = new HashSet<>();
+        }
+        return targetAttrs;
+    }
 }

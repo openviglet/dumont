@@ -36,4 +36,49 @@ public class DumWCSourceExchange {
     private Collection<String> notAllowExtensions = new HashSet<>();
     @Builder.Default
     private Collection<DumWCAttribExchange> attributes = new HashSet<>();
+
+    // Roadmap DU17: Jackson creates this bean without the builder defaults, so a file that leaves
+    // a collection out reads as empty here rather than failing the import on a null.
+
+    public Collection<String> getTurSNSites() {
+        if (turSNSites == null) {
+            turSNSites = new HashSet<>();
+        }
+        return turSNSites;
+    }
+
+    public Collection<String> getStartingPoints() {
+        if (startingPoints == null) {
+            startingPoints = new HashSet<>();
+        }
+        return startingPoints;
+    }
+
+    public Collection<String> getAllowUrls() {
+        if (allowUrls == null) {
+            allowUrls = new HashSet<>();
+        }
+        return allowUrls;
+    }
+
+    public Collection<String> getNotAllowUrls() {
+        if (notAllowUrls == null) {
+            notAllowUrls = new HashSet<>();
+        }
+        return notAllowUrls;
+    }
+
+    public Collection<String> getNotAllowExtensions() {
+        if (notAllowExtensions == null) {
+            notAllowExtensions = new HashSet<>();
+        }
+        return notAllowExtensions;
+    }
+
+    public Collection<DumWCAttribExchange> getAttributes() {
+        if (attributes == null) {
+            attributes = new HashSet<>();
+        }
+        return attributes;
+    }
 }
