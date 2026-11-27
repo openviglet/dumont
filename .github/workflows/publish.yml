@@ -74,7 +74,7 @@ jobs:
       - name: Deploy Version
         env:
           GH_TOKEN: ${{ secrets.GH_PKG_TOKEN }}
-          # openviglet/dumont-ce no longer resolves; releases live on the product repository.
+          # Releases live on the product repository.
           RELEASE_REPO: openviglet/dumont
           RELEASE_COMMIT: ${{ steps.bump.outputs.commit }}
         run: |
