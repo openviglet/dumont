@@ -3,15 +3,12 @@ import { BlankSlate } from "@/components/blank-slate";
 import { GridList } from "@/components/grid.list";
 import { LoadProvider } from "@/components/loading-provider";
 import { SubPageHeader } from "@/components/sub.page.header";
-import { importSourceFromJson } from "@/components/integration/source-import-export";
 import { useSourceExchange } from "@/components/integration/source-exchange";
 import { useGridAdapter } from "@/hooks/use-grid-adapter";
 import type { TurIntegrationAemSource } from "@/models/integration/integration-aem-source.model";
 import { TurIntegrationAemSourceService } from "@/services/integration/integration-aem-source.service";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { IconGitCommit, IconUpload } from "@tabler/icons-react";
-import { toast } from "@viglet/viglet-design-system";
-import { useMemo, useEffect, useRef, useState } from "react";
+import { IconGitCommit } from "@tabler/icons-react";
+import { useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
@@ -20,7 +17,6 @@ export default function IntegrationInstanceSourceListPage() {
   const [integrationAemSources, setIntegrationAemSources] = useState<TurIntegrationAemSource[]>();
   const turIntegrationAemSourceService = useMemo(() => new TurIntegrationAemSourceService(id), [id]);
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -30,55 +26,8 @@ export default function IntegrationInstanceSourceListPage() {
   }, [turIntegrationAemSourceService, t]);
 
   const reload = () => turIntegrationAemSourceService.query().then(setIntegrationAemSources);
+  // DU16: the one Import; the browser-side Import JSON that created a duplicate is gone.
   const exchange = useSourceExchange(turIntegrationAemSourceService, "aem-sources", reload);
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const stripIds = (payload: Partial<TurIntegrationAemSource>) => {
-    delete (payload as { id?: string }).id;
-    payload.localePaths?.forEach((lp) => delete (lp as { id?: string }).id);
-    payload.attributeSpecifications?.forEach((spec) => delete (spec as { id?: string }).id);
-    payload.models?.forEach((model) => {
-      delete (model as { id?: string }).id;
-      model.targetAttrs?.forEach((ta) => {
-        delete (ta as { id?: string }).id;
-        ta.sourceAttrs?.forEach((sa) => delete (sa as { id?: string }).id);
-      });
-    });
-  };
-
-  const createFromImport = async (payload: Partial<TurIntegrationAemSource>) => {
-    try {
-      const created = await turIntegrationAemSourceService.create(payload as TurIntegrationAemSource);
-      if (created) {
-        toast.success(t("forms.importExport.importSuccess"));
-        const sources = await turIntegrationAemSourceService.query();
-        setIntegrationAemSources(sources);
-      } else {
-        toast.error(t("forms.common.formSubmitFailed"));
-      }
-    } catch {
-      toast.error(t("forms.common.formSubmitFailed"));
-    }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
-    const json = await file.text();
-    const parsed = importSourceFromJson(json);
-    if (!parsed) {
-      toast.error(t("forms.importExport.importFailed"));
-      return;
-    }
-    const payload = { ...parsed } as Partial<TurIntegrationAemSource>;
-    stripIds(payload);
-    await createFromImport(payload);
-  };
 
   const gridItemList = useGridAdapter(integrationAemSources, {
     name: "name",
@@ -87,15 +36,6 @@ export default function IntegrationInstanceSourceListPage() {
   });
   return (
     <LoadProvider checkIsNotUndefined={integrationAemSources} error={error} tryAgainUrl={`${ROUTES.INTEGRATION_INSTANCE}/${id}/source`}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".json"
-        className="hidden"
-        aria-label={t("forms.importExport.import")}
-        title={t("forms.importExport.import")}
-        onChange={handleFileChange}
-      />
       {exchange.input}
       {gridItemList.length > 0 ? (<>
         <SubPageHeader icon={IconGitCommit} name={t("integration.sources.title")}
@@ -104,10 +44,6 @@ export default function IntegrationInstanceSourceListPage() {
         <GridList gridItemList={gridItemList}>
           <GridList.NewButton to={`${ROUTES.INTEGRATION_INSTANCE}/${id}/source/new`} label={t("integration.sources.feature")} />
           <GridList.Action>
-            <DropdownMenuItem onClick={handleImportClick}>
-              <IconUpload className="size-4 mr-2" />
-              {t("forms.importExport.import")}
-            </DropdownMenuItem>
             {exchange.menuItems}
           </GridList.Action>
         </GridList>

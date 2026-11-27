@@ -1,4 +1,4 @@
-import type { SourceReplacePlan } from "@/models/integration/source-replace-plan.model";
+import type { SourceImportMode, SourceReplacePlan } from "@/models/integration/source-replace-plan.model";
 import type { TurIntegrationDbSource } from "@/models/integration/integration-db-source.model";
 import axios, { type AxiosInstance } from "axios";
 
@@ -90,27 +90,23 @@ export class TurIntegrationDbSourceService {
     return data;
   }
 
-  /** Puts back a zip written by {@link exportAll}, here or on another instance. */
-  async importAll(file: File): Promise<void> {
-    const form = new FormData();
-    form.append("file", file);
-    await this.axiosInstance.post(`${this.dbUrl}/import`, form);
-  }
-
-  /** What replacing every source with `file` would do, writing nothing (roadmap DU10). */
-  async previewReplace(file: File): Promise<SourceReplacePlan> {
+  /** What importing `file` in `mode` would do, writing nothing (roadmap DU10, DU14). */
+  async previewImport(file: File, mode: SourceImportMode): Promise<SourceReplacePlan> {
     const form = new FormData();
     form.append("file", file);
     const { data } = await this.axiosInstance.post<SourceReplacePlan>(`${this.dbUrl}/import`, form, {
-      params: { mode: "replace", dryRun: true },
+      params: { mode, dryRun: true },
     });
     return data;
   }
 
-  /** Makes `file` the whole set of sources of this type (roadmap DU9). */
-  async replaceAll(file: File): Promise<void> {
+  /**
+   * Imports `file`, a zip or JSON written by {@link exportAll}: `merge` updates the sources it names
+   * and keeps the others, `replace` makes it the whole set (roadmap DU9, DU14).
+   */
+  async importFile(file: File, mode: SourceImportMode): Promise<void> {
     const form = new FormData();
     form.append("file", file);
-    await this.axiosInstance.post(`${this.dbUrl}/import`, form, { params: { mode: "replace" } });
+    await this.axiosInstance.post(`${this.dbUrl}/import`, form, { params: { mode } });
   }
 }
