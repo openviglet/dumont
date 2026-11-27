@@ -63,6 +63,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import tools.jackson.core.exc.JacksonIOException;
 import com.viglet.dumont.connector.commons.exchange.DumSourceImportException;
+import com.viglet.dumont.connector.commons.exchange.DumSourceExchangeFile;
 import com.viglet.dumont.connector.commons.exchange.DumSourceImportMode;
 import com.viglet.dumont.connector.commons.exchange.DumSourceReplacePlan;
 
@@ -203,10 +204,18 @@ public class DumAemExchangeProcess {
         return withExportFile(multipartFile, exportFile -> planFromFile(exportFile, mode));
     }
 
+    /** Whether the upload is a zip, told by its content and not its name (roadmap DU15). */
+    private static boolean isZipUpload(MultipartFile multipartFile) {
+        try (java.io.InputStream content = multipartFile.getInputStream()) {
+            return DumSourceExchangeFile.isZip(content);
+        } catch (IOException e) {
+            throw new DumSourceImportException("The uploaded file could not be read.", e);
+        }
+    }
+
     /** Runs {@code action} on the upload's {@code export.json}, and cleans up what was extracted. */
     private <T> T withExportFile(MultipartFile multipartFile, java.util.function.Function<File, T> action) {
-        String originalName = multipartFile.getOriginalFilename();
-        if (originalName != null && originalName.toLowerCase(java.util.Locale.ROOT).endsWith(".json")) {
+        if (!isZipUpload(multipartFile)) {
             return withJsonUpload(multipartFile, action);
         }
         File extractFolder = DumSpringUtils.extractZipFile(multipartFile);
@@ -222,6 +231,7 @@ public class DumAemExchangeProcess {
         }
         File exportFile = new File(extractFolder.getAbsolutePath().concat(File.separator + EXPORT_FILE));
         try {
+            DumSourceExchangeFile.normalize(exportFile, "name");
             return action.apply(exportFile);
         } finally {
             try {
@@ -246,6 +256,7 @@ public class DumAemExchangeProcess {
             Files.createDirectories(tmpDir);
             tmpFile = tmpDir.resolve("aem-import-" + UUID.randomUUID() + ".json").toFile();
             multipartFile.transferTo(tmpFile);
+            DumSourceExchangeFile.normalize(tmpFile, "name");
             return action.apply(tmpFile);
         } catch (IOException e) {
             throw new DumSourceImportException("The uploaded file could not be read.", e);

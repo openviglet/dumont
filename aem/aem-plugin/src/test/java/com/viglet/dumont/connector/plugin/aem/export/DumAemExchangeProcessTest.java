@@ -451,6 +451,54 @@ class DumAemExchangeProcessTest {
         }
 
         @Test
+        @DisplayName("DU15: an upload holding a single source object imports that source, whatever its name says")
+        void shouldImportASingleSourceUpload() throws Exception {
+            org.springframework.web.multipart.MultipartFile upload = singleSourceUpload(
+                    "{ \"name\": \"wknd\", \"endpoint\": \"http://aem\", \"localePaths\": [],"
+                            + " \"attributes\": [], \"models\": [] }");
+            when(dumAemSourceRepository.findByName("wknd")).thenReturn(Optional.empty());
+            ArgumentCaptor<DumAemSource> saved = ArgumentCaptor.forClass(DumAemSource.class);
+            when(dumAemSourceRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+
+            exchangeProcess.importFromMultipartFile(upload);
+
+            assertEquals("wknd", saved.getValue().getName());
+            assertEquals("http://aem", saved.getValue().getEndpoint());
+        }
+
+        @Test
+        @DisplayName("DU15: an upload in no accepted shape is refused in every mode, the dry run included")
+        void shouldRefuseAnUnknownShape() throws Exception {
+            for (var mode : com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.values()) {
+                org.springframework.web.multipart.MultipartFile upload = singleSourceUpload(
+                        "{ \"targetAttrDefinitions\": [] }");
+                org.junit.jupiter.api.Assertions.assertThrows(
+                        com.viglet.dumont.connector.commons.exchange.DumSourceImportException.class,
+                        () -> exchangeProcess.importFromMultipartFile(upload, mode), mode.name());
+            }
+            org.springframework.web.multipart.MultipartFile upload = singleSourceUpload("[]");
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportException.class,
+                    () -> exchangeProcess.planFromMultipartFile(upload,
+                            com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.REPLACE));
+            verify(dumAemSourceRepository, never()).save(any());
+        }
+
+        /** A mocked upload named like a zip, holding {@code json}: the content decides, not the name. */
+        private org.springframework.web.multipart.MultipartFile singleSourceUpload(String json) throws Exception {
+            byte[] bytes = json.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            org.springframework.web.multipart.MultipartFile upload = mock(
+                    org.springframework.web.multipart.MultipartFile.class);
+            lenient().when(upload.getOriginalFilename()).thenReturn("wknd.zip");
+            when(upload.getInputStream()).thenAnswer(i -> new java.io.ByteArrayInputStream(bytes));
+            org.mockito.Mockito.doAnswer(i -> {
+                java.nio.file.Files.write(i.<File>getArgument(0).toPath(), bytes);
+                return null;
+            }).when(upload).transferTo(any(File.class));
+            return upload;
+        }
+
+        @Test
         @DisplayName("Should import attribute specifications")
         void shouldImportAttributeSpecifications() {
             // Given

@@ -2,19 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU15 Imports detect the file's shape
-
-The server imports read only the `{ "sources": [...] }` shape of `export.json`. The JSON
-a source page's Export writes for a single source (`exportSourceToJson` in
-`source-import-export.ts`) is accepted by the console's list-page Import JSON, which
-parses it in the browser, but sent to `POST .../import` it maps to no sources and
-nothing is imported, with no error.
-
-Build: each exchange process detects the upload's shape before importing: a zip (by its
-content, not only the extension), an `export.json` with `sources`, or a single source
-object, which is wrapped as a one-source exchange. A JSON that is none of these refuses
-with 400 and says which shapes are accepted, in every mode including the dry run.
-
 ### §DU16 One import that warns before replacing
 
 The source lists offer three overlapping imports: Import JSON (AEM list only, parsed in
@@ -30,3 +17,22 @@ to confirm. An unchecked option "Also delete the sources not in the file (N)" sw
 the confirm to `replace` and lists those names in red. Invalid names block the confirm.
 Import JSON and Import and replace all leave the menus; the source page's own
 Import/Export JSON stays. Strings in en and pt.
+
+### §DU17 Missing collections in an imported source read as empty
+
+`DumAemSourceExchange` declares `attributes`, `models` and `localePaths` with
+`@Builder.Default`, but Jackson builds it through the `@NoArgsConstructor`, which leaves
+those fields null. `setSource` then calls `getLocalePaths().forEach(...)`, and
+`setFacetNames`/`setModels` do the same for the other two, so a source object that
+leaves any of them out (a hand-written file, or a single source accepted since DU15)
+fails the whole import with a NullPointerException instead of creating the source. Found
+while testing DU15 with `{ "name": "wknd", "endpoint": "..." }`. The zip export and the
+source page's Export always write the three arrays, so they are not affected.
+
+Build: treat a missing collection as empty. Either initialise the three fields in the
+no-args path (field initialisers Jackson keeps, or null-safe getters) or iterate through
+a null-safe helper in `DumAemExchangeProcess`. Check the nested exchange beans
+(`DumAemModelExchange.targetAttrs`, `DumAemTargetAttrExchange.sourceAttrs`) and the DB,
+web-crawler and assets exchange beans for the same pattern (`DumWCSourceExchange`
+starting points, allow and deny lists, attributes). A test imports a source object
+holding only a name and an endpoint and gets one saved source.
