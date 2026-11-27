@@ -158,11 +158,11 @@ public class DumDbExchangeProcess {
     }
 
     /**
-     * What replacing with the uploaded file would do (roadmap DU10): the file is read and matched by
-     * the same code the replace runs, and nothing is written.
+     * What importing the uploaded file in {@code mode} would do (roadmap DU10, DU14): the file is
+     * read and matched by the same code the import runs, and nothing is written.
      */
-    public DumSourceReplacePlan planFromMultipartFile(MultipartFile multipartFile) {
-        return withExportFile(multipartFile, this::planFromFile);
+    public DumSourceReplacePlan planFromMultipartFile(MultipartFile multipartFile, DumSourceImportMode mode) {
+        return withExportFile(multipartFile, exportFile -> planFromFile(exportFile, mode));
     }
 
     /**
@@ -233,7 +233,7 @@ public class DumDbExchangeProcess {
                     .build();
             dumDbExchange = mapper.readValue(exportFile, DumDbExchange.class);
         } catch (StreamReadException | DatabindException | JacksonIOException e) {
-            if (mode == DumSourceImportMode.REPLACE) {
+            if (mode != DumSourceImportMode.ADD) {
                 throw new DumSourceImportException("The file could not be read as a source export.", e);
             }
             log.error(e.getMessage(), e);
@@ -241,9 +241,35 @@ public class DumDbExchangeProcess {
         }
         if (mode == DumSourceImportMode.REPLACE) {
             replaceSources(dumDbExchange);
+        } else if (mode == DumSourceImportMode.MERGE) {
+            mergeSources(dumDbExchange);
         } else if (hasSources(dumDbExchange)) {
             importDbSources(dumDbExchange);
         }
+    }
+
+    /**
+     * The file updates the DB sources it names and keeps the others (roadmap DU14): a source whose
+     * name is in the file is deleted and recreated from it, a new name is created, and the rest are
+     * left alone, inside this class's transaction. A file holding a name that cannot be saved is
+     * refused before anything is deleted.
+     */
+    public DumSourceReplacePlan mergeSources(DumDbExchange exchange) {
+        List<DumDbSourceExchange> sources = exchange.getSources() == null ? List.of()
+                : List.copyOf(exchange.getSources());
+        DumSourceReplacePlan plan = planReplace(sources).forMode(DumSourceImportMode.MERGE);
+        if (!plan.isApplicable()) {
+            throw plan.refusal();
+        }
+        log.info("Merging the DB sources: create {}, overwrite {}", plan.create(), plan.overwrite());
+        dumDbSourceRepository.deleteAll(dumDbSourceRepository.findAll().stream()
+                .filter(source -> plan.overwrite().contains(source.getName())).toList());
+        dumDbSourceRepository.flush();
+        sources.forEach(source -> source.setId(null));
+        if (!sources.isEmpty()) {
+            importDbSources(exchange);
+        }
+        return plan;
     }
 
     /**
@@ -272,6 +298,11 @@ public class DumDbExchangeProcess {
 
     /** What replacing with {@code exportFile} would do (roadmap DU10), without writing anything. */
     public DumSourceReplacePlan planFromFile(File exportFile) {
+        return planFromFile(exportFile, DumSourceImportMode.REPLACE);
+    }
+
+    /** What importing {@code exportFile} in {@code mode} would do (roadmap DU14), without writing. */
+    public DumSourceReplacePlan planFromFile(File exportFile, DumSourceImportMode mode) {
         DumDbExchange exchange;
         try {
             exchange = JsonMapper.builder()
@@ -279,7 +310,8 @@ public class DumDbExchangeProcess {
         } catch (RuntimeException e) {
             throw new DumSourceImportException("The file could not be read as a source export.", e);
         }
-        return planReplace(exchange.getSources() == null ? List.<DumDbSourceExchange>of() : List.copyOf(exchange.getSources()));
+        return planReplace(exchange.getSources() == null ? List.<DumDbSourceExchange>of() : List.copyOf(exchange.getSources()))
+                .forMode(mode);
     }
 
     /** What replacing the DB sources with {@code sources} would do, without writing anything. */

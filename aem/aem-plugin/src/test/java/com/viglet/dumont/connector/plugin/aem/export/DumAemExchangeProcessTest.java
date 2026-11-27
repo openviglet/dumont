@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -372,6 +373,80 @@ class DumAemExchangeProcessTest {
             assertEquals(List.of("news"), plan.overwrite());
             assertEquals(List.of("legacy"), plan.remove());
             verify(dumAemSourceRepository, never()).deleteAll();
+            verify(dumAemSourceRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("DU14: merge recreates the sources the file names and keeps the others")
+        void shouldMergeByName() {
+            DumAemSource news = createDumAemSource();
+            news.setName("news");
+            DumAemSource legacy = createDumAemSource();
+            legacy.setName("legacy");
+            when(dumAemSourceRepository.findAll()).thenReturn(List.of(news, legacy));
+            when(dumAemSourceRepository.findByName(any())).thenReturn(Optional.empty());
+            ArgumentCaptor<DumAemSource> saved = ArgumentCaptor.forClass(DumAemSource.class);
+            when(dumAemSourceRepository.save(saved.capture())).thenAnswer(i -> i.getArgument(0));
+            DumAemSourceExchange newsInFile = DumAemSourceExchange.builder().id("old-id").name("news")
+                    .endpoint("http://new").build();
+            DumAemSourceExchange wknd = DumAemSourceExchange.builder().name("wknd").build();
+
+            var plan = exchangeProcess.mergeAemSources(new DumAemExchange(List.of(newsInFile, wknd)));
+
+            org.mockito.InOrder order = org.mockito.Mockito.inOrder(dumAemSourceRepository);
+            order.verify(dumAemSourceRepository).deleteAll(List.of(news));
+            order.verify(dumAemSourceRepository).flush();
+            order.verify(dumAemSourceRepository, times(2)).save(any());
+            verify(dumAemSourceRepository, never()).deleteAll();
+            assertEquals(List.of("news", "wknd"), saved.getAllValues().stream().map(DumAemSource::getName).toList());
+            assertEquals("http://new", saved.getAllValues().get(0).getEndpoint());
+            assertNull(saved.getAllValues().get(0).getId(), "the id is left to the generator");
+            assertEquals(List.of("wknd"), plan.create());
+            assertEquals(List.of("news"), plan.overwrite());
+            assertTrue(plan.remove().isEmpty());
+        }
+
+        @Test
+        @DisplayName("DU14: merge refuses a file with an invalid name, and an unreadable file, before deleting anything")
+        void shouldRefuseAnInvalidMerge() throws Exception {
+            when(dumAemSourceRepository.findAll()).thenReturn(List.of(createDumAemSource()));
+            DumAemSourceExchange spaced = DumAemSourceExchange.builder().name("wknd site").build();
+            File broken = File.createTempFile("aem-merge", ".json");
+            broken.deleteOnExit();
+            java.nio.file.Files.writeString(broken.toPath(), "{ not json");
+
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportException.class,
+                    () -> exchangeProcess.mergeAemSources(new DumAemExchange(List.of(spaced))));
+            org.junit.jupiter.api.Assertions.assertThrows(
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportException.class,
+                    () -> exchangeProcess.importFromFile(broken,
+                            com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.MERGE));
+
+            verify(dumAemSourceRepository, never()).deleteAll(any());
+            verify(dumAemSourceRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("DU14: the merge dry run answers the same plan with nothing to remove, writing nothing")
+        void shouldPlanAMergeWithoutWriting() throws Exception {
+            File export = File.createTempFile("aem-merge-plan", ".json");
+            export.deleteOnExit();
+            java.nio.file.Files.writeString(export.toPath(),
+                    "{ \"sources\": [ { \"name\": \"wknd\" }, { \"name\": \"news\" } ] }");
+            DumAemSource existing = createDumAemSource();
+            existing.setName("news");
+            DumAemSource legacy = createDumAemSource();
+            legacy.setName("legacy");
+            when(dumAemSourceRepository.findAll()).thenReturn(List.of(existing, legacy));
+
+            var plan = exchangeProcess.planFromFile(export,
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.MERGE);
+
+            assertEquals(List.of("wknd"), plan.create());
+            assertEquals(List.of("news"), plan.overwrite());
+            assertTrue(plan.remove().isEmpty());
+            verify(dumAemSourceRepository, never()).deleteAll(any());
             verify(dumAemSourceRepository, never()).save(any());
         }
 

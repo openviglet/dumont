@@ -445,12 +445,31 @@ class DumAemSourceApiTest {
                     .mock(org.springframework.web.multipart.MultipartFile.class);
             var plan = new com.viglet.dumont.connector.commons.exchange.DumSourceReplacePlan(
                     List.of("wknd"), List.of(), List.of("legacy"), List.of());
-            when(dumAemExchangeProcess.planFromMultipartFile(file)).thenReturn(plan);
+            when(dumAemExchangeProcess.planFromMultipartFile(file,
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.REPLACE)).thenReturn(plan);
 
             var result = api.importSources(file, "replace", true);
 
             assertSame(plan, result.getBody());
             verify(dumAemExchangeProcess, org.mockito.Mockito.never()).importFromMultipartFile(any(), any());
+        }
+
+        @Test
+        @DisplayName("DU14: POST /import?mode=merge imports in merge mode, and its dryRun answers the merge plan")
+        void shouldDelegateAMergingImport() {
+            org.springframework.web.multipart.MultipartFile file = org.mockito.Mockito
+                    .mock(org.springframework.web.multipart.MultipartFile.class);
+            var plan = new com.viglet.dumont.connector.commons.exchange.DumSourceReplacePlan(
+                    List.of("wknd"), List.of("news"), List.of(), List.of());
+            when(dumAemExchangeProcess.planFromMultipartFile(file,
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.MERGE)).thenReturn(plan);
+
+            assertSame(plan, api.importSources(file, "merge", true).getBody());
+            verify(dumAemExchangeProcess, org.mockito.Mockito.never()).importFromMultipartFile(any(), any());
+
+            api.importSources(file, "Merge", false);
+            verify(dumAemExchangeProcess).importFromMultipartFile(file,
+                    com.viglet.dumont.connector.commons.exchange.DumSourceImportMode.MERGE);
         }
 
         @Test

@@ -61,6 +61,23 @@ class DumSourceReplacePlanTest {
         assertEquals(DumSourceImportMode.ADD, DumSourceImportMode.of(null));
         assertEquals(DumSourceImportMode.ADD, DumSourceImportMode.of(" "));
         assertEquals(DumSourceImportMode.REPLACE, DumSourceImportMode.of("Replace"));
+        assertEquals(DumSourceImportMode.MERGE, DumSourceImportMode.of("merge"));
         assertThrows(DumSourceImportException.class, () -> DumSourceImportMode.of("overwrite"));
+    }
+
+    @Test
+    @DisplayName("DU14: a merge keeps what the file does not name, and refuses the same names")
+    void mergeKeepsUnnamedSources() {
+        DumSourceReplacePlan replace = DumSourceReplacePlan.of(List.of("wknd", "news"), List.of("news", "legacy"),
+                true);
+
+        DumSourceReplacePlan merge = replace.forMode(DumSourceImportMode.MERGE);
+
+        assertEquals(List.of("wknd"), merge.create());
+        assertEquals(List.of("news"), merge.overwrite());
+        assertTrue(merge.remove().isEmpty());
+        assertEquals(replace, replace.forMode(DumSourceImportMode.REPLACE));
+        assertFalse(DumSourceReplacePlan.of(List.of("a", "a"), List.of(), true)
+                .forMode(DumSourceImportMode.MERGE).isApplicable());
     }
 }

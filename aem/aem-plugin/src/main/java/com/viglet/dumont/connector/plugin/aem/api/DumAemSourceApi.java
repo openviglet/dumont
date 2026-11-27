@@ -223,8 +223,8 @@ public class DumAemSourceApi {
     @Operation(summary = "Import AEM Sources from ZIP")
     /**
      * Imports a zip or plain {@code .json} export. {@code mode=add} (the default) skips sources that
-     * exist; {@code mode=replace} makes the file the whole set (roadmap DU9). A refused file answers
-     * 400 with the reason, and nothing is changed. With {@code dryRun=true} (replace only, roadmap
+     * exist; {@code mode=replace} makes the file the whole set (roadmap DU9); {@code mode=merge} updates the sources the file names and keeps the others (roadmap DU14). A refused file answers
+     * 400 with the reason, and nothing is changed. With {@code dryRun=true} (replace or merge, roadmap
      * DU10) nothing is written: the answer is what the replace would create, overwrite, remove, and
      * which names it would refuse.
      */
@@ -234,10 +234,10 @@ public class DumAemSourceApi {
         try {
             DumSourceImportMode importMode = DumSourceImportMode.of(mode);
             if (dryRun) {
-                if (importMode != DumSourceImportMode.REPLACE) {
-                    throw new DumSourceImportException("dryRun previews mode=replace only.");
+                if (importMode == DumSourceImportMode.ADD) {
+                    throw new DumSourceImportException("dryRun previews mode=replace or mode=merge only.");
                 }
-                return ResponseEntity.ok(dumAemExchangeProcess.planFromMultipartFile(file));
+                return ResponseEntity.ok(dumAemExchangeProcess.planFromMultipartFile(file, importMode));
             }
             dumAemExchangeProcess.importFromMultipartFile(file, importMode);
         } catch (DumSourceImportException e) {

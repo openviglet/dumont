@@ -28,11 +28,17 @@ import java.util.Locale;
  * the type is deleted and the file's sources are created, in one transaction, so a file that fails
  * halfway changes nothing. Sources keep their names, and the indexing history, rules and stats are
  * keyed by name, so they stay attached; ids are regenerated.</li>
+ * <li>{@link #MERGE} (roadmap <strong>DU14</strong>): the file updates the sources it names and
+ * leaves the others alone. A source whose name matches one in the file is replaced by the file's
+ * version (deleted and recreated under the same name, as {@link #REPLACE} does), a new name is
+ * created, and an existing source the file does not name is kept. Same transaction and refusal
+ * rules as {@link #REPLACE}.</li>
  * </ul>
  */
 public enum DumSourceImportMode {
     ADD,
-    REPLACE;
+    REPLACE,
+    MERGE;
 
     /**
      * The mode a request parameter names, case-insensitively; null or blank is {@link #ADD}.
@@ -47,7 +53,7 @@ public enum DumSourceImportMode {
         try {
             return valueOf(value.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            throw new DumSourceImportException("Unknown import mode '" + value + "': use add or replace.");
+            throw new DumSourceImportException("Unknown import mode '" + value + "': use add, replace or merge.");
         }
     }
 }

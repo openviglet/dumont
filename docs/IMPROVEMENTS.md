@@ -2,22 +2,6 @@
 
 ## Block A — Source configuration moves between instances
 
-### §DU14 Import that merges by name
-
-The source imports have two modes since DU9: `add` skips every source whose id or name
-exists, and `replace` makes the file the whole set, deleting what it does not name. The
-common case sits between them: bring sources from another environment and update the
-ones that already exist here, leaving the rest alone. Today that takes either a replace,
-which deletes unrelated sources, or deleting the stale ones by hand before an add.
-
-Build: a third mode, `merge`, on the AEM, DB, web-crawler and assets imports. A source
-whose name matches one in the file is replaced by the file's version (deleted and
-recreated under the same name, as DU9 does; history is keyed by name); a new name is
-created; an existing source the file does not name is kept. Same transaction and refusal
-rules as `replace`: invalid names refuse the whole file before anything is written.
-`dryRun=true` answers for `merge` too, with `remove` always empty, reusing
-`DumSourceReplacePlan` so the preview and the write match by the same code.
-
 ### §DU15 Imports detect the file's shape
 
 The server imports read only the `{ "sources": [...] }` shape of `export.json`. The JSON

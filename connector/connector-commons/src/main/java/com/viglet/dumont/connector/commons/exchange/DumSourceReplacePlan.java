@@ -71,6 +71,18 @@ public record DumSourceReplacePlan(List<String> create, List<String> overwrite, 
                 List.copyOf(invalid));
     }
 
+    /**
+     * This plan as {@code mode} applies it: a {@link DumSourceImportMode#MERGE} keeps the existing
+     * sources the file does not name (roadmap DU14), so its {@code remove} is empty; every other mode
+     * answers the plan unchanged.
+     */
+    public DumSourceReplacePlan forMode(DumSourceImportMode mode) {
+        if (mode != DumSourceImportMode.MERGE) {
+            return this;
+        }
+        return new DumSourceReplacePlan(create, overwrite, List.of(), invalid);
+    }
+
     /** Whether every name in the file can be saved, so the replace may go ahead. */
     public boolean isApplicable() {
         return invalid.isEmpty();
